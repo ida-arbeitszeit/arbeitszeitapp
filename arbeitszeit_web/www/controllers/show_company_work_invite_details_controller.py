@@ -6,7 +6,7 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsRequest,
 )
 
-from ..session import Session
+from ...session import Session
 
 
 @dataclass

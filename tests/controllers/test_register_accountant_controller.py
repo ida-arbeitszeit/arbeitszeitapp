@@ -1,7 +1,7 @@
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit_web.controllers.register_accountant_controller import (
+from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
 from tests.token import FakeTokenService

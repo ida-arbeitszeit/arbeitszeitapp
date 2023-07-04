@@ -2,7 +2,7 @@ from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
-from arbeitszeit_web.presenters.request_cooperation_presenter import (
+from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )
 from tests.email import FakeEmailSender

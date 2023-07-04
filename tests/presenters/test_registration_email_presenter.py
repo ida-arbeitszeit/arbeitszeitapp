@@ -1,7 +1,7 @@
 from datetime import datetime
 from unittest import TestCase
 
-from arbeitszeit_web.presenters.registration_email_presenter import (
+from arbeitszeit_web.www.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
 from tests.datetime_service import FakeDatetimeService

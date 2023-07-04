@@ -10,7 +10,7 @@ from arbeitszeit.use_cases.create_cooperation import (
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import CreateCooperationForm
 from arbeitszeit_flask.template import UserTemplateRenderer
-from arbeitszeit_web.presenters.create_cooperation_presenter import (
+from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )
 

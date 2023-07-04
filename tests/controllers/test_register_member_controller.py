@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit_web.controllers.register_member_controller import (
+from arbeitszeit_web.www.controllers.register_member_controller import (
     RegisterMemberController,
 )
 from tests.forms import RegisterFormImpl

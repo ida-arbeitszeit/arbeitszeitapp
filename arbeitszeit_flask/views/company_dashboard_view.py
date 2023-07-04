@@ -7,7 +7,7 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
-from arbeitszeit_web.presenters.get_company_dashboard_presenter import (
+from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
 

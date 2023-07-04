@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRequest
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
 from tests.forms import PayMeansFakeForm

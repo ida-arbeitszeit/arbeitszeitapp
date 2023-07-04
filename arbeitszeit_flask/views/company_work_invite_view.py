@@ -13,17 +13,17 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
-from arbeitszeit_web.controllers.answer_company_work_invite_controller import (
+from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInviteForm,
 )
-from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
+from arbeitszeit_web.www.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
-from arbeitszeit_web.presenters.answer_company_work_invite_presenter import (
+from arbeitszeit_web.www.presenters.answer_company_work_invite_presenter import (
     AnswerCompanyWorkInvitePresenter,
 )
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
+from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
 

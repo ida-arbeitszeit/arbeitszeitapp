@@ -1,6 +1,8 @@
 from uuid import uuid4
 
-from arbeitszeit_web.controllers.approve_plan_controller import ApprovePlanController
+from arbeitszeit_web.www.controllers.approve_plan_controller import (
+    ApprovePlanController,
+)
 
 from .base_test_case import BaseTestCase
 

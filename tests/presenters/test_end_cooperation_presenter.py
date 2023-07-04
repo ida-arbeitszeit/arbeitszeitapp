@@ -3,8 +3,10 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
-from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.end_cooperation_presenter import (
+    EndCooperationPresenter,
+)
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.translator import FakeTranslator

@@ -3,10 +3,10 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 

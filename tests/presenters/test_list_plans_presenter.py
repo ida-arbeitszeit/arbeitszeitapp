@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.list_active_plans_of_company import ListedPlan
-from arbeitszeit_web.presenters.list_plans_presenter import (
+from arbeitszeit_web.www.presenters.list_plans_presenter import (
     ListPlansPresenter,
     ListPlansResponse,
 )

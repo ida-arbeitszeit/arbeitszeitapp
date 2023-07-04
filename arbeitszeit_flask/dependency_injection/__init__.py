@@ -63,17 +63,6 @@ from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
-from arbeitszeit_web.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailPresenter,
-    AccountantInvitationEmailView,
-)
-from arbeitszeit_web.presenters.notify_accountant_about_new_plan_presenter import (
-    NotifyAccountantsAboutNewPlanPresenterImpl,
-)
-from arbeitszeit_web.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
-    RegistrationEmailTemplate,
-)
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.text_renderer import TextRenderer
@@ -85,6 +74,17 @@ from arbeitszeit_web.url_index import (
     LanguageChangerUrlIndex,
     RenewPlanUrlIndex,
     UrlIndex,
+)
+from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailPresenter,
+    AccountantInvitationEmailView,
+)
+from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
+    NotifyAccountantsAboutNewPlanPresenterImpl,
+)
+from arbeitszeit_web.www.presenters.registration_email_presenter import (
+    RegistrationEmailPresenter,
+    RegistrationEmailTemplate,
 )
 
 

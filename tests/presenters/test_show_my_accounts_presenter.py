@@ -2,7 +2,7 @@ from decimal import Decimal
 from unittest import TestCase
 
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccountsResponse
-from arbeitszeit_web.presenters.show_my_accounts_presenter import (
+from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
 from tests.use_cases.dependency_injection import get_dependency_injector

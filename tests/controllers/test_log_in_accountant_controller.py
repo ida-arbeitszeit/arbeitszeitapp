@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from arbeitszeit_web.controllers.log_in_accountant_controller import (
+from arbeitszeit_web.www.controllers.log_in_accountant_controller import (
     LogInAccountantController,
 )
 from tests.forms import LoginForm

@@ -4,10 +4,10 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_coop_summary import AssociatedPlan, GetCoopSummarySuccess
-from arbeitszeit_web.presenters.get_coop_summary_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector

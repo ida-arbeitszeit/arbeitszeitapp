@@ -24,21 +24,23 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
-from arbeitszeit_web.controllers.confirm_company_controller import (
+from arbeitszeit_web.www.controllers.confirm_company_controller import (
     ConfirmCompanyController,
 )
-from arbeitszeit_web.controllers.confirm_member_controller import (
+from arbeitszeit_web.www.controllers.confirm_member_controller import (
     ConfirmMemberController,
 )
-from arbeitszeit_web.controllers.log_in_accountant_controller import (
+from arbeitszeit_web.www.controllers.log_in_accountant_controller import (
     LogInAccountantController,
 )
-from arbeitszeit_web.presenters.log_in_accountant_presenter import (
+from arbeitszeit_web.www.presenters.log_in_accountant_presenter import (
     LogInAccountantPresenter,
 )
-from arbeitszeit_web.presenters.log_in_company_presenter import LogInCompanyPresenter
-from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
-from arbeitszeit_web.presenters.start_page_presenter import StartPagePresenter
+from arbeitszeit_web.www.presenters.log_in_company_presenter import (
+    LogInCompanyPresenter,
+)
+from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
+from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
 
 auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
 

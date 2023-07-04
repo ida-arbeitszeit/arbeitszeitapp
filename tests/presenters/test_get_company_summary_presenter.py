@@ -11,11 +11,11 @@ from arbeitszeit.use_cases.get_company_summary import (
     PlanDetails,
     Supplier,
 )
-from arbeitszeit_web.presenters.get_company_summary_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     Deviation,
     GetCompanySummarySuccessPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator

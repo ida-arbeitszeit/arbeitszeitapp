@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.hide_plan import HidePlanResponse
-from arbeitszeit_web.presenters.hide_plan_presenter import HidePlanPresenter
+from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl

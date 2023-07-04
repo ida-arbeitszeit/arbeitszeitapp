@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.get_company_transactions import (
     GetCompanyTransactionsResponse,
     TransactionInfo,
 )
-from arbeitszeit_web.presenters.get_company_transactions_presenter import (
+from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService

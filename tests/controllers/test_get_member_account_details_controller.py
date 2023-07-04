@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from arbeitszeit_web.controllers import (
+from arbeitszeit_web.www.controllers import (
     get_member_account_details_controller as controller,
 )
 from tests.session import FakeSession

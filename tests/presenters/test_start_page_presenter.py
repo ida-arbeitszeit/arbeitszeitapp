@@ -3,7 +3,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
-from arbeitszeit_web.presenters.start_page_presenter import StartPagePresenter
+from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
 
 from .base_test_case import BaseTestCase
 

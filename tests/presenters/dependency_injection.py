@@ -2,9 +2,6 @@ from arbeitszeit.injector import AliasProvider, Binder, Injector, Module
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailView,
-)
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import (
@@ -13,6 +10,9 @@ from arbeitszeit_web.url_index import (
     LanguageChangerUrlIndex,
     RenewPlanUrlIndex,
     UrlIndex,
+)
+from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
+    AccountantInvitationEmailView,
 )
 from tests.dependency_injection import TestingModule
 from tests.email import FakeEmailConfiguration, FakeEmailSender

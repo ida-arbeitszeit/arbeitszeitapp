@@ -4,7 +4,7 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
 )
-from arbeitszeit_web.presenters.pay_consumer_product_presenter import (
+from arbeitszeit_web.www.presenters.pay_consumer_product_presenter import (
     PayConsumerProductPresenter,
 )
 from tests.translator import FakeTranslator

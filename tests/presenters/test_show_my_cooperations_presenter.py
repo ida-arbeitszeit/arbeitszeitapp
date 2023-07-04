@@ -19,10 +19,10 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListedOutboundCoopRequest,
     ListOutboundCoopRequestsResponse,
 )
-from arbeitszeit_web.presenters.show_my_cooperations_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.presenters.base_test_case import BaseTestCase
 from tests.translator import FakeTranslator
 

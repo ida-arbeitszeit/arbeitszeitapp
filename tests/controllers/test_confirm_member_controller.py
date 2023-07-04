@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from arbeitszeit_web.controllers.confirm_member_controller import (
+from arbeitszeit_web.www.controllers.confirm_member_controller import (
     ConfirmMemberController,
 )
 from tests.datetime_service import FakeDatetimeService

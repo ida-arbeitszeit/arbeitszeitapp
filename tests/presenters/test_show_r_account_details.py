@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
-from arbeitszeit_web.presenters.show_r_account_details_presenter import (
+from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService

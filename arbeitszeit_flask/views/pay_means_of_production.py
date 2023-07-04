@@ -7,10 +7,10 @@ from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProduction
 from arbeitszeit_flask.forms import PayMeansOfProductionForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
-from arbeitszeit_web.controllers.pay_means_of_production_controller import (
+from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
-from arbeitszeit_web.presenters.pay_means_of_production_presenter import (
+from arbeitszeit_web.www.presenters.pay_means_of_production_presenter import (
     PayMeansOfProductionPresenter,
 )
 

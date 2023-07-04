@@ -3,7 +3,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
-from arbeitszeit_web.presenters.create_cooperation_presenter import (
+from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )
 from tests.translator import FakeTranslator

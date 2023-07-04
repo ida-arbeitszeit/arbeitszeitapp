@@ -8,7 +8,7 @@ from arbeitszeit_web.formatters.plan_summary_formatter import (
 )
 from arbeitszeit_web.url_index import UrlIndex
 
-from ..translator import Translator
+from ...translator import Translator
 
 
 @dataclass

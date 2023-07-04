@@ -6,7 +6,7 @@ from arbeitszeit.use_cases.pay_consumer_product import (
 )
 from arbeitszeit_web.translator import Translator
 
-from ..notification import Notifier
+from ...notification import Notifier
 
 
 @dataclass

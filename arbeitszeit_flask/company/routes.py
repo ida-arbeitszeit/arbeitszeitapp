@@ -75,68 +75,76 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
-from arbeitszeit_web.controllers.create_draft_controller import CreateDraftController
-from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftController
-from arbeitszeit_web.controllers.file_plan_with_accounting_controller import (
+from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.controllers.create_draft_controller import (
+    CreateDraftController,
+)
+from arbeitszeit_web.www.controllers.delete_draft_controller import (
+    DeleteDraftController,
+)
+from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
 )
-from arbeitszeit_web.controllers.query_companies_controller import (
+from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from arbeitszeit_web.controllers.request_cooperation_controller import (
+from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
 )
-from arbeitszeit_web.presenters.company_purchases_presenter import (
+from arbeitszeit_web.www.presenters.company_purchases_presenter import (
     CompanyPurchasesPresenter,
 )
-from arbeitszeit_web.presenters.create_draft_presenter import (
+from arbeitszeit_web.www.presenters.create_draft_presenter import (
     CreateDraftPresenter,
     GetPrefilledDraftDataPresenter,
 )
-from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
-from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
+from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
+from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from arbeitszeit_web.presenters.get_company_summary_presenter import (
+from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
-from arbeitszeit_web.presenters.get_company_transactions_presenter import (
+from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
-from arbeitszeit_web.presenters.get_coop_summary_presenter import (
+from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
 )
-from arbeitszeit_web.presenters.get_plan_summary_company_presenter import (
+from arbeitszeit_web.www.presenters.get_plan_summary_company_presenter import (
     GetPlanSummaryCompanyPresenter,
 )
-from arbeitszeit_web.presenters.get_statistics_presenter import GetStatisticsPresenter
-from arbeitszeit_web.presenters.hide_plan_presenter import HidePlanPresenter
-from arbeitszeit_web.presenters.list_all_cooperations_presenter import (
+from arbeitszeit_web.www.presenters.get_statistics_presenter import (
+    GetStatisticsPresenter,
+)
+from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
+from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
     ListAllCooperationsPresenter,
 )
-from arbeitszeit_web.presenters.list_plans_presenter import ListPlansPresenter
-from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
-from arbeitszeit_web.presenters.request_cooperation_presenter import (
+from arbeitszeit_web.www.presenters.list_plans_presenter import ListPlansPresenter
+from arbeitszeit_web.www.presenters.query_companies_presenter import (
+    QueryCompaniesPresenter,
+)
+from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )
-from arbeitszeit_web.presenters.show_a_account_details_presenter import (
+from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.show_my_cooperations_presenter import (
+from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
-from arbeitszeit_web.presenters.show_my_plans_presenter import ShowMyPlansPresenter
-from arbeitszeit_web.presenters.show_p_account_details_presenter import (
+from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
+from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.show_prd_account_details_presenter import (
+from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.show_r_account_details_presenter import (
+from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.url_index import UrlIndex
 
 from .blueprint import CompanyRoute
 

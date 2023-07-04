@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
-from arbeitszeit_web.presenters.get_accountant_dashboard_presenter import (
+from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
 

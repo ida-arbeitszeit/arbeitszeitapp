@@ -1,7 +1,7 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit_web.controllers.show_my_accounts_controller import (
+from arbeitszeit_web.www.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
 from tests.session import FakeSession

@@ -10,7 +10,7 @@ from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProductionRequest,
 )
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
-from arbeitszeit_web.presenters.get_company_transactions_presenter import (
+from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsResponse,
 )
 

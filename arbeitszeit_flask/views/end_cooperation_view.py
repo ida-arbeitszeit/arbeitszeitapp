@@ -5,10 +5,12 @@ from flask import redirect
 from arbeitszeit.use_cases.end_cooperation import EndCooperation
 from arbeitszeit_flask import types
 from arbeitszeit_flask.views.http_404_view import Http404View
-from arbeitszeit_web.controllers.end_cooperation_controller import (
+from arbeitszeit_web.www.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
-from arbeitszeit_web.presenters.end_cooperation_presenter import EndCooperationPresenter
+from arbeitszeit_web.www.presenters.end_cooperation_presenter import (
+    EndCooperationPresenter,
+)
 
 
 @dataclass

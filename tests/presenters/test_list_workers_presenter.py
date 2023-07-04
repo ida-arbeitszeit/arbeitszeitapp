@@ -3,7 +3,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.list_workers import ListedWorker, ListWorkersResponse
-from arbeitszeit_web.presenters.list_workers_presenter import ListWorkersPresenter
+from arbeitszeit_web.www.presenters.list_workers_presenter import ListWorkersPresenter
 
 from .dependency_injection import get_dependency_injector
 

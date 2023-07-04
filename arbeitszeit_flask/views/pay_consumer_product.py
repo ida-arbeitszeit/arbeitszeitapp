@@ -9,10 +9,10 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import PayConsumerProductForm
 from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_flask.types import Response
-from arbeitszeit_web.controllers.pay_consumer_product_controller import (
+from arbeitszeit_web.www.controllers.pay_consumer_product_controller import (
     PayConsumerProductController,
 )
-from arbeitszeit_web.presenters.pay_consumer_product_presenter import (
+from arbeitszeit_web.www.presenters.pay_consumer_product_presenter import (
     PayConsumerProductPresenter,
 )
 

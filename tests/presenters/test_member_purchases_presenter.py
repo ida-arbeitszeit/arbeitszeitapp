@@ -5,7 +5,7 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.query_member_purchases import PurchaseQueryResponse
-from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
+from arbeitszeit_web.www.presenters.member_purchases import MemberPurchasesPresenter
 from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import get_dependency_injector
