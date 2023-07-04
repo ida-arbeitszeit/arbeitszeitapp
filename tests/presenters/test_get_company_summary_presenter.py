@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.get_company_summary import (
     PlanDetails,
     Supplier,
 )
-from arbeitszeit_web.get_company_summary import (
+from arbeitszeit_web.presenters.get_company_summary_presenter import (
     Deviation,
     GetCompanySummarySuccessPresenter,
 )
