@@ -3,8 +3,10 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.request_cooperation import RequestCooperationRequest
+from arbeitszeit_web.controllers.request_cooperation_controller import (
+    RequestCooperationController,
+)
 from arbeitszeit_web.malformed_input_data import MalformedInputData
-from arbeitszeit_web.request_cooperation import RequestCooperationController
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 

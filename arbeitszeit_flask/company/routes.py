@@ -82,6 +82,9 @@ from arbeitszeit_web.controllers.file_plan_with_accounting_controller import (
 from arbeitszeit_web.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
+from arbeitszeit_web.controllers.request_cooperation_controller import (
+    RequestCooperationController,
+)
 from arbeitszeit_web.create_draft import (
     CreateDraftController,
     CreateDraftPresenter,
@@ -113,6 +116,9 @@ from arbeitszeit_web.presenters.list_all_cooperations_presenter import (
 )
 from arbeitszeit_web.presenters.list_plans_presenter import ListPlansPresenter
 from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
+from arbeitszeit_web.presenters.request_cooperation_presenter import (
+    RequestCooperationPresenter,
+)
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
@@ -130,10 +136,6 @@ from arbeitszeit_web.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.request_cooperation import (
-    RequestCooperationController,
-    RequestCooperationPresenter,
-)
 from arbeitszeit_web.url_index import UrlIndex
 
 from .blueprint import CompanyRoute
