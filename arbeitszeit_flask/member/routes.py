@@ -33,7 +33,6 @@ from arbeitszeit_web.controllers.get_member_account_details_controller import (
 from arbeitszeit_web.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
@@ -52,6 +51,7 @@ from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
 from arbeitszeit_web.presenters.get_plan_summary_member_presenter import (
     GetPlanSummaryMemberMemberPresenter,
 )
+from arbeitszeit_web.presenters.get_statistics_presenter import GetStatisticsPresenter
 from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
 from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
