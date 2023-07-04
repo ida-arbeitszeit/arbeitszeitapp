@@ -33,11 +33,13 @@ from arbeitszeit_web.controllers.get_member_account_details_controller import (
 from arbeitszeit_web.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.presenters.get_coop_summary_presenter import (
+    GetCoopSummarySuccessPresenter,
 )
 from arbeitszeit_web.presenters.get_member_account_details_presenter import (
     GetMemberAccountDetailsPresenter,

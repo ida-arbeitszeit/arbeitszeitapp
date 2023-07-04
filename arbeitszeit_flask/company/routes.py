@@ -88,7 +88,6 @@ from arbeitszeit_web.create_draft import (
     GetPrefilledDraftDataPresenter,
 )
 from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsPresenter
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
 from arbeitszeit_web.get_plan_summary_company import GetPlanSummaryCompanyPresenter
 from arbeitszeit_web.get_statistics import GetStatisticsPresenter
 from arbeitszeit_web.hide_plan import HidePlanPresenter
@@ -103,6 +102,9 @@ from arbeitszeit_web.presenters.file_plan_with_accounting_presenter import (
 )
 from arbeitszeit_web.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.presenters.get_coop_summary_presenter import (
+    GetCoopSummarySuccessPresenter,
 )
 from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.presenters.show_a_account_details_presenter import (
