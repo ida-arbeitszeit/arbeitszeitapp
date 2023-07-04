@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Optional
 from unittest import TestCase
 
-from arbeitszeit_web.register_member import RegisterMemberController
+from arbeitszeit_web.controllers.register_member_controller import (
+    RegisterMemberController,
+)
 from tests.forms import RegisterFormImpl
 
 from .dependency_injection import get_dependency_injector
