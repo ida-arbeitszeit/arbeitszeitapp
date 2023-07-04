@@ -1,6 +1,6 @@
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.api_presenters.get_plan_api_presenter import GetPlanApiPresenter
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.get_plan_api_presenter import GetPlanApiPresenter
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
     JsonDecimal,
@@ -8,7 +8,7 @@ from arbeitszeit_web.api_presenters.interfaces import (
     JsonObject,
     JsonString,
 )
-from arbeitszeit_web.api_presenters.response_errors import NotFound
+from arbeitszeit_web.api.response_errors import NotFound
 from tests.api.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import PlanSummaryGenerator
 

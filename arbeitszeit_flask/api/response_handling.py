@@ -1,7 +1,7 @@
 from flask_restx import Namespace
 
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
-from arbeitszeit_web.api_presenters.response_errors import ApiResponseError
+from arbeitszeit_web.api.response_errors import ApiResponseError
 
 
 def handle_exception(error: ApiResponseError):

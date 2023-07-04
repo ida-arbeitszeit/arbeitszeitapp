@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonInteger,
     JsonObject,
     JsonString,

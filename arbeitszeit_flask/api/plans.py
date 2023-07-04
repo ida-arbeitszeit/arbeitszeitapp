@@ -6,15 +6,15 @@ from arbeitszeit_flask.api.input_documentation import generate_input_documentati
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_web.api_controllers.get_plan_api_controller import GetPlanApiController
-from arbeitszeit_web.api_controllers.query_plans_api_controller import (
+from arbeitszeit_web.api.controllers.get_plan_api_controller import GetPlanApiController
+from arbeitszeit_web.api.controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
-from arbeitszeit_web.api_presenters.get_plan_api_presenter import GetPlanApiPresenter
-from arbeitszeit_web.api_presenters.query_plans_api_presenter import (
+from arbeitszeit_web.api.presenters.get_plan_api_presenter import GetPlanApiPresenter
+from arbeitszeit_web.api.presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
-from arbeitszeit_web.api_presenters.response_errors import BadRequest, NotFound
+from arbeitszeit_web.api.response_errors import BadRequest, NotFound
 
 namespace = Namespace("plans", "Plan related endpoints.")
 

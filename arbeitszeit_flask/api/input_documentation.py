@@ -2,8 +2,8 @@ from typing import List
 
 from flask_restx.reqparse import RequestParser
 
-from arbeitszeit_web.api_controllers.expected_input import InputLocation
-from arbeitszeit_web.api_controllers.query_plans_api_controller import ExpectedInput
+from arbeitszeit_web.api.controllers.expected_input import InputLocation
+from arbeitszeit_web.api.controllers.query_plans_api_controller import ExpectedInput
 
 
 def _generate_location(location: InputLocation) -> str:

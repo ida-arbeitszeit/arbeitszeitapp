@@ -1,9 +1,9 @@
-from arbeitszeit_web.api_presenters.interfaces import (
+from arbeitszeit_web.api.presenters.interfaces import (
     JsonInteger,
     JsonObject,
     JsonString,
 )
-from arbeitszeit_web.api_presenters.query_companies_api_presenter import (
+from arbeitszeit_web.api.presenters.query_companies_api_presenter import (
     QueryCompaniesApiPresenter,
 )
 from tests.api.presenters.base_test_case import BaseTestCase

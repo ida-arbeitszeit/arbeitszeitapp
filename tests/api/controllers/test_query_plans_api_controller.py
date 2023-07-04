@@ -1,9 +1,9 @@
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
-from arbeitszeit_web.api_controllers.expected_input import InputLocation
-from arbeitszeit_web.api_controllers.query_plans_api_controller import (
+from arbeitszeit_web.api.controllers.expected_input import InputLocation
+from arbeitszeit_web.api.controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
-from arbeitszeit_web.api_presenters.response_errors import BadRequest
+from arbeitszeit_web.api.response_errors import BadRequest
 from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
 

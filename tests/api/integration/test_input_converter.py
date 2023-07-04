@@ -1,7 +1,7 @@
 from typing import Optional, Type, Union
 
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
-from arbeitszeit_web.api_controllers.expected_input import ExpectedInput, InputLocation
+from arbeitszeit_web.api.controllers.expected_input import ExpectedInput, InputLocation
 from tests.api.integration.base_test_case import ApiTestCase
 
 

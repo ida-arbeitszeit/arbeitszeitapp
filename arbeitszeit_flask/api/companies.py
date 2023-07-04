@@ -7,13 +7,13 @@ from arbeitszeit_flask.api.input_documentation import generate_input_documentati
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_web.api_controllers.query_companies_api_controller import (
+from arbeitszeit_web.api.controllers.query_companies_api_controller import (
     QueryCompaniesApiController,
 )
-from arbeitszeit_web.api_presenters.query_companies_api_presenter import (
+from arbeitszeit_web.api.presenters.query_companies_api_presenter import (
     QueryCompaniesApiPresenter,
 )
-from arbeitszeit_web.api_presenters.response_errors import BadRequest
+from arbeitszeit_web.api.response_errors import BadRequest
 
 namespace = Namespace("companies", "Companies related endpoints.")
 
