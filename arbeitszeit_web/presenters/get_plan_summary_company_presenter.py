@@ -9,7 +9,7 @@ from arbeitszeit_web.formatters.plan_summary_formatter import (
 )
 from arbeitszeit_web.session import Session
 
-from .url_index import UrlIndex
+from ..url_index import UrlIndex
 
 
 @dataclass

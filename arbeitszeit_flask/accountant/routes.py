@@ -17,15 +17,15 @@ from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.controllers.approve_plan_controller import ApprovePlanController
-from arbeitszeit_web.get_plan_summary_accountant import (
-    GetPlanSummaryAccountantPresenter,
-)
 from arbeitszeit_web.presenters.approve_plan_presenter import ApprovePlanPresenter
 from arbeitszeit_web.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
 from arbeitszeit_web.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.presenters.get_plan_summary_accountant_presenter import (
+    GetPlanSummaryAccountantPresenter,
 )
 from arbeitszeit_web.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,

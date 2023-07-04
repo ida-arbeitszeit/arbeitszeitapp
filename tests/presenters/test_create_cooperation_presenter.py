@@ -3,7 +3,9 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
-from arbeitszeit_web.create_cooperation import CreateCooperationPresenter
+from arbeitszeit_web.presenters.create_cooperation_presenter import (
+    CreateCooperationPresenter,
+)
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector

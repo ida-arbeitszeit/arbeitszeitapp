@@ -2,7 +2,9 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
+from arbeitszeit_web.presenters.get_plan_summary_member_presenter import (
+    GetPlanSummaryMemberMemberPresenter,
+)
 from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.presenters.url_index import UrlIndexTestImpl
 
