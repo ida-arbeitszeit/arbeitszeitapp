@@ -10,7 +10,9 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_web.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.presenters.pay_means_of_production_presenter import (
+    PayMeansOfProductionPresenter,
+)
 
 
 @dataclass

@@ -7,8 +7,8 @@ from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOf
 from arbeitszeit.use_cases.request_cooperation import RequestCooperation
 from arbeitszeit_flask.forms import RequestCooperationForm
 from arbeitszeit_flask.template import TemplateRenderer
-from arbeitszeit_web.list_plans import ListPlansPresenter
 from arbeitszeit_web.malformed_input_data import MalformedInputData
+from arbeitszeit_web.presenters.list_plans_presenter import ListPlansPresenter
 from arbeitszeit_web.request_cooperation import (
     RequestCooperationController,
     RequestCooperationPresenter,

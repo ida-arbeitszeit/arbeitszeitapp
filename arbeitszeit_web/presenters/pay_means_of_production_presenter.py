@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRe
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
-from .notification import Notifier
+from ..notification import Notifier
 
 
 @dataclass
