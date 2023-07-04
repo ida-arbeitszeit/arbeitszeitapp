@@ -3,7 +3,9 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProductRequest
-from arbeitszeit_web.pay_consumer_product import PayConsumerProductController
+from arbeitszeit_web.controllers.pay_consumer_product_controller import (
+    PayConsumerProductController,
+)
 from tests.forms import PayConsumerProductFakeForm
 from tests.translator import FakeTranslator
 
