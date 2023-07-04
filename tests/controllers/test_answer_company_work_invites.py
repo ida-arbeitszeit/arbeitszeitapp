@@ -8,7 +8,9 @@ from uuid import uuid4
 from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
 )
-from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInviteController
+from arbeitszeit_web.controllers.answer_company_work_invite_controller import (
+    AnswerCompanyWorkInviteController,
+)
 
 from ..session import FakeSession
 from .dependency_injection import get_dependency_injector

@@ -4,7 +4,9 @@ from unittest import TestCase
 from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteResponse,
 )
-from arbeitszeit_web.answer_company_work_invite import AnswerCompanyWorkInvitePresenter
+from arbeitszeit_web.presenters.answer_company_work_invite_presenter import (
+    AnswerCompanyWorkInvitePresenter,
+)
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector
