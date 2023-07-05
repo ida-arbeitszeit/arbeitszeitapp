@@ -102,7 +102,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             ),
         )
         info_receiver = self.get_company_transactions(company)
-        assert len(info_receiver.transactions) == 3
+        assert len(info_receiver.transactions) == 4
         transaction_volumes = [t.transaction_volume for t in info_receiver.transactions]
         assert expected_p_amount in transaction_volumes
         assert expected_r_amount in transaction_volumes
@@ -129,9 +129,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
         self.update_plans_and_payout()
         info_receiver = self.get_company_transactions(company)
-        assert info_receiver.transactions[0].transaction_volume == Decimal(10)
+        assert info_receiver.transactions[3].transaction_volume == Decimal(10)
         assert (
-            info_receiver.transactions[0].transaction_type
+            info_receiver.transactions[3].transaction_type
             == TransactionTypes.credit_for_wages
         )
 

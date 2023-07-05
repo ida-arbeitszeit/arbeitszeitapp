@@ -44,6 +44,9 @@ class ApprovePlanUseCase:
         self._create_transaction_from_social_accounting(
             plan, planner.product_account, -plan.expected_sales_value
         )
+        self._create_transaction_from_social_accounting(
+            plan, planner.work_account, plan.production_costs.labour_cost
+        )
         return self.Response()
 
     def _create_transaction_from_social_accounting(

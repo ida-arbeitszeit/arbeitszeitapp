@@ -121,7 +121,7 @@ class SendCertificatesControllerTests(TestCase):
         assert isinstance(controller_response, SendWorkCertificatesToWorkerRequest)
         self.assertEqual(controller_response.company_id, user_id)
         self.assertEqual(controller_response.worker_id, member_id)
-        self.assertEqual(controller_response.amount, Decimal("10"))
+        self.assertEqual(controller_response.hours_worked, Decimal("10"))
 
     def test_worker_uuid_gets_stripped(
         self,

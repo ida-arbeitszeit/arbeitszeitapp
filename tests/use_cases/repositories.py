@@ -142,6 +142,12 @@ class PlanResult(QueryResultImpl[Plan]):
             and plan.approval_date + timedelta(days=plan.timeframe) > timestamp
         )
 
+    def that_are_expired_as_of(self, timestamp: datetime) -> Self:
+        return self._filtered_by(
+            lambda plan: plan.approval_date is not None
+            and plan.approval_date + timedelta(days=plan.timeframe) <= timestamp
+        )
+
     def that_are_productive(self) -> PlanResult:
         return self._filtered_by(lambda plan: not plan.is_public_service)
 
@@ -233,23 +239,6 @@ class PlanResult(QueryResultImpl[Plan]):
             else Decimal(0),
             total_planned_costs=production_costs,
         )
-
-    def where_payout_counts_are_less_then_active_days(
-        self, timestamp: datetime
-    ) -> PlanResult:
-        def plan_filter(plan: Plan) -> bool:
-            if plan.activation_date is None:
-                return False
-            active_days = min(
-                (timestamp - plan.activation_date).days,
-                plan.timeframe,
-            )
-            payout_count = len(
-                self.entities.labour_certificates_payouts_by_plan[plan.id]
-            )
-            return payout_count < active_days
-
-        return self._filtered_by(plan_filter)
 
     def that_are_not_hidden(self) -> Self:
         return self._filtered_by(lambda plan: not plan.hidden_by_user)
@@ -850,16 +839,6 @@ class AccountResult(QueryResultImpl[Account]):
         )
 
 
-class LabourCertificatesPayoutResult(
-    QueryResultImpl[entities.LabourCertificatesPayout]
-):
-    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
-        return replace(
-            self,
-            items=lambda: filter(lambda payout: payout.plan_id == plan, self.items()),
-        )
-
-
 class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
     def ordered_by_calculation_date(
         self, *, descending: bool = False
@@ -1009,12 +988,6 @@ class EntityStorage:
             self.social_accounting.account: self.social_accounting
         }
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.labour_certificates_payouts_by_transaction: Dict[
-            UUID, entities.LabourCertificatesPayout
-        ] = dict()
-        self.labour_certificates_payouts_by_plan: Dict[
-            UUID, List[entities.LabourCertificatesPayout]
-        ] = defaultdict(list)
         self.payout_factors: List[entities.PayoutFactor] = list()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
         self.consumer_purchase_by_transaction: Dict[
@@ -1038,23 +1011,6 @@ class EntityStorage:
         )
         self.email_addresses[address] = record
         return record
-
-    def create_labour_certificates_payout(
-        self, transaction: UUID, plan: UUID
-    ) -> entities.LabourCertificatesPayout:
-        assert transaction not in self.labour_certificates_payouts_by_transaction
-        payout = entities.LabourCertificatesPayout(
-            transaction_id=transaction, plan_id=plan
-        )
-        self.labour_certificates_payouts_by_transaction[transaction] = payout
-        self.labour_certificates_payouts_by_plan[plan].append(payout)
-        return payout
-
-    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
-        return LabourCertificatesPayoutResult(
-            items=lambda: self.labour_certificates_payouts_by_transaction.values(),
-            entities=self,
-        )
 
     def get_payout_factors(self) -> PayoutFactorResult:
         return PayoutFactorResult(

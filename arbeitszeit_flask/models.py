@@ -226,25 +226,6 @@ class CompanyPurchase(db.Model):
     amount = db.Column(db.Integer, nullable=False)
 
 
-class LabourCertificatesPayout(db.Model):
-    transaction_id = db.Column(
-        db.String,
-        db.ForeignKey("transaction.id"),
-        nullable=False,
-        primary_key=True,
-    )
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
-
-    def __repr__(self) -> str:
-        fields = ", ".join(
-            [
-                f"transaction_id={self.transaction_id!r}",
-                f"plan_id={self.plan_id!r}",
-            ]
-        )
-        return f"LabourCertificatesPayout({fields})"
-
-
 class CompanyWorkInvite(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)

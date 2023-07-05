@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Generic, Iterator, Optional, Tuple, Type
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, and_, case, cast, func, or_, update
+from sqlalchemy import and_, func, or_, update
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
@@ -109,6 +109,15 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
         )
         return self._with_modified_query(
             lambda query: query.filter(expiration_date > timestamp)
+        )
+
+    def that_are_expired_as_of(self, timestamp: datetime) -> Self:
+        expiration_date = (
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
+            + models.Plan.activation_date
+        )
+        return self._with_modified_query(
+            lambda query: query.filter(expiration_date <= timestamp)
         )
 
     def that_are_productive(self) -> PlanQueryResult:
@@ -219,40 +228,6 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 labour_cost=result.costs_a or Decimal(0),
             ),
         )
-
-    def where_payout_counts_are_less_then_active_days(
-        self, timestamp: datetime
-    ) -> PlanQueryResult:
-        payout = aliased(models.LabourCertificatesPayout)
-        payouts_counted = (
-            self.db.session.query(
-                func.count("*").label("payout_count"),
-                payout.plan_id,
-            )
-            .group_by(payout.plan_id)
-            .subquery()
-        )
-        days_passed = cast(
-            func.extract("day", func.age(timestamp, models.Plan.activation_date)),
-            Integer,
-        )
-        active_days = case(
-            (days_passed > models.Plan.timeframe, models.Plan.timeframe),
-            else_=days_passed,
-        )
-        q = self._with_modified_query(
-            lambda query: query.join(
-                payouts_counted,
-                payouts_counted.c.plan_id == models.Plan.id,
-                isouter=True,
-            ).filter(
-                or_(
-                    active_days > payouts_counted.c.payout_count,
-                    payouts_counted.c.payout_count == None,
-                )
-            )
-        )
-        return q
 
     def that_are_not_hidden(self) -> Self:
         return self._with_modified_query(
@@ -799,17 +774,6 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
 
-class LabourCertificatesPayoutResult(
-    FlaskQueryResult[entities.LabourCertificatesPayout]
-):
-    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
-        return self._with_modified_query(
-            lambda query: query.filter(
-                models.LabourCertificatesPayout.plan_id == str(plan),
-            )
-        )
-
-
 class PayoutFactorResult(FlaskQueryResult[entities.PayoutFactor]):
     def ordered_by_calculation_date(
         self, descending: bool = False
@@ -1154,23 +1118,6 @@ class AccountingRepository:
 class DatabaseGatewayImpl:
     db: SQLAlchemy
 
-    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
-        return LabourCertificatesPayoutResult(
-            query=models.LabourCertificatesPayout.query,
-            mapper=self._labour_certificates_payout_from_orm,
-            db=self.db,
-        )
-
-    def create_labour_certificates_payout(
-        self, transaction: UUID, plan: UUID
-    ) -> entities.LabourCertificatesPayout:
-        orm = models.LabourCertificatesPayout(
-            transaction_id=str(transaction),
-            plan_id=str(plan),
-        )
-        self.db.session.add(orm)
-        return self._labour_certificates_payout_from_orm(orm)
-
     def create_payout_factor(
         self, timestamp: datetime, payout_factor: Decimal
     ) -> entities.PayoutFactor:
@@ -1186,14 +1133,6 @@ class DatabaseGatewayImpl:
             query=models.PayoutFactor.query,
             db=self.db,
             mapper=self._payout_factor_from_orm,
-        )
-
-    def _labour_certificates_payout_from_orm(
-        self, orm: models.LabourCertificatesPayout
-    ) -> entities.LabourCertificatesPayout:
-        return entities.LabourCertificatesPayout(
-            plan_id=UUID(orm.plan_id),
-            transaction_id=UUID(orm.transaction_id),
         )
 
     def _payout_factor_from_orm(
