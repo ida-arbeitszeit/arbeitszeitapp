@@ -18,7 +18,6 @@ from arbeitszeit.entities import (
     ConsumerPurchase,
     Cooperation,
     EmailAddress,
-    LabourCertificatesPayout,
     Member,
     PayoutFactor,
     Plan,
@@ -85,6 +84,9 @@ class PlanResult(QueryResult[Plan], Protocol):
         should not be included in the result.
         """
 
+    def that_are_expired_as_of(self, timestamp: datetime) -> Self:
+        """Plans that will be expired by a given timestamp."""
+
     def that_are_productive(self) -> PlanResult:
         ...
 
@@ -125,18 +127,6 @@ class PlanResult(QueryResult[Plan], Protocol):
     def get_statistics(self) -> PlanningStatistics:
         """Return aggregate planning information for all plans
         included in a result set.
-        """
-
-    def where_payout_counts_are_less_then_active_days(
-        self, timestamp: datetime
-    ) -> PlanResult:
-        """Filter only those plans where the plan duration that is
-        already passed in days is lower than the amount of times where
-        labor certificates where payed.
-
-        The plan duration considered for the comparison with the
-        payout count can never be more than the total plan duration in
-        days.
         """
 
     def that_are_not_hidden(self) -> Self:
@@ -371,11 +361,6 @@ class AccountResult(QueryResult[Account], Protocol):
         ...
 
 
-class LabourCertificatesPayoutResult(QueryResult[LabourCertificatesPayout], Protocol):
-    def for_plan(self, plan: UUID) -> LabourCertificatesPayoutResult:
-        ...
-
-
 class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
     def ordered_by_calculation_date(
         self, *, descending: bool = ...
@@ -430,14 +415,6 @@ class LanguageRepository(Protocol):
 
 
 class DatabaseGateway(Protocol):
-    def get_labour_certificates_payouts(self) -> LabourCertificatesPayoutResult:
-        ...
-
-    def create_labour_certificates_payout(
-        self, transaction: UUID, plan: UUID
-    ) -> LabourCertificatesPayout:
-        ...
-
     def get_payout_factors(self) -> PayoutFactorResult:
         ...
 

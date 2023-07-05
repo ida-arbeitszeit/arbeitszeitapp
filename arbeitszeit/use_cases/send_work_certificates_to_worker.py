@@ -12,13 +12,14 @@ from arbeitszeit.repositories import DatabaseGateway
 class SendWorkCertificatesToWorkerRequest:
     company_id: UUID
     worker_id: UUID
-    amount: Decimal
+    hours_worked: Decimal
 
 
 @dataclass
 class SendWorkCertificatesToWorkerResponse:
     class RejectionReason(Exception, Enum):
         worker_not_at_company = auto()
+        hours_worked_must_be_positive = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -35,6 +36,10 @@ class SendWorkCertificatesToWorker:
     def __call__(
         self, use_case_request: SendWorkCertificatesToWorkerRequest
     ) -> SendWorkCertificatesToWorkerResponse:
+        if use_case_request.hours_worked <= Decimal(0):
+            return SendWorkCertificatesToWorkerResponse(
+                rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.hours_worked_must_be_positive
+            )
         company = (
             self.database_gateway.get_companies()
             .with_id(use_case_request.company_id)
@@ -54,12 +59,20 @@ class SendWorkCertificatesToWorker:
             return SendWorkCertificatesToWorkerResponse(
                 rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
             )
+        if (
+            payout_factor := self.database_gateway.get_payout_factors()
+            .ordered_by_calculation_date(descending=True)
+            .first()
+        ):
+            fik = payout_factor.value
+        else:
+            fik = Decimal(1)
         self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
             sending_account=company.work_account,
             receiving_account=worker.account,
-            amount_sent=use_case_request.amount,
-            amount_received=use_case_request.amount,
+            amount_sent=use_case_request.hours_worked,
+            amount_received=use_case_request.hours_worked * fik,
             purpose="Lohn",
         )
         return SendWorkCertificatesToWorkerResponse(rejection_reason=None)

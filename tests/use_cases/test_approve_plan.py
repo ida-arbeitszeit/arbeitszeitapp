@@ -134,11 +134,12 @@ class UseCaseTests(BaseTestCase):
             Decimal("5.16"),
         )
 
-    def test_that_no_labour_costs_are_transfered(self):
+    def test_that_labour_account_of_company_is_increased_by_planned_amount(self):
+        expected_amount = Decimal(5)
         plan = self.plan_generator.create_plan(
             approved=False,
             costs=ProductionCosts(
-                labour_cost=Decimal(5),
+                labour_cost=expected_amount,
                 resource_cost=Decimal(0),
                 means_cost=Decimal(0),
             ),
@@ -146,7 +147,7 @@ class UseCaseTests(BaseTestCase):
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         self.assertEqual(
             self.get_company_account_balances(plan.planner).work,
-            Decimal(0),
+            expected_amount,
         )
 
     def test_that_product_account_is_adjusted(self):
