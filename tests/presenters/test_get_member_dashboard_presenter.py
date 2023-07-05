@@ -7,10 +7,10 @@ from uuid import UUID, uuid4
 from dateutil import tz
 
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
-from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
 

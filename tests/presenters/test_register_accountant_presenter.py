@@ -3,10 +3,10 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
-from arbeitszeit_web.presenters.register_accountant_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
-from arbeitszeit_web.session import UserRole
 from tests.presenters.notifier import NotifierTestImpl
 from tests.session import FakeSession
 from tests.translator import FakeTranslator

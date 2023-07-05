@@ -2,7 +2,9 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess
-from arbeitszeit_web.create_draft import GetPrefilledDraftDataPresenter
+from arbeitszeit_web.www.presenters.create_draft_presenter import (
+    GetPrefilledDraftDataPresenter,
+)
 from tests.forms import DraftForm
 from tests.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import PlanSummaryGenerator

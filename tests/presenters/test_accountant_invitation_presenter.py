@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Callable
 from unittest import TestCase
 
-from arbeitszeit_web.presenters.accountant_invitation_presenter import (
+from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     ViewModel,
 )

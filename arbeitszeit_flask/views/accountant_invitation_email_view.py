@@ -4,7 +4,7 @@ from flask import render_template
 
 from arbeitszeit_flask.mail_service import MailService
 from arbeitszeit_flask.template import TemplateRenderer
-from arbeitszeit_web.presenters.accountant_invitation_presenter import ViewModel
+from arbeitszeit_web.www.presenters.accountant_invitation_presenter import ViewModel
 
 
 @dataclass

@@ -4,10 +4,10 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase as UseCase,
 )
-from arbeitszeit_web.presenters.list_plans_with_pending_review_presenter import (
+from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
 )
-from arbeitszeit_web.session import UserRole
 
 from .base_test_case import BaseTestCase
 from .url_index import UrlIndexTestImpl

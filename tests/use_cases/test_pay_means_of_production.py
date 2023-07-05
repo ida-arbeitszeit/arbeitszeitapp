@@ -10,7 +10,9 @@ from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProductionRequest,
 )
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
-from arbeitszeit_web.get_company_transactions import GetCompanyTransactionsResponse
+from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
+    GetCompanyTransactionsResponse,
+)
 
 from .base_test_case import BaseTestCase
 from .repositories import EntityStorage

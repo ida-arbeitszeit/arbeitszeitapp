@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
-from arbeitszeit_web.presenters.list_available_languages_presenter import (
+from arbeitszeit_web.www.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
 from tests.language_service import FakeLanguageService

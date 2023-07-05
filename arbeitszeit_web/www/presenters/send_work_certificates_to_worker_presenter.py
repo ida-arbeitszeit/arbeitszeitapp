@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorkerResponse,
 )
-from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
     ControllerRejection,
 )
-from arbeitszeit_web.notification import Notifier
 
-from ..translator import Translator
+from ...translator import Translator
 
 
 @dataclass

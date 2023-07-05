@@ -3,7 +3,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.register_company import RegisterCompany
-from arbeitszeit_web.presenters.register_company_presenter import (
+from arbeitszeit_web.www.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
 from tests.forms import RegisterFormImpl

@@ -1,4 +1,4 @@
-from arbeitszeit_web.controllers.register_company_controller import (
+from arbeitszeit_web.www.controllers.register_company_controller import (
     RegisterCompanyController,
 )
 from tests.forms import RegisterFormImpl

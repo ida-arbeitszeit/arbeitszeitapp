@@ -3,10 +3,10 @@ from unittest import TestCase
 from arbeitszeit.use_cases.send_work_certificates_to_worker import (
     SendWorkCertificatesToWorkerResponse,
 )
-from arbeitszeit_web.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
     ControllerRejection,
 )
-from arbeitszeit_web.presenters.send_work_certificates_to_worker_presenter import (
+from arbeitszeit_web.www.presenters.send_work_certificates_to_worker_presenter import (
     SendWorkCertificatesToWorkerPresenter,
 )
 

@@ -1,5 +1,5 @@
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase as UseCase
-from arbeitszeit_web.presenters.approve_plan_presenter import ApprovePlanPresenter
+from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
 from tests.presenters.notifier import NotifierTestImpl
 from tests.translator import FakeTranslator
 

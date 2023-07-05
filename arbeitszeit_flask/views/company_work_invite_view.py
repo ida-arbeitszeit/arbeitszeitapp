@@ -4,22 +4,26 @@ from uuid import UUID
 
 from flask import Response, redirect
 
-from arbeitszeit.use_cases.answer_company_work_invite import AnswerCompanyWorkInvite
+from arbeitszeit.use_cases.answer_company_work_invite import (
+    AnswerCompanyWorkInvite,
+    AnswerCompanyWorkInviteRequest,
+)
 from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
-from arbeitszeit_web.answer_company_work_invite import (
+from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInviteForm,
-    AnswerCompanyWorkInvitePresenter,
-    AnswerCompanyWorkInviteRequest,
 )
-from arbeitszeit_web.controllers.show_company_work_invite_details_controller import (
+from arbeitszeit_web.www.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
+from arbeitszeit_web.www.presenters.answer_company_work_invite_presenter import (
+    AnswerCompanyWorkInvitePresenter,
+)
+from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
 

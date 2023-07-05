@@ -6,8 +6,12 @@ from flask_login import current_user
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm
-from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
-from arbeitszeit_web.register_member import RegisterMemberController
+from arbeitszeit_web.www.controllers.register_member_controller import (
+    RegisterMemberController,
+)
+from arbeitszeit_web.www.presenters.register_member_presenter import (
+    RegisterMemberPresenter,
+)
 
 
 @dataclass

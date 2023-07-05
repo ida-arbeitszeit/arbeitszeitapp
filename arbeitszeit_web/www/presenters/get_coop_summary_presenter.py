@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
 from arbeitszeit_web.session import Session
 
-from .url_index import UrlIndex, UserUrlIndex
+from ...url_index import UrlIndex, UserUrlIndex
 
 
 @dataclass

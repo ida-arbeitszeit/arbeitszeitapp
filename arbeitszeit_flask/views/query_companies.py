@@ -5,10 +5,10 @@ from flask import Response
 from arbeitszeit.use_cases import query_companies as use_case
 from arbeitszeit_flask.forms import CompanySearchForm
 from arbeitszeit_flask.template import TemplateRenderer
-from arbeitszeit_web.controllers.query_companies_controller import (
+from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from arbeitszeit_web.presenters.query_companies_presenter import (
+from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
     QueryCompaniesViewModel,
 )

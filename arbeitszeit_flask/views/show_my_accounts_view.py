@@ -4,10 +4,10 @@ from flask import Response
 
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts
 from arbeitszeit_flask.template import TemplateRenderer
-from arbeitszeit_web.controllers.show_my_accounts_controller import (
+from arbeitszeit_web.www.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
-from arbeitszeit_web.presenters.show_my_accounts_presenter import (
+from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
 

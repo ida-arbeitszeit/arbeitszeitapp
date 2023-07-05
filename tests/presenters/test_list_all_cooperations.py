@@ -6,8 +6,10 @@ from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperationsResponse,
     ListedCooperation,
 )
-from arbeitszeit_web.list_all_cooperations import ListAllCooperationsPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
+    ListAllCooperationsPresenter,
+)
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector

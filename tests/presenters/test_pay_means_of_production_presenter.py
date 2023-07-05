@@ -2,7 +2,9 @@ from typing import Optional
 from unittest import TestCase
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
-from arbeitszeit_web.pay_means_of_production import PayMeansOfProductionPresenter
+from arbeitszeit_web.www.presenters.pay_means_of_production_presenter import (
+    PayMeansOfProductionPresenter,
+)
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector

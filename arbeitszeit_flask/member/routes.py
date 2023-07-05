@@ -27,28 +27,38 @@ from arbeitszeit_flask.views import (
     QueryCompaniesView,
     QueryPlansView,
 )
-from arbeitszeit_web.controllers.get_member_account_details_controller import (
+from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.www.controllers.get_member_account_details_controller import (
     GetMemberAccountDetailsController,
 )
-from arbeitszeit_web.controllers.query_companies_controller import (
+from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from arbeitszeit_web.get_company_summary import GetCompanySummarySuccessPresenter
-from arbeitszeit_web.get_coop_summary import GetCoopSummarySuccessPresenter
-from arbeitszeit_web.get_plan_summary_member import GetPlanSummaryMemberMemberPresenter
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
-from arbeitszeit_web.presenters.get_member_account_details_presenter import (
+from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
+    GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
+    GetCoopSummarySuccessPresenter,
+)
+from arbeitszeit_web.www.presenters.get_member_account_details_presenter import (
     GetMemberAccountDetailsPresenter,
 )
-from arbeitszeit_web.presenters.get_member_account_presenter import (
+from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
-from arbeitszeit_web.presenters.get_member_dashboard_presenter import (
+from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from arbeitszeit_web.presenters.member_purchases import MemberPurchasesPresenter
-from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.www.presenters.get_plan_summary_member_presenter import (
+    GetPlanSummaryMemberMemberPresenter,
+)
+from arbeitszeit_web.www.presenters.get_statistics_presenter import (
+    GetStatisticsPresenter,
+)
+from arbeitszeit_web.www.presenters.member_purchases import MemberPurchasesPresenter
+from arbeitszeit_web.www.presenters.query_companies_presenter import (
+    QueryCompaniesPresenter,
+)
 
 from .blueprint import MemberRoute
 

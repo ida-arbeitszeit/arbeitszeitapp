@@ -12,7 +12,7 @@ from arbeitszeit.use_cases.show_my_plans import (
 )
 from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.session import UserRole
-from arbeitszeit_web.show_my_plans import ShowMyPlansPresenter
+from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.presenters.notifier import NotifierTestImpl

@@ -5,7 +5,9 @@ from unittest import TestCase
 
 from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.use_cases.get_statistics import StatisticsResponse
-from arbeitszeit_web.get_statistics import GetStatisticsPresenter
+from arbeitszeit_web.www.presenters.get_statistics_presenter import (
+    GetStatisticsPresenter,
+)
 from tests.datetime_service import FakeDatetimeService
 
 from ..translator import FakeTranslator

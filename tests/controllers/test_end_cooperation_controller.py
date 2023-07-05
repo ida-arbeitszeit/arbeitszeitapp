@@ -2,7 +2,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationRequest
-from arbeitszeit_web.controllers.end_cooperation_controller import (
+from arbeitszeit_web.www.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from tests.request import FakeRequest

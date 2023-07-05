@@ -3,8 +3,8 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit_web.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 

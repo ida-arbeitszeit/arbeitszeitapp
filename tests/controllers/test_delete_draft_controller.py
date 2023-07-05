@@ -1,7 +1,9 @@
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit_web.controllers.delete_draft_controller import DeleteDraftController
+from arbeitszeit_web.www.controllers.delete_draft_controller import (
+    DeleteDraftController,
+)
 from tests.request import FakeRequest
 from tests.session import FakeSession
 

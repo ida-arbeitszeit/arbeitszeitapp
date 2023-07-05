@@ -1,8 +1,10 @@
 from uuid import uuid4
 
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
-from arbeitszeit_web.presenters.query_companies_presenter import QueryCompaniesPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.query_companies_presenter import (
+    QueryCompaniesPresenter,
+)
 from tests.presenters.base_test_case import BaseTestCase
 from tests.presenters.data_generators import QueriedCompanyGenerator
 from tests.presenters.url_index import UrlIndexTestImpl

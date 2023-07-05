@@ -8,7 +8,7 @@ from arbeitszeit.use_cases.get_member_account import (
     GetMemberAccountResponse,
     TransactionInfo,
 )
-from arbeitszeit_web.presenters.get_member_account_presenter import (
+from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
 from tests.datetime_service import FakeDatetimeService

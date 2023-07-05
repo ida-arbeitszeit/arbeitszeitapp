@@ -11,10 +11,12 @@ from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_flask.views.http_404_view import Http404View
-from arbeitszeit_web.create_draft import CreateDraftController
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.www.controllers.create_draft_controller import (
+    CreateDraftController,
+)
 
 
 @dataclass

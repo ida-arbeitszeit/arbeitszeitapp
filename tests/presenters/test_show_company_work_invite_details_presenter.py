@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsResponse,
 )
-from arbeitszeit_web.presenters.show_company_work_invite_details_presenter import (
+from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
 from tests.translator import FakeTranslator

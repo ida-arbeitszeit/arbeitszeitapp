@@ -3,7 +3,9 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftRequest
-from arbeitszeit_web.create_draft import CreateDraftController
+from arbeitszeit_web.www.controllers.create_draft_controller import (
+    CreateDraftController,
+)
 from tests.forms import DraftForm
 from tests.session import FakeSession
 

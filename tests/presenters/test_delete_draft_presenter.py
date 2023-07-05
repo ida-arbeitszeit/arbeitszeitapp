@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
-from arbeitszeit_web.presenters.delete_draft_presenter import DeleteDraftPresenter
+from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 

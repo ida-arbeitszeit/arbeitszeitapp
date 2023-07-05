@@ -1,7 +1,9 @@
 from unittest import TestCase
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from arbeitszeit_web.invite_worker_to_company import InviteWorkerToCompanyPresenter
+from arbeitszeit_web.www.presenters.invite_worker_to_company_presenter import (
+    InviteWorkerToCompanyPresenter,
+)
 from tests.translator import FakeTranslator
 
 from .dependency_injection import get_dependency_injector

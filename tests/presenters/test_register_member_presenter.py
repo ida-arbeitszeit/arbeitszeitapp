@@ -2,7 +2,9 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
-from arbeitszeit_web.presenters.register_member_presenter import RegisterMemberPresenter
+from arbeitszeit_web.www.presenters.register_member_presenter import (
+    RegisterMemberPresenter,
+)
 from tests.forms import RegisterFormImpl
 from tests.translator import FakeTranslator
 

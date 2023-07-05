@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.query_company_purchases import (
     PurchaseQueryResponse,
     QueryCompanyPurchases,
 )
-from arbeitszeit_web.presenters.company_purchases_presenter import (
+from arbeitszeit_web.www.presenters.company_purchases_presenter import (
     CompanyPurchasesPresenter,
     ViewModel,
 )

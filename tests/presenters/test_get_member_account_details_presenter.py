@@ -1,7 +1,9 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases import get_user_account_details as use_case
-from arbeitszeit_web.presenters import get_member_account_details_presenter as presenter
+from arbeitszeit_web.www.presenters import (
+    get_member_account_details_presenter as presenter,
+)
 
 from .base_test_case import BaseTestCase
 
