@@ -2,6 +2,7 @@ from flask_restx import Namespace, Resource
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit.use_cases.query_plans import QueryPlans
+from arbeitszeit_flask.api.authentication_helper import authentication_check
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
@@ -14,7 +15,7 @@ from arbeitszeit_web.api.presenters.get_plan_api_presenter import GetPlanApiPres
 from arbeitszeit_web.api.presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
-from arbeitszeit_web.api.response_errors import BadRequest, NotFound
+from arbeitszeit_web.api.response_errors import BadRequest, NotFound, Unauthorized
 
 namespace = Namespace("plans", "Plan related endpoints.")
 
@@ -31,7 +32,10 @@ active_plans_get_model = SchemaConverter(namespace).json_schema_to_flaskx(
 class ActivePlans(Resource):
     @namespace.expect(active_plans_get_input_documentation)
     @namespace.marshal_with(active_plans_get_model, skip_none=True)
-    @error_response_handling(error_responses=[BadRequest], namespace=namespace)
+    @error_response_handling(
+        error_responses=[BadRequest, Unauthorized], namespace=namespace
+    )
+    @authentication_check
     @with_injection()
     def get(
         self,
