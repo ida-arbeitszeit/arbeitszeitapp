@@ -6,12 +6,18 @@ class UnauthentificatedUserTests(ApiTestCase):
         super().setUp()
         self.url = self.url_prefix + "/plans/active"
 
-    def test_unauthenticated_user_cannot_get_plans_and_gets_401(self):
+    def test_unauthenticated_user_gets_401(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_unauthenticated_user_gets_corrrect_error_message(self):
         expected_message = "You have to authenticate before using this service."
         response = self.client.get(self.url)
-        self.assertEqual(response.mimetype, "application/json")
-        self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json["message"], expected_message)
+
+    def test_unauthenticated_user_gets_mimetype_application_json(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.mimetype, "application/json")
 
 
 class AuthentificatedCompanyTests(ApiTestCase):

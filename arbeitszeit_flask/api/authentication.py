@@ -8,7 +8,7 @@ from arbeitszeit_web.api.authentication import Authenticator
 def authentication_check(func, authenticator: Authenticator):
     @wraps(func)
     def decorated_function(*args, **kwargs):
-        authenticator.assert_user_is_authenticated
+        authenticator.authenticate_request()
         return func(*args, **kwargs)
 
     return decorated_function

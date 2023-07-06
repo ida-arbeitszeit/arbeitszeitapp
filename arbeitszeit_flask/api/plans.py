@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource
 
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit.use_cases.query_plans import QueryPlans
-from arbeitszeit_flask.api.authentication_helper import authentication_check
+from arbeitszeit_flask.api.authentication import authentication_check
 from arbeitszeit_flask.api.input_documentation import generate_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter

@@ -8,8 +8,7 @@ from arbeitszeit_web.session import Session
 class Authenticator:
     session: Session
 
-    @property
-    def assert_user_is_authenticated(self) -> None:
+    def authenticate_request(self) -> None:
         user_id = self.session.get_current_user()
         if user_id is None:
             raise Unauthorized(
