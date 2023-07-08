@@ -188,6 +188,14 @@ arbeitszeit.use\_cases.get\_statistics module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit.use\_cases.get\_user\_account\_details module
+---------------------------------------------------------
+
+.. automodule:: arbeitszeit.use_cases.get_user_account_details
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit.use\_cases.hide\_plan module
 ----------------------------------------
 
