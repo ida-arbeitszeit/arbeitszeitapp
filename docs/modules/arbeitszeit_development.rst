@@ -28,10 +28,10 @@ arbeitszeit\_development.update\_dependencies module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_development.update\_flask\_restx module
-----------------------------------------------------
+arbeitszeit\_development.update\_python\_packages module
+--------------------------------------------------------
 
-.. automodule:: arbeitszeit_development.update_flask_restx
+.. automodule:: arbeitszeit_development.update_python_packages
    :members:
    :undoc-members:
    :show-inheritance:
