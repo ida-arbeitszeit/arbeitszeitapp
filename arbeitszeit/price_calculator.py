@@ -8,66 +8,34 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class PriceComponents:
-    total_cost: Decimal
-    amount: Decimal
-    timeframe: Decimal
-    is_public_service: bool
-
-
-@dataclass
 class PriceCalculator:
     database_gateway: DatabaseGateway
 
     def calculate_cooperative_price(self, plan: Plan) -> Decimal:
         if plan.is_public_service:
             return Decimal(0)
-        return self._calculate_price(
-            list(
-                self.database_gateway.get_plans().that_are_in_same_cooperation_as(
-                    plan.id
-                )
-            )
+        plans = list(
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan.id)
         )
+        assert plans
+        if len(plans) == 1:
+            return self.calculate_individual_price(plans[0])
+        else:
+            return self._calculate_coop_price(plans)
 
     def calculate_individual_price(self, plan: Plan) -> Decimal:
         if plan.is_public_service:
             return Decimal(0)
         return plan.production_costs.total_cost() / plan.prd_amount
 
-    def _calculate_price(self, cooperating_plans: List[Plan]) -> Decimal:
-        components = [
-            PriceComponents(
-                plan.production_costs.total_cost(),
-                Decimal(plan.prd_amount),
-                Decimal(plan.timeframe),
-                plan.is_public_service,
-            )
-            for plan in cooperating_plans
-        ]
-
-        if len(components) == 1:
-            return self._calculate_individual_price(components)
-        elif len(components) > 1:
-            return self._calculate_coop_price(components)
-        else:
-            raise AssertionError("No plans specified.")
-
-    def _calculate_individual_price(self, components: List[PriceComponents]) -> Decimal:
-        component = components[0]
-        return (
-            component.total_cost / component.amount
-            if not component.is_public_service
-            else Decimal(0)
-        )
-
-    def _calculate_coop_price(self, components: List[PriceComponents]) -> Decimal:
-        for comp in components:
-            assert (
-                not comp.is_public_service
-            ), "Public plans are not allowed in cooperations."
-
+    def _calculate_coop_price(self, plans: List[Plan]) -> Decimal:
+        assert not any(plan.is_public_service for plan in plans)
         coop_price = (
-            decimal_sum([plan.total_cost / plan.timeframe for plan in components])
-        ) / (decimal_sum([plan.amount / plan.timeframe for plan in components]) or 1)
+            decimal_sum(
+                plan.production_costs.total_cost() / plan.timeframe for plan in plans
+            )
+        ) / (
+            decimal_sum(Decimal(plan.prd_amount) / plan.timeframe for plan in plans)
+            or 1
+        )
         return coop_price
