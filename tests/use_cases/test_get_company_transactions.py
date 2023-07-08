@@ -3,8 +3,10 @@ from decimal import Decimal
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 
 from .base_test_case import BaseTestCase
 
@@ -13,7 +15,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.get_company_transactions = self.injector.get(GetCompanyTransactions)
-        self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
+        self.calculate_fic_and_update_expired_plans = self.injector.get(
+            CalculateFicAndUpdateExpiredPlans
+        )
 
     def test_that_no_info_is_generated_when_no_transaction_took_place(self) -> None:
         company = self.company_generator.create_company()
@@ -127,7 +131,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             timeframe=1,
         )
         self.datetime_service.advance_time(timedelta(days=1))
-        self.update_plans_and_payout()
+        self.calculate_fic_and_update_expired_plans()
         info_receiver = self.get_company_transactions(company)
         assert info_receiver.transactions[3].transaction_volume == Decimal(10)
         assert (

@@ -9,14 +9,14 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class SendWorkCertificatesToWorkerRequest:
+class RegisterHoursWorkedRequest:
     company_id: UUID
     worker_id: UUID
     hours_worked: Decimal
 
 
 @dataclass
-class SendWorkCertificatesToWorkerResponse:
+class RegisterHoursWorkedResponse:
     class RejectionReason(Exception, Enum):
         worker_not_at_company = auto()
         hours_worked_must_be_positive = auto()
@@ -29,16 +29,16 @@ class SendWorkCertificatesToWorkerResponse:
 
 
 @dataclass
-class SendWorkCertificatesToWorker:
+class RegisterHoursWorked:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
     def __call__(
-        self, use_case_request: SendWorkCertificatesToWorkerRequest
-    ) -> SendWorkCertificatesToWorkerResponse:
+        self, use_case_request: RegisterHoursWorkedRequest
+    ) -> RegisterHoursWorkedResponse:
         if use_case_request.hours_worked <= Decimal(0):
-            return SendWorkCertificatesToWorkerResponse(
-                rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.hours_worked_must_be_positive
+            return RegisterHoursWorkedResponse(
+                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.hours_worked_must_be_positive
             )
         company = (
             self.database_gateway.get_companies()
@@ -56,8 +56,8 @@ class SendWorkCertificatesToWorker:
             company.id
         )
         if worker not in company_workers:
-            return SendWorkCertificatesToWorkerResponse(
-                rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
+            return RegisterHoursWorkedResponse(
+                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
             )
         if (
             payout_factor := self.database_gateway.get_payout_factors()
@@ -75,4 +75,4 @@ class SendWorkCertificatesToWorker:
             amount_received=use_case_request.hours_worked * fik,
             purpose="Lohn",
         )
-        return SendWorkCertificatesToWorkerResponse(rejection_reason=None)
+        return RegisterHoursWorkedResponse(rejection_reason=None)

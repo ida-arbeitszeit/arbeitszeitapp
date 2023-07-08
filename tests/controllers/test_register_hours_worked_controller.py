@@ -2,12 +2,10 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorkerRequest,
-)
-from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedRequest
+from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
-    SendWorkCertificatesToWorkerController,
+    RegisterHoursWorkedController,
 )
 from tests.request import FakeRequest
 from tests.session import FakeSession
@@ -15,12 +13,12 @@ from tests.session import FakeSession
 from .dependency_injection import get_dependency_injector
 
 
-class SendCertificatesControllerTests(TestCase):
+class RegisterHoursWorkedControllerTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.session = self.injector.get(FakeSession)
         self.request = self.injector.get(FakeRequest)
-        self.controller = self.injector.get(SendWorkCertificatesToWorkerController)
+        self.controller = self.injector.get(RegisterHoursWorkedController)
 
     def test_when_company_is_not_authenticated_then_we_get_the_adequate_controller_rejection(
         self,
@@ -107,7 +105,7 @@ class SendCertificatesControllerTests(TestCase):
         self.request.set_form("amount", "10")
         self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
-        self.assertIsInstance(controller_response, SendWorkCertificatesToWorkerRequest)
+        self.assertIsInstance(controller_response, RegisterHoursWorkedRequest)
 
     def test_a_use_case_request_with_correct_attributes_can_get_returned(
         self,
@@ -118,7 +116,7 @@ class SendCertificatesControllerTests(TestCase):
         user_id = uuid4()
         self.session.login_company(user_id)
         controller_response = self.controller.create_use_case_request()
-        assert isinstance(controller_response, SendWorkCertificatesToWorkerRequest)
+        assert isinstance(controller_response, RegisterHoursWorkedRequest)
         self.assertEqual(controller_response.company_id, user_id)
         self.assertEqual(controller_response.worker_id, member_id)
         self.assertEqual(controller_response.hours_worked, Decimal("10"))
@@ -131,5 +129,5 @@ class SendCertificatesControllerTests(TestCase):
         self.request.set_form("amount", "10")
         self.session.login_company(uuid4())
         controller_response = self.controller.create_use_case_request()
-        assert isinstance(controller_response, SendWorkCertificatesToWorkerRequest)
+        assert isinstance(controller_response, RegisterHoursWorkedRequest)
         self.assertEqual(controller_response.worker_id, member_id)

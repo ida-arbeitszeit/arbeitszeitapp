@@ -4,13 +4,15 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan, PlanDraft
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from arbeitszeit.use_cases.show_my_plans import (
     PlanInfo,
     ShowMyPlansRequest,
     ShowMyPlansResponse,
     ShowMyPlansUseCase,
 )
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
@@ -39,7 +41,9 @@ class ShowMyPlansPresenterTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.update_plans_use_case = self.injector.get(UpdatePlansAndPayout)
+        self.update_plans_use_case = self.injector.get(
+            CalculateFicAndUpdateExpiredPlans
+        )
         self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())

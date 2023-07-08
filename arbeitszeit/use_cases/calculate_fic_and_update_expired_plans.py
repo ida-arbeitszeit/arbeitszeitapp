@@ -6,7 +6,7 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class UpdatePlansAndPayout:
+class CalculateFicAndUpdateExpiredPlans:
     datetime_service: DatetimeService
     payout_factor_service: PayoutFactorService
     database_gateway: DatabaseGateway

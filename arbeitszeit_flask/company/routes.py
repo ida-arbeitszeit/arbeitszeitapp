@@ -73,8 +73,8 @@ from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
+from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
-from arbeitszeit_flask.views.transfer_to_worker_view import TransferToWorkerView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.controllers.create_draft_controller import (
@@ -459,9 +459,9 @@ def account_prd(
     )
 
 
-@CompanyRoute("/company/transfer_to_worker", methods=["GET", "POST"])
+@CompanyRoute("/company/register_hours_worked", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_worker(view: TransferToWorkerView):
+def register_hours_worked(view: RegisterHoursWorkedView):
     if request.method == "GET":
         return view.respond_to_get()
     elif request.method == "POST":

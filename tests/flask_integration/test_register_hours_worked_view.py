@@ -7,7 +7,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company = self.login_company()
-        self.url = "company/transfer_to_worker"
+        self.url = "company/register_hours_worked"
         self.company_manager = self.injector.get(CompanyManager)
 
     def test_company_gets_200_when_accessing_page(self) -> None:

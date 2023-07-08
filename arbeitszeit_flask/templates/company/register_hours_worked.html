@@ -1,7 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">{{ gettext("Transfer to worker") }}</div>
+<div class="navbar-item">{{ gettext("Register hours worked") }}</div>
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
         <div class="column"></div>
         <div class="column is-6">
             <h1 class="title">
-                {{ gettext("Transfer of work certificates to worker") }}
+                {{ gettext("Register hours worked") }}
             </h1>
             {% if workers_list is defined and workers_list|length %}
             <form method="post">
@@ -38,8 +38,9 @@
                 </div>
                 <div class="field">
                     <div class="control">
-                        <button class="button is-primary" name="transfer_type" value="transfer_to_worker"
-                            type="submit">{{ gettext("Transfer")}}</button>
+                        <button class="button is-primary" type="submit">
+                          {{ gettext("Register")}}
+                        </button>
                     </div>
                 </div>
                 <p class="help"><a href="{{url_for('main_company.invite_worker_to_company')}}">

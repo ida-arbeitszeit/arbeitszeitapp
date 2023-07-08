@@ -5,25 +5,23 @@ from flask import Response
 from flask_login import current_user
 
 from arbeitszeit.use_cases.list_workers import ListWorkers, ListWorkersRequest
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorker,
-)
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
 from arbeitszeit_flask.template import TemplateRenderer
-from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
-    SendWorkCertificatesToWorkerController,
+    RegisterHoursWorkedController,
 )
-from arbeitszeit_web.www.presenters.send_work_certificates_to_worker_presenter import (
-    SendWorkCertificatesToWorkerPresenter,
+from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
+    RegisterHoursWorkedPresenter,
 )
 
 
 @dataclass
-class TransferToWorkerView:
+class RegisterHoursWorkedView:
     template_renderer: TemplateRenderer
-    send_work_certificates_to_worker: SendWorkCertificatesToWorker
-    controller: SendWorkCertificatesToWorkerController
-    presenter: SendWorkCertificatesToWorkerPresenter
+    register_hours_worked: RegisterHoursWorked
+    controller: RegisterHoursWorkedController
+    presenter: RegisterHoursWorkedPresenter
     list_workers: ListWorkers
 
     def respond_to_get(self) -> Response:
@@ -35,9 +33,7 @@ class TransferToWorkerView:
             self.presenter.present_controller_warnings(controller_response)
             return self.create_response(status=400)
         else:
-            use_case_response = self.send_work_certificates_to_worker(
-                controller_response
-            )
+            use_case_response = self.register_hours_worked(controller_response)
             status_code = self.presenter.present_use_case_response(use_case_response)
             return self.create_response(status=status_code)
 
@@ -47,7 +43,7 @@ class TransferToWorkerView:
         )
         return Response(
             self.template_renderer.render_template(
-                "company/transfer_to_worker.html",
+                "company/register_hours_worked.html",
                 context=dict(workers_list=workers_list.workers),
             ),
             status=status,

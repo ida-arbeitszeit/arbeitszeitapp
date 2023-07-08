@@ -5,7 +5,9 @@ from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
@@ -24,7 +26,7 @@ class PlanSummaryServiceTests(TestCase):
         summary = self.service.get_summary_from_plan(self.plan.id)
         assert summary is not None
         self.summary: PlanSummary = summary
-        self.payout_use_case = self.injector.get(UpdatePlansAndPayout)
+        self.payout_use_case = self.injector.get(CalculateFicAndUpdateExpiredPlans)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_no_summary_is_returned_when_plan_id_does_not_exist(self) -> None:
