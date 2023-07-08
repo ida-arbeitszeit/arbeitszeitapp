@@ -4,9 +4,7 @@ from enum import Enum, auto
 from typing import Union
 from uuid import UUID
 
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorkerRequest,
-)
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedRequest
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 
@@ -21,13 +19,13 @@ class ControllerRejection:
 
 
 @dataclass
-class SendWorkCertificatesToWorkerController:
+class RegisterHoursWorkedController:
     session: Session
     request: Request
 
     def create_use_case_request(
         self,
-    ) -> Union[SendWorkCertificatesToWorkerRequest, ControllerRejection]:
+    ) -> Union[RegisterHoursWorkedRequest, ControllerRejection]:
         company_uuid = self.session.get_current_user()
         worker_id = self.request.get_form("member_id")
         amount_str = self.request.get_form("amount")
@@ -52,7 +50,5 @@ class SendWorkCertificatesToWorkerController:
                 reason=ControllerRejection.RejectionReason.negative_amount
             )
 
-        use_case_request = SendWorkCertificatesToWorkerRequest(
-            company_uuid, worker_uuid, amount
-        )
+        use_case_request = RegisterHoursWorkedRequest(company_uuid, worker_uuid, amount)
         return use_case_request

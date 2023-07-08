@@ -1,23 +1,21 @@
 from unittest import TestCase
 
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorkerResponse,
-)
-from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedResponse
+from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
 )
-from arbeitszeit_web.www.presenters.send_work_certificates_to_worker_presenter import (
-    SendWorkCertificatesToWorkerPresenter,
+from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
+    RegisterHoursWorkedPresenter,
 )
 
 from ..translator import FakeTranslator
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
-SUCCESS_USE_CASE_RESPONSE = SendWorkCertificatesToWorkerResponse(rejection_reason=None)
+SUCCESS_USE_CASE_RESPONSE = RegisterHoursWorkedResponse(rejection_reason=None)
 
-REJECTED_USE_CASE_RESPONSE = SendWorkCertificatesToWorkerResponse(
-    rejection_reason=SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
+REJECTED_USE_CASE_RESPONSE = RegisterHoursWorkedResponse(
+    rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
 )
 
 REJECTED_CONTROLLER_RES_INVALID_INPUT = ControllerRejection(
@@ -33,7 +31,8 @@ class PresentUseCaseResponseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.presenter = self.injector.get(SendWorkCertificatesToWorkerPresenter)
+        self.presenter = self.injector.get(RegisterHoursWorkedPresenter)
+        self.translator = self.injector.get(FakeTranslator)
 
     def test_presenter_renders_warning_if_use_case_response_is_rejected(self):
         self.presenter.present_use_case_response(REJECTED_USE_CASE_RESPONSE)
@@ -53,12 +52,19 @@ class PresentUseCaseResponseTests(TestCase):
         code = self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)
         self.assertEqual(code, 200)
 
+    def test_that_the_user_is_notified_about_success(self) -> None:
+        self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)
+        assert (
+            self.translator.gettext("Labour hours successfully registered")
+            in self.notifier.infos
+        )
+
 
 class PresentControllerResponseTests(TestCase):
     def setUp(self) -> None:
         self.translator = FakeTranslator()
         self.notifier = NotifierTestImpl()
-        self.presenter = SendWorkCertificatesToWorkerPresenter(
+        self.presenter = RegisterHoursWorkedPresenter(
             notifier=self.notifier, translator=self.translator
         )
 

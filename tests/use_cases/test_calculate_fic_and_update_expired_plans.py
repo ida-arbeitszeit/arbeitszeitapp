@@ -4,8 +4,10 @@ from uuid import UUID
 
 from arbeitszeit.entities import AccountTypes, ProductionCosts
 from arbeitszeit.use_cases import get_company_transactions, get_statistics
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccounts, ShowMyAccountsRequest
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from tests.use_cases.base_test_case import BaseTestCase
 
 from .dependency_injection import get_dependency_injector
@@ -15,7 +17,7 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.injector = get_dependency_injector()
-        self.payout = self.injector.get(UpdatePlansAndPayout)
+        self.payout = self.injector.get(CalculateFicAndUpdateExpiredPlans)
         self.show_my_accounts = self.injector.get(ShowMyAccounts)
         self.get_company_transactions = self.injector.get(
             get_company_transactions.GetCompanyTransactions

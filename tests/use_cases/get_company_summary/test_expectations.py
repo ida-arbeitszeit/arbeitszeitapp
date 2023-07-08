@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 
 from ..base_test_case import BaseTestCase
 
@@ -12,7 +14,7 @@ class ExpectationsTestCase(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
-        self.payout = self.injector.get(UpdatePlansAndPayout)
+        self.payout = self.injector.get(CalculateFicAndUpdateExpiredPlans)
 
     def test_returns_expectations_of_zero_when_no_transactions_took_place(self) -> None:
         company = self.company_generator.create_company()

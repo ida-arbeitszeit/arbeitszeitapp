@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.send_work_certificates_to_worker import (
-    SendWorkCertificatesToWorkerResponse,
-)
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedResponse
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.www.controllers.send_work_certificates_to_worker_controller import (
+from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
 )
 
@@ -12,17 +10,15 @@ from ...translator import Translator
 
 
 @dataclass
-class SendWorkCertificatesToWorkerPresenter:
+class RegisterHoursWorkedPresenter:
     notifier: Notifier
     translator: Translator
 
-    def present_use_case_response(
-        self, response: SendWorkCertificatesToWorkerResponse
-    ) -> int:
+    def present_use_case_response(self, response: RegisterHoursWorkedResponse) -> int:
         if response.is_rejected:
             if (
                 response.rejection_reason
-                == SendWorkCertificatesToWorkerResponse.RejectionReason.worker_not_at_company
+                == RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
             ):
                 self.notifier.display_warning(
                     self.translator.gettext(
@@ -32,7 +28,7 @@ class SendWorkCertificatesToWorkerPresenter:
             return 404
         else:
             self.notifier.display_info(
-                self.translator.gettext("Work certificates successfully transferred.")
+                self.translator.gettext("Labour hours successfully registered")
             )
             return 200
 

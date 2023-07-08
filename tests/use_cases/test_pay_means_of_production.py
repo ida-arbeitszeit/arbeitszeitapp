@@ -4,12 +4,14 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import query_company_purchases
+from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
+    CalculateFicAndUpdateExpiredPlans,
+)
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProduction,
     PayMeansOfProductionRequest,
 )
-from arbeitszeit.use_cases.update_plans_and_payout import UpdatePlansAndPayout
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsResponse,
 )
@@ -23,7 +25,9 @@ class PayMeansOfProductionTests(BaseTestCase):
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.entity_storage = self.injector.get(EntityStorage)
-        self.update_plans_and_payout = self.injector.get(UpdatePlansAndPayout)
+        self.calculate_fic_and_update_expired_plans = self.injector.get(
+            CalculateFicAndUpdateExpiredPlans
+        )
         self.query_company_purchases = self.injector.get(
             query_company_purchases.QueryCompanyPurchases
         )
@@ -32,9 +36,9 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         sender = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(timeframe=1)
-        self.update_plans_and_payout()
+        self.calculate_fic_and_update_expired_plans()
         self.datetime_service.freeze_time(datetime(2001, 1, 1))
-        self.update_plans_and_payout()
+        self.calculate_fic_and_update_expired_plans()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
         response = self.pay_means_of_production(
