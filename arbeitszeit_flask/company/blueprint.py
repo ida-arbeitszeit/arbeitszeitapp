@@ -5,7 +5,7 @@ from flask import Blueprint, redirect
 
 from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
-from arbeitszeit_web.authentication import CompanyAuthenticator
+from arbeitszeit_web.www.authentication import CompanyAuthenticator
 
 main_company = Blueprint(
     "main_company", __name__, template_folder="templates", static_folder="static"

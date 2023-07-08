@@ -1,12 +1,44 @@
 from tests.api.integration.base_test_case import ApiTestCase
 
 
-class ListActivePlansTests(ApiTestCase):
+class UnauthentificatedUserTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = self.url_prefix + "/plans/active"
 
-    def test_get_returns_200(self):
+    def test_unauthenticated_user_gets_401(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_unauthenticated_user_gets_corrrect_error_message(self):
+        expected_message = "You have to authenticate before using this service."
+        response = self.client.get(self.url)
+        self.assertEqual(response.json["message"], expected_message)
+
+    def test_unauthenticated_user_gets_mimetype_application_json(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.mimetype, "application/json")
+
+
+class AuthentificatedCompanyTests(ApiTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = self.url_prefix + "/plans/active"
+        self.login_company()
+
+    def test_authenticated_company_can_get_plan_and_gets_200(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.mimetype, "application/json")
+        self.assertEqual(response.status_code, 200)
+
+
+class AuthentificatedMemberTests(ApiTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = self.url_prefix + "/plans/active"
+        self.login_member()
+
+    def test_authenticated_member_can_get_plans_and_gets_200(self):
         response = self.client.get(self.url)
         self.assertEqual(response.mimetype, "application/json")
         self.assertEqual(response.status_code, 200)
