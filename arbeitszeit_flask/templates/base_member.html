@@ -4,10 +4,9 @@
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary has-text-white">
-      <a
-        href="{{ url_for('main_member.get_member_account_details') }}"
-        class="navbar-item"
-        >
+      <a href="{{ url_for('main_member.get_member_account_details') }}"
+         class="navbar-item"
+         >
         {% if current_user.is_authenticated %}
         <span class="icon">
           <i class="fas fa-user"></i>
