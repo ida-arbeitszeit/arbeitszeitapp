@@ -12,6 +12,7 @@ from arbeitszeit.injector import (
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import (
     AccountantInvitationPresenter,
+    InviteWorkerPresenter,
     NotifyAccountantsAboutNewPlanPresenter,
 )
 from arbeitszeit_web.token import TokenService
@@ -19,6 +20,7 @@ from tests.accountant_invitation_presenter import AccountantInvitationPresenterT
 from tests.dependency_injection import TestingModule
 from tests.password_hasher import PasswordHasherImpl
 from tests.token import FakeTokenService
+from tests.work_invitation_presenter import InviteWorkerPresenterImpl
 
 from . import repositories
 from .notify_accountant_about_new_plan_presenter import (
@@ -42,6 +44,7 @@ class InMemoryModule(Module):
         binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
             AccountantInvitationPresenterTestImpl
         )
+        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
         binder[entities.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )

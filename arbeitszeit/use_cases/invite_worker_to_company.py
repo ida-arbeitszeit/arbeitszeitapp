@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.member_notifications import MemberNotifier
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -20,6 +21,7 @@ class InviteWorkerToCompanyUseCase:
         invite_id: Optional[UUID] = None
 
     database_gateway: DatabaseGateway
+    member_notifier: MemberNotifier
 
     def __call__(self, request: Request) -> Response:
         addressee = self.database_gateway.get_members().with_id(request.worker).first()
@@ -36,5 +38,8 @@ class InviteWorkerToCompanyUseCase:
         else:
             invite = self.database_gateway.create_company_work_invite(
                 request.company, request.worker
+            )
+            self.member_notifier.notify_member_about_invitation(
+                member=invite.member, invite=invite.id
             )
             return self.Response(is_success=True, invite_id=invite.id)
