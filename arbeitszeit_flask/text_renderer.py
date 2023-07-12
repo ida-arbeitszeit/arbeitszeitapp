@@ -21,3 +21,6 @@ class TextRendererImpl:
             "accountant/notification-about-new-plan.html",
             product_name=product_name,
         )
+
+    def render_member_notfication_about_work_invitation(self) -> str:
+        return render_template("member/notification-about-work-invitation.html")
