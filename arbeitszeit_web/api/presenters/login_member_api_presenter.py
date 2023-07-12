@@ -31,6 +31,6 @@ class LoginMemberApiPresenter:
                 response.rejection_reason
                 == LogInMemberUseCase.RejectionReason.unknown_email_address
             ):
-                raise Unauthorized(message="Unknown email adress.")
+                raise Unauthorized(message="Unknown email address.")
             else:
                 raise Unauthorized(message="Invalid password.")

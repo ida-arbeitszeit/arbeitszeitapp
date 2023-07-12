@@ -24,7 +24,7 @@ class TestViewModelCreation(BaseTestCase):
         )
         with self.assertRaises(Unauthorized) as err:
             self.presenter.create_view_model(response)
-        self.assertEqual(err.exception.message, "Unknown email adress.")
+        self.assertEqual(err.exception.message, "Unknown email address.")
 
     def test_unauthorized_raises_if_wrong_password_was_given(self) -> None:
         response = self.create_failure_response(

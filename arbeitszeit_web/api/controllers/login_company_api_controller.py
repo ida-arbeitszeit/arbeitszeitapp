@@ -35,6 +35,8 @@ class LoginCompanyApiController:
     def create_request(self) -> LogInCompanyUseCase.Request:
         email = self.request.get_form("email")
         password = self.request.get_form("password")
-        if not email or not password:
-            raise BadRequest(message="Email or password missing.")
+        if not email:
+            raise BadRequest(message="Email missing.")
+        if not password:
+            raise BadRequest(message="Password missing.")
         return LogInCompanyUseCase.Request(email_address=email, password=password)
