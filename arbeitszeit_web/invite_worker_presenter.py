@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from uuid import UUID
 
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.text_renderer import TextRenderer
@@ -13,7 +12,7 @@ class InviteWorkerPresenterImpl:
     text_renderer: TextRenderer
     translator: Translator
 
-    def show_invite_worker_message(self, worker_email: str, invite: UUID) -> None:
+    def show_invite_worker_message(self, worker_email: str) -> None:
         self.email_service.send_message(
             subject=self.translator.gettext(
                 "Invitation from a company on Arbeitszeitapp"

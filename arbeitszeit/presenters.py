@@ -33,5 +33,5 @@ class AccountantInvitationPresenter(Protocol):
 
 
 class InviteWorkerPresenter(Protocol):
-    def show_invite_worker_message(self, worker_email: str, invite: UUID) -> None:
+    def show_invite_worker_message(self, worker_email: str) -> None:
         ...

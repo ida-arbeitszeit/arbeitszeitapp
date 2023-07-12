@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.member_notifications import MemberNotifier
+from arbeitszeit.presenters import InviteWorkerPresenter as Presenter
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -21,7 +21,7 @@ class InviteWorkerToCompanyUseCase:
         invite_id: Optional[UUID] = None
 
     database_gateway: DatabaseGateway
-    member_notifier: MemberNotifier
+    presenter: Presenter
 
     def __call__(self, request: Request) -> Response:
         addressee = self.database_gateway.get_members().with_id(request.worker).first()
@@ -39,7 +39,16 @@ class InviteWorkerToCompanyUseCase:
             invite = self.database_gateway.create_company_work_invite(
                 request.company, request.worker
             )
-            self.member_notifier.notify_member_about_invitation(
-                member=invite.member, invite=invite.id
-            )
+            self.notify_member_about_invitation(member=invite.member)
             return self.Response(is_success=True, invite_id=invite.id)
+
+    def notify_member_about_invitation(self, member: UUID) -> None:
+        record = (
+            self.database_gateway.get_members()
+            .with_id(member)
+            .joined_with_email_address()
+            .first()
+        )
+        if record is not None:
+            _, member_email = record
+            self.presenter.show_invite_worker_message(worker_email=member_email.address)
