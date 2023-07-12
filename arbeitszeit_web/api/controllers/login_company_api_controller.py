@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.api.controllers.expected_input import ExpectedInput, InputLocation
 from arbeitszeit_web.api.response_errors import BadRequest
 from arbeitszeit_web.request import Request
 
 
 @dataclass
-class LoginMemberApiController:
+class LoginCompanyApiController:
     @classmethod
     def create_expected_inputs(cls) -> List[ExpectedInput]:
         return [
@@ -32,11 +32,11 @@ class LoginMemberApiController:
 
     request: Request
 
-    def create_request(self) -> LogInMemberUseCase.Request:
+    def create_request(self) -> LogInCompanyUseCase.Request:
         email = self.request.get_form("email")
         password = self.request.get_form("password")
         if not email:
             raise BadRequest(message="Email missing.")
         if not password:
             raise BadRequest(message="Password missing.")
-        return LogInMemberUseCase.Request(email=email, password=password)
+        return LogInCompanyUseCase.Request(email_address=email, password=password)
