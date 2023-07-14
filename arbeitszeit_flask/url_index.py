@@ -63,7 +63,7 @@ class GeneralUrlIndex:
         else:
             raise ValueError(f"company summary not available for {user_role}")
 
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+    def get_answer_company_work_invite_url(self, *, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
     def get_pay_consumer_product_url(

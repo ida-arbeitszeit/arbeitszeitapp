@@ -52,6 +52,10 @@ class AnswerCompanyWorkInvite:
             self.database_gateway.get_company_work_invites().with_id(
                 request.invite_id
             ).delete()
+        elif not request.is_accepted:
+            self.database_gateway.get_company_work_invites().with_id(
+                request.invite_id
+            ).delete()
         company = self.database_gateway.get_companies().with_id(invite.company).first()
         assert company
         return AnswerCompanyWorkInviteResponse(
