@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from arbeitszeit.entities import Company
 from arbeitszeit_flask.database.repositories import AccountRepository
 from tests.data_generators import CompanyGenerator, MemberGenerator
+from utility import Utility
 
 from ..flask import FlaskTestCase
 
