@@ -30,3 +30,8 @@ class NotifyAccountantsAboutNewPlanPresenter(Protocol):
 class AccountantInvitationPresenter(Protocol):
     def send_accountant_invitation(self, email: str) -> None:
         ...
+
+
+class InviteWorkerPresenter(Protocol):
+    def show_invite_worker_message(self, worker_email: str, invite: UUID) -> None:
+        ...

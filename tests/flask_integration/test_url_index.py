@@ -128,6 +128,15 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_url_for_answering_existing_work_invite_leads_to_functional_url(
+        self,
+    ) -> None:
+        member = self.login_member()
+        invite_id = self._create_invite(member.id)
+        url = self.url_index.get_answer_company_work_invite_url(invite_id=invite_id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_plan_company_summary_url_for_existing_plan_leads_to_functional_url(
         self,
     ) -> None:

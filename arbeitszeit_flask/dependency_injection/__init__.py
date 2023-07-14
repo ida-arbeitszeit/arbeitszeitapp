@@ -18,6 +18,7 @@ from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import (
     AccountantInvitationPresenter,
     CompanyRegistrationMessagePresenter,
+    InviteWorkerPresenter,
     MemberRegistrationMessagePresenter,
     NotifyAccountantsAboutNewPlanPresenter,
 )
@@ -60,6 +61,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
+from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -129,6 +131,7 @@ class FlaskModule(Module):
         )
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
         binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
+        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
