@@ -54,13 +54,13 @@ class Member(UserMixin, db.Model):
         "User",
         lazy=True,
         uselist=False,
-        backref=db.backref("member", cascade_backrefs=False),
+        backref=db.backref("member"),
     )
     workplaces = db.relationship(
         "Company",
         secondary=jobs,
         lazy="dynamic",
-        backref=db.backref("workers", lazy="dynamic", cascade_backrefs=False),
+        backref=db.backref("workers", lazy="dynamic"),
     )
 
 
@@ -79,12 +79,12 @@ class Company(UserMixin, db.Model):
         "User",
         lazy=True,
         uselist=False,
-        backref=db.backref("company", cascade_backrefs=False),
+        backref=db.backref("company"),
     )
     plans = db.relationship(
         "Plan",
         lazy="dynamic",
-        backref=db.backref("company", cascade_backrefs=False),
+        backref=db.backref("company"),
     )
 
     def __repr__(self):
@@ -100,7 +100,7 @@ class Accountant(UserMixin, db.Model):
         "User",
         lazy=True,
         uselist=False,
-        backref=db.backref("accountant", cascade_backrefs=False),
+        backref=db.backref("accountant"),
     )
 
 
@@ -140,9 +140,7 @@ class Plan(db.Model):
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
     hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
 
-    review = db.relationship(
-        "PlanReview", uselist=False, back_populates="plan", cascade_backrefs=False
-    )
+    review = db.relationship("PlanReview", uselist=False, back_populates="plan")
 
 
 class PlanReview(db.Model):
@@ -150,7 +148,7 @@ class PlanReview(db.Model):
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
 
-    plan = db.relationship("Plan", back_populates="review", cascade_backrefs=False)
+    plan = db.relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
         return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r})"
@@ -172,13 +170,13 @@ class Account(db.Model):
         "Transaction",
         foreign_keys="Transaction.sending_account",
         lazy="dynamic",
-        backref=db.backref("account_from", cascade_backrefs=False),
+        backref=db.backref("account_from"),
     )
     transactions_received = db.relationship(
         "Transaction",
         foreign_keys="Transaction.receiving_account",
         lazy="dynamic",
-        backref=db.backref("account_to", cascade_backrefs=False),
+        backref=db.backref("account_to"),
     )
 
 
@@ -243,7 +241,7 @@ class Cooperation(db.Model):
         "Plan",
         foreign_keys="Plan.cooperation",
         lazy="dynamic",
-        backref=db.backref("coop", cascade_backrefs=False),
+        backref=db.backref("coop"),
     )
 
 
