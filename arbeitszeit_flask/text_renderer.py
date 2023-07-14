@@ -22,5 +22,10 @@ class TextRendererImpl:
             product_name=product_name,
         )
 
-    def render_member_notfication_about_work_invitation(self) -> str:
-        return render_template("member/notification-about-work-invitation.html")
+    def render_member_notfication_about_work_invitation(
+        self, *, invitation_url: str
+    ) -> str:
+        return render_template(
+            "member/notification-about-work-invitation.html",
+            invitation_url=invitation_url,
+        )

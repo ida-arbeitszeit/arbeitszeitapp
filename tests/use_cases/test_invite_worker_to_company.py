@@ -132,3 +132,13 @@ class NotificationTests(BaseTestCase):
         )
         invites = self.invite_worker_presenter.invites
         self.assertEqual(invites[0].worker_email, self.member.email)
+
+    def test_worker_gets_notified_about_correct_invite(self) -> None:
+        response = self.invite_worker_to_company(
+            InviteWorkerToCompanyUseCase.Request(
+                company=self.company.id,
+                worker=self.member.id,
+            )
+        )
+        invites = self.invite_worker_presenter.invites
+        self.assertEqual(invites[0].id, response.invite_id)

@@ -47,7 +47,7 @@ class UrlIndex(Protocol):
     def get_delete_draft_url(self, draft_id: UUID) -> str:
         ...
 
-    def get_answer_company_work_invite_url(self, invite_id: UUID) -> str:
+    def get_answer_company_work_invite_url(self, *, invite_id: UUID) -> str:
         ...
 
     def get_global_barplot_for_certificates_url(
