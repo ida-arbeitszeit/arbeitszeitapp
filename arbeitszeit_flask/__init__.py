@@ -95,7 +95,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         )
         app.cli.command("invite-accountant")(invite_accountant)
 
-        from .models import Accountant, Company, Member
+        from .database.models import Accountant, Company, Member
 
         @login_manager.user_loader
         def load_user(user_id: Any) -> Any:
