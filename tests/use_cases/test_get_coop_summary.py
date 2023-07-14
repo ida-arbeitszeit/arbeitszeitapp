@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Callable
 from uuid import uuid4
@@ -85,6 +86,15 @@ class GetCoopSummaryTests(BaseTestCase):
         assert summary.plans[0].plan_name == plan1.prd_name
         assert summary.plans[0].plan_individual_price == approx(Decimal("0.5"))
         assert summary.plans[0].plan_coop_price == approx(Decimal("0.75"))
+
+    def test_that_inactive_plans_do_not_show_up_in_cooperation_summary(self) -> None:
+        requester = self.company_generator.create_company()
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        plan = self.plan_generator.create_plan(timeframe=1)
+        coop = self.cooperation_generator.create_cooperation(plans=[plan])
+        self.datetime_service.advance_time(timedelta(days=2))
+        summary = self.get_coop_summary(GetCoopSummaryRequest(requester, coop.id))
+        self.assert_success(summary, lambda s: len(s.plans) == 0)
 
     def assert_success(
         self,

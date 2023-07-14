@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
+
 from arbeitszeit.entities import Cooperation
 from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperations,
     ListAllCooperationsResponse,
 )
 from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -59,10 +62,25 @@ def test_one_cooperation_with_correct_plan_count_is_returned_if_there_is_one_coo
     use_case: ListAllCooperations,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
-):
+) -> None:
     plan1 = plan_generator.create_plan()
     plan2 = plan_generator.create_plan()
     cooperation = cooperation_generator.create_cooperation(plans=[plan1, plan2])
     response = use_case()
     assert response.cooperations[0].plan_count == 2
     assert coop_in_response(cooperation, response)
+
+
+@injection_test
+def test_that_expired_plans_are_not_included_in_plan_count(
+    use_case: ListAllCooperations,
+    cooperation_generator: CooperationGenerator,
+    plan_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
+) -> None:
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    plan = plan_generator.create_plan(timeframe=1)
+    cooperation_generator.create_cooperation(plans=[plan])
+    datetime_service.advance_time(timedelta(days=2))
+    response = use_case()
+    assert response.cooperations[0].plan_count == 0

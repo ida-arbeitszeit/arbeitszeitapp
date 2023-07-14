@@ -7,9 +7,6 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases import query_member_purchases
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProduct,
     PayConsumerProductRequest,
@@ -28,9 +25,6 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
         self.entity_storage = self.injector.get(EntityStorage)
         self.buyer = self.member_generator.create_member_entity()
-        self.calculate_fic_and_update_expired_plans = self.injector.get(
-            CalculateFicAndUpdateExpiredPlans
-        )
         self.query_member_purchases = self.injector.get(
             query_member_purchases.QueryMemberPurchases
         )
@@ -57,9 +51,7 @@ class PayConsumerProductTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             timeframe=1,
         )
-        self.calculate_fic_and_update_expired_plans()
         self.datetime_service.freeze_time(datetime(2001, 1, 1))
-        self.calculate_fic_and_update_expired_plans()
         response = self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, amount=3)
         )

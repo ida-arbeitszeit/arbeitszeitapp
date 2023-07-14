@@ -3,9 +3,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 
 from ..base_test_case import BaseTestCase
@@ -15,7 +12,6 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
-        self.payout = self.injector.get(CalculateFicAndUpdateExpiredPlans)
 
     def test_returns_none_when_company_does_not_exist(self) -> None:
         response = self.get_company_summary(uuid4())
@@ -73,7 +69,6 @@ class UseCaseTests(BaseTestCase):
             planner=company,
         )
         self.datetime_service.advance_time(timedelta(days=2))
-        self.payout()
         response = self.get_company_summary(company)
         assert response
         assert response.account_balances.work == expected_amount

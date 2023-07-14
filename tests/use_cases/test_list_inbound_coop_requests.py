@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan
@@ -38,6 +39,18 @@ class UseCaseTest(BaseTestCase):
         assert len(response.cooperation_requests) == 2
         assert self.plan_in_list(requesting_plan1, response)
         assert self.plan_in_list(requesting_plan2, response)
+
+    def test_that_requests_for_expired_plans_are_not_shown(
+        self,
+    ):
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        coordinator = self.company_generator.create_company_entity()
+        coop = self.coop_generator.create_cooperation(coordinator=coordinator)
+        self.plan_generator.create_plan(requested_cooperation=coop, timeframe=1)
+        self.plan_generator.create_plan(requested_cooperation=coop, timeframe=5)
+        self.datetime_service.advance_time(timedelta(days=2))
+        response = self.use_case(ListInboundCoopRequestsRequest(coordinator.id))
+        assert len(response.cooperation_requests) == 1
 
     def plan_in_list(
         self, plan: Plan, response: ListInboundCoopRequestsResponse

@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.entities import PayoutFactor, ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -43,7 +43,10 @@ class PayoutFactorService:
         payout_factor = numerator / denominator
         return Decimal(payout_factor)
 
-    def store_payout_factor(self, payout_factor: Decimal) -> None:
-        self.database_gateway.create_payout_factor(
+    def store_payout_factor(self, payout_factor: Decimal) -> PayoutFactor:
+        return self.database_gateway.create_payout_factor(
             self.datetime_service.now(), payout_factor
         )
+
+    def get_current_payout_factor(self) -> PayoutFactor:
+        return self.store_payout_factor(self.calculate_payout_factor())
