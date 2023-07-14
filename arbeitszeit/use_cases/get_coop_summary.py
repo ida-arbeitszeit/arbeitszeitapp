@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -40,6 +41,7 @@ GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
 class GetCoopSummary:
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
+    datetime_service: DatetimeService
 
     def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:
         coop_and_coordinator = (
@@ -51,6 +53,7 @@ class GetCoopSummary:
         if coop_and_coordinator is None:
             return None
         coop, coordinator = coop_and_coordinator
+        now = self.datetime_service.now()
         plans = [
             AssociatedPlan(
                 plan_id=plan.id,
@@ -61,9 +64,9 @@ class GetCoopSummary:
                 else Decimal(0),
                 plan_coop_price=self.price_calculator.calculate_cooperative_price(plan),
             )
-            for plan in self.database_gateway.get_plans().that_are_part_of_cooperation(
-                request.coop_id
-            )
+            for plan in self.database_gateway.get_plans()
+            .that_are_part_of_cooperation(request.coop_id)
+            .that_will_expire_after(now)
         ]
         return GetCoopSummarySuccess(
             requester_is_coordinator=coop.coordinator == request.requester_id,

@@ -34,6 +34,7 @@ class ListCoordinations:
     def __call__(self, request: ListCoordinationsRequest) -> ListCoordinationsResponse:
         if not self.database_gateway.get_companies().with_id(request.company):
             return ListCoordinationsResponse(coordinations=[])
+        now = self.datetime_service.now()
         cooperations = [
             CooperationInfo(
                 id=coop.id,
@@ -41,9 +42,9 @@ class ListCoordinations:
                 name=coop.name,
                 definition=coop.definition,
                 count_plans_in_coop=len(
-                    self.database_gateway.get_plans().that_are_part_of_cooperation(
-                        coop.id
-                    )
+                    self.database_gateway.get_plans()
+                    .that_are_part_of_cooperation(coop.id)
+                    .that_will_expire_after(now)
                 ),
             )
             for coop in self.database_gateway.get_cooperations().coordinated_by_company(

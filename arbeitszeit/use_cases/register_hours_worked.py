@@ -5,6 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -32,6 +33,7 @@ class RegisterHoursWorkedResponse:
 class RegisterHoursWorked:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
+    fic_service: PayoutFactorService
 
     def __call__(
         self, use_case_request: RegisterHoursWorkedRequest
@@ -59,11 +61,7 @@ class RegisterHoursWorked:
             return RegisterHoursWorkedResponse(
                 rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
             )
-        if (
-            payout_factor := self.database_gateway.get_payout_factors()
-            .ordered_by_calculation_date(descending=True)
-            .first()
-        ):
+        if payout_factor := self.fic_service.get_current_payout_factor():
             fik = payout_factor.value
         else:
             fik = Decimal(1)

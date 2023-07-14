@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -187,20 +188,34 @@ class AcceptCooperationTests(BaseTestCase):
             == Decimal("1.5")
         )
 
-    def test_that_attribute_requested_cooperation_is_set_to_none_after_start_of_cooperation(
-        self,
-    ) -> None:
-        requester = self.company_generator.create_company_entity()
+    def test_that_cooperation_cannot_be_accepted_twice(self) -> None:
+        requester = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation.id
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
         )
-        assert plan.requested_cooperation == cooperation.id
         self.accept_cooperation(request)
-        assert plan.requested_cooperation is None
+        response = self.accept_cooperation(request)
+        assert response.is_rejected
+
+    def test_that_cooperation_cannot_be_accepted_for_expired_plans(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        requester = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=requester
+        )
+        plan = self.plan_generator.create_plan(
+            requested_cooperation=cooperation, timeframe=1
+        )
+        request = AcceptCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        self.datetime_service.advance_time(timedelta(days=2))
+        response = self.accept_cooperation(request)
+        assert response.is_rejected
 
     def assert_plan_in_cooperation(self, plan: UUID, cooperation: UUID) -> None:
         request = GetPlanSummaryUseCase.Request(plan)

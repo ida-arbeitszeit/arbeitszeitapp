@@ -4,9 +4,6 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import query_company_purchases
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 from arbeitszeit.use_cases.pay_means_of_production import (
     PayMeansOfProduction,
@@ -25,9 +22,6 @@ class PayMeansOfProductionTests(BaseTestCase):
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
         self.entity_storage = self.injector.get(EntityStorage)
-        self.calculate_fic_and_update_expired_plans = self.injector.get(
-            CalculateFicAndUpdateExpiredPlans
-        )
         self.query_company_purchases = self.injector.get(
             query_company_purchases.QueryCompanyPurchases
         )
@@ -36,9 +30,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         sender = self.company_generator.create_company_entity()
         plan = self.plan_generator.create_plan(timeframe=1)
-        self.calculate_fic_and_update_expired_plans()
         self.datetime_service.freeze_time(datetime(2001, 1, 1))
-        self.calculate_fic_and_update_expired_plans()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
         response = self.pay_means_of_production(
@@ -154,6 +146,40 @@ class PayMeansOfProductionTests(BaseTestCase):
             == balance_before_transaction
             + self.price_checker.get_unit_cost(plan.id) * 5
         )
+
+    def test_that_unit_cost_for_cooperating_plans_only_considers_non_expired_plans(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2010, 1, 1))
+        coop = self.cooperation_generator.create_cooperation()
+        sender = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            cooperation=coop,
+            timeframe=1,
+            amount=1,
+            costs=ProductionCosts(
+                labour_cost=Decimal(10), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+        )
+        plan = self.plan_generator.create_plan(
+            amount=1,
+            cooperation=coop,
+            timeframe=10,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+        )
+        self.datetime_service.advance_time(timedelta(days=2))
+        purpose = PurposesOfPurchases.raw_materials
+        balance_before_transaction = self.balance_checker.get_company_account_balances(
+            sender
+        ).r_account
+        self.pay_means_of_production(
+            PayMeansOfProductionRequest(sender, plan.id, 1, purpose)
+        )
+        assert self.balance_checker.get_company_account_balances(
+            sender
+        ).r_account == balance_before_transaction - Decimal(1)
 
     def test_correct_transaction_added_if_means_of_production_were_paid(self) -> None:
         sender = self.company_generator.create_company_entity()

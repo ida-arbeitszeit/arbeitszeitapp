@@ -3,9 +3,6 @@ from typing import Union
 from unittest import TestCase
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.get_statistics import GetStatistics
 from tests.data_generators import (
     CompanyGenerator,
@@ -39,9 +36,6 @@ class GetStatisticsTester(TestCase):
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.calculate_fic_and_update_expired_plans = self.injector.get(
-            CalculateFicAndUpdateExpiredPlans
-        )
         self.plan_generator = self.injector.get(PlanGenerator)
 
     def test_that_values_are_zero_if_repositories_are_empty(self) -> None:
@@ -197,13 +191,8 @@ class GetStatisticsTester(TestCase):
         stats = self.use_case()
         assert stats.planned_means == 5
 
-    def test_that_use_case_returns_none_for_payout_factor_if_it_never_has_been_calculated(
+    def test_that_payout_factor_is_available_even_with_no_plans_in_approved(
         self,
     ) -> None:
-        stats = self.use_case()
-        assert stats.payout_factor is None
-
-    def test_that_use_case_shows_payout_factor_if_it_has_been_calculated(self) -> None:
-        self.calculate_fic_and_update_expired_plans()
         stats = self.use_case()
         assert stats.payout_factor is not None

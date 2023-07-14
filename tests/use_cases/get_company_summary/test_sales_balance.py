@@ -2,9 +2,6 @@ from decimal import Decimal
 from typing import Union
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummary,
     GetCompanySummarySuccess,
@@ -18,7 +15,6 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
-        self.payout = self.injector.get(CalculateFicAndUpdateExpiredPlans)
 
     def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions_took_place(
         self,
