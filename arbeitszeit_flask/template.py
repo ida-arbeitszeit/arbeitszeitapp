@@ -75,9 +75,3 @@ class UserTemplateRenderer:
         self, name: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
         return self.inner_renderer.render_template(name, context)
-
-
-@dataclass
-class MemberRegistrationEmailTemplateImpl:
-    def render_to_html(self, confirmation_url: str) -> str:
-        return render_template("auth/activate.html", confirm_url=confirmation_url)

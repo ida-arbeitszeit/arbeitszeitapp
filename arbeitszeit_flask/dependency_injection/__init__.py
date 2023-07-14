@@ -46,7 +46,6 @@ from arbeitszeit_flask.template import (
     AccountantTemplateIndex,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
-    MemberRegistrationEmailTemplateImpl,
     MemberTemplateIndex,
     TemplateIndex,
     TemplateRenderer,
@@ -84,7 +83,6 @@ from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter i
 )
 from arbeitszeit_web.www.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
-    RegistrationEmailTemplate,
 )
 
 
@@ -132,7 +130,6 @@ class FlaskModule(Module):
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
-        binder[RegistrationEmailTemplate] = AliasProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
         binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore
