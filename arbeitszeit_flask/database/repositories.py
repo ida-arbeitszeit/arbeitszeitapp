@@ -462,7 +462,7 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
     def with_email_address(self, email: str) -> CompanyQueryResult:
         return self._with_modified_query(
             lambda query: query.join(models.User).filter(
-                models.User.email_address == email
+                func.lower(models.User.email_address) == func.lower(email)
             )
         )
 
