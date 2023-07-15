@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan
@@ -7,6 +8,7 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListOutboundCoopRequestsResponse,
 )
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -59,3 +61,25 @@ def test_correct_plans_are_returned_when_there_are_outbound_requests(
     assert len(response.cooperation_requests) == 2
     assert plan_in_list(requesting_plan1, response)
     assert plan_in_list(requesting_plan2, response)
+
+
+@injection_test
+def test_that_requests_for_expired_plans_are_not_shown(
+    list_requests: ListOutboundCoopRequests,
+    coop_generator: CooperationGenerator,
+    plan_generator: PlanGenerator,
+    company_generator: CompanyGenerator,
+    datetime_service: FakeDatetimeService,
+):
+    datetime_service.freeze_time(datetime(2000, 1, 1))
+    requester = company_generator.create_company()
+    coop = coop_generator.create_cooperation()
+    plan_generator.create_plan(
+        requested_cooperation=coop, planner=requester, timeframe=1
+    )
+    plan_generator.create_plan(
+        requested_cooperation=coop, planner=requester, timeframe=5
+    )
+    datetime_service.advance_time(timedelta(days=2))
+    response = list_requests(ListOutboundCoopRequestsRequest(requester))
+    assert len(response.cooperation_requests) == 1

@@ -323,6 +323,10 @@ class ShowMyCooperationsPresenter:
                         "You are not coordinator of this cooperation."
                     )
                 ]
+            else:
+                # catchall for rejected responses where rejection
+                # reason cannot be handled by presenter.
+                deny_message = [self.translator.gettext("Could not deny cooperation")]
         return deny_message, deny_message_success
 
     def _cancel_message_info(

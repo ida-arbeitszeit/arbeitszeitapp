@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import calculate_fic_and_update_expired_plans
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
@@ -17,9 +16,6 @@ class UseCaseTester(BaseTestCase):
         super().setUp()
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
         self.entity_storage = self.injector.get(EntityStorage)
-        self.calculate_fic_and_update_expired_plans = self.injector.get(
-            calculate_fic_and_update_expired_plans.CalculateFicAndUpdateExpiredPlans
-        )
 
     def test_that_request_is_rejected_if_worker_is_not_member_of_company(
         self,
@@ -106,7 +102,6 @@ class UseCaseTester(BaseTestCase):
                 resource_cost=Decimal(0),
             ),
         )
-        self.calculate_fic_and_update_expired_plans()
         hours_worked = Decimal(10)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker.id, hours_worked=hours_worked)

@@ -18,6 +18,7 @@ from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import (
     AccountantInvitationPresenter,
     CompanyRegistrationMessagePresenter,
+    InviteWorkerPresenter,
     MemberRegistrationMessagePresenter,
     NotifyAccountantsAboutNewPlanPresenter,
 )
@@ -46,7 +47,6 @@ from arbeitszeit_flask.template import (
     AccountantTemplateIndex,
     CompanyTemplateIndex,
     FlaskTemplateRenderer,
-    MemberRegistrationEmailTemplateImpl,
     MemberTemplateIndex,
     TemplateIndex,
     TemplateRenderer,
@@ -60,6 +60,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
+from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -84,7 +85,6 @@ from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter i
 )
 from arbeitszeit_web.www.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
-    RegistrationEmailTemplate,
 )
 
 
@@ -129,10 +129,10 @@ class FlaskModule(Module):
         )
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
         binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
+        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
         binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
         binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
-        binder[RegistrationEmailTemplate] = AliasProvider(MemberRegistrationEmailTemplateImpl)  # type: ignore
         binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
         binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore

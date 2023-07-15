@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject, JsonValue
 from arbeitszeit_web.api.response_errors import Unauthorized
 from arbeitszeit_web.session import Session
 
 
 @dataclass
-class LoginMemberApiPresenter:
+class LoginCompanyApiPresenter:
     @dataclass
     class ViewModel:
         success: bool
@@ -16,20 +16,20 @@ class LoginMemberApiPresenter:
     def get_schema(cls) -> JsonValue:
         return JsonObject(
             members=dict(success=JsonBoolean()),
-            name="LoginMemberResponse",
+            name="LoginCompanyResponse",
         )
 
     session: Session
 
-    def create_view_model(self, response: LogInMemberUseCase.Response) -> ViewModel:
+    def create_view_model(self, response: LogInCompanyUseCase.Response) -> ViewModel:
         if response.is_logged_in:
             assert response.user_id
-            self.session.login_member(member=response.user_id, remember=False)
+            self.session.login_company(company=response.user_id, remember=False)
             return self.ViewModel(success=True)
         else:
             if (
                 response.rejection_reason
-                == LogInMemberUseCase.RejectionReason.unknown_email_address
+                == LogInCompanyUseCase.RejectionReason.invalid_email_address
             ):
                 raise Unauthorized(message="Unknown email address.")
             else:

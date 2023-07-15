@@ -114,12 +114,23 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         )
         self.assertTrue(response.is_success)
 
-    def test_cannot_answer_to_invite_twice(self) -> None:
+    def test_cannot_accept_invite_twice(self) -> None:
         invite_id = self._invite_worker()
         for _ in range(2):
             response = self.answer_company_work_invite(
                 self._create_request(
                     is_accepted=True,
+                    invite_id=invite_id,
+                )
+            )
+        assert not response.is_success
+
+    def test_cannot_reject_invite_twice(self) -> None:
+        invite_id = self._invite_worker()
+        for _ in range(2):
+            response = self.answer_company_work_invite(
+                self._create_request(
+                    is_accepted=False,
                     invite_id=invite_id,
                 )
             )

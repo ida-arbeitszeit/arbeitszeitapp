@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import PayoutFactor
+from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
 
@@ -28,6 +29,7 @@ class GetStatistics:
     account_repository: AccountRepository
     database: DatabaseGateway
     datetime_service: DatetimeService
+    fic_service: PayoutFactorService
 
     def __call__(self) -> StatisticsResponse:
         (
@@ -53,9 +55,7 @@ class GetStatistics:
             planned_work=planning_statistics.total_planned_costs.labour_cost,
             planned_resources=planning_statistics.total_planned_costs.resource_cost,
             planned_means=planning_statistics.total_planned_costs.means_cost,
-            payout_factor=self.database.get_payout_factors()
-            .ordered_by_calculation_date(descending=True)
-            .first(),
+            payout_factor=self.fic_service.get_current_payout_factor(),
         )
 
     def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:

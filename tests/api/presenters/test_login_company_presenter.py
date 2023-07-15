@@ -1,10 +1,10 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject
-from arbeitszeit_web.api.presenters.login_member_api_presenter import (
-    LoginMemberApiPresenter,
+from arbeitszeit_web.api.presenters.login_company_api_presenter import (
+    LoginCompanyApiPresenter,
 )
 from arbeitszeit_web.api.response_errors import Unauthorized
 from arbeitszeit_web.session import UserRole
@@ -15,12 +15,12 @@ from tests.session import FakeSession
 class TestViewModelCreation(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.presenter = self.injector.get(LoginMemberApiPresenter)
+        self.presenter = self.injector.get(LoginCompanyApiPresenter)
         self.session = self.injector.get(FakeSession)
 
     def test_unauthorized_raises_if_wrong_mail_adress_was_given(self) -> None:
         response = self.create_failure_response(
-            rejection_reason=LogInMemberUseCase.RejectionReason.unknown_email_address,
+            rejection_reason=LogInCompanyUseCase.RejectionReason.invalid_email_address,
         )
         with self.assertRaises(Unauthorized) as err:
             self.presenter.create_view_model(response)
@@ -28,7 +28,7 @@ class TestViewModelCreation(BaseTestCase):
 
     def test_unauthorized_raises_if_wrong_password_was_given(self) -> None:
         response = self.create_failure_response(
-            rejection_reason=LogInMemberUseCase.RejectionReason.invalid_password,
+            rejection_reason=LogInCompanyUseCase.RejectionReason.invalid_password,
         )
         with self.assertRaises(Unauthorized) as err:
             self.presenter.create_view_model(response)
@@ -68,39 +68,39 @@ class TestViewModelCreation(BaseTestCase):
         assert login_attempt
         self.assertFalse(login_attempt.is_remember)
 
-    def test_that_user_gets_logged_in_as_member(self) -> None:
+    def test_that_user_gets_logged_in_as_company(self) -> None:
         response = self.create_success_response()
         self.presenter.create_view_model(response)
         login_attempt = self.session.get_most_recent_login()
         assert login_attempt
         self.assertEqual(
             login_attempt.user_role,
-            UserRole.member,
+            UserRole.company,
         )
 
     def create_failure_response(
-        self, rejection_reason: Optional[LogInMemberUseCase.RejectionReason] = None
-    ) -> LogInMemberUseCase.Response:
+        self, rejection_reason: Optional[LogInCompanyUseCase.RejectionReason] = None
+    ) -> LogInCompanyUseCase.Response:
         if rejection_reason is None:
-            rejection_reason == LogInMemberUseCase.RejectionReason.unknown_email_address
-        return LogInMemberUseCase.Response(
+            rejection_reason == LogInCompanyUseCase.RejectionReason.invalid_email_address
+        return LogInCompanyUseCase.Response(
             is_logged_in=False,
             rejection_reason=rejection_reason,
-            email="some@mail.org",
+            email_address="some@mail.org",
             user_id=None,
         )
 
     def create_success_response(
         self, email: Optional[str] = None, user_id: Optional[UUID] = None
-    ) -> LogInMemberUseCase.Response:
+    ) -> LogInCompanyUseCase.Response:
         if email is None:
             email = "test@test.test"
         if user_id is None:
             user_id = uuid4()
-        return LogInMemberUseCase.Response(
+        return LogInCompanyUseCase.Response(
             is_logged_in=True,
             rejection_reason=None,
-            email=email,
+            email_address=email,
             user_id=user_id,
         )
 
@@ -108,13 +108,13 @@ class TestViewModelCreation(BaseTestCase):
 class TestSchema(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.presenter = self.injector.get(LoginMemberApiPresenter)
+        self.presenter = self.injector.get(LoginCompanyApiPresenter)
 
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()
         assert isinstance(schema, JsonObject)
         assert not schema.as_list
-        assert schema.name == "LoginMemberResponse"
+        assert schema.name == "LoginCompanyResponse"
 
     def test_schema_top_level_members(self) -> None:
         schema = self.presenter.get_schema()

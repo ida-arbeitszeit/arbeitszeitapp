@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Cooperation
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -21,6 +22,7 @@ class ListAllCooperationsResponse:
 @dataclass
 class ListAllCooperations:
     database_gateway: DatabaseGateway
+    datetime_service: DatetimeService
 
     def __call__(self) -> ListAllCooperationsResponse:
         all_cooperations = self.database_gateway.get_cooperations()
@@ -30,7 +32,10 @@ class ListAllCooperations:
         return ListAllCooperationsResponse(cooperations=cooperations)
 
     def _coop_to_response_model(self, coop: Cooperation) -> ListedCooperation:
+        now = self.datetime_service.now()
         plan_count = len(
-            self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
+            self.database_gateway.get_plans()
+            .that_are_part_of_cooperation(coop.id)
+            .that_will_expire_after(now)
         )
         return ListedCooperation(id=coop.id, name=coop.name, plan_count=plan_count)

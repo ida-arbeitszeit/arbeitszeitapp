@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import DatabaseGateway
@@ -10,12 +11,18 @@ from arbeitszeit.repositories import DatabaseGateway
 @dataclass
 class PriceCalculator:
     database_gateway: DatabaseGateway
+    datetime_service: DatetimeService
 
     def calculate_cooperative_price(self, plan: Plan) -> Decimal:
+        now = self.datetime_service.now()
         if plan.is_public_service:
             return Decimal(0)
+        if plan.is_expired_as_of(now):
+            return self.calculate_individual_price(plan)
         plans = list(
-            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan.id)
+            self.database_gateway.get_plans()
+            .that_are_in_same_cooperation_as(plan.id)
+            .that_will_expire_after(now)
         )
         assert plans
         if len(plans) == 1:

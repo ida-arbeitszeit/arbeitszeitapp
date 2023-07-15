@@ -12,3 +12,8 @@ class TextRenderer(Protocol):
         self, *, product_name: str
     ) -> str:
         ...
+
+    def render_member_notfication_about_work_invitation(
+        self, *, invitation_url: str
+    ) -> str:
+        ...

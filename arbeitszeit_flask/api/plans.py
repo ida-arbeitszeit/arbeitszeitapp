@@ -59,8 +59,9 @@ plan_get_model = SchemaConverter(namespace).json_schema_to_flaskx(
 class Plan(Resource):
     @namespace.marshal_with(plan_get_model, skip_none=True)
     @error_response_handling(
-        error_responses=[BadRequest, NotFound], namespace=namespace
+        error_responses=[BadRequest, NotFound, Unauthorized], namespace=namespace
     )
+    @authentication_check
     @with_injection()
     def get(
         self,

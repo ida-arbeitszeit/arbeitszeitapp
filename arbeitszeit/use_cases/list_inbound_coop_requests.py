@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -29,17 +30,19 @@ class ListInboundCoopRequestsResponse:
 @dataclass
 class ListInboundCoopRequests:
     database_gateway: DatabaseGateway
+    datetime_service: DatetimeService
 
     def __call__(
         self, request: ListInboundCoopRequestsRequest
     ) -> ListInboundCoopRequestsResponse:
+        now = self.datetime_service.now()
         if not self._coordinator_exists(request):
             return ListInboundCoopRequestsResponse(cooperation_requests=[])
         cooperation_requests = [
             self._plan_to_response_model(plan)
-            for plan in self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
-                request.coordinator_id
-            )
+            for plan in self.database_gateway.get_plans()
+            .that_request_cooperation_with_coordinator(request.coordinator_id)
+            .that_will_expire_after(now)
         ]
         return ListInboundCoopRequestsResponse(
             cooperation_requests=cooperation_requests

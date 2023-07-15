@@ -5,9 +5,6 @@ from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_summary import PlanSummary, PlanSummaryService
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
@@ -26,7 +23,6 @@ class PlanSummaryServiceTests(TestCase):
         summary = self.service.get_summary_from_plan(self.plan.id)
         assert summary is not None
         self.summary: PlanSummary = summary
-        self.payout_use_case = self.injector.get(CalculateFicAndUpdateExpiredPlans)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_no_summary_is_returned_when_plan_id_does_not_exist(self) -> None:
@@ -133,7 +129,6 @@ class PlanSummaryServiceTests(TestCase):
 
     def test_that_zero_active_days_is_shown_if_plan_is_not_active_yet(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
-        self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary
         self.assertEqual(summary.active_days, 0)
@@ -142,7 +137,6 @@ class PlanSummaryServiceTests(TestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary
         self.assertEqual(summary.active_days, 0)
@@ -153,7 +147,6 @@ class PlanSummaryServiceTests(TestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self.plan_generator.create_plan()
         self.datetime_service.freeze_time(datetime(2000, 1, 2, hour=1))
-        self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary
         self.assertEqual(summary.active_days, 1)
@@ -167,7 +160,6 @@ class PlanSummaryServiceTests(TestCase):
             timeframe=timeframe,
         )
         self.datetime_service.freeze_time(datetime(2000, 1, 11))
-        self.payout_use_case()
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary
         self.assertEqual(summary.active_days, timeframe)
@@ -181,7 +173,6 @@ class PlanSummaryServiceTests(TestCase):
 
     def test_that_expiration_date_is_shown_if_it_exists(self) -> None:
         plan = self.plan_generator.create_plan(timeframe=5)
-        self.payout_use_case()
         assert plan.expiration_date
         summary = self.service.get_summary_from_plan(plan.id)
         assert summary

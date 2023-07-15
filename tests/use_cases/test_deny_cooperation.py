@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases.deny_cooperation import (
@@ -109,3 +110,20 @@ class UseCaseTests(BaseTestCase):
             requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
         )
         self.request_cooperation(request_request)
+
+    def test_that_cooperation_for_inactive_plans_cannot_be_denied(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        requester = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=requester
+        )
+        plan = self.plan_generator.create_plan(
+            requested_cooperation=cooperation, timeframe=1
+        )
+        self.datetime_service.advance_time(timedelta(days=2))
+        request = DenyCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        response = self.deny_cooperation(request)
+        assert response.is_rejected
+        assert response.rejection_reason == response.RejectionReason.plan_is_inactive

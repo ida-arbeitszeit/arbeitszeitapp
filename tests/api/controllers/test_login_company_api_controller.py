@@ -1,6 +1,6 @@
 from arbeitszeit_web.api.controllers.expected_input import InputLocation
-from arbeitszeit_web.api.controllers.login_member_api_controller import (
-    LoginMemberApiController,
+from arbeitszeit_web.api.controllers.login_company_api_controller import (
+    LoginCompanyApiController,
 )
 from arbeitszeit_web.api.response_errors import BadRequest
 from tests.controllers.base_test_case import BaseTestCase
@@ -10,12 +10,18 @@ from tests.request import FakeRequest
 class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.controller = self.injector.get(LoginMemberApiController)
+        self.controller = self.injector.get(LoginCompanyApiController)
         self.request = self.injector.get(FakeRequest)
 
     def test_bad_request_raised_when_request_has_no_email_and_no_password(
         self,
     ) -> None:
+        with self.assertRaises(BadRequest) as err:
+            self.controller.create_request()
+        self.assertEqual(err.exception.message, "Email missing.")
+
+    def test_bad_request_raised_when_request_has_password_but_no_email(self) -> None:
+        self.request.set_form(key="password", value="123safe")
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Email missing.")
@@ -26,12 +32,6 @@ class ControllerTests(BaseTestCase):
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Password missing.")
 
-    def test_bad_request_raised_when_request_has_password_but_no_email(self) -> None:
-        self.request.set_form(key="password", value="123safe")
-        with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
-        self.assertEqual(err.exception.message, "Email missing.")
-
     def test_email_and_password_are_passed_to_use_case_request(self) -> None:
         EXPECTED_MAIL = "test@test.org"
         EXPECTED_PASSWORD = "123safe"
@@ -39,14 +39,14 @@ class ControllerTests(BaseTestCase):
         self.request.set_form(key="password", value=EXPECTED_PASSWORD)
         use_case_request = self.controller.create_request()
         assert use_case_request
-        self.assertEqual(use_case_request.email, EXPECTED_MAIL)
+        self.assertEqual(use_case_request.email_address, EXPECTED_MAIL)
         self.assertEqual(use_case_request.password, EXPECTED_PASSWORD)
 
 
 class ExpectedInputsTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.controller = self.injector.get(LoginMemberApiController)
+        self.controller = self.injector.get(LoginCompanyApiController)
         self.inputs = self.controller.create_expected_inputs()
 
     def test_controller_has_two_expected_inputs(self) -> None:

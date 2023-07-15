@@ -79,23 +79,11 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     app.template_filter()(RealtimeDatetimeService().format_datetime)
 
     with app.app_context():
-        from arbeitszeit_flask.commands import (
-            calculate_fic_and_update_expired_plans,
-            deprecated,
-            invite_accountant,
-        )
+        from arbeitszeit_flask.commands import invite_accountant
 
-        app.cli.command("payout")(
-            deprecated(
-                "Use the 'calculate-fic-and-update-expired-plans' command to update expired plans."
-            )(calculate_fic_and_update_expired_plans)
-        )
-        app.cli.command("calculate-fic-and-update-expired-plans")(
-            calculate_fic_and_update_expired_plans
-        )
         app.cli.command("invite-accountant")(invite_accountant)
 
-        from .models import Accountant, Company, Member
+        from .database.models import Accountant, Company, Member
 
         @login_manager.user_loader
         def load_user(user_id: Any) -> Any:

@@ -4,9 +4,6 @@ from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan, PlanDraft
-from arbeitszeit.use_cases.calculate_fic_and_update_expired_plans import (
-    CalculateFicAndUpdateExpiredPlans,
-)
 from arbeitszeit.use_cases.show_my_plans import (
     PlanInfo,
     ShowMyPlansRequest,
@@ -41,9 +38,6 @@ class ShowMyPlansPresenterTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.update_plans_use_case = self.injector.get(
-            CalculateFicAndUpdateExpiredPlans
-        )
         self.notifier = self.injector.get(NotifierTestImpl)
         self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
@@ -328,5 +322,4 @@ class ShowMyPlansPresenterTests(TestCase):
         plan = self.plan_generator.create_plan(
             timeframe=timeframe,
         )
-        self.update_plans_use_case()
         return plan
