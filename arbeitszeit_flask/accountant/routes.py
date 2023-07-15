@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -19,7 +20,13 @@ from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.www.controllers.approve_plan_controller import (
     ApprovePlanController,
 )
+from arbeitszeit_web.www.controllers.get_accountant_account_details_controller import (
+    GetAccountantAccountDetailsController,
+)
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
+from arbeitszeit_web.www.presenters.get_accountant_account_details_presenter import (
+    GetAccountantAccountDetailsPresenter,
+)
 from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
@@ -122,3 +129,22 @@ def company_summary(
         )
     else:
         return http_404_view.get_response()
+
+
+@AccountantRoute("/accountant/account")
+def get_accountant_account_details(
+    use_case: GetUserAccountDetailsUseCase,
+    controller: GetAccountantAccountDetailsController,
+    presenter: GetAccountantAccountDetailsPresenter,
+    template_renderer: UserTemplateRenderer,
+):
+    uc_request = controller.parse_web_request()
+    uc_response = use_case.get_user_account_details(uc_request)
+    view_model = presenter.render_accountant_account_details(uc_response)
+    return FlaskResponse(
+        template_renderer.render_template(
+            "accountant/get_accountant_account_details.html",
+            dict(view_model=view_model),
+        ),
+        status=200,
+    )
