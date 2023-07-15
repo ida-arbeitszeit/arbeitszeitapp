@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from decimal import Decimal
 
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
@@ -11,95 +10,6 @@ from tests.data_generators import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
-
-
-class PayoutFactorTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-
-    def test_that_returned_payout_factor_is_equal_to_specified_value_on_creation(
-        self,
-    ) -> None:
-        expected_values = [Decimal("0.5"), Decimal("0")]
-        for expected_value in expected_values:
-            factor = self.database_gateway.create_payout_factor(
-                timestamp=datetime(2000, 1, 1), payout_factor=expected_value
-            )
-            assert factor.value == expected_value
-
-    def test_that_returned_calulcation_date_is_equal_to_specified_timestamp_on_creation(
-        self,
-    ) -> None:
-        expected_timestamps = [datetime(2000, 2, 2), datetime(2050, 1, 1)]
-        for expected_timestamp in expected_timestamps:
-            factor = self.database_gateway.create_payout_factor(
-                timestamp=expected_timestamp, payout_factor=Decimal(0)
-            )
-            assert factor.calculation_date == expected_timestamp
-
-    def test_a_priori_no_payout_factor_is_stored_in_db(self) -> None:
-        assert not self.database_gateway.get_payout_factors()
-
-    def test_that_some_payout_factors_are_queried_after_one_payout_factor_was_created(
-        self,
-    ) -> None:
-        self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 1),
-            payout_factor=Decimal(1),
-        )
-        assert self.database_gateway.get_payout_factors()
-
-    def test_that_created_payout_factor_is_in_queried_results(
-        self,
-    ) -> None:
-        factor_1 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 1),
-            payout_factor=Decimal(1),
-        )
-        factor_2 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 1),
-            payout_factor=Decimal(0),
-        )
-        factor_3 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 2),
-            payout_factor=Decimal(0),
-        )
-        assert factor_1 in self.database_gateway.get_payout_factors()
-        assert factor_2 in self.database_gateway.get_payout_factors()
-        assert factor_3 in self.database_gateway.get_payout_factors()
-
-    def test_that_payout_factors_can_be_ordered_by_calculation_date_ascending(
-        self,
-    ) -> None:
-        factor_1 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 1),
-            payout_factor=Decimal(1),
-        )
-        factor_2 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 2),
-            payout_factor=Decimal(1),
-        )
-        assert list(
-            self.database_gateway.get_payout_factors().ordered_by_calculation_date()
-        ) == [factor_1, factor_2]
-
-    def test_that_payout_factors_can_be_ordered_by_calculation_date_descending(
-        self,
-    ) -> None:
-        factor_1 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 1),
-            payout_factor=Decimal(1),
-        )
-        factor_2 = self.database_gateway.create_payout_factor(
-            timestamp=datetime(2000, 1, 2),
-            payout_factor=Decimal(1),
-        )
-        assert list(
-            self.database_gateway.get_payout_factors().ordered_by_calculation_date(
-                descending=True
-            )
-        ) == [factor_2, factor_1]
 
 
 class CompanyPurchaseTests(FlaskTestCase):

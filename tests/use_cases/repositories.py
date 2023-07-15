@@ -32,7 +32,6 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     Cooperation,
     Member,
-    PayoutFactor,
     Plan,
     PlanDraft,
     ProductionCosts,
@@ -839,21 +838,6 @@ class AccountResult(QueryResultImpl[Account]):
         )
 
 
-class PayoutFactorResult(QueryResultImpl[entities.PayoutFactor]):
-    def ordered_by_calculation_date(
-        self, *, descending: bool = False
-    ) -> PayoutFactorResult:
-        def sorted_factors() -> Iterable[entities.PayoutFactor]:
-            return sorted(
-                self.items(), key=lambda f: f.calculation_date, reverse=descending
-            )
-
-        return replace(
-            self,
-            items=sorted_factors,
-        )
-
-
 class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
     def issued_by(self, company: UUID) -> Self:
         return replace(
@@ -988,7 +972,6 @@ class EntityStorage:
             self.social_accounting.account: self.social_accounting
         }
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.payout_factors: List[entities.PayoutFactor] = list()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
         self.consumer_purchase_by_transaction: Dict[
             UUID, entities.ConsumerPurchase
@@ -1011,19 +994,6 @@ class EntityStorage:
         )
         self.email_addresses[address] = record
         return record
-
-    def get_payout_factors(self) -> PayoutFactorResult:
-        return PayoutFactorResult(
-            items=lambda: self.payout_factors,
-            entities=self,
-        )
-
-    def create_payout_factor(
-        self, timestamp: datetime, payout_factor: Decimal
-    ) -> PayoutFactor:
-        factor = entities.PayoutFactor(calculation_date=timestamp, value=payout_factor)
-        self.payout_factors.append(factor)
-        return factor
 
     def create_account(self) -> Account:
         account = Account(
