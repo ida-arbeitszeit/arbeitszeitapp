@@ -528,7 +528,9 @@ class AccountantResult(FlaskQueryResult[entities.Accountant]):
     def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(user).filter(user.email_address == email)
+            lambda query: query.join(user).filter(
+                func.lower(user.email_address) == func.lower(email),
+                )
         )
 
     def with_id(self, id_: UUID) -> Self:
@@ -1418,7 +1420,7 @@ class DatabaseGatewayImpl:
     ) -> models.User:
         if (
             user := self.db.session.query(models.User)
-            .filter(models.User.email_address == email)
+            .filter(func.lower(models.User.email_address) == func.lower(email))
             .first()
         ):
             return user
