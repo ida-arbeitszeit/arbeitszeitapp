@@ -230,9 +230,3 @@ class Cooperation(db.Model):
     name = db.Column(db.String(100), nullable=False)
     definition = db.Column(db.String(5000), nullable=False)
     coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
-
-
-class PayoutFactor(db.Model):
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    timestamp = db.Column(db.DateTime, nullable=False)
-    payout_factor = db.Column(db.Numeric(), nullable=False)

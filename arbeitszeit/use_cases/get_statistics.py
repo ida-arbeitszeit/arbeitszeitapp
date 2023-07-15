@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional, Tuple
+from typing import Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import AccountRepository, DatabaseGateway
 
@@ -21,7 +20,7 @@ class StatisticsResponse:
     planned_work: Decimal
     planned_resources: Decimal
     planned_means: Decimal
-    payout_factor: Optional[PayoutFactor]
+    payout_factor: Decimal
 
 
 @dataclass

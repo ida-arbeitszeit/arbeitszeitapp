@@ -774,16 +774,6 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
 
-class PayoutFactorResult(FlaskQueryResult[entities.PayoutFactor]):
-    def ordered_by_calculation_date(
-        self, descending: bool = False
-    ) -> PayoutFactorResult:
-        ordering = models.PayoutFactor.timestamp
-        if descending:
-            ordering = ordering.desc()
-        return self._with_modified_query(lambda query: query.order_by(ordering))
-
-
 class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
     def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
         transaction = aliased(models.Transaction)
@@ -1117,31 +1107,6 @@ class AccountingRepository:
 @dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
-
-    def create_payout_factor(
-        self, timestamp: datetime, payout_factor: Decimal
-    ) -> entities.PayoutFactor:
-        orm = models.PayoutFactor(
-            timestamp=timestamp,
-            payout_factor=payout_factor,
-        )
-        self.db.session.add(orm)
-        return self._payout_factor_from_orm(orm)
-
-    def get_payout_factors(self) -> PayoutFactorResult:
-        return PayoutFactorResult(
-            query=models.PayoutFactor.query,
-            db=self.db,
-            mapper=self._payout_factor_from_orm,
-        )
-
-    def _payout_factor_from_orm(
-        self, orm: models.PayoutFactor
-    ) -> entities.PayoutFactor:
-        return entities.PayoutFactor(
-            calculation_date=orm.timestamp,
-            value=orm.payout_factor,
-        )
 
     def create_company_purchase(
         self, transaction: UUID, amount: int, plan: UUID

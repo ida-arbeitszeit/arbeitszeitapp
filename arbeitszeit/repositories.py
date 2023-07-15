@@ -19,7 +19,6 @@ from arbeitszeit.entities import (
     Cooperation,
     EmailAddress,
     Member,
-    PayoutFactor,
     Plan,
     PlanDraft,
     PlanningStatistics,
@@ -361,13 +360,6 @@ class AccountResult(QueryResult[Account], Protocol):
         ...
 
 
-class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
-    def ordered_by_calculation_date(
-        self, *, descending: bool = ...
-    ) -> PayoutFactorResult:
-        ...
-
-
 class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
     def issued_by(self, company: UUID) -> Self:
         ...
@@ -415,14 +407,6 @@ class LanguageRepository(Protocol):
 
 
 class DatabaseGateway(Protocol):
-    def get_payout_factors(self) -> PayoutFactorResult:
-        ...
-
-    def create_payout_factor(
-        self, timestamp: datetime, payout_factor: Decimal
-    ) -> PayoutFactor:
-        ...
-
     def create_consumer_purchase(
         self, transaction: UUID, amount: int, plan: UUID
     ) -> ConsumerPurchase:

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import PayoutFactor, ProductionCosts
+from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -12,12 +13,11 @@ class PayoutFactorService:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def calculate_payout_factor(self) -> Decimal:
-        now = self.datetime_service.now()
+    def calculate_payout_factor(self, timestamp: datetime) -> Decimal:
         active_plans = (
             self.database_gateway.get_plans()
-            .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_will_expire_after(timestamp)
+            .that_were_activated_before(timestamp)
         )
         # payout factor = (A − ( P o + R o )) / (A + A o)
         productive_plans = active_plans.that_are_productive()
@@ -43,10 +43,6 @@ class PayoutFactorService:
         payout_factor = numerator / denominator
         return Decimal(payout_factor)
 
-    def store_payout_factor(self, payout_factor: Decimal) -> PayoutFactor:
-        return self.database_gateway.create_payout_factor(
-            self.datetime_service.now(), payout_factor
-        )
-
-    def get_current_payout_factor(self) -> PayoutFactor:
-        return self.store_payout_factor(self.calculate_payout_factor())
+    def get_current_payout_factor(self) -> Decimal:
+        now = self.datetime_service.now()
+        return self.calculate_payout_factor(now)

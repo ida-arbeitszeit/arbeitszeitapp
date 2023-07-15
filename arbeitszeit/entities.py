@@ -297,12 +297,6 @@ class Accountant:
 
 
 @dataclass
-class PayoutFactor:
-    calculation_date: datetime
-    value: Decimal
-
-
-@dataclass
 class PlanningStatistics:
     average_plan_duration_in_days: Decimal
     total_planned_costs: ProductionCosts
