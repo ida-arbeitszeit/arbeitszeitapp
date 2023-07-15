@@ -6,7 +6,7 @@ from flask import request, session
 from flask_login import current_user, login_user, logout_user
 from is_safe_url import is_safe_url
 
-from arbeitszeit_flask import models
+from arbeitszeit_flask.database import models
 from arbeitszeit_web.session import UserRole
 
 

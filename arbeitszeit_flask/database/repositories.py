@@ -15,8 +15,8 @@ from typing_extensions import Self
 
 from arbeitszeit import entities, repositories
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit_flask import models
-from arbeitszeit_flask.models import (
+from arbeitszeit_flask.database import models
+from arbeitszeit_flask.database.models import (
     Account,
     Company,
     Member,
