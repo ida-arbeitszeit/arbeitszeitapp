@@ -1,16 +1,10 @@
 from dataclasses import dataclass
-from typing import Protocol
 
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.token import TokenService
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
-
-
-class RegistrationEmailTemplate(Protocol):
-    def render_to_html(self, confirmation_url: str) -> str:
-        ...
 
 
 @dataclass
