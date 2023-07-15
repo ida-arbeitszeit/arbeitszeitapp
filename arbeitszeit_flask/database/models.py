@@ -74,16 +74,10 @@ class Company(UserMixin, db.Model):
     a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     prd_account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
-    drafts = db.relationship("PlanDraft", lazy="dynamic")
     user = db.relationship(
         "User",
         lazy=True,
         uselist=False,
-        backref=db.backref("company"),
-    )
-    plans = db.relationship(
-        "Plan",
-        lazy="dynamic",
         backref=db.backref("company"),
     )
 
@@ -236,13 +230,6 @@ class Cooperation(db.Model):
     name = db.Column(db.String(100), nullable=False)
     definition = db.Column(db.String(5000), nullable=False)
     coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
-
-    plans = db.relationship(
-        "Plan",
-        foreign_keys="Plan.cooperation",
-        lazy="dynamic",
-        backref=db.backref("coop"),
-    )
 
 
 class PayoutFactor(db.Model):
