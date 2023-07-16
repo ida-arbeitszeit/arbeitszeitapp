@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, func, or_, update
 from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
@@ -1532,6 +1533,12 @@ class DatabaseGatewayImpl:
         self, *, address: str, confirmed_on: Optional[datetime]
     ) -> entities.EmailAddress:
         orm = models.Email(address=address, confirmed_on=confirmed_on)
+        if (
+            already_existing := self.db.session.query(models.Email)
+            .filter(func.lower(models.Email.address) == func.lower(address))
+            .first()
+        ):
+            orm.address = already_existing.address
         self.db.session.add(orm)
         self.db.session.flush()
         return self.email_address_from_orm(orm)

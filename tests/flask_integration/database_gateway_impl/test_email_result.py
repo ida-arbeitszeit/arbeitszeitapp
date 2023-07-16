@@ -16,7 +16,7 @@ class EmailResultTests(FlaskTestCase):
                 address=address, confirmed_on=datetime.min
             )
 
-    def test_cannot_create_same_email_address_twice_case_insensitive(self) -> None:
+    def test_cannot_create_similar_email_address_case_insensitive(self) -> None:
         address = "test@test.test"
         self.database_gateway.create_email_address(address=address, confirmed_on=None)
         altered_address = Utility.mangle_case(address) 
