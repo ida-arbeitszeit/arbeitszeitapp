@@ -725,6 +725,24 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             lambda query: query.filter(models.Account.id.in_(ids))
         )
 
+    def that_are_member_accounts(self) -> Self:
+        member = aliased(models.Member)
+        return self._with_modified_query(
+            lambda query: query.join(member, member.account == models.Account.id)
+        )
+
+    def that_are_product_accounts(self) -> Self:
+        company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(company, company.prd_account == models.Account.id)
+        )
+
+    def that_are_labour_accounts(self) -> Self:
+        company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(company, company.a_account == models.Account.id)
+        )
+
     def joined_with_owner(
         self,
     ) -> FlaskQueryResult[Tuple[entities.Account, entities.AccountOwner]]:
@@ -755,6 +773,37 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             mapper=self.map_account_and_owner,
             db=self.db,
         )
+
+    def joined_with_balance(self) -> FlaskQueryResult[Tuple[entities.Account, Decimal]]:
+        outbound_transactions = aliased(Transaction)
+        inbound_transactions = aliased(Transaction)
+        query = (
+            self.query.join(
+                outbound_transactions,
+                outbound_transactions.sending_account == models.Account.id,
+                isouter=True,
+            )
+            .join(
+                inbound_transactions,
+                inbound_transactions.receiving_account == models.Account.id,
+                isouter=True,
+            )
+            .group_by(models.Account)
+            .with_entities(
+                models.Account,
+                func.sum(outbound_transactions.amount_sent),
+                func.sum(inbound_transactions.amount_received),
+            )
+        )
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=self.map_account_and_balance,
+        )
+
+    @classmethod
+    def map_account_and_balance(cls, orm: Any) -> Tuple[entities.Account, Decimal]:
+        return orm[0], (orm[2] or Decimal(0)) - (orm[1] or Decimal(0))
 
     @classmethod
     def map_account_and_owner(

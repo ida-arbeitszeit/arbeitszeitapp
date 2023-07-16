@@ -813,6 +813,30 @@ class AccountResult(QueryResultImpl[Account]):
             items=lambda: filter(lambda account: account.id in id_, self.items()),
         )
 
+    def that_are_member_accounts(self) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda account: account in self.entities.member_accounts, self.items()
+            ),
+        )
+
+    def that_are_product_accounts(self) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda account: account in self.entities.prd_accounts, self.items()
+            ),
+        )
+
+    def that_are_labour_accounts(self) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda account: account in self.entities.l_accounts, self.items()
+            ),
+        )
+
     def joined_with_owner(
         self,
     ) -> QueryResultImpl[Tuple[Account, entities.AccountOwner]]:
@@ -836,6 +860,22 @@ class AccountResult(QueryResultImpl[Account]):
             items=items,
             entities=self.entities,
         )
+
+    def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
+        def items() -> Iterable[Tuple[Account, Decimal]]:
+            for account in self.items():
+                transactions = self.entities.get_transactions()
+                received_transactions = transactions.where_account_is_receiver(
+                    account.id
+                )
+                sent_transactions = transactions.where_account_is_sender(account.id)
+                yield account, decimal_sum(
+                    transaction.amount_received for transaction in received_transactions
+                ) - decimal_sum(
+                    transaction.amount_sent for transaction in sent_transactions
+                )
+
+        return QueryResultImpl(items=items, entities=self.entities)
 
 
 class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
@@ -963,6 +1003,11 @@ class EntityStorage:
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
+        self.p_accounts: Set[Account] = set()
+        self.r_accounts: Set[Account] = set()
+        self.l_accounts: Set[Account] = set()
+        self.prd_accounts: Set[Account] = set()
+        self.member_accounts: Set[Account] = set()
         self.accountants: Dict[UUID, Accountant] = dict()
         self.social_accounting = SocialAccounting(
             id=uuid4(),
@@ -1175,6 +1220,7 @@ class EntityStorage:
         registered_on: datetime,
     ) -> Member:
         assert email in self.email_addresses
+        self.member_accounts.add(account)
         id = uuid4()
         member = Member(
             id=id,
@@ -1206,6 +1252,10 @@ class EntityStorage:
         registered_on: datetime,
     ) -> Company:
         assert email in self.email_addresses
+        self.p_accounts.add(means_account)
+        self.r_accounts.add(resource_account)
+        self.l_accounts.add(labour_account)
+        self.prd_accounts.add(products_account)
         new_company = Company(
             id=uuid4(),
             email=email,
