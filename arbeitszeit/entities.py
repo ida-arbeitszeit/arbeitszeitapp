@@ -120,7 +120,7 @@ class AccountTypes(Enum):
     accounting = "accounting"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Account:
     id: UUID
 

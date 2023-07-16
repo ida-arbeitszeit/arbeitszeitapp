@@ -356,7 +356,19 @@ class AccountResult(QueryResult[Account], Protocol):
     def with_id(self, id_: UUID) -> AccountResult:
         ...
 
+    def that_are_member_accounts(self) -> Self:
+        ...
+
+    def that_are_product_accounts(self) -> Self:
+        ...
+
+    def that_are_labour_accounts(self) -> Self:
+        ...
+
     def joined_with_owner(self) -> QueryResult[Tuple[Account, AccountOwner]]:
+        ...
+
+    def joined_with_balance(self) -> QueryResult[Tuple[Account, Decimal]]:
         ...
 
 

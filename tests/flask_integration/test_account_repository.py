@@ -1,4 +1,9 @@
+from datetime import datetime
+from decimal import Decimal
+from typing import List
 from uuid import uuid4
+
+from parameterized import parameterized
 
 from arbeitszeit.entities import SocialAccounting
 from arbeitszeit_flask.database.repositories import AccountRepository
@@ -166,3 +171,108 @@ class RepositoryTester(FlaskTestCase):
         )
         assert result
         assert result[1] == self.social_accounting
+
+    def test_with_no_members_have_no_member_accounts(self) -> None:
+        assert not self.repository.get_accounts().that_are_member_accounts()
+
+    def test_with_one_member_have_one_member_accounts(self) -> None:
+        self.member_generator.create_member()
+        assert len(self.repository.get_accounts().that_are_member_accounts()) == 1
+
+    def test_with_no_company_there_are_no_prd_accounts(self) -> None:
+        assert not self.repository.get_accounts().that_are_product_accounts()
+
+    def test_with_one_company_there_is_one_prd_accounts(self) -> None:
+        self.company_generator.create_company()
+        assert len(self.repository.get_accounts().that_are_product_accounts()) == 1
+
+    def test_filtering_by_prd_account_yields_the_product_account_of_previously_created_company(
+        self,
+    ) -> None:
+        expected_account = self.repository.create_account()
+        self.database_gateway.create_company(
+            email="",
+            name="",
+            password_hash="",
+            means_account=self.repository.create_account(),
+            resource_account=self.repository.create_account(),
+            labour_account=self.repository.create_account(),
+            products_account=expected_account,
+            registered_on=datetime(2000, 1, 1),
+        )
+        assert (
+            expected_account
+            in self.repository.get_accounts().that_are_product_accounts()
+        )
+
+    def test_with_no_company_there_are_no_labour_accounts(self) -> None:
+        assert not self.repository.get_accounts().that_are_labour_accounts()
+
+    def test_with_one_company_there_is_one_labour_accounts(self) -> None:
+        self.company_generator.create_company()
+        assert len(self.repository.get_accounts().that_are_labour_accounts()) == 1
+
+    def test_filtering_by_labour_account_yields_the_labour_account_of_previously_created_company(
+        self,
+    ) -> None:
+        expected_account = self.repository.create_account()
+        self.database_gateway.create_company(
+            email="",
+            name="",
+            password_hash="",
+            means_account=self.repository.create_account(),
+            resource_account=self.repository.create_account(),
+            labour_account=expected_account,
+            products_account=self.repository.create_account(),
+            registered_on=datetime(2000, 1, 1),
+        )
+        assert (
+            expected_account
+            in self.repository.get_accounts().that_are_labour_accounts()
+        )
+
+    @parameterized.expand(
+        [
+            ([], 0),
+            ([1], 1),
+            ([2], 2),
+            ([1, 2, 3], 6),
+            ([-1], -1),
+            ([-1, 1], 0),
+        ]
+    )
+    def test_when_joining_with_account_balance_the_proper_value_is_calculated(
+        self, transactions: List[float], expected_total: float
+    ) -> None:
+        account = self.account_generator.create_account()
+        for amount in transactions:
+            if amount > 0:
+                self.transaction_generator.create_transaction(
+                    receiving_account=account.id, amount_received=amount
+                )
+            else:
+                self.transaction_generator.create_transaction(
+                    sending_account=account.id, amount_sent=abs(amount)
+                )
+
+        result = (
+            self.repository.get_accounts()
+            .with_id(account.id)
+            .joined_with_balance()
+            .first()
+        )
+        assert result
+        assert result[1] == Decimal(expected_total)
+
+    def test_when_joining_with_account_balance_and_having_multiple_transactions_we_get_one_result_for_one_account(
+        self,
+    ) -> None:
+        account = self.account_generator.create_account()
+        self.transaction_generator.create_transaction(receiving_account=account.id)
+        self.transaction_generator.create_transaction(receiving_account=account.id)
+        assert (
+            len(
+                self.repository.get_accounts().with_id(account.id).joined_with_balance()
+            )
+            == 1
+        )
