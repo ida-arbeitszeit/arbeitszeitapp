@@ -12,7 +12,7 @@ from .entities import (
     SocialAccounting,
     Transaction,
 )
-from .repositories import AccountRepository, DatabaseGateway
+from .repositories import DatabaseGateway
 
 
 class TransactionTypes(Enum):
@@ -46,7 +46,6 @@ class AccountStatementRow:
 @dataclass
 class UserAccountingService:
     database_gateway: DatabaseGateway
-    account_repository: AccountRepository
 
     def get_all_transactions_sorted(
         self, user: Union[Member, Company]
@@ -149,7 +148,7 @@ class UserAccountingService:
         ):
             return None
         buyer_account = (
-            self.account_repository.get_accounts()
+            self.database_gateway.get_accounts()
             .with_id(transaction.sending_account)
             .first()
         )
@@ -199,7 +198,7 @@ class UserAccountingService:
 
     def _get_account_owner(self, account_id: UUID) -> AccountOwner:
         result = (
-            self.account_repository.get_accounts()
+            self.database_gateway.get_accounts()
             .with_id(account_id)
             .joined_with_owner()
             .first()

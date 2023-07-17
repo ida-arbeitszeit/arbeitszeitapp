@@ -8,12 +8,11 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import MemberRegistrationMessagePresenter
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
 class RegisterMemberUseCase:
-    account_repository: AccountRepository
     datetime_service: DatetimeService
     member_registration_message_presenter: MemberRegistrationMessagePresenter
     password_hasher: PasswordHasher
@@ -63,7 +62,7 @@ class RegisterMemberUseCase:
         else:
             is_company_with_same_email_already_registered = False
 
-        member_account = self.account_repository.create_account()
+        member_account = self.database.create_account()
         registered_on = self.datetime_service.now()
         if not self.database.get_email_addresses().with_address(request.email):
             self.database.create_email_address(address=request.email, confirmed_on=None)

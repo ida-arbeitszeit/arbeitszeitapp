@@ -6,10 +6,9 @@ from typing import Any, Callable
 from arbeitszeit import entities
 from arbeitszeit_flask.extensions import db
 
-from .repositories import AccountingRepository, AccountRepository
+from .repositories import AccountingRepository
 
 __all__ = [
-    "AccountRepository",
     "AccountingRepository",
     "commit_changes",
 ]

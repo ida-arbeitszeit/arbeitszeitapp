@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
 from typing import Generic, Iterable, Iterator, Optional, Protocol, Tuple, TypeVar
@@ -353,7 +352,13 @@ class TransactionResult(QueryResult[Transaction], Protocol):
 
 
 class AccountResult(QueryResult[Account], Protocol):
-    def with_id(self, id_: UUID) -> AccountResult:
+    def with_id(self, *id_: UUID) -> AccountResult:
+        ...
+
+    def owned_by_member(self, *member: UUID) -> Self:
+        ...
+
+    def owned_by_company(self, *company: UUID) -> Self:
         ...
 
     def that_are_member_accounts(self) -> Self:
@@ -397,20 +402,6 @@ class EmailAddressResult(QueryResult[EmailAddress], Protocol):
 class EmailAddressUpdate(DatabaseUpdate, Protocol):
     def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
         ...
-
-
-class AccountRepository(ABC):
-    @abstractmethod
-    def create_account(self) -> Account:
-        pass
-
-    @abstractmethod
-    def get_accounts(self) -> AccountResult:
-        pass
-
-    @abstractmethod
-    def get_account_balance(self, account: UUID) -> Decimal:
-        pass
 
 
 class LanguageRepository(Protocol):
@@ -545,4 +536,10 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_plan_drafts(self) -> PlanDraftResult:
+        ...
+
+    def create_account(self) -> Account:
+        ...
+
+    def get_accounts(self) -> AccountResult:
         ...

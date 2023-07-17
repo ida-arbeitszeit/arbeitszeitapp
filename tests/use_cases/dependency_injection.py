@@ -48,9 +48,6 @@ class InMemoryModule(Module):
         binder[entities.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )
-        binder[interfaces.AccountRepository] = AliasProvider(  # type: ignore
-            repositories.AccountRepository
-        )
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
             to=AliasProvider(repositories.EntityStorage),

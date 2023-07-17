@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -19,13 +19,20 @@ class ShowMyAccountsResponse:
 @dataclass
 class ShowMyAccounts:
     database: DatabaseGateway
-    account_repository: AccountRepository
 
     def __call__(self, request: ShowMyAccountsRequest) -> ShowMyAccountsResponse:
+        accounts = dict(
+            (account.id, balance)
+            for account, balance in self.database.get_accounts()
+            .owned_by_company(request.current_user)
+            .joined_with_balance()
+        )
         company = self.database.get_companies().with_id(request.current_user).first()
         assert company
         balances = [
-            self.account_repository.get_account_balance(account)
-            for account in company.accounts()
+            accounts[company.means_account],
+            accounts[company.raw_material_account],
+            accounts[company.work_account],
+            accounts[company.product_account],
         ]
         return ShowMyAccountsResponse(balances=balances)

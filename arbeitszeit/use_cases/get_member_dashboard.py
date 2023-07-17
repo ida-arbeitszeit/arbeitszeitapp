@@ -8,7 +8,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import CompanyWorkInvite
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -40,7 +40,6 @@ class GetMemberDashboard:
         email: str
         id: UUID
 
-    account_repository: AccountRepository
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
@@ -66,13 +65,21 @@ class GetMemberDashboard:
             workplaces=workplaces,
             invites=invites,
             three_latest_plans=self._get_three_latest_plans(),
-            account_balance=self.account_repository.get_account_balance(
-                _member.account
-            ),
+            account_balance=self._get_account_balance(member),
             name=_member.name,
             email=_member.email,
             id=_member.id,
         )
+
+    def _get_account_balance(self, member: UUID) -> Decimal:
+        result = (
+            self.database_gateway.get_accounts()
+            .owned_by_member(member)
+            .joined_with_balance()
+            .first()
+        )
+        assert result
+        return result[1]
 
     def _render_company_work_invite(self, invite: CompanyWorkInvite) -> WorkInvitation:
         company = self.database_gateway.get_companies().with_id(invite.company).first()

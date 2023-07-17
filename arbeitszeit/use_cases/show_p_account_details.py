@@ -7,7 +7,7 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -33,7 +33,6 @@ class ShowPAccountDetailsUseCase:
         plot: ShowPAccountDetailsUseCase.PlotDetails
 
     accounting_service: UserAccountingService
-    account_repository: AccountRepository
     database: DatabaseGateway
 
     def __call__(self, company_id: UUID) -> Response:
@@ -50,10 +49,7 @@ class ShowPAccountDetailsUseCase:
                 company, [company.means_account]
             )
         ]
-        account_balance = self.account_repository.get_account_balance(
-            company.means_account
-        )
-
+        account_balance = self._get_account_balance(company.means_account)
         plot = self.PlotDetails(
             timestamps=self._get_plot_dates(transactions),
             accumulated_volumes=self._get_plot_volumes(transactions),
@@ -64,6 +60,13 @@ class ShowPAccountDetailsUseCase:
             account_balance=account_balance,
             plot=plot,
         )
+
+    def _get_account_balance(self, account: UUID) -> Decimal:
+        result = (
+            self.database.get_accounts().with_id(account).joined_with_balance().first()
+        )
+        assert result
+        return result[1]
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
         timestamps = [t.date for t in transactions]
