@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
@@ -106,33 +105,13 @@ class QueriedCompanyGenerator:
         return CompanyQueryResponse(
             results=[company for company in queried_companies],
             total_results=total_results,
-            request=QueryCompaniesRequestTestImpl(
+            request=QueryCompaniesRequest(
                 offset=requested_offset,
                 limit=requested_limit,
-                query=query_string,
+                query_string=query_string,
                 filter_category=requested_filter_category,
             ),
         )
-
-
-@dataclass
-class QueryCompaniesRequestTestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-    offset: Optional[int] = None
-    limit: Optional[int] = None
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-    def get_offset(self) -> Optional[int]:
-        return self.offset
-
-    def get_limit(self) -> Optional[int]:
-        return self.limit
 
 
 class PlanSummaryGenerator:
