@@ -46,7 +46,7 @@ class QueryCompaniesPresenter:
             self.user_notifier.display_warning(self.translator.gettext("No results"))
         paginator = self._create_paginator(
             total_results=response.total_results,
-            current_offset=response.request.get_offset() or 0,
+            current_offset=response.request.offset or 0,
         )
         return QueryCompaniesViewModel(
             show_results=bool(response.results),

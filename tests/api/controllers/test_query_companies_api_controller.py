@@ -18,37 +18,37 @@ class ControllerTests(BaseTestCase):
         self,
     ) -> None:
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_filter_category(), CompanyFilter.by_name)
+        self.assertEqual(use_case_request.filter_category, CompanyFilter.by_name)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self) -> None:
         use_case_request = self.controller.create_request()
-        self.assertIsNone(use_case_request.get_query_string())
+        self.assertIsNone(use_case_request.query_string)
 
     def test_that_by_default_a_use_case_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
         self,
     ):
         assert not self.request.query_string().get("offset")
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_offset(), 0)
+        self.assertEqual(use_case_request.offset, 0)
 
     def test_that_by_default_a_use_case_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
         self,
     ) -> None:
         assert not self.request.query_string().get("limit")
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_limit(), 30)
+        self.assertEqual(use_case_request.limit, 30)
 
     def test_correct_offset_gets_returned_if_it_was_set_in_query_string(self) -> None:
         expected_offset = 8
         self.request.set_arg(arg="offset", value=str(expected_offset))
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_offset(), expected_offset)
+        self.assertEqual(use_case_request.offset, expected_offset)
 
     def test_correct_limit_gets_returned_if_it_was_set_in_query_string(self) -> None:
         expected_limit = 7
         self.request.set_arg(arg="limit", value=expected_limit)
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_limit(), expected_limit)
+        self.assertEqual(use_case_request.limit, expected_limit)
 
     def test_both_correct_limit_and_offset_get_returned_if_specified_in_query_string(
         self,
@@ -58,8 +58,8 @@ class ControllerTests(BaseTestCase):
         expected_offset = 8
         self.request.set_arg(arg="offset", value=str(expected_offset))
         use_case_request = self.controller.create_request()
-        self.assertEqual(use_case_request.get_limit(), expected_limit)
-        self.assertEqual(use_case_request.get_offset(), expected_offset)
+        self.assertEqual(use_case_request.limit, expected_limit)
+        self.assertEqual(use_case_request.offset, expected_offset)
 
     def test_controller_raises_bad_request_if_offset_query_string_has_letters(self):
         input = "123abc"

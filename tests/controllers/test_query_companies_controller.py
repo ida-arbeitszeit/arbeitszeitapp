@@ -20,25 +20,25 @@ class QueryCompaniesControllerTests(BaseTestCase):
         self,
     ) -> None:
         request = self.controller.import_form_data(make_fake_form(query=""))
-        self.assertIsNone(request.get_query_string())
+        self.assertIsNone(request.query_string)
 
     def test_that_a_query_string_is_taken_as_the_literal_string_in_request(
         self,
     ) -> None:
         request = self.controller.import_form_data(make_fake_form(query="test"))
-        self.assertEqual(request.get_query_string(), "test")
+        self.assertEqual(request.query_string, "test")
 
     def test_that_leading_and_trailing_whitespaces_are_ignored(self) -> None:
         request = self.controller.import_form_data(make_fake_form(query=" test  "))
-        self.assertEqual(request.get_query_string(), "test")
+        self.assertEqual(request.query_string, "test")
         request = self.controller.import_form_data(make_fake_form(query="   "))
-        self.assertIsNone(request.get_query_string())
+        self.assertIsNone(request.query_string)
 
     def test_that_name_choice_produces_requests_filter_by_company_name(self) -> None:
         request = self.controller.import_form_data(
             make_fake_form(filter_category="Name")
         )
-        self.assertEqual(request.get_filter_category(), CompanyFilter.by_name)
+        self.assertEqual(request.filter_category, CompanyFilter.by_name)
 
     def test_that_email_choice_produces_requests_filter_by_email(
         self,
@@ -46,7 +46,7 @@ class QueryCompaniesControllerTests(BaseTestCase):
         request = self.controller.import_form_data(
             make_fake_form(filter_category="Email")
         )
-        self.assertEqual(request.get_filter_category(), CompanyFilter.by_email)
+        self.assertEqual(request.filter_category, CompanyFilter.by_email)
 
     def test_that_random_string_produces_requests_filter_by_name(
         self,
@@ -54,13 +54,13 @@ class QueryCompaniesControllerTests(BaseTestCase):
         request = self.controller.import_form_data(
             make_fake_form(filter_category="awqwrndaj")
         )
-        self.assertEqual(request.get_filter_category(), CompanyFilter.by_name)
+        self.assertEqual(request.filter_category, CompanyFilter.by_name)
 
     def test_that_default_request_model_includes_no_search_query(
         self,
     ) -> None:
         request = self.controller.import_form_data()
-        self.assertIsNone(request.get_query_string())
+        self.assertIsNone(request.query_string)
 
 
 class PaginationTests(BaseTestCase):
@@ -73,30 +73,30 @@ class PaginationTests(BaseTestCase):
         self,
     ):
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_offset() == 0
+        assert use_case_request.offset == 0
 
     def test_that_without_request_specified_the_offset_is_set_to_0(self) -> None:
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_offset() == 0
+        assert use_case_request.offset == 0
 
     def test_that_page_two_has_an_offset_of_15(self) -> None:
         self.request.set_arg(arg="page", value="2")
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_offset() == 15
+        assert use_case_request.offset == 15
 
     def test_that_offset_0_is_assumed_if_no_valid_integer_is_specified_as_page(self):
         self.request.set_arg(arg="page", value="123abc")
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_offset() == 0
+        assert use_case_request.offset == 0
 
     def test_that_offset_is_150_for_page_11(self) -> None:
         self.request.set_arg(arg="page", value="11")
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_offset() == 150
+        assert use_case_request.offset == 150
 
     def test_that_limit_is_15(self) -> None:
         use_case_request = self.controller.import_form_data()
-        assert use_case_request.get_limit() == 15
+        assert use_case_request.limit == 15
 
 
 def make_fake_form(

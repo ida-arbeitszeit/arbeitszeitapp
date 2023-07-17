@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.entities import Company
@@ -155,29 +154,9 @@ def make_request(
     offset: Optional[int] = None,
     limit: Optional[int] = None,
 ) -> QueryCompaniesRequest:
-    return QueryCompaniesRequestTestImpl(
-        query=query or "",
+    return QueryCompaniesRequest(
+        query_string=query or "",
         filter_category=category or CompanyFilter.by_name,
         offset=offset,
         limit=limit,
     )
-
-
-@dataclass
-class QueryCompaniesRequestTestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-    offset: Optional[int] = None
-    limit: Optional[int] = None
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-    def get_offset(self) -> Optional[int]:
-        return self.offset
-
-    def get_limit(self) -> Optional[int]:
-        return self.limit

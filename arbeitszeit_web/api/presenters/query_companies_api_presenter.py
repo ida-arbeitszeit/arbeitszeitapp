@@ -42,6 +42,6 @@ class QueryCompaniesApiPresenter:
         return self.ViewModel(
             results=use_case_response.results,
             total_results=use_case_response.total_results,
-            offset=use_case_response.request.get_offset(),
-            limit=use_case_response.request.get_limit(),
+            offset=use_case_response.request.offset,
+            limit=use_case_response.request.limit,
         )

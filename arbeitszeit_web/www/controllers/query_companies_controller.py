@@ -18,26 +18,6 @@ _page_size = DEFAULT_PAGE_SIZE
 
 
 @dataclass
-class QueryCompaniesRequestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-    offset: Optional[int]
-    limit: Optional[int]
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-    def get_offset(self) -> Optional[int]:
-        return self.offset
-
-    def get_limit(self) -> Optional[int]:
-        return self.limit
-
-
-@dataclass
 class QueryCompaniesController:
     request: Request
 
@@ -55,8 +35,8 @@ class QueryCompaniesController:
             else:
                 filter_category = CompanyFilter.by_name
         offset = self._get_pagination_offset()
-        return QueryCompaniesRequestImpl(
-            query=query,
+        return QueryCompaniesRequest(
+            query_string=query,
             filter_category=filter_category,
             offset=offset,
             limit=_page_size,

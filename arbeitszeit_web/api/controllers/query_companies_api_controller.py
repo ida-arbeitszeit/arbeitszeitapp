@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
 from arbeitszeit_web.api.controllers import query_parser
@@ -8,26 +8,6 @@ from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET: int = 0
 DEFAULT_LIMIT: int = 30
-
-
-@dataclass
-class QueryCompaniesRequestImpl(QueryCompaniesRequest):
-    query: Optional[str]
-    filter_category: CompanyFilter
-    offset: int
-    limit: int
-
-    def get_query_string(self) -> Optional[str]:
-        return self.query
-
-    def get_filter_category(self) -> CompanyFilter:
-        return self.filter_category
-
-    def get_offset(self) -> Optional[int]:
-        return self.offset
-
-    def get_limit(self) -> Optional[int]:
-        return self.limit
 
 
 @dataclass
@@ -56,8 +36,8 @@ class QueryCompaniesApiController:
     def create_request(self) -> QueryCompaniesRequest:
         offset = self._parse_offset(self.request)
         limit = self._parse_limit(self.request)
-        return QueryCompaniesRequestImpl(
-            query=None,
+        return QueryCompaniesRequest(
+            query_string=None,
             filter_category=CompanyFilter.by_name,
             offset=offset,
             limit=limit,
