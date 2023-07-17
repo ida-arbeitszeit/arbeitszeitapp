@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.entities import AccountOwner, Member, Transaction
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
@@ -28,7 +28,6 @@ class GetMemberAccountResponse:
 class GetMemberAccount:
     accounting_service: UserAccountingService
     database: DatabaseGateway
-    account_repository: AccountRepository
 
     def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
         member = self.database.get_members().with_id(member_id).first()
@@ -45,7 +44,14 @@ class GetMemberAccount:
                 member, member.accounts()
             )
         ]
-        balance = self.account_repository.get_account_balance(member.account)
+        result = (
+            self.database.get_accounts()
+            .with_id(member.account)
+            .joined_with_balance()
+            .first()
+        )
+        assert result
+        balance = result[1]
         return GetMemberAccountResponse(transaction_info, balance)
 
     def _get_peer_name(self, user: Member, transaction: Transaction) -> str:
@@ -57,10 +63,7 @@ class GetMemberAccount:
 
     def get_account_owner(self, account_id: UUID) -> AccountOwner:
         result = (
-            self.account_repository.get_accounts()
-            .with_id(account_id)
-            .joined_with_owner()
-            .first()
+            self.database.get_accounts().with_id(account_id).joined_with_owner().first()
         )
         assert result
         _, owner = result

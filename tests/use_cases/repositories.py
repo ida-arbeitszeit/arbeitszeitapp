@@ -21,7 +21,6 @@ from uuid import UUID, uuid4
 
 from typing_extensions import Self
 
-import arbeitszeit.repositories as interfaces
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
@@ -813,6 +812,33 @@ class AccountResult(QueryResultImpl[Account]):
             items=lambda: filter(lambda account: account.id in id_, self.items()),
         )
 
+    def owned_by_member(self, *member: UUID) -> Self:
+        return replace(
+            self,
+            items=lambda: filter(
+                lambda account: account in self.entities.member_accounts
+                and self.entities.account_owner_by_account[account.id].id in member,
+                self.items(),
+            ),
+        )
+
+    def owned_by_company(self, *company: UUID) -> Self:
+        def items() -> Iterable[Account]:
+            for account in self.items():
+                owner = self.entities.account_owner_by_account.get(account.id)
+                if owner is None:
+                    continue
+                if owner.id not in self.entities.companies:
+                    continue
+                if owner.id not in company:
+                    continue
+                yield account
+
+        return replace(
+            self,
+            items=items,
+        )
+
     def that_are_member_accounts(self) -> Self:
         return replace(
             self,
@@ -954,34 +980,6 @@ class EmailAddressUpdate:
 
 
 @singleton
-class AccountRepository(interfaces.AccountRepository):
-    def __init__(self, entities: EntityStorage):
-        self.entities = entities
-
-    def __contains__(self, account: object) -> bool:
-        if not isinstance(account, Account):
-            return False
-        return account in self.entities.accounts
-
-    def create_account(self) -> Account:
-        return self.entities.create_account()
-
-    def get_accounts(self) -> AccountResult:
-        return AccountResult(
-            items=lambda: self.entities.accounts,
-            entities=self.entities,
-        )
-
-    def get_account_balance(self, account: UUID) -> Decimal:
-        transactions = self.entities.get_transactions()
-        received_transactions = transactions.where_account_is_receiver(account)
-        sent_transactions = transactions.where_account_is_sender(account)
-        return decimal_sum(
-            transaction.amount_received for transaction in received_transactions
-        ) - decimal_sum(transaction.amount_sent for transaction in sent_transactions)
-
-
-@singleton
 class FakeLanguageRepository:
     def __init__(self) -> None:
         self._language_codes: Set[str] = set()
@@ -1039,13 +1037,6 @@ class EntityStorage:
         )
         self.email_addresses[address] = record
         return record
-
-    def create_account(self) -> Account:
-        account = Account(
-            id=uuid4(),
-        )
-        self.accounts.append(account)
-        return account
 
     def get_company_by_id(self, company: UUID) -> Optional[Company]:
         return self.companies.get(company)
@@ -1316,5 +1307,18 @@ class EntityStorage:
     def get_plan_drafts(self) -> PlanDraftResult:
         return PlanDraftResult(
             items=lambda: self.drafts.values(),
+            entities=self,
+        )
+
+    def create_account(self) -> Account:
+        account = Account(
+            id=uuid4(),
+        )
+        self.accounts.append(account)
+        return account
+
+    def get_accounts(self) -> AccountResult:
+        return AccountResult(
+            items=lambda: self.accounts,
             entities=self,
         )

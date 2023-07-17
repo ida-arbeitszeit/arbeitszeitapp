@@ -14,7 +14,7 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -68,7 +68,6 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 
 @dataclass
 class GetCompanySummary:
-    account_repository: AccountRepository
     social_accounting: SocialAccounting
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
@@ -156,15 +155,18 @@ class GetCompanySummary:
         )
 
     def _get_account_balances(self, company: Company) -> AccountBalances:
-        account_balances = [
-            self.account_repository.get_account_balance(account)
-            for account in company.accounts()
-        ]
+        company_accounts = self.database_gateway.get_accounts().with_id(
+            *company.accounts()
+        )
+        balances = dict(
+            (account.id, balance)
+            for account, balance in company_accounts.joined_with_balance()
+        )
         return AccountBalances(
-            account_balances[0],
-            account_balances[1],
-            account_balances[2],
-            account_balances[3],
+            balances[company.means_account],
+            balances[company.raw_material_account],
+            balances[company.work_account],
+            balances[company.product_account],
         )
 
     def _calculate_deviation(

@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.payout_factor import PayoutFactorService
-from arbeitszeit.repositories import AccountRepository, AccountResult, DatabaseGateway
+from arbeitszeit.repositories import AccountResult, DatabaseGateway
 
 
 @dataclass
@@ -24,7 +24,6 @@ class StatisticsResponse:
 
 @dataclass
 class GetStatistics:
-    account_repository: AccountRepository
     database: DatabaseGateway
     datetime_service: DatetimeService
     fic_service: PayoutFactorService
@@ -59,7 +58,7 @@ class GetStatistics:
         return (
             self._count_certs_in_member_accounts()
             + _sum_account_balances(
-                self.account_repository.get_accounts().that_are_labour_accounts()
+                self.database.get_accounts().that_are_labour_accounts()
             )
             * fic
         )
@@ -67,14 +66,14 @@ class GetStatistics:
     def _estimate_available_product(self) -> Decimal:
         return (
             _sum_account_balances(
-                self.account_repository.get_accounts().that_are_product_accounts()
+                self.database.get_accounts().that_are_product_accounts()
             )
             * -1
         )
 
     def _count_certs_in_member_accounts(self) -> Decimal:
         return _sum_account_balances(
-            self.account_repository.get_accounts().that_are_member_accounts()
+            self.database.get_accounts().that_are_member_accounts()
         )
 
 
