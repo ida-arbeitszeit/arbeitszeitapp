@@ -1533,13 +1533,13 @@ class DatabaseGatewayImpl:
         self, *, address: str, confirmed_on: Optional[datetime]
     ) -> entities.EmailAddress:
         orm = models.Email(address=address, confirmed_on=confirmed_on)
+        self.db.session.add(orm)
         if (
             already_existing := self.db.session.query(models.Email)
             .filter(func.lower(models.Email.address) == func.lower(address))
             .first()
         ):
             orm.address = already_existing.address
-        self.db.session.add(orm)
         self.db.session.flush()
         return self.email_address_from_orm(orm)
 
