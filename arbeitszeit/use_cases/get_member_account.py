@@ -4,7 +4,6 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import AccountOwner, Member, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -35,7 +34,7 @@ class GetMemberAccount:
         transaction_info = [
             TransactionInfo(
                 date=row.transaction.date,
-                peer_name=self._get_peer_name(member, row.transaction),
+                peer_name=row.peer.get_name(),
                 transaction_volume=row.volume,
                 purpose=row.transaction.purpose,
                 type=row.transaction_type,
@@ -53,18 +52,3 @@ class GetMemberAccount:
         assert result
         balance = result[1]
         return GetMemberAccountResponse(transaction_info, balance)
-
-    def _get_peer_name(self, user: Member, transaction: Transaction) -> str:
-        user_is_sender = self.accounting_service.user_is_sender(transaction, user)
-        if user_is_sender:
-            return self.get_account_owner(transaction.receiving_account).get_name()
-        else:
-            return self.get_account_owner(transaction.sending_account).get_name()
-
-    def get_account_owner(self, account_id: UUID) -> AccountOwner:
-        result = (
-            self.database.get_accounts().with_id(account_id).joined_with_owner().first()
-        )
-        assert result
-        _, owner = result
-        return owner
