@@ -84,7 +84,7 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
             self.database_gateway.get_accountants().with_id(new_accountant_id).first()
         )
         self.db.session.flush()
-        assert new_accountant.email_address == self.expected_email
+        assert new_accountant and new_accountant.email_address == self.expected_email
 
 
 class ValidationTests(FlaskTestCase):

@@ -176,7 +176,7 @@ class CreateCompanyTests(FlaskTestCase):
             self.database_gateway.get_companies().with_id(company.id).first()
         )
         self.db.session.flush()
-        assert retrieved_company.email == email
+        assert retrieved_company and retrieved_company.email == email
 
 
 class ConfirmCompanyTests(FlaskTestCase):
