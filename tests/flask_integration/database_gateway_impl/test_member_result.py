@@ -3,11 +3,11 @@ from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
-from .utility import Utility
 
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
+from .utility import Utility
 
 
 class RepositoryTests(FlaskTestCase):
@@ -38,14 +38,12 @@ class RepositoryTests(FlaskTestCase):
 
     def test_that_member_can_be_retrieved_by_email_case_insensitive(self) -> None:
         expected_mail = "test_mail@testmail.com"
-        altered_mail = Utility.mangle_case(expected_mail);
+        altered_mail = Utility.mangle_case(expected_mail)
         expected_member = self.member_generator.create_member_entity(
             email=expected_mail
         )
         assert (
-            self.database_gateway.get_members()
-            .with_email_address(altered_mail)
-            .first()
+            self.database_gateway.get_members().with_email_address(altered_mail).first()
             == expected_member
         )
 
@@ -231,9 +229,7 @@ class CreateMemberTests(FlaskTestCase):
             )
             self.db.session.flush()
 
-    def test_cannot_create_member_with_similar_email_case_insensitive(
-        self
-    ) -> None:
+    def test_cannot_create_member_with_similar_email_case_insensitive(self) -> None:
         email = "test@test.test"
         self.database_gateway.create_member(
             email=email,

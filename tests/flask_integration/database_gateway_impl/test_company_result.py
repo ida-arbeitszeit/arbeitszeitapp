@@ -6,9 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.entities import Company
 from tests.data_generators import CompanyGenerator, MemberGenerator
-from .utility import Utility
 
 from ..flask import FlaskTestCase
+from .utility import Utility
 
 
 def company_in_companies(company: Company, companies: List[Company]) -> bool:
@@ -172,11 +172,11 @@ class CreateCompanyTests(FlaskTestCase):
             registered_on=self.timestamp,
         )
         self.db.session.flush()
-        retrieved_company = \
-                self.database_gateway.get_companies().with_id(company.id).first()
+        retrieved_company = (
+            self.database_gateway.get_companies().with_id(company.id).first()
+        )
         self.db.session.flush()
         assert retrieved_company.email == email
-
 
 
 class ConfirmCompanyTests(FlaskTestCase):
@@ -304,14 +304,10 @@ class WithEmailContainingTests(FlaskTestCase):
 
     def test_that_companies_can_be_filtered_by_email_case_insensitive(self):
         email = "some.mail@cp.org"
-        expected_company_id = self.company_generator.create_company(
-            email=email
-        )
+        expected_company_id = self.company_generator.create_company(email=email)
         altered_email = Utility.mangle_case(email)
         returned_companies = list(
-            self.database_gateway.get_companies().with_email_containing(
-                altered_email
-            )
+            self.database_gateway.get_companies().with_email_containing(altered_email)
         )
         assert returned_companies[0].id == expected_company_id
 
@@ -351,4 +347,3 @@ class JoinedWithEmailTests(FlaskTestCase):
             .first()
         )
         assert record
-

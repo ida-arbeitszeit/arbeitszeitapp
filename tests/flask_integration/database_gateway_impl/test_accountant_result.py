@@ -6,7 +6,6 @@ from sqlalchemy.exc import IntegrityError
 from tests.data_generators import MemberGenerator
 
 from ..flask import FlaskTestCase
-
 from .utility import Utility
 
 
@@ -52,7 +51,6 @@ class CreateAccountantTests(FlaskTestCase):
             self.db.session.flush()
 
 
-
 class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -82,9 +80,12 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
             password_hash=self.expected_password,
         )
         self.db.session.flush()
-        new_accountant = self.database_gateway.get_accountants().with_id(new_accountant_id).first()
+        new_accountant = (
+            self.database_gateway.get_accountants().with_id(new_accountant_id).first()
+        )
         self.db.session.flush()
         assert new_accountant.email_address == self.expected_email
+
 
 class ValidationTests(FlaskTestCase):
     def setUp(self) -> None:
@@ -193,4 +194,3 @@ class WithEmailAddressTests(FlaskTestCase):
             )
             == 1
         )
-

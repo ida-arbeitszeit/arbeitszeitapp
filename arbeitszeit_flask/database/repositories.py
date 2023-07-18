@@ -420,8 +420,9 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def with_email_address(self, email: str) -> MemberQueryResult:
         user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(user)
-            .filter(func.lower(user.email_address) == func.lower(email))
+            lambda query: query.join(user).filter(
+                func.lower(user.email_address) == func.lower(email)
+            )
         )
 
     def that_are_confirmed(self) -> MemberQueryResult:
@@ -531,7 +532,7 @@ class AccountantResult(FlaskQueryResult[entities.Accountant]):
         return self._with_modified_query(
             lambda query: query.join(user).filter(
                 func.lower(user.email_address) == func.lower(email),
-                )
+            )
         )
 
     def with_id(self, id_: UUID) -> Self:
