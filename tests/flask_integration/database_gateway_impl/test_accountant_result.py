@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from tests.data_generators import MemberGenerator
 
 from ..flask import FlaskTestCase
+from .utility import Utility
 
 
 class CreateAccountantTests(FlaskTestCase):
@@ -39,6 +40,16 @@ class CreateAccountantTests(FlaskTestCase):
             )
             self.db.session.flush()
 
+    def test_cannot_create_accountant_with_similar_email_case_insensitive(self) -> None:
+        with self.assertRaises(IntegrityError):
+            altered_email = Utility.mangle_case(self.expected_email)
+            self.uuid = self.database_gateway.create_accountant(
+                email=altered_email,
+                name=self.expected_name,
+                password_hash=self.expected_password,
+            )
+            self.db.session.flush()
+
 
 class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
     def setUp(self) -> None:
@@ -57,6 +68,23 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
             password_hash=self.expected_password,
         )
         self.db.session.flush()
+
+    def test_can_create_accountant_with_similar_email_address_as_member_case_insensitive(
+        self,
+    ) -> None:
+        self.member_generator.create_member_entity(email=self.expected_email)
+        altered_email = Utility.mangle_case(self.expected_email)
+        new_accountant_id = self.database_gateway.create_accountant(
+            email=altered_email,
+            name=self.expected_name,
+            password_hash=self.expected_password,
+        )
+        self.db.session.flush()
+        new_accountant = (
+            self.database_gateway.get_accountants().with_id(new_accountant_id).first()
+        )
+        self.db.session.flush()
+        assert new_accountant and new_accountant.email_address == self.expected_email
 
 
 class ValidationTests(FlaskTestCase):
@@ -145,6 +173,23 @@ class WithEmailAddressTests(FlaskTestCase):
             len(
                 self.database_gateway.get_accountants().with_email_address(
                     "test@test.test"
+                )
+            )
+            == 1
+        )
+
+    def test_result_set_contains_one_record_with_case_insensitive_email_address_of_existing_accountant(
+        self,
+    ) -> None:
+        email = "test@test.test"
+        self.database_gateway.create_accountant(
+            email=email, name="test name", password_hash="1234"
+        )
+        altered_email = Utility.mangle_case(email)
+        assert (
+            len(
+                self.database_gateway.get_accountants().with_email_address(
+                    altered_email
                 )
             )
             == 1

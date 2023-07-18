@@ -419,7 +419,9 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
     def with_email_address(self, email: str) -> MemberQueryResult:
         user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(user).filter(user.email_address == email)
+            lambda query: query.join(user).filter(
+                func.lower(user.email_address) == func.lower(email)
+            )
         )
 
     def that_are_confirmed(self) -> MemberQueryResult:
@@ -461,7 +463,7 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
     def with_email_address(self, email: str) -> CompanyQueryResult:
         return self._with_modified_query(
             lambda query: query.join(models.User).filter(
-                models.User.email_address == email
+                func.lower(models.User.email_address) == func.lower(email)
             )
         )
 
@@ -527,7 +529,9 @@ class AccountantResult(FlaskQueryResult[entities.Accountant]):
     def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
-            lambda query: query.join(user).filter(user.email_address == email)
+            lambda query: query.join(user).filter(
+                func.lower(user.email_address) == func.lower(email),
+            )
         )
 
     def with_id(self, id_: UUID) -> Self:
@@ -1418,7 +1422,7 @@ class DatabaseGatewayImpl:
     ) -> models.User:
         if (
             user := self.db.session.query(models.User)
-            .filter(models.User.email_address == email)
+            .filter(func.lower(models.User.email_address) == func.lower(email))
             .first()
         ):
             return user
@@ -1531,6 +1535,12 @@ class DatabaseGatewayImpl:
     ) -> entities.EmailAddress:
         orm = models.Email(address=address, confirmed_on=confirmed_on)
         self.db.session.add(orm)
+        if (
+            already_existing := self.db.session.query(models.Email)
+            .filter(func.lower(models.Email.address) == func.lower(address))
+            .first()
+        ):
+            orm.address = already_existing.address
         self.db.session.flush()
         return self.email_address_from_orm(orm)
 

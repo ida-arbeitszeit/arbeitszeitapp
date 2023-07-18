@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
+from .utility import Utility
 
 
 class RepositoryTests(FlaskTestCase):
@@ -15,7 +16,7 @@ class RepositoryTests(FlaskTestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
 
-    def test_that_member_can_be_retrieved_by_its_id(self) -> None:
+    def test_that_member_can_be_retrieved_by_id(self) -> None:
         expected_member = self.member_generator.create_member()
         retrieved_member = (
             self.database_gateway.get_members().with_id(expected_member).first()
@@ -23,7 +24,7 @@ class RepositoryTests(FlaskTestCase):
         assert retrieved_member
         assert retrieved_member.id == expected_member
 
-    def test_that_member_can_be_retrieved_by_its_email(self) -> None:
+    def test_that_member_can_be_retrieved_by_email(self) -> None:
         expected_mail = "test_mail@testmail.com"
         expected_member = self.member_generator.create_member_entity(
             email=expected_mail
@@ -32,6 +33,17 @@ class RepositoryTests(FlaskTestCase):
             self.database_gateway.get_members()
             .with_email_address(expected_mail)
             .first()
+            == expected_member
+        )
+
+    def test_that_member_can_be_retrieved_by_email_case_insensitive(self) -> None:
+        expected_mail = "test_mail@testmail.com"
+        altered_mail = Utility.mangle_case(expected_mail)
+        expected_member = self.member_generator.create_member_entity(
+            email=expected_mail
+        )
+        assert (
+            self.database_gateway.get_members().with_email_address(altered_mail).first()
             == expected_member
         )
 
@@ -210,6 +222,26 @@ class CreateMemberTests(FlaskTestCase):
         with self.assertRaises(IntegrityError):
             self.database_gateway.create_member(
                 email=email,
+                name="test name",
+                password_hash="test password",
+                account=self.account,
+                registered_on=self.timestamp,
+            )
+            self.db.session.flush()
+
+    def test_cannot_create_member_with_similar_email_case_insensitive(self) -> None:
+        email = "test@test.test"
+        self.database_gateway.create_member(
+            email=email,
+            name="test name",
+            password_hash="test password",
+            account=self.account,
+            registered_on=self.timestamp,
+        )
+        altered_email = Utility.mangle_case(email)
+        with self.assertRaises(IntegrityError):
+            self.database_gateway.create_member(
+                email=altered_email,
                 name="test name",
                 password_hash="test password",
                 account=self.account,
