@@ -87,7 +87,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxcontrib-websupport==1.2.4
-SQLAlchemy==2.0.15
+SQLAlchemy==2.0.17
 tomli==2.0.1
 types-python-dateutil==2.8.19
 typing_extensions==4.5.0
