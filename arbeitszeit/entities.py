@@ -120,7 +120,7 @@ class AccountTypes(Enum):
     accounting = "accounting"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Account:
     id: UUID
 
@@ -294,12 +294,6 @@ class Accountant:
     email_address: str
     name: str
     password_hash: str
-
-
-@dataclass
-class PayoutFactor:
-    calculation_date: datetime
-    value: Decimal
 
 
 @dataclass

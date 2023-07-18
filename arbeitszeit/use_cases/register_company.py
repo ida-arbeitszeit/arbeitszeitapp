@@ -8,12 +8,11 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import CompanyRegistrationMessagePresenter
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
 class RegisterCompany:
-    account_repository: AccountRepository
     datetime_service: DatetimeService
     company_registration_message_presenter: CompanyRegistrationMessagePresenter
     password_hasher: PasswordHasher
@@ -54,10 +53,10 @@ class RegisterCompany:
                 password=request.password, password_hash=member.password_hash
             ):
                 raise self.Response.RejectionReason.user_password_is_invalid
-        means_account = self.account_repository.create_account()
-        resources_account = self.account_repository.create_account()
-        labour_account = self.account_repository.create_account()
-        products_account = self.account_repository.create_account()
+        means_account = self.database.create_account()
+        resources_account = self.database.create_account()
+        labour_account = self.database.create_account()
+        products_account = self.database.create_account()
         registered_on = self.datetime_service.now()
         if not self.database.get_email_addresses().with_address(request.email):
             self.database.create_email_address(address=request.email, confirmed_on=None)

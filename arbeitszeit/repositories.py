@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
 from typing import Generic, Iterable, Iterator, Optional, Protocol, Tuple, TypeVar
@@ -19,7 +18,6 @@ from arbeitszeit.entities import (
     Cooperation,
     EmailAddress,
     Member,
-    PayoutFactor,
     Plan,
     PlanDraft,
     PlanningStatistics,
@@ -354,17 +352,28 @@ class TransactionResult(QueryResult[Transaction], Protocol):
 
 
 class AccountResult(QueryResult[Account], Protocol):
-    def with_id(self, id_: UUID) -> AccountResult:
+    def with_id(self, *id_: UUID) -> AccountResult:
+        ...
+
+    def owned_by_member(self, *member: UUID) -> Self:
+        ...
+
+    def owned_by_company(self, *company: UUID) -> Self:
+        ...
+
+    def that_are_member_accounts(self) -> Self:
+        ...
+
+    def that_are_product_accounts(self) -> Self:
+        ...
+
+    def that_are_labour_accounts(self) -> Self:
         ...
 
     def joined_with_owner(self) -> QueryResult[Tuple[Account, AccountOwner]]:
         ...
 
-
-class PayoutFactorResult(QueryResult[PayoutFactor], Protocol):
-    def ordered_by_calculation_date(
-        self, *, descending: bool = ...
-    ) -> PayoutFactorResult:
+    def joined_with_balance(self) -> QueryResult[Tuple[Account, Decimal]]:
         ...
 
 
@@ -395,34 +404,12 @@ class EmailAddressUpdate(DatabaseUpdate, Protocol):
         ...
 
 
-class AccountRepository(ABC):
-    @abstractmethod
-    def create_account(self) -> Account:
-        pass
-
-    @abstractmethod
-    def get_accounts(self) -> AccountResult:
-        pass
-
-    @abstractmethod
-    def get_account_balance(self, account: UUID) -> Decimal:
-        pass
-
-
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
         ...
 
 
 class DatabaseGateway(Protocol):
-    def get_payout_factors(self) -> PayoutFactorResult:
-        ...
-
-    def create_payout_factor(
-        self, timestamp: datetime, payout_factor: Decimal
-    ) -> PayoutFactor:
-        ...
-
     def create_consumer_purchase(
         self, transaction: UUID, amount: int, plan: UUID
     ) -> ConsumerPurchase:
@@ -549,4 +536,10 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_plan_drafts(self) -> PlanDraftResult:
+        ...
+
+    def create_account(self) -> Account:
+        ...
+
+    def get_accounts(self) -> AccountResult:
         ...

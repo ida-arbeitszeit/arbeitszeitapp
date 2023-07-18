@@ -22,7 +22,7 @@ from arbeitszeit.entities import (
     Transaction,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.use_cases import (
     confirm_member,
     pay_consumer_product,
@@ -170,10 +170,10 @@ class CompanyGenerator:
 
 @dataclass
 class AccountGenerator:
-    account_repository: AccountRepository
+    database: DatabaseGateway
 
     def create_account(self) -> Account:
-        return self.account_repository.create_account()
+        return self.database.create_account()
 
 
 class EmailGenerator:

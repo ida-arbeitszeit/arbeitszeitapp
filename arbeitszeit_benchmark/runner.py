@@ -12,9 +12,9 @@ class BenchmarkCatalog:
     def register_benchmark(self, name: str, benchmark_class: Type[Benchmark]) -> None:
         self.registered_benchmark_classes[name] = benchmark_class
 
-    def get_all_benchmarks(self) -> Iterable[Tuple[str, Benchmark]]:
+    def get_all_benchmarks(self) -> Iterable[Tuple[str, Type[Benchmark]]]:
         for name, benchmark_class in self.registered_benchmark_classes.items():
-            yield name, benchmark_class()
+            yield name, benchmark_class
 
 
 class Benchmark(Protocol):

@@ -25,7 +25,6 @@ from arbeitszeit.presenters import (
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
-    AccountRepository,
     DatabaseGatewayImpl,
     UserAddressBookImpl,
 )
@@ -114,10 +113,6 @@ class FlaskModule(Module):
         binder.bind(
             entities.SocialAccounting,
             to=CallableProvider(get_social_accounting),
-        )
-        binder.bind(
-            interfaces.AccountRepository,  # type: ignore
-            to=AliasProvider(AccountRepository),
         )
         binder.bind(
             DatetimeService,  # type: ignore

@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from .utility import Utility
 
-from arbeitszeit_flask.database.repositories import AccountRepository
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
@@ -16,7 +15,6 @@ class RepositoryTests(FlaskTestCase):
         super().setUp()
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.account_repository = self.injector.get(AccountRepository)
 
     def test_that_member_can_be_retrieved_by_id(self) -> None:
         expected_member = self.member_generator.create_member()
@@ -59,7 +57,7 @@ class RepositoryTests(FlaskTestCase):
     def test_cannot_find_member_by_email_before_it_was_added(self) -> None:
         members = self.database_gateway.get_members()
         assert not members.with_email_address("member@cp.org")
-        account = self.account_repository.create_account()
+        account = self.database_gateway.create_account()
         self.database_gateway.create_member(
             email="member@cp.org",
             name="karl",
@@ -78,7 +76,7 @@ class RepositoryTests(FlaskTestCase):
         assert not self.database_gateway.get_members().with_id(company.id)
 
     def test_does_identify_member_id_as_member(self) -> None:
-        account = self.account_repository.create_account()
+        account = self.database_gateway.create_account()
         member = self.database_gateway.create_member(
             email="member@cp.org",
             name="karl",
@@ -143,8 +141,7 @@ class GetAllMembersTests(FlaskTestCase):
 class ConfirmMemberTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account()
+        self.account = self.database_gateway.create_account()
         self.timestamp = datetime(2000, 1, 1)
 
     def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
@@ -199,8 +196,7 @@ class CreateMemberTests(FlaskTestCase):
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
-        self.account_repository = self.injector.get(AccountRepository)
-        self.account = self.account_repository.create_account()
+        self.account = self.database_gateway.create_account()
         self.timestamp = datetime(2000, 1, 1)
         self.db = self.injector.get(SQLAlchemy)
 

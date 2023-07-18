@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import PayoutFactor
 from arbeitszeit.payout_factor import PayoutFactorService
-from arbeitszeit.repositories import AccountRepository, DatabaseGateway
+from arbeitszeit.repositories import AccountResult, DatabaseGateway
 
 
 @dataclass
@@ -21,21 +19,19 @@ class StatisticsResponse:
     planned_work: Decimal
     planned_resources: Decimal
     planned_means: Decimal
-    payout_factor: Optional[PayoutFactor]
+    payout_factor: Decimal
 
 
 @dataclass
 class GetStatistics:
-    account_repository: AccountRepository
     database: DatabaseGateway
     datetime_service: DatetimeService
     fic_service: PayoutFactorService
 
     def __call__(self) -> StatisticsResponse:
-        (
-            certs_total,
-            available_product,
-        ) = self._count_certificates_and_available_product()
+        fic = self.fic_service.get_current_payout_factor()
+        certs_total = self._estimate_total_certificates(fic)
+        available_product = self._estimate_available_product()
         now = self.datetime_service.now()
         active_plans = (
             self.database.get_plans()
@@ -55,41 +51,34 @@ class GetStatistics:
             planned_work=planning_statistics.total_planned_costs.labour_cost,
             planned_resources=planning_statistics.total_planned_costs.resource_cost,
             planned_means=planning_statistics.total_planned_costs.means_cost,
-            payout_factor=self.fic_service.get_current_payout_factor(),
+            payout_factor=fic,
         )
 
-    def _count_certificates_and_available_product(self) -> Tuple[Decimal, Decimal]:
-        """
-        available certificates is sum of company work account balances and sum of member account balances
-        """
-        (
-            certs_in_company_accounts,
-            available_product,
-        ) = self._count_certs_and_products_from_companies()
-
-        certs_in_member_accounts = self._count_certs_in_member_accounts()
-        certs_total = certs_in_company_accounts + certs_in_member_accounts
-        return certs_total, available_product
-
-    def _count_certs_and_products_from_companies(self) -> Tuple[Decimal, Decimal]:
-        """available product is sum of prd account balances *(-1)"""
-        certs_in_company_accounts = Decimal(0)
-        available_product = Decimal(0)
-        all_companies = self.database.get_companies()
-        for company in all_companies:
-            available_product += self.account_repository.get_account_balance(
-                company.product_account
+    def _estimate_total_certificates(self, fic: Decimal) -> Decimal:
+        return (
+            self._count_certs_in_member_accounts()
+            + _sum_account_balances(
+                self.database.get_accounts().that_are_labour_accounts()
             )
-            certs_in_company_accounts += self.account_repository.get_account_balance(
-                company.work_account
+            * fic
+        )
+
+    def _estimate_available_product(self) -> Decimal:
+        return (
+            _sum_account_balances(
+                self.database.get_accounts().that_are_product_accounts()
             )
-        return certs_in_company_accounts, available_product * -1
+            * -1
+        )
 
     def _count_certs_in_member_accounts(self) -> Decimal:
-        certs_in_member_accounts = Decimal(0)
-        all_members = self.database.get_members()
-        for member in all_members:
-            certs_in_member_accounts += self.account_repository.get_account_balance(
-                member.account
-            )
-        return certs_in_member_accounts
+        return _sum_account_balances(
+            self.database.get_accounts().that_are_member_accounts()
+        )
+
+
+def _sum_account_balances(accounts: AccountResult) -> Decimal:
+    return sum(
+        (balance for (_, balance) in accounts.joined_with_balance()),
+        Decimal(0),
+    )

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
+from typing import Iterable
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import PayoutFactor, ProductionCosts
+from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -12,41 +13,32 @@ class PayoutFactorService:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def calculate_payout_factor(self) -> Decimal:
-        now = self.datetime_service.now()
+    def calculate_payout_factor(self, timestamp: datetime) -> Decimal:
         active_plans = (
             self.database_gateway.get_plans()
-            .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_will_expire_after(timestamp)
+            .that_were_activated_before(timestamp)
         )
-        # payout factor = (A − ( P o + R o )) / (A + A o)
-        productive_plans = active_plans.that_are_productive()
-        public_plans = active_plans.that_are_public()
-        if not public_plans:
-            return Decimal(1)
-        # A o, P o, R o
-        public_costs_per_day: ProductionCosts = sum(
-            (p.production_costs / p.timeframe for p in public_plans),
-            start=ProductionCosts(Decimal(0), Decimal(0), Decimal(0)),
-        )
-        # A
-        sum_of_productive_work_per_day = decimal_sum(
-            p.production_costs.labour_cost / p.timeframe for p in productive_plans
-        )
-        numerator = sum_of_productive_work_per_day - (
-            public_costs_per_day.means_cost + public_costs_per_day.resource_cost
-        )
-        denominator = (
-            sum_of_productive_work_per_day + public_costs_per_day.labour_cost
-        ) or 1
-        # Payout factor
-        payout_factor = numerator / denominator
-        return Decimal(payout_factor)
+        return calculate_payout_factor(active_plans)
 
-    def store_payout_factor(self, payout_factor: Decimal) -> PayoutFactor:
-        return self.database_gateway.create_payout_factor(
-            self.datetime_service.now(), payout_factor
-        )
+    def get_current_payout_factor(self) -> Decimal:
+        now = self.datetime_service.now()
+        return self.calculate_payout_factor(now)
 
-    def get_current_payout_factor(self) -> PayoutFactor:
-        return self.store_payout_factor(self.calculate_payout_factor())
+
+def calculate_payout_factor(plans: Iterable[Plan]) -> Decimal:
+    # payout factor = (L − ( P_o + R_o )) / (L + L_o)
+    l: Decimal = Decimal(0)
+    l_o: Decimal = Decimal(0)
+    p_o_and_r_o = Decimal(0)
+    for plan in plans:
+        costs = plan.production_costs
+        if plan.is_public_service:
+            l_o += costs.labour_cost
+            p_o_and_r_o += costs.means_cost + costs.resource_cost
+        else:
+            l += costs.labour_cost
+    if l + l_o:
+        return (l - p_o_and_r_o) / (l + l_o)
+    else:
+        return Decimal(1)

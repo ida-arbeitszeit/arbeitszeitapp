@@ -14,8 +14,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
 
-from arbeitszeit import entities, repositories
-from arbeitszeit.decimal import decimal_sum
+from arbeitszeit import entities
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.models import (
     Account,
@@ -729,6 +728,46 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             lambda query: query.filter(models.Account.id.in_(ids))
         )
 
+    def owned_by_member(self, *members: UUID) -> Self:
+        member = aliased(models.Member)
+        return self._with_modified_query(
+            lambda query: query.join(
+                member, member.account == models.Account.id
+            ).filter(member.id.in_([str(m) for m in members]))
+        )
+
+    def owned_by_company(self, *companies: UUID) -> Self:
+        company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(
+                company,
+                or_(
+                    company.p_account == models.Account.id,
+                    company.r_account == models.Account.id,
+                    company.a_account == models.Account.id,
+                    company.prd_account == models.Account.id,
+                ),
+            ).filter(company.id.in_([str(c) for c in companies]))
+        )
+
+    def that_are_member_accounts(self) -> Self:
+        member = aliased(models.Member)
+        return self._with_modified_query(
+            lambda query: query.join(member, member.account == models.Account.id)
+        )
+
+    def that_are_product_accounts(self) -> Self:
+        company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(company, company.prd_account == models.Account.id)
+        )
+
+    def that_are_labour_accounts(self) -> Self:
+        company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(company, company.a_account == models.Account.id)
+        )
+
     def joined_with_owner(
         self,
     ) -> FlaskQueryResult[Tuple[entities.Account, entities.AccountOwner]]:
@@ -760,6 +799,39 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             db=self.db,
         )
 
+    def joined_with_balance(self) -> FlaskQueryResult[Tuple[entities.Account, Decimal]]:
+        outbound_transactions = aliased(Transaction)
+        inbound_transactions = aliased(Transaction)
+        query = (
+            self.query.join(
+                outbound_transactions,
+                outbound_transactions.sending_account == models.Account.id,
+                isouter=True,
+            )
+            .join(
+                inbound_transactions,
+                inbound_transactions.receiving_account == models.Account.id,
+                isouter=True,
+            )
+            .group_by(models.Account)
+            .with_entities(
+                models.Account,
+                func.sum(outbound_transactions.amount_sent),
+                func.sum(inbound_transactions.amount_received),
+            )
+        )
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=self.map_account_and_balance,
+        )
+
+    @classmethod
+    def map_account_and_balance(cls, orm: Any) -> Tuple[entities.Account, Decimal]:
+        return DatabaseGatewayImpl.account_from_orm(orm[0]), (orm[2] or Decimal(0)) - (
+            orm[1] or Decimal(0)
+        )
+
     @classmethod
     def map_account_and_owner(
         cls, orm: Any
@@ -773,19 +845,9 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         else:
             owner = AccountingRepository.social_accounting_from_orm(social_accounting)
         return (
-            AccountRepository.account_from_orm(account),
+            DatabaseGatewayImpl.account_from_orm(account),
             owner,
         )
-
-
-class PayoutFactorResult(FlaskQueryResult[entities.PayoutFactor]):
-    def ordered_by_calculation_date(
-        self, descending: bool = False
-    ) -> PayoutFactorResult:
-        ordering = models.PayoutFactor.timestamp
-        if descending:
-            ordering = ordering.desc()
-        return self._with_modified_query(lambda query: query.order_by(ordering))
 
 
 class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
@@ -1045,45 +1107,8 @@ class UserAddressBookImpl:
 
 
 @dataclass
-class AccountRepository(repositories.AccountRepository):
-    db: SQLAlchemy
-
-    @classmethod
-    def account_from_orm(cls, account_orm: Account) -> entities.Account:
-        return entities.Account(
-            id=UUID(account_orm.id),
-        )
-
-    def create_account(self) -> entities.Account:
-        account = Account(id=str(uuid4()))
-        self.db.session.add(account)
-        return self.account_from_orm(account)
-
-    def get_account_balance(self, account: UUID) -> Decimal:
-        account_orm = models.Account.query.filter(
-            models.Account.id == str(account)
-        ).first()
-        assert account_orm
-        received = set(account_orm.transactions_received)
-        sent = set(account_orm.transactions_sent)
-        intersection = received & sent
-        received -= intersection
-        sent -= intersection
-        return decimal_sum(t.amount_received for t in received) - decimal_sum(
-            t.amount_sent for t in sent
-        )
-
-    def get_accounts(self) -> AccountQueryResult:
-        return AccountQueryResult(
-            db=self.db,
-            mapper=self.account_from_orm,
-            query=models.Account.query,
-        )
-
-
-@dataclass
 class AccountingRepository:
-    account_repository: AccountRepository
+    database_gateway: DatabaseGatewayImpl
     db: SQLAlchemy
 
     @classmethod
@@ -1106,7 +1131,7 @@ class AccountingRepository:
             social_accounting = SocialAccounting(
                 id=str(uuid4()),
             )
-            account = self.account_repository.create_account()
+            account = self.database_gateway.create_account()
             social_accounting.account = str(account.id)
             self.db.session.add(social_accounting)
         return social_accounting
@@ -1121,31 +1146,6 @@ class AccountingRepository:
 @dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
-
-    def create_payout_factor(
-        self, timestamp: datetime, payout_factor: Decimal
-    ) -> entities.PayoutFactor:
-        orm = models.PayoutFactor(
-            timestamp=timestamp,
-            payout_factor=payout_factor,
-        )
-        self.db.session.add(orm)
-        return self._payout_factor_from_orm(orm)
-
-    def get_payout_factors(self) -> PayoutFactorResult:
-        return PayoutFactorResult(
-            query=models.PayoutFactor.query,
-            db=self.db,
-            mapper=self._payout_factor_from_orm,
-        )
-
-    def _payout_factor_from_orm(
-        self, orm: models.PayoutFactor
-    ) -> entities.PayoutFactor:
-        return entities.PayoutFactor(
-            calculation_date=orm.timestamp,
-            value=orm.payout_factor,
-        )
 
     def create_company_purchase(
         self, transaction: UUID, amount: int, plan: UUID
@@ -1597,4 +1597,22 @@ class DatabaseGatewayImpl:
             description=orm.description,
             timeframe=int(orm.timeframe),
             is_public_service=orm.is_public_service,
+        )
+
+    @classmethod
+    def account_from_orm(cls, account_orm: Account) -> entities.Account:
+        return entities.Account(
+            id=UUID(account_orm.id),
+        )
+
+    def create_account(self) -> entities.Account:
+        account = Account(id=str(uuid4()))
+        self.db.session.add(account)
+        return self.account_from_orm(account)
+
+    def get_accounts(self) -> AccountQueryResult:
+        return AccountQueryResult(
+            db=self.db,
+            mapper=self.account_from_orm,
+            query=models.Account.query,
         )
