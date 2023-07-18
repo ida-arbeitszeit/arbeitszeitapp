@@ -5,10 +5,10 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
-from tests.presenters.base_test_case import BaseTestCase
-from tests.presenters.data_generators import QueriedCompanyGenerator
-from tests.presenters.url_index import UrlIndexTestImpl
 from tests.session import FakeSession
+from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.presenters.data_generators import QueriedCompanyGenerator
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 from .notifier import NotifierTestImpl
 

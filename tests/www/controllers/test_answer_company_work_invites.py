@@ -11,8 +11,8 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
 )
+from tests.session import FakeSession
 
-from ..session import FakeSession
 from .dependency_injection import get_dependency_injector
 
 

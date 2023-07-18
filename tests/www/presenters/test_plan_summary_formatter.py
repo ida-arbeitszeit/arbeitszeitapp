@@ -5,9 +5,9 @@ from uuid import uuid4
 from arbeitszeit_web.formatters.plan_summary_formatter import PlanSummaryFormatter
 from arbeitszeit_web.session import UserRole
 from tests.datetime_service import FakeDatetimeService
-from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.presenters.data_generators import PlanSummaryGenerator
 
 from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl

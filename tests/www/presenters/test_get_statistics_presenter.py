@@ -7,8 +7,8 @@ from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
+from tests.translator import FakeTranslator
 
-from ..translator import FakeTranslator
 from .dependency_injection import get_dependency_injector
 
 TESTING_RESPONSE_MODEL = StatisticsResponse(

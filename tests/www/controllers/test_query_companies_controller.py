@@ -7,8 +7,9 @@ from arbeitszeit.use_cases.query_companies import CompanyFilter
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
-from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
+
+from .base_test_case import BaseTestCase
 
 
 class QueryCompaniesControllerTests(BaseTestCase):

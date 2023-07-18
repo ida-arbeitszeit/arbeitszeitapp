@@ -5,8 +5,8 @@ from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_web.www.presenters.get_plan_summary_member_presenter import (
     GetPlanSummaryMemberMemberPresenter,
 )
-from tests.presenters.data_generators import PlanSummaryGenerator
-from tests.presenters.url_index import UrlIndexTestImpl
+from tests.www.presenters.data_generators import PlanSummaryGenerator
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 from .dependency_injection import get_dependency_injector
 

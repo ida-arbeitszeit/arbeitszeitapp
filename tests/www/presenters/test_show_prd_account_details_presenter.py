@@ -10,8 +10,8 @@ from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 from .dependency_injection import get_dependency_injector
 

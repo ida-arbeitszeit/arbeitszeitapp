@@ -8,9 +8,9 @@ from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
 from arbeitszeit_web.www.presenters.get_plan_summary_company_presenter import (
     GetPlanSummaryCompanyPresenter,
 )
-from tests.presenters.base_test_case import BaseTestCase
-from tests.presenters.data_generators import PlanSummaryGenerator
 from tests.session import FakeSession
+from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.presenters.data_generators import PlanSummaryGenerator
 
 from .url_index import UrlIndexTestImpl
 

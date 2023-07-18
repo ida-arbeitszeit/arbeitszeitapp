@@ -4,8 +4,8 @@ from uuid import uuid4
 from arbeitszeit_web.www.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
+from tests.session import FakeSession
 
-from ..session import FakeSession
 from .dependency_injection import get_dependency_injector
 
 

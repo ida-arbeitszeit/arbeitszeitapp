@@ -7,8 +7,8 @@ from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
 from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
     RegisterHoursWorkedPresenter,
 )
+from tests.translator import FakeTranslator
 
-from ..translator import FakeTranslator
 from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 

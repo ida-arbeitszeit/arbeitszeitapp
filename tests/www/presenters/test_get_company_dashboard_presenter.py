@@ -9,8 +9,8 @@ from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.presenters.dependency_injection import get_dependency_injector
-from tests.presenters.url_index import UrlIndexTestImpl
+from tests.www.presenters.dependency_injection import get_dependency_injector
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
 class TestPresenter(TestCase):

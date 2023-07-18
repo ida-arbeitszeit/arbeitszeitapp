@@ -17,11 +17,11 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeAddressBook
 from tests.plotter import FakePlotter
-from tests.presenters.test_colors import ColorsTestImpl
 from tests.request import FakeRequest
 from tests.text_renderer import TextRendererImpl
 from tests.token import TokenDeliveryService
 from tests.translator import FakeTranslator
+from tests.www.presenters.test_colors import ColorsTestImpl
 
 
 class TestingModule(Module):
