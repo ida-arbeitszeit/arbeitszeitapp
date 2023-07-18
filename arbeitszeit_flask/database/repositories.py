@@ -9,7 +9,6 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, func, or_, update
 from sqlalchemy.dialects.postgresql import INTERVAL
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
