@@ -11,8 +11,8 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from tests.presenters.url_index import UrlIndexTestImpl
 from tests.translator import FakeTranslator
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 from .dependency_injection import get_dependency_injector
 

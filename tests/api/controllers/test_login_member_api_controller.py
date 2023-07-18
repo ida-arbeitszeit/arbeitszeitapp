@@ -3,8 +3,8 @@ from arbeitszeit_web.api.controllers.login_member_api_controller import (
     LoginMemberApiController,
 )
 from arbeitszeit_web.api.response_errors import BadRequest
-from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
+from tests.www.controllers.base_test_case import BaseTestCase
 
 
 class ControllerTests(BaseTestCase):

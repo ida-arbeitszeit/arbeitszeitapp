@@ -4,8 +4,8 @@ from arbeitszeit_web.api.controllers.query_plans_api_controller import (
     QueryPlansApiController,
 )
 from arbeitszeit_web.api.response_errors import BadRequest
-from tests.controllers.base_test_case import BaseTestCase
 from tests.request import FakeRequest
+from tests.www.controllers.base_test_case import BaseTestCase
 
 
 class ControllerTests(BaseTestCase):

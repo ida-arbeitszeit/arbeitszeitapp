@@ -10,7 +10,7 @@ from arbeitszeit_web.api.presenters.query_plans_api_presenter import (
     QueryPlansApiPresenter,
 )
 from tests.api.presenters.base_test_case import BaseTestCase
-from tests.presenters.data_generators import QueriedPlanGenerator
+from tests.www.presenters.data_generators import QueriedPlanGenerator
 
 
 class TestViewModelCreation(BaseTestCase):

@@ -9,10 +9,10 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_company_presenter import (
     LogInCompanyPresenter,
 )
+from tests.forms import LoginForm
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
 
-from ..forms import LoginForm
 from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 

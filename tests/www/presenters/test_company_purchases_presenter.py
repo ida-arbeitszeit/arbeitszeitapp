@@ -13,8 +13,8 @@ from arbeitszeit_web.www.presenters.company_purchases_presenter import (
 )
 from tests.data_generators import CompanyGenerator, PurchaseGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.presenters.base_test_case import BaseTestCase
 from tests.translator import FakeTranslator
+from tests.www.presenters.base_test_case import BaseTestCase
 
 
 class TestPresenter(BaseTestCase):

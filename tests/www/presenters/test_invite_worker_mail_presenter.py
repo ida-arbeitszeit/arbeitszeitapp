@@ -2,10 +2,10 @@ from uuid import uuid4
 
 from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
 from tests.email import FakeEmailConfiguration, FakeEmailSender
-from tests.presenters.base_test_case import BaseTestCase
-from tests.presenters.url_index import UrlIndexTestImpl
 from tests.text_renderer import TextRendererImpl
 from tests.translator import FakeTranslator
+from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
 class SendMailTests(BaseTestCase):

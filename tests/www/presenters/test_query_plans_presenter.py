@@ -3,9 +3,9 @@ from uuid import uuid4
 
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.session import UserRole
-from tests.presenters.data_generators import QueriedPlanGenerator
 from tests.request import FakeRequest
 from tests.session import FakeSession
+from tests.www.presenters.data_generators import QueriedPlanGenerator
 
 from .base_test_case import BaseTestCase
 from .notifier import NotifierTestImpl
