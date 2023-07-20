@@ -3,6 +3,8 @@ from decimal import Decimal
 from typing import List
 from uuid import uuid4
 
+from arbeitszeit import entities
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
@@ -650,3 +652,115 @@ class ThatAreNotHiddenTests(FlaskTestCase):
         self.plan_generator.create_plan()
         self.database_gateway.get_plans().update().hide().perform()
         assert not self.database_gateway.get_plans().that_are_not_hidden()
+
+
+class JoinedWithPlannerAndCooperatingPlansTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
+        self.datetime_service = self.injector.get(DatetimeService)  # type: ignore
+
+    def test_that_one_result_is_yieled_with_one_cooperating_plan_in_db(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        assert (
+            len(
+                self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                    self.datetime_service.now()
+                )
+            )
+            == 1
+        )
+
+    def test_that_two_results_are_yieled_with_two_cooperating_plans_in_db(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        self.plan_generator.create_plan(cooperation=cooperation)
+        assert (
+            len(
+                self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                    self.datetime_service.now()
+                )
+            )
+            == 2
+        )
+
+    def test_that_each_plan_has_two_cooperating_plans_in_result_with_two_plans_in_cooperation(
+        self,
+    ) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        self.plan_generator.create_plan(cooperation=cooperation)
+        results = (
+            self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        assert results
+        for v in results:
+            assert len(v[2]) == 2
+
+    def test_that_production_costs_for_cooperating_plans_are_as_they_were_created(
+        self,
+    ) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(
+            cooperation=cooperation,
+            costs=entities.ProductionCosts(
+                means_cost=Decimal(1),
+                resource_cost=Decimal(2),
+                labour_cost=Decimal(3),
+            ),
+        )
+        results = (
+            self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        assert results
+        for v in results:
+            assert v[2][0].production_costs == Decimal(6)
+
+    def test_that_amount_for_cooperating_plans_are_as_they_were_created(
+        self,
+    ) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation, amount=123)
+        results = (
+            self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        assert results
+        for v in results:
+            assert v[2][0].amount == 123
+
+    def test_that_duration_for_cooperating_plans_are_as_they_were_created(
+        self,
+    ) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation, timeframe=234)
+        results = (
+            self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        assert results
+        for v in results:
+            assert v[2][0].duration_in_days == 234
+
+    def test_that_no_plan_is_cooperating_with_two_plans_that_are_not_in_coop(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan()
+        results = (
+            self.database_gateway.get_plans().joined_with_planner_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        assert results
+        for v in results:
+            assert not v[2]

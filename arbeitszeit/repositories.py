@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, Optional, Protocol, Tuple, TypeVar
+from typing import Generic, Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar
 from uuid import UUID
 
 from typing_extensions import Self
 
+from arbeitszeit import entities
 from arbeitszeit.entities import (
     Account,
     Accountant,
@@ -131,6 +132,13 @@ class PlanResult(QueryResult[Plan], Protocol):
         """Filter out those plans which are hidden. The result will
         only contain plans that are not hidden.
         """
+
+    def joined_with_planner_and_cooperating_plans(
+        self, timestamp: datetime
+    ) -> QueryResult[
+        Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]
+    ]:
+        ...
 
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""

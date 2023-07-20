@@ -116,6 +116,20 @@ class UseCaseTests(BaseTestCase):
         response = self.query_plans(self.make_request())
         assert response.results[0].price_per_unit == 0
 
+    def test_that_price_of_cooperating_plans_is_correctly_displayed(self) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=cooperation, amount=1000)
+        plan2 = self.plan_generator.create_plan(cooperation=cooperation, amount=1)
+        response = self.query_plans(
+            self.make_request(sorting=PlanSorting.by_activation)
+        )
+        assert response.results[0].price_per_unit == self.price_checker.get_unit_price(
+            plan1.id
+        )
+        assert response.results[1].price_per_unit == self.price_checker.get_unit_price(
+            plan2.id
+        )
+
     def test_that_total_results_is_1_if_one_plan_is_present(
         self,
     ):

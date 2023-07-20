@@ -8,8 +8,11 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan
-from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.entities import Company, Plan, PlanSummary
+from arbeitszeit.price_calculator import (
+    calculate_average_costs,
+    calculate_individual_price,
+)
 from arbeitszeit.repositories import DatabaseGateway, PlanResult
 
 
@@ -55,29 +58,28 @@ class QueryPlansRequest:
 
 @dataclass
 class QueryPlans:
-    price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
-        query = request.query_string
-        filter_by = request.filter_category
-        sort_by = request.sorting_category
         plans = (
             self.database_gateway.get_plans()
             .that_will_expire_after(now)
             .that_were_activated_before(now)
         )
-        plans = self._apply_filter(plans, query, filter_by)
         total_results = len(plans)
-        plans = self._apply_sorting(plans, sort_by)
+        plans = self._apply_filter(plans, request.query_string, request.filter_category)
+        plans = self._apply_sorting(plans, request.sorting_category)
+        planning_info = plans.joined_with_planner_and_cooperating_plans(now)
         if request.offset is not None:
-            plans = plans.offset(n=request.offset)
+            planning_info = planning_info.offset(n=request.offset)
         if request.limit is not None:
-            plans = plans.limit(n=request.limit)
-
-        results = [self._plan_to_response_model(plan) for plan in plans]
+            planning_info = planning_info.limit(n=request.limit)
+        results = [
+            self._plan_to_response_model(plan, planner, cooperating_plans)
+            for plan, planner, cooperating_plans in planning_info
+        ]
         return PlanQueryResponse(
             results=results, total_results=total_results, request=request
         )
@@ -100,11 +102,14 @@ class QueryPlans:
             plans = plans.ordered_by_activation_date(ascending=False)
         return plans
 
-    def _plan_to_response_model(self, plan: Plan) -> QueriedPlan:
-        price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
+    def _plan_to_response_model(
+        self, plan: Plan, planner: Company, cooperating_plans: List[PlanSummary]
+    ) -> QueriedPlan:
+        if cooperating_plans:
+            price_per_unit = calculate_average_costs(cooperating_plans)
+        else:
+            price_per_unit = calculate_individual_price(plan)
         assert plan.activation_date
-        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
-        assert planner
         return QueriedPlan(
             plan_id=plan.id,
             company_name=planner.name,

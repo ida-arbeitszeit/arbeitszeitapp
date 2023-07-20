@@ -253,6 +253,13 @@ class Plan:
     def is_expired_as_of(self, timestamp: datetime) -> bool:
         return self.expiration_date is not None and timestamp >= self.expiration_date
 
+    def to_summary(self) -> PlanSummary:
+        return PlanSummary(
+            production_costs=self.production_costs.total_cost(),
+            duration_in_days=self.timeframe,
+            amount=self.prd_amount,
+        )
+
 
 class PurposesOfPurchases(Enum):
     means_of_prod = "means_of_prod"
@@ -319,3 +326,10 @@ class CompanyPurchase:
 
 
 AccountOwner = Union[Member, Company, SocialAccounting]
+
+
+@dataclass
+class PlanSummary:
+    production_costs: Decimal
+    duration_in_days: int
+    amount: int
