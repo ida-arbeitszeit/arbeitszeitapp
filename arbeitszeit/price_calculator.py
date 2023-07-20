@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List
+from typing import Iterable, List
 
+from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -13,7 +12,7 @@ class PriceCalculator:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def calculate_cooperative_price(self, plan: Plan) -> Decimal:
+    def calculate_cooperative_price(self, plan: entities.Plan) -> Decimal:
         now = self.datetime_service.now()
         if plan.is_public_service:
             return Decimal(0)
@@ -31,19 +30,27 @@ class PriceCalculator:
         else:
             return self._calculate_coop_price(plans)
 
-    def calculate_individual_price(self, plan: Plan) -> Decimal:
-        if plan.is_public_service:
-            return Decimal(0)
-        return plan.production_costs.total_cost() / plan.prd_amount
+    def calculate_individual_price(self, plan: entities.Plan) -> Decimal:
+        return calculate_individual_price(plan)
 
-    def _calculate_coop_price(self, plans: List[Plan]) -> Decimal:
+    def _calculate_coop_price(self, plans: List[entities.Plan]) -> Decimal:
         assert not any(plan.is_public_service for plan in plans)
-        coop_price = (
-            decimal_sum(
-                plan.production_costs.total_cost() / plan.timeframe for plan in plans
-            )
-        ) / (
-            decimal_sum(Decimal(plan.prd_amount) / plan.timeframe for plan in plans)
-            or 1
-        )
-        return coop_price
+        return calculate_average_costs([p.to_summary() for p in plans])
+
+
+def calculate_individual_price(plan: entities.Plan) -> Decimal:
+    if plan.is_public_service:
+        return Decimal(0)
+    return plan.production_costs.total_cost() / plan.prd_amount
+
+
+def calculate_average_costs(plans: Iterable[entities.PlanSummary]) -> Decimal:
+    cost_by_time = Decimal(0)
+    amount_by_time = Decimal(0)
+    for plan in plans:
+        cost_by_time += plan.production_costs / Decimal(plan.duration_in_days)
+        amount_by_time += Decimal(plan.amount) / Decimal(plan.duration_in_days)
+    if not amount_by_time:
+        return Decimal(0)
+    else:
+        return cost_by_time / amount_by_time

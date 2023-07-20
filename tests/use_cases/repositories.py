@@ -241,10 +241,36 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_are_not_hidden(self) -> Self:
         return self._filtered_by(lambda plan: not plan.hidden_by_user)
 
+    def joined_with_planner_and_cooperating_plans(
+        self, timestamp: datetime
+    ) -> QueryResultImpl[
+        Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]
+    ]:
+        def items() -> (
+            Iterable[Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]]
+        ):
+            for plan in self.items():
+                cooperating_plans = (
+                    [
+                        self.entities.plans[p].to_summary()
+                        for p in self.entities.plan_id_by_cooperation[plan.cooperation]
+                        if self.entities.plans[p].is_active_as_of(timestamp)
+                    ]
+                    if plan.cooperation
+                    else []
+                )
+                yield plan, self.entities.companies[plan.planner], cooperating_plans
+
+        return QueryResultImpl(
+            entities=self.entities,
+            items=items,
+        )
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,
             update_functions=[],
+            entities=self.entities,
         )
 
     def _filtered_by(self, key: Callable[[Plan], bool]) -> Self:
@@ -258,9 +284,14 @@ class PlanResult(QueryResultImpl[Plan]):
 class PlanUpdate:
     items: Callable[[], Iterable[Plan]]
     update_functions: List[Callable[[Plan], None]]
+    entities: EntityStorage
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
         def update(plan: Plan) -> None:
+            if plan.cooperation:
+                self.entities.plan_id_by_cooperation[plan.cooperation].remove(plan.id)
+            if cooperation:
+                self.entities.plan_id_by_cooperation[cooperation].add(plan.id)
             plan.cooperation = cooperation
 
         return self._add_update(update)
@@ -1016,6 +1047,7 @@ class EntityStorage:
         self.companies: Dict[UUID, Company] = {}
         self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
+        self.plan_id_by_cooperation: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
         self.p_accounts: Set[Account] = set()
