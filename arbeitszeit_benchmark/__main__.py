@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 from typing_extensions import Self
 
+from .get_company_summary_benchmark import GetCompanySummaryBenchmark
 from .get_company_transactions import GetCompanyTransactionsBenchmark
 from .get_statistics import GetStatisticsBenchmark
 from .runner import BenchmarkCatalog, BenchmarkResult, render_results_as_json
@@ -26,6 +27,9 @@ def main() -> None:
     )
     catalog.register_benchmark(
         name="get_statistics", benchmark_class=GetStatisticsBenchmark
+    )
+    catalog.register_benchmark(
+        name="get_company_summary", benchmark_class=GetCompanySummaryBenchmark
     )
     for name, benchmark_class in catalog.get_all_benchmarks():
         if (configuration.include_filter or "") not in name:
