@@ -929,6 +929,35 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             ).with_entities(models.CompanyPurchase, transaction),
         )
 
+    def with_transaction_and_provider(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[entities.CompanyPurchase, entities.Transaction, entities.Company]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[entities.CompanyPurchase, entities.Transaction, entities.Company]:
+            purchase_orm, transaction_orm, provider_orm = orm
+            return (
+                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.company_from_orm(provider_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        provider = aliased(models.Company)
+        plan = aliased(models.Plan)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.CompanyPurchase.transaction_id == transaction.id
+            )
+            .join(plan, models.CompanyPurchase.plan_id == plan.id)
+            .join(provider, provider.id == plan.planner)
+            .with_entities(models.CompanyPurchase, transaction, provider),
+        )
+
 
 class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
     def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
@@ -1171,7 +1200,7 @@ class DatabaseGatewayImpl:
         cls, orm: models.CompanyPurchase
     ) -> entities.CompanyPurchase:
         return entities.CompanyPurchase(
-            id=uuid4(),
+            id=orm.id,
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),
             amount=orm.amount,
