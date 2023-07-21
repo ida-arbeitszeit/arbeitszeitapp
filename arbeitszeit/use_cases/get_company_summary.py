@@ -2,18 +2,12 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from decimal import Decimal, DivisionByZero, InvalidOperation
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Generator, Iterable, List, Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import (
-    Company,
-    CompanyPurchase,
-    Plan,
-    SocialAccounting,
-    Transaction,
-)
+from arbeitszeit.entities import Company, Plan, SocialAccounting, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -81,10 +75,11 @@ class GetCompanySummary:
             .planned_by(company.id)
             .ordered_by_creation_date(ascending=False)
         )
-        purchases = (
-            self.database_gateway.get_company_purchases().where_buyer_is_company(
-                company=company_id
-            )
+        supply = self._get_suppliers_and_supply_volume(
+            (transaction, company)
+            for _, transaction, company in self.database_gateway.get_company_purchases()
+            .where_buyer_is_company(company=company_id)
+            .with_transaction_and_provider()
         )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
@@ -103,8 +98,8 @@ class GetCompanySummary:
                 for account_name in ["means", "raw_material", "work", "product"]
             ],
             plan_details=[self._get_plan_details(plan) for plan in plans],
-            suppliers_ordered_by_volume=self._get_suppliers(
-                purchases.with_transaction()
+            suppliers_ordered_by_volume=list(
+                sorted(supply, key=lambda supplier: -supplier.volume_of_sales)
             ),
         )
 
@@ -181,38 +176,17 @@ class GetCompanySummary:
         except DivisionByZero:  # non-zero devided by zero
             return Decimal("Infinity")
 
-    def _get_suppliers(
-        self, purchases: Iterable[Tuple[CompanyPurchase, Transaction]]
-    ) -> List[Supplier]:
-        ordered_suppliers = sorted(
-            self._get_suppliers_and_volume_of_sales(purchases),
-            key=lambda item: item[1],
-            reverse=True,
-        )
-        suppliers = [
-            self._get_supplier_info(supplier_id, transaction_volume)
-            for supplier_id, transaction_volume in ordered_suppliers
-        ]
-        return suppliers
-
-    def _get_supplier_info(
-        self, supplier_id: UUID, transaction_volume: Decimal
-    ) -> Supplier:
-        supplier = self.database_gateway.get_companies().with_id(supplier_id).first()
-        assert supplier
-        return Supplier(
-            company_id=supplier_id,
-            company_name=supplier.name,
-            volume_of_sales=transaction_volume,
-        )
-
-    def _get_suppliers_and_volume_of_sales(
-        self, purchases: Iterable[Tuple[CompanyPurchase, Transaction]]
-    ) -> List[Tuple[UUID, Decimal]]:
-        suppliers: Dict[UUID, Decimal] = defaultdict(lambda: Decimal("0"))
-        for purchase, transaction in purchases:
-            plan = self.database_gateway.get_plans().with_id(purchase.plan_id).first()
-            assert plan
-            if plan:
-                suppliers[plan.planner] += transaction.amount_sent
-        return list(suppliers.items())
+    def _get_suppliers_and_supply_volume(
+        self, supply: Iterable[Tuple[Transaction, Company]]
+    ) -> Generator[Supplier, None, None]:
+        volume_by_company_id: Dict[UUID, Decimal] = defaultdict(lambda: Decimal(0))
+        suppliers_by_id: Dict[UUID, Company] = dict()
+        for transaction, company in supply:
+            suppliers_by_id[company.id] = company
+            volume_by_company_id[company.id] += transaction.amount_sent
+        for company_id, volume in volume_by_company_id.items():
+            yield Supplier(
+                company_id=company_id,
+                company_name=suppliers_by_id[company_id].name,
+                volume_of_sales=volume,
+            )

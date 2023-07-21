@@ -276,6 +276,11 @@ class CompanyPurchaseResult(QueryResult[CompanyPurchase], Protocol):
     ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Plan]]:
         ...
 
+    def with_transaction_and_provider(
+        self,
+    ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Company]]:
+        ...
+
     def with_transaction(self) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
         ...
 

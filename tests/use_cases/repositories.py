@@ -731,9 +731,9 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
                 plan = self.entities.plans[purchase.plan_id]
                 yield purchase, transaction, plan
 
-        return replace(
-            self,  # type: ignore
+        return QueryResultImpl(
             items=joined_items,
+            entities=self.entities,
         )
 
 
@@ -802,6 +802,23 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
         return replace(
             self,  # type: ignore
             items=joined_items,
+        )
+
+    def with_transaction_and_provider(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Company]]:
+        def joined_items() -> (
+            Iterator[Tuple[entities.CompanyPurchase, Transaction, Company]]
+        ):
+            for purchase in self.items():
+                transaction = self.entities.transactions[purchase.transaction_id]
+                plan = self.entities.plans[purchase.plan_id]
+                provider = self.entities.companies[plan.planner]
+                yield purchase, transaction, provider
+
+        return QueryResultImpl(
+            items=joined_items,
+            entities=self.entities,
         )
 
 
