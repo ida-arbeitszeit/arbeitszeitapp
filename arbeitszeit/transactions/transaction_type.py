@@ -65,7 +65,6 @@ class _Rules:
             if (sender_pattern is None or sender == sender_pattern) and (
                 receiver_pattern is None or receiver_pattern == receiver
             ):
-                print(sender, receiver)
                 return result
         return None
 
