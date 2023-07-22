@@ -23,14 +23,11 @@ class QueryCompaniesView:
     template_name: str
     template_renderer: TemplateRenderer
 
-    def respond_to_post(self) -> Response:
+    def respond_to_get(self) -> Response:
         if not self.search_form.validate():
             return self._get_invalid_form_response()
         use_case_request = self.controller.import_form_data(self.search_form)
         return self._handle_use_case_request(use_case_request)
-
-    def respond_to_get(self) -> Response:
-        return self._handle_use_case_request(self.controller.import_form_data(None))
 
     def _get_invalid_form_response(self) -> Response:
         return Response(

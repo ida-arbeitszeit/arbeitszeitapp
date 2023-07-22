@@ -233,13 +233,11 @@ class CompanySearchForm(Form):
     select = SelectField(
         trans.lazy_gettext("Search for company"),
         choices=choices,
-        validators=[validators.DataRequired()],
+        default="Name",
     )
     search = StringField(
         trans.lazy_gettext("Search term"),
-        validators=[
-            FieldMustExist(message=trans.lazy_gettext("Required")),
-        ],
+        default="",
     )
 
     def get_query_string(self) -> str:

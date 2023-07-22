@@ -106,7 +106,7 @@ def query_companies(
     presenter: QueryCompaniesPresenter,
 ):
     template_name = "member/query_companies.html"
-    search_form = CompanySearchForm(request.form)
+    search_form = CompanySearchForm(request.args)
     view = QueryCompaniesView(
         search_form,
         query_companies,
@@ -115,10 +115,7 @@ def query_companies(
         template_name,
         template_renderer,
     )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
+    return view.respond_to_get()
 
 
 @MemberRoute("/member/pay_consumer_product", methods=["GET", "POST"])
