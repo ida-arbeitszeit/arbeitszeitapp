@@ -24,8 +24,9 @@ class PriceCalculator:
             .that_are_in_same_cooperation_as(plan.id)
             .that_will_expire_after(now)
         )
-        assert plans
-        if len(plans) == 1:
+        if not plans:
+            return self.calculate_individual_price(plan)
+        elif len(plans) == 1:
             return self.calculate_individual_price(plans[0])
         else:
             return self._calculate_coop_price(plans)
