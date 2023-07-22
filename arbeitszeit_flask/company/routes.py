@@ -180,7 +180,7 @@ def query_plans(
     return view.respond_to_get(search_form, FlaskRequest())
 
 
-@CompanyRoute("/company/query_companies", methods=["GET", "POST"])
+@CompanyRoute("/company/query_companies", methods=["GET"])
 def query_companies(
     query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
@@ -188,7 +188,7 @@ def query_companies(
     presenter: QueryCompaniesPresenter,
 ):
     template_name = "company/query_companies.html"
-    search_form = CompanySearchForm(request.form)
+    search_form = CompanySearchForm(request.args)
     view = QueryCompaniesView(
         search_form,
         query_companies,
@@ -197,10 +197,7 @@ def query_companies(
         template_name,
         template_renderer,
     )
-    if request.method == "POST":
-        return view.respond_to_post()
-    else:
-        return view.respond_to_get()
+    return view.respond_to_get()
 
 
 @CompanyRoute("/company/purchases")

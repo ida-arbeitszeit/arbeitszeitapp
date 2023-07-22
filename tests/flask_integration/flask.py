@@ -177,10 +177,10 @@ class ViewTestCase(FlaskTestCase):
             self.login_accountant()
 
         if method.lower() == "get":
-            response = self.client.get(url, data=data)
+            response = self.client.get(url, query_string=data)
         elif method.lower() == "post":
             response = self.client.post(url, data=data)
         else:
             raise ValueError(f"Unknown {method=}")
 
-        self.assertEqual(response.status_code, expected_code)
+        assert response.status_code == expected_code
