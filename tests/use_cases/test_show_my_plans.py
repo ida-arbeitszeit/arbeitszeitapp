@@ -70,3 +70,11 @@ class UseCaseTests(BaseTestCase):
         self.assertEqual(response.drafts[0].id, expected_first_plan)
         self.assertEqual(response.drafts[1].id, expected_second_plan)
         self.assertEqual(response.drafts[2].id, expected_third_plan)
+
+    def test_non_approved_plan_is_shown_as_non_active_plan(self) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(approved=False, planner=planner)
+        response = self.use_case.show_company_plans(
+            request=ShowMyPlansRequest(company_id=planner)
+        )
+        assert len(response.non_active_plans) == 1

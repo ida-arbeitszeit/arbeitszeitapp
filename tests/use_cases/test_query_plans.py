@@ -155,6 +155,12 @@ class UseCaseTests(BaseTestCase):
         response = self.query_plans(self.make_request(offset=15))
         assert len(response.results) == 5
 
+    def test_that_a_plan_awaiting_approval_is_not_returned(self) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(approved=False, planner=planner)
+        response = self.query_plans(self.make_request())
+        assert not response.results
+
     def make_request(
         self,
         query: Optional[str] = None,
