@@ -1,11 +1,11 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
-from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.formatters.plan_summary_formatter import (
-    PlanSummaryFormatter,
-    PlanSummaryWeb,
+from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit_web.formatters.plan_details_formatter import (
+    PlanDetailsFormatter,
+    PlanDetailsWeb,
 )
 from arbeitszeit_web.session import Session
 
@@ -22,8 +22,8 @@ class OwnPlanAction:
 
 
 @dataclass
-class GetPlanSummaryCompanyViewModel:
-    summary: PlanSummaryWeb
+class GetPlanDetailsCompanyViewModel:
+    details: PlanDetailsWeb
     show_own_plan_action_section: bool
     own_plan_action: OwnPlanAction
     show_payment_url: bool
@@ -34,33 +34,33 @@ class GetPlanSummaryCompanyViewModel:
 
 
 @dataclass
-class GetPlanSummaryCompanyPresenter:
-    plan_summary_service: PlanSummaryFormatter
+class GetPlanDetailsCompanyPresenter:
+    plan_details_service: PlanDetailsFormatter
     url_index: UrlIndex
     session: Session
 
     def present(
-        self, response: GetPlanSummaryUseCase.Response
-    ) -> GetPlanSummaryCompanyViewModel:
-        plan_summary = response.plan_summary
+        self, response: GetPlanDetailsUseCase.Response
+    ) -> GetPlanDetailsCompanyViewModel:
+        plan_details = response.plan_details
         current_user = self.session.get_current_user()
         assert current_user
-        current_user_is_planner = response.plan_summary.planner_id == current_user
+        current_user_is_planner = response.plan_details.planner_id == current_user
         show_own_plan_action_section = (
-            current_user_is_planner and plan_summary.is_active
+            current_user_is_planner and plan_details.is_active
         )
-        view_model = GetPlanSummaryCompanyViewModel(
-            summary=self.plan_summary_service.format_plan_summary(plan_summary),
+        view_model = GetPlanDetailsCompanyViewModel(
+            details=self.plan_details_service.format_plan_details(plan_details),
             show_own_plan_action_section=show_own_plan_action_section,
-            own_plan_action=self._create_own_plan_action_section(plan_summary),
+            own_plan_action=self._create_own_plan_action_section(plan_details),
             show_payment_url=True if not current_user_is_planner else False,
             payment_url=self.url_index.get_pay_means_of_production_url(
-                plan_summary.plan_id
+                plan_details.plan_id
             ),
         )
         return view_model
 
-    def _create_own_plan_action_section(self, plan: PlanSummary) -> OwnPlanAction:
+    def _create_own_plan_action_section(self, plan: PlanDetails) -> OwnPlanAction:
         section = OwnPlanAction(
             is_available_bool=plan.is_available,
             toggle_availability_url=self.url_index.get_toggle_availability_url(

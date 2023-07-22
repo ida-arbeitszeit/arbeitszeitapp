@@ -1,4 +1,4 @@
-{% macro plan_summary(view_model) %}
+{% macro plan_details(view_model) %}
 <div class="section has-text-centered">
     <div class="section">
         <div class="content">
@@ -12,21 +12,21 @@
                     <div class="tile">
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification">
-                                <p class="title is-4">{{ view_model.summary.plan_id[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.plan_id[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.plan_id[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.plan_id[1] }}</p>
                             </article>
                             <div class="tile">
                                 <div class="tile is-parent">
                                     <article class="tile is-child notification">
-                                        <p class="title is-4">{{ view_model.summary.product_name[0] }}</p>
-                                        <p class="subtitle">{{ view_model.summary.product_name[1] }}</p>
+                                        <p class="title is-4">{{ view_model.details.product_name[0] }}</p>
+                                        <p class="subtitle">{{ view_model.details.product_name[1] }}</p>
                                     </article>
                                 </div>
                                 <div class="tile is-parent">
                                     <article class="tile is-child notification">
-                                        <p class="title is-4">{{ view_model.summary.planner[0] }}</p>
-                                        <p class="subtitle"><a href="{{ view_model.summary.planner[2] }}">{{
-                                        view_model.summary.planner[3] }}</a></p>
+                                        <p class="title is-4">{{ view_model.details.planner[0] }}</p>
+                                        <p class="subtitle"><a href="{{ view_model.details.planner[2] }}">{{
+                                        view_model.details.planner[3] }}</a></p>
                                     </article>
                                 </div>
                             </div>
@@ -36,9 +36,9 @@
                 <div class="tile is-parent">
                     <article class="tile is-child notification has-background-primary-light">
                         <div class="content">
-                            <p class="title is-4">{{ view_model.summary.description[0] }}</p>
+                            <p class="title is-4">{{ view_model.details.description[0] }}</p>
                             <div class="content">
-                                <p>{% for paragraph in view_model.summary.description[1] %}{{ paragraph
+                                <p>{% for paragraph in view_model.details.description[1] %}{{ paragraph
                                     }}<br>{% endfor %}</p>
                             </div>
                         </div>
@@ -52,18 +52,18 @@
                 <div class="tile is-4">
                     <div class="tile is-parent">
                         <article class="tile is-child notification has-background-warning-light">
-                            <p class="title is-4">{{ view_model.summary.activity_string[0] }}</p>
-                            <p class="subtitle">{{ view_model.summary.activity_string[1] }}</p>
+                            <p class="title is-4">{{ view_model.details.activity_string[0] }}</p>
+                            <p class="subtitle">{{ view_model.details.activity_string[1] }}</p>
                         </article>
                     </div>
                 </div>
                 <div class="tile is-parent">
                     <div class="tile is-child notification">
-                        <p class="title is-4">{{ view_model.summary.timeframe[0] }}</p>
-                        <p class="subtitle">({{ view_model.summary.active_days}} / {{ view_model.summary.timeframe[1]
+                        <p class="title is-4">{{ view_model.details.timeframe[0] }}</p>
+                        <p class="subtitle">({{ view_model.details.active_days}} / {{ view_model.details.timeframe[1]
                             }})</p>
-                        <progress class="progress" value="{{ view_model.summary.active_days}}"
-                            max="{{ view_model.summary.timeframe[1] }}"></progress>
+                        <progress class="progress" value="{{ view_model.details.active_days}}"
+                            max="{{ view_model.details.timeframe[1] }}"></progress>
                     </div>
                 </div>
             </div>
@@ -73,13 +73,13 @@
                         <div class="columns subtitle is-italic">
                             <div class="column"><span
                                     class="has-text-weight-semibold">{{  gettext("Plan creation") }}</span>
-                                {{ view_model.summary.creation_date }}</div>
+                                {{ view_model.details.creation_date }}</div>
                             <div class="column"><span
                                     class="has-text-weight-semibold">{{  gettext("Plan approval") }}</span>
-                                {{ view_model.summary.approval_date }}</div>
+                                {{ view_model.details.approval_date }}</div>
                             <div class="column"><span
                                     class="has-text-weight-semibold">{{  gettext("Plan expiration") }}</span>
-                                {{ view_model.summary.expiration_date }}</div>
+                                {{ view_model.details.expiration_date }}</div>
                         </div>
                     </article>
                 </div>
@@ -92,12 +92,12 @@
                     <div class="tile">
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification">
-                                <p class="title is-4">{{ view_model.summary.amount[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.amount[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.amount[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.amount[1] }}</p>
                             </article>
                             <article class="tile is-child notification">
-                                <p class="title is-4">{{ view_model.summary.production_unit[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.production_unit[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.production_unit[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.production_unit[1] }}</p>
                             </article>
                         </div>
                     </div>
@@ -106,16 +106,16 @@
                     <div class="tile">
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification has-background-danger-light">
-                                <p class="title is-4">{{ view_model.summary.means_cost[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.means_cost[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.means_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.means_cost[1] }}</p>
                             </article>
                             <article class="tile is-child notification has-background-danger-light">
-                                <p class="title is-4">{{ view_model.summary.resources_cost[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.resources_cost[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.resources_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.resources_cost[1] }}</p>
                             </article>
                             <article class="tile is-child notification has-background-danger-light">
-                                <p class="title is-4">{{ view_model.summary.labour_cost[0] }}</p>
-                                <p class="subtitle">{{ view_model.summary.labour_cost[1] }}</p>
+                                <p class="title is-4">{{ view_model.details.labour_cost[0] }}</p>
+                                <p class="subtitle">{{ view_model.details.labour_cost[1] }}</p>
                             </article>
                         </div>
                     </div>
@@ -127,16 +127,16 @@
             <div class="tile is-ancestor">
                 <div class="tile is-parent">
                     <article class="tile is-child notification">
-                        <p class="title is-4">{{ view_model.summary.type_of_plan[0] }}</p>
-                        <p class="subtitle">{{ view_model.summary.type_of_plan[1] }}</p>
+                        <p class="title is-4">{{ view_model.details.type_of_plan[0] }}</p>
+                        <p class="subtitle">{{ view_model.details.type_of_plan[1] }}</p>
                     </article>
                 </div>
                 <div class="tile is-parent">
                     <div class="tile is-child notification has-background-warning-light">
-                        <p class="title is-4">{{ view_model.summary.price_per_unit[0] }}</p>
-                        <p class="subtitle">{{ view_model.summary.price_per_unit[1] }}
-                            {% if view_model.summary.price_per_unit[2] %} <span>
-                                <a href="{{ view_model.summary.price_per_unit[3] }}">
+                        <p class="title is-4">{{ view_model.details.price_per_unit[0] }}</p>
+                        <p class="subtitle">{{ view_model.details.price_per_unit[1] }}
+                            {% if view_model.details.price_per_unit[2] %} <span>
+                                <a href="{{ view_model.details.price_per_unit[3] }}">
                                     <i class="fas fa-hands-helping"></i></a>
                             </span>
                             {% endif %}
@@ -145,8 +145,8 @@
                 </div>
                 <div class="tile is-parent">
                     <article class="tile is-child notification">
-                        <p class="title is-4">{{ view_model.summary.availability_string[0] }}</p>
-                        <p class="subtitle">{{ view_model.summary.availability_string[1] }}</p>
+                        <p class="title is-4">{{ view_model.details.availability_string[0] }}</p>
+                        <p class="subtitle">{{ view_model.details.availability_string[1] }}</p>
                     </article>
                 </div>
             </div>

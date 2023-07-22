@@ -98,8 +98,8 @@ class TestPresenter(TestCase):
             )
         )
         self.assertEqual(
-            view_model.latest_plans[0].plan_summary_url,
-            self.plan_index.get_plan_summary_url(
+            view_model.latest_plans[0].plan_details_url,
+            self.plan_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan_id
             ),
         )

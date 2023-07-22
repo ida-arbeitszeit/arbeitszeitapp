@@ -111,7 +111,7 @@ class GetMemberDashboardPresenterTests(TestCase):
             presentation.three_latest_plans[0].activation_date, now.strftime("%d.%m.")
         )
 
-    def test_plan_summary_url_is_correctly_shown(self):
+    def test_plan_details_url_is_correctly_shown(self):
         plan_id = uuid4()
         response = self.get_response(
             three_latest_plans=[
@@ -124,8 +124,8 @@ class GetMemberDashboardPresenterTests(TestCase):
         )
         presentation = self.presenter.present(response)
         self.assertEqual(
-            presentation.three_latest_plans[0].plan_summary_url,
-            self.url_index.get_plan_summary_url(
+            presentation.three_latest_plans[0].plan_details_url,
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.member, plan_id=plan_id
             ),
         )

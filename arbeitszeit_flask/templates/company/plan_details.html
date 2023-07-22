@@ -6,8 +6,8 @@
 
 {% block content %}
 
-{% from 'macros/plan_summary.html' import plan_summary %}
-{{ plan_summary(view_model) }}
+{% from 'macros/plan_details.html' import plan_details %}
+{{ plan_details(view_model) }}
 
 <div class="section has-text-centered">
     {% if view_model.show_payment_url %}

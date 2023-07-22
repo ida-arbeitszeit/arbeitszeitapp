@@ -15,7 +15,7 @@ class GetCompanyDashboardPresenter:
     class PlanDetailsWeb:
         prd_name: str
         activation_date: str
-        plan_summary_url: str
+        plan_details_url: str
 
     @dataclass
     class ViewModel:
@@ -53,7 +53,7 @@ class GetCompanyDashboardPresenter:
             activation_date=self.datetime_service.format_datetime(
                 plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
             ),
-            plan_summary_url=self.url_index.get_plan_summary_url(
+            plan_details_url=self.url_index.get_plan_details_url(
                 plan_id=plan.plan_id, user_role=UserRole.company
             ),
         )

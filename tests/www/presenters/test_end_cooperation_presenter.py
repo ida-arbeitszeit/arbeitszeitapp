@@ -83,18 +83,18 @@ class PresenterTests(TestCase):
             ),
         )
 
-    def test_plan_summary_url_gets_returned_when_plan_summary_url_was_referer(
+    def test_plan_details_url_gets_returned_when_plan_details_url_was_referer(
         self,
     ):
         plan_id = uuid4()
-        self.request.set_header("Referer", f"/company/plan_summary/{str(plan_id)}")
+        self.request.set_header("Referer", f"/company/plan_details/{str(plan_id)}")
         self.request.set_arg("plan_id", str(plan_id))
         self.request.set_arg("cooperation_id", str(uuid4()))
         view_model = self.presenter.present(SUCCESSFUL_RESPONSE)
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan_id
             ),
         )

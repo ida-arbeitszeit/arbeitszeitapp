@@ -10,7 +10,7 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class PlanSummary:
+class PlanDetails:
     plan_id: UUID
     is_active: bool
     planner_id: UUID
@@ -35,12 +35,12 @@ class PlanSummary:
 
 
 @dataclass
-class PlanSummaryService:
+class PlanDetailsService:
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
-    def get_summary_from_plan(self, plan_id: UUID) -> Optional[PlanSummary]:
+    def get_details_from_plan(self, plan_id: UUID) -> Optional[PlanDetails]:
         now = self.datetime_service.now()
         plan = self.database_gateway.get_plans().with_id(plan_id).first()
         if plan is None:
@@ -51,7 +51,7 @@ class PlanSummaryService:
             price_per_unit = self.price_calculator.calculate_individual_price(plan)
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
-        return PlanSummary(
+        return PlanDetails(
             plan_id=plan.id,
             is_active=plan.is_active_as_of(now),
             planner_id=planner.id,

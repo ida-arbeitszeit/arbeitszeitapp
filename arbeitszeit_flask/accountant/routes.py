@@ -7,7 +7,7 @@ from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
@@ -33,8 +33,8 @@ from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
-from arbeitszeit_web.www.presenters.get_plan_summary_accountant_presenter import (
-    GetPlanSummaryAccountantPresenter,
+from arbeitszeit_web.www.presenters.get_plan_details_accountant_presenter import (
+    GetPlanDetailsAccountantPresenter,
 )
 from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
@@ -88,21 +88,21 @@ def approve_plan(
     return redirect(view_model.redirect_url)
 
 
-@AccountantRoute("/accountant/plan_summary/<uuid:plan_id>")
-def plan_summary(
+@AccountantRoute("/accountant/plan_details/<uuid:plan_id>")
+def plan_details(
     plan_id: UUID,
-    use_case: GetPlanSummaryUseCase,
+    use_case: GetPlanDetailsUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryAccountantPresenter,
+    presenter: GetPlanDetailsAccountantPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
-    use_case_response = use_case.get_plan_summary(use_case_request)
+    use_case_request = GetPlanDetailsUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_details(use_case_request)
     if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(
-                "accountant/plan_summary.html",
+                "accountant/plan_details.html",
                 context=dict(view_model=view_model.to_dict()),
             )
         )

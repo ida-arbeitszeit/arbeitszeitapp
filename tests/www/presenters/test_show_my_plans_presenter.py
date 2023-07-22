@@ -81,8 +81,8 @@ class ShowMyPlansPresenterTests(TestCase):
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
-            presentation.active_plans.rows[0].plan_summary_url,
-            self.url_index.get_plan_summary_url(
+            presentation.active_plans.rows[0].plan_details_url,
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan.id
             ),
         )
@@ -122,8 +122,8 @@ class ShowMyPlansPresenterTests(TestCase):
         row1 = presentation.expired_plans.rows[0]
         expected_plan = RESPONSE_WITH_ONE_EXPIRED_PLAN.expired_plans[0]
         self.assertEqual(
-            row1.plan_summary_url,
-            self.url_index.get_plan_summary_url(
+            row1.plan_details_url,
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=expected_plan.id
             ),
         )
@@ -148,8 +148,8 @@ class ShowMyPlansPresenterTests(TestCase):
         row1 = presentation.non_active_plans.rows[0]
         expected_plan = RESPONSE_WITH_ONE_NON_ACTIVE_PLAN.non_active_plans[0]
         self.assertEqual(
-            row1.plan_summary_url,
-            self.url_index.get_plan_summary_url(
+            row1.plan_details_url,
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan.id
             ),
         )
@@ -201,7 +201,7 @@ class ShowMyPlansPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.drafts.rows[0].draft_details_url,
-            self.url_index.get_draft_summary_url(draft_id),
+            self.url_index.get_draft_details_url(draft_id),
         )
 
     def test_that_delete_draft_url_is_set_correctly(self) -> None:
@@ -228,7 +228,7 @@ class ShowMyPlansPresenterTests(TestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.drafts.rows[0].edit_plan_url,
-            self.url_index.get_draft_summary_url(draft_id),
+            self.url_index.get_draft_details_url(draft_id),
         )
 
     def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:

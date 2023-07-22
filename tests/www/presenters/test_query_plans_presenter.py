@@ -59,8 +59,8 @@ class QueryPlansPresenterTests(BaseTestCase):
         presentation = self.presenter.present(response, self.request)
         table_row = presentation.results.rows[0]
         self.assertEqual(
-            table_row.plan_summary_url,
-            self.url_index.get_plan_summary_url(
+            table_row.plan_details_url,
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.member, plan_id=plan_id
             ),
         )

@@ -1,7 +1,7 @@
 from typing import Optional
 
-from arbeitszeit.plan_summary import PlanSummary
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,
@@ -41,12 +41,12 @@ class GetPlanApiPresenter:
                 approval_date=JsonDatetime(required=False),
                 expiration_date=JsonDatetime(required=False),
             ),
-            name="PlanSummary",
+            name="PlanDetails",
         )
 
     def create_view_model(
-        self, use_case_response: Optional[GetPlanSummaryUseCase.Response]
-    ) -> PlanSummary:
+        self, use_case_response: Optional[GetPlanDetailsUseCase.Response]
+    ) -> PlanDetails:
         if not use_case_response:
             raise NotFound("No plan with such ID.")
-        return use_case_response.plan_summary
+        return use_case_response.plan_details

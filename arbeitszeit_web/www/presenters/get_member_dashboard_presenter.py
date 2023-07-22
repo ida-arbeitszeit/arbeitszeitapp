@@ -18,7 +18,7 @@ class Workplace:
 class PlanDetailsWeb:
     prd_name: str
     activation_date: str
-    plan_summary_url: str
+    plan_details_url: str
 
 
 @dataclass
@@ -91,7 +91,7 @@ class GetMemberDashboardPresenter:
                 zone="Europe/Berlin",
                 fmt="%d.%m.",
             ),
-            plan_summary_url=self.url_index.get_plan_summary_url(
+            plan_details_url=self.url_index.get_plan_details_url(
                 user_role=UserRole.member, plan_id=plan_detail.plan_id
             ),
         )

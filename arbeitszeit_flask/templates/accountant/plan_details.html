@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/plan_summary.html' import plan_summary %}
-{{ plan_summary(view_model) }}
+{% from 'macros/plan_details.html' import plan_details %}
+{{ plan_details(view_model) }}
 
 {% endblock %}

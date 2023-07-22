@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
-from arbeitszeit.use_cases.get_draft_summary import DraftSummarySuccess, GetDraftSummary
+from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess, GetDraftDetails
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
 from .dependency_injection import get_dependency_injector
@@ -17,7 +17,7 @@ class UseCaseTests(TestCase):
         self.use_case = self.injector.get(EditDraftUseCase)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.get_draft_summary_use_case = self.injector.get(GetDraftSummary)
+        self.get_draft_details_use_case = self.injector.get(GetDraftDetails)
 
     def test_cannot_edit_successfully_non_existing_draft(self) -> None:
         request = self.create_request(draft=uuid4())
@@ -167,10 +167,10 @@ class UseCaseTests(TestCase):
         self.assertDraft(draft, lambda d: d.production_unit == "new unit")
 
     def assertDraft(
-        self, draft_id: UUID, condition: Callable[[DraftSummarySuccess], bool]
+        self, draft_id: UUID, condition: Callable[[DraftDetailsSuccess], bool]
     ) -> None:
-        response = self.get_draft_summary_use_case(draft_id)
-        assert isinstance(response, DraftSummarySuccess)
+        response = self.get_draft_details_use_case(draft_id)
+        assert isinstance(response, DraftDetailsSuccess)
         self.assertTrue(condition(response))
 
     def create_request(
