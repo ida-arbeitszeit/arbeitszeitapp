@@ -17,7 +17,7 @@ from arbeitszeit_web.url_index import (
 
 @dataclass
 class ActivePlansRow:
-    plan_summary_url: str
+    plan_details_url: str
     prd_name: str
     price_per_unit: str
     activation_date: str
@@ -35,7 +35,7 @@ class ActivePlansTable:
 
 @dataclass
 class NonActivePlansRow:
-    plan_summary_url: str
+    plan_details_url: str
     prd_name: str
     price_per_unit: str
     type_of_plan: str
@@ -49,7 +49,7 @@ class NonActivePlansTable:
 
 @dataclass
 class ExpiredPlansRow:
-    plan_summary_url: str
+    plan_details_url: str
     prd_name: str
     plan_creation_date: str
     renew_plan_url: str
@@ -124,7 +124,7 @@ class ShowMyPlansPresenter:
         return ActivePlansTable(
             rows=[
                 ActivePlansRow(
-                    plan_summary_url=self.user_url_index.get_plan_summary_url(plan.id),
+                    plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
                     prd_name=f"{plan.prd_name}",
                     price_per_unit=self.__format_price(plan.price_per_unit),
                     activation_date=self.__format_date(plan.activation_date),
@@ -146,7 +146,7 @@ class ShowMyPlansPresenter:
         return NonActivePlansTable(
             rows=[
                 NonActivePlansRow(
-                    plan_summary_url=self.user_url_index.get_plan_summary_url(plan.id),
+                    plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
                     prd_name=f"{plan.prd_name}",
                     price_per_unit=self.__format_price(plan.price_per_unit),
                     type_of_plan=self.__get_type_of_plan(plan.is_public_service),
@@ -162,7 +162,7 @@ class ShowMyPlansPresenter:
         return ExpiredPlansTable(
             rows=[
                 ExpiredPlansRow(
-                    plan_summary_url=self.user_url_index.get_plan_summary_url(plan.id),
+                    plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
                     prd_name=f"{plan.prd_name}",
                     is_public_service=plan.is_public_service,
                     plan_creation_date=self.__format_date(plan.plan_creation_date),
@@ -181,10 +181,10 @@ class ShowMyPlansPresenter:
                 DraftsTableRow(
                     product_name=draft.prd_name,
                     draft_creation_date=self.__format_date(draft.plan_creation_date),
-                    draft_details_url=self.url_index.get_draft_summary_url(draft.id),
+                    draft_details_url=self.url_index.get_draft_details_url(draft.id),
                     draft_delete_url=self.url_index.get_delete_draft_url(draft.id),
                     file_plan_url=self.url_index.get_file_plan_url(draft.id),
-                    edit_plan_url=self.url_index.get_draft_summary_url(draft.id),
+                    edit_plan_url=self.url_index.get_draft_details_url(draft.id),
                 )
                 for draft in response.drafts
             ]

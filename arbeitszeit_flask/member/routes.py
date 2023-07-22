@@ -8,7 +8,7 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -49,8 +49,8 @@ from arbeitszeit_web.www.presenters.get_member_account_presenter import (
 from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
-from arbeitszeit_web.www.presenters.get_plan_summary_member_presenter import (
-    GetPlanSummaryMemberMemberPresenter,
+from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
+    GetPlanDetailsMemberMemberPresenter,
 )
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
@@ -175,21 +175,21 @@ def statistics(
     )
 
 
-@MemberRoute("/member/plan_summary/<uuid:plan_id>")
-def plan_summary(
+@MemberRoute("/member/plan_details/<uuid:plan_id>")
+def plan_details(
     plan_id: UUID,
-    use_case: GetPlanSummaryUseCase,
+    use_case: GetPlanDetailsUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryMemberMemberPresenter,
+    presenter: GetPlanDetailsMemberMemberPresenter,
     http_404_view: Http404View,
 ) -> Response:
-    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
-    use_case_response = use_case.get_plan_summary(use_case_request)
+    use_case_request = GetPlanDetailsUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_details(use_case_request)
     if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
             template_renderer.render_template(
-                "member/plan_summary.html",
+                "member/plan_details.html",
                 context=dict(view_model=view_model.to_dict()),
             )
         )

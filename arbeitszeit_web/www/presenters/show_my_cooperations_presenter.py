@@ -186,7 +186,7 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
-            plan_url=self.url_index.get_plan_summary_url(
+            plan_url=self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan.plan_id
             ),
             planner_name=plan.planner_name,
@@ -201,7 +201,7 @@ class ShowMyCooperationsPresenter:
         return ListOfOutboundCooperationRequestsRow(
             plan_id=str(plan.plan_id),
             plan_name=plan.plan_name,
-            plan_url=self.url_index.get_plan_summary_url(
+            plan_url=self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan.plan_id
             ),
             coop_id=str(plan.coop_id),
@@ -213,7 +213,7 @@ class ShowMyCooperationsPresenter:
     ) -> CooperatingPlan:
         return CooperatingPlan(
             plan_name=plan.plan_name,
-            plan_url=self.url_index.get_plan_summary_url(
+            plan_url=self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan.plan_id
             ),
             coop_name=plan.coop_name,

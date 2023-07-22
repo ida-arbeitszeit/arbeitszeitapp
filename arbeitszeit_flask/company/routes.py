@@ -24,8 +24,8 @@ from arbeitszeit.use_cases.deny_cooperation import (
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
-from arbeitszeit.use_cases.get_draft_summary import GetDraftSummary
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
@@ -119,8 +119,8 @@ from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
 )
-from arbeitszeit_web.www.presenters.get_plan_summary_company_presenter import (
-    GetPlanSummaryCompanyPresenter,
+from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
+    GetPlanDetailsCompanyPresenter,
 )
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
@@ -238,8 +238,8 @@ def delete_draft(
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
-    get_plan_summary_use_case: GetPlanSummaryUseCase,
-    get_plan_summary_presenter: GetPrefilledDraftDataPresenter,
+    get_plan_details_use_case: GetPlanDetailsUseCase,
+    get_plan_details_presenter: GetPrefilledDraftDataPresenter,
     create_plan_draft_use_case: CreatePlanDraft,
     create_draft_controller: CreateDraftController,
     create_draft_presenter: CreateDraftPresenter,
@@ -249,12 +249,12 @@ def create_draft_from_plan(
 ) -> Response:
     form = CreateDraftForm(request.form)
     if request.method == "GET":
-        use_case_request_get = GetPlanSummaryUseCase.Request(plan_id)
-        response = get_plan_summary_use_case.get_plan_summary(use_case_request_get)
+        use_case_request_get = GetPlanDetailsUseCase.Request(plan_id)
+        response = get_plan_details_use_case.get_plan_details(use_case_request_get)
         if not response:
             return not_found_view.get_response()
-        view_model_get = get_plan_summary_presenter.show_prefilled_draft_data(
-            summary_data=response.plan_summary, form=form
+        view_model_get = get_plan_details_presenter.show_prefilled_draft_data(
+            draft_data=response.plan_details, form=form
         )
         return FlaskResponse(
             template_renderer.render_template(
@@ -328,9 +328,9 @@ def file_plan(
 
 
 @CompanyRoute("/company/draft/<draft_id>", methods=["GET"])
-def get_draft_summary(
+def get_draft_details(
     draft_id: str,
-    use_case: GetDraftSummary,
+    use_case: GetDraftDetails,
     presenter: GetPrefilledDraftDataPresenter,
     template_renderer: UserTemplateRenderer,
     not_found_view: Http404View,
@@ -370,7 +370,7 @@ def my_plans(
 @commit_changes
 def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
     toggle_availability(UUID(current_user.id), plan_id)
-    return redirect(url_for("main_company.plan_summary", plan_id=plan_id))
+    return redirect(url_for("main_company.plan_details", plan_id=plan_id))
 
 
 @CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
@@ -496,21 +496,21 @@ def statistics(
     )
 
 
-@CompanyRoute("/company/plan_summary/<uuid:plan_id>")
-def plan_summary(
+@CompanyRoute("/company/plan_details/<uuid:plan_id>")
+def plan_details(
     plan_id: UUID,
-    use_case: GetPlanSummaryUseCase,
+    use_case: GetPlanDetailsUseCase,
     template_renderer: UserTemplateRenderer,
-    presenter: GetPlanSummaryCompanyPresenter,
+    presenter: GetPlanDetailsCompanyPresenter,
     http_404_view: Http404View,
 ):
-    use_case_request = GetPlanSummaryUseCase.Request(plan_id)
-    use_case_response = use_case.get_plan_summary(use_case_request)
+    use_case_request = GetPlanDetailsUseCase.Request(plan_id)
+    use_case_response = use_case.get_plan_details(use_case_request)
     if not use_case_response:
         return http_404_view.get_response()
     view_model = presenter.present(use_case_response)
     return template_renderer.render_template(
-        "company/plan_summary.html", context=dict(view_model=view_model.to_dict())
+        "company/plan_details.html", context=dict(view_model=view_model.to_dict())
     )
 
 

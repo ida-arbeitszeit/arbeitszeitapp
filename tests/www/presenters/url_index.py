@@ -36,14 +36,14 @@ class UrlIndexTestImpl:
     names.
     """
 
-    get_plan_summary_url = UrlIndexMethod()
+    get_plan_details_url = UrlIndexMethod()
     get_member_dashboard_url = UrlIndexMethod()
     get_work_invite_url = UrlIndexMethod()
     get_company_summary_url = UrlIndexMethod()
     get_coop_summary_url = UrlIndexMethod()
     get_company_dashboard_url = UrlIndexMethod()
     get_draft_list_url = UrlIndexMethod()
-    get_draft_summary_url = UrlIndexMethod()
+    get_draft_details_url = UrlIndexMethod()
     get_answer_company_work_invite_url = UrlIndexMethod()
     get_global_barplot_for_certificates_url = UrlIndexMethod()
     get_global_barplot_for_means_of_production_url = UrlIndexMethod()

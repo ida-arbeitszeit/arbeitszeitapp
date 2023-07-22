@@ -1,35 +1,35 @@
 """
-some functionalities are tested in tests/presenters/test_plan_summary_formatter.py
+some functionalities are tested in tests/presenters/test_plan_details_formatter.py
 """
 
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
-from arbeitszeit_web.www.presenters.get_plan_summary_company_presenter import (
-    GetPlanSummaryCompanyPresenter,
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
+    GetPlanDetailsCompanyPresenter,
 )
 from tests.session import FakeSession
 from tests.www.presenters.base_test_case import BaseTestCase
-from tests.www.presenters.data_generators import PlanSummaryGenerator
+from tests.www.presenters.data_generators import PlanDetailsGenerator
 
 from .url_index import UrlIndexTestImpl
 
-UseCaseResponse = GetPlanSummaryUseCase.Response
+UseCaseResponse = GetPlanDetailsUseCase.Response
 
 
 class TestPresenterForPlanner(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
-        self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
+        self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
+        self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.session = self.injector.get(FakeSession)
         self.expected_planner = uuid4()
         self.session.login_company(company=self.expected_planner)
 
     def test_action_section_is_shown_when_current_user_is_planner(self):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 planner_id=self.expected_planner
             ),
         )
@@ -40,7 +40,7 @@ class TestPresenterForPlanner(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_active=False, planner_id=self.expected_planner
             ),
         )
@@ -50,7 +50,7 @@ class TestPresenterForPlanner(BaseTestCase):
     def test_url_for_changing_availability_is_displayed_correctly(self):
         expected_plan_id = uuid4()
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 plan_id=expected_plan_id, planner_id=self.expected_planner
             ),
         )
@@ -66,7 +66,7 @@ class TestPresenterForPlanner(BaseTestCase):
         expected_plan_id = uuid4()
         expected_cooperation_id = uuid4()
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=True,
                 plan_id=expected_plan_id,
                 cooperation=expected_cooperation_id,
@@ -86,7 +86,7 @@ class TestPresenterForPlanner(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=True, planner_id=self.expected_planner
             ),
         )
@@ -97,7 +97,7 @@ class TestPresenterForPlanner(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=False, cooperation=None, planner_id=self.expected_planner
             ),
         )
@@ -108,7 +108,7 @@ class TestPresenterForPlanner(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=False, cooperation=None, planner_id=self.expected_planner
             ),
         )
@@ -123,7 +123,7 @@ class TestPresenterForPlanner(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            self.plan_summary_generator.create_plan_summary(
+            self.plan_details_generator.create_plan_details(
                 planner_id=self.expected_planner
             ),
         )
@@ -135,21 +135,21 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.presenter = self.injector.get(GetPlanSummaryCompanyPresenter)
-        self.plan_summary_generator = self.injector.get(PlanSummaryGenerator)
+        self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
+        self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
 
     def test_action_section_is_not_shown_when_current_user_is_not_planner(self):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(),
+            plan_details=self.plan_details_generator.create_plan_details(),
         )
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
     def test_view_model_shows_availability_when_plan_is_available(self):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_available=True
             ),
         )
@@ -160,7 +160,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            plan_summary=self.plan_summary_generator.create_plan_summary(
+            plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=True
             ),
         )
@@ -171,7 +171,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         self,
     ):
         response = UseCaseResponse(
-            self.plan_summary_generator.create_plan_summary(),
+            self.plan_details_generator.create_plan_details(),
         )
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.show_payment_url)
@@ -181,7 +181,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
     ):
         expected_plan_id = uuid4()
         response = UseCaseResponse(
-            self.plan_summary_generator.create_plan_summary(plan_id=expected_plan_id),
+            self.plan_details_generator.create_plan_details(plan_id=expected_plan_id),
         )
         view_model = self.presenter.present(response)
         self.assertEqual(

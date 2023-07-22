@@ -3,14 +3,14 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
-class PlanSummaryWeb:
+class PlanDetailsWeb:
     plan_id: Tuple[str, str]
     activity_string: Tuple[str, str]
     planner: Tuple[str, str, str, str]
@@ -32,101 +32,101 @@ class PlanSummaryWeb:
 
 
 @dataclass
-class PlanSummaryFormatter:
+class PlanDetailsFormatter:
     url_index: UrlIndex
     translator: Translator
     datetime_service: DatetimeService
     session: Session
 
-    def format_plan_summary(self, plan_summary: PlanSummary) -> PlanSummaryWeb:
+    def format_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
         user_role = self.session.get_user_role()
-        return PlanSummaryWeb(
-            plan_id=(self.translator.gettext("Plan ID"), str(plan_summary.plan_id)),
+        return PlanDetailsWeb(
+            plan_id=(self.translator.gettext("Plan ID"), str(plan_details.plan_id)),
             activity_string=(
                 self.translator.gettext("Status"),
                 self.translator.gettext("Active")
-                if plan_summary.is_active
+                if plan_details.is_active
                 else self.translator.gettext("Inactive"),
             ),
             planner=(
                 self.translator.gettext("Planning company"),
-                str(plan_summary.planner_id),
+                str(plan_details.planner_id),
                 self.url_index.get_company_summary_url(
                     user_role=user_role,
-                    company_id=plan_summary.planner_id,
+                    company_id=plan_details.planner_id,
                 ),
-                plan_summary.planner_name,
+                plan_details.planner_name,
             ),
             product_name=(
                 self.translator.gettext("Name of product"),
-                plan_summary.product_name,
+                plan_details.product_name,
             ),
             description=(
                 self.translator.gettext("Description of product"),
-                plan_summary.description.splitlines(),
+                plan_details.description.splitlines(),
             ),
             timeframe=(
                 self.translator.gettext("Planning timeframe (days)"),
-                str(plan_summary.timeframe),
+                str(plan_details.timeframe),
             ),
-            active_days=str(plan_summary.active_days),
+            active_days=str(plan_details.active_days),
             production_unit=(
                 self.translator.gettext("Smallest delivery unit"),
-                plan_summary.production_unit,
+                plan_details.production_unit,
             ),
-            amount=(self.translator.gettext("Amount"), str(plan_summary.amount)),
+            amount=(self.translator.gettext("Amount"), str(plan_details.amount)),
             means_cost=(
                 self.translator.gettext("Costs for fixed means of production"),
-                str(plan_summary.means_cost),
+                str(plan_details.means_cost),
             ),
             resources_cost=(
                 self.translator.gettext("Costs for liquid means of production"),
-                str(plan_summary.resources_cost),
+                str(plan_details.resources_cost),
             ),
             labour_cost=(
                 self.translator.gettext("Costs for work"),
-                str(plan_summary.labour_cost),
+                str(plan_details.labour_cost),
             ),
             type_of_plan=(
                 self.translator.gettext("Type"),
                 self.translator.gettext("Public")
-                if plan_summary.is_public_service
+                if plan_details.is_public_service
                 else self.translator.gettext("Productive"),
             ),
             price_per_unit=(
                 self.translator.gettext("Price (per unit)"),
-                self._format_price(plan_summary.price_per_unit),
-                plan_summary.is_cooperating,
+                self._format_price(plan_details.price_per_unit),
+                plan_details.is_cooperating,
                 self.url_index.get_coop_summary_url(
-                    user_role=user_role, coop_id=plan_summary.cooperation
+                    user_role=user_role, coop_id=plan_details.cooperation
                 )
-                if plan_summary.cooperation
+                if plan_details.cooperation
                 else None,
             ),
             availability_string=(
                 self.translator.gettext("Product currently available"),
                 self.translator.gettext("Yes")
-                if plan_summary.is_available
+                if plan_details.is_available
                 else self.translator.gettext("No"),
             ),
             creation_date=self.datetime_service.format_datetime(
-                date=plan_summary.creation_date,
+                date=plan_details.creation_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             approval_date=self.datetime_service.format_datetime(
-                date=plan_summary.approval_date,
+                date=plan_details.approval_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             )
-            if plan_summary.approval_date
+            if plan_details.approval_date
             else "-",
             expiration_date=self.datetime_service.format_datetime(
-                date=plan_summary.expiration_date,
+                date=plan_details.expiration_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             )
-            if plan_summary.expiration_date
+            if plan_details.expiration_date
             else "-",
         )
 

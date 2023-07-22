@@ -148,14 +148,14 @@ class PlansOfCompanyTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company,
                 plan_id=RESPONSE_WITH_2_PLANS.plan_details[0].id,
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company,
                 plan_id=RESPONSE_WITH_2_PLANS.plan_details[1].id,
             ),
@@ -166,14 +166,14 @@ class PlansOfCompanyTests(TestCase):
         view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
         self.assertEqual(
             view_model.plan_details[0].url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.member,
                 plan_id=RESPONSE_WITH_2_PLANS.plan_details[0].id,
             ),
         )
         self.assertEqual(
             view_model.plan_details[1].url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.member,
                 plan_id=RESPONSE_WITH_2_PLANS.plan_details[1].id,
             ),

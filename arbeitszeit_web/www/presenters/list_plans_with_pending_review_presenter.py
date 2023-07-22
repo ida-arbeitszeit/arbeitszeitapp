@@ -17,7 +17,7 @@ class ListPlansWithPendingReviewPresenter:
         product_name: str
         planner_name: str
         approve_plan_url: str
-        plan_summary_url: str
+        plan_details_url: str
         company_summary_url: str
 
     @dataclass
@@ -35,7 +35,7 @@ class ListPlansWithPendingReviewPresenter:
                     product_name=plan.product_name,
                     planner_name=plan.planner_name,
                     approve_plan_url=self.url_index.get_approve_plan_url(plan.id),
-                    plan_summary_url=self.url_index.get_plan_summary_url(
+                    plan_details_url=self.url_index.get_plan_details_url(
                         user_role=UserRole.accountant, plan_id=plan.id
                     ),
                     company_summary_url=self.url_index.get_company_summary_url(

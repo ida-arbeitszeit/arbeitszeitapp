@@ -108,7 +108,7 @@ class GetCompanySummarySuccessPresenter:
         return PlanDetailsWeb(
             id=str(plan_details.id),
             name=plan_details.name,
-            url=self.user_url_index.get_plan_summary_url(
+            url=self.user_url_index.get_plan_details_url(
                 plan_details.id,
             ),
             status=self.translator.gettext("Active")

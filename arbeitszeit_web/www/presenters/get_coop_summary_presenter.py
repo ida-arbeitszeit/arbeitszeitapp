@@ -54,7 +54,7 @@ class GetCoopSummarySuccessPresenter:
             plans=[
                 AssociatedPlanPresentation(
                     plan_name=plan.plan_name,
-                    plan_url=self.user_url_index.get_plan_summary_url(plan.plan_id),
+                    plan_url=self.user_url_index.get_plan_details_url(plan.plan_id),
                     plan_individual_price=self.__format_price(
                         plan.plan_individual_price
                     ),

@@ -142,7 +142,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_summary_url(UserRole.company, plan.id)
+        url = self.url_index.get_plan_details_url(UserRole.company, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -151,7 +151,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_summary_url(UserRole.member, plan.id)
+        url = self.url_index.get_plan_details_url(UserRole.member, plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -161,12 +161,12 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_that_draft_summary_url_leads_to_200_response_for_existing_draft(
+    def test_that_draft_details_url_leads_to_200_response_for_existing_draft(
         self,
     ) -> None:
         company = self.login_company()
         draft = self.plan_generator.draft_plan(planner=company.id)
-        url = self.url_index.get_draft_summary_url(draft_id=draft)
+        url = self.url_index.get_draft_details_url(draft_id=draft)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

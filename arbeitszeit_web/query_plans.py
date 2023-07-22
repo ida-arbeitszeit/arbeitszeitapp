@@ -87,7 +87,7 @@ class QueryPlansController:
 
 @dataclass
 class ResultTableRow:
-    plan_summary_url: str
+    plan_details_url: str
     company_summary_url: str
     company_name: str
     product_name: str
@@ -136,7 +136,7 @@ class QueryPlansPresenter:
             results=ResultsTable(
                 rows=[
                     ResultTableRow(
-                        plan_summary_url=self.user_url_index.get_plan_summary_url(
+                        plan_details_url=self.user_url_index.get_plan_details_url(
                             result.plan_id
                         ),
                         company_summary_url=self.url_index.get_company_summary_url(

@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.use_cases import get_draft_summary
+from arbeitszeit.use_cases import get_draft_details
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -32,9 +32,9 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.create_plan_draft = self.injector.get(CreatePlanDraft)
-        self.get_draft_summary = self.injector.get(get_draft_summary.GetDraftSummary)
+        self.get_draft_details = self.injector.get(get_draft_details.GetDraftDetails)
 
-    def test_that_plan_plan_summary_can_be_accessed_after_draft_is_created(
+    def test_that_plan_plan_details_can_be_accessed_after_draft_is_created(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
@@ -42,7 +42,7 @@ class UseCaseTests(BaseTestCase):
         response = self.create_plan_draft(request)
         assert not response.is_rejected
         assert response.draft_id
-        assert self.get_draft_summary(response.draft_id)
+        assert self.get_draft_details(response.draft_id)
 
     def test_that_create_plan_returns_a_draft_id(self) -> None:
         planner = self.company_generator.create_company()
@@ -101,6 +101,6 @@ class UseCaseTests(BaseTestCase):
         request = replace(REQUEST, planner=planner)
         response = self.create_plan_draft(request)
         assert response.draft_id
-        summary = self.get_draft_summary(response.draft_id)
-        assert summary
-        assert summary.planner_id == planner
+        details = self.get_draft_details(response.draft_id)
+        assert details
+        assert details.planner_id == planner

@@ -7,7 +7,7 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
 )
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 
 from .base_test_case import BaseTestCase
 
@@ -16,7 +16,7 @@ class AcceptCooperationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.accept_cooperation = self.injector.get(AcceptCooperation)
-        self.get_plan_summary_use_case = self.injector.get(GetPlanSummaryUseCase)
+        self.get_plan_details_use_case = self.injector.get(GetPlanDetailsUseCase)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
         requester = self.company_generator.create_company_entity()
@@ -218,8 +218,8 @@ class AcceptCooperationTests(BaseTestCase):
         assert response.is_rejected
 
     def assert_plan_in_cooperation(self, plan: UUID, cooperation: UUID) -> None:
-        request = GetPlanSummaryUseCase.Request(plan)
-        summary_response = self.get_plan_summary_use_case.get_plan_summary(request)
+        request = GetPlanDetailsUseCase.Request(plan)
+        summary_response = self.get_plan_details_use_case.get_plan_details(request)
         assert summary_response
-        assert summary_response.plan_summary
-        assert summary_response.plan_summary.cooperation == cooperation
+        assert summary_response.plan_details
+        assert summary_response.plan_details.cooperation == cooperation

@@ -7,7 +7,7 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class DraftSummarySuccess:
+class DraftDetailsSuccess:
     draft_id: UUID
     planner_id: UUID
     product_name: str
@@ -21,18 +21,18 @@ class DraftSummarySuccess:
     is_public_service: bool
 
 
-DraftSummaryResponse = Optional[DraftSummarySuccess]
+DraftDetailsResponse = Optional[DraftDetailsSuccess]
 
 
 @dataclass
-class GetDraftSummary:
+class GetDraftDetails:
     database: DatabaseGateway
 
-    def __call__(self, draft_id: UUID) -> DraftSummaryResponse:
+    def __call__(self, draft_id: UUID) -> DraftDetailsResponse:
         draft = self.database.get_plan_drafts().with_id(draft_id).first()
         if draft is None:
             return None
-        return DraftSummarySuccess(
+        return DraftDetailsSuccess(
             draft_id=draft.id,
             planner_id=draft.planner,
             product_name=draft.product_name,

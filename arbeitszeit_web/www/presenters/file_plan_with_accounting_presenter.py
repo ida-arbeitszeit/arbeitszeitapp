@@ -20,7 +20,7 @@ class FilePlanWithAccountingPresenter:
     def present_response(self, response: FilePlanWithAccounting.Response) -> ViewModel:
         plan_id = response.plan_id
         if plan_id is not None and response.is_plan_successfully_filed:
-            redirect_url = self.user_url_index.get_plan_summary_url(plan_id)
+            redirect_url = self.user_url_index.get_plan_details_url(plan_id)
             self.notifier.display_info(
                 self.translator.gettext(
                     "Successfully filed plan with social accounting"

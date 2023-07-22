@@ -2,9 +2,9 @@ from typing import Callable, Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.entities import ProductionCosts
-from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_plan_summary import GetPlanSummaryUseCase
+from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -22,7 +22,7 @@ class BaseUseCaseTestCase(BaseTestCase):
         self.list_plans_with_pending_review_use_case = self.injector.get(
             ListPlansWithPendingReviewUseCase
         )
-        self.get_plan_summary_use_case = self.injector.get(GetPlanSummaryUseCase)
+        self.get_plan_details_use_case = self.injector.get(GetPlanDetailsUseCase)
         self.planner = self.company_generator.create_company()
         self.notify_accountants_presenter = self.injector.get(
             NotifyAccountantsAboutNewPlanPresenterImpl
@@ -69,26 +69,26 @@ class BaseUseCaseTestCase(BaseTestCase):
             draft_id=draft, filing_company=filing_company
         )
 
-    def assertPlanSummaryIsAvailable(self, plan: UUID) -> None:
-        request = GetPlanSummaryUseCase.Request(plan)
-        response = self.get_plan_summary_use_case.get_plan_summary(request)
+    def assertPlanDetailsIsAvailable(self, plan: UUID) -> None:
+        request = GetPlanDetailsUseCase.Request(plan)
+        response = self.get_plan_details_use_case.get_plan_details(request)
         self.assertTrue(
             response,
-            msg=f"Plan summary for plan {plan} is not available",
+            msg=f"Plan details for plan {plan} is not available",
         )
 
-    def assertPlanSummary(
-        self, plan: UUID, condition: Callable[[PlanSummary], bool]
+    def assertPlanDetails(
+        self, plan: UUID, condition: Callable[[PlanDetails], bool]
     ) -> None:
-        request = GetPlanSummaryUseCase.Request(plan)
-        response = self.get_plan_summary_use_case.get_plan_summary(request)
+        request = GetPlanDetailsUseCase.Request(plan)
+        response = self.get_plan_details_use_case.get_plan_details(request)
         self.assertTrue(
             response,
-            msg=f"Plan summary for plan {plan} is not available",
+            msg=f"Plan details for plan {plan} is not available",
         )
         assert response
-        summary = response.plan_summary
-        self.assertTrue(condition(summary), msg=f"{summary}")
+        details = response.plan_details
+        self.assertTrue(condition(details), msg=f"{details}")
 
 
 class UseCaseTests(BaseUseCaseTestCase):
@@ -126,13 +126,13 @@ class UseCaseTests(BaseUseCaseTestCase):
         request = self.create_request()
         response = self.use_case.file_plan_with_accounting(request)
         assert response.plan_id
-        self.assertPlanSummaryIsAvailable(plan=response.plan_id)
+        self.assertPlanDetailsIsAvailable(plan=response.plan_id)
 
     def test_that_product_name_is_correct_in_newly_created_plan(self) -> None:
         expected_product_name = "test product name"
         draft = self.create_draft(product_name=expected_product_name)
         plan_id = self.file_draft(draft)
-        self.assertPlanSummary(
+        self.assertPlanDetails(
             plan=plan_id,
             condition=lambda s: s.product_name == expected_product_name,
         )

@@ -20,7 +20,7 @@ class UrlIndex(Protocol):
     def get_member_dashboard_url(self) -> str:
         ...
 
-    def get_plan_summary_url(
+    def get_plan_details_url(
         self, *, user_role: Optional[UserRole], plan_id: UUID
     ) -> str:
         ...
@@ -41,7 +41,7 @@ class UrlIndex(Protocol):
     def get_company_dashboard_url(self) -> str:
         ...
 
-    def get_draft_summary_url(self, draft_id: UUID) -> str:
+    def get_draft_details_url(self, draft_id: UUID) -> str:
         ...
 
     def get_delete_draft_url(self, draft_id: UUID) -> str:
@@ -182,6 +182,6 @@ class UserUrlIndex:
     session: Session
     url_index: UrlIndex
 
-    def get_plan_summary_url(self, plan_id: UUID) -> str:
+    def get_plan_details_url(self, plan_id: UUID) -> str:
         user_role = self.session.get_user_role()
-        return self.url_index.get_plan_summary_url(user_role=user_role, plan_id=plan_id)
+        return self.url_index.get_plan_details_url(user_role=user_role, plan_id=plan_id)

@@ -33,7 +33,7 @@ class Tests(TestCase):
         view_model = self.presenter.present_response(self.create_failure_response())
         self.assertIsNotNone(view_model.redirect_url)
 
-    def test_user_gets_redirected_to_plan_summary_page_on_successful_response(
+    def test_user_gets_redirected_to_plan_details_page_on_successful_response(
         self,
     ) -> None:
         plan_id = uuid4()
@@ -42,7 +42,7 @@ class Tests(TestCase):
         )
         self.assertEqual(
             view_model.redirect_url,
-            self.url_index.get_plan_summary_url(
+            self.url_index.get_plan_details_url(
                 user_role=UserRole.company, plan_id=plan_id
             ),
         )

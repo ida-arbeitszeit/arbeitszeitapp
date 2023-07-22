@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.plan_summary import PlanSummary
+from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.use_cases.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
@@ -114,8 +114,8 @@ class QueriedCompanyGenerator:
         )
 
 
-class PlanSummaryGenerator:
-    def create_plan_summary(
+class PlanDetailsGenerator:
+    def create_plan_details(
         self,
         plan_id: Optional[UUID] = None,
         is_active: Optional[bool] = None,
@@ -138,7 +138,7 @@ class PlanSummaryGenerator:
         creation_date: Optional[datetime] = None,
         approval_date: Optional[datetime] = None,
         expiration_date: Optional[datetime] = None,
-    ) -> PlanSummary:
+    ) -> PlanDetails:
         if plan_id is None:
             plan_id = uuid4()
         if is_active is None:
@@ -176,7 +176,7 @@ class PlanSummaryGenerator:
         if creation_date is None:
             creation_date = datetime(2023, 5, 1)
         assert isinstance(cooperation, UUID) or (cooperation is None)
-        return PlanSummary(
+        return PlanDetails(
             plan_id=plan_id,
             is_active=is_active,
             planner_id=planner_id,

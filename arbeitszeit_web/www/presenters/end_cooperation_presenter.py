@@ -43,8 +43,8 @@ class EndCooperationPresenter:
         assert plan_id
         assert cooperation_id
         if referer:
-            if self._refers_from_plan_summary(referer):
-                url = self.url_index.get_plan_summary_url(
+            if self._refers_from_plan_details(referer):
+                url = self.url_index.get_plan_details_url(
                     user_role=self.session.get_user_role(), plan_id=UUID(plan_id)
                 )
                 return url
@@ -53,6 +53,6 @@ class EndCooperationPresenter:
         )
         return url
 
-    def _refers_from_plan_summary(self, referer: str) -> bool:
+    def _refers_from_plan_details(self, referer: str) -> bool:
         referer_path = urlparse(referer).path
-        return True if referer_path.startswith("/company/plan_summary") else False
+        return True if referer_path.startswith("/company/plan_details") else False

@@ -9,13 +9,13 @@ from arbeitszeit_web.session import UserRole
 
 
 class GeneralUrlIndex:
-    def get_plan_summary_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
+    def get_plan_details_url(self, user_role: Optional[UserRole], plan_id: UUID) -> str:
         if user_role == UserRole.company:
-            return url_for("main_company.plan_summary", plan_id=plan_id)
+            return url_for("main_company.plan_details", plan_id=plan_id)
         elif user_role == UserRole.member:
-            return url_for("main_member.plan_summary", plan_id=plan_id)
+            return url_for("main_member.plan_details", plan_id=plan_id)
         elif user_role == UserRole.accountant:
-            return url_for("main_accountant.plan_summary", plan_id=plan_id)
+            return url_for("main_accountant.plan_details", plan_id=plan_id)
         else:
             raise ValueError(f"Plan summary url is unsupported for {user_role}")
 
@@ -34,8 +34,8 @@ class GeneralUrlIndex:
     def get_language_change_url(self, language_code: str) -> str:
         return url_for("auth.set_language", language=language_code)
 
-    def get_draft_summary_url(self, draft_id: UUID) -> str:
-        return url_for("main_company.get_draft_summary", draft_id=draft_id)
+    def get_draft_details_url(self, draft_id: UUID) -> str:
+        return url_for("main_company.get_draft_details", draft_id=draft_id)
 
     def get_delete_draft_url(self, draft_id: UUID) -> str:
         return url_for("main_company.delete_draft", draft_id=draft_id)

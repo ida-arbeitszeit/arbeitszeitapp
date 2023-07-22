@@ -20,7 +20,7 @@
           <div class="content">
             <p>
               <strong class="is-size-5">
-                <a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a>
+                <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
               <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.activation_date }}</small>
@@ -69,7 +69,7 @@
       <tbody>
         {% for plan in non_active_plans.rows %}
         <tr>
-          <td><a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a></td>
+          <td><a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a></td>
           <td>{{ plan.price_per_unit }}</td>
           <td>{{ plan.type_of_plan }}</td>
           <td>{{ plan.plan_creation_date }}</td>
@@ -143,7 +143,7 @@
           <div class="content">
             <p>
               <strong class="is-size-5">
-                <a href="{{ plan.plan_summary_url }}">{{ plan.prd_name }}</a>
+                <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
               <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.plan_creation_date }}</small>
