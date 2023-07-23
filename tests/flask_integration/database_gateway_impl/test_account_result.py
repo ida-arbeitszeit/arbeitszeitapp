@@ -187,6 +187,7 @@ class AccountResultTests(FlaskTestCase):
             ([1, 2, 3], 6),
             ([-1], -1),
             ([-1, 1], 0),
+            ([-10, 1, 1], -8),
         ]
     )
     def test_when_joining_with_account_balance_the_proper_value_is_calculated(
