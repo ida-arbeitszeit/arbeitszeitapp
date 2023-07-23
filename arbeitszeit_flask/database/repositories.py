@@ -17,7 +17,7 @@ from typing import (
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, func, or_, update
+from sqlalchemy import and_, case, func, or_, update
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import concat
@@ -884,24 +884,35 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
     def joined_with_balance(self) -> FlaskQueryResult[Tuple[entities.Account, Decimal]]:
-        outbound_transactions = aliased(Transaction)
-        inbound_transactions = aliased(Transaction)
+        transaction = aliased(models.Transaction)
         query = (
             self.query.join(
-                outbound_transactions,
-                outbound_transactions.sending_account == models.Account.id,
-                isouter=True,
-            )
-            .join(
-                inbound_transactions,
-                inbound_transactions.receiving_account == models.Account.id,
+                transaction,
+                or_(
+                    transaction.sending_account == models.Account.id,
+                    transaction.receiving_account == models.Account.id,
+                ),
                 isouter=True,
             )
             .group_by(models.Account)
             .with_entities(
                 models.Account,
-                func.sum(outbound_transactions.amount_sent),
-                func.sum(inbound_transactions.amount_received),
+                func.sum(
+                    case(
+                        (
+                            transaction.receiving_account == models.Account.id,
+                            transaction.amount_received,
+                        ),
+                        else_=Decimal(0),
+                    )
+                    - case(
+                        (
+                            transaction.sending_account == models.Account.id,
+                            transaction.amount_sent,
+                        ),
+                        else_=Decimal(0),
+                    )
+                ),
             )
         )
         return FlaskQueryResult(
@@ -912,9 +923,7 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
 
     @classmethod
     def map_account_and_balance(cls, orm: Any) -> Tuple[entities.Account, Decimal]:
-        return DatabaseGatewayImpl.account_from_orm(orm[0]), (orm[2] or Decimal(0)) - (
-            orm[1] or Decimal(0)
-        )
+        return DatabaseGatewayImpl.account_from_orm(orm[0]), orm[1] or Decimal(0)
 
     @classmethod
     def map_account_and_owner(
