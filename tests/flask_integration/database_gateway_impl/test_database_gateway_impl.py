@@ -98,7 +98,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self.purchase_generator.create_resource_purchase_by_company()
         result = (
             self.database_gateway.get_company_purchases()
-            .with_transaction_and_plan()
+            .joined_with_transactions_and_plan()
             .first()
         )
         assert result
@@ -109,7 +109,9 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_can_retrieve_transaction_with_purchase(self) -> None:
         self.purchase_generator.create_resource_purchase_by_company()
         result = (
-            self.database_gateway.get_company_purchases().with_transaction().first()
+            self.database_gateway.get_company_purchases()
+            .joined_with_transaction()
+            .first()
         )
         assert result
         purchase, transaction = result
@@ -124,7 +126,7 @@ class CompanyPurchaseTests(FlaskTestCase):
             self.database_gateway.get_company_purchases()
             .ordered_by_creation_date()
             .where_buyer_is_company(company)
-            .with_transaction_and_plan()
+            .joined_with_transactions_and_plan()
         )
 
     def test_can_combine_filtering_and_joining_of_purchases_with_transactions(
@@ -136,13 +138,13 @@ class CompanyPurchaseTests(FlaskTestCase):
             self.database_gateway.get_company_purchases()
             .ordered_by_creation_date()
             .where_buyer_is_company(company)
-            .with_transaction()
+            .joined_with_transaction()
         )
 
     def test_that_purchases_can_be_joined_with_transaction_and_provider(self) -> None:
         self.purchase_generator.create_resource_purchase_by_company()
         assert (
-            self.database_gateway.get_company_purchases().with_transaction_and_provider()
+            self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
         )
 
     def test_joining_with_transaction_and_provider_yields_same_transaction_as_when_just_joining_with_transaction(
@@ -151,10 +153,10 @@ class CompanyPurchaseTests(FlaskTestCase):
         self.purchase_generator.create_resource_purchase_by_company()
         assert [
             transaction
-            for _, transaction, _ in self.database_gateway.get_company_purchases().with_transaction_and_provider()
+            for _, transaction, _ in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
         ] == [
             transaction
-            for _, transaction in self.database_gateway.get_company_purchases().with_transaction()
+            for _, transaction in self.database_gateway.get_company_purchases().joined_with_transaction()
         ]
 
     def test_joining_with_transaction_and_provider_yields_same_purchase_as_when_not_joining(
@@ -163,7 +165,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self.purchase_generator.create_resource_purchase_by_company()
         assert [
             purchase
-            for purchase, _, _ in self.database_gateway.get_company_purchases().with_transaction_and_provider()
+            for purchase, _, _ in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
         ] == list(self.database_gateway.get_company_purchases())
 
     def test_joining_with_transaction_and_provider_yields_original_provider(
@@ -174,7 +176,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
         assert [
             provider.id
-            for _, _, provider in self.database_gateway.get_company_purchases().with_transaction_and_provider()
+            for _, _, provider in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
         ] == [provider]
 
 
@@ -264,7 +266,7 @@ class ConsumerPurchaseTests(FlaskTestCase):
         self.purchase_generator.create_purchase_by_member()
         result = (
             self.database_gateway.get_consumer_purchases()
-            .with_transaction_and_plan()
+            .joined_with_transactions_and_plan()
             .first()
         )
         assert result
@@ -281,5 +283,5 @@ class ConsumerPurchaseTests(FlaskTestCase):
             self.database_gateway.get_consumer_purchases()
             .ordered_by_creation_date()
             .where_buyer_is_member(member)
-            .with_transaction_and_plan()
+            .joined_with_transactions_and_plan()
         )

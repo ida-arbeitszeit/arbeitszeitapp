@@ -79,7 +79,7 @@ class GetCompanySummary:
             (transaction, company)
             for _, transaction, company in self.database_gateway.get_company_purchases()
             .where_buyer_is_company(company=company_id)
-            .with_transaction_and_provider()
+            .joined_with_transaction_and_provider()
         )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)

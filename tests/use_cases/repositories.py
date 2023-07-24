@@ -751,7 +751,7 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
             items=filtered_items,
         )
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> QueryResultImpl[Tuple[entities.ConsumerPurchase, Transaction, Plan]]:
         def joined_items() -> (
@@ -804,7 +804,7 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
             items=filtered_items,
         )
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Plan]]:
         def joined_items() -> (
@@ -820,7 +820,7 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
             items=joined_items,
         )
 
-    def with_transaction(
+    def joined_with_transaction(
         self,
     ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, entities.Transaction]]:
         def joined_items() -> (
@@ -835,7 +835,7 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
             items=joined_items,
         )
 
-    def with_transaction_and_provider(
+    def joined_with_transaction_and_provider(
         self,
     ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Company]]:
         def joined_items() -> (
