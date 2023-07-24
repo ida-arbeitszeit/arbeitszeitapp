@@ -33,7 +33,7 @@ class QueryMemberPurchases:
             self._purchase_to_response_model(purchase, transaction, plan)
             for purchase, transaction, plan in purchases.ordered_by_creation_date(
                 ascending=False
-            ).with_transaction_and_plan()
+            ).joined_with_transactions_and_plan()
         )
 
     def _purchase_to_response_model(

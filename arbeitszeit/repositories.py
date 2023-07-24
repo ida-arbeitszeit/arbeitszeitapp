@@ -264,7 +264,7 @@ class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):
     def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
         ...
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> QueryResult[Tuple[ConsumerPurchase, Transaction, Plan]]:
         ...
@@ -279,17 +279,19 @@ class CompanyPurchaseResult(QueryResult[CompanyPurchase], Protocol):
     def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
         ...
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Plan]]:
         ...
 
-    def with_transaction_and_provider(
+    def joined_with_transaction_and_provider(
         self,
     ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Company]]:
         ...
 
-    def with_transaction(self) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
+    def joined_with_transaction(
+        self,
+    ) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
         ...
 
 

@@ -974,7 +974,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             ).order_by(ordering)
         )
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
         Tuple[entities.CompanyPurchase, entities.Transaction, entities.Plan]
@@ -1001,7 +1001,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             .with_entities(models.CompanyPurchase, transaction, plan),
         )
 
-    def with_transaction(
+    def joined_with_transaction(
         self,
     ) -> FlaskQueryResult[Tuple[entities.CompanyPurchase, entities.Transaction]]:
         def mapper(
@@ -1022,7 +1022,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
             ).with_entities(models.CompanyPurchase, transaction),
         )
 
-    def with_transaction_and_provider(
+    def joined_with_transaction_and_provider(
         self,
     ) -> FlaskQueryResult[
         Tuple[entities.CompanyPurchase, entities.Transaction, entities.Company]
@@ -1080,7 +1080,7 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
             ).order_by(ordering)
         )
 
-    def with_transaction_and_plan(
+    def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
         Tuple[entities.ConsumerPurchase, entities.Transaction, entities.Plan]
