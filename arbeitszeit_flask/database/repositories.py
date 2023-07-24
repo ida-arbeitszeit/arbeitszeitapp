@@ -288,8 +288,35 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
             mapper=self._map_result_with_plan_and_company_and_cooperating_plans,
             query=query,
         )
-        return self._with_modified_query(
-            lambda query: query.join(planner, models.Plan.planner == planner.id)
+
+    def joined_with_provided_product_amount(
+        self,
+    ) -> FlaskQueryResult[Tuple[entities.Plan, int]]:
+        company_purchases = (
+            models.CompanyPurchase.query.filter(
+                models.CompanyPurchase.plan_id == models.Plan.id
+            )
+            .with_entities(func.sum(models.CompanyPurchase.amount))
+            .scalar_subquery()
+        )
+        consumer_purchases = (
+            models.ConsumerPurchase.query.filter(
+                models.ConsumerPurchase.plan_id == models.Plan.id
+            )
+            .with_entities(func.sum(models.ConsumerPurchase.amount))
+            .scalar_subquery()
+        )
+        query = self.query.with_entities(
+            models.Plan,
+            func.coalesce(company_purchases, 0) + func.coalesce(consumer_purchases, 0),
+        )
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=lambda orm: (
+                DatabaseGatewayImpl.plan_from_orm(orm[0]),
+                orm[1],
+            ),
         )
 
     def update(self) -> PlanUpdate:
