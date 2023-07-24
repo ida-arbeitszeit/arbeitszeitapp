@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from decimal import Decimal, DivisionByZero, InvalidOperation
+from decimal import Decimal
 from typing import Dict, Generator, Iterable, List, Optional, Tuple
 from uuid import UUID
 
@@ -97,18 +97,22 @@ class GetCompanySummary:
                 )
                 for account_name in ["means", "raw_material", "work", "product"]
             ],
-            plan_details=[self._get_plan_details(plan) for plan in plans],
+            plan_details=[
+                self._get_plan_details(plan=plan, provided_amount=provided_amount)
+                for plan, provided_amount in plans.joined_with_provided_product_amount()
+            ],
             suppliers_ordered_by_volume=list(
                 sorted(supply, key=lambda supplier: -supplier.volume_of_sales)
             ),
         )
 
-    def _get_plan_details(self, plan: Plan) -> PlanDetails:
+    def _get_plan_details(self, plan: Plan, provided_amount: int) -> PlanDetails:
         expected_sales_volume = plan.expected_sales_value
-        sales = self.database_gateway.get_transactions().that_were_a_sale_for_plan(
-            plan.id
+        certificates_from_sales = (
+            plan.expected_sales_value
+            * Decimal(provided_amount)
+            / Decimal(plan.prd_amount)
         )
-        certificates_from_sales = sum(sale.amount_received for sale in sales)
         sales_balance_of_plan = certificates_from_sales - expected_sales_volume
         now = self.datetime_service.now()
         return PlanDetails(
@@ -169,12 +173,13 @@ class GetCompanySummary:
         account_balance: Decimal,
         expectation: Decimal,
     ) -> Decimal:
-        try:
+        if expectation == 0:
+            if account_balance == 0:
+                return Decimal(0)
+            else:
+                return Decimal("Infinity")
+        else:
             return abs(account_balance / expectation) * 100
-        except InvalidOperation:  # zero devided by zero
-            return Decimal(0)
-        except DivisionByZero:  # non-zero devided by zero
-            return Decimal("Infinity")
 
     def _get_suppliers_and_supply_volume(
         self, supply: Iterable[Tuple[Transaction, Company]]

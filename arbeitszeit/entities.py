@@ -309,7 +309,7 @@ class PlanningStatistics:
     total_planned_costs: ProductionCosts
 
 
-@dataclass
+@dataclass(frozen=True)
 class ConsumerPurchase:
     id: UUID
     plan_id: UUID
@@ -317,7 +317,7 @@ class ConsumerPurchase:
     amount: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class CompanyPurchase:
     id: UUID
     plan_id: UUID

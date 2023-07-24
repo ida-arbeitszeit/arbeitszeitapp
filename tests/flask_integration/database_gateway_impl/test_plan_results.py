@@ -3,12 +3,20 @@ from decimal import Decimal
 from typing import List
 from uuid import uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit import entities
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.entities import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.data_generators import (
+    CompanyGenerator,
+    CooperationGenerator,
+    PlanGenerator,
+    PurchaseGenerator,
+)
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
@@ -764,3 +772,80 @@ class JoinedWithPlannerAndCooperatingPlansTests(FlaskTestCase):
         assert results
         for v in results:
             assert not v[2]
+
+
+class JoinedWithProvidedProductAmountTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
+
+    @parameterized.expand(
+        [
+            ([], [], 0),
+            ([1], [], 1),
+            ([1, 2], [], 3),
+            ([], [1], 1),
+            ([1], [2], 3),
+            ([1, 1], [1, 1], 4),
+        ]
+    )
+    def test_that_after_some_purchases_the_correct_amount_of_provided_product_is_calculated(
+        self,
+        company_purchases: List[int],
+        consumer_purchases: List[int],
+        expected_amount: int,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        for amount in company_purchases:
+            self.purchase_generator.create_fixed_means_purchase(
+                plan=plan.id, amount=amount
+            )
+        for amount in consumer_purchases:
+            self.purchase_generator.create_purchase_by_member(
+                plan=plan.id, amount=amount
+            )
+        result = (
+            self.database_gateway.get_plans()
+            .joined_with_provided_product_amount()
+            .first()
+        )
+        assert result
+        _, queried_amount = result
+        assert queried_amount == expected_amount
+
+    @parameterized.expand(
+        [
+            ([], [], 0),
+            ([1], [2], 3),
+        ]
+    )
+    def test_provided_product_amount_is_correct_even_with_other_plans_having_purchases_too(
+        self,
+        company_purchases: List[int],
+        consumer_purchases: List[int],
+        expected_amount: int,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.purchase_generator.create_fixed_means_purchase()
+        self.purchase_generator.create_purchase_by_member()
+        for amount in company_purchases:
+            self.purchase_generator.create_fixed_means_purchase(
+                plan=plan.id, amount=amount
+            )
+        for amount in consumer_purchases:
+            self.purchase_generator.create_purchase_by_member(
+                plan=plan.id, amount=amount
+            )
+        result = (
+            self.database_gateway.get_plans()
+            .with_id(plan.id)
+            .joined_with_provided_product_amount()
+            .first()
+        )
+        assert result
+        _, queried_amount = result
+        assert queried_amount == expected_amount

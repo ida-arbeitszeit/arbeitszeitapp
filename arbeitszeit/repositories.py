@@ -140,6 +140,11 @@ class PlanResult(QueryResult[Plan], Protocol):
     ]:
         ...
 
+    def joined_with_provided_product_amount(
+        self,
+    ) -> QueryResult[Tuple[entities.Plan, int]]:
+        ...
+
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""
 

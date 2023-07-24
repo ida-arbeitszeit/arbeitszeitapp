@@ -266,6 +266,26 @@ class PlanResult(QueryResultImpl[Plan]):
             items=items,
         )
 
+    def joined_with_provided_product_amount(
+        self,
+    ) -> QueryResultImpl[Tuple[entities.Plan, int]]:
+        def items() -> Iterable[Tuple[Plan, int]]:
+            for plan in self.items():
+                amount_purchased_by_companies = sum(
+                    purchase.amount
+                    for purchase in self.entities.company_purchase_by_plan_id[plan.id]
+                )
+                amount_purchased_by_members = sum(
+                    purchase.amount
+                    for purchase in self.entities.consumer_purchase_by_plan_id[plan.id]
+                )
+                yield plan, amount_purchased_by_companies + amount_purchased_by_members
+
+        return QueryResultImpl(
+            items=items,
+            entities=self.entities,
+        )
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,
@@ -1068,10 +1088,16 @@ class EntityStorage:
         self.consumer_purchase_by_transaction: Dict[
             UUID, entities.ConsumerPurchase
         ] = dict()
+        self.consumer_purchase_by_plan_id: Dict[
+            UUID, Set[entities.ConsumerPurchase]
+        ] = defaultdict(set)
         self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
         self.company_purchase_by_transaction: Dict[
             UUID, entities.CompanyPurchase
         ] = dict()
+        self.company_purchase_by_plan_id: Dict[
+            UUID, Set[entities.CompanyPurchase]
+        ] = defaultdict(set)
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, entities.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
@@ -1101,6 +1127,7 @@ class EntityStorage:
         )
         self.consumer_purchases[purchase.id] = purchase
         self.consumer_purchase_by_transaction[transaction] = purchase
+        self.consumer_purchase_by_plan_id[plan].add(purchase)
         return purchase
 
     def get_consumer_purchases(self) -> ConsumerPurchaseResult:
@@ -1120,6 +1147,7 @@ class EntityStorage:
         )
         self.company_purchases[purchase.id] = purchase
         self.company_purchase_by_transaction[transaction] = purchase
+        self.company_purchase_by_plan_id[plan].add(purchase)
         return purchase
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
