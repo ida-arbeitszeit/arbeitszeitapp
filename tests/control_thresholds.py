@@ -1,13 +1,11 @@
-from dataclasses import dataclass
-
 from arbeitszeit.injector import singleton
 
 
 @singleton
-@dataclass
 class ControlThresholdsTestImpl:
-    allowed_overdraw_of_member_account: int = 0
-    acceptable_relative_account_deviation: int = 33
+    def __init__(self) -> None:
+        self.allowed_overdraw_of_member_account: int = 10000000
+        self.acceptable_relative_account_deviation: int = 33
 
     def get_allowed_overdraw_of_member_account(self) -> int:
         return self.allowed_overdraw_of_member_account

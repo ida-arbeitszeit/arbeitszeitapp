@@ -146,7 +146,7 @@ class CreateCompanyTests(FlaskTestCase):
         self,
     ) -> None:
         email = "test@test.test"
-        self.member_generator.create_member_entity(email=email)
+        self.member_generator.create_member(email=email)
         self.database_gateway.create_company(
             email=email,
             name="test name",

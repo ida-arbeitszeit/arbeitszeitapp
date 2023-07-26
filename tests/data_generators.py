@@ -10,17 +10,7 @@ from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import (
-    Account,
-    AccountTypes,
-    Company,
-    Cooperation,
-    Member,
-    Plan,
-    ProductionCosts,
-    PurposesOfPurchases,
-    Transaction,
-)
+from arbeitszeit import entities
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.use_cases import (
@@ -71,7 +61,7 @@ class MemberGenerator:
         name: str = "test member name",
         password: str = "password",
         confirmed: bool = True,
-    ) -> Member:
+    ) -> entities.Member:
         if email is None:
             email = self.email_generator.get_random_email()
         register_response = self.register_member_use_case.register_member(
@@ -126,7 +116,7 @@ class CompanyGenerator:
         name: str = "Company Name",
         password: str = "password",
         workers: Optional[Iterable[UUID]] = None,
-    ) -> Company:
+    ) -> entities.Company:
         company_id = self.create_company(
             email=email, confirmed=True, name=name, workers=workers, password=password
         )
@@ -172,7 +162,7 @@ class CompanyGenerator:
 class AccountGenerator:
     database: DatabaseGateway
 
-    def create_account(self) -> Account:
+    def create_account(self) -> entities.Account:
         return self.database.create_account()
 
 
@@ -196,18 +186,18 @@ class PlanGenerator:
         *,
         amount: int = 100,
         approved: bool = True,
-        costs: Optional[ProductionCosts] = None,
+        costs: Optional[entities.ProductionCosts] = None,
         description="Beschreibung für Produkt A.",
         is_public_service: bool = False,
         planner: Optional[UUID] = None,
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
-        requested_cooperation: Optional[Cooperation] = None,
-        cooperation: Optional[Cooperation] = None,
+        requested_cooperation: Optional[entities.Cooperation] = None,
+        cooperation: Optional[entities.Cooperation] = None,
         is_available: bool = True,
         hidden_by_user: bool = False,
-    ) -> Plan:
+    ) -> entities.Plan:
         if planner is None:
             planner = self.company_generator.create_company()
         draft = self.draft_plan(
@@ -285,7 +275,7 @@ class PlanGenerator:
         self,
         planner: Optional[UUID] = None,
         timeframe: Optional[int] = None,
-        costs: Optional[ProductionCosts] = None,
+        costs: Optional[entities.ProductionCosts] = None,
         is_public_service: Optional[bool] = None,
         product_name: Optional[str] = None,
         description: Optional[str] = None,
@@ -303,7 +293,7 @@ class PlanGenerator:
         if product_name is None:
             product_name = "Produkt A."
         if costs is None:
-            costs = ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
+            costs = entities.ProductionCosts(Decimal(1), Decimal(1), Decimal(1))
         if planner is None:
             planner = self.company_generator.create_company()
         if timeframe is None:
@@ -341,7 +331,7 @@ class PurchaseGenerator:
         amount: int = 1,
     ) -> pay_means_of_production.PayMeansOfProductionResponse:
         return self._create_company_purchase(
-            purpose=PurposesOfPurchases.raw_materials,
+            purpose=entities.PurposesOfPurchases.raw_materials,
             buyer=buyer,
             plan=plan,
             amount=amount,
@@ -355,7 +345,7 @@ class PurchaseGenerator:
         amount: int = 1,
     ) -> pay_means_of_production.PayMeansOfProductionResponse:
         return self._create_company_purchase(
-            purpose=PurposesOfPurchases.means_of_prod,
+            purpose=entities.PurposesOfPurchases.means_of_prod,
             buyer=buyer,
             plan=plan,
             amount=amount,
@@ -364,7 +354,7 @@ class PurchaseGenerator:
     def _create_company_purchase(
         self,
         *,
-        purpose: PurposesOfPurchases,
+        purpose: entities.PurposesOfPurchases,
         buyer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
@@ -415,15 +405,15 @@ class TransactionGenerator:
 
     def create_transaction(
         self,
-        sending_account_type=AccountTypes.p,
-        receiving_account_type=AccountTypes.prd,
+        sending_account_type=entities.AccountTypes.p,
+        receiving_account_type=entities.AccountTypes.prd,
         sending_account: Optional[UUID] = None,
         receiving_account: Optional[UUID] = None,
         amount_sent=None,
         amount_received=None,
         purpose=None,
         date=None,
-    ) -> Transaction:
+    ) -> entities.Transaction:
         if sending_account is None:
             sending_account = self.account_generator.create_account().id
         if receiving_account is None:
@@ -455,14 +445,14 @@ class CooperationGenerator:
     def create_cooperation(
         self,
         name: Optional[str] = None,
-        coordinator: Optional[Union[Company, UUID]] = None,
-        plans: Optional[List[Plan]] = None,
-    ) -> Cooperation:
+        coordinator: Optional[Union[entities.Company, UUID]] = None,
+        plans: Optional[List[entities.Plan]] = None,
+    ) -> entities.Cooperation:
         if name is None:
             name = "test name"
         if coordinator is None:
             coordinator = self.company_generator.create_company_entity()
-        if isinstance(coordinator, Company):
+        if isinstance(coordinator, entities.Company):
             coordinator = coordinator.id
         cooperation = self.database_gateway.create_cooperation(
             self.datetime_service.now(),

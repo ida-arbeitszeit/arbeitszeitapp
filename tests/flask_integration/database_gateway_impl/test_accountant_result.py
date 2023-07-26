@@ -61,7 +61,7 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
         self.expected_password = "test password"
 
     def test_can_create_accountant_with_same_email_address_as_member(self) -> None:
-        self.member_generator.create_member_entity(email=self.expected_email)
+        self.member_generator.create_member(email=self.expected_email)
         self.database_gateway.create_accountant(
             email=self.expected_email,
             name=self.expected_name,
@@ -72,7 +72,7 @@ class CreateAccountantWithExistingMemberEmailTests(FlaskTestCase):
     def test_can_create_accountant_with_similar_email_address_as_member_case_insensitive(
         self,
     ) -> None:
-        self.member_generator.create_member_entity(email=self.expected_email)
+        self.member_generator.create_member(email=self.expected_email)
         altered_email = Utility.mangle_case(self.expected_email)
         new_accountant_id = self.database_gateway.create_accountant(
             email=altered_email,
