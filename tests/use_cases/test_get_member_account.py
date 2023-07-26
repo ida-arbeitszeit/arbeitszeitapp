@@ -1,12 +1,15 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from arbeitszeit import entities
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccount
 from tests.data_generators import (
     CompanyGenerator,
     FakeDatetimeService,
     MemberGenerator,
+    PlanGenerator,
+    PurchaseGenerator,
     TransactionGenerator,
 )
 
@@ -37,20 +40,11 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
 def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
-    transaction_generator: TransactionGenerator,
+    purchase_generator: PurchaseGenerator,
     company_generator: CompanyGenerator,
 ):
     member_of_interest = member_generator.create_member()
-    company = company_generator.create_company_entity()
-    other_member = member_generator.create_member_entity()
-
-    transaction_generator.create_transaction(
-        sending_account=other_member.account,
-        receiving_account=company.product_account,
-        amount_sent=Decimal(10),
-        amount_received=Decimal(8.5),
-    )
-
+    purchase_generator.create_purchase_by_member()
     response = use_case(member_of_interest)
     assert not response.transactions
 
@@ -60,21 +54,25 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
-    transaction_generator: TransactionGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
-    member = member_generator.create_member_entity()
-    company = company_generator.create_company_entity()
-
-    transaction_generator.create_transaction(
-        sending_account=member.account,
-        receiving_account=company.product_account,
-        amount_sent=Decimal(10),
-        amount_received=Decimal(8.5),
+    expected_company_name = "test company 123"
+    member = member_generator.create_member()
+    company = company_generator.create_company(name=expected_company_name)
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=entities.ProductionCosts(
+            labour_cost=Decimal(10),
+            means_cost=Decimal(0),
+            resource_cost=Decimal(0),
+        ),
+        amount=1,
     )
-
-    response = use_case(member.id)
+    purchase_generator.create_purchase_by_member(buyer=member, amount=1, plan=plan.id)
+    response = use_case(member)
     assert len(response.transactions) == 1
-    assert response.transactions[0].peer_name == company.name
+    assert response.transactions[0].peer_name == expected_company_name
     assert response.transactions[0].transaction_volume == Decimal(-10)
     assert response.transactions[0].type == TransactionTypes.payment_of_consumer_product
     assert response.balance == Decimal(-10)
@@ -85,19 +83,23 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
-    transaction_generator: TransactionGenerator,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
-    member = member_generator.create_member_entity()
-    company = company_generator.create_company_entity()
-
-    transaction_generator.create_transaction(
-        sending_account=member.account,
-        receiving_account=company.product_account,
-        amount_sent=Decimal(0),
-        amount_received=Decimal(0),
+    expected_company_name = "test company 123"
+    member = member_generator.create_member()
+    company = company_generator.create_company(name=expected_company_name)
+    plan = plan_generator.create_plan(
+        planner=company,
+        costs=entities.ProductionCosts(
+            labour_cost=Decimal(0),
+            means_cost=Decimal(0),
+            resource_cost=Decimal(0),
+        ),
+        amount=1,
     )
-
-    response = use_case(member.id)
+    purchase_generator.create_purchase_by_member(buyer=member, amount=1, plan=plan.id)
+    response = use_case(member)
     assert response.transactions[0].transaction_volume == Decimal("0")
     assert str(response.transactions[0].transaction_volume) == "0"
 

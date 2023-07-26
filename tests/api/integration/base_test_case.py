@@ -20,7 +20,7 @@ class ApiTestCase(FlaskTestCase):
     def login_member(self) -> None:
         password = "password123"
         email = self.email_generator.get_random_email()
-        self.member_generator.create_member_entity(
+        self.member_generator.create_member(
             password=password, email=email, confirmed=True
         )
         response = self.client.post(

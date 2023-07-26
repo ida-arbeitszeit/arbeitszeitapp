@@ -18,10 +18,11 @@ class UserAddressBookTests(FlaskTestCase):
         self.assertIsNone(self.repository.get_user_email_address(uuid4()))
 
     def test_that_associated_email_for_member_is_returned(self) -> None:
-        member = self.member_generator.create_member_entity()
+        expected_email = "test@test.test"
+        member = self.member_generator.create_member(email=expected_email)
         self.assertEqual(
-            member.email,
-            self.repository.get_user_email_address(member.id),
+            expected_email,
+            self.repository.get_user_email_address(member),
         )
 
     def test_that_associated_email_for_company_is_returned(self) -> None:

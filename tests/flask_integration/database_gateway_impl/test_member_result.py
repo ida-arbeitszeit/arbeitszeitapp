@@ -26,30 +26,28 @@ class RepositoryTests(FlaskTestCase):
 
     def test_that_member_can_be_retrieved_by_email(self) -> None:
         expected_mail = "test_mail@testmail.com"
-        expected_member = self.member_generator.create_member_entity(
-            email=expected_mail
-        )
-        assert (
+        expected_member = self.member_generator.create_member(email=expected_mail)
+        result = (
             self.database_gateway.get_members()
             .with_email_address(expected_mail)
             .first()
-            == expected_member
         )
+        assert result
+        assert result.id == expected_member
 
     def test_that_member_can_be_retrieved_by_email_case_insensitive(self) -> None:
         expected_mail = "test_mail@testmail.com"
         altered_mail = Utility.mangle_case(expected_mail)
-        expected_member = self.member_generator.create_member_entity(
-            email=expected_mail
-        )
-        assert (
+        expected_member = self.member_generator.create_member(email=expected_mail)
+        result = (
             self.database_gateway.get_members().with_email_address(altered_mail).first()
-            == expected_member
         )
+        assert result
+        assert result.id == expected_member
 
     def test_that_random_email_returns_no_member(self) -> None:
         random_email = "xyz123@testmail.com"
-        self.member_generator.create_member_entity(email="test_mail@testmail.com")
+        self.member_generator.create_member(email="test_mail@testmail.com")
         assert not self.database_gateway.get_members().with_email_address(random_email)
 
     def test_cannot_find_member_by_email_before_it_was_added(self) -> None:
@@ -88,7 +86,7 @@ class RepositoryTests(FlaskTestCase):
         assert len(self.database_gateway.get_members()) == 0
 
     def test_count_one_registered_member_when_one_was_created(self) -> None:
-        self.member_generator.create_member_entity()
+        self.member_generator.create_member()
         assert len(self.database_gateway.get_members()) == 1
 
     def test_with_id_returns_no_members_when_member_does_not_exist(self) -> None:
@@ -111,18 +109,18 @@ class GetAllMembersTests(FlaskTestCase):
         assert member.id == expected_member_id
 
     def test_that_all_members_can_be_retrieved(self) -> None:
-        expected_member1 = self.member_generator.create_member_entity()
-        expected_member2 = self.member_generator.create_member_entity()
+        expected_member1 = self.member_generator.create_member()
+        expected_member2 = self.member_generator.create_member()
         all_members = list(self.database_gateway.get_members())
-        assert expected_member1 in all_members
-        assert expected_member2 in all_members
+        assert expected_member1 in {m.id for m in all_members}
+        assert expected_member2 in {m.id for m in all_members}
 
     def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
         self,
     ) -> None:
         expected_number_of_members = 3
         for i in range(expected_number_of_members):
-            self.member_generator.create_member_entity()
+            self.member_generator.create_member()
         member_count = len(self.database_gateway.get_members())
         assert member_count == expected_number_of_members
 

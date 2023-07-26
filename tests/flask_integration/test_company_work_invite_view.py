@@ -38,7 +38,7 @@ class AuthenticatedTests(ViewTestCase):
         response = self.invite_use_case(
             InviteWorkerToCompanyUseCase.Request(
                 company.id,
-                self.member.id,
+                self.member,
             )
         )
         assert response.invite_id
