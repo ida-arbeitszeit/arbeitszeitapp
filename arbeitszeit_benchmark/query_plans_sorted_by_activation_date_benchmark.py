@@ -44,6 +44,8 @@ class QueryPlansSortedByActivationDateBenchmark:
             limit=None,
             offset=None,
         )
+        db.session.commit()
+        db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

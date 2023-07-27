@@ -34,6 +34,8 @@ class ShowPrdAccountDetailsBenchmark:
         for _ in range(1000):
             self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
         self.use_case = self.injector.get(ShowPRDAccountDetailsUseCase)
+        self.db.session.commit()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()
