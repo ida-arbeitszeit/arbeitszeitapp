@@ -55,12 +55,3 @@ def get_dependency_injector() -> Injector:
     return Injector(
         modules=[TestingModule(), InMemoryModule(), PresenterTestsInjector()]
     )
-
-
-def injection_test(original_test):
-    injector = get_dependency_injector()
-
-    def wrapper(*args, **kwargs):
-        return injector.call_with_injection(original_test, args=args, kwargs=kwargs)
-
-    return wrapper
