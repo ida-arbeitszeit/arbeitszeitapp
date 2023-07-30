@@ -52,9 +52,46 @@ class GetCoopSummaryTests(BaseTestCase):
         requester = self.company_generator.create_company_entity()
         plan1 = self.plan_generator.create_plan()
         plan2 = self.plan_generator.create_plan()
-        coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
+        coop = self.cooperation_generator.create_cooperation(
+            plans=[plan1, plan2], coordinator=requester.id
+        )
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
-        self.assert_success(summary, lambda s: s.coordinator_id == coop.coordinator)
+        self.assert_success(summary, lambda s: s.current_coordinator == requester.id)
+
+    def test_that_correct_coordinator_id_is_shown_when_several_cooperations_exist(
+        self,
+    ) -> None:
+        requester = self.company_generator.create_company_entity()
+        plan1 = self.plan_generator.create_plan()
+        plan2 = self.plan_generator.create_plan()
+
+        self.cooperation_generator.create_cooperation()
+        coop = self.cooperation_generator.create_cooperation(
+            plans=[plan1, plan2], coordinator=requester.id
+        )
+        self.cooperation_generator.create_cooperation()
+
+        summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
+        self.assert_success(summary, lambda s: s.current_coordinator == requester.id)
+
+    def test_that_if_cooperation_has_two_coordinations_the_current_coordinator_is_shown(
+        self,
+    ) -> None:
+        coordinator = self.company_generator.create_company()
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=coordinator
+        )
+        self.datetime_service.advance_time(timedelta(days=1))
+        current_coordination = (
+            self.coordination_tenure_generator.create_coordination_tenure(
+                cooperation=cooperation.id
+            )
+        )
+        summary = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), cooperation.id))
+        self.assert_success(
+            summary, lambda s: s.current_coordinator == current_coordination.company
+        )
 
     def test_that_correct_coordinator_name_is_shown(self) -> None:
         expected_coordinator_name = "expected coordinator name"
@@ -65,7 +102,7 @@ class GetCoopSummaryTests(BaseTestCase):
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(
-            summary, lambda s: s.coordinator_name == expected_coordinator_name
+            summary, lambda s: s.current_coordinator_name == expected_coordinator_name
         )
 
     def test_that_correct_info_of_associated_plan_is_shown(self) -> None:

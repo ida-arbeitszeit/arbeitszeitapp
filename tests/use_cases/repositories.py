@@ -22,7 +22,6 @@ from uuid import UUID, uuid4
 from typing_extensions import Self
 
 from arbeitszeit import entities
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
@@ -204,9 +203,9 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
         def new_items() -> Iterator[Plan]:
             cooperations: Set[UUID] = {
-                key
-                for key, value in self.entities.cooperations.items()
-                if value.coordinator in company
+                coop.id
+                for coop, coordinator in self.entities.get_cooperations().joined_with_current_coordinator()
+                if coordinator.id in company
             }
             return filter(
                 lambda plan: plan.requested_cooperation in cooperations
@@ -506,26 +505,63 @@ class CooperationResult(QueryResultImpl[Cooperation]):
         )
 
     def coordinated_by_company(self, company_id: UUID) -> Self:
+        def filter_func(coop: Cooperation) -> bool:
+            tenures = [
+                tenure
+                for tenure in self.entities.get_coordination_tenures().of_cooperation(
+                    coop.id
+                )
+            ]
+            for tenure in tenures:
+                if tenure.company == company_id:
+                    return True
+            return False
+
         return replace(
             self,
-            items=lambda: filter(
-                lambda coop: coop.coordinator == company_id, self.items()
-            ),
+            items=lambda: filter(filter_func, self.items()),
         )
 
-    def joined_with_coordinator(self) -> QueryResultImpl[Tuple[Cooperation, Company]]:
-        def mapping(
-            coop: entities.Cooperation,
-        ) -> Tuple[entities.Cooperation, entities.Company]:
-            coordinator = self.entities.get_company_by_id(coop.coordinator)
-            assert coordinator
-            return (coop, coordinator)
+    def joined_with_current_coordinator(
+        self,
+    ) -> QueryResultImpl[Tuple[Cooperation, Company]]:
+        def items() -> Iterable[Tuple[entities.Cooperation, entities.Company]]:
+            for coop in self.items():
+                current_tenure = (
+                    self.entities.get_coordination_tenures()
+                    .of_cooperation(coop.id)
+                    .ordered_by_start_date(ascending=False)
+                    .first()
+                )
+                assert current_tenure
+                current_coordinator_uuid = current_tenure.company
+                current_coordinator = self.entities.get_company_by_id(
+                    current_coordinator_uuid
+                )
+                assert current_coordinator
+                yield coop, current_coordinator
 
         return QueryResultImpl(
-            items=lambda: map(
-                mapping,
-                self.items(),
-            ),
+            items=items,
+            entities=self.entities,
+        )
+
+
+class CoordinationTenureResult(QueryResultImpl[entities.CoordinationTenure]):
+    def of_cooperation(self, cooperation: UUID) -> CoordinationTenureResult:
+        return self._filtered_by(lambda tenure: tenure.cooperation == cooperation)
+
+    def ordered_by_start_date(self, ascending: bool = True) -> CoordinationTenureResult:
+        tenures_sorted = sorted(
+            self.items(), key=lambda tenure: tenure.start_date, reverse=not ascending
+        )
+        return type(self)(items=lambda: tenures_sorted, entities=self.entities)
+
+    def _filtered_by(
+        self, key: Callable[[entities.CoordinationTenure], bool]
+    ) -> CoordinationTenureResult:
+        return type(self)(
+            items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
 
@@ -1061,7 +1097,7 @@ class FakeLanguageRepository:
 
 @singleton
 class EntityStorage:
-    def __init__(self, datetime_service: DatetimeService) -> None:
+    def __init__(self) -> None:
         self.members: Dict[UUID, Member] = {}
         self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.companies: Dict[UUID, Company] = {}
@@ -1084,6 +1120,7 @@ class EntityStorage:
             self.social_accounting.account: self.social_accounting
         }
         self.cooperations: Dict[UUID, Cooperation] = dict()
+        self.coordination_tenures: Dict[UUID, entities.CoordinationTenure] = dict()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
         self.consumer_purchase_by_transaction: Dict[
             UUID, entities.ConsumerPurchase
@@ -1197,7 +1234,6 @@ class EntityStorage:
         creation_timestamp: datetime,
         name: str,
         definition: str,
-        coordinator: UUID,
     ) -> Cooperation:
         cooperation_id = uuid4()
         cooperation = Cooperation(
@@ -1205,7 +1241,6 @@ class EntityStorage:
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
-            coordinator=coordinator,
         )
         self.cooperations[cooperation_id] = cooperation
         return cooperation
@@ -1213,6 +1248,25 @@ class EntityStorage:
     def get_cooperations(self) -> CooperationResult:
         return CooperationResult(
             items=lambda: self.cooperations.values(),
+            entities=self,
+        )
+
+    def create_coordination_tenure(
+        self, company: UUID, cooperation: UUID, start_date: datetime
+    ) -> entities.CoordinationTenure:
+        tenure_id = uuid4()
+        tenure = entities.CoordinationTenure(
+            id=tenure_id,
+            company=company,
+            cooperation=cooperation,
+            start_date=start_date,
+        )
+        self.coordination_tenures[tenure_id] = tenure
+        return tenure
+
+    def get_coordination_tenures(self) -> CoordinationTenureResult:
+        return CoordinationTenureResult(
+            items=lambda: self.coordination_tenures.values(),
             entities=self,
         )
 

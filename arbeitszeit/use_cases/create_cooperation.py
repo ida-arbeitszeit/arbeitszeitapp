@@ -45,7 +45,11 @@ class CreateCooperation:
             self.datetime_service.now(),
             request.name,
             request.definition,
-            coordinator.id,
+        )
+        self.database_gateway.create_coordination_tenure(
+            company=coordinator.id,
+            cooperation=cooperation.id,
+            start_date=self.datetime_service.now(),
         )
         return CreateCooperationResponse(
             rejection_reason=None, cooperation_id=cooperation.id

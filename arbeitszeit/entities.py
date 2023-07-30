@@ -131,7 +131,14 @@ class Cooperation:
     creation_date: datetime
     name: str
     definition: str
-    coordinator: UUID
+
+
+@dataclass
+class CoordinationTenure:
+    id: UUID
+    company: UUID
+    cooperation: UUID
+    start_date: datetime
 
 
 @dataclass

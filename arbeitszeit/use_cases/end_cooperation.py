@@ -48,18 +48,20 @@ class EndCooperation:
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
         plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
-        cooperation = (
+        cooperation_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.cooperation_id)
+            .joined_with_current_coordinator()
             .first()
         )
+        if not cooperation_and_coordinator:
+            raise EndCooperationResponse.RejectionReason.cooperation_not_found
         if plan is None:
             raise EndCooperationResponse.RejectionReason.plan_not_found
-        if cooperation is None:
-            raise EndCooperationResponse.RejectionReason.cooperation_not_found
         if plan.cooperation is None:
             raise EndCooperationResponse.RejectionReason.plan_has_no_cooperation
-        if (request.requester_id != cooperation.coordinator) and (
+        coordinator = cooperation_and_coordinator[1]
+        if (request.requester_id != coordinator.id) and (
             request.requester_id != plan.planner
         ):
             raise EndCooperationResponse.RejectionReason.requester_is_not_authorized

@@ -6,6 +6,7 @@ from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
     CooperationGenerator,
+    CoordinationTenureGenerator,
     MemberGenerator,
     PlanGenerator,
     PurchaseGenerator,
@@ -65,6 +66,7 @@ class BaseTestCase(TestCase):
     control_thresholds = _lazy_property(ControlThresholdsTestImpl)
     coop_generator = _lazy_property(CooperationGenerator)
     cooperation_generator = _lazy_property(CooperationGenerator)
+    coordination_tenure_generator = _lazy_property(CoordinationTenureGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
