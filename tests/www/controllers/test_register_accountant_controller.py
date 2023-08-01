@@ -1,17 +1,15 @@
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
 from tests.token import FakeTokenService
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.controller = self.injector.get(RegisterAccountantController)
         self.token_service = self.injector.get(FakeTokenService)
 

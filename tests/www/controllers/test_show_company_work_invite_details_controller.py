@@ -1,18 +1,14 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.www.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
 )
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(ShowCompanyWorkInviteDetailsController)
 
     def test_when_user_is_not_logged_in_then_dont_generate_use_case_request(

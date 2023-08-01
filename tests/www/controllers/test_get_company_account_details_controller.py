@@ -5,15 +5,12 @@ import pytest
 from arbeitszeit_web.www.controllers.get_company_account_details_controller import (
     GetCompanyAccountDetailsController,
 )
-from tests.session import FakeSession
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class GetCompanyAccountDetailsControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.session = self.injector.get(FakeSession)
         self.controller = self.injector.get(GetCompanyAccountDetailsController)
 
     def test_that_exception_is_raised_when_user_is_not_logged_in(self) -> None:

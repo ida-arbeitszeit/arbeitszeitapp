@@ -1,7 +1,6 @@
 from dataclasses import replace
 from datetime import datetime
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_company_summary import (
@@ -17,10 +16,9 @@ from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
@@ -62,13 +60,12 @@ RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
 )
 
 
-class GetCompanySummaryPresenterTests(TestCase):
+class GetCompanySummaryPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
 
     def test_company_id_is_shown(self):
@@ -112,14 +109,13 @@ class GetCompanySummaryPresenterTests(TestCase):
             self.assertEqual(deviation.is_critical, expected_is_critical[count])
 
 
-class PlansOfCompanyTests(TestCase):
+class PlansOfCompanyTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
 
     def test_ids_of_plans_are_shown(self):

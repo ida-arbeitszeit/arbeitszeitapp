@@ -1,23 +1,19 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(DeleteDraftPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
-        self.session = self.injector.get(FakeSession)
 
     def test_that_user_gets_redirected_to_my_plans(self) -> None:
         response = self.get_response()

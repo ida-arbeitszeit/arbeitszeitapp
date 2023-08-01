@@ -1,19 +1,15 @@
 from dataclasses import dataclass
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.www.controllers.invite_worker_to_company_controller import (
     InviteWorkerToCompanyController,
 )
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class InviteWorkerToCompanyControllerTests(TestCase):
+class InviteWorkerToCompanyControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(InviteWorkerToCompanyController)
         self.company_id = uuid4()
         self.session.login_company(company=self.company_id)
@@ -44,10 +40,9 @@ class InviteWorkerToCompanyControllerTests(TestCase):
         self.assertEqual(use_case_request.worker, expected_worker_id)
 
 
-class AnonymousUserTests(TestCase):
+class AnonymousUserTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(InviteWorkerToCompanyController)
         self.session.logout()
 

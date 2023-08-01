@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest import TestCase
 
 from arbeitszeit_web.www.presenters.registration_email_presenter import (
     RegistrationEmailPresenter,
@@ -9,14 +8,14 @@ from tests.email import Email, FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
 from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class MemberPresenterTests(TestCase):
+class MemberPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.url_index = self.injector.get(UrlIndexTestImpl)
@@ -69,9 +68,9 @@ class MemberPresenterTests(TestCase):
         return self.email_sender.sent_mails[0]
 
 
-class CompanyPresenterTests(TestCase):
+class CompanyPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.url_index = self.injector.get(UrlIndexTestImpl)

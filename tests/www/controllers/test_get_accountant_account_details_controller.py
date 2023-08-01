@@ -5,16 +5,13 @@ import pytest
 from arbeitszeit_web.www.controllers.get_accountant_account_details_controller import (
     GetAccountantAccountDetailsController,
 )
-from tests.session import FakeSession
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class GetAccountantAccountDetailsControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(GetAccountantAccountDetailsController)
-        self.session = self.injector.get(FakeSession)
 
     def test_processing_authenticated_request_from_accountant_does_not_raise(
         self,

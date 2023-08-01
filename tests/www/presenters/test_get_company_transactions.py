@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-from unittest import TestCase
 
 from dateutil import tz
 
@@ -16,13 +15,12 @@ from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class CompanyTransactionsPresenterTests(TestCase):
+class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetCompanyTransactionsPresenter)
         self.datetime_service = self.injector.get(FakeDatetimeService)

@@ -5,9 +5,7 @@ import pytest
 from arbeitszeit_web.www.controllers import (
     get_member_account_details_controller as controller,
 )
-from tests.session import FakeSession
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class GetMemberAccountDetailsControllerTests(BaseTestCase):
@@ -16,7 +14,6 @@ class GetMemberAccountDetailsControllerTests(BaseTestCase):
         self.controller = self.injector.get(
             controller.GetMemberAccountDetailsController
         )
-        self.session = self.injector.get(FakeSession)
 
     def test_that_controller_raises_if_user_is_not_logged_in(self) -> None:
         self.session.logout()
