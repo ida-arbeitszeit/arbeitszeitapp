@@ -229,4 +229,10 @@ class Cooperation(db.Model):
     creation_date = db.Column(db.DateTime, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     definition = db.Column(db.String(5000), nullable=False)
-    coordinator = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+
+
+class CoordinationTenure(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)

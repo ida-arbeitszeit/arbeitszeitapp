@@ -206,16 +206,22 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
         self, *company: UUID
     ) -> PlanQueryResult:
         companies = list(map(str, company))
+
+        coordination_tenure = aliased(models.CoordinationTenure)
+        cooperation = aliased(models.Cooperation)
+        company_alias = aliased(models.Company)
         if companies:
             return self._with_modified_query(
                 lambda query: query.join(
-                    models.Cooperation,
-                    models.Plan.requested_cooperation == models.Cooperation.id,
+                    cooperation,
+                    models.Plan.requested_cooperation == cooperation.id,
                 )
                 .join(
-                    models.Company, models.Cooperation.coordinator == models.Company.id
+                    coordination_tenure,
+                    cooperation.id == coordination_tenure.cooperation,
                 )
-                .filter(models.Company.id.in_(companies))
+                .join(company_alias, coordination_tenure.company == company_alias.id)
+                .filter(company_alias.id.in_(companies))
             )
         else:
             return self._with_modified_query(
@@ -1148,14 +1154,24 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
             )
         )
 
-    def coordinated_by_company(self, company_id: UUID) -> Self:
-        return self._with_modified_query(
-            lambda query: query.filter(
-                models.Cooperation.coordinator == str(company_id)
+    def coordinated_by_company(self, company_id: UUID) -> FlaskQueryResult:
+        coordination_tenure = aliased(models.CoordinationTenure)
+        company = aliased(models.Company)
+        query = (
+            self.query.join(
+                coordination_tenure,
+                models.Cooperation.id == coordination_tenure.cooperation,
             )
+            .join(company, coordination_tenure.company == company.id)
+            .filter(coordination_tenure.company == str(company_id))
+        )
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=self.mapper,
         )
 
-    def joined_with_coordinator(
+    def joined_with_current_coordinator(
         self,
     ) -> FlaskQueryResult[Tuple[entities.Cooperation, entities.Company]]:
         def mapper(
@@ -1168,13 +1184,32 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
             )
 
         company = aliased(models.Company)
+        coordination_tenure = aliased(models.CoordinationTenure)
+
+        query = (
+            self.query.join(
+                coordination_tenure,
+                models.Cooperation.id == coordination_tenure.cooperation,
+            )
+            .join(company, coordination_tenure.company == company.id)
+            .order_by(coordination_tenure.start_date.desc())
+            .with_entities(models.Cooperation, company)
+            .limit(1)
+        )
+
         return FlaskQueryResult(
             db=self.db,
-            query=self.query.join(
-                company, models.Cooperation.coordinator == company.id
-            ).with_entities(models.Cooperation, company),
+            query=query,
             mapper=mapper,
         )
+
+
+class CoordinationTenureResult(FlaskQueryResult[entities.CoordinationTenure]):
+    def of_cooperation(self, cooperation: UUID) -> Self:
+        raise NotImplementedError()
+
+    def ordered_by_start_date(self, ascending: bool = ...) -> Self:
+        raise NotImplementedError()
 
 
 class CompanyWorkInviteResult(FlaskQueryResult[entities.CompanyWorkInvite]):
@@ -1428,13 +1463,11 @@ class DatabaseGatewayImpl:
         creation_timestamp: datetime,
         name: str,
         definition: str,
-        coordinator: UUID,
     ) -> entities.Cooperation:
         cooperation = models.Cooperation(
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
-            coordinator=str(coordinator),
         )
         self.db.session.add(cooperation)
         self.db.session.flush()
@@ -1454,7 +1487,34 @@ class DatabaseGatewayImpl:
             creation_date=orm.creation_date,
             name=orm.name,
             definition=orm.definition,
-            coordinator=UUID(orm.coordinator),
+        )
+
+    def create_coordination_tenure(
+        self, company: UUID, cooperation: UUID, start_date: datetime
+    ) -> entities.CoordinationTenure:
+        coordination = models.CoordinationTenure(
+            company=str(company), cooperation=str(cooperation), start_date=start_date
+        )
+        self.db.session.add(coordination)
+        self.db.session.flush()
+        return self.coordination_tenure_from_orm(coordination)
+
+    def get_coordination_tenures(self) -> CoordinationTenureResult:
+        return CoordinationTenureResult(
+            mapper=self.coordination_tenure_from_orm,
+            query=models.CoordinationTenure.query,
+            db=self.db,
+        )
+
+    @classmethod
+    def coordination_tenure_from_orm(
+        self, orm: models.CoordinationTenure
+    ) -> entities.CoordinationTenure:
+        return entities.CoordinationTenure(
+            id=UUID(orm.id),
+            company=UUID(orm.company),
+            cooperation=UUID(orm.cooperation),
+            start_date=orm.start_date,
         )
 
     @classmethod
