@@ -32,8 +32,12 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_posting_with_valid_form_data_results_in_302(self) -> None:
+        account = (
+            self.database_gateway.get_accounts().owned_by_member(self.member).first()
+        )
+        assert account
         self.transaction_generator.create_transaction(
-            receiving_account=self.member.account, amount_received=Decimal(100)
+            receiving_account=account.id, amount_received=Decimal(100)
         )
         plan = self.plan_generator.create_plan()
         response = self.client.post(

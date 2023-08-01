@@ -268,13 +268,15 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_sender_is_correctly_retrieved_for_transaction_from_member_account(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        self.create_transaction(sender=member.account)
+        member = self.member_generator.create_member()
+        account = self.database_gateway.get_accounts().owned_by_member(member).first()
+        assert account
+        self.create_transaction(sender=account.id)
         transactions = self.database_gateway.get_transactions().where_account_is_sender(
-            member.account
+            account.id
         )
         _, sender, _ = transactions.joined_with_sender_and_receiver().first()  # type: ignore
-        assert sender == member
+        assert sender.id == member
 
     def test_that_sender_is_correctly_retrieved_for_transaction_from_company_r_account(
         self,
@@ -333,15 +335,17 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_receiver_is_correctly_retrieved_for_transaction_to_member_account(
         self,
     ) -> None:
-        member = self.member_generator.create_member_entity()
-        self.create_transaction(receiver=member.account)
+        member = self.member_generator.create_member()
+        account = self.database_gateway.get_accounts().owned_by_member(member).first()
+        assert account
+        self.create_transaction(receiver=account.id)
         transactions = (
             self.database_gateway.get_transactions().where_account_is_receiver(
-                member.account
+                account.id
             )
         )
         _, _, receiver = transactions.joined_with_sender_and_receiver().first()  # type: ignore
-        assert receiver == member
+        assert receiver.id == member
 
     def test_that_receiver_is_correctly_retrieved_for_transaction_to_company_r_account(
         self,
@@ -411,9 +415,9 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
         self, sender: Optional[UUID] = None, receiver: Optional[UUID] = None
     ) -> None:
         if sender is None:
-            sender = self.create_account()
+            sender = self.create_member_account()
         if receiver is None:
-            receiver = self.create_account()
+            receiver = self.create_member_account()
         self.database_gateway.create_transaction(
             date=datetime(2000, 1, 1),
             sending_account=sender,
@@ -423,6 +427,11 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
             purpose="test purpose",
         )
 
-    def create_account(self) -> UUID:
-        member = self.member_generator.create_member_entity()
-        return member.account
+    def create_member_account(self) -> UUID:
+        result = (
+            self.database_gateway.get_accounts()
+            .owned_by_member(self.member_generator.create_member())
+            .first()
+        )
+        assert result
+        return result.id

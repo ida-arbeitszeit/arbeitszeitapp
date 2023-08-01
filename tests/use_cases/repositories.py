@@ -551,11 +551,17 @@ class CoordinationTenureResult(QueryResultImpl[entities.CoordinationTenure]):
     def of_cooperation(self, cooperation: UUID) -> CoordinationTenureResult:
         return self._filtered_by(lambda tenure: tenure.cooperation == cooperation)
 
-    def ordered_by_start_date(self, ascending: bool = True) -> CoordinationTenureResult:
-        tenures_sorted = sorted(
-            self.items(), key=lambda tenure: tenure.start_date, reverse=not ascending
-        )
-        return type(self)(items=lambda: tenures_sorted, entities=self.entities)
+    def ordered_by_start_date(
+        self, *, ascending: bool = True
+    ) -> CoordinationTenureResult:
+        def tenures_sorted():
+            return sorted(
+                self.items(),
+                key=lambda tenure: tenure.start_date,
+                reverse=not ascending,
+            )
+
+        return type(self)(entities=self.entities, items=tenures_sorted)
 
     def _filtered_by(
         self, key: Callable[[entities.CoordinationTenure], bool]

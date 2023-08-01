@@ -6,7 +6,7 @@ from uuid import UUID
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit.entities import Company, Member
+from arbeitszeit.entities import Company
 from arbeitszeit.injector import Module
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
@@ -59,17 +59,17 @@ class ViewTestCase(FlaskTestCase):
 
     def login_member(
         self,
-        member: Optional[Member] = None,
+        member: Optional[UUID] = None,
         password: Optional[str] = None,
         email: Optional[str] = None,
         confirm_member: bool = True,
-    ) -> Member:
+    ) -> UUID:
         if password is None:
             password = "password123"
         if email is None:
             email = self.email_generator.get_random_email()
         if member is None:
-            member = self.member_generator.create_member_entity(
+            member = self.member_generator.create_member(
                 password=password, email=email, confirmed=False
             )
         response = self.client.post(
@@ -83,11 +83,7 @@ class ViewTestCase(FlaskTestCase):
         assert response.status_code < 400
         if confirm_member:
             self._confirm_member(email)
-        updated_member = (
-            self.database_gateway.get_members().with_email_address(email).first()
-        )
-        assert updated_member
-        return updated_member
+        return member
 
     def _confirm_member(
         self,

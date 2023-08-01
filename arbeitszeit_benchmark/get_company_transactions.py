@@ -33,6 +33,8 @@ class GetCompanyTransactionsBenchmark:
                 self.purchase_generator.create_resource_purchase_by_company(
                     buyer=self.buyer, plan=plan.id
                 )
+        self.db.session.commit()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

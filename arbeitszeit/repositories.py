@@ -250,7 +250,7 @@ class CoordinationTenureResult(QueryResult[CoordinationTenure], Protocol):
     def of_cooperation(self, cooperation: UUID) -> Self:
         ...
 
-    def ordered_by_start_date(self, ascending: bool = ...) -> Self:
+    def ordered_by_start_date(self, *, ascending: bool = ...) -> Self:
         ...
 
 

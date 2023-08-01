@@ -39,8 +39,8 @@ class CoordinationTenureResultTests(FlaskTestCase):
     ) -> None:
         expected_company = self.company_generator.create_company()
         expected_cooperation = self.cooperation_generator.create_cooperation()
-        self.datetime_service.freeze_time(datetime(2001, 1, 1))
-        expected_date = self.datetime_service.now()
+        expected_date = datetime(2001, 1, 1)
+        self.datetime_service.freeze_time(expected_date)
         tenure = self.database_gateway.create_coordination_tenure(
             company=expected_company,
             cooperation=expected_cooperation.id,

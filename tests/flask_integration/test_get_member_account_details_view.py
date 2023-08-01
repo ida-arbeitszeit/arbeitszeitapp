@@ -12,6 +12,6 @@ class GetMemberAccountDetailsViewTests(ViewTestCase):
         assert response.status_code == 200
 
     def test_that_response_contains_user_id(self) -> None:
-        member = str(self.login_member().id)
+        member = self.login_member()
         response = self.client.get(self.url)
-        assert member in response.text
+        assert str(member) in response.text

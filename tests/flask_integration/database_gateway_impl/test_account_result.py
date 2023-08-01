@@ -47,8 +47,14 @@ class AccountResultTests(FlaskTestCase):
         assert self.database_gateway.get_accounts().with_id(actual_id)
 
     def test_that_account_joined_with_owner_yields_original_member(self) -> None:
-        member = self.member_generator.create_member_entity()
-        assert member
+        account = self.database_gateway.create_account()
+        member = self.database_gateway.create_member(
+            email="test@test.test",
+            name="test name",
+            password_hash="password",
+            account=account,
+            registered_on=datetime(2000, 1, 1),
+        )
         result = (
             self.database_gateway.get_accounts()
             .with_id(member.account)

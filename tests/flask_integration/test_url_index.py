@@ -123,7 +123,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         member = self.login_member()
-        invite_id = self._create_invite(member.id)
+        invite_id = self._create_invite(member)
         url = self.url_index.get_work_invite_url(invite_id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -132,7 +132,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         member = self.login_member()
-        invite_id = self._create_invite(member.id)
+        invite_id = self._create_invite(member)
         url = self.url_index.get_answer_company_work_invite_url(invite_id=invite_id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
