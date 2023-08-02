@@ -22,8 +22,9 @@ class CorrectCredentialsTests(BaseTestCase):
     def test_can_log_in_with_correct_credentials_but_exta_whitespace(
         self,
     ) -> None:
+        altered_email = " " + self.email + " "
         request = LogInCompanyUseCase.Request(
-            email_address=self.email, password=self.password
+            email_address=altered_email, password=self.password
         )
         response = self.use_case.log_in_company(request)
         self.assertTrue(response.is_logged_in)
