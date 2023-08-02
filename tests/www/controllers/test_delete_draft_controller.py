@@ -1,20 +1,15 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.www.controllers.delete_draft_controller import (
     DeleteDraftController,
 )
 from tests.request import FakeRequest
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
         self.controller = self.injector.get(DeleteDraftController)
         self.request = FakeRequest()
 

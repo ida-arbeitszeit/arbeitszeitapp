@@ -1,17 +1,13 @@
-from unittest import TestCase
-
 from arbeitszeit_web.www.controllers.log_in_accountant_controller import (
     LogInAccountantController,
 )
 from tests.forms import LoginForm
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class ControllerTester(TestCase):
+class ControllerTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.injector = get_dependency_injector()
         self.form = LoginForm()
         self.controller = self.injector.get(LogInAccountantController)
 

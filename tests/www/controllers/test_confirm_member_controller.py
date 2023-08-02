@@ -5,8 +5,7 @@ from arbeitszeit_web.www.controllers.confirm_member_controller import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.token import FakeTokenService
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class ConfirmMemberControllerTests(BaseTestCase):

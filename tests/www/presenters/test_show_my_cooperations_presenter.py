@@ -24,7 +24,7 @@ from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
 from tests.translator import FakeTranslator
-from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 from .url_index import UrlIndexTestImpl
 

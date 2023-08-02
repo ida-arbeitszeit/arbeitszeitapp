@@ -5,8 +5,7 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
-from tests.session import FakeSession
-from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedCompanyGenerator
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
@@ -20,7 +19,6 @@ class QueryCompaniesPresenterTests(BaseTestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryCompaniesPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.session = self.injector.get(FakeSession)
         self.session.login_member(uuid4())
 
     def test_empty_view_model_does_not_show_results(self):

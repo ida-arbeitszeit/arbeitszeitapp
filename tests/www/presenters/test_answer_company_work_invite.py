@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInviteResponse,
@@ -8,8 +7,8 @@ from arbeitszeit_web.www.presenters.answer_company_work_invite_presenter import 
     AnswerCompanyWorkInvitePresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
@@ -39,9 +38,9 @@ def get_response(
     )
 
 
-class SuccessfulResponseTests(TestCase):
+class SuccessfulResponseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
@@ -94,9 +93,9 @@ class SuccessfulResponseTests(TestCase):
         )
 
 
-class UnsuccessfulResponseTests(TestCase):
+class UnsuccessfulResponseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)

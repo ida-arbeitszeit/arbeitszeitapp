@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedResponse
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
@@ -8,8 +6,8 @@ from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
     RegisterHoursWorkedPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 SUCCESS_USE_CASE_RESPONSE = RegisterHoursWorkedResponse(rejection_reason=None)
@@ -27,9 +25,9 @@ REJECTED_CONTROLLER_RES_NEGATIVE_AMOUNT = ControllerRejection(
 )
 
 
-class PresentUseCaseResponseTests(TestCase):
+class PresentUseCaseResponseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(RegisterHoursWorkedPresenter)
         self.translator = self.injector.get(FakeTranslator)
@@ -60,8 +58,9 @@ class PresentUseCaseResponseTests(TestCase):
         )
 
 
-class PresentControllerResponseTests(TestCase):
+class PresentControllerResponseTests(BaseTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.translator = FakeTranslator()
         self.notifier = NotifierTestImpl()
         self.presenter = RegisterHoursWorkedPresenter(

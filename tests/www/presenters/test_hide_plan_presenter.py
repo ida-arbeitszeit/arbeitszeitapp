@@ -1,10 +1,9 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.hide_plan import HidePlanResponse
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 SUCCESSFUL_DELETE_RESPONSE = HidePlanResponse(
@@ -17,9 +16,9 @@ FAILED_DELETE_RESPONSE = HidePlanResponse(
 )
 
 
-class HidePlanPresenterTests(TestCase):
+class HidePlanPresenterTests(BaseTestCase):
     def setUp(self):
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(HidePlanPresenter)
 

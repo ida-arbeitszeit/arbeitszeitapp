@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
 from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
@@ -7,15 +6,14 @@ from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
 )
 from tests.email import FakeEmailSender
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 RejectionReason = RequestCooperationResponse.RejectionReason
 
 
-class RequestCooperationPresenterTests(TestCase):
+class RequestCooperationPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RequestCooperationPresenter)
         self.mail_service = self.injector.get(FakeEmailSender)

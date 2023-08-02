@@ -1,22 +1,21 @@
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionResponse
 from arbeitszeit_web.www.presenters.pay_means_of_production_presenter import (
     PayMeansOfProductionPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
 reasons = PayMeansOfProductionResponse.RejectionReason
 
 
-class PayMeansOfProductionTests(TestCase):
+class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.trans = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(PayMeansOfProductionPresenter)

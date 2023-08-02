@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductResponse,
     RejectionReason,
@@ -8,14 +6,14 @@ from arbeitszeit_web.www.presenters.pay_consumer_product_presenter import (
     PayConsumerProductPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 
-class PayConsumerProductPresenterTests(TestCase):
+class PayConsumerProductPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(PayConsumerProductPresenter)

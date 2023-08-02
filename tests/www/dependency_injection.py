@@ -21,9 +21,11 @@ from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.use_cases.dependency_injection import InMemoryModule
 
-from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
-from .notifier import NotifierTestImpl
-from .url_index import (
+from .presenters.accountant_invitation_email_view import (
+    AccountantInvitationEmailViewImpl,
+)
+from .presenters.notifier import NotifierTestImpl
+from .presenters.url_index import (
     AccountantInvitationUrlIndexImpl,
     HidePlanUrlIndexTestImpl,
     LanguageChangerUrlIndexImpl,
@@ -32,7 +34,7 @@ from .url_index import (
 )
 
 
-class PresenterTestsInjector(Module):
+class WwwTestsInjector(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder[AccountantInvitationEmailView] = AliasProvider(  # type: ignore
@@ -52,6 +54,4 @@ class PresenterTestsInjector(Module):
 
 
 def get_dependency_injector() -> Injector:
-    return Injector(
-        modules=[TestingModule(), InMemoryModule(), PresenterTestsInjector()]
-    )
+    return Injector(modules=[TestingModule(), InMemoryModule(), WwwTestsInjector()])

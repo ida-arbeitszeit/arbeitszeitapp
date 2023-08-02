@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Callable, cast
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.answer_company_work_invite import (
@@ -11,15 +10,12 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
 )
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class BaseTestCase(TestCase):
+class SubBaseTestCase(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(AnswerCompanyWorkInviteController)
 
     def _get_request_form(self, is_accepted: bool = True) -> FakeRequestForm:
@@ -34,7 +30,7 @@ class BaseTestCase(TestCase):
         self.assertTrue(condition(cast(AnswerCompanyWorkInviteRequest, candidate)))
 
 
-class AnonymousUserTests(BaseTestCase):
+class AnonymousUserTests(SubBaseTestCase):
     def test_that_controller_returns_none_when_importing_form_data_from_anonymous_user(
         self,
     ) -> None:
@@ -45,7 +41,7 @@ class AnonymousUserTests(BaseTestCase):
         )
 
 
-class LoggedInUsertests(BaseTestCase):
+class LoggedInUsertests(SubBaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.requesting_user = uuid4()
