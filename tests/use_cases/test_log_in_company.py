@@ -19,6 +19,15 @@ class CorrectCredentialsTests(BaseTestCase):
         response = self.try_log_in()
         self.assertTrue(response.is_logged_in)
 
+    def test_can_log_in_with_correct_credentials_but_exta_whitespace(
+        self,
+    ) -> None:
+        request = LogInCompanyUseCase.Request(
+            email_address=self.email, password=self.password
+        )
+        response = self.use_case.log_in_company(request)
+        self.assertTrue(response.is_logged_in)
+
     def test_that_no_rejection_reason_is_given(self) -> None:
         response = self.try_log_in()
         self.assertIsNone(response.rejection_reason)

@@ -26,8 +26,8 @@ class UseCaseTests(BaseTestCase):
         self.assertTrue(response.is_logged_in)
 
     def test_that_with_correct_credentials_but_extra_whitespace_can_log_in(
-            self,
-        ) -> None:
+        self,
+    ) -> None:
         email = "test@communism.org"
         altered_email = " test@communism.org "
         password = "test user password"
