@@ -32,7 +32,7 @@ class LogInMemberUseCase:
     password_hasher: PasswordHasher
 
     def log_in_member(self, request: Request) -> Response:
-        member = self.database.get_members().with_email_address(request.email).first()
+        member = self.database.get_members().with_email_address(request.email.strip()).first()
         if not member:
             reason = self.RejectionReason.unknown_email_address
         elif not self.password_hasher.is_password_matching_hash(
