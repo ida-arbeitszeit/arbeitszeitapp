@@ -46,19 +46,17 @@ class UseCaseTester(BaseTestCase):
     def test_with_no_public_plans_that_certificates_received_equal_hours_worked(
         self,
     ) -> None:
-        worker = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity(workers=[worker.id])
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company_entity(workers=[worker])
         hours_worked = Decimal(50)
         self.register_hours_worked(
-            RegisterHoursWorkedRequest(company.id, worker.id, hours_worked=hours_worked)
+            RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (
             self.balance_checker.get_company_account_balances(company.id).a_account
             == -hours_worked
         )
-        assert (
-            self.balance_checker.get_member_account_balance(worker.id) == hours_worked
-        )
+        assert self.balance_checker.get_member_account_balance(worker) == hours_worked
 
     def test_that_request_with_negative_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
@@ -92,8 +90,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_with_all_public_plans_that_worker_receives_no_certificates(
         self,
     ) -> None:
-        worker = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity(workers=[worker.id])
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company_entity(workers=[worker])
         self.plan_generator.create_plan(
             is_public_service=True,
             costs=ProductionCosts(
@@ -104,12 +102,10 @@ class UseCaseTester(BaseTestCase):
         )
         hours_worked = Decimal(10)
         self.register_hours_worked(
-            RegisterHoursWorkedRequest(company.id, worker.id, hours_worked=hours_worked)
+            RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (
             self.balance_checker.get_company_account_balances(company.id).a_account
             == -hours_worked
         )
-        assert self.balance_checker.get_member_account_balance(worker.id) == Decimal(
-            "0"
-        )
+        assert self.balance_checker.get_member_account_balance(worker) == Decimal("0")
