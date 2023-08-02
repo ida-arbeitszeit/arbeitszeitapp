@@ -1,5 +1,4 @@
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftRequest
@@ -7,15 +6,12 @@ from arbeitszeit_web.www.controllers.create_draft_controller import (
     CreateDraftController,
 )
 from tests.forms import DraftForm
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(CreateDraftController)
         self.fake_form = DraftForm(
             prd_name="test name",

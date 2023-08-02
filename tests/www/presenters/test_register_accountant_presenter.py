@@ -1,5 +1,4 @@
 from typing import Callable, Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
@@ -9,18 +8,17 @@ from arbeitszeit_web.www.presenters.register_accountant_presenter import (
 )
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.notifier import NotifierTestImpl
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(RegisterAccountantPresenter)
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.session = self.injector.get(FakeSession)
         self.translator = self.injector.get(FakeTranslator)
         self.url_index = self.injector.get(UrlIndexTestImpl)
 

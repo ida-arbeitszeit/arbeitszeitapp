@@ -1,4 +1,3 @@
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationRequest
@@ -6,15 +5,12 @@ from arbeitszeit_web.www.controllers.end_cooperation_controller import (
     EndCooperationController,
 )
 from tests.request import FakeRequest
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class EndCooperationControllerTests(TestCase):
+class EndCooperationControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.request = self.injector.get(FakeRequest)
         self.controller = self.injector.get(EndCooperationController)
 

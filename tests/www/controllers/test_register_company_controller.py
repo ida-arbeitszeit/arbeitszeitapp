@@ -2,8 +2,7 @@ from arbeitszeit_web.www.controllers.register_company_controller import (
     RegisterCompanyController,
 )
 from tests.forms import RegisterFormImpl
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class RegisterCompanyControllerTests(BaseTestCase):

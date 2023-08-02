@@ -7,8 +7,7 @@ from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter i
 from tests.email import FakeAddressBook, FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
 from tests.translator import FakeTranslator
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 Notification = Interface.Notification
 

@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
@@ -11,8 +10,7 @@ from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = ShowAAccountDetailsUseCase.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_wages,
@@ -29,9 +27,9 @@ DEFAULT_INFO2 = ShowAAccountDetailsUseCase.TransactionInfo(
 )
 
 
-class CompanyTransactionsPresenterTests(TestCase):
+class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowAAccountDetailsPresenter)

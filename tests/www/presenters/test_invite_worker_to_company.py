@@ -1,17 +1,14 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit_web.www.presenters.invite_worker_to_company_presenter import (
     InviteWorkerToCompanyPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class InviteWorkerToCompanyPresenterTests(TestCase):
+class InviteWorkerToCompanyPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(InviteWorkerToCompanyPresenter)
 

@@ -1,5 +1,4 @@
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedRequest
@@ -8,15 +7,12 @@ from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     RegisterHoursWorkedController,
 )
 from tests.request import FakeRequest
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class RegisterHoursWorkedControllerTests(TestCase):
+class RegisterHoursWorkedControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.request = self.injector.get(FakeRequest)
         self.controller = self.injector.get(RegisterHoursWorkedController)
 

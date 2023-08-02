@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProductRequest
@@ -8,15 +7,14 @@ from arbeitszeit_web.www.controllers.pay_consumer_product_controller import (
 )
 from tests.forms import PayConsumerProductFakeForm
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 ControllerResult = Optional[PayConsumerProductRequest]
 
 
-class PayConsumerProductControllerTests(TestCase):
+class PayConsumerProductControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.controller = self.injector.get(PayConsumerProductController)
         self.form = PayConsumerProductFakeForm()

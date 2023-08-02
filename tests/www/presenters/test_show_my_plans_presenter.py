@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import Plan, PlanDraft
@@ -14,11 +13,10 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.notifier import NotifierTestImpl
 
-from .dependency_injection import get_dependency_injector
 from .url_index import (
     HidePlanUrlIndexTestImpl,
     RenewPlanUrlIndexTestImpl,
@@ -26,10 +24,9 @@ from .url_index import (
 )
 
 
-class ShowMyPlansPresenterTests(TestCase):
+class ShowMyPlansPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.injector = get_dependency_injector()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
@@ -39,7 +36,6 @@ class ShowMyPlansPresenterTests(TestCase):
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.notifier = self.injector.get(NotifierTestImpl)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
         self.company_generator = self.injector.get(CompanyGenerator)

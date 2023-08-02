@@ -4,8 +4,7 @@ from arbeitszeit.use_cases import get_user_account_details as use_case
 from arbeitszeit_web.www.presenters.get_accountant_account_details_presenter import (
     GetAccountantAccountDetailsPresenter,
 )
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class GetAccoutantAccountDetailsPresenter(BaseTestCase):

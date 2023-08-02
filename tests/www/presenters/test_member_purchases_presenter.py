@@ -1,19 +1,17 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.query_member_purchases import PurchaseQueryResponse
 from arbeitszeit_web.www.presenters.member_purchases import MemberPurchasesPresenter
 from tests.datetime_service import FakeDatetimeService
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(MemberPurchasesPresenter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
 

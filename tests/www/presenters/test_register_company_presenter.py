@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -7,20 +6,17 @@ from arbeitszeit_web.www.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
 from tests.forms import RegisterFormImpl
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 RejectionReason = RegisterCompany.Response.RejectionReason
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(RegisterCompanyPresenter)
         self.translator = self.injector.get(FakeTranslator)
-        self.session = self.injector.get(FakeSession)
         self.form = RegisterFormImpl.create()
 
     def test_that_correct_error_message_is_displayed_when_email_is_already_registered(
