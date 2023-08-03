@@ -21,6 +21,20 @@ class UseCaseTests(BaseTestCase):
         )
         self.assertIsNotNone(response.user_id)
 
+    def test_that_user_can_log_in_with_whitespace_surrounding_email(self) -> None:
+        email = "test@test.test"
+        altered_email = " " + email + " "
+        expected_password = "1234password"
+        self.accountant_generator.create_accountant(
+            email_address=email, password=expected_password
+        )
+        response = self.log_in_use_case.log_in_accountant(
+            request=LogInAccountantUseCase.Request(
+                email_address=altered_email, password=expected_password
+            )
+        )
+        self.assertIsNotNone(response.user_id)
+
     def test_no_rejection_reason_is_given_on_successful_login(self) -> None:
         email = "test@test.test"
         expected_password = "1234password"
