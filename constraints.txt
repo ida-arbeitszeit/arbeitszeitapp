@@ -29,7 +29,7 @@ Flask-Mail==0.9.1
 Flask-Migrate==4.0.4
 flask-restx==1.1.0
 Flask-SQLAlchemy==3.0.3
-flask-talisman==1.0.0
+flask-talisman==1.1.0
 Flask-WTF==1.1.1
 fonttools==4.38.0
 greenlet==2.0.2
