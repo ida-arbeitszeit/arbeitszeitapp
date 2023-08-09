@@ -11,7 +11,6 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.dependency_injection import (
     CompanyModule,
     MemberModule,
@@ -24,6 +23,7 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
 from arbeitszeit_flask.views.signup_member_view import SignupMemberView
+from arbeitszeit_web.www.authentication import CompanyAuthenticator, MemberAuthenticator
 from arbeitszeit_web.www.controllers.confirm_company_controller import (
     ConfirmCompanyController,
 )
@@ -75,10 +75,10 @@ def set_language(language=None):
 @auth.route("/member/unconfirmed")
 @with_injection()
 @login_required
-def unconfirmed_member(database: DatabaseGatewayImpl):
-    if database.get_members().with_id(UUID(current_user.id)).that_are_confirmed():
-        return redirect(url_for("auth.start"))
-    return render_template("auth/unconfirmed_member.html")
+def unconfirmed_member(authenticator: MemberAuthenticator):
+    if authenticator.is_unconfirmed_member():
+        return render_template("auth/unconfirmed_member.html")
+    return redirect(url_for("auth.start"))
 
 
 @auth.route("/member/signup", methods=["GET", "POST"])
@@ -157,10 +157,10 @@ def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
 @auth.route("/company/unconfirmed")
 @with_injection()
 @login_required
-def unconfirmed_company(database: DatabaseGatewayImpl):
-    if database.get_companies().with_id(UUID(current_user.id)).that_are_confirmed():
-        return redirect(url_for("auth.start"))
-    return render_template("auth/unconfirmed_company.html")
+def unconfirmed_company(authenticator: CompanyAuthenticator):
+    if authenticator.is_unconfirmed_company():
+        return render_template("auth/unconfirmed_company.html")
+    return redirect(url_for("auth.start"))
 
 
 @auth.route("/company/login", methods=["GET", "POST"])
