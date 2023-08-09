@@ -39,9 +39,15 @@ from arbeitszeit.records import (
     Transaction,
 )
 
+Many = TypeVar("Many", bound=Hashable)
+One = TypeVar("One", bound=Hashable)
+S_Hash = TypeVar("S_Hash", bound=Hashable)
 T = TypeVar("T")
+T_Hash = TypeVar("T_Hash", bound=Hashable)
+
 Key = TypeVar("Key", bound=Hashable)
 Value = TypeVar("Value", bound=Hashable)
+
 QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
 
 
@@ -554,7 +560,7 @@ class MemberResult(QueryResultImpl[Member]):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filter_elements(
             lambda member: member.id
-            in self.database.indices.worker_by_company.get(company),
+            in self.database.relationships.company_workers.get_right_values(company),
         )
 
     def with_id(self, member: UUID) -> MemberResult:
@@ -599,7 +605,9 @@ class CompanyResult(QueryResultImpl[Company]):
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
         def items() -> Iterable[records.Company]:
             for company in self.items():
-                workers = self.database.indices.worker_by_company.get(company.id)
+                workers = self.database.relationships.company_workers.get_right_values(
+                    company.id
+                )
                 if member in workers:
                     yield company
 
@@ -612,7 +620,7 @@ class CompanyResult(QueryResultImpl[Company]):
         companies_changed = 0
         for company in self.items():
             companies_changed += 1
-            self.database.indices.worker_by_company.add(company.id, member)
+            self.database.relationships.company_workers.relate(company.id, member)
         return companies_changed
 
     def with_name_containing(self, query: str) -> CompanyResult:
@@ -1109,6 +1117,7 @@ class MockDatabase:
         self.email_addresses: Dict[str, records.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.indices = Indices()
+        self.relationships = Relationships()
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
@@ -1435,9 +1444,79 @@ class Index(Generic[Key, Value]):
         self._index[key].remove(value)
 
 
+class OneToOne(Generic[S_Hash, T_Hash]):
+    def __init__(self) -> None:
+        self._forwards: Dict[S_Hash, T_Hash] = dict()
+        self._backwards: Dict[T_Hash, S_Hash] = dict()
+
+    def relate(self, s: S_Hash, t: T_Hash) -> None:
+        assert s not in self._forwards
+        assert t not in self._backwards
+        self._forwards[s] = t
+        self._backwards[t] = s
+
+    def get_right_value(self, s: S_Hash) -> Optional[T_Hash]:
+        return self._forwards.get(s)
+
+    def get_left_value(self, t: T_Hash) -> Optional[S_Hash]:
+        return self._backwards.get(t)
+
+    def dissociate(self, s: S_Hash, t: T_Hash) -> None:
+        assert self._forwards.get(s) == t
+        assert self._backwards.get(t) == s
+        del self._forwards[s]
+        del self._backwards[t]
+
+
+class OneToMany(Generic[One, Many]):
+    def __init__(self) -> None:
+        self._forwards: Dict[One, Set[Many]] = defaultdict(set)
+        self._backwards: Dict[Many, Optional[One]] = defaultdict(lambda: None)
+
+    def relate(self, one: One, many: Many) -> None:
+        assert not self._backwards[many]
+        self._forwards[one].add(many)
+        self._backwards[many] = one
+
+    def get_many(self, one: One) -> Set[Many]:
+        return self._forwards[one]
+
+    def get_one(self, many: Many) -> Optional[One]:
+        return self._backwards[many]
+
+    def dissociate(self, one: One, many: Many) -> None:
+        assert self._backwards[many] == one
+        self._forwards[one].remove(many)
+        del self._backwards[many]
+
+
+class ManyToMany(Generic[S_Hash, T_Hash]):
+    def __init__(self) -> None:
+        self._forwards: Dict[S_Hash, Set[T_Hash]] = defaultdict(set)
+        self._backwards: Dict[T_Hash, Set[S_Hash]] = defaultdict(set)
+
+    def relate(self, s: S_Hash, t: T_Hash) -> None:
+        self._forwards[s].add(t)
+        self._backwards[t].add(s)
+
+    def get_right_values(self, s: S_Hash) -> Set[T_Hash]:
+        return self._forwards[s]
+
+    def get_left_values(self, t: T_Hash) -> Set[S_Hash]:
+        return self._backwards[t]
+
+    def dissociate(self, s: S_Hash, t: T_Hash) -> None:
+        self._forwards[s].remove(t)
+        self._backwards[t].remove(s)
+
+
+@dataclass
+class Relationships:
+    company_workers: ManyToMany[UUID, UUID] = field(default_factory=ManyToMany)
+
+
 @dataclass
 class Indices:
-    worker_by_company: Index[UUID, UUID] = field(default_factory=Index)
     plan_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
     member_by_account: Index[UUID, UUID] = field(default_factory=Index)
     company_by_account: Index[UUID, UUID] = field(default_factory=Index)
