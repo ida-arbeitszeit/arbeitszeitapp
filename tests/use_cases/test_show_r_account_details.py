@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.entities import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
 from tests.data_generators import TransactionGenerator
@@ -76,6 +76,45 @@ class UseCaseTester(BaseTestCase):
 
         response = self.show_r_account_details(company.id)
         assert len(response.transactions) == 0
+
+    def test_that_one_transaction_is_shown_when_credit_for_r_is_granted(self) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        )
+        response = self.show_r_account_details(planner)
+        assert len(response.transactions) == 1
+
+    def test_that_two_transactions_are_shown_when_credit_for_r_is_granted_and_company_buys_r(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        )
+        self.purchase_generator.create_resource_purchase_by_company(
+            buyer=planner, amount=2
+        )
+        response = self.show_r_account_details(planner)
+        assert len(response.transactions) == 2
+
+    def test_that_two_transactions_are_shown_in_descending_order(self) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        )
+        self.purchase_generator.create_resource_purchase_by_company(
+            buyer=planner, amount=2
+        )
+        response = self.show_r_account_details(planner)
+        assert (
+            response.transactions[0].transaction_type
+            == TransactionTypes.payment_of_liquid_means
+        )
+        assert (
+            response.transactions[1].transaction_type
+            == TransactionTypes.credit_for_liquid_means
+        )
 
     def test_that_correct_info_is_generated_when_credit_for_r_is_granted(self) -> None:
         company = self.company_generator.create_company_entity()
