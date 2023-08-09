@@ -9,6 +9,7 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Hashable,
     Iterable,
     Iterator,
     List,
@@ -40,6 +41,8 @@ from arbeitszeit.entities import (
 from arbeitszeit.injector import singleton
 
 T = TypeVar("T")
+Key = TypeVar("Key", bound=Hashable)
+Value = TypeVar("Value", bound=Hashable)
 QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
 
 
@@ -250,15 +253,16 @@ class PlanResult(QueryResultImpl[Plan]):
             Iterable[Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]]
         ):
             for plan in self.items():
-                cooperating_plans = (
-                    [
+                if plan.cooperation:
+                    cooperating_plans = [
                         self.entities.plans[p].to_summary()
-                        for p in self.entities.plan_id_by_cooperation[plan.cooperation]
+                        for p in self.entities.indices.plan_by_cooperation.get(
+                            plan.cooperation
+                        )
                         if self.entities.plans[p].is_active_as_of(timestamp)
                     ]
-                    if plan.cooperation
-                    else []
-                )
+                else:
+                    cooperating_plans = []
                 yield plan, self.entities.companies[plan.planner], cooperating_plans
 
         return QueryResultImpl(
@@ -271,13 +275,21 @@ class PlanResult(QueryResultImpl[Plan]):
     ) -> QueryResultImpl[Tuple[entities.Plan, int]]:
         def items() -> Iterable[Tuple[Plan, int]]:
             for plan in self.items():
+                company_purchases = (
+                    purchase
+                    for purchase in self.entities.company_purchases.values()
+                    if purchase.plan_id == plan.id
+                )
+                member_purchases = (
+                    purchase
+                    for purchase in self.entities.consumer_purchases.values()
+                    if purchase.plan_id == plan.id
+                )
                 amount_purchased_by_companies = sum(
-                    purchase.amount
-                    for purchase in self.entities.company_purchase_by_plan_id[plan.id]
+                    purchase.amount for purchase in company_purchases
                 )
                 amount_purchased_by_members = sum(
-                    purchase.amount
-                    for purchase in self.entities.consumer_purchase_by_plan_id[plan.id]
+                    purchase.amount for purchase in member_purchases
                 )
                 yield plan, amount_purchased_by_companies + amount_purchased_by_members
 
@@ -309,9 +321,11 @@ class PlanUpdate:
     def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
         def update(plan: Plan) -> None:
             if plan.cooperation:
-                self.entities.plan_id_by_cooperation[plan.cooperation].remove(plan.id)
+                self.entities.indices.plan_by_cooperation.remove(
+                    plan.cooperation, plan.id
+                )
             if cooperation:
-                self.entities.plan_id_by_cooperation[cooperation].add(plan.id)
+                self.entities.indices.plan_by_cooperation.add(cooperation, plan.id)
             plan.cooperation = cooperation
 
         return self._add_update(update)
@@ -533,7 +547,8 @@ class CooperationResult(QueryResultImpl[Cooperation]):
 class MemberResult(QueryResultImpl[Member]):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filtered_by(
-            lambda member: member.id in self.entities.company_workers.get(company, []),
+            lambda member: member.id
+            in self.entities.indices.worker_by_company.get(company),
         )
 
     def with_id(self, member: UUID) -> MemberResult:
@@ -582,11 +597,14 @@ class CompanyResult(QueryResultImpl[Company]):
         )
 
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+        def items() -> Iterable[entities.Company]:
+            for company in self.items():
+                workers = self.entities.indices.worker_by_company.get(company.id)
+                if member in workers:
+                    yield company
+
         return type(self)(
-            items=lambda: filter(
-                lambda company: member in self.entities.company_workers[company.id],
-                self.items(),
-            ),
+            items=items,
             entities=self.entities,
         )
 
@@ -594,7 +612,7 @@ class CompanyResult(QueryResultImpl[Company]):
         companies_changed = 0
         for company in self.items():
             companies_changed += 1
-            self.entities.company_workers[company.id].add(member)
+            self.entities.indices.worker_by_company.add(company.id, member)
         return companies_changed
 
     def with_name_containing(self, query: str) -> CompanyResult:
@@ -691,16 +709,23 @@ class TransactionResult(QueryResultImpl[Transaction]):
         )
 
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
+        plans = set(plan)
+
         def transaction_filter(transaction: Transaction) -> bool:
-            purchase = self.entities.consumer_purchase_by_transaction.get(
-                transaction.id
-            ) or self.entities.company_purchase_by_transaction.get(transaction.id)
-            if purchase is None:
-                return False
-            elif not plan:
-                return purchase.plan_id is not None
-            else:
-                return purchase.plan_id in plan
+            consumer_purchases = (
+                self.entities.indices.consumer_purchase_by_transaction.get(
+                    transaction.id
+                )
+            )
+            company_purchases = (
+                self.entities.indices.company_purchase_by_transaction.get(
+                    transaction.id
+                )
+            )
+            transaction_plans = {
+                self.entities.consumer_purchases[i].plan_id for i in consumer_purchases
+            } | {self.entities.company_purchases[i].plan_id for i in company_purchases}
+            return bool(transaction_plans & plans)
 
         return replace(
             self,
@@ -716,12 +741,13 @@ class TransactionResult(QueryResultImpl[Transaction]):
         Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
     ]:
         def get_account_owner(account_id: UUID) -> entities.AccountOwner:
-            owner = self.entities.account_owner_by_account.get(account_id)
-            if owner:
-                return owner
-            raise Exception(
-                f"Tried to get owner for account {account_id} but failed to find one"
-            )
+            if members := self.entities.indices.member_by_account.get(account_id):
+                (member,) = members
+                return self.entities.members[member]
+            if companies := self.entities.indices.company_by_account.get(account_id):
+                (company,) = companies
+                return self.entities.companies[company]
+            return self.entities.social_accounting
 
         def items() -> (
             Iterable[
@@ -881,26 +907,25 @@ class AccountResult(QueryResultImpl[Account]):
         )
 
     def owned_by_member(self, *member: UUID) -> Self:
+        def items():
+            memberes = set(member)
+            for account in self.items():
+                owner_ids = self.entities.indices.member_by_account.get(account.id)
+                if memberes & owner_ids:
+                    yield account
+
         return replace(
             self,
-            items=lambda: filter(
-                lambda account: account in self.entities.member_accounts
-                and self.entities.account_owner_by_account[account.id].id in member,
-                self.items(),
-            ),
+            items=items,
         )
 
     def owned_by_company(self, *company: UUID) -> Self:
         def items() -> Iterable[Account]:
+            companies = set(company)
             for account in self.items():
-                owner = self.entities.account_owner_by_account.get(account.id)
-                if owner is None:
-                    continue
-                if owner.id not in self.entities.companies:
-                    continue
-                if owner.id not in company:
-                    continue
-                yield account
+                owner_ids = self.entities.indices.company_by_account.get(account.id)
+                if companies & owner_ids:
+                    yield account
 
         return replace(
             self,
@@ -1063,11 +1088,8 @@ class FakeLanguageRepository:
 class EntityStorage:
     def __init__(self, datetime_service: DatetimeService) -> None:
         self.members: Dict[UUID, Member] = {}
-        self.company_workers: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.companies: Dict[UUID, Company] = {}
-        self.company_passwords: Dict[UUID, str] = {}
         self.plans: Dict[UUID, Plan] = {}
-        self.plan_id_by_cooperation: Dict[UUID, Set[UUID]] = defaultdict(lambda: set())
         self.transactions: Dict[UUID, Transaction] = dict()
         self.accounts: List[Account] = []
         self.p_accounts: Set[Account] = set()
@@ -1080,27 +1102,13 @@ class EntityStorage:
             id=uuid4(),
             account=self.create_account().id,
         )
-        self.account_owner_by_account: Dict[UUID, entities.AccountOwner] = {
-            self.social_accounting.account: self.social_accounting
-        }
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
-        self.consumer_purchase_by_transaction: Dict[
-            UUID, entities.ConsumerPurchase
-        ] = dict()
-        self.consumer_purchase_by_plan_id: Dict[
-            UUID, Set[entities.ConsumerPurchase]
-        ] = defaultdict(set)
         self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
-        self.company_purchase_by_transaction: Dict[
-            UUID, entities.CompanyPurchase
-        ] = dict()
-        self.company_purchase_by_plan_id: Dict[
-            UUID, Set[entities.CompanyPurchase]
-        ] = defaultdict(set)
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, entities.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
+        self.indices = Indices()
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
@@ -1126,8 +1134,8 @@ class EntityStorage:
             amount=amount,
         )
         self.consumer_purchases[purchase.id] = purchase
-        self.consumer_purchase_by_transaction[transaction] = purchase
-        self.consumer_purchase_by_plan_id[plan].add(purchase)
+        self.indices.consumer_purchase_by_transaction.add(transaction, purchase.id)
+        self.indices.consumer_purchase_by_plan.add(plan, purchase.id)
         return purchase
 
     def get_consumer_purchases(self) -> ConsumerPurchaseResult:
@@ -1146,8 +1154,8 @@ class EntityStorage:
             transaction_id=transaction,
         )
         self.company_purchases[purchase.id] = purchase
-        self.company_purchase_by_transaction[transaction] = purchase
-        self.company_purchase_by_plan_id[plan].add(purchase)
+        self.indices.company_purchase_by_transaction.add(transaction, purchase.id)
+        self.indices.company_purchase_by_plan.add(plan, purchase.id)
         return purchase
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
@@ -1299,7 +1307,7 @@ class EntityStorage:
             password_hash=password_hash,
         )
         self.members[id] = member
-        self.account_owner_by_account[member.account] = member
+        self.indices.member_by_account.add(member.account, member.id)
         return member
 
     def get_members(self) -> MemberResult:
@@ -1336,10 +1344,10 @@ class EntityStorage:
             password_hash=password_hash,
         )
         self.companies[new_company.id] = new_company
-        self.account_owner_by_account[means_account.id] = new_company
-        self.account_owner_by_account[labour_account.id] = new_company
-        self.account_owner_by_account[resource_account.id] = new_company
-        self.account_owner_by_account[products_account.id] = new_company
+        self.indices.company_by_account.add(means_account.id, new_company.id)
+        self.indices.company_by_account.add(labour_account.id, new_company.id)
+        self.indices.company_by_account.add(resource_account.id, new_company.id)
+        self.indices.company_by_account.add(products_account.id, new_company.id)
         return new_company
 
     def get_companies(self) -> CompanyResult:
@@ -1399,3 +1407,29 @@ class EntityStorage:
             items=lambda: self.accounts,
             entities=self,
         )
+
+
+class Index(Generic[Key, Value]):
+    def __init__(self) -> None:
+        self._index: Dict[Key, Set[Value]] = defaultdict(set)
+
+    def get(self, key: Key) -> Set[Value]:
+        return self._index[key]
+
+    def add(self, key: Key, value: Value) -> None:
+        self._index[key].add(value)
+
+    def remove(self, key: Key, value: Value) -> None:
+        self._index[key].remove(value)
+
+
+@dataclass
+class Indices:
+    worker_by_company: Index[UUID, UUID] = field(default_factory=Index)
+    plan_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
+    member_by_account: Index[UUID, UUID] = field(default_factory=Index)
+    company_by_account: Index[UUID, UUID] = field(default_factory=Index)
+    consumer_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
+    consumer_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
+    company_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
+    company_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
