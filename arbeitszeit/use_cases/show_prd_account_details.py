@@ -58,11 +58,12 @@ class ShowPRDAccountDetailsUseCase:
                 company, [company.product_account]
             )
         ]
-        transactions.reverse()
+        transactions_ascending = transactions.copy()
+        transactions_ascending.reverse()
         account_balance = self._get_account_balance(company.product_account)
         plot = self.PlotDetails(
-            timestamps=self._get_plot_dates(transactions),
-            accumulated_volumes=self._get_plot_volumes(transactions),
+            timestamps=self._get_plot_dates(transactions_ascending),
+            accumulated_volumes=self._get_plot_volumes(transactions_ascending),
         )
         return self.Response(
             company_id=company_id,

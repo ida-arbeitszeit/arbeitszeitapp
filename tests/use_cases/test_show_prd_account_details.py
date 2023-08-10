@@ -55,6 +55,27 @@ class UseCaseTester(BaseTestCase):
         response = self.show_prd_account_details(company)
         assert len(response.transactions) == 1
 
+    def test_that_two_transactions_are_shown_after_filed_plan_is_accepted_and_product_is_sold(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        response = self.show_prd_account_details(planner)
+        assert len(response.transactions) == 2
+
+    def test_that_transactions_are_shown_in_correct_descending_order(self) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        response = self.show_prd_account_details(planner)
+        transactions = response.transactions
+        assert (
+            transactions[0].transaction_type
+            == TransactionTypes.sale_of_consumer_product
+        )
+        assert transactions[1].transaction_type == TransactionTypes.expected_sales
+
     def test_that_correct_info_is_generated_after_selling_of_consumer_product(
         self,
     ) -> None:
@@ -78,11 +99,12 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
-        assert response.transactions[-1].transaction_volume == Decimal(2)
-        assert response.transactions[-1].purpose is not None
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.transaction_volume == Decimal(2)
+        assert transaction_of_sale.purpose is not None
         assert isinstance(response.transactions[-1].date, datetime)
         assert (
-            response.transactions[-1].transaction_type
+            transaction_of_sale.transaction_type
             == TransactionTypes.sale_of_consumer_product
         )
         assert response.account_balance == Decimal(0)
@@ -104,12 +126,12 @@ class UseCaseTester(BaseTestCase):
         self.purchase_generator.create_fixed_means_purchase(plan=plan.id, buyer=buyer)
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
-        assert response.transactions[-1].transaction_volume == Decimal(2)
-        assert response.transactions[-1].purpose is not None
-        assert isinstance(response.transactions[-1].date, datetime)
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.transaction_volume == Decimal(2)
+        assert transaction_of_sale.purpose is not None
+        assert isinstance(transaction_of_sale.date, datetime)
         assert (
-            response.transactions[-1].transaction_type
-            == TransactionTypes.sale_of_fixed_means
+            transaction_of_sale.transaction_type == TransactionTypes.sale_of_fixed_means
         )
         assert response.account_balance == Decimal(0)
 
@@ -130,11 +152,12 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
-        assert response.transactions[-1].transaction_volume == Decimal(2)
-        assert response.transactions[-1].purpose is not None
-        assert isinstance(response.transactions[-1].date, datetime)
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.transaction_volume == Decimal(2)
+        assert transaction_of_sale.purpose is not None
+        assert isinstance(transaction_of_sale.date, datetime)
         assert (
-            response.transactions[-1].transaction_type
+            transaction_of_sale.transaction_type
             == TransactionTypes.sale_of_liquid_means
         )
         assert response.account_balance == Decimal(0)
@@ -219,10 +242,11 @@ class UseCaseTester(BaseTestCase):
         buyer = self.member_generator.create_member_entity()
         self.purchase_generator.create_purchase_by_member(plan=plan.id, buyer=buyer.id)
         response = self.show_prd_account_details(planner)
-        assert response.transactions[-1].buyer
-        assert response.transactions[-1].buyer.buyer_is_member == True
-        assert response.transactions[-1].buyer.buyer_id == buyer.id
-        assert response.transactions[-1].buyer.buyer_name == buyer.name
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.buyer
+        assert transaction_of_sale.buyer.buyer_is_member == True
+        assert transaction_of_sale.buyer.buyer_id == buyer.id
+        assert transaction_of_sale.buyer.buyer_name == buyer.name
 
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
         self,
@@ -234,7 +258,8 @@ class UseCaseTester(BaseTestCase):
             buyer=buyer.id, plan=plan.id
         )
         response = self.show_prd_account_details(planner.id)
-        assert response.transactions[-1].buyer
-        assert response.transactions[-1].buyer.buyer_is_member == False
-        assert response.transactions[-1].buyer.buyer_id == buyer.id
-        assert response.transactions[-1].buyer.buyer_name == buyer.name
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.buyer
+        assert transaction_of_sale.buyer.buyer_is_member == False
+        assert transaction_of_sale.buyer.buyer_id == buyer.id
+        assert transaction_of_sale.buyer.buyer_name == buyer.name
