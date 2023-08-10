@@ -519,69 +519,37 @@ class CooperationResult(QueryResultImpl[Cooperation]):
         )
 
     def coordinated_by_company(self, company_id: UUID) -> Self:
-        def filter_func(coop: Cooperation) -> bool:
-            tenures = [
-                tenure
-                for tenure in self.entities.get_coordination_tenures().of_cooperation(
-                    coop.id
-                )
-            ]
-            for tenure in tenures:
-                if tenure.company == company_id:
-                    return True
-            return False
+        def items() -> Iterable[entities.Cooperation]:
+            for cooperation in self.items():
+                tenures = [
+                    self.entities.coordination_tenures[id_]
+                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                        cooperation.id
+                    )
+                ]
+                tenures.sort(key=lambda t: t.start_date, reverse=True)
+                if tenures and tenures[0].company == company_id:
+                    yield cooperation
 
-        return replace(
-            self,
-            items=lambda: filter(filter_func, self.items()),
-        )
+        return replace(self, items=items)
 
     def joined_with_current_coordinator(
         self,
     ) -> QueryResultImpl[Tuple[Cooperation, Company]]:
-        def items() -> Iterable[Tuple[entities.Cooperation, entities.Company]]:
-            for coop in self.items():
-                current_tenure = (
-                    self.entities.get_coordination_tenures()
-                    .of_cooperation(coop.id)
-                    .ordered_by_start_date(ascending=False)
-                    .first()
-                )
-                assert current_tenure
-                current_coordinator_uuid = current_tenure.company
-                current_coordinator = self.entities.get_company_by_id(
-                    current_coordinator_uuid
-                )
-                assert current_coordinator
-                yield coop, current_coordinator
+        def items() -> Iterable[Tuple[entities.Cooperation, Company]]:
+            for cooperation in self.items():
+                tenures = [
+                    self.entities.coordination_tenures[id_]
+                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                        cooperation.id
+                    )
+                ]
+                tenures.sort(key=lambda t: t.start_date, reverse=True)
+                if tenures:
+                    yield cooperation, self.entities.companies[tenures[0].company]
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
-        )
-
-
-class CoordinationTenureResult(QueryResultImpl[entities.CoordinationTenure]):
-    def of_cooperation(self, cooperation: UUID) -> CoordinationTenureResult:
-        return self._filtered_by(lambda tenure: tenure.cooperation == cooperation)
-
-    def ordered_by_start_date(
-        self, *, ascending: bool = True
-    ) -> CoordinationTenureResult:
-        def tenures_sorted():
-            return sorted(
-                self.items(),
-                key=lambda tenure: tenure.start_date,
-                reverse=not ascending,
-            )
-
-        return type(self)(entities=self.entities, items=tenures_sorted)
-
-    def _filtered_by(
-        self, key: Callable[[entities.CoordinationTenure], bool]
-    ) -> CoordinationTenureResult:
-        return type(self)(
-            items=lambda: filter(key, self.items()),
             entities=self.entities,
         )
 
@@ -1276,13 +1244,8 @@ class EntityStorage:
             start_date=start_date,
         )
         self.coordination_tenures[tenure_id] = tenure
+        self.indices.coordination_tenure_by_cooperation.add(cooperation, tenure_id)
         return tenure
-
-    def get_coordination_tenures(self) -> CoordinationTenureResult:
-        return CoordinationTenureResult(
-            items=lambda: self.coordination_tenures.values(),
-            entities=self,
-        )
 
     def create_transaction(
         self,
@@ -1493,3 +1456,4 @@ class Indices:
     consumer_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
+    coordination_tenure_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
