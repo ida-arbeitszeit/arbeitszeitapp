@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.list_all_cooperations import (
@@ -10,18 +9,16 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
     ListAllCooperationsPresenter,
 )
-from tests.session import FakeSession
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class ListMessagesPresenterTests(TestCase):
+class ListMessagesPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(ListAllCooperationsPresenter)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(company=uuid4())
 
     def test_view_model_contains_no_cooperation_and_does_not_show_result_when_non_were_provided(

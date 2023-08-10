@@ -4,6 +4,10 @@ from unittest import TestCase
 
 from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.use_cases.get_statistics import GetStatistics
+from arbeitszeit.use_cases.register_hours_worked import (
+    RegisterHoursWorked,
+    RegisterHoursWorkedRequest,
+)
 from tests.data_generators import (
     CompanyGenerator,
     CooperationGenerator,
@@ -37,6 +41,7 @@ class GetStatisticsTester(TestCase):
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.plan_generator = self.injector.get(PlanGenerator)
+        self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
     def test_that_values_are_zero_if_repositories_are_empty(self) -> None:
         stats = self.use_case()
@@ -56,8 +61,8 @@ class GetStatisticsTester(TestCase):
         assert stats.registered_companies_count == 2
 
     def test_counting_of_members(self) -> None:
-        self.member_generator.create_member_entity()
-        self.member_generator.create_member_entity()
+        self.member_generator.create_member()
+        self.member_generator.create_member()
         stats = self.use_case()
         assert stats.registered_members_count == 2
 
@@ -77,33 +82,24 @@ class GetStatisticsTester(TestCase):
     ) -> None:
         num_transactions = 2
         for _ in range(num_transactions):
-            worker = self.member_generator.create_member_entity()
-            account = worker.account
-            self.transaction_generator.create_transaction(
-                receiving_account=account,
-                amount_received=Decimal(10),
+            self.plan_generator.create_plan(
+                costs=ProductionCosts(
+                    labour_cost=Decimal(10),
+                    means_cost=Decimal(0),
+                    resource_cost=Decimal(0),
+                )
             )
+            worker = self.member_generator.create_member()
+            workplace = self.company_generator.create_company(workers=[worker])
+            assert not self.register_hours_worked(
+                RegisterHoursWorkedRequest(
+                    company_id=workplace,
+                    worker_id=worker,
+                    hours_worked=Decimal(10),
+                )
+            ).is_rejected
         stats = self.use_case()
         assert stats.certificates_count == num_transactions * Decimal(10)
-
-    def test_counting_of_certificates_when_one_worker_and_one_company_have_received_certs(
-        self,
-    ) -> None:
-        # worker receives certs
-        worker = self.member_generator.create_member_entity()
-        worker_account = worker.account
-        self.transaction_generator.create_transaction(
-            receiving_account=worker_account,
-            amount_received=Decimal(10.5),
-        )
-        # company receives certs
-        company = self.company_generator.create_company_entity()
-        company_account = company.work_account
-        self.transaction_generator.create_transaction(
-            receiving_account=company_account, amount_received=Decimal(10)
-        )
-        stats = self.use_case()
-        assert stats.certificates_count == Decimal(20.5)
 
     def test_available_product_is_positive_number_when_amount_on_prd_account_is_negative(
         self,

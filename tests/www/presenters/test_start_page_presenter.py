@@ -4,8 +4,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class PresenterTester(BaseTestCase):

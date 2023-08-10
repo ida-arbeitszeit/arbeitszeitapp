@@ -1,5 +1,4 @@
 from typing import List
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
@@ -7,8 +6,8 @@ from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 
 SUCCESSFUL_CREATE_RESPONSE = CreateCooperationResponse(
@@ -26,9 +25,9 @@ REJECTED_RESPONSE_COORDINATOR_NOT_FOUND = CreateCooperationResponse(
 )
 
 
-class CreateCooperationPresenterTests(TestCase):
+class CreateCooperationPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(CreateCooperationPresenter)

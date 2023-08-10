@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Callable
-from unittest import TestCase
 
 from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
@@ -10,15 +9,15 @@ from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailConfiguration
 from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
-from .dependency_injection import get_dependency_injector
 from .url_index import AccountantInvitationUrlIndexImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.view = self.injector.get(AccountantInvitationEmailViewImpl)
         self.presenter = self.injector.get(AccountantInvitationEmailPresenter)
         self.translator = self.injector.get(FakeTranslator)

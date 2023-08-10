@@ -1,16 +1,15 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
 )
-from tests.session import FakeSession
+from tests.www.base_test_case import BaseTestCase
 
 
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.controller = FilePlanWithAccountingController()
-        self.session = FakeSession()
         self.session.login_company(company=uuid4())
 
     def test_that_request_is_processed_as_invalid_with_empty_draft_id_string(

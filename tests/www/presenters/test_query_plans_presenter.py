@@ -4,10 +4,9 @@ from uuid import uuid4
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.session import UserRole
 from tests.request import FakeRequest
-from tests.session import FakeSession
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedPlanGenerator
 
-from .base_test_case import BaseTestCase
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
@@ -18,7 +17,6 @@ class QueryPlansPresenterTests(BaseTestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryPlansPresenter)
-        self.session = self.injector.get(FakeSession)
         self.queried_plan_generator = QueriedPlanGenerator()
         self.session.login_member(uuid4())
         self.request = FakeRequest()

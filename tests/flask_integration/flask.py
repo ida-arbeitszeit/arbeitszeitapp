@@ -23,7 +23,9 @@ from .dependency_injection import get_dependency_injector
 
 class LogInUser(Enum):
     member = auto()
+    unconfirmed_member = auto()
     company = auto()
+    unconfirmed_company = auto()
     accountant = auto()
 
 
@@ -163,15 +165,8 @@ class ViewTestCase(FlaskTestCase):
         login: Optional[LogInUser],
         data: Optional[dict[Any, Any]] = None,
     ) -> None:
-        if login is None:
-            pass
-        elif login == LogInUser.member:
-            self.login_member()
-        elif login == LogInUser.company:
-            self.login_company()
-        else:
-            self.login_accountant()
-
+        if login:
+            self._conduct_login(login)
         if method.lower() == "get":
             response = self.client.get(url, query_string=data)
         elif method.lower() == "post":
@@ -179,4 +174,18 @@ class ViewTestCase(FlaskTestCase):
         else:
             raise ValueError(f"Unknown {method=}")
 
-        assert response.status_code == expected_code
+        assert (
+            response.status_code == expected_code
+        ), f"Expected status code {expected_code} but got {response.status_code}"
+
+    def _conduct_login(self, login: LogInUser) -> None:
+        if login == LogInUser.member:
+            self.login_member()
+        elif login == LogInUser.unconfirmed_member:
+            self.login_member(confirm_member=False)
+        elif login == LogInUser.company:
+            self.login_company()
+        elif login == LogInUser.unconfirmed_company:
+            self.login_company(confirm_company=False)
+        elif login == LogInUser.accountant:
+            self.login_accountant()

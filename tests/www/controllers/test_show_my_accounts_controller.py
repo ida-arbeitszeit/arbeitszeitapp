@@ -1,18 +1,14 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit_web.www.controllers.show_my_accounts_controller import (
     ShowMyAccountsController,
 )
-from tests.session import FakeSession
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class ControllerTests(TestCase):
+class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.controller = self.injector.get(ShowMyAccountsController)
 
     def test_when_company_exists_then_the_user_is_identified_in_use_case_request(

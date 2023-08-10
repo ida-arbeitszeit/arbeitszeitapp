@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from dateutil import tz
@@ -12,14 +11,13 @@ from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
-from .dependency_injection import get_dependency_injector
 
-
-class GetMemberDashboardPresenterTests(TestCase):
+class GetMemberDashboardPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetMemberDashboardPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)

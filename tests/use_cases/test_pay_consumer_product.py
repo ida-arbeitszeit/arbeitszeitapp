@@ -12,7 +12,10 @@ from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProductRequest,
     RejectionReason,
 )
-from tests.data_generators import TransactionGenerator
+from arbeitszeit.use_cases.register_hours_worked import (
+    RegisterHoursWorked,
+    RegisterHoursWorkedRequest,
+)
 
 from .base_test_case import BaseTestCase
 from .repositories import EntityStorage
@@ -21,13 +24,13 @@ from .repositories import EntityStorage
 class PayConsumerProductTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.transaction_generator = self.injector.get(TransactionGenerator)
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
         self.entity_storage = self.injector.get(EntityStorage)
-        self.buyer = self.member_generator.create_member_entity()
+        self.buyer = self.member_generator.create_member()
         self.query_member_purchases = self.injector.get(
             query_member_purchases.QueryMemberPurchases
         )
+        self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
     def test_payment_fails_when_plan_does_not_exist(self) -> None:
         response = self.pay_consumer_product.pay_consumer_product(
@@ -62,7 +65,7 @@ class PayConsumerProductTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -79,7 +82,7 @@ class PayConsumerProductTests(BaseTestCase):
         plan = self.plan_generator.create_plan()
 
         transactions_before_payment = len(self.entity_storage.get_transactions())
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product.pay_consumer_product(
@@ -94,13 +97,13 @@ class PayConsumerProductTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, amount=3)
         )
-        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        user_purchases = list(self.query_member_purchases(self.buyer))
         assert len(user_purchases) == 0
 
     def test_payment_is_successful_if_member_has_negative_certs_and_buys_public_product(
@@ -108,9 +111,9 @@ class PayConsumerProductTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
         self.make_transaction_to_buyer_account(Decimal("-10"))
-        assert self.balance_checker.get_member_account_balance(
-            self.buyer.id
-        ) == Decimal("-10")
+        assert self.balance_checker.get_member_account_balance(self.buyer) == Decimal(
+            "-10"
+        )
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -129,7 +132,7 @@ class PayConsumerProductTests(BaseTestCase):
             ),
             amount=1,
         )
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(9)
 
         response = self.pay_consumer_product.pay_consumer_product(
@@ -152,40 +155,13 @@ class PayConsumerProductTests(BaseTestCase):
             amount=1,
             cooperation=None,
         )
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == 0
+        assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(11)
 
         response = self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, 1)
         )
         self.assertTrue(response.is_accepted)
-
-    def test_that_correct_transaction_is_added(self) -> None:
-        plan = self.plan_generator.create_plan()
-        transactions_before_payment = len(self.entity_storage.get_transactions())
-        pieces = 3
-        self.make_transaction_to_buyer_account(Decimal(100))
-        self.pay_consumer_product.pay_consumer_product(
-            self.make_request(plan.id, pieces)
-        )
-        self.assertEqual(
-            len(self.entity_storage.get_transactions()),
-            transactions_before_payment + 2,
-        )
-        transaction_added = (
-            self.entity_storage.get_transactions()
-            .ordered_by_transaction_date(descending=True)
-            .first()
-        )
-        assert transaction_added
-        expected_amount_sent = pieces * self.price_checker.get_unit_price(plan.id)
-        expected_amount_received = pieces * self.price_checker.get_unit_cost(plan.id)
-        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
-        assert planner
-        assert transaction_added.sending_account == self.buyer.account
-        assert transaction_added.receiving_account == planner.product_account
-        assert transaction_added.amount_sent == expected_amount_sent
-        assert transaction_added.amount_received == expected_amount_received
 
     def test_balances_are_adjusted_correctly(self) -> None:
         plan = self.plan_generator.create_plan(
@@ -206,7 +182,7 @@ class PayConsumerProductTests(BaseTestCase):
 
         expected_balance = start_balance - costs
         assert (
-            self.balance_checker.get_member_account_balance(self.buyer.id)
+            self.balance_checker.get_member_account_balance(self.buyer)
             == expected_balance
         )
         planner = self.entity_storage.get_companies().with_id(plan.planner).first()
@@ -215,31 +191,6 @@ class PayConsumerProductTests(BaseTestCase):
             self.balance_checker.get_company_account_balances(planner.id).prd_account
             == Decimal("-9") + costs
         )
-
-    def test_that_correct_transaction_is_added_when_plan_is_public_service(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan(is_public_service=True)
-        transactions_before_payment = len(self.entity_storage.get_transactions())
-        pieces = 3
-        self.pay_consumer_product.pay_consumer_product(
-            self.make_request(plan.id, pieces)
-        )
-        self.assertEqual(
-            len(self.entity_storage.get_transactions()),
-            transactions_before_payment + 1,
-        )
-        transaction_added = (
-            self.entity_storage.get_transactions()
-            .ordered_by_transaction_date(descending=True)
-            .first()
-        )
-        assert transaction_added
-        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
-        assert planner
-        assert transaction_added.sending_account == self.buyer.account
-        assert transaction_added.receiving_account == planner.product_account
-        assert transaction_added.amount_sent == transaction_added.amount_received == 0
 
     def test_balances_are_adjusted_correctly_when_plan_is_public_service(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
@@ -250,7 +201,7 @@ class PayConsumerProductTests(BaseTestCase):
         costs = pieces * self.price_checker.get_unit_price(plan.id)
         planner = self.entity_storage.get_companies().with_id(plan.planner).first()
         assert planner
-        assert self.balance_checker.get_member_account_balance(self.buyer.id) == -costs
+        assert self.balance_checker.get_member_account_balance(self.buyer) == -costs
         assert (
             self.balance_checker.get_company_account_balances(planner.id).prd_account
             == costs
@@ -263,7 +214,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
-        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        user_purchases = list(self.query_member_purchases(self.buyer))
         assert len(user_purchases) == 1
         latest_purchase = user_purchases[0]
         assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
@@ -278,7 +229,7 @@ class PayConsumerProductTests(BaseTestCase):
         self.pay_consumer_product.pay_consumer_product(
             self.make_request(plan.id, pieces)
         )
-        user_purchases = list(self.query_member_purchases(self.buyer.id))
+        user_purchases = list(self.query_member_purchases(self.buyer))
         assert len(user_purchases) == 1
         latest_purchase = user_purchases[0]
         assert latest_purchase.price_per_unit == Decimal(0)
@@ -288,7 +239,7 @@ class PayConsumerProductTests(BaseTestCase):
         self, plan: UUID, amount: int, buyer: Optional[UUID] = None
     ) -> PayConsumerProductRequest:
         if buyer is None:
-            buyer = self.buyer.id
+            buyer = self.buyer
         return PayConsumerProductRequest(
             buyer=buyer,
             plan=plan,
@@ -296,7 +247,27 @@ class PayConsumerProductTests(BaseTestCase):
         )
 
     def make_transaction_to_buyer_account(self, amount: Decimal) -> None:
-        self.transaction_generator.create_transaction(
-            receiving_account=self.buyer.account,
-            amount_received=amount,
-        )
+        if amount > 0:
+            company = self.company_generator.create_company(workers=[self.buyer])
+            self.register_hours_worked(
+                RegisterHoursWorkedRequest(
+                    company_id=company,
+                    worker_id=self.buyer,
+                    hours_worked=amount,
+                )
+            )
+        else:
+            amount = -amount
+            plan = self.plan_generator.create_plan(
+                amount=1,
+                costs=ProductionCosts(
+                    labour_cost=amount,
+                    means_cost=Decimal(0),
+                    resource_cost=Decimal(0),
+                ),
+            )
+            self.purchase_generator.create_purchase_by_member(
+                buyer=self.buyer,
+                plan=plan.id,
+                amount=1,
+            )

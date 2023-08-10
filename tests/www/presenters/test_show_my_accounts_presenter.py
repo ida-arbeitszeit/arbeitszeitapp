@@ -1,16 +1,15 @@
 from decimal import Decimal
-from unittest import TestCase
 
 from arbeitszeit.use_cases.show_my_accounts import ShowMyAccountsResponse
 from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
     ShowMyAccountsPresenter,
 )
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
-class ShowMyAccountsPresenterTests(TestCase):
+class ShowMyAccountsPresenterTests(BaseTestCase):
     def setUp(self):
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(ShowMyAccountsPresenter)
 
     def test_show_correct_balance_string_for_balances(self):

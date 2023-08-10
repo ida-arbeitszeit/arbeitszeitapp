@@ -1,4 +1,3 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.list_active_plans_of_company import ListedPlan
@@ -6,17 +5,16 @@ from arbeitszeit_web.www.presenters.list_plans_presenter import (
     ListPlansPresenter,
     ListPlansResponse,
 )
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 fake_response_with_one_plan = ListPlansResponse(
     plans=[ListedPlan(id=uuid4(), prd_name="fake prd name")]
 )
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(ListPlansPresenter)
 
     def test_presenter_does_not_show_empty_list_of_plans(self) -> None:

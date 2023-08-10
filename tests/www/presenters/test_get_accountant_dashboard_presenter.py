@@ -4,8 +4,8 @@ from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboar
 from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
+from tests.www.base_test_case import BaseTestCase
 
-from .base_test_case import BaseTestCase
 from .url_index import UrlIndexTestImpl
 
 

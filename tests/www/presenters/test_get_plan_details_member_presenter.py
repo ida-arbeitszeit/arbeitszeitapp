@@ -1,23 +1,21 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
     GetPlanDetailsMemberMemberPresenter,
 )
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
-from .dependency_injection import get_dependency_injector
 
-
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     """
     some functionality tested in tests/presenters/test_plan_details_formatter.py
     """
 
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsMemberMemberPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)

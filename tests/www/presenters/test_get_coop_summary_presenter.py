@@ -1,6 +1,5 @@
 from dataclasses import replace
 from decimal import Decimal
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_coop_summary import AssociatedPlan, GetCoopSummarySuccess
@@ -8,9 +7,8 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
 )
-from tests.session import FakeSession
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
@@ -31,12 +29,11 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
 )
 
 
-class GetCoopSummarySuccessPresenterTests(TestCase):
+class GetCoopSummarySuccessPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(company=uuid4())
 
     def test_end_coop_button_is_shown_when_requester_is_coordinator(self):

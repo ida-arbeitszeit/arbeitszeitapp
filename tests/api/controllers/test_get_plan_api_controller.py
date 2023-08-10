@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from arbeitszeit_web.api.controllers.get_plan_api_controller import GetPlanApiController
 from arbeitszeit_web.api.response_errors import BadRequest
-from tests.www.controllers.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class ControllerTests(BaseTestCase):

@@ -25,6 +25,17 @@ class UseCaseTests(BaseTestCase):
         response = self.use_case.log_in_member(request)
         self.assertTrue(response.is_logged_in)
 
+    def test_that_with_correct_credentials_but_extra_whitespace_can_log_in(
+        self,
+    ) -> None:
+        email = "test@communism.org"
+        altered_email = " test@communism.org "
+        password = "test user password"
+        self.create_member(email=email, password=password)
+        request = self.get_request(email=altered_email, password=password)
+        response = self.use_case.log_in_member(request)
+        self.assertTrue(response.is_logged_in)
+
     def test_with_invalid_email_address_return_a_rejection_reason(self) -> None:
         request = self.get_request()
         response = self.use_case.log_in_member(request)

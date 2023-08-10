@@ -18,6 +18,21 @@ class MemberAuthenticator:
     request: Request
     url_index: UrlIndex
 
+    def is_unconfirmed_member(self) -> bool:
+        user_id = self.session.get_current_user()
+        if not user_id:
+            return False
+        record = (
+            self.database.get_members()
+            .with_id(user_id)
+            .joined_with_email_address()
+            .first()
+        )
+        if not record:
+            return False
+        _, email = record
+        return email.confirmed_on is None
+
     def redirect_user_to_member_login(self) -> Optional[str]:
         user_id = self.session.get_current_user()
         if not user_id:
@@ -35,7 +50,6 @@ class MemberAuthenticator:
                 )
             )
             self.session.logout()
-            self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
         elif not self.database.get_members().with_id(user_id).that_are_confirmed():
             # not a confirmed member
@@ -51,6 +65,21 @@ class CompanyAuthenticator:
     notifier: Notifier
     request: Request
     url_index: UrlIndex
+
+    def is_unconfirmed_company(self) -> bool:
+        user_id = self.session.get_current_user()
+        if not user_id:
+            return False
+        record = (
+            self.database.get_companies()
+            .with_id(user_id)
+            .joined_with_email_address()
+            .first()
+        )
+        if not record:
+            return False
+        _, email = record
+        return email.confirmed_on is None
 
     def redirect_user_to_company_login(self) -> Optional[str]:
         user_id = self.session.get_current_user()
@@ -69,7 +98,6 @@ class CompanyAuthenticator:
                 )
             )
             self.session.logout()
-            self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
         elif not self.database.get_companies().with_id(user_id).that_are_confirmed():
             # not a confirmed company

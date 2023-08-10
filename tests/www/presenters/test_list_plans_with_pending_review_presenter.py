@@ -8,8 +8,8 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
 )
+from tests.www.base_test_case import BaseTestCase
 
-from .base_test_case import BaseTestCase
 from .url_index import UrlIndexTestImpl
 
 
