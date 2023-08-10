@@ -2,11 +2,7 @@ from datetime import datetime, timedelta
 
 from arbeitszeit.entities import Cooperation
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
-from tests.data_generators import (
-    CompanyGenerator,
-    CooperationGenerator,
-    CoordinationTenureGenerator,
-)
+from tests.data_generators import CompanyGenerator, CooperationGenerator
 from tests.datetime_service import FakeDatetimeService
 
 from ..flask import FlaskTestCase
@@ -18,9 +14,6 @@ class CooperationResultTests(FlaskTestCase):
         self.db_gateway = self.injector.get(DatabaseGatewayImpl)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.coordination_tenure_generator = self.injector.get(
-            CoordinationTenureGenerator
-        )
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_a_priori_no_cooperations_are_in_db(self) -> None:
@@ -90,8 +83,11 @@ class CooperationResultTests(FlaskTestCase):
         self,
     ) -> None:
         coordinator = self.company_generator.create_company()
-        self.coordination_tenure_generator.create_coordination_tenure(
-            company=coordinator
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.db_gateway.create_coordination_tenure(
+            company=coordinator,
+            cooperation=cooperation.id,
+            start_date=datetime(2000, 1, 1),
         )
         cooperations = self.db_gateway.get_cooperations()
         assert cooperations.coordinated_by_company(coordinator)
@@ -101,8 +97,11 @@ class CooperationResultTests(FlaskTestCase):
     ) -> None:
         coordinator = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
-        self.coordination_tenure_generator.create_coordination_tenure(
-            company=coordinator
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.db_gateway.create_coordination_tenure(
+            company=coordinator,
+            cooperation=cooperation.id,
+            start_date=datetime(2000, 1, 1),
         )
         cooperations = self.db_gateway.get_cooperations()
         assert not cooperations.coordinated_by_company(other_company)
@@ -117,12 +116,11 @@ class CooperationResultTests(FlaskTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator_id)
         self.datetime_service.advance_time(timedelta(days=1))
-        expected_coordination = (
-            self.coordination_tenure_generator.create_coordination_tenure(
-                cooperation=coop.id, company=coordinator_id
-            )
+        expected_coordination = self.db_gateway.create_coordination_tenure(
+            company=coordinator_id,
+            cooperation=coop.id,
+            start_date=self.datetime_service.now(),
         )
-
         cooperations = self.db_gateway.get_cooperations()
         result = cooperations.joined_with_current_coordinator().first()
         assert result is not None
