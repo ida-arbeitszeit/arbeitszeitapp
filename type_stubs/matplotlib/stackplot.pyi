@@ -1,0 +1,3 @@
+from _typeshed import Incomplete
+
+def stackplot(axes, x, *args, labels=..., colors: Incomplete | None = ..., baseline: str = ..., **kwargs): ...

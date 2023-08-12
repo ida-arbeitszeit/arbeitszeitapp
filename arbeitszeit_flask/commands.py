@@ -14,7 +14,7 @@ from arbeitszeit_flask.dependency_injection import with_injection
 def invite_accountant(
     email_address: str, use_case: SendAccountantRegistrationTokenUseCase
 ) -> None:
-    with force_locale("de"):
+    with force_locale("de"):  # type: ignore
         use_case.send_accountant_registration_token(
             SendAccountantRegistrationTokenUseCase.Request(email=email_address)
         )

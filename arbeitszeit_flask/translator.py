@@ -1,4 +1,4 @@
-from flask_babel import gettext, lazy_gettext, ngettext, pgettext
+from flask_babel import LazyString, gettext, lazy_gettext, ngettext, pgettext
 
 from arbeitszeit_web.translator import Number, Translator
 
@@ -13,5 +13,5 @@ class FlaskTranslator(Translator):
     def ngettext(self, singular: str, plural: str, n: Number) -> str:
         return ngettext(singular, plural, n)
 
-    def lazy_gettext(self, text: str) -> str:
+    def lazy_gettext(self, text: str) -> LazyString:
         return lazy_gettext(text)

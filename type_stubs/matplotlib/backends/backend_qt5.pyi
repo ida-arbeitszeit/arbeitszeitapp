@@ -1,0 +1,6 @@
+from .. import backends as backends
+from .backend_qt import ConfigureSubplotsQt as ConfigureSubplotsQt, FigureCanvasBase as FigureCanvasBase, FigureCanvasQT as FigureCanvasQT, FigureManagerBase as FigureManagerBase, FigureManagerQT as FigureManagerQT, Gcf as Gcf, HelpQt as HelpQt, MainWindow as MainWindow, MouseButton as MouseButton, NavigationToolbar2 as NavigationToolbar2, NavigationToolbar2QT as NavigationToolbar2QT, RubberbandQt as RubberbandQt, SPECIAL_KEYS as SPECIAL_KEYS, SaveFigureQt as SaveFigureQt, SubplotToolQt as SubplotToolQt, TimerBase as TimerBase, TimerQT as TimerQT, ToolContainerBase as ToolContainerBase, ToolCopyToClipboardQT as ToolCopyToClipboardQT, ToolbarQt as ToolbarQt, _BackendQT, cursord as cursord, figureoptions as figureoptions
+
+class _BackendQT5(_BackendQT): ...
+
+def __getattr__(name): ...

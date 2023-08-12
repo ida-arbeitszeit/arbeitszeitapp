@@ -1,0 +1,3 @@
+from matplotlib._tight_layout import *
+
+def get_renderer(fig): ...

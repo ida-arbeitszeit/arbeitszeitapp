@@ -1,0 +1,3 @@
+from matplotlib.tri._triangulation import Triangulation as Triangulation
+
+def triplot(ax, *args, **kwargs): ...
