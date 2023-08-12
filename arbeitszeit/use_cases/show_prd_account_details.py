@@ -7,7 +7,7 @@ from itertools import accumulate
 from typing import List, Optional
 from uuid import UUID
 
-from arbeitszeit.entities import AccountOwner, SocialAccounting
+from arbeitszeit.records import AccountOwner, SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 

@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import query_member_purchases
 from arbeitszeit.use_cases.pay_consumer_product import (
     PayConsumerProduct,
@@ -18,14 +18,14 @@ from arbeitszeit.use_cases.register_hours_worked import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import EntityStorage
+from .repositories import MockDatabase
 
 
 class PayConsumerProductTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_consumer_product = self.injector.get(PayConsumerProduct)
-        self.entity_storage = self.injector.get(EntityStorage)
+        self.mock_database = self.injector.get(MockDatabase)
         self.buyer = self.member_generator.create_member()
         self.query_member_purchases = self.injector.get(
             query_member_purchases.QueryMemberPurchases
@@ -81,7 +81,7 @@ class PayConsumerProductTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
 
-        transactions_before_payment = len(self.entity_storage.get_transactions())
+        transactions_before_payment = len(self.mock_database.get_transactions())
         assert self.balance_checker.get_member_account_balance(self.buyer) == 0
         self.control_thresholds.set_allowed_overdraw_of_member_account(0)
 
@@ -89,7 +89,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.make_request(plan.id, amount=3)
         )
         self.assertEqual(
-            len(self.entity_storage.get_transactions()),
+            len(self.mock_database.get_transactions()),
             transactions_before_payment,
         )
 
@@ -185,7 +185,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.balance_checker.get_member_account_balance(self.buyer)
             == expected_balance
         )
-        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
+        planner = self.mock_database.get_companies().with_id(plan.planner).first()
         assert planner
         assert (
             self.balance_checker.get_company_account_balances(planner.id).prd_account
@@ -199,7 +199,7 @@ class PayConsumerProductTests(BaseTestCase):
             self.make_request(plan.id, pieces)
         )
         costs = pieces * self.price_checker.get_unit_price(plan.id)
-        planner = self.entity_storage.get_companies().with_id(plan.planner).first()
+        planner = self.mock_database.get_companies().with_id(plan.planner).first()
         assert planner
         assert self.balance_checker.get_member_account_balance(self.buyer) == -costs
         assert (

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 from uuid import UUID
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -13,7 +13,7 @@ class GetUserAccountDetailsUseCase:
     database: DatabaseGateway
 
     def get_user_account_details(self, request: Request) -> Response:
-        user: Union[entities.Member, entities.Company, entities.Accountant, None] = (
+        user: Union[records.Member, records.Company, records.Accountant, None] = (
             self.database.get_members().with_id(request.user_id).first()
             or self.database.get_companies().with_id(request.user_id).first()
             or self.database.get_accountants().with_id(request.user_id).first()

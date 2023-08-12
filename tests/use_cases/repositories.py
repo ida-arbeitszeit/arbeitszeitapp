@@ -22,9 +22,10 @@ from uuid import UUID, uuid4
 
 from typing_extensions import Self
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import (
+from arbeitszeit.injector import singleton
+from arbeitszeit.records import (
     Account,
     Accountant,
     Company,
@@ -37,7 +38,6 @@ from arbeitszeit.entities import (
     SocialAccounting,
     Transaction,
 )
-from arbeitszeit.injector import singleton
 
 T = TypeVar("T")
 Key = TypeVar("Key", bound=Hashable)
@@ -48,18 +48,18 @@ QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
 @dataclass
 class QueryResultImpl(Generic[T]):
     items: Callable[[], Iterable[T]]
-    entities: EntityStorage
+    database: MockDatabase
 
-    def limit(self: QueryResultT, n: int) -> QueryResultT:
-        return type(self)(
+    def limit(self, n: int) -> Self:
+        return replace(
+            self,
             items=lambda: islice(self.items(), n),
-            entities=self.entities,
         )
 
-    def offset(self: QueryResultT, n: int) -> QueryResultT:
-        return type(self)(
+    def offset(self, n: int) -> Self:
+        return replace(
+            self,
             items=lambda: islice(self.items(), n, None),
-            entities=self.entities,
         )
 
     def first(self) -> Optional[T]:
@@ -84,17 +84,18 @@ class QueryResultImpl(Generic[T]):
 
 class PlanResult(QueryResultImpl[Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
-        return type(self)(
+        return replace(
+            self,
             items=lambda: sorted(
                 list(self.items()),
                 key=lambda plan: plan.plan_creation_date,
                 reverse=not ascending,
             ),
-            entities=self.entities,
         )
 
     def ordered_by_activation_date(self, ascending: bool = True) -> PlanResult:
-        return type(self)(
+        return replace(
+            self,
             items=lambda: sorted(
                 list(self.items()),
                 key=lambda plan: plan.activation_date
@@ -102,85 +103,86 @@ class PlanResult(QueryResultImpl[Plan]):
                 else datetime.min,
                 reverse=not ascending,
             ),
-            entities=self.entities,
         )
 
     def ordered_by_planner_name(self, ascending: bool = True) -> PlanResult:
         def get_company_name(planner_id: UUID) -> str:
-            planner = self.entities.get_company_by_id(planner_id)
+            planner = self.database.get_company_by_id(planner_id)
             assert planner
             planner_name = planner.name
             return planner_name.casefold()
 
-        return type(self)(
+        return replace(
+            self,
             items=lambda: sorted(
                 list(self.items()),
                 key=lambda plan: get_company_name(plan.planner),
                 reverse=not ascending,
             ),
-            entities=self.entities,
         )
 
     def with_id_containing(self, query: str) -> PlanResult:
-        return self._filtered_by(lambda plan: query in str(plan.id))
+        return self._filter_elements(lambda plan: query in str(plan.id))
 
     def with_product_name_containing(self, query: str) -> PlanResult:
-        return self._filtered_by(lambda plan: query.lower() in plan.prd_name.lower())
+        return self._filter_elements(
+            lambda plan: query.lower() in plan.prd_name.lower()
+        )
 
     def that_are_approved(self) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.approval_date is not None)
+        return self._filter_elements(lambda plan: plan.approval_date is not None)
 
     def that_were_activated_before(self, timestamp: datetime) -> Self:
-        return self._filtered_by(
+        return self._filter_elements(
             lambda plan: plan.activation_date is not None
             and plan.activation_date <= timestamp
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
-        return self._filtered_by(
+        return self._filter_elements(
             lambda plan: plan.approval_date is not None
             and plan.approval_date + timedelta(days=plan.timeframe) > timestamp
         )
 
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
-        return self._filtered_by(
+        return self._filter_elements(
             lambda plan: plan.approval_date is not None
             and plan.approval_date + timedelta(days=plan.timeframe) <= timestamp
         )
 
     def that_are_productive(self) -> PlanResult:
-        return self._filtered_by(lambda plan: not plan.is_public_service)
+        return self._filter_elements(lambda plan: not plan.is_public_service)
 
     def that_are_public(self) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.is_public_service)
+        return self._filter_elements(lambda plan: plan.is_public_service)
 
     def that_are_cooperating(self) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.cooperation is not None)
+        return self._filter_elements(lambda plan: plan.cooperation is not None)
 
     def planned_by(self, *company: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.planner in company)
+        return self._filter_elements(lambda plan: plan.planner in company)
 
     def with_id(self, *id_: UUID) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.id in id_)
+        return self._filter_elements(lambda plan: plan.id in id_)
 
     def without_completed_review(self) -> PlanResult:
-        return self._filtered_by(lambda plan: plan.approval_date is None)
+        return self._filter_elements(lambda plan: plan.approval_date is None)
 
     def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
     ) -> PlanResult:
-        return self._filtered_by(
+        return self._filter_elements(
             lambda plan: plan.requested_cooperation == cooperation
             if cooperation
             else plan.requested_cooperation is not None
         )
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
-        def items_generator() -> Iterator[entities.Plan]:
-            plan_entity = self.entities.plans.get(plan)
-            if not plan_entity:
+        def items_generator() -> Iterator[records.Plan]:
+            plan_record = self.database.plans.get(plan)
+            if not plan_record:
                 return
-            if plan_entity.cooperation is None:
+            if plan_record.cooperation is None:
                 yield from (
                     other_plan for other_plan in self.items() if other_plan.id == plan
                 )
@@ -188,16 +190,16 @@ class PlanResult(QueryResultImpl[Plan]):
                 yield from (
                     plan
                     for plan in self.items()
-                    if plan.cooperation == plan_entity.cooperation
+                    if plan.cooperation == plan_record.cooperation
                 )
 
-        return type(self)(
+        return replace(
+            self,
             items=items_generator,
-            entities=self.entities,
         )
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
-        return self._filtered_by(
+        return self._filter_elements(
             (lambda plan: plan.cooperation in cooperation)
             if cooperation
             else (lambda plan: plan.cooperation is not None)
@@ -207,7 +209,7 @@ class PlanResult(QueryResultImpl[Plan]):
         def new_items() -> Iterator[Plan]:
             cooperations: Set[UUID] = {
                 coop.id
-                for coop, coordinator in self.entities.get_cooperations().joined_with_current_coordinator()
+                for coop, coordinator in self.database.get_cooperations().joined_with_current_coordinator()
                 if coordinator.id in company
             }
             return filter(
@@ -222,18 +224,18 @@ class PlanResult(QueryResultImpl[Plan]):
             items=new_items,
         )
 
-    def get_statistics(self) -> entities.PlanningStatistics:
+    def get_statistics(self) -> records.PlanningStatistics:
         """Return aggregate planning information for all plans
         included in a result set.
         """
         duration_sum = 0
         plan_count = 0
-        production_costs = entities.ProductionCosts(Decimal(0), Decimal(0), Decimal(0))
+        production_costs = records.ProductionCosts(Decimal(0), Decimal(0), Decimal(0))
         for plan in self.items():
             plan_count += 1
             production_costs += plan.production_costs
             duration_sum += plan.timeframe
-        return entities.PlanningStatistics(
+        return records.PlanningStatistics(
             average_plan_duration_in_days=(Decimal(duration_sum) / Decimal(plan_count))
             if plan_count > 0
             else Decimal(0),
@@ -241,47 +243,47 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
     def that_are_not_hidden(self) -> Self:
-        return self._filtered_by(lambda plan: not plan.hidden_by_user)
+        return self._filter_elements(lambda plan: not plan.hidden_by_user)
 
     def joined_with_planner_and_cooperating_plans(
         self, timestamp: datetime
     ) -> QueryResultImpl[
-        Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]
+        Tuple[records.Plan, records.Company, List[records.PlanSummary]]
     ]:
         def items() -> (
-            Iterable[Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]]
+            Iterable[Tuple[records.Plan, records.Company, List[records.PlanSummary]]]
         ):
             for plan in self.items():
                 if plan.cooperation:
                     cooperating_plans = [
-                        self.entities.plans[p].to_summary()
-                        for p in self.entities.indices.plan_by_cooperation.get(
+                        self.database.plans[p].to_summary()
+                        for p in self.database.indices.plan_by_cooperation.get(
                             plan.cooperation
                         )
-                        if self.entities.plans[p].is_active_as_of(timestamp)
+                        if self.database.plans[p].is_active_as_of(timestamp)
                     ]
                 else:
                     cooperating_plans = []
-                yield plan, self.entities.companies[plan.planner], cooperating_plans
+                yield plan, self.database.companies[plan.planner], cooperating_plans
 
         return QueryResultImpl(
-            entities=self.entities,
+            database=self.database,
             items=items,
         )
 
     def joined_with_provided_product_amount(
         self,
-    ) -> QueryResultImpl[Tuple[entities.Plan, int]]:
+    ) -> QueryResultImpl[Tuple[records.Plan, int]]:
         def items() -> Iterable[Tuple[Plan, int]]:
             for plan in self.items():
                 company_purchases = (
                     purchase
-                    for purchase in self.entities.company_purchases.values()
+                    for purchase in self.database.company_purchases.values()
                     if purchase.plan_id == plan.id
                 )
                 member_purchases = (
                     purchase
-                    for purchase in self.entities.consumer_purchases.values()
+                    for purchase in self.database.consumer_purchases.values()
                     if purchase.plan_id == plan.id
                 )
                 amount_purchased_by_companies = sum(
@@ -294,20 +296,14 @@ class PlanResult(QueryResultImpl[Plan]):
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
+            database=self.database,
         )
 
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,
             update_functions=[],
-            entities=self.entities,
-        )
-
-    def _filtered_by(self, key: Callable[[Plan], bool]) -> Self:
-        return type(self)(
-            items=lambda: filter(key, self.items()),
-            entities=self.entities,
+            records=self.database,
         )
 
 
@@ -315,16 +311,16 @@ class PlanResult(QueryResultImpl[Plan]):
 class PlanUpdate:
     items: Callable[[], Iterable[Plan]]
     update_functions: List[Callable[[Plan], None]]
-    entities: EntityStorage
+    records: MockDatabase
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
         def update(plan: Plan) -> None:
             if plan.cooperation:
-                self.entities.indices.plan_by_cooperation.remove(
+                self.records.indices.plan_by_cooperation.remove(
                     plan.cooperation, plan.id
                 )
             if cooperation:
-                self.entities.indices.plan_by_cooperation.add(cooperation, plan.id)
+                self.records.indices.plan_by_cooperation.add(cooperation, plan.id)
             plan.cooperation = cooperation
 
         return self._add_update(update)
@@ -350,13 +346,13 @@ class PlanUpdate:
         return self._add_update(update)
 
     def hide(self) -> Self:
-        def update(plan: entities.Plan) -> None:
+        def update(plan: records.Plan) -> None:
             plan.hidden_by_user = True
 
         return self._add_update(update)
 
     def toggle_product_availability(self) -> Self:
-        def update(plan: entities.Plan) -> None:
+        def update(plan: records.Plan) -> None:
             plan.is_available = not plan.is_available
 
         return self._add_update(update)
@@ -373,7 +369,7 @@ class PlanUpdate:
         return replace(self, update_functions=self.update_functions + [update])
 
 
-class PlanDraftResult(QueryResultImpl[entities.PlanDraft]):
+class PlanDraftResult(QueryResultImpl[records.PlanDraft]):
     def with_id(self, id_: UUID) -> Self:
         return replace(
             self,
@@ -396,21 +392,21 @@ class PlanDraftResult(QueryResultImpl[entities.PlanDraft]):
         drafts_to_delete = [draft.id for draft in self.items()]
         drafts_deleted = 0
         for draft in drafts_to_delete:
-            if draft in self.entities.drafts:
-                del self.entities.drafts[draft]
+            if draft in self.database.drafts:
+                del self.database.drafts[draft]
                 drafts_deleted += 1
         return drafts_deleted
 
     def update(self) -> PlanDraftUpdate:
         return PlanDraftUpdate(
-            entities=self.entities,
+            database=self.database,
             items=self.items,
         )
 
 
 @dataclass
 class PlanDraftUpdate:
-    entities: EntityStorage
+    database: MockDatabase
     items: Callable[[], Iterable[PlanDraft]]
     changes: Callable[[PlanDraft], None] = lambda _: None
 
@@ -519,11 +515,11 @@ class CooperationResult(QueryResultImpl[Cooperation]):
         )
 
     def coordinated_by_company(self, company_id: UUID) -> Self:
-        def items() -> Iterable[entities.Cooperation]:
+        def items() -> Iterable[records.Cooperation]:
             for cooperation in self.items():
                 tenures = [
-                    self.entities.coordination_tenures[id_]
-                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                    self.database.coordination_tenures[id_]
+                    for id_ in self.database.indices.coordination_tenure_by_cooperation.get(
                         cooperation.id
                     )
                 ]
@@ -536,124 +532,116 @@ class CooperationResult(QueryResultImpl[Cooperation]):
     def joined_with_current_coordinator(
         self,
     ) -> QueryResultImpl[Tuple[Cooperation, Company]]:
-        def items() -> Iterable[Tuple[entities.Cooperation, Company]]:
+        def items() -> Iterable[Tuple[records.Cooperation, Company]]:
             for cooperation in self.items():
                 tenures = [
-                    self.entities.coordination_tenures[id_]
-                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                    self.database.coordination_tenures[id_]
+                    for id_ in self.database.indices.coordination_tenure_by_cooperation.get(
                         cooperation.id
                     )
                 ]
                 tenures.sort(key=lambda t: t.start_date, reverse=True)
                 if tenures:
-                    yield cooperation, self.entities.companies[tenures[0].company]
+                    yield cooperation, self.database.companies[tenures[0].company]
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
+            database=self.database,
         )
 
 
 class MemberResult(QueryResultImpl[Member]):
     def working_at_company(self, company: UUID) -> MemberResult:
-        return self._filtered_by(
+        return self._filter_elements(
             lambda member: member.id
-            in self.entities.indices.worker_by_company.get(company),
+            in self.database.indices.worker_by_company.get(company),
         )
 
     def with_id(self, member: UUID) -> MemberResult:
-        return self._filtered_by(lambda model: model.id == member)
+        return self._filter_elements(lambda model: model.id == member)
 
     def with_email_address(self, email: str) -> MemberResult:
-        return self._filtered_by(lambda model: model.email == email)
+        return self._filter_elements(lambda model: model.email == email)
 
     def that_are_confirmed(self) -> MemberResult:
-        def filtered(model: entities.Member) -> bool:
-            email = self.entities.email_addresses[model.email]
+        def filtered(model: records.Member) -> bool:
+            email = self.database.email_addresses[model.email]
             return email.confirmed_on is not None
 
-        return self._filtered_by(filtered)
+        return self._filter_elements(filtered)
 
     def joined_with_email_address(
         self,
-    ) -> QueryResultImpl[Tuple[entities.Member, entities.EmailAddress]]:
-        def items() -> Iterable[Tuple[entities.Member, entities.EmailAddress]]:
+    ) -> QueryResultImpl[Tuple[records.Member, records.EmailAddress]]:
+        def items() -> Iterable[Tuple[records.Member, records.EmailAddress]]:
             for member in self.items():
-                yield member, self.entities.email_addresses[member.email]
+                yield member, self.database.email_addresses[member.email]
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
-        )
-
-    def _filtered_by(self, key: Callable[[Member], bool]) -> MemberResult:
-        return type(self)(
-            items=lambda: filter(key, self.items()),
-            entities=self.entities,
+            database=self.database,
         )
 
 
 class CompanyResult(QueryResultImpl[Company]):
     def with_id(self, id_: UUID) -> CompanyResult:
-        return type(self)(
+        return replace(
+            self,
             items=lambda: filter(lambda company: company.id == id_, self.items()),
-            entities=self.entities,
         )
 
     def with_email_address(self, email: str) -> CompanyResult:
-        return type(self)(
+        return replace(
+            self,
             items=lambda: filter(lambda company: company.email == email, self.items()),
-            entities=self.entities,
         )
 
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
-        def items() -> Iterable[entities.Company]:
+        def items() -> Iterable[records.Company]:
             for company in self.items():
-                workers = self.entities.indices.worker_by_company.get(company.id)
+                workers = self.database.indices.worker_by_company.get(company.id)
                 if member in workers:
                     yield company
 
-        return type(self)(
+        return replace(
+            self,
             items=items,
-            entities=self.entities,
         )
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
         for company in self.items():
             companies_changed += 1
-            self.entities.indices.worker_by_company.add(company.id, member)
+            self.database.indices.worker_by_company.add(company.id, member)
         return companies_changed
 
     def with_name_containing(self, query: str) -> CompanyResult:
-        return self._filtered_by(lambda company: query.lower() in company.name.lower())
+        return self._filter_elements(
+            lambda company: query.lower() in company.name.lower()
+        )
 
     def with_email_containing(self, query: str) -> CompanyResult:
-        return self._filtered_by(lambda company: query.lower() in company.email.lower())
+        return self._filter_elements(
+            lambda company: query.lower() in company.email.lower()
+        )
 
     def that_are_confirmed(self) -> Self:
-        def filtered(company: entities.Company) -> bool:
-            email = self.entities.email_addresses[company.email]
+        def filtered(company: records.Company) -> bool:
+            email = self.database.email_addresses[company.email]
             return email.confirmed_on is not None
 
-        return self._filtered_by(filtered)
+        return self._filter_elements(filtered)
 
     def joined_with_email_address(
         self,
-    ) -> QueryResultImpl[Tuple[entities.Company, entities.EmailAddress]]:
-        def items() -> Iterable[Tuple[entities.Company, entities.EmailAddress]]:
+    ) -> QueryResultImpl[Tuple[records.Company, records.EmailAddress]]:
+        def items() -> Iterable[Tuple[records.Company, records.EmailAddress]]:
             for company in self.items():
-                yield company, self.entities.email_addresses[company.email]
+                yield company, self.database.email_addresses[company.email]
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
-        )
-
-    def _filtered_by(self, key: Callable[[Company], bool]) -> Self:
-        return type(self)(
-            items=lambda: filter(key, self.items()),
-            entities=self.entities,
+            database=self.database,
         )
 
 
@@ -713,7 +701,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             self,
             items=lambda: filter(
                 lambda transaction: transaction.sending_account
-                == self.entities.social_accounting.account,
+                == self.database.social_accounting.account,
                 self.items(),
             ),
         )
@@ -723,18 +711,18 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
         def transaction_filter(transaction: Transaction) -> bool:
             consumer_purchases = (
-                self.entities.indices.consumer_purchase_by_transaction.get(
+                self.database.indices.consumer_purchase_by_transaction.get(
                     transaction.id
                 )
             )
             company_purchases = (
-                self.entities.indices.company_purchase_by_transaction.get(
+                self.database.indices.company_purchase_by_transaction.get(
                     transaction.id
                 )
             )
             transaction_plans = {
-                self.entities.consumer_purchases[i].plan_id for i in consumer_purchases
-            } | {self.entities.company_purchases[i].plan_id for i in company_purchases}
+                self.database.consumer_purchases[i].plan_id for i in consumer_purchases
+            } | {self.database.company_purchases[i].plan_id for i in company_purchases}
             return bool(transaction_plans & plans)
 
         return replace(
@@ -748,22 +736,20 @@ class TransactionResult(QueryResultImpl[Transaction]):
     def joined_with_sender_and_receiver(
         self,
     ) -> QueryResultImpl[
-        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
     ]:
-        def get_account_owner(account_id: UUID) -> entities.AccountOwner:
-            if members := self.entities.indices.member_by_account.get(account_id):
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
                 (member,) = members
-                return self.entities.members[member]
-            if companies := self.entities.indices.company_by_account.get(account_id):
+                return self.database.members[member]
+            if companies := self.database.indices.company_by_account.get(account_id):
                 (company,) = companies
-                return self.entities.companies[company]
-            return self.entities.social_accounting
+                return self.database.companies[company]
+            return self.database.social_accounting
 
         def items() -> (
             Iterable[
-                Tuple[
-                    entities.Transaction, entities.AccountOwner, entities.AccountOwner
-                ]
+                Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
             ]
         ):
             for transaction in self.items():
@@ -773,32 +759,32 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
+            database=self.database,
         )
 
 
-class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
+class ConsumerPurchaseResult(QueryResultImpl[records.ConsumerPurchase]):
     def ordered_by_creation_date(
         self, *, ascending: bool = True
     ) -> ConsumerPurchaseResult:
-        def purchase_sorting_key(purchase: entities.ConsumerPurchase) -> datetime:
-            transaction = self.entities.transactions[purchase.transaction_id]
+        def purchase_sorting_key(purchase: records.ConsumerPurchase) -> datetime:
+            transaction = self.database.transactions[purchase.transaction_id]
             return transaction.date
 
-        return type(self)(
+        return replace(
+            self,
             items=lambda: sorted(
                 list(self.items()),
                 key=purchase_sorting_key,
                 reverse=not ascending,
             ),
-            entities=self.entities,
         )
 
     def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
-        def filtered_items() -> Iterator[entities.ConsumerPurchase]:
-            member_account = self.entities.members[member].account
+        def filtered_items() -> Iterator[records.ConsumerPurchase]:
+            member_account = self.database.members[member].account
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
+                transaction = self.database.transactions[purchase.transaction_id]
                 if transaction.sending_account == member_account:
                     yield purchase
 
@@ -809,45 +795,45 @@ class ConsumerPurchaseResult(QueryResultImpl[entities.ConsumerPurchase]):
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResultImpl[Tuple[entities.ConsumerPurchase, Transaction, Plan]]:
+    ) -> QueryResultImpl[Tuple[records.ConsumerPurchase, Transaction, Plan]]:
         def joined_items() -> (
-            Iterator[Tuple[entities.ConsumerPurchase, Transaction, Plan]]
+            Iterator[Tuple[records.ConsumerPurchase, Transaction, Plan]]
         ):
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
-                plan = self.entities.plans[purchase.plan_id]
+                transaction = self.database.transactions[purchase.transaction_id]
+                plan = self.database.plans[purchase.plan_id]
                 yield purchase, transaction, plan
 
         return QueryResultImpl(
             items=joined_items,
-            entities=self.entities,
+            database=self.database,
         )
 
 
-class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
+class CompanyPurchaseResult(QueryResultImpl[records.CompanyPurchase]):
     def ordered_by_creation_date(
         self, *, ascending: bool = True
     ) -> CompanyPurchaseResult:
-        def purchase_sorting_key(purchase: entities.CompanyPurchase) -> datetime:
-            transaction = self.entities.transactions[purchase.transaction_id]
+        def purchase_sorting_key(purchase: records.CompanyPurchase) -> datetime:
+            transaction = self.database.transactions[purchase.transaction_id]
             return transaction.date
 
-        return type(self)(
+        return replace(
+            self,
             items=lambda: sorted(
                 list(self.items()),
                 key=purchase_sorting_key,
                 reverse=not ascending,
             ),
-            entities=self.entities,
         )
 
     def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
-        def filtered_items() -> Iterator[entities.CompanyPurchase]:
-            company_record = self.entities.get_company_by_id(company)
+        def filtered_items() -> Iterator[records.CompanyPurchase]:
+            company_record = self.database.get_company_by_id(company)
             if company_record is None:
                 return None
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
+                transaction = self.database.transactions[purchase.transaction_id]
                 if (
                     transaction.sending_account == company_record.means_account
                     or transaction.sending_account
@@ -862,13 +848,13 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Plan]]:
+    ) -> QueryResultImpl[Tuple[records.CompanyPurchase, Transaction, Plan]]:
         def joined_items() -> (
-            Iterator[Tuple[entities.CompanyPurchase, Transaction, Plan]]
+            Iterator[Tuple[records.CompanyPurchase, Transaction, Plan]]
         ):
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
-                plan = self.entities.plans[purchase.plan_id]
+                transaction = self.database.transactions[purchase.transaction_id]
+                plan = self.database.plans[purchase.plan_id]
                 yield purchase, transaction, plan
 
         return replace(
@@ -878,12 +864,12 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
 
     def joined_with_transaction(
         self,
-    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, entities.Transaction]]:
+    ) -> QueryResultImpl[Tuple[records.CompanyPurchase, records.Transaction]]:
         def joined_items() -> (
-            Iterator[Tuple[entities.CompanyPurchase, entities.Transaction]]
+            Iterator[Tuple[records.CompanyPurchase, records.Transaction]]
         ):
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
+                transaction = self.database.transactions[purchase.transaction_id]
                 yield purchase, transaction
 
         return replace(
@@ -893,19 +879,19 @@ class CompanyPurchaseResult(QueryResultImpl[entities.CompanyPurchase]):
 
     def joined_with_transaction_and_provider(
         self,
-    ) -> QueryResultImpl[Tuple[entities.CompanyPurchase, Transaction, Company]]:
+    ) -> QueryResultImpl[Tuple[records.CompanyPurchase, Transaction, Company]]:
         def joined_items() -> (
-            Iterator[Tuple[entities.CompanyPurchase, Transaction, Company]]
+            Iterator[Tuple[records.CompanyPurchase, Transaction, Company]]
         ):
             for purchase in self.items():
-                transaction = self.entities.transactions[purchase.transaction_id]
-                plan = self.entities.plans[purchase.plan_id]
-                provider = self.entities.companies[plan.planner]
+                transaction = self.database.transactions[purchase.transaction_id]
+                plan = self.database.plans[purchase.plan_id]
+                provider = self.database.companies[plan.planner]
                 yield purchase, transaction, provider
 
         return QueryResultImpl(
             items=joined_items,
-            entities=self.entities,
+            database=self.database,
         )
 
 
@@ -920,7 +906,7 @@ class AccountResult(QueryResultImpl[Account]):
         def items():
             memberes = set(member)
             for account in self.items():
-                owner_ids = self.entities.indices.member_by_account.get(account.id)
+                owner_ids = self.database.indices.member_by_account.get(account.id)
                 if memberes & owner_ids:
                     yield account
 
@@ -933,7 +919,7 @@ class AccountResult(QueryResultImpl[Account]):
         def items() -> Iterable[Account]:
             companies = set(company)
             for account in self.items():
-                owner_ids = self.entities.indices.company_by_account.get(account.id)
+                owner_ids = self.database.indices.company_by_account.get(account.id)
                 if companies & owner_ids:
                     yield account
 
@@ -946,7 +932,7 @@ class AccountResult(QueryResultImpl[Account]):
         return replace(
             self,
             items=lambda: filter(
-                lambda account: account in self.entities.member_accounts, self.items()
+                lambda account: account in self.database.member_accounts, self.items()
             ),
         )
 
@@ -954,7 +940,7 @@ class AccountResult(QueryResultImpl[Account]):
         return replace(
             self,
             items=lambda: filter(
-                lambda account: account in self.entities.prd_accounts, self.items()
+                lambda account: account in self.database.prd_accounts, self.items()
             ),
         )
 
@@ -962,21 +948,21 @@ class AccountResult(QueryResultImpl[Account]):
         return replace(
             self,
             items=lambda: filter(
-                lambda account: account in self.entities.l_accounts, self.items()
+                lambda account: account in self.database.l_accounts, self.items()
             ),
         )
 
     def joined_with_owner(
         self,
-    ) -> QueryResultImpl[Tuple[Account, entities.AccountOwner]]:
-        def items() -> Iterable[Tuple[Account, entities.AccountOwner]]:
+    ) -> QueryResultImpl[Tuple[Account, records.AccountOwner]]:
+        def items() -> Iterable[Tuple[Account, records.AccountOwner]]:
             for account in self.items():
-                if account.id == self.entities.social_accounting.account:
-                    yield account, self.entities.social_accounting
-                for member in self.entities.members.values():
+                if account.id == self.database.social_accounting.account:
+                    yield account, self.database.social_accounting
+                for member in self.database.members.values():
                     if account.id == member.account:
                         yield account, member
-                for company in self.entities.companies.values():
+                for company in self.database.companies.values():
                     if account.id in [
                         company.means_account,
                         company.raw_material_account,
@@ -987,13 +973,13 @@ class AccountResult(QueryResultImpl[Account]):
 
         return QueryResultImpl(
             items=items,
-            entities=self.entities,
+            database=self.database,
         )
 
     def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
         def items() -> Iterable[Tuple[Account, Decimal]]:
             for account in self.items():
-                transactions = self.entities.get_transactions()
+                transactions = self.database.get_transactions()
                 received_transactions = transactions.where_account_is_receiver(
                     account.id
                 )
@@ -1004,7 +990,7 @@ class AccountResult(QueryResultImpl[Account]):
                     transaction.amount_sent for transaction in sent_transactions
                 )
 
-        return QueryResultImpl(items=items, entities=self.entities)
+        return QueryResultImpl(items=items, database=self.database)
 
 
 class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
@@ -1037,14 +1023,14 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
 
     def delete(self) -> None:
         invites_to_delete = set(invite.id for invite in self.items())
-        self.entities.company_work_invites = [
+        self.database.company_work_invites = [
             invite
-            for invite in self.entities.company_work_invites
+            for invite in self.database.company_work_invites
             if invite.id not in invites_to_delete
         ]
 
 
-class EmailAddressResult(QueryResultImpl[entities.EmailAddress]):
+class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
         return replace(
             self,
@@ -1062,13 +1048,13 @@ class EmailAddressResult(QueryResultImpl[entities.EmailAddress]):
 
 @dataclass
 class EmailAddressUpdate:
-    items: Callable[[], Iterable[entities.EmailAddress]]
-    transformation: Callable[[entities.EmailAddress], None] = field(
+    items: Callable[[], Iterable[records.EmailAddress]]
+    transformation: Callable[[records.EmailAddress], None] = field(
         default=lambda _: None
     )
 
     def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
-        def transformation(item: entities.EmailAddress) -> None:
+        def transformation(item: records.EmailAddress) -> None:
             self.transformation(item)
             item.confirmed_on = timestamp
 
@@ -1095,7 +1081,7 @@ class FakeLanguageRepository:
 
 
 @singleton
-class EntityStorage:
+class MockDatabase:
     def __init__(self) -> None:
         self.members: Dict[UUID, Member] = {}
         self.companies: Dict[UUID, Company] = {}
@@ -1113,19 +1099,19 @@ class EntityStorage:
             account=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
-        self.coordination_tenures: Dict[UUID, entities.CoordinationTenure] = dict()
-        self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
-        self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
+        self.coordination_tenures: Dict[UUID, records.CoordinationTenure] = dict()
+        self.consumer_purchases: Dict[UUID, records.ConsumerPurchase] = dict()
+        self.company_purchases: Dict[UUID, records.CompanyPurchase] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
-        self.email_addresses: Dict[str, entities.EmailAddress] = dict()
+        self.email_addresses: Dict[str, records.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.indices = Indices()
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
-    ) -> entities.EmailAddress:
+    ) -> records.EmailAddress:
         assert address not in self.email_addresses
-        record = entities.EmailAddress(
+        record = records.EmailAddress(
             address=address,
             confirmed_on=confirmed_on,
         )
@@ -1137,8 +1123,8 @@ class EntityStorage:
 
     def create_consumer_purchase(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> entities.ConsumerPurchase:
-        purchase = entities.ConsumerPurchase(
+    ) -> records.ConsumerPurchase:
+        purchase = records.ConsumerPurchase(
             id=uuid4(),
             plan_id=plan,
             transaction_id=transaction,
@@ -1151,14 +1137,14 @@ class EntityStorage:
 
     def get_consumer_purchases(self) -> ConsumerPurchaseResult:
         return ConsumerPurchaseResult(
-            entities=self,
+            database=self,
             items=self.consumer_purchases.values,
         )
 
     def create_company_purchase(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> entities.CompanyPurchase:
-        purchase = entities.CompanyPurchase(
+    ) -> records.CompanyPurchase:
+        purchase = records.CompanyPurchase(
             id=uuid4(),
             amount=amount,
             plan_id=plan,
@@ -1170,12 +1156,12 @@ class EntityStorage:
         return purchase
 
     def get_company_purchases(self) -> CompanyPurchaseResult:
-        return CompanyPurchaseResult(entities=self, items=self.company_purchases.values)
+        return CompanyPurchaseResult(database=self, items=self.company_purchases.values)
 
     def get_plans(self) -> PlanResult:
         return PlanResult(
             items=lambda: self.plans.values(),
-            entities=self,
+            database=self,
         )
 
     def create_plan(
@@ -1189,7 +1175,7 @@ class EntityStorage:
         product_description: str,
         duration_in_days: int,
         is_public_service: bool,
-    ) -> entities.Plan:
+    ) -> records.Plan:
         plan = Plan(
             id=uuid4(),
             plan_creation_date=creation_timestamp,
@@ -1230,14 +1216,14 @@ class EntityStorage:
     def get_cooperations(self) -> CooperationResult:
         return CooperationResult(
             items=lambda: self.cooperations.values(),
-            entities=self,
+            database=self,
         )
 
     def create_coordination_tenure(
         self, company: UUID, cooperation: UUID, start_date: datetime
-    ) -> entities.CoordinationTenure:
+    ) -> records.CoordinationTenure:
         tenure_id = uuid4()
-        tenure = entities.CoordinationTenure(
+        tenure = records.CoordinationTenure(
             id=tenure_id,
             company=company,
             cooperation=cooperation,
@@ -1271,7 +1257,7 @@ class EntityStorage:
     def get_transactions(self) -> TransactionResult:
         return TransactionResult(
             items=lambda: self.transactions.values(),
-            entities=self,
+            database=self,
         )
 
     def create_company_work_invite(
@@ -1288,7 +1274,7 @@ class EntityStorage:
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
         return CompanyWorkInviteResult(
             items=lambda: self.company_work_invites,
-            entities=self,
+            database=self,
         )
 
     def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
@@ -1306,7 +1292,7 @@ class EntityStorage:
     def get_accountants(self) -> AccountantResult:
         return AccountantResult(
             items=lambda: self.accountants.values(),
-            entities=self,
+            database=self,
         )
 
     def create_member(
@@ -1336,7 +1322,7 @@ class EntityStorage:
     def get_members(self) -> MemberResult:
         return MemberResult(
             items=lambda: self.members.values(),
-            entities=self,
+            database=self,
         )
 
     def create_company(
@@ -1376,12 +1362,12 @@ class EntityStorage:
     def get_companies(self) -> CompanyResult:
         return CompanyResult(
             items=lambda: self.companies.values(),
-            entities=self,
+            database=self,
         )
 
     def get_email_addresses(self) -> EmailAddressResult:
         return EmailAddressResult(
-            entities=self,
+            database=self,
             items=lambda: self.email_addresses.values(),
         )
 
@@ -1415,7 +1401,7 @@ class EntityStorage:
     def get_plan_drafts(self) -> PlanDraftResult:
         return PlanDraftResult(
             items=lambda: self.drafts.values(),
-            entities=self,
+            database=self,
         )
 
     def create_account(self) -> Account:
@@ -1428,7 +1414,7 @@ class EntityStorage:
     def get_accounts(self) -> AccountResult:
         return AccountResult(
             items=lambda: self.accounts,
-            entities=self,
+            database=self,
         )
 
 

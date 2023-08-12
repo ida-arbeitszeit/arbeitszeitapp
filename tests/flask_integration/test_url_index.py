@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -198,7 +198,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         self.login_company()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         url = self.url_index.get_company_summary_url(
             user_role=UserRole.company, company_id=company.id
         )
@@ -209,7 +209,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         self.login_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         url = self.url_index.get_company_summary_url(
             user_role=UserRole.member, company_id=company.id
         )
@@ -217,7 +217,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self.assertEqual(response.status_code, 200)
 
     def _create_invite(self, member: UUID) -> UUID:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 company=company.id,

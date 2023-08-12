@@ -27,7 +27,7 @@ def test_empty_list_is_returned_when_plans_are_not_cooperating(
 ):
     plan_generator.create_plan()
     plan_generator.create_plan()
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company_record()
     response = use_case(ListCoordinationsRequest(company.id))
     assert len(response.coordinations) == 0
 
@@ -42,7 +42,7 @@ def test_empty_list_is_returned_when_requester_is_not_coordinator_of_cooperation
     p1 = plan_generator.create_plan()
     p2 = plan_generator.create_plan()
     cooperation_generator.create_cooperation(plans=[p1, p2])
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company_record()
     response = use_case(ListCoordinationsRequest(company.id))
     assert len(response.coordinations) == 0
 
@@ -56,7 +56,7 @@ def test_cooperation_is_listed_when_requester_is_coordinator_of_cooperation(
 ):
     p1 = plan_generator.create_plan()
     p2 = plan_generator.create_plan()
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company_record()
     cooperation = cooperation_generator.create_cooperation(
         plans=[p1, p2], coordinator=company
     )
@@ -74,12 +74,12 @@ def test_only_cooperations_are_listed_where_requester_is_coordinator(
 ):
     p1 = plan_generator.create_plan()
     p2 = plan_generator.create_plan()
-    company = company_generator.create_company_entity()
+    company = company_generator.create_company_record()
     expected_cooperation = cooperation_generator.create_cooperation(
         plans=[p1, p2], coordinator=company
     )
     cooperation_generator.create_cooperation(
-        plans=[p1, p2], coordinator=company_generator.create_company_entity()
+        plans=[p1, p2], coordinator=company_generator.create_company_record()
     )
     response = use_case(ListCoordinationsRequest(company.id))
     assert len(response.coordinations) == 1
@@ -95,7 +95,7 @@ def test_that_expired_plans_are_not_counted_in_cooperations(
     datetime_service: FakeDatetimeService,
 ) -> None:
     datetime_service.freeze_time(datetime(2000, 1, 1))
-    coordinator = company_generator.create_company_entity()
+    coordinator = company_generator.create_company_record()
     p1 = plan_generator.create_plan(timeframe=1)
     p2 = plan_generator.create_plan(timeframe=5)
     cooperation_generator.create_cooperation(plans=[p1, p2], coordinator=coordinator)

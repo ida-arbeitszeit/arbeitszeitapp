@@ -7,9 +7,9 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member, Plan
 from arbeitszeit.giro_office import GiroOffice, Transaction, TransactionRejection
 from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.records import Member, Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 

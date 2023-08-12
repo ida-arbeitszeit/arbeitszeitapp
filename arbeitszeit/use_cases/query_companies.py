@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Iterable, List, Optional
 from uuid import UUID
 
-from arbeitszeit.entities import Company
+from arbeitszeit.records import Company
 from arbeitszeit.repositories import CompanyResult, DatabaseGateway
 
 

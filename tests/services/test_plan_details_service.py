@@ -3,8 +3,8 @@ from decimal import Decimal
 from unittest import TestCase
 from uuid import uuid4
 
-from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_details import PlanDetails, PlanDetailsService
+from arbeitszeit.records import ProductionCosts
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector
@@ -17,7 +17,7 @@ class PlanDetailsServiceTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.planner = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company_record()
         self.plan = self.plan_generator.create_plan(planner=self.planner.id)
         assert self.planner
         details = self.service.get_details_from_plan(self.plan.id)

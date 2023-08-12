@@ -3,7 +3,7 @@ from typing import Callable, Optional
 from unittest import TestCase
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
 from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess, GetDraftDetails
 from tests.data_generators import CompanyGenerator, PlanGenerator

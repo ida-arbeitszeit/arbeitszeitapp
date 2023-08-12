@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company
+from arbeitszeit.records import Company
 from arbeitszeit.repositories import DatabaseGateway
 
 

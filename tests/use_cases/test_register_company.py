@@ -32,7 +32,7 @@ class RegisterCompanyTests(BaseTestCase):
         self.assertFalse(response.is_rejected)
 
     def test_that_correct_error_is_raised_when_user_with_mail_exists(self) -> None:
-        self.company_generator.create_company_entity(email="test@cp.org")
+        self.company_generator.create_company_record(email="test@cp.org")
         response = self.use_case.register_company(
             self._create_request(email="test@cp.org")
         )

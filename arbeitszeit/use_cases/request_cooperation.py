@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Cooperation
+from arbeitszeit.records import Company, Cooperation
 from arbeitszeit.repositories import DatabaseGateway
 
 

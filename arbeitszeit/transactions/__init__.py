@@ -3,13 +3,7 @@ from decimal import Decimal
 from typing import Iterable, Union
 from uuid import UUID
 
-from arbeitszeit.entities import (
-    AccountOwner,
-    AccountTypes,
-    Company,
-    Member,
-    Transaction,
-)
+from arbeitszeit.records import AccountOwner, AccountTypes, Company, Member, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 
 from .transaction_type import TransactionTypes

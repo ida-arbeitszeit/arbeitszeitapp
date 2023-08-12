@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import uuid4
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit.use_cases.query_company_purchases import (
     PurchaseQueryResponse,
     QueryCompanyPurchases,

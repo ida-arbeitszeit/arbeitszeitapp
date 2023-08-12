@@ -2,7 +2,7 @@ from dataclasses import replace
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import get_draft_details
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,

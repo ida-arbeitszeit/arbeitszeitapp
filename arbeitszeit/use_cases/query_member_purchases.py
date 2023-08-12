@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import UUID
 
-from arbeitszeit.entities import ConsumerPurchase, Plan, Transaction
+from arbeitszeit.records import ConsumerPurchase, Plan, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 
 

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.entities import Plan, PlanDraft
+from arbeitszeit.records import Plan, PlanDraft
 from arbeitszeit.use_cases.show_my_plans import (
     PlanInfo,
     ShowMyPlansRequest,

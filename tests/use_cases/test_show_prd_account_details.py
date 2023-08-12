@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from arbeitszeit.entities import ProductionCosts, SocialAccounting
+from arbeitszeit.records import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 
@@ -17,21 +17,21 @@ class UseCaseTester(BaseTestCase):
 
     def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_prd_account_details(company.id)
         assert not response.transactions
 
     def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_prd_account_details(company.id)
         assert response.account_balance == 0
 
     def test_company_id_is_returned(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_prd_account_details(company.id)
         assert response.company_id == company.id
@@ -163,7 +163,7 @@ class UseCaseTester(BaseTestCase):
         assert response.account_balance == Decimal(0)
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.show_prd_account_details(company.id)
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
@@ -239,7 +239,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        buyer = self.member_generator.create_member_entity()
+        buyer = self.member_generator.create_member_record()
         self.purchase_generator.create_purchase_by_member(plan=plan.id, buyer=buyer.id)
         response = self.show_prd_account_details(planner)
         transaction_of_sale = response.transactions[0]
@@ -251,8 +251,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_buyer_info_is_shown_when_company_sold_to_company(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_entity()
-        planner = self.company_generator.create_company_entity()
+        buyer = self.company_generator.create_company_record()
+        planner = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(planner=planner.id)
         self.purchase_generator.create_fixed_means_purchase(
             buyer=buyer.id, plan=plan.id

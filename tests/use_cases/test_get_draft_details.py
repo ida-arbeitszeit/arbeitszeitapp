@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Callable
 from uuid import uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_draft_details import (
     DraftDetailsResponse,
     DraftDetailsSuccess,

@@ -44,7 +44,7 @@ class UseCaseTests(BaseTestCase):
         self.assertEqual(response.count_all_plans, 1)
 
     def test_that_with_no_drafts_that_drafts_in_response_is_empty(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.show_company_plans(
             request=ShowMyPlansRequest(company_id=company.id)
         )

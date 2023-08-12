@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.use_cases.dependency_injection import get_dependency_injector

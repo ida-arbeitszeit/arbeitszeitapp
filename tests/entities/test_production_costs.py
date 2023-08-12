@@ -1,7 +1,7 @@
 from decimal import Decimal
 from unittest import TestCase
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 
 
 class ArithmeticTests(TestCase):

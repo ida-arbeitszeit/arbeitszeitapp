@@ -63,14 +63,8 @@ protocol. It has two types of methods: ``create_*`` methods to persist
 new data records in the DB and ``get_*`` methods that allow us to
 query existing data records. The kinds of data records that DB
 implementations should understand are defined in
-``arbeitszeit/entities.py``. The simple dataclasses defined there are
-called entities from now on.
-
-Some readers might notice that the usage of the term *entity* in this
-manner does not follow the principles of clean architecture. The
-authors are aware of this problem and acknowledge that the term
-*entity* is used incorrectly but continue to do so until the proper
-changes are implemented in the code base.
+``arbeitszeit/records.py``. The simple dataclasses defined there are
+called records from now on.
 
 Object creation
 ...............
@@ -79,10 +73,10 @@ Methods that are supposed to create a new data record in the DB are
 expected to follow some basic principles.
 
 First of all they should be named ``create_RECORD_NAME``.  If we would
-have an entity called ``CouncilReport`` then the appropriate name for
+have a record called ``CouncilReport`` then the appropriate name for
 the create method is ``create_council_report``.
 
-Secondly every *create method* must return the entity that was created
+Secondly every *create method* must return the record that was created
 in the DB. In our example the return value of
 ``create_council_report`` would be ``-> CouncilReport``.
 
@@ -95,7 +89,7 @@ consistency across different implementations.
 
 To give a small example::
 
-  # entities.py
+  # records.py
   @dataclass
   class CouncilReport:
       release_date: date

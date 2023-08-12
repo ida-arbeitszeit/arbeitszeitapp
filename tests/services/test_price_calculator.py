@@ -4,8 +4,8 @@ from unittest import TestCase
 
 from pytest import approx
 
-from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.records import ProductionCosts
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.use_cases.dependency_injection import get_dependency_injector
 

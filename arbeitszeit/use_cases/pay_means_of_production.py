@@ -6,8 +6,8 @@ from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Company, Plan, PurposesOfPurchases
 from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.records import Company, Plan, PurposesOfPurchases
 from arbeitszeit.repositories import DatabaseGateway
 
 

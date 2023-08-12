@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from pytest import approx
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
@@ -22,12 +22,12 @@ class GetCoopSummaryTests(BaseTestCase):
         self.get_coop_summary = self.injector.get(GetCoopSummary)
 
     def test_that_none_is_returned_when_cooperation_does_not_exist(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, uuid4()))
         assert summary is None
 
     def test_that_requester_is_correctly_defined_as_equal_to_coordinator(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation(coordinator=requester)
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(summary, lambda s: s.requester_is_coordinator == True)
@@ -35,13 +35,13 @@ class GetCoopSummaryTests(BaseTestCase):
     def test_that_requester_is_correctly_defined_as_different_from_coordinator(
         self,
     ) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation()
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(summary, lambda s: s.requester_is_coordinator == False)
 
     def test_that_correct_amount_of_associated_plans_are_shown(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan()
         plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
@@ -49,7 +49,7 @@ class GetCoopSummaryTests(BaseTestCase):
         self.assert_success(summary, lambda s: len(s.plans) == 2)
 
     def test_that_correct_coordinator_id_is_shown(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan()
         plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(
@@ -61,7 +61,7 @@ class GetCoopSummaryTests(BaseTestCase):
     def test_that_correct_coordinator_id_is_shown_when_several_cooperations_exist(
         self,
     ) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan()
         plan2 = self.plan_generator.create_plan()
 
@@ -79,7 +79,7 @@ class GetCoopSummaryTests(BaseTestCase):
         coordinator = self.company_generator.create_company(
             name=expected_coordinator_name
         )
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester.id, coop.id))
         self.assert_success(
@@ -87,7 +87,7 @@ class GetCoopSummaryTests(BaseTestCase):
         )
 
     def test_that_correct_info_of_associated_plan_is_shown(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),
             amount=10,

@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Cooperation
+from arbeitszeit.records import Cooperation
 from arbeitszeit.repositories import DatabaseGateway
 
 

@@ -47,7 +47,7 @@ class UseCaseTests(BaseTestCase):
         self.assertIsNone(response)
 
     def test_that_plan_is_not_deleted_if_deleter_is_not_planner(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         draft = self.plan_generator.draft_plan()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(
@@ -57,7 +57,7 @@ class UseCaseTests(BaseTestCase):
         self.assertIsNotNone(response)
 
     def test_failure_is_raised_if_deleter_is_not_planner(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         draft = self.plan_generator.draft_plan()
         with self.assertRaises(DeleteDraftUseCase.Failure):
             self.use_case.delete_draft(

@@ -13,7 +13,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_that_false_is_returned_when_requester_is_not_planner(self) -> None:
         plan = self.plan_generator.create_plan()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case(
             CancelCooperationSolicitationRequest(company.id, plan.id)
         )

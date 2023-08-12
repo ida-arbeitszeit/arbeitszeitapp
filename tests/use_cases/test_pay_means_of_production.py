@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import Company, ProductionCosts, PurposesOfPurchases
+from arbeitszeit.records import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import query_company_purchases
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 from arbeitszeit.use_cases.pay_means_of_production import (
@@ -14,21 +14,21 @@ from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import EntityStorage
+from .repositories import MockDatabase
 
 
 class PayMeansOfProductionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
-        self.entity_storage = self.injector.get(EntityStorage)
+        self.mock_database = self.injector.get(MockDatabase)
         self.query_company_purchases = self.injector.get(
             query_company_purchases.QueryCompanyPurchases
         )
 
     def test_reject_payment_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.freeze_time(datetime(2001, 1, 1))
         purpose = PurposesOfPurchases.means_of_prod
@@ -40,7 +40,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert response.rejection_reason == response.RejectionReason.plan_is_not_active
 
     def test_payment_is_rejected_when_purpose_is_consumption(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.consumption
         response = self.pay_means_of_production(
@@ -50,7 +50,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert response.rejection_reason == response.RejectionReason.invalid_purpose
 
     def test_reject_payment_trying_to_pay_public_service(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(is_public_service=True)
         purpose = PurposesOfPurchases.means_of_prod
         response = self.pay_means_of_production(
@@ -182,21 +182,21 @@ class PayMeansOfProductionTests(BaseTestCase):
         ).r_account == balance_before_transaction - Decimal(1)
 
     def test_correct_transaction_added_if_means_of_production_were_paid(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
-        transactions_before_payment = len(self.entity_storage.get_transactions())
+        transactions_before_payment = len(self.mock_database.get_transactions())
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.entity_storage.get_transactions())
+            len(self.mock_database.get_transactions())
             == transactions_before_payment + 1
         )
         latest_transaction = (
-            self.entity_storage.get_transactions()
+            self.mock_database.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )
@@ -209,21 +209,21 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert latest_transaction.amount_received == price_total
 
     def test_correct_transaction_added_if_raw_materials_were_paid(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
-        transactions_before_payment = len(self.entity_storage.get_transactions())
+        transactions_before_payment = len(self.mock_database.get_transactions())
         self.pay_means_of_production(
             PayMeansOfProductionRequest(sender.id, plan.id, pieces, purpose)
         )
         price_total = pieces * self.price_checker.get_unit_price(plan.id)
         assert (
-            len(self.entity_storage.get_transactions())
+            len(self.mock_database.get_transactions())
             == transactions_before_payment + 1
         )
         latest_transaction = (
-            self.entity_storage.get_transactions()
+            self.mock_database.get_transactions()
             .ordered_by_transaction_date(descending=True)
             .first()
         )
@@ -236,7 +236,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert latest_transaction.amount_received == price_total
 
     def test_correct_purchase_added_if_means_of_production_were_paid(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
         pieces = 5
@@ -254,7 +254,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert latest_purchase.purpose == PurposesOfPurchases.means_of_prod
 
     def test_correct_purchase_added_if_raw_materials_were_paid(self) -> None:
-        sender = self.company_generator.create_company_entity()
+        sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
         pieces = 5
@@ -272,7 +272,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert latest_purchase.purpose == PurposesOfPurchases.raw_materials
 
     def test_plan_not_found_rejects_payment(self) -> None:
-        buyer = self.company_generator.create_company_entity()
+        buyer = self.company_generator.create_company_record()
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
                 buyer=buyer.id,
@@ -285,7 +285,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert response.rejection_reason == response.RejectionReason.plan_not_found
 
     def test_plan_found_accepts_payment(self) -> None:
-        buyer = self.company_generator.create_company_entity()
+        buyer = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
@@ -299,7 +299,7 @@ class PayMeansOfProductionTests(BaseTestCase):
         assert response.rejection_reason is None
 
     def get_product_account(self, company: UUID) -> UUID:
-        company_model = self.entity_storage.get_companies().with_id(company).first()
+        company_model = self.mock_database.get_companies().with_id(company).first()
         assert company_model
         return company_model.product_account
 
@@ -309,7 +309,7 @@ class TestSuccessfulPayment(BaseTestCase):
         super().setUp()
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
-        self.buyer = self.company_generator.create_company_entity()
+        self.buyer = self.company_generator.create_company_record()
         self.planner = self.company_generator.create_company()
         self.plan = self.plan_generator.create_plan(planner=self.planner, timeframe=2)
         self.pay_means_of_production = self.injector.get(PayMeansOfProduction)

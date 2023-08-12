@@ -12,7 +12,7 @@ class ShowWorkInvitesTests(BaseTestCase):
         super().setUp()
         self.show_work_invites = self.injector.get(ShowWorkInvites)
         self.member = self.member_generator.create_member()
-        self.company = self.company_generator.create_company_entity().id
+        self.company = self.company_generator.create_company_record().id
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_no_invites_are_shown_when_none_was_sent(self) -> None:

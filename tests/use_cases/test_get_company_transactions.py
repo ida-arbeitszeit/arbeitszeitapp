@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from arbeitszeit.entities import AccountTypes, ProductionCosts
+from arbeitszeit.records import AccountTypes, ProductionCosts
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
 

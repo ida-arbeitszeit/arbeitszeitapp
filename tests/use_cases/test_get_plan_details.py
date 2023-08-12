@@ -13,7 +13,7 @@ class UseCaseTests(TestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.use_case = self.injector.get(GetPlanDetailsUseCase)
-        self.company = self.company_generator.create_company_entity()
+        self.company = self.company_generator.create_company_record()
 
     def test_that_none_is_returned_when_plan_does_not_exist(self) -> None:
         request = GetPlanDetailsUseCase.Request(uuid4())
