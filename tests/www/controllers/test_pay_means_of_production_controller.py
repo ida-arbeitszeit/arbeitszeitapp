@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRequest
 from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,

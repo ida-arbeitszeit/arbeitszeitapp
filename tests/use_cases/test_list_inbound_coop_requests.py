@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from arbeitszeit.entities import Plan
+from arbeitszeit.records import Plan
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
     ListInboundCoopRequestsRequest,
@@ -22,7 +22,7 @@ class UseCaseTest(BaseTestCase):
     def test_empty_list_is_returned_when_there_are_no_requests_for_coordinator(
         self,
     ):
-        coordinator = self.company_generator.create_company_entity()
+        coordinator = self.company_generator.create_company_record()
         coop = self.coop_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=coop)
         response = self.use_case(ListInboundCoopRequestsRequest(coordinator.id))
@@ -44,7 +44,7 @@ class UseCaseTest(BaseTestCase):
         self,
     ):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        coordinator = self.company_generator.create_company_entity()
+        coordinator = self.company_generator.create_company_record()
         coop = self.coop_generator.create_cooperation(coordinator=coordinator)
         self.plan_generator.create_plan(requested_cooperation=coop, timeframe=1)
         self.plan_generator.create_plan(requested_cooperation=coop, timeframe=5)

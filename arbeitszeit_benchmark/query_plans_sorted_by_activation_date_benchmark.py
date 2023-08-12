@@ -4,7 +4,7 @@ from decimal import Decimal
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import query_plans
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector

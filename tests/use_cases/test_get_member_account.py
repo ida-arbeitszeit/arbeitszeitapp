@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccount
 from arbeitszeit.use_cases.register_hours_worked import (
@@ -63,7 +63,7 @@ def test_that_correct_info_is_generated_after_member_pays_product(
     company = company_generator.create_company(name=expected_company_name)
     plan = plan_generator.create_plan(
         planner=company,
-        costs=entities.ProductionCosts(
+        costs=records.ProductionCosts(
             labour_cost=Decimal(10),
             means_cost=Decimal(0),
             resource_cost=Decimal(0),
@@ -92,7 +92,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     company = company_generator.create_company(name=expected_company_name)
     plan = plan_generator.create_plan(
         planner=company,
-        costs=entities.ProductionCosts(
+        costs=records.ProductionCosts(
             labour_cost=Decimal(0),
             means_cost=Decimal(0),
             resource_cost=Decimal(0),
@@ -148,7 +148,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     company1 = company_generator.create_company(workers=[member], name=company1_name)
     company1_plan = plan_generator.create_plan(
         planner=company1,
-        costs=entities.ProductionCosts(
+        costs=records.ProductionCosts(
             labour_cost=Decimal(5), means_cost=Decimal(0), resource_cost=Decimal(0)
         ),
         amount=1,

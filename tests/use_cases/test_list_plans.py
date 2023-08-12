@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.entities import Company, Plan
+from arbeitszeit.records import Company, Plan
 from arbeitszeit.use_cases.list_active_plans_of_company import (
     ListActivePlansOfCompany,
     ListPlansResponse,
@@ -32,7 +32,7 @@ def test_list_plans_response_is_empty_for_company_without_plans(
     list_plans: ListActivePlansOfCompany,
     company_generator: CompanyGenerator,
 ):
-    company: Company = company_generator.create_company_entity()
+    company: Company = company_generator.create_company_record()
     response: ListPlansResponse = list_plans(company_id=company.id)
     assert not response.plans
 

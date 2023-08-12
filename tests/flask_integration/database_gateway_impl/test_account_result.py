@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.entities import SocialAccounting
+from arbeitszeit.records import SocialAccounting
 from tests.data_generators import (
     AccountGenerator,
     CompanyGenerator,
@@ -65,7 +65,7 @@ class AccountResultTests(FlaskTestCase):
         assert member == result[1]
 
     def test_that_p_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert company
         result = (
             self.database_gateway.get_accounts()
@@ -77,7 +77,7 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_r_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert company
         result = (
             self.database_gateway.get_accounts()
@@ -89,7 +89,7 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_a_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert company
         result = (
             self.database_gateway.get_accounts()
@@ -101,7 +101,7 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_prd_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert company
         result = (
             self.database_gateway.get_accounts()

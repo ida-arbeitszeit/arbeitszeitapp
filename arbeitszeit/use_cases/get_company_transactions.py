@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import AccountTypes
+from arbeitszeit.records import AccountTypes
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 

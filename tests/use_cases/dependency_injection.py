@@ -1,7 +1,7 @@
 from typing import Any, Callable, TypeVar, cast
 
 import arbeitszeit.repositories as interfaces
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.injector import (
     AliasProvider,
     Binder,
@@ -29,9 +29,9 @@ from .notify_accountant_about_new_plan_presenter import (
 
 
 def provide_social_accounting_instance(
-    entity_storage: repositories.EntityStorage,
-) -> entities.SocialAccounting:
-    return entity_storage.social_accounting
+    mock_database: repositories.MockDatabase,
+) -> records.SocialAccounting:
+    return mock_database.social_accounting
 
 
 class InMemoryModule(Module):
@@ -45,12 +45,12 @@ class InMemoryModule(Module):
             AccountantInvitationPresenterTestImpl
         )
         binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
-        binder[entities.SocialAccounting] = CallableProvider(
+        binder[records.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )
         binder.bind(
             interfaces.DatabaseGateway,  # type: ignore
-            to=AliasProvider(repositories.EntityStorage),
+            to=AliasProvider(repositories.MockDatabase),
         )
         binder.bind(
             PasswordHasher,  # type: ignore

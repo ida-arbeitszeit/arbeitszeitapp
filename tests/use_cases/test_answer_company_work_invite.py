@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 
 from .base_test_case import BaseTestCase
-from .repositories import EntityStorage
+from .repositories import MockDatabase
 
 
 class AnwerCompanyWorkInviteTests(BaseTestCase):
@@ -17,8 +17,8 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         super().setUp()
         self.answer_company_work_invite = self.injector.get(AnswerCompanyWorkInvite)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.entity_storage = self.injector.get(EntityStorage)
-        self.company = self.company_generator.create_company_entity()
+        self.mock_database = self.injector.get(MockDatabase)
+        self.company = self.company_generator.create_company_record()
         self.member = self.member_generator.create_member()
 
     def test_trying_to_answer_non_existing_invite_is_unsuccessful(self) -> None:
@@ -78,7 +78,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.entity_storage.get_members().working_at_company(
+                for worker in self.mock_database.get_members().working_at_company(
                     self.company.id
                 )
             },
@@ -107,7 +107,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
             self.member,
             {
                 worker.id
-                for worker in self.entity_storage.get_members().working_at_company(
+                for worker in self.mock_database.get_members().working_at_company(
                     self.company.id
                 )
             },

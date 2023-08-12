@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
@@ -33,7 +33,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_company_id_is_returned(self):
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.show_a_account_details(company.id)
         assert response.company_id == company.id
 
@@ -142,7 +142,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.show_a_account_details(company.id)
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
@@ -205,7 +205,7 @@ class UseCaseTester(BaseTestCase):
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
         worker3 = self.member_generator.create_member()
-        own_company = self.company_generator.create_company_entity(
+        own_company = self.company_generator.create_company_record(
             workers=[worker1, worker2, worker3]
         )
 

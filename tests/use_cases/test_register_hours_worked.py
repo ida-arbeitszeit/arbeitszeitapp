@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
@@ -8,21 +8,19 @@ from arbeitszeit.use_cases.register_hours_worked import (
 )
 
 from .base_test_case import BaseTestCase
-from .repositories import EntityStorage
 
 
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
-        self.entity_storage = self.injector.get(EntityStorage)
 
     def test_that_request_is_rejected_if_worker_is_not_member_of_company(
         self,
     ) -> None:
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker1])
+        company = self.company_generator.create_company_record(workers=[worker1])
         response = self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker2, hours_worked=Decimal(50))
         )
@@ -34,7 +32,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_requrest_is_granted_when_worker_is_member_of_company(self) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         amount_to_transfer = Decimal(50)
         response = self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -47,7 +45,7 @@ class UseCaseTester(BaseTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         hours_worked = Decimal(50)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
@@ -60,7 +58,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_request_with_negative_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         response = self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("-1"))
         )
@@ -68,7 +66,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_request_with_zero_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         response = self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("0"))
         )
@@ -78,7 +76,7 @@ class UseCaseTester(BaseTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         response = self.register_hours_worked(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("0"))
         )
@@ -91,7 +89,7 @@ class UseCaseTester(BaseTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         self.plan_generator.create_plan(
             is_public_service=True,
             costs=ProductionCosts(

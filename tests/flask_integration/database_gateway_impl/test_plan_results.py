@@ -5,9 +5,9 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan, ProductionCosts
+from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
@@ -168,7 +168,7 @@ class GetActivePlansTests(FlaskTestCase):
     ) -> None:
         planner_names = ["1_name", "B_name", "d_name", "c_name"]
         planners = [
-            self.company_generator.create_company_entity(name=name)
+            self.company_generator.create_company_record(name=name)
             for name in planner_names
         ]
         plans: List[Plan] = list()
@@ -691,7 +691,7 @@ class JoinedWithPlannerAndCooperatingPlansTests(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(
             cooperation=cooperation,
-            costs=entities.ProductionCosts(
+            costs=records.ProductionCosts(
                 means_cost=Decimal(1),
                 resource_cost=Decimal(2),
                 labour_cost=Decimal(3),

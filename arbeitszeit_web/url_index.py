@@ -12,7 +12,7 @@ from decimal import Decimal
 from typing import Optional, Protocol
 from uuid import UUID
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit_web.session import Session, UserRole
 
 

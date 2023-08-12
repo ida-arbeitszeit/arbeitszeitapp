@@ -51,8 +51,8 @@ class InviteWorkerTests(BaseTestCase):
         self.assertTrue(response.is_success)
 
     def test_can_invite_same_worker_to_different_companies(self) -> None:
-        first_company = self.company_generator.create_company_entity()
-        second_company = self.company_generator.create_company_entity()
+        first_company = self.company_generator.create_company_record()
+        second_company = self.company_generator.create_company_record()
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(
                 company=first_company.id,

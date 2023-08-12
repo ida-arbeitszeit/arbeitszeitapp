@@ -1,8 +1,8 @@
 from typing import Callable, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import ProductionCosts
 from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
@@ -141,7 +141,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company_record()
         request = self.create_request(draft=draft, filing_company=other_company.id)
         self.use_case.file_plan_with_accounting(request)
         response = (
@@ -155,7 +155,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company_record()
         request = self.create_request(draft=draft, filing_company=other_company.id)
         response = self.use_case.file_plan_with_accounting(request)
         self.assertFalse(response.is_plan_successfully_filed)
@@ -164,7 +164,7 @@ class UseCaseTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         draft = self.create_draft()
-        other_company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company_record()
         self.use_case.file_plan_with_accounting(
             request=self.create_request(draft=draft, filing_company=other_company.id)
         )

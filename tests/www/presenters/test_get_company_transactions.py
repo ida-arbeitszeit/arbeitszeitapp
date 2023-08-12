@@ -4,7 +4,7 @@ from typing import Optional
 
 from dateutil import tz
 
-from arbeitszeit.entities import AccountTypes
+from arbeitszeit.records import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_company_transactions import (
     GetCompanyTransactionsResponse,

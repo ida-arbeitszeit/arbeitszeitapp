@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from arbeitszeit.entities import ProductionCosts, SocialAccounting
+from arbeitszeit.records import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
 from tests.data_generators import TransactionGenerator
@@ -18,27 +18,27 @@ class UseCaseTester(BaseTestCase):
 
     def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.show_r_account_details(company.id)
         assert not response.transactions
 
     def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_r_account_details(company.id)
         assert response.account_balance == 0
 
     def test_company_id_is_returned(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_r_account_details(company.id)
         assert response.company_id == company.id
 
     def test_that_no_info_is_generated_after_selling_of_consumer_product(self) -> None:
-        member = self.member_generator.create_member_entity()
-        company = self.company_generator.create_company_entity()
+        member = self.member_generator.create_member_record()
+        company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
             sending_account=member.account,
@@ -51,8 +51,8 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
+        company1 = self.company_generator.create_company_record()
+        company2 = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
             sending_account=company1.means_account,
@@ -65,7 +65,7 @@ class UseCaseTester(BaseTestCase):
         assert not response.transactions
 
     def test_that_no_info_is_generated_when_credit_for_p_is_granted(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -117,7 +117,7 @@ class UseCaseTester(BaseTestCase):
         )
 
     def test_that_correct_info_is_generated_when_credit_for_r_is_granted(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
@@ -138,8 +138,8 @@ class UseCaseTester(BaseTestCase):
         assert response.account_balance == Decimal(8.5)
 
     def test_that_correct_info_for_is_generated_after_company_buying_r(self) -> None:
-        company1 = self.company_generator.create_company_entity()
-        company2 = self.company_generator.create_company_entity()
+        company1 = self.company_generator.create_company_record()
+        company2 = self.company_generator.create_company_record()
 
         trans = self.transaction_generator.create_transaction(
             sending_account=company1.raw_material_account,
@@ -156,7 +156,7 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
 
         response = self.show_r_account_details(company.id)
         assert not response.plot.timestamps
@@ -165,8 +165,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_after_paying_of_liquid_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_entity()
-        other_company = self.company_generator.create_company_entity()
+        own_company = self.company_generator.create_company_record()
+        other_company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
             sending_account=own_company.raw_material_account,
@@ -182,8 +182,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_paying_of_two_liquid_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_entity()
-        other_company = self.company_generator.create_company_entity()
+        own_company = self.company_generator.create_company_record()
+        other_company = self.company_generator.create_company_record()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=own_company.raw_material_account,
@@ -214,8 +214,8 @@ class UseCaseTester(BaseTestCase):
     def test_that_plotting_info_is_generated_in_the_correct_order_after_paying_of_three_liquid_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_entity()
-        other_company = self.company_generator.create_company_entity()
+        own_company = self.company_generator.create_company_record()
+        other_company = self.company_generator.create_company_record()
 
         trans1 = self.transaction_generator.create_transaction(
             sending_account=own_company.raw_material_account,
@@ -252,7 +252,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_receiving_of_credit_for_liquid_means_of_production(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         trans = self.transaction_generator.create_transaction(
             sending_account=self.social_accounting.account,
             receiving_account=company.raw_material_account,

@@ -23,7 +23,7 @@ from sqlalchemy.sql.expression import and_, case, func, or_, update
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.models import (
     Account,
@@ -68,7 +68,7 @@ class FlaskQueryResult(Generic[T]):
         return self.query.count()
 
 
-class PlanQueryResult(FlaskQueryResult[entities.Plan]):
+class PlanQueryResult(FlaskQueryResult[records.Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> PlanQueryResult:
         ordering = models.Plan.plan_creation_date
         if not ascending:
@@ -229,16 +229,16 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
                 lambda query: query.filter(models.Plan.requested_cooperation != None)
             )
 
-    def get_statistics(self) -> entities.PlanningStatistics:
+    def get_statistics(self) -> records.PlanningStatistics:
         result = self.query.with_entities(
             func.avg(models.Plan.timeframe).label("duration"),
             func.sum(models.Plan.costs_p).label("costs_p"),
             func.sum(models.Plan.costs_r).label("costs_r"),
             func.sum(models.Plan.costs_a).label("costs_a"),
         ).first()
-        return entities.PlanningStatistics(
+        return records.PlanningStatistics(
             average_plan_duration_in_days=result.duration or Decimal(0),
-            total_planned_costs=entities.ProductionCosts(
+            total_planned_costs=records.ProductionCosts(
                 means_cost=result.costs_p or Decimal(0),
                 resource_cost=result.costs_r or Decimal(0),
                 labour_cost=result.costs_a or Decimal(0),
@@ -253,7 +253,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
     def joined_with_planner_and_cooperating_plans(
         self, timestamp: datetime
     ) -> FlaskQueryResult[
-        Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]
+        Tuple[records.Plan, records.Company, List[records.PlanSummary]]
     ]:
         planner = aliased(models.Company)
         cooperating_plan = aliased(models.Plan)
@@ -298,7 +298,7 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
 
     def joined_with_provided_product_amount(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.Plan, int]]:
+    ) -> FlaskQueryResult[Tuple[records.Plan, int]]:
         company_purchases = (
             models.CompanyPurchase.query.filter(
                 models.CompanyPurchase.plan_id == models.Plan.id
@@ -335,10 +335,10 @@ class PlanQueryResult(FlaskQueryResult[entities.Plan]):
     @classmethod
     def _map_result_with_plan_and_company_and_cooperating_plans(
         self, orm: Any
-    ) -> Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]:
+    ) -> Tuple[records.Plan, records.Company, List[records.PlanSummary]]:
         if any(orm[2]):
             cooperating_plans = list(
-                entities.PlanSummary(
+                records.PlanSummary(
                     production_costs=cost,
                     duration_in_days=duration,
                     amount=amount,
@@ -451,7 +451,7 @@ class PlanUpdate:
         )
 
 
-class PlanDraftResult(FlaskQueryResult[entities.PlanDraft]):
+class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.PlanDraft.id == str(id_))
@@ -523,7 +523,7 @@ class PlanDraftUpdate:
         return self.db.session.execute(sql_statement).rowcount  # type: ignore
 
 
-class MemberQueryResult(FlaskQueryResult[entities.Member]):
+class MemberQueryResult(FlaskQueryResult[records.Member]):
     def working_at_company(self, company: UUID) -> MemberQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.workplaces.any(id=str(company)))
@@ -553,7 +553,7 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
 
     def joined_with_email_address(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.Member, entities.EmailAddress]]:
+    ) -> FlaskQueryResult[Tuple[records.Member, records.EmailAddress]]:
         def mapper(row):
             member_orm, email_orm = row
             return (
@@ -572,7 +572,7 @@ class MemberQueryResult(FlaskQueryResult[entities.Member]):
         )
 
 
-class CompanyQueryResult(FlaskQueryResult[entities.Company]):
+class CompanyQueryResult(FlaskQueryResult[records.Company]):
     def with_id(self, id_: UUID) -> CompanyQueryResult:
         return self._with_modified_query(
             lambda query: query.filter(models.Company.id == str(id_))
@@ -624,7 +624,7 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
 
     def joined_with_email_address(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.Company, entities.EmailAddress]]:
+    ) -> FlaskQueryResult[Tuple[records.Company, records.EmailAddress]]:
         def mapper(row):
             company_orm, email_orm = row
             return (
@@ -643,7 +643,7 @@ class CompanyQueryResult(FlaskQueryResult[entities.Company]):
         )
 
 
-class AccountantResult(FlaskQueryResult[entities.Accountant]):
+class AccountantResult(FlaskQueryResult[records.Accountant]):
     def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
@@ -658,7 +658,7 @@ class AccountantResult(FlaskQueryResult[entities.Accountant]):
         )
 
 
-class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
+class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
     def where_account_is_sender_or_receiver(
         self, *account: UUID
     ) -> TransactionQueryResult:
@@ -737,7 +737,7 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
     def joined_with_sender_and_receiver(
         self,
     ) -> FlaskQueryResult[
-        Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]
+        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
     ]:
         sender_member = aliased(models.Member)
         sender_company = aliased(models.Company)
@@ -804,7 +804,7 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
     @classmethod
     def map_transaction_and_sender_and_receiver(
         cls, orm: Any
-    ) -> Tuple[entities.Transaction, entities.AccountOwner, entities.AccountOwner]:
+    ) -> Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]:
         (
             transaction,
             sending_member,
@@ -814,8 +814,8 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
             receiver_company,
             receiver_social_accounting,
         ) = orm
-        sender: entities.AccountOwner
-        receiver: entities.AccountOwner
+        sender: records.AccountOwner
+        receiver: records.AccountOwner
         if sending_member:
             sender = DatabaseGatewayImpl.member_from_orm(sending_member)
         elif sending_company:
@@ -839,7 +839,7 @@ class TransactionQueryResult(FlaskQueryResult[entities.Transaction]):
         )
 
 
-class AccountQueryResult(FlaskQueryResult[entities.Account]):
+class AccountQueryResult(FlaskQueryResult[records.Account]):
     def with_id(self, *id_: UUID) -> AccountQueryResult:
         ids = list(map(str, id_))
         return self._with_modified_query(
@@ -888,7 +888,7 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
 
     def joined_with_owner(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.Account, entities.AccountOwner]]:
+    ) -> FlaskQueryResult[Tuple[records.Account, records.AccountOwner]]:
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
@@ -917,7 +917,7 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
             db=self.db,
         )
 
-    def joined_with_balance(self) -> FlaskQueryResult[Tuple[entities.Account, Decimal]]:
+    def joined_with_balance(self) -> FlaskQueryResult[Tuple[records.Account, Decimal]]:
         transaction = aliased(models.Transaction)
         query = (
             self.query.join(
@@ -956,14 +956,14 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
     @classmethod
-    def map_account_and_balance(cls, orm: Any) -> Tuple[entities.Account, Decimal]:
+    def map_account_and_balance(cls, orm: Any) -> Tuple[records.Account, Decimal]:
         return DatabaseGatewayImpl.account_from_orm(orm[0]), orm[1] or Decimal(0)
 
     @classmethod
     def map_account_and_owner(
         cls, orm: Any
-    ) -> Tuple[entities.Account, entities.AccountOwner]:
-        owner: entities.AccountOwner
+    ) -> Tuple[records.Account, records.AccountOwner]:
+        owner: records.AccountOwner
         account, member, company, social_accounting = orm
         if member:
             owner = DatabaseGatewayImpl.member_from_orm(member)
@@ -977,7 +977,7 @@ class AccountQueryResult(FlaskQueryResult[entities.Account]):
         )
 
 
-class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
+class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
     def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
@@ -1011,11 +1011,11 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
-        Tuple[entities.CompanyPurchase, entities.Transaction, entities.Plan]
+        Tuple[records.CompanyPurchase, records.Transaction, records.Plan]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[entities.CompanyPurchase, entities.Transaction, entities.Plan]:
+        ) -> Tuple[records.CompanyPurchase, records.Transaction, records.Plan]:
             purchase_orm, transaction_orm, plan_orm = orm
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
@@ -1037,10 +1037,10 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
 
     def joined_with_transaction(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.CompanyPurchase, entities.Transaction]]:
+    ) -> FlaskQueryResult[Tuple[records.CompanyPurchase, records.Transaction]]:
         def mapper(
             orm,
-        ) -> Tuple[entities.CompanyPurchase, entities.Transaction]:
+        ) -> Tuple[records.CompanyPurchase, records.Transaction]:
             purchase_orm, transaction_orm = orm
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
@@ -1059,11 +1059,11 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
     def joined_with_transaction_and_provider(
         self,
     ) -> FlaskQueryResult[
-        Tuple[entities.CompanyPurchase, entities.Transaction, entities.Company]
+        Tuple[records.CompanyPurchase, records.Transaction, records.Company]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[entities.CompanyPurchase, entities.Transaction, entities.Company]:
+        ) -> Tuple[records.CompanyPurchase, records.Transaction, records.Company]:
             purchase_orm, transaction_orm, provider_orm = orm
             return (
                 DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
@@ -1086,7 +1086,7 @@ class CompanyPurchaseResult(FlaskQueryResult[entities.CompanyPurchase]):
         )
 
 
-class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
+class ConsumerPurchaseResult(FlaskQueryResult[records.ConsumerPurchase]):
     def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
@@ -1117,11 +1117,11 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
-        Tuple[entities.ConsumerPurchase, entities.Transaction, entities.Plan]
+        Tuple[records.ConsumerPurchase, records.Transaction, records.Plan]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[entities.ConsumerPurchase, entities.Transaction, entities.Plan]:
+        ) -> Tuple[records.ConsumerPurchase, records.Transaction, records.Plan]:
             purchase_orm, transaction_orm, plan_orm = orm
             return (
                 DatabaseGatewayImpl.consumer_purchase_from_orm(purchase_orm),
@@ -1142,7 +1142,7 @@ class ConsumerPurchaseResult(FlaskQueryResult[entities.ConsumerPurchase]):
         )
 
 
-class CooperationResult(FlaskQueryResult[entities.Cooperation]):
+class CooperationResult(FlaskQueryResult[records.Cooperation]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Cooperation.id == str(id_))
@@ -1174,10 +1174,10 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
 
     def joined_with_current_coordinator(
         self,
-    ) -> FlaskQueryResult[Tuple[entities.Cooperation, entities.Company]]:
+    ) -> FlaskQueryResult[Tuple[records.Cooperation, records.Company]]:
         def mapper(
             orm,
-        ) -> Tuple[entities.Cooperation, entities.Company]:
+        ) -> Tuple[records.Cooperation, records.Company]:
             cooperation_orm, company_orm = orm
             return (
                 DatabaseGatewayImpl.cooperation_from_orm(cooperation_orm),
@@ -1206,7 +1206,7 @@ class CooperationResult(FlaskQueryResult[entities.Cooperation]):
         )
 
 
-class CompanyWorkInviteResult(FlaskQueryResult[entities.CompanyWorkInvite]):
+class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
     def with_id(self, id: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.CompanyWorkInvite.id == str(id))
@@ -1226,7 +1226,7 @@ class CompanyWorkInviteResult(FlaskQueryResult[entities.CompanyWorkInvite]):
         self.query.delete()
 
 
-class EmailAddressResult(FlaskQueryResult[entities.EmailAddress]):
+class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Email.address.in_(addresses))
@@ -1292,13 +1292,13 @@ class AccountingRepository:
     @classmethod
     def social_accounting_from_orm(
         cls, accounting_orm: SocialAccounting
-    ) -> entities.SocialAccounting:
-        return entities.SocialAccounting(
+    ) -> records.SocialAccounting:
+        return records.SocialAccounting(
             account=UUID(accounting_orm.account),
             id=UUID(accounting_orm.id),
         )
 
-    def get_or_create_social_accounting(self) -> entities.SocialAccounting:
+    def get_or_create_social_accounting(self) -> records.SocialAccounting:
         return self.social_accounting_from_orm(
             self.get_or_create_social_accounting_orm()
         )
@@ -1314,7 +1314,7 @@ class AccountingRepository:
             self.db.session.add(social_accounting)
         return social_accounting
 
-    def get_by_id(self, id: UUID) -> Optional[entities.SocialAccounting]:
+    def get_by_id(self, id: UUID) -> Optional[records.SocialAccounting]:
         accounting_orm = SocialAccounting.query.filter_by(id=str(id)).first()
         if accounting_orm is None:
             return None
@@ -1327,7 +1327,7 @@ class DatabaseGatewayImpl:
 
     def create_company_purchase(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> entities.CompanyPurchase:
+    ) -> records.CompanyPurchase:
         orm = models.CompanyPurchase(
             plan_id=str(plan),
             transaction_id=str(transaction),
@@ -1347,8 +1347,8 @@ class DatabaseGatewayImpl:
     @classmethod
     def company_purchase_from_orm(
         cls, orm: models.CompanyPurchase
-    ) -> entities.CompanyPurchase:
-        return entities.CompanyPurchase(
+    ) -> records.CompanyPurchase:
+        return records.CompanyPurchase(
             id=orm.id,
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),
@@ -1357,7 +1357,7 @@ class DatabaseGatewayImpl:
 
     def create_consumer_purchase(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> entities.ConsumerPurchase:
+    ) -> records.ConsumerPurchase:
         orm = models.ConsumerPurchase(
             id=str(uuid4()),
             amount=amount,
@@ -1378,8 +1378,8 @@ class DatabaseGatewayImpl:
     @classmethod
     def consumer_purchase_from_orm(
         self, orm: models.ConsumerPurchase
-    ) -> entities.ConsumerPurchase:
-        return entities.ConsumerPurchase(
+    ) -> records.ConsumerPurchase:
+        return records.ConsumerPurchase(
             id=UUID(orm.id),
             amount=orm.amount,
             plan_id=UUID(orm.plan_id),
@@ -1397,14 +1397,14 @@ class DatabaseGatewayImpl:
         self,
         creation_timestamp: datetime,
         planner: UUID,
-        production_costs: entities.ProductionCosts,
+        production_costs: records.ProductionCosts,
         product_name: str,
         distribution_unit: str,
         amount_produced: int,
         product_description: str,
         duration_in_days: int,
         is_public_service: bool,
-    ) -> entities.Plan:
+    ) -> records.Plan:
         plan = models.Plan(
             id=str(uuid4()),
             plan_creation_date=creation_timestamp,
@@ -1425,13 +1425,13 @@ class DatabaseGatewayImpl:
         return self.plan_from_orm(plan)
 
     @classmethod
-    def plan_from_orm(cls, plan: models.Plan) -> entities.Plan:
-        production_costs = entities.ProductionCosts(
+    def plan_from_orm(cls, plan: models.Plan) -> records.Plan:
+        production_costs = records.ProductionCosts(
             labour_cost=plan.costs_a,
             resource_cost=plan.costs_r,
             means_cost=plan.costs_p,
         )
-        return entities.Plan(
+        return records.Plan(
             id=UUID(plan.id),
             plan_creation_date=plan.plan_creation_date,
             planner=UUID(plan.planner),
@@ -1457,7 +1457,7 @@ class DatabaseGatewayImpl:
         creation_timestamp: datetime,
         name: str,
         definition: str,
-    ) -> entities.Cooperation:
+    ) -> records.Cooperation:
         cooperation = models.Cooperation(
             creation_date=creation_timestamp,
             name=name,
@@ -1475,8 +1475,8 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def cooperation_from_orm(self, orm: models.Cooperation) -> entities.Cooperation:
-        return entities.Cooperation(
+    def cooperation_from_orm(self, orm: models.Cooperation) -> records.Cooperation:
+        return records.Cooperation(
             id=UUID(orm.id),
             creation_date=orm.creation_date,
             name=orm.name,
@@ -1485,7 +1485,7 @@ class DatabaseGatewayImpl:
 
     def create_coordination_tenure(
         self, company: UUID, cooperation: UUID, start_date: datetime
-    ) -> entities.CoordinationTenure:
+    ) -> records.CoordinationTenure:
         coordination = models.CoordinationTenure(
             company=str(company), cooperation=str(cooperation), start_date=start_date
         )
@@ -1496,8 +1496,8 @@ class DatabaseGatewayImpl:
     @classmethod
     def coordination_tenure_from_orm(
         self, orm: models.CoordinationTenure
-    ) -> entities.CoordinationTenure:
-        return entities.CoordinationTenure(
+    ) -> records.CoordinationTenure:
+        return records.CoordinationTenure(
             id=UUID(orm.id),
             company=UUID(orm.company),
             cooperation=UUID(orm.cooperation),
@@ -1505,8 +1505,8 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def transaction_from_orm(cls, transaction: Transaction) -> entities.Transaction:
-        return entities.Transaction(
+    def transaction_from_orm(cls, transaction: Transaction) -> records.Transaction:
+        return records.Transaction(
             id=UUID(transaction.id),
             date=transaction.date,
             sending_account=UUID(transaction.sending_account),
@@ -1524,7 +1524,7 @@ class DatabaseGatewayImpl:
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
-    ) -> entities.Transaction:
+    ) -> records.Transaction:
         transaction = Transaction(
             id=str(uuid4()),
             date=date,
@@ -1554,7 +1554,7 @@ class DatabaseGatewayImpl:
 
     def create_company_work_invite(
         self, company: UUID, member: UUID
-    ) -> entities.CompanyWorkInvite:
+    ) -> records.CompanyWorkInvite:
         orm = models.CompanyWorkInvite(
             id=str(uuid4()),
             company=str(company),
@@ -1566,16 +1566,16 @@ class DatabaseGatewayImpl:
     @classmethod
     def company_work_invite_from_orm(
         cls, orm: models.CompanyWorkInvite
-    ) -> entities.CompanyWorkInvite:
-        return entities.CompanyWorkInvite(
+    ) -> records.CompanyWorkInvite:
+        return records.CompanyWorkInvite(
             id=UUID(orm.id),
             member=UUID(orm.member),
             company=UUID(orm.company),
         )
 
     @classmethod
-    def member_from_orm(cls, orm_object: Member) -> entities.Member:
-        return entities.Member(
+    def member_from_orm(cls, orm_object: Member) -> records.Member:
+        return records.Member(
             id=UUID(orm_object.id),
             name=orm_object.name,
             account=UUID(orm_object.account),
@@ -1590,9 +1590,9 @@ class DatabaseGatewayImpl:
         email: str,
         name: str,
         password_hash: str,
-        account: entities.Account,
+        account: records.Account,
         registered_on: datetime,
-    ) -> entities.Member:
+    ) -> records.Member:
         user_orm = self._get_or_create_user(
             email=email, password_hash=password_hash, email_confirmed_on=None
         )
@@ -1635,8 +1635,8 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def company_from_orm(cls, company_orm: Company) -> entities.Company:
-        return entities.Company(
+    def company_from_orm(cls, company_orm: Company) -> records.Company:
+        return records.Company(
             id=UUID(company_orm.id),
             email=company_orm.user.email_address,
             name=company_orm.name,
@@ -1653,12 +1653,12 @@ class DatabaseGatewayImpl:
         email: str,
         name: str,
         password_hash: str,
-        means_account: entities.Account,
-        labour_account: entities.Account,
-        resource_account: entities.Account,
-        products_account: entities.Account,
+        means_account: records.Account,
+        labour_account: records.Account,
+        resource_account: records.Account,
+        products_account: records.Account,
         registered_on: datetime,
-    ) -> entities.Company:
+    ) -> records.Company:
         user_orm = self._get_or_create_user(
             email=email, password_hash=password_hash, email_confirmed_on=None
         )
@@ -1704,8 +1704,8 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def accountant_from_orm(self, orm: models.Accountant) -> entities.Accountant:
-        return entities.Accountant(
+    def accountant_from_orm(self, orm: models.Accountant) -> records.Accountant:
+        return records.Accountant(
             email_address=orm.user.email_address,
             name=orm.name,
             id=UUID(orm.id),
@@ -1713,8 +1713,8 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def email_address_from_orm(self, orm: models.Email) -> entities.EmailAddress:
-        return entities.EmailAddress(
+    def email_address_from_orm(self, orm: models.Email) -> records.EmailAddress:
+        return records.EmailAddress(
             orm.address,
             confirmed_on=orm.confirmed_on,
         )
@@ -1728,7 +1728,7 @@ class DatabaseGatewayImpl:
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
-    ) -> entities.EmailAddress:
+    ) -> records.EmailAddress:
         orm = models.Email(address=address, confirmed_on=confirmed_on)
         self.db.session.add(orm)
         if (
@@ -1745,13 +1745,13 @@ class DatabaseGatewayImpl:
         planner: UUID,
         product_name: str,
         description: str,
-        costs: entities.ProductionCosts,
+        costs: records.ProductionCosts,
         production_unit: str,
         amount: int,
         timeframe_in_days: int,
         is_public_service: bool,
         creation_timestamp: datetime,
-    ) -> entities.PlanDraft:
+    ) -> records.PlanDraft:
         orm = PlanDraft(
             id=str(uuid4()),
             plan_creation_date=creation_timestamp,
@@ -1777,12 +1777,12 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> entities.PlanDraft:
-        return entities.PlanDraft(
+    def plan_draft_from_orm(cls, orm: models.PlanDraft) -> records.PlanDraft:
+        return records.PlanDraft(
             id=orm.id,
             creation_date=orm.plan_creation_date,
             planner=UUID(orm.planner),
-            production_costs=entities.ProductionCosts(
+            production_costs=records.ProductionCosts(
                 labour_cost=orm.costs_a,
                 resource_cost=orm.costs_r,
                 means_cost=orm.costs_p,
@@ -1796,12 +1796,12 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def account_from_orm(cls, account_orm: Account) -> entities.Account:
-        return entities.Account(
+    def account_from_orm(cls, account_orm: Account) -> records.Account:
+        return records.Account(
             id=UUID(account_orm.id),
         )
 
-    def create_account(self) -> entities.Account:
+    def create_account(self) -> records.Account:
         account = Account(id=str(uuid4()))
         self.db.session.add(account)
         return self.account_from_orm(account)

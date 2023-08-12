@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import (
     calculate_average_costs,
@@ -104,9 +104,9 @@ class QueryPlans:
 
     def _plan_to_response_model(
         self,
-        plan: entities.Plan,
-        planner: entities.Company,
-        cooperating_plans: List[entities.PlanSummary],
+        plan: records.Plan,
+        planner: records.Company,
+        cooperating_plans: List[records.PlanSummary],
     ) -> QueriedPlan:
         if cooperating_plans:
             price_per_unit = calculate_average_costs(cooperating_plans)

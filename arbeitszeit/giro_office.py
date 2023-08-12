@@ -6,7 +6,7 @@ from uuid import UUID
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Member, Transaction
+from arbeitszeit.records import Member, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 
 

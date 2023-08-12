@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import Member
+from arbeitszeit.records import Member
 from arbeitszeit.repositories import DatabaseGateway
 
 

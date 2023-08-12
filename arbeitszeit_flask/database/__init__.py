@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import wraps
 from typing import Any, Callable
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit_flask.extensions import db
 
 from .repositories import AccountingRepository
@@ -16,7 +16,7 @@ __all__ = [
 
 def get_social_accounting(
     accounting_repo: AccountingRepository,
-) -> entities.SocialAccounting:
+) -> records.SocialAccounting:
     return accounting_repo.get_or_create_social_accounting()
 
 
