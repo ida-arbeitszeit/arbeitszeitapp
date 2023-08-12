@@ -1,0 +1,62 @@
+from _typeshed import Incomplete
+from enum import IntEnum
+
+class HTTPStatus(IntEnum):
+    def __new__(cls, value, phrase, description: str = ...): ...
+    CONTINUE: Incomplete
+    SWITCHING_PROTOCOLS: Incomplete
+    PROCESSING: Incomplete
+    OK: Incomplete
+    CREATED: Incomplete
+    ACCEPTED: Incomplete
+    NON_AUTHORITATIVE_INFORMATION: Incomplete
+    NO_CONTENT: Incomplete
+    RESET_CONTENT: Incomplete
+    PARTIAL_CONTENT: Incomplete
+    MULTI_STATUS: Incomplete
+    ALREADY_REPORTED: Incomplete
+    IM_USED: Incomplete
+    MULTIPLE_CHOICES: Incomplete
+    MOVED_PERMANENTLY: Incomplete
+    FOUND: Incomplete
+    SEE_OTHER: Incomplete
+    NOT_MODIFIED: Incomplete
+    USE_PROXY: Incomplete
+    TEMPORARY_REDIRECT: Incomplete
+    PERMANENT_REDIRECT: Incomplete
+    BAD_REQUEST: Incomplete
+    UNAUTHORIZED: Incomplete
+    PAYMENT_REQUIRED: Incomplete
+    FORBIDDEN: Incomplete
+    NOT_FOUND: Incomplete
+    METHOD_NOT_ALLOWED: Incomplete
+    NOT_ACCEPTABLE: Incomplete
+    PROXY_AUTHENTICATION_REQUIRED: Incomplete
+    REQUEST_TIMEOUT: Incomplete
+    CONFLICT: Incomplete
+    GONE: Incomplete
+    LENGTH_REQUIRED: Incomplete
+    PRECONDITION_FAILED: Incomplete
+    REQUEST_ENTITY_TOO_LARGE: Incomplete
+    REQUEST_URI_TOO_LONG: Incomplete
+    UNSUPPORTED_MEDIA_TYPE: Incomplete
+    REQUESTED_RANGE_NOT_SATISFIABLE: Incomplete
+    EXPECTATION_FAILED: Incomplete
+    UNPROCESSABLE_ENTITY: Incomplete
+    LOCKED: Incomplete
+    FAILED_DEPENDENCY: Incomplete
+    UPGRADE_REQUIRED: Incomplete
+    PRECONDITION_REQUIRED: Incomplete
+    TOO_MANY_REQUESTS: Incomplete
+    REQUEST_HEADER_FIELDS_TOO_LARGE: Incomplete
+    INTERNAL_SERVER_ERROR: Incomplete
+    NOT_IMPLEMENTED: Incomplete
+    BAD_GATEWAY: Incomplete
+    SERVICE_UNAVAILABLE: Incomplete
+    GATEWAY_TIMEOUT: Incomplete
+    HTTP_VERSION_NOT_SUPPORTED: Incomplete
+    VARIANT_ALSO_NEGOTIATES: Incomplete
+    INSUFFICIENT_STORAGE: Incomplete
+    LOOP_DETECTED: Incomplete
+    NOT_EXTENDED: Incomplete
+    NETWORK_AUTHENTICATION_REQUIRED: Incomplete

@@ -1,0 +1,3 @@
+from typing import Any
+
+def convert_ttf_to_ps(filename, output, fonttype, glyph_ids) -> Any: ...

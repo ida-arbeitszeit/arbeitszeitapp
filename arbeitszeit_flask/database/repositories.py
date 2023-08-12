@@ -17,9 +17,9 @@ from typing import (
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, case, func, or_, update
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import and_, case, func, or_, update
 from sqlalchemy.sql.functions import concat
 from typing_extensions import Self
 

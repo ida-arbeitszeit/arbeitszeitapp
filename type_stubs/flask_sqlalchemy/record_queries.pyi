@@ -1,0 +1,16 @@
+import typing as t
+
+def get_recorded_queries() -> list[_QueryInfo]: ...
+
+class _QueryInfo:
+    statement: str | None
+    parameters: t.Any
+    start_time: float
+    end_time: float
+    location: str
+    @property
+    def duration(self) -> float: ...
+    @property
+    def context(self) -> str: ...
+    def __getitem__(self, key: int) -> object: ...
+    def __init__(self, statement, parameters, start_time, end_time, location) -> None: ...

@@ -12,7 +12,7 @@ def initialize_babel(app: Flask) -> None:
 
 def _initialize_babel_2_x(app: Flask) -> None:
     babel = Babel(app)
-    babel.localeselector(get_locale)
+    babel.localeselector(get_locale)  # type: ignore
 
 
 def _initialize_babel_3_x(app: Flask) -> bool:

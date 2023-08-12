@@ -47,7 +47,7 @@ error_msgs = {
 
 
 class FieldMustExist:
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: object) -> None:
         self.message = message
 
     def __call__(self, form, field):
@@ -359,7 +359,7 @@ class PayMeansOfProductionForm(Form):
     )
     choices = [
         ("", ""),
-        ("fixed", trans.lazy_gettext(trans.lazy_gettext("Fixed means of production"))),
+        ("fixed", trans.lazy_gettext("Fixed means of production")),
         (
             "liquid",
             trans.lazy_gettext("Liquid means of production"),
