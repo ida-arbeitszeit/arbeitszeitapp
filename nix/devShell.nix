@@ -8,6 +8,7 @@ mkShell {
     psycopg2
     gunicorn
     types-dateutil
+    types-pytz
     coverage
   ]) ++ [ nixfmt sqlite ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;

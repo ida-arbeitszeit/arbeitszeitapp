@@ -37,12 +37,12 @@ skip = "arbeitszeit_flask/migrations"
 
 [tool.mypy]
 files = [
-    "arbeitszeit/**/*.py",
-    "arbeitszeit_benchmark/**/*.py",
-    "arbeitszeit_development/**/*.py",
-    "arbeitszeit_flask/__init__.py",
-    "arbeitszeit_web/**/*.py",
-    "tests/**/*.py",
+    "arbeitszeit",
+    "arbeitszeit_benchmark",
+    "arbeitszeit_development",
+    "arbeitszeit_flask",
+    "arbeitszeit_web",
+    "tests",
 ]
 mypy_path = "type_stubs"
 exclude = '''
@@ -64,18 +64,21 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
+    "deepdiff.*",
     "flask_babel",
-    "flask_mail",
-    "flask_migrate",
-    "flask_profiler",
-    "flask_sqlalchemy",
-    "flask_talisman",
-    "flask_wtf.*",
+    "flask_login",
     "flask_restx.*",
-    "is_safe_url",
+    "flask_sqlalchemy.*",
+    "flask_wtf",
     "matplotlib.*",
-    "pytz",
+    "parameterized.*",
     "sqlalchemy.*",
-    "wtforms"
+    "wtforms.*",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "sqlalchemy.*",
 ]
 ignore_missing_imports = true
