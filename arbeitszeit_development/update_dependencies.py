@@ -8,6 +8,7 @@ def main() -> None:
     update_bulma()
     update_python_packages.main()
     update_constraints()
+    generate_type_stubs()
 
 
 def update_flake() -> None:
@@ -32,6 +33,19 @@ def update_constraints() -> None:
             "arbeitszeit_development.update_constraints",
         ],
         check=True,
+    )
+
+
+def generate_type_stubs() -> None:
+    subprocess.run(
+        [
+            "nix",
+            "develop",
+            "-c",
+            "python",
+            "-m",
+            "arbeitszeit_development.generate_type_stubs",
+        ]
     )
 
 
