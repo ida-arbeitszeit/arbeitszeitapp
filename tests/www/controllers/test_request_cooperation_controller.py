@@ -1,5 +1,4 @@
 from dataclasses import dataclass, replace
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.request_cooperation import RequestCooperationRequest
@@ -7,10 +6,8 @@ from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
 )
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 
 @dataclass
@@ -30,10 +27,9 @@ fake_form = FakeRequestCooperationForm(
 )
 
 
-class RequestCooperationControllerTests(TestCase):
+class RequestCooperationControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.session = self.injector.get(FakeSession)
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
         self.controller = self.injector.get(RequestCooperationController)
 

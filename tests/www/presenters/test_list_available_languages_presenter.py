@@ -1,18 +1,16 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit_web.www.presenters.list_available_languages_presenter import (
     ListAvailableLanguagesPresenter,
 )
 from tests.language_service import FakeLanguageService
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import LanguageChangerUrlIndexImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(ListAvailableLanguagesPresenter)
         self.language_url_index = self.injector.get(LanguageChangerUrlIndexImpl)
         self.language_service = self.injector.get(FakeLanguageService)

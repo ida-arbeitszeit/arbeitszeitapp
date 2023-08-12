@@ -1,4 +1,3 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -7,14 +6,14 @@ from arbeitszeit_web.www.presenters.register_member_presenter import (
 )
 from tests.forms import RegisterFormImpl
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(RegisterMemberPresenter)
         self.translator = self.injector.get(FakeTranslator)
         self.url_index = self.injector.get(UrlIndexTestImpl)

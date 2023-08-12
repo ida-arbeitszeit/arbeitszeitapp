@@ -8,8 +8,7 @@ from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
-from tests.session import FakeSession
-from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
 from .url_index import UrlIndexTestImpl
@@ -23,7 +22,6 @@ class TestPresenterForPlanner(BaseTestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
-        self.session = self.injector.get(FakeSession)
         self.expected_planner = uuid4()
         self.session.login_company(company=self.expected_planner)
 
@@ -137,7 +135,6 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(uuid4())
 
     def test_action_section_is_not_shown_when_current_user_is_not_planner(self):

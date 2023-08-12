@@ -1,6 +1,5 @@
 from dataclasses import replace
 from decimal import Decimal
-from unittest import TestCase
 
 from arbeitszeit.use_cases.get_statistics import StatisticsResponse
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
@@ -8,8 +7,7 @@ from arbeitszeit_web.www.presenters.get_statistics_presenter import (
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
-
-from .dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 
 TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_companies_count=5,
@@ -27,9 +25,9 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
 )
 
 
-class GetStatisticsPresenterTests(TestCase):
+class GetStatisticsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetStatisticsPresenter)

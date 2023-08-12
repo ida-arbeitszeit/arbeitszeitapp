@@ -1,20 +1,9 @@
 from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
-from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.data_generators import (
-    AccountantGenerator,
-    CompanyGenerator,
-    CooperationGenerator,
-    MemberGenerator,
-    PlanGenerator,
-    PurchaseGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
+from tests.session import FakeSession
 
-from .balance_checker import BalanceChecker
 from .dependency_injection import get_dependency_injector
-from .price_checker import PriceChecker
 
 T = TypeVar("T")
 
@@ -46,7 +35,7 @@ class _lazy_property(Generic[T]):
 
 
 class BaseTestCase(TestCase):
-    "Use case unit tests should inherit from this class."
+    "Wwww unit tests should inherit from this class."
 
     def setUp(self) -> None:
         super().setUp()
@@ -59,14 +48,4 @@ class BaseTestCase(TestCase):
 
     # It would be nice to have the following list sorted
     # alphabetically
-    accountant_generator = _lazy_property(AccountantGenerator)
-    balance_checker = _lazy_property(BalanceChecker)
-    company_generator = _lazy_property(CompanyGenerator)
-    control_thresholds = _lazy_property(ControlThresholdsTestImpl)
-    coop_generator = _lazy_property(CooperationGenerator)
-    cooperation_generator = _lazy_property(CooperationGenerator)
-    datetime_service = _lazy_property(FakeDatetimeService)
-    member_generator = _lazy_property(MemberGenerator)
-    plan_generator = _lazy_property(PlanGenerator)
-    price_checker = _lazy_property(PriceChecker)
-    purchase_generator = _lazy_property(PurchaseGenerator)
+    session = _lazy_property(FakeSession)

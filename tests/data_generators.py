@@ -488,28 +488,6 @@ class CooperationGenerator:
 
 
 @dataclass
-class CoordinationTenureGenerator:
-    datetime_service: FakeDatetimeService
-    company_generator: CompanyGenerator
-    cooperation_generator: CooperationGenerator
-    database_gateway: DatabaseGateway
-
-    def create_coordination_tenure(
-        self, company: Optional[UUID] = None, cooperation: Optional[UUID] = None
-    ) -> entities.CoordinationTenure:
-        if company is None:
-            company = self.company_generator.create_company()
-        if cooperation is None:
-            cooperation = self.cooperation_generator.create_cooperation().id
-        tenure = self.database_gateway.create_coordination_tenure(
-            company=company,
-            cooperation=cooperation,
-            start_date=self.datetime_service.now(),
-        )
-        return tenure
-
-
-@dataclass
 class AccountantGenerator:
     invite_accountant_use_case: SendAccountantRegistrationTokenUseCase
     invite_accountant_presenter: AccountantInvitationPresenterTestImpl

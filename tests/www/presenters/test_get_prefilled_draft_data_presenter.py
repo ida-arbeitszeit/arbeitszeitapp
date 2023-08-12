@@ -6,7 +6,7 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
     GetPrefilledDraftDataPresenter,
 )
 from tests.forms import DraftForm
-from tests.www.presenters.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 from tests.www.presenters.url_index import UrlIndexTestImpl
 

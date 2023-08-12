@@ -3,8 +3,7 @@ from uuid import uuid4
 from arbeitszeit_web.www.controllers.approve_plan_controller import (
     ApprovePlanController,
 )
-
-from .base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class ControllerTests(BaseTestCase):

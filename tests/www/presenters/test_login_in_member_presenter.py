@@ -1,23 +1,20 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from tests.forms import LoginForm
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(LogInMemberPresenter)
-        self.session = self.injector.get(FakeSession)
         self.translator = self.injector.get(FakeTranslator)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.form = LoginForm()

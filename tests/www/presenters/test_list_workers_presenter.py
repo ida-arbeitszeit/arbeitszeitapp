@@ -1,16 +1,14 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.list_workers import ListedWorker, ListWorkersResponse
 from arbeitszeit_web.www.presenters.list_workers_presenter import ListWorkersPresenter
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(ListWorkersPresenter)
 
     def test_that_view_model_does_not_contains_workers_if_response_didnt_either(

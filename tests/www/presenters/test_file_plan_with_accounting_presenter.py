@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
@@ -7,22 +6,20 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
 
-class Tests(TestCase):
+class Tests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(FilePlanWithAccountingPresenter)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(company=uuid4())
 
     def test_view_model_has_redirect_url_with_successful_responses(self) -> None:

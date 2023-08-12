@@ -1,5 +1,4 @@
 from typing import Optional
-from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.show_company_work_invite_details import (
@@ -9,14 +8,14 @@ from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter i
     ShowCompanyWorkInviteDetailsPresenter,
 )
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .url_index import UrlIndexTestImpl
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowCompanyWorkInviteDetailsPresenter)

@@ -1,5 +1,4 @@
 from typing import List
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
@@ -8,10 +7,9 @@ from arbeitszeit_web.www.presenters.end_cooperation_presenter import (
     EndCooperationPresenter,
 )
 from tests.request import FakeRequest
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 from .notifier import NotifierTestImpl
 from .url_index import UrlIndexTestImpl
 
@@ -26,15 +24,14 @@ REJECTED_RESPONSE_COOPERATION_NOT_FOUND = EndCooperationResponse(
 )
 
 
-class PresenterTests(TestCase):
+class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.request = self.injector.get(FakeRequest)
         self.notifier = self.injector.get(NotifierTestImpl)
         self.url_index = self.injector.get(UrlIndexTestImpl)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
-        self.session = self.injector.get(FakeSession)
         self.session.login_company(company=uuid4())
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(

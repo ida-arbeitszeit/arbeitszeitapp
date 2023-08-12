@@ -246,14 +246,6 @@ class CooperationResult(QueryResult[Cooperation], Protocol):
         ...
 
 
-class CoordinationTenureResult(QueryResult[CoordinationTenure], Protocol):
-    def of_cooperation(self, cooperation: UUID) -> Self:
-        ...
-
-    def ordered_by_start_date(self, *, ascending: bool = ...) -> Self:
-        ...
-
-
 class MemberResult(QueryResult[Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
         ...
@@ -488,9 +480,6 @@ class DatabaseGateway(Protocol):
     def create_coordination_tenure(
         self, company: UUID, cooperation: UUID, start_date: datetime
     ) -> CoordinationTenure:
-        ...
-
-    def get_coordination_tenures(self) -> CoordinationTenureResult:
         ...
 
     def get_transactions(self) -> TransactionResult:

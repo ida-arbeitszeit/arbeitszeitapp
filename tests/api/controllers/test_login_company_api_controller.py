@@ -4,7 +4,7 @@ from arbeitszeit_web.api.controllers.login_company_api_controller import (
 )
 from arbeitszeit_web.api.response_errors import BadRequest
 from tests.request import FakeRequest
-from tests.www.controllers.base_test_case import BaseTestCase
+from tests.www.base_test_case import BaseTestCase
 
 
 class ControllerTests(BaseTestCase):

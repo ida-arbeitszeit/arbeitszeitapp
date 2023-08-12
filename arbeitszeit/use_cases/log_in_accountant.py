@@ -32,7 +32,7 @@ class LogInAccountantUseCase:
     def log_in_accountant(self, request: Request) -> Response:
         accountant = (
             self.database.get_accountants()
-            .with_email_address(request.email_address)
+            .with_email_address(request.email_address.strip())
             .first()
         )
         if accountant is None:

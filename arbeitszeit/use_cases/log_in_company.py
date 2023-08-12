@@ -33,7 +33,7 @@ class LogInCompanyUseCase:
     def log_in_company(self, request: Request) -> Response:
         company = (
             self.database.get_companies()
-            .with_email_address(request.email_address)
+            .with_email_address(request.email_address.strip())
             .first()
         )
         if company is None:

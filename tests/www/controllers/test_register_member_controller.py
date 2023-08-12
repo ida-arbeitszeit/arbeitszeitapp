@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 from typing import Optional
-from unittest import TestCase
 
 from arbeitszeit_web.www.controllers.register_member_controller import (
     RegisterMemberController,
 )
 from tests.forms import RegisterFormImpl
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class RegisterMemberControllerTests(TestCase):
+class RegisterMemberControllerTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.controller = self.injector.get(RegisterMemberController)
 
     def test_that_strings_are_taken_as_literal_strings_in_request(

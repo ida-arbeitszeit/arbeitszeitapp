@@ -1,16 +1,17 @@
-from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit import entities
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccount
+from arbeitszeit.use_cases.register_hours_worked import (
+    RegisterHoursWorked,
+    RegisterHoursWorkedRequest,
+)
 from tests.data_generators import (
     CompanyGenerator,
-    FakeDatetimeService,
     MemberGenerator,
     PlanGenerator,
     PurchaseGenerator,
-    TransactionGenerator,
 )
 
 from .dependency_injection import injection_test
@@ -109,21 +110,24 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
-    transaction_generator: TransactionGenerator,
+    register_hours_worked: RegisterHoursWorked,
 ):
-    member = member_generator.create_member_entity()
-    company = company_generator.create_company_entity()
-
-    transaction_generator.create_transaction(
-        sending_account=company.work_account,
-        receiving_account=member.account,
-        amount_sent=Decimal(10),
-        amount_received=Decimal(8.5),
+    expected_company_name = "test company name"
+    member = member_generator.create_member()
+    company = company_generator.create_company(
+        workers=[member], name=expected_company_name
+    )
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=member,
+            hours_worked=Decimal("8.5"),
+        )
     )
 
-    response = use_case(member.id)
+    response = use_case(member)
     assert len(response.transactions) == 1
-    assert response.transactions[0].peer_name == company.name
+    assert response.transactions[0].peer_name == expected_company_name
     assert response.transactions[0].transaction_volume == Decimal(8.5)
     assert response.transactions[0].type == TransactionTypes.incoming_wages
     assert response.balance == Decimal(8.5)
@@ -133,47 +137,53 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
 def test_that_correct_info_for_company_is_generated_in_correct_order_after_several_transactions_of_different_kind(
     use_case: GetMemberAccount,
     company_generator: CompanyGenerator,
-    transaction_generator: TransactionGenerator,
     member_generator: MemberGenerator,
-    datetime_service: FakeDatetimeService,
+    register_hours_worked: RegisterHoursWorked,
+    purchase_generator: PurchaseGenerator,
+    plan_generator: PlanGenerator,
 ):
-    company1 = company_generator.create_company_entity()
-    company2 = company_generator.create_company_entity()
-    member = member_generator.create_member_entity()
-
-    # wages from comp1
-    transaction_generator.create_transaction(
-        sending_account=company1.work_account,
-        receiving_account=member.account,
-        amount_received=Decimal(12),
-        date=datetime_service.now() + timedelta(hours=1),
+    company1_name = "test company 1"
+    company2_name = "test company 2"
+    member = member_generator.create_member()
+    company1 = company_generator.create_company(workers=[member], name=company1_name)
+    company1_plan = plan_generator.create_plan(
+        planner=company1,
+        costs=entities.ProductionCosts(
+            labour_cost=Decimal(5), means_cost=Decimal(0), resource_cost=Decimal(0)
+        ),
+        amount=1,
     )
-    # pay product of comp1
-    transaction_generator.create_transaction(
-        sending_account=member.account,
-        receiving_account=company1.product_account,
-        amount_sent=Decimal(5),
-        date=datetime_service.now() + timedelta(hours=2),
+    company2 = company_generator.create_company(workers=[member], name=company2_name)
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company1,
+            worker_id=member,
+            hours_worked=Decimal("12"),
+        )
     )
-    # wages from comp2
-    transaction_generator.create_transaction(
-        sending_account=company2.work_account,
-        receiving_account=member.account,
-        amount_received=Decimal(2),
-        date=datetime_service.now() + timedelta(hours=3),
+    purchase_generator.create_purchase_by_member(
+        buyer=member,
+        plan=company1_plan.id,
+        amount=1,
     )
-
-    response = use_case(member.id)
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company2,
+            worker_id=member,
+            hours_worked=Decimal("2"),
+        )
+    )
+    response = use_case(member)
     assert len(response.transactions) == 3
 
     trans1 = response.transactions.pop()
-    assert trans1.peer_name == company1.name
+    assert trans1.peer_name == company1_name
     assert trans1.transaction_volume == Decimal(12)
 
     trans2 = response.transactions.pop()
-    assert trans2.peer_name == company1.name
+    assert trans2.peer_name == company1_name
     assert trans2.transaction_volume == Decimal(-5)
 
     trans3 = response.transactions.pop()
-    assert trans3.peer_name == company2.name
+    assert trans3.peer_name == company2_name
     assert trans3.transaction_volume == Decimal(2)

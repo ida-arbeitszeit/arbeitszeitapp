@@ -1,4 +1,3 @@
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.entities import PurposesOfPurchases
@@ -7,17 +6,14 @@ from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
     PayMeansOfProductionController,
 )
 from tests.forms import PayMeansFakeForm
-from tests.session import FakeSession
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 
-from .dependency_injection import get_dependency_injector
 
-
-class AuthenticatedCompanyTests(TestCase):
+class AuthenticatedCompanyTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.translator = self.injector.get(FakeTranslator)
-        self.session = self.injector.get(FakeSession)
         self.expected_user_id = uuid4()
         self.session.login_company(self.expected_user_id)
         self.controller = PayMeansOfProductionController(self.session, self.translator)

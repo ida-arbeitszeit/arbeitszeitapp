@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import List, Optional
-from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
@@ -9,13 +8,13 @@ from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.www.presenters.dependency_injection import get_dependency_injector
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
-class TestPresenter(TestCase):
+class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.presenter = self.injector.get(GetCompanyDashboardPresenter)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.plan_index = self.injector.get(UrlIndexTestImpl)

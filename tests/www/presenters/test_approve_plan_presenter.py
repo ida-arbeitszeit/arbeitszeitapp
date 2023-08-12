@@ -1,9 +1,9 @@
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase as UseCase
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
 from tests.translator import FakeTranslator
+from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.notifier import NotifierTestImpl
 
-from .base_test_case import BaseTestCase
 from .url_index import UrlIndexTestImpl
 
 
