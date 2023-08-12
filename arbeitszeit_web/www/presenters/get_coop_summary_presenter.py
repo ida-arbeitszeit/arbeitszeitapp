@@ -23,9 +23,9 @@ class GetCoopSummaryViewModel:
     coop_id: str
     coop_name: str
     coop_definition: List[str]
-    coordinator_id: str
-    coordinator_name: str
-    coordinator_url: str
+    current_coordinator_id: str
+    current_coordinator_name: str
+    current_coordinator_url: str
 
     plans: List[AssociatedPlanPresentation]
 
@@ -45,11 +45,11 @@ class GetCoopSummarySuccessPresenter:
             coop_id=str(response.coop_id),
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
-            coordinator_id=str(response.coordinator_id),
-            coordinator_name=response.coordinator_name,
-            coordinator_url=self.url_index.get_company_summary_url(
+            current_coordinator_id=str(response.current_coordinator),
+            current_coordinator_name=response.current_coordinator_name,
+            current_coordinator_url=self.url_index.get_company_summary_url(
                 user_role=self.session.get_user_role(),
-                company_id=response.coordinator_id,
+                company_id=response.current_coordinator,
             ),
             plans=[
                 AssociatedPlanPresentation(

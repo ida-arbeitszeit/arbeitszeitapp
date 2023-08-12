@@ -50,16 +50,18 @@ class AcceptCooperation:
 
     def _validate_request(self, request: AcceptCooperationRequest) -> None:
         plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
-        cooperation = (
+        cooperation_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.cooperation_id)
+            .joined_with_current_coordinator()
             .first()
         )
         now = self.datetime_service.now()
+        if cooperation_and_coordinator is None:
+            raise AcceptCooperationResponse.RejectionReason.cooperation_not_found
+        cooperation, coordinator = cooperation_and_coordinator
         if plan is None:
             raise AcceptCooperationResponse.RejectionReason.plan_not_found
-        if cooperation is None:
-            raise AcceptCooperationResponse.RejectionReason.cooperation_not_found
         if not plan.is_active_as_of(now):
             raise AcceptCooperationResponse.RejectionReason.plan_inactive
         if plan.cooperation:
@@ -68,5 +70,5 @@ class AcceptCooperation:
             raise AcceptCooperationResponse.RejectionReason.plan_is_public_service
         if plan.requested_cooperation != cooperation.id:
             raise AcceptCooperationResponse.RejectionReason.cooperation_was_not_requested
-        if request.requester_id != cooperation.coordinator:
+        if request.requester_id != coordinator.id:
             raise AcceptCooperationResponse.RejectionReason.requester_is_not_coordinator

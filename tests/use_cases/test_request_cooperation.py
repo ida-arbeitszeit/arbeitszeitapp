@@ -56,7 +56,7 @@ class RequestCooperationTests(TestCase):
     def test_error_is_raised_when_plan_has_already_cooperation(self) -> None:
         cooperation1 = self.coop_generator.create_cooperation()
         cooperation2 = self.coop_generator.create_cooperation(
-            coordinator=self.requester
+            name="name2", coordinator=self.requester
         )
         plan = self.plan_generator.create_plan(cooperation=cooperation1)
         request = RequestCooperationRequest(

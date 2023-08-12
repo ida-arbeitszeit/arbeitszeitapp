@@ -17,6 +17,7 @@ from arbeitszeit.entities import (
     CompanyWorkInvite,
     ConsumerPurchase,
     Cooperation,
+    CoordinationTenure,
     EmailAddress,
     Member,
     Plan,
@@ -239,7 +240,9 @@ class CooperationResult(QueryResult[Cooperation], Protocol):
     def coordinated_by_company(self, company_id: UUID) -> Self:
         ...
 
-    def joined_with_coordinator(self) -> QueryResult[Tuple[Cooperation, Company]]:
+    def joined_with_current_coordinator(
+        self,
+    ) -> QueryResult[Tuple[Cooperation, Company]]:
         ...
 
 
@@ -468,11 +471,15 @@ class DatabaseGateway(Protocol):
         creation_timestamp: datetime,
         name: str,
         definition: str,
-        coordinator: UUID,
     ) -> Cooperation:
         ...
 
     def get_cooperations(self) -> CooperationResult:
+        ...
+
+    def create_coordination_tenure(
+        self, company: UUID, cooperation: UUID, start_date: datetime
+    ) -> CoordinationTenure:
         ...
 
     def get_transactions(self) -> TransactionResult:

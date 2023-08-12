@@ -66,7 +66,7 @@ class RequestCooperation:
         cooperation_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.cooperation_id)
-            .joined_with_coordinator()
+            .joined_with_current_coordinator()
             .first()
         )
         if cooperation_and_coordinator is None:

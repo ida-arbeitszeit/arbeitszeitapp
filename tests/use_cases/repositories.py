@@ -23,7 +23,6 @@ from uuid import UUID, uuid4
 from typing_extensions import Self
 
 from arbeitszeit import entities
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.entities import (
     Account,
@@ -207,9 +206,9 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
         def new_items() -> Iterator[Plan]:
             cooperations: Set[UUID] = {
-                key
-                for key, value in self.entities.cooperations.items()
-                if value.coordinator in company
+                coop.id
+                for coop, coordinator in self.entities.get_cooperations().joined_with_current_coordinator()
+                if coordinator.id in company
             }
             return filter(
                 lambda plan: plan.requested_cooperation in cooperations
@@ -520,26 +519,37 @@ class CooperationResult(QueryResultImpl[Cooperation]):
         )
 
     def coordinated_by_company(self, company_id: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda coop: coop.coordinator == company_id, self.items()
-            ),
-        )
+        def items() -> Iterable[entities.Cooperation]:
+            for cooperation in self.items():
+                tenures = [
+                    self.entities.coordination_tenures[id_]
+                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                        cooperation.id
+                    )
+                ]
+                tenures.sort(key=lambda t: t.start_date, reverse=True)
+                if tenures and tenures[0].company == company_id:
+                    yield cooperation
 
-    def joined_with_coordinator(self) -> QueryResultImpl[Tuple[Cooperation, Company]]:
-        def mapping(
-            coop: entities.Cooperation,
-        ) -> Tuple[entities.Cooperation, entities.Company]:
-            coordinator = self.entities.get_company_by_id(coop.coordinator)
-            assert coordinator
-            return (coop, coordinator)
+        return replace(self, items=items)
+
+    def joined_with_current_coordinator(
+        self,
+    ) -> QueryResultImpl[Tuple[Cooperation, Company]]:
+        def items() -> Iterable[Tuple[entities.Cooperation, Company]]:
+            for cooperation in self.items():
+                tenures = [
+                    self.entities.coordination_tenures[id_]
+                    for id_ in self.entities.indices.coordination_tenure_by_cooperation.get(
+                        cooperation.id
+                    )
+                ]
+                tenures.sort(key=lambda t: t.start_date, reverse=True)
+                if tenures:
+                    yield cooperation, self.entities.companies[tenures[0].company]
 
         return QueryResultImpl(
-            items=lambda: map(
-                mapping,
-                self.items(),
-            ),
+            items=items,
             entities=self.entities,
         )
 
@@ -1086,7 +1096,7 @@ class FakeLanguageRepository:
 
 @singleton
 class EntityStorage:
-    def __init__(self, datetime_service: DatetimeService) -> None:
+    def __init__(self) -> None:
         self.members: Dict[UUID, Member] = {}
         self.companies: Dict[UUID, Company] = {}
         self.plans: Dict[UUID, Plan] = {}
@@ -1103,6 +1113,7 @@ class EntityStorage:
             account=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
+        self.coordination_tenures: Dict[UUID, entities.CoordinationTenure] = dict()
         self.consumer_purchases: Dict[UUID, entities.ConsumerPurchase] = dict()
         self.company_purchases: Dict[UUID, entities.CompanyPurchase] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
@@ -1205,7 +1216,6 @@ class EntityStorage:
         creation_timestamp: datetime,
         name: str,
         definition: str,
-        coordinator: UUID,
     ) -> Cooperation:
         cooperation_id = uuid4()
         cooperation = Cooperation(
@@ -1213,7 +1223,6 @@ class EntityStorage:
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
-            coordinator=coordinator,
         )
         self.cooperations[cooperation_id] = cooperation
         return cooperation
@@ -1223,6 +1232,20 @@ class EntityStorage:
             items=lambda: self.cooperations.values(),
             entities=self,
         )
+
+    def create_coordination_tenure(
+        self, company: UUID, cooperation: UUID, start_date: datetime
+    ) -> entities.CoordinationTenure:
+        tenure_id = uuid4()
+        tenure = entities.CoordinationTenure(
+            id=tenure_id,
+            company=company,
+            cooperation=cooperation,
+            start_date=start_date,
+        )
+        self.coordination_tenures[tenure_id] = tenure
+        self.indices.coordination_tenure_by_cooperation.add(cooperation, tenure_id)
+        return tenure
 
     def create_transaction(
         self,
@@ -1433,3 +1456,4 @@ class Indices:
     consumer_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
+    coordination_tenure_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List
 from uuid import uuid4
@@ -423,22 +423,6 @@ class GetAllPlans(FlaskTestCase):
         plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
         assert len(plans) == 0
 
-    def test_correct_inbound_requests_are_returned(self) -> None:
-        coordinator = self.company_generator.create_company_entity()
-        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
-        requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
-        requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
-        other_coop = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(requested_cooperation=other_coop)
-        inbound_requests = (
-            self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
-                coordinator.id
-            )
-        )
-        assert len(inbound_requests) == 2
-        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
-        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
-
     def test_possible_to_add_and_to_remove_plan_to_cooperation(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
@@ -456,15 +440,6 @@ class GetAllPlans(FlaskTestCase):
         plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation is None
-
-    def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
-        cooperation = self.cooperation_generator.create_cooperation()
-        plan = self.plan_generator.create_plan()
-        plan_result = self.database_gateway.get_plans().with_id(plan.id)
-        plan_result.update().set_requested_cooperation(cooperation.id).perform()
-        assert plan_result.that_request_cooperation_with_coordinator()
-        plan_result.update().set_requested_cooperation(None).perform()
-        assert not plan_result.that_request_cooperation_with_coordinator()
 
     def test_can_set_approval_date(self) -> None:
         plan = self.plan_generator.create_plan()
@@ -849,3 +824,57 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         assert result
         _, queried_amount = result
         assert queried_amount == expected_amount
+
+
+class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
+
+    def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
+        cooperation = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan()
+        plan_result = self.database_gateway.get_plans().with_id(plan.id)
+        plan_result.update().set_requested_cooperation(cooperation.id).perform()
+        assert plan_result.that_request_cooperation_with_coordinator()
+        plan_result.update().set_requested_cooperation(None).perform()
+        assert not plan_result.that_request_cooperation_with_coordinator()
+
+    def test_correct_inbound_requests_are_returned(self) -> None:
+        coordinator = self.company_generator.create_company()
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
+        requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
+        requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
+        other_coop = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(requested_cooperation=other_coop)
+        inbound_requests = (
+            self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
+                coordinator
+            )
+        )
+        assert len(inbound_requests) == 2
+        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
+
+    def test_that_plans_where_coordination_was_passed_on_are_ignored(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        original_coordinator = self.company_generator.create_company()
+        new_coordinator = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=original_coordinator
+        )
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.database_gateway.create_coordination_tenure(
+            company=new_coordinator,
+            cooperation=cooperation.id,
+            start_date=self.datetime_service.now(),
+        )
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.plan_generator.create_plan(requested_cooperation=cooperation)
+        assert not self.database_gateway.get_plans().that_request_cooperation_with_coordinator(
+            original_coordinator
+        )

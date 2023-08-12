@@ -28,8 +28,8 @@ class GetCoopSummarySuccess:
     coop_id: UUID
     coop_name: str
     coop_definition: str
-    coordinator_id: UUID
-    coordinator_name: str
+    current_coordinator: UUID
+    current_coordinator_name: str
 
     plans: List[AssociatedPlan]
 
@@ -47,7 +47,7 @@ class GetCoopSummary:
         coop_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.coop_id)
-            .joined_with_coordinator()
+            .joined_with_current_coordinator()
             .first()
         )
         if coop_and_coordinator is None:
@@ -69,11 +69,11 @@ class GetCoopSummary:
             .that_will_expire_after(now)
         ]
         return GetCoopSummarySuccess(
-            requester_is_coordinator=coop.coordinator == request.requester_id,
+            requester_is_coordinator=coordinator.id == request.requester_id,
             coop_id=coop.id,
             coop_name=coop.name,
             coop_definition=coop.definition,
-            coordinator_id=coop.coordinator,
-            coordinator_name=coordinator.name,
+            current_coordinator=coordinator.id,
+            current_coordinator_name=coordinator.name,
             plans=plans,
         )

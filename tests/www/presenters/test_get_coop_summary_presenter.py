@@ -16,8 +16,8 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     coop_id=uuid4(),
     coop_name="coop name",
     coop_definition="coop def\ncoop def2",
-    coordinator_id=uuid4(),
-    coordinator_name="coordinator name",
+    current_coordinator=uuid4(),
+    current_coordinator_name="coordinator name",
     plans=[
         AssociatedPlan(
             plan_id=uuid4(),
@@ -63,21 +63,23 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
     def test_coordinator_id_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.coordinator_id, str(TESTING_RESPONSE_MODEL.coordinator_id)
+            view_model.current_coordinator_id,
+            str(TESTING_RESPONSE_MODEL.current_coordinator),
         )
 
     def test_coordinator_name_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.coordinator_name, TESTING_RESPONSE_MODEL.coordinator_name
+            view_model.current_coordinator_name,
+            TESTING_RESPONSE_MODEL.current_coordinator_name,
         )
 
     def test_link_to_coordinators_company_summary_page_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
-            view_model.coordinator_url,
+            view_model.current_coordinator_url,
             self.url_index.get_company_summary_url(
-                company_id=TESTING_RESPONSE_MODEL.coordinator_id,
+                company_id=TESTING_RESPONSE_MODEL.current_coordinator,
                 user_role=UserRole.company,
             ),
         )

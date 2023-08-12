@@ -24,6 +24,10 @@ from arbeitszeit.use_cases.accept_cooperation import (
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
+from arbeitszeit.use_cases.create_cooperation import (
+    CreateCooperation,
+    CreateCooperationRequest,
+)
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
     CreatePlanDraftRequest,
@@ -246,13 +250,19 @@ class PlanGenerator:
                 not request_cooperation_response.is_rejected
             ), f"Cooperation request failed: {request_cooperation_response}"
         if cooperation:
+            coop_and_coordinator = (
+                self.database_gateway.get_cooperations()
+                .with_id(cooperation.id)
+                .joined_with_current_coordinator()
+                .first()
+            )
+            assert coop_and_coordinator
+            _, coordinator = coop_and_coordinator
             self.request_cooperation(
                 RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
             )
             self.accept_cooperation(
-                AcceptCooperationRequest(
-                    cooperation.coordinator, plan.id, cooperation.id
-                )
+                AcceptCooperationRequest(coordinator.id, plan.id, cooperation.id)
             )
         selected_plan = self.database_gateway.get_plans().with_id(
             file_plan_response.plan_id
@@ -441,6 +451,7 @@ class CooperationGenerator:
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
+    create_cooperation_use_case: CreateCooperation
 
     def create_cooperation(
         self,
@@ -449,26 +460,31 @@ class CooperationGenerator:
         plans: Optional[List[entities.Plan]] = None,
     ) -> entities.Cooperation:
         if name is None:
-            name = "test name"
+            name = f"name_{uuid4()}"
         if coordinator is None:
             coordinator = self.company_generator.create_company_entity()
         if isinstance(coordinator, entities.Company):
             coordinator = coordinator.id
-        cooperation = self.database_gateway.create_cooperation(
-            self.datetime_service.now(),
-            name=name,
-            definition="test info",
-            coordinator=coordinator,
+        uc_request = CreateCooperationRequest(
+            coordinator_id=coordinator, name=name, definition="test info"
         )
+        uc_response = self.create_cooperation_use_case(uc_request)
+        assert not uc_response.is_rejected
+        cooperation_id = uc_response.cooperation_id
+        assert cooperation_id
         if plans is not None:
             assert (
                 self.database_gateway.get_plans()
                 .with_id(*[plan.id for plan in plans])
                 .update()
-                .set_cooperation(cooperation.id)
+                .set_cooperation(cooperation_id)
                 .perform()
             )
-        return cooperation
+        cooperation_entity = (
+            self.database_gateway.get_cooperations().with_id(cooperation_id).first()
+        )
+        assert cooperation_entity
+        return cooperation_entity
 
 
 @dataclass
