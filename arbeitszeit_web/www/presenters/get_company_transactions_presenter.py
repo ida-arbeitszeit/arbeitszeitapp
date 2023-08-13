@@ -83,9 +83,7 @@ class GetCompanyTransactionsPresenter:
             sale_of_consumer_product=self.translator.gettext(
                 "Sale of consumer product"
             ),
-            payment_of_consumer_product=self.translator.gettext(
-                "Payment of consumer product"
-            ),
+            private_consumption=self.translator.gettext("Private consumption"),
             sale_of_fixed_means=self.translator.gettext(
                 "Sale of fixed means of production"
             ),

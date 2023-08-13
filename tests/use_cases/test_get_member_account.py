@@ -76,7 +76,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
     assert len(response.transactions) == 1
     assert response.transactions[0].peer_name == expected_company_name
     assert response.transactions[0].transaction_volume == Decimal(-10)
-    assert response.transactions[0].type == TransactionTypes.payment_of_consumer_product
+    assert response.transactions[0].type == TransactionTypes.private_consumption
     assert response.balance == Decimal(-10)
 
 
