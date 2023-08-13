@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -34,7 +34,7 @@ class ListPlansWithPendingReviewUseCase:
             ]
         )
 
-    def _get_info_for_plan(self, plan_model: entities.Plan) -> Plan:
+    def _get_info_for_plan(self, plan_model: records.Plan) -> Plan:
         planner = (
             self.database_gateway.get_companies().with_id(plan_model.planner).first()
         )

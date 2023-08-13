@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.entities import SocialAccounting, Transaction
+from arbeitszeit.records import SocialAccounting, Transaction
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
@@ -281,7 +281,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_sender_is_correctly_retrieved_for_transaction_from_company_r_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(sender=company.raw_material_account)
         transactions = self.database_gateway.get_transactions().where_account_is_sender(
             company.raw_material_account
@@ -292,7 +292,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_sender_is_correctly_retrieved_for_transactions_from_company_p_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(sender=company.means_account)
         transactions = self.database_gateway.get_transactions().where_account_is_sender(
             company.means_account
@@ -303,7 +303,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_sender_is_correctly_retrieved_for_transaction_from_company_a_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(sender=company.work_account)
         transactions = self.database_gateway.get_transactions().where_account_is_sender(
             company.work_account
@@ -314,7 +314,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_sender_is_correctly_retrieved_for_transactions_from_company_prd_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(sender=company.product_account)
         transactions = self.database_gateway.get_transactions().where_account_is_sender(
             company.product_account
@@ -350,7 +350,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_receiver_is_correctly_retrieved_for_transaction_to_company_r_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(receiver=company.raw_material_account)
         transactions = (
             self.database_gateway.get_transactions().where_account_is_receiver(
@@ -363,7 +363,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_receiver_is_correctly_retrieved_for_transactions_to_company_p_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(receiver=company.means_account)
         transactions = (
             self.database_gateway.get_transactions().where_account_is_receiver(
@@ -376,7 +376,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_receiver_is_correctly_retrieved_for_transaction_to_company_a_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(receiver=company.work_account)
         transactions = (
             self.database_gateway.get_transactions().where_account_is_receiver(
@@ -389,7 +389,7 @@ class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def test_that_receiver_is_correctly_retrieved_for_transactions_to_company_prd_account(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.create_transaction(receiver=company.product_account)
         transactions = (
             self.database_gateway.get_transactions().where_account_is_receiver(

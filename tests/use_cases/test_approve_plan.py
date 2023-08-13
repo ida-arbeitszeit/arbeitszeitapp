@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.entities import ProductionCosts, PurposesOfPurchases
+from arbeitszeit.records import ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -70,7 +70,7 @@ class UseCaseTests(BaseTestCase):
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         plan_id = self.get_latest_activated_plan().plan_id
-        other_company = self.company_generator.create_company_entity()
+        other_company = self.company_generator.create_company_record()
         purchase_response = self.pay_means_of_production(
             PayMeansOfProductionRequest(
                 buyer=other_company.id,

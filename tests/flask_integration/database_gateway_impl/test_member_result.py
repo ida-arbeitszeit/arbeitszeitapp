@@ -68,7 +68,7 @@ class RepositoryTests(FlaskTestCase):
         assert not self.database_gateway.get_members().with_id(member_id)
 
     def test_does_not_identify_company_as_member(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert not self.database_gateway.get_members().with_id(company.id)
 
     def test_does_identify_member_id_as_member(self) -> None:
@@ -127,7 +127,7 @@ class GetAllMembersTests(FlaskTestCase):
     def test_can_filter_members_by_their_workplace(self) -> None:
         member = self.member_generator.create_member()
         self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[member])
+        company = self.company_generator.create_company_record(workers=[member])
         assert len(self.database_gateway.get_members()) == 2
         assert (
             len(self.database_gateway.get_members().working_at_company(company.id)) == 1
@@ -198,7 +198,7 @@ class CreateMemberTests(FlaskTestCase):
 
     def test_can_create_member_with_same_email_as_company(self) -> None:
         email = "test@test.test"
-        self.company_generator.create_company_entity(email=email)
+        self.company_generator.create_company_record(email=email)
         self.database_gateway.create_member(
             email=email,
             name="test name",

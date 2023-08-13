@@ -5,7 +5,7 @@ from typing import Iterable, Optional, Tuple
 
 from typing_extensions import TypeAlias
 
-from arbeitszeit.entities import AccountTypes
+from arbeitszeit.records import AccountTypes
 
 
 class TransactionTypes(Enum):

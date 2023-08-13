@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -19,7 +19,7 @@ class AcceptCooperationTests(BaseTestCase):
         self.get_plan_details_use_case = self.injector.get(GetPlanDetailsUseCase)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -31,7 +31,7 @@ class AcceptCooperationTests(BaseTestCase):
         assert response.rejection_reason == response.RejectionReason.plan_not_found
 
     def test_error_is_raised_when_cooperation_does_not_exist(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan.id, cooperation_id=uuid4()
@@ -43,7 +43,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
 
     def test_error_is_raised_when_plan_is_already_in_cooperation(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation1 = self.cooperation_generator.create_cooperation()
         cooperation2 = self.cooperation_generator.create_cooperation(
             coordinator=requester
@@ -59,7 +59,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
 
     def test_error_is_raised_when_plan_is_public_plan(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(is_public_service=True)
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
@@ -74,7 +74,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
 
     def test_error_is_raised_when_cooperation_was_not_requested(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
@@ -92,8 +92,8 @@ class AcceptCooperationTests(BaseTestCase):
     def test_error_is_raised_when_requester_is_not_coordinator_of_cooperation(
         self,
     ) -> None:
-        requester = self.company_generator.create_company_entity()
-        coordinator = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
+        coordinator = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=coordinator
         )
@@ -109,7 +109,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
 
     def test_possible_to_add_plan_to_cooperation(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -121,7 +121,7 @@ class AcceptCooperationTests(BaseTestCase):
         assert not response.is_rejected
 
     def test_cooperation_is_added_to_plan(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -134,7 +134,7 @@ class AcceptCooperationTests(BaseTestCase):
         self.assert_plan_in_cooperation(plan.id, cooperation.id)
 
     def test_two_cooperating_plans_have_same_prices(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )
@@ -159,7 +159,7 @@ class AcceptCooperationTests(BaseTestCase):
         ) == self.price_checker.get_unit_price(plan2.id)
 
     def test_price_of_cooperating_plans_is_correctly_calculated(self) -> None:
-        requester = self.company_generator.create_company_entity()
+        requester = self.company_generator.create_company_record()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester
         )

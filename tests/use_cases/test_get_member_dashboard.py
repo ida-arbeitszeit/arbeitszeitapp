@@ -18,7 +18,7 @@ class UseCaseTests(TestCase):
         self.member = self.member_generator.create_member()
 
     def test_that_correct_workplace_email_is_shown(self):
-        self.company_generator.create_company_entity(
+        self.company_generator.create_company_record(
             email="companyname@mail.com",
             workers=[self.member],
         )
@@ -28,7 +28,7 @@ class UseCaseTests(TestCase):
         )
 
     def test_that_correct_workplace_name_is_shown(self):
-        self.company_generator.create_company_entity(
+        self.company_generator.create_company_record(
             name="SomeCompanyNameXY",
             workers=[self.member],
         )
@@ -51,7 +51,7 @@ class UseCaseTests(TestCase):
         self.assertFalse(response.invites)
 
     def test_invites_are_shown_when_worker_was_previously_invited(self):
-        inviting_company = self.company_generator.create_company_entity()
+        inviting_company = self.company_generator.create_company_record()
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
@@ -59,7 +59,7 @@ class UseCaseTests(TestCase):
         self.assertTrue(response.invites)
 
     def test_show_id_of_company_that_sent_the_invite(self):
-        inviting_company = self.company_generator.create_company_entity()
+        inviting_company = self.company_generator.create_company_record()
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
@@ -67,7 +67,7 @@ class UseCaseTests(TestCase):
         self.assertEqual(response.invites[0].company_id, inviting_company.id)
 
     def test_show_name_of_company_that_sent_the_invite(self):
-        inviting_company = self.company_generator.create_company_entity()
+        inviting_company = self.company_generator.create_company_record()
         self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
@@ -75,7 +75,7 @@ class UseCaseTests(TestCase):
         self.assertEqual(response.invites[0].company_name, inviting_company.name)
 
     def test_show_correct_invite_id(self):
-        inviting_company = self.company_generator.create_company_entity()
+        inviting_company = self.company_generator.create_company_record()
         invite_response = self.invite_worker_to_company(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Iterator, List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit.use_cases.query_company_purchases import PurchaseQueryResponse
 from arbeitszeit_web.translator import Translator
 

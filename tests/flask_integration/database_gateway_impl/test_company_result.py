@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit.entities import Company
+from arbeitszeit.records import Company
 from tests.data_generators import CompanyGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
@@ -25,14 +25,14 @@ class RepositoryTester(FlaskTestCase):
         assert not self.database_gateway.get_companies().with_id(uuid4())
 
     def test_can_retrieve_a_company_by_its_uuid(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert (
             self.database_gateway.get_companies().with_id(company.id).first() == company
         )
 
     def test_can_retrieve_a_company_by_its_email(self) -> None:
         expected_email = "expected@mail.com"
-        expected_company = self.company_generator.create_company_entity(
+        expected_company = self.company_generator.create_company_record(
             email=expected_email
         )
         assert (
@@ -46,7 +46,7 @@ class RepositoryTester(FlaskTestCase):
         self,
     ) -> None:
         expected_email = "expected@mail.com"
-        expected_company = self.company_generator.create_company_entity(
+        expected_company = self.company_generator.create_company_record(
             email=expected_email
         )
         altered_email = Utility.mangle_case(expected_email)
@@ -59,7 +59,7 @@ class RepositoryTester(FlaskTestCase):
 
     def test_that_random_email_returns_no_company(self) -> None:
         random_email = "xyz123@testmail.com"
-        self.company_generator.create_company_entity(email="test_mail@testmail.com")
+        self.company_generator.create_company_record(email="test_mail@testmail.com")
         assert not self.database_gateway.get_companies().with_email_address(
             random_email
         )
@@ -86,7 +86,7 @@ class RepositoryTester(FlaskTestCase):
         expected_email = "rosa@cp.org"
         companies = self.database_gateway.get_companies()
         assert not companies.with_email_address(expected_email)
-        self.company_generator.create_company_entity(email=expected_email)
+        self.company_generator.create_company_record(email=expected_email)
         assert companies.with_email_address(expected_email)
 
     def test_can_detect_if_company_with_email_is_already_present_case_insensitive(
@@ -96,7 +96,7 @@ class RepositoryTester(FlaskTestCase):
         companies = self.database_gateway.get_companies()
         altered_email = Utility.mangle_case(expected_email)
         assert not companies.with_email_address(altered_email)
-        self.company_generator.create_company_entity(email=expected_email)
+        self.company_generator.create_company_record(email=expected_email)
         assert companies.with_email_address(altered_email)
 
     def test_does_not_identify_random_id_with_company(self) -> None:
@@ -108,21 +108,21 @@ class RepositoryTester(FlaskTestCase):
         assert not self.database_gateway.get_companies().with_id(member)
 
     def test_does_identify_company_id_as_company(self) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         assert self.database_gateway.get_companies().with_id(company.id)
 
     def test_count_no_registered_company_if_none_was_created(self) -> None:
         assert len(self.database_gateway.get_companies()) == 0
 
     def test_count_one_registered_company_if_one_was_created(self) -> None:
-        self.company_generator.create_company_entity()
+        self.company_generator.create_company_record()
         assert len(self.database_gateway.get_companies()) == 1
 
     def test_that_get_all_companies_returns_all_companies(self) -> None:
-        expected_company1 = self.company_generator.create_company_entity(
+        expected_company1 = self.company_generator.create_company_record(
             email="company1@provider.de"
         )
-        expected_company2 = self.company_generator.create_company_entity(
+        expected_company2 = self.company_generator.create_company_record(
             email="company2@provider.de"
         )
         all_companies = list(self.database_gateway.get_companies())

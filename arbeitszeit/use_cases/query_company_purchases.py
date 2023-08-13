@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import UUID
 
-from arbeitszeit.entities import (
+from arbeitszeit.records import (
     Company,
     CompanyPurchase,
     Plan,
@@ -35,11 +35,11 @@ class QueryCompanyPurchases:
     ) -> Iterator[PurchaseQueryResponse]:
         purchases = self.database_gateway.get_company_purchases()
         purchases = purchases.where_buyer_is_company(company=company)
-        company_entity = self.database_gateway.get_companies().with_id(company).first()
-        assert company_entity
+        company_record = self.database_gateway.get_companies().with_id(company).first()
+        assert company_record
         return (
             self._purchase_to_response_model(
-                purchase, transaction, plan, company_entity
+                purchase, transaction, plan, company_record
             )
             for purchase, transaction, plan in purchases.ordered_by_creation_date(
                 ascending=False

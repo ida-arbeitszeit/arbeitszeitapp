@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from arbeitszeit.entities import Plan
+from arbeitszeit.records import Plan
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,

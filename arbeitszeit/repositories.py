@@ -7,8 +7,8 @@ from uuid import UUID
 
 from typing_extensions import Self
 
-from arbeitszeit import entities
-from arbeitszeit.entities import (
+from arbeitszeit import records
+from arbeitszeit.records import (
     Account,
     Accountant,
     AccountOwner,
@@ -136,14 +136,12 @@ class PlanResult(QueryResult[Plan], Protocol):
 
     def joined_with_planner_and_cooperating_plans(
         self, timestamp: datetime
-    ) -> QueryResult[
-        Tuple[entities.Plan, entities.Company, List[entities.PlanSummary]]
-    ]:
+    ) -> QueryResult[Tuple[records.Plan, records.Company, List[records.PlanSummary]]]:
         ...
 
     def joined_with_provided_product_amount(
         self,
-    ) -> QueryResult[Tuple[entities.Plan, int]]:
+    ) -> QueryResult[Tuple[records.Plan, int]]:
         ...
 
     def update(self) -> PlanUpdate:

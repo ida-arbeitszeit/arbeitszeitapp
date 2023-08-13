@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftRequest
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.session import Session

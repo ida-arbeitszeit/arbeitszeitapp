@@ -5,7 +5,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan, SocialAccounting
+from arbeitszeit.records import Plan, SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
 
 

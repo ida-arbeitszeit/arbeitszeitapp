@@ -20,35 +20,35 @@ class GeneralUseCaseTests(TestCase):
             self.use_case.get_dashboard(uuid4())
 
     def test_that_retrieving_dashboard_for_existing_company_succeeds(self):
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertIsInstance(response, GetCompanyDashboardUseCase.Response)
 
     def test_that_dashboard_shows_company_name(self):
         expected_name = "test coop name"
-        company = self.company_generator.create_company_entity(name=expected_name)
+        company = self.company_generator.create_company_record(name=expected_name)
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.company_info.name, expected_name)
 
     def test_that_dashboard_shows_company_id(self):
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.company_info.id, company.id)
 
     def test_that_dashboard_shows_company_email(self):
         expected_mail = "t@tmail.com"
-        company = self.company_generator.create_company_entity(email=expected_mail)
+        company = self.company_generator.create_company_record(email=expected_mail)
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.company_info.email, expected_mail)
 
     def test_that_dashboard_shows_that_company_has_no_workers(self):
-        company = self.company_generator.create_company_entity(workers=None)
+        company = self.company_generator.create_company_record(workers=None)
         response = self.use_case.get_dashboard(company.id)
         self.assertFalse(response.has_workers)
 
     def test_that_dashboard_shows_that_company_has_workers(self):
         worker = self.member_generator.create_member()
-        company = self.company_generator.create_company_entity(workers=[worker])
+        company = self.company_generator.create_company_record(workers=[worker])
         response = self.use_case.get_dashboard(company.id)
         self.assertTrue(response.has_workers)
 
@@ -62,7 +62,7 @@ class ThreeLatestPlansTests(TestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_list_of_latest_plans_is_empty_when_there_are_no_plans(self):
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertFalse(response.three_latest_plans)
 
@@ -71,7 +71,7 @@ class ThreeLatestPlansTests(TestCase):
     ):
         for _ in range(5):
             self.plan_generator.create_plan()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(len(response.three_latest_plans), 3)
 
@@ -79,7 +79,7 @@ class ThreeLatestPlansTests(TestCase):
         self,
     ):
         plan = self.plan_generator.create_plan()
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.three_latest_plans[0].plan_id, plan.id)
 
@@ -88,7 +88,7 @@ class ThreeLatestPlansTests(TestCase):
     ):
         expected_name = "test product xy"
         self.plan_generator.create_plan(product_name=expected_name)
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.three_latest_plans[0].prd_name, expected_name)
 
@@ -99,7 +99,7 @@ class ThreeLatestPlansTests(TestCase):
         self.datetime_service.freeze_time(expected_datetime)
         self.plan_generator.create_plan()
         self.datetime_service.advance_time(timedelta(hours=1))
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(
             response.three_latest_plans[0].activation_date, expected_datetime

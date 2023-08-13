@@ -4,7 +4,7 @@ from uuid import UUID
 
 from flask import url_for
 
-from arbeitszeit.entities import PurposesOfPurchases
+from arbeitszeit.records import PurposesOfPurchases
 from arbeitszeit_web.session import UserRole
 
 

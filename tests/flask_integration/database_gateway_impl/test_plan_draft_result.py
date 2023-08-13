@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import PlanDraft, ProductionCosts
+from arbeitszeit.records import PlanDraft, ProductionCosts
 from tests.data_generators import CompanyGenerator
 from tests.datetime_service import FakeDatetimeService
 
@@ -20,7 +20,7 @@ class PlanDraftRepositoryBaseTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.planner = self.company_generator.create_company_entity()
+        self.planner = self.company_generator.create_company_record()
         self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def create_plan_draft(

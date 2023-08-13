@@ -7,7 +7,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import CompanyWorkInvite
+from arbeitszeit.records import CompanyWorkInvite
 from arbeitszeit.repositories import DatabaseGateway
 
 

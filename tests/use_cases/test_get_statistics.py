@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Union
 from unittest import TestCase
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_statistics import GetStatistics
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
@@ -55,8 +55,8 @@ class GetStatisticsTester(TestCase):
         assert stats.planned_means == 0
 
     def test_counting_of_companies(self) -> None:
-        self.company_generator.create_company_entity()
-        self.company_generator.create_company_entity()
+        self.company_generator.create_company_record()
+        self.company_generator.create_company_record()
         stats = self.use_case()
         assert stats.registered_companies_count == 2
 
@@ -104,7 +104,7 @@ class GetStatisticsTester(TestCase):
     def test_available_product_is_positive_number_when_amount_on_prd_account_is_negative(
         self,
     ) -> None:
-        company = self.company_generator.create_company_entity()
+        company = self.company_generator.create_company_record()
         self.transaction_generator.create_transaction(
             receiving_account=company.product_account, amount_received=Decimal(-10)
         )
@@ -116,7 +116,7 @@ class GetStatisticsTester(TestCase):
     ) -> None:
         num_companies = 2
         for _ in range(num_companies):
-            company = self.company_generator.create_company_entity()
+            company = self.company_generator.create_company_record()
             self.transaction_generator.create_transaction(
                 receiving_account=company.product_account, amount_received=Decimal(-22)
             )

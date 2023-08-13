@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Iterable, List
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -12,7 +12,7 @@ class PriceCalculator:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def calculate_cooperative_price(self, plan: entities.Plan) -> Decimal:
+    def calculate_cooperative_price(self, plan: records.Plan) -> Decimal:
         now = self.datetime_service.now()
         if plan.is_public_service:
             return Decimal(0)
@@ -30,21 +30,21 @@ class PriceCalculator:
         else:
             return self._calculate_coop_price(plans)
 
-    def calculate_individual_price(self, plan: entities.Plan) -> Decimal:
+    def calculate_individual_price(self, plan: records.Plan) -> Decimal:
         return calculate_individual_price(plan)
 
-    def _calculate_coop_price(self, plans: List[entities.Plan]) -> Decimal:
+    def _calculate_coop_price(self, plans: List[records.Plan]) -> Decimal:
         assert not any(plan.is_public_service for plan in plans)
         return calculate_average_costs([p.to_summary() for p in plans])
 
 
-def calculate_individual_price(plan: entities.Plan) -> Decimal:
+def calculate_individual_price(plan: records.Plan) -> Decimal:
     if plan.is_public_service:
         return Decimal(0)
     return plan.production_costs.total_cost() / plan.prd_amount
 
 
-def calculate_average_costs(plans: Iterable[entities.PlanSummary]) -> Decimal:
+def calculate_average_costs(plans: Iterable[records.PlanSummary]) -> Decimal:
     cost_by_time = Decimal(0)
     amount_by_time = Decimal(0)
     for plan in plans:

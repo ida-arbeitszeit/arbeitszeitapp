@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from arbeitszeit.entities import Cooperation
+from arbeitszeit.records import Cooperation
 from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperations,
     ListAllCooperationsResponse,

@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Iterable
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan
+from arbeitszeit.records import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 

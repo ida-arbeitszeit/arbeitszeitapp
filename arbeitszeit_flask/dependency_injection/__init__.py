@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit import entities
+from arbeitszeit import records
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
@@ -111,7 +111,7 @@ class FlaskModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder.bind(
-            entities.SocialAccounting,
+            records.SocialAccounting,
             to=CallableProvider(get_social_accounting),
         )
         binder.bind(

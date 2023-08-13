@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import UUID, uuid4
 
-from arbeitszeit.entities import Member
+from arbeitszeit.records import Member
 from arbeitszeit.use_cases.list_workers import (
     ListWorkers,
     ListWorkersRequest,
@@ -62,6 +62,6 @@ def test_list_workers_response_includes_multiple_company_workers(
 ) -> None:
     worker1 = member_generator.create_member()
     worker2 = member_generator.create_member()
-    company = company_generator.create_company_entity(workers=[worker1, worker2])
+    company = company_generator.create_company_record(workers=[worker1, worker2])
     response: ListWorkersResponse = list_workers(make_request(company=company.id))
     assert worker_in_results(worker1, response) and worker_in_results(worker2, response)

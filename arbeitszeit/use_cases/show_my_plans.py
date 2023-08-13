@@ -5,8 +5,8 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import Plan, PlanDraft
 from arbeitszeit.price_calculator import PriceCalculator
+from arbeitszeit.records import Plan, PlanDraft
 from arbeitszeit.repositories import DatabaseGateway
 
 

@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.entities import AccountTypes
+from arbeitszeit.records import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_company_transactions import (
     GetCompanyTransactionsResponse,

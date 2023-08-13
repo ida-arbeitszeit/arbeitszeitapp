@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from arbeitszeit.entities import Cooperation
+from arbeitszeit.records import Cooperation
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.data_generators import CompanyGenerator, CooperationGenerator
 from tests.datetime_service import FakeDatetimeService

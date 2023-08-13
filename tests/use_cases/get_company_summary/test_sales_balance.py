@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Union
 
-from arbeitszeit.entities import ProductionCosts
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummary,
     GetCompanySummarySuccess,

@@ -7,7 +7,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.entities import Company, Plan, SocialAccounting, Transaction
+from arbeitszeit.records import Company, Plan, SocialAccounting, Transaction
 from arbeitszeit.repositories import DatabaseGateway
 
 
