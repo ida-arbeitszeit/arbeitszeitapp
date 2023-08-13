@@ -4,7 +4,7 @@ from tests.flask_integration.flask import ViewTestCase
 class AnonymousUserTest(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/member/purchases"
+        self.url = "/member/consumptions"
 
     def test_anonymous_user_gets_302(
         self,
@@ -22,7 +22,7 @@ class AnonymousUserTest(ViewTestCase):
 class CompanyTest(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/member/purchases"
+        self.url = "/member/consumptions"
         self.company = self.login_company(confirm_company=True)
 
     def test_company_gets_302(self) -> None:
@@ -40,7 +40,7 @@ class UnconfirmedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.member = self.login_member(confirm_member=False)
-        self.url = "/member/purchases"
+        self.url = "/member/consumptions"
 
     def test_unconfirmed_member_gets_302(self) -> None:
         response = self.client.get(self.url)
@@ -55,7 +55,7 @@ class ConfirmedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.member = self.login_member(confirm_member=True)
-        self.url = "/member/purchases"
+        self.url = "/member/consumptions"
 
     def test_member_gets_200(self) -> None:
         response = self.client.get(self.url)

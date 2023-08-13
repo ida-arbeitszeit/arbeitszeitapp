@@ -212,11 +212,11 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
         self.plan_generator.create_plan()
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan()
 
-    def test_with_approved_plan_that_has_a_consumer_purchase_that_we_find_some_transactions(
+    def test_with_approved_plan_that_has_a_private_consumption_that_we_find_some_transactions(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
 
     def test_with_approved_plan_that_has_a_fixed_means_purchase_that_we_find_some_transactions(
@@ -236,12 +236,12 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
             plan.id
         )
 
-    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_consumer_purchase_for_other_plans(
+    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_private_consumptions_for_other_plans(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_purchase_by_member(plan=other_plan.id)
+        self.purchase_generator.create_private_consumption(plan=other_plan.id)
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
             plan.id
         )

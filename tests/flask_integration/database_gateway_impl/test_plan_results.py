@@ -771,7 +771,7 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
     def test_that_after_some_purchases_the_correct_amount_of_provided_product_is_calculated(
         self,
         company_purchases: List[int],
-        consumer_purchases: List[int],
+        private_consumptions: List[int],
         expected_amount: int,
     ) -> None:
         plan = self.plan_generator.create_plan()
@@ -779,8 +779,8 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
             self.purchase_generator.create_fixed_means_purchase(
                 plan=plan.id, amount=amount
             )
-        for amount in consumer_purchases:
-            self.purchase_generator.create_purchase_by_member(
+        for amount in private_consumptions:
+            self.purchase_generator.create_private_consumption(
                 plan=plan.id, amount=amount
             )
         result = (
@@ -801,18 +801,18 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
     def test_provided_product_amount_is_correct_even_with_other_plans_having_purchases_too(
         self,
         company_purchases: List[int],
-        consumer_purchases: List[int],
+        private_consumptions: List[int],
         expected_amount: int,
     ) -> None:
         plan = self.plan_generator.create_plan()
         self.purchase_generator.create_fixed_means_purchase()
-        self.purchase_generator.create_purchase_by_member()
+        self.purchase_generator.create_private_consumption()
         for amount in company_purchases:
             self.purchase_generator.create_fixed_means_purchase(
                 plan=plan.id, amount=amount
             )
-        for amount in consumer_purchases:
-            self.purchase_generator.create_purchase_by_member(
+        for amount in private_consumptions:
+            self.purchase_generator.create_private_consumption(
                 plan=plan.id, amount=amount
             )
         result = (

@@ -307,10 +307,10 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             .scalar_subquery()
         )
         consumer_purchases = (
-            models.ConsumerPurchase.query.filter(
-                models.ConsumerPurchase.plan_id == models.Plan.id
+            models.PrivateConsumption.query.filter(
+                models.PrivateConsumption.plan_id == models.Plan.id
             )
-            .with_entities(func.sum(models.ConsumerPurchase.amount))
+            .with_entities(func.sum(models.PrivateConsumption.amount))
             .scalar_subquery()
         )
         query = self.query.with_entities(
@@ -706,23 +706,23 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
 
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
         plan_ids = [str(p) for p in plan]
-        consumer_purchase = aliased(models.ConsumerPurchase)
+        private_consumption = aliased(models.PrivateConsumption)
         company_purchase = aliased(models.CompanyPurchase)
-        valid_consumer_purchase = consumer_purchase.query
+        valid_private_consumption = private_consumption.query
         valid_company_purchase = company_purchase.query
         if plan:
             valid_company_purchase = valid_company_purchase.filter(
                 company_purchase.plan_id.in_(plan_ids)
             )
-            valid_consumer_purchase = valid_consumer_purchase.filter(
-                consumer_purchase.plan_id.in_(plan_ids)
+            valid_private_consumption = valid_private_consumption.filter(
+                private_consumption.plan_id.in_(plan_ids)
             )
         return self._with_modified_query(
             lambda query: query.filter(
                 or_(
                     models.Transaction.id.in_(
-                        valid_consumer_purchase.with_entities(
-                            consumer_purchase.transaction_id
+                        valid_private_consumption.with_entities(
+                            private_consumption.transaction_id
                         ).scalar_subquery()
                     ),
                     models.Transaction.id.in_(
@@ -1086,45 +1086,45 @@ class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
         )
 
 
-class ConsumerPurchaseResult(FlaskQueryResult[records.ConsumerPurchase]):
-    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
+class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
+    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
-        buying_member = aliased(models.Member)
+        consuming_member = aliased(models.Member)
         return self._with_modified_query(
             lambda query: query.join(transaction)
             .join(account, transaction.sending_account == account.id)
             .join(
-                buying_member,
-                account.id == buying_member.account,
+                consuming_member,
+                account.id == consuming_member.account,
             )
-            .filter(buying_member.id == str(member))
+            .filter(consuming_member.id == str(member))
         )
 
     def ordered_by_creation_date(
         self, *, ascending: bool = True
-    ) -> ConsumerPurchaseResult:
+    ) -> PrivateConsumptionResult:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(
             lambda query: query.join(
-                transaction, models.ConsumerPurchase.transaction_id == transaction.id
+                transaction, models.PrivateConsumption.transaction_id == transaction.id
             ).order_by(ordering)
         )
 
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
-        Tuple[records.ConsumerPurchase, records.Transaction, records.Plan]
+        Tuple[records.PrivateConsumption, records.Transaction, records.Plan]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[records.ConsumerPurchase, records.Transaction, records.Plan]:
+        ) -> Tuple[records.PrivateConsumption, records.Transaction, records.Plan]:
             purchase_orm, transaction_orm, plan_orm = orm
             return (
-                DatabaseGatewayImpl.consumer_purchase_from_orm(purchase_orm),
+                DatabaseGatewayImpl.private_consumption_from_orm(purchase_orm),
                 DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
@@ -1135,10 +1135,10 @@ class ConsumerPurchaseResult(FlaskQueryResult[records.ConsumerPurchase]):
             db=self.db,
             mapper=mapper,
             query=self.query.join(
-                transaction, models.ConsumerPurchase.transaction_id == transaction.id
+                transaction, models.PrivateConsumption.transaction_id == transaction.id
             )
-            .join(plan, models.ConsumerPurchase.plan_id == plan.id)
-            .with_entities(models.ConsumerPurchase, transaction, plan),
+            .join(plan, models.PrivateConsumption.plan_id == plan.id)
+            .with_entities(models.PrivateConsumption, transaction, plan),
         )
 
 
@@ -1355,10 +1355,10 @@ class DatabaseGatewayImpl:
             amount=orm.amount,
         )
 
-    def create_consumer_purchase(
+    def create_private_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> records.ConsumerPurchase:
-        orm = models.ConsumerPurchase(
+    ) -> records.PrivateConsumption:
+        orm = models.PrivateConsumption(
             id=str(uuid4()),
             amount=amount,
             plan_id=str(plan),
@@ -1366,20 +1366,20 @@ class DatabaseGatewayImpl:
         )
         self.db.session.add(orm)
         self.db.session.flush()
-        return self.consumer_purchase_from_orm(orm)
+        return self.private_consumption_from_orm(orm)
 
-    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
-        return ConsumerPurchaseResult(
+    def get_private_consumptions(self) -> PrivateConsumptionResult:
+        return PrivateConsumptionResult(
             db=self.db,
-            query=models.ConsumerPurchase.query,
-            mapper=self.consumer_purchase_from_orm,
+            query=models.PrivateConsumption.query,
+            mapper=self.private_consumption_from_orm,
         )
 
     @classmethod
-    def consumer_purchase_from_orm(
-        self, orm: models.ConsumerPurchase
-    ) -> records.ConsumerPurchase:
-        return records.ConsumerPurchase(
+    def private_consumption_from_orm(
+        self, orm: models.PrivateConsumption
+    ) -> records.PrivateConsumption:
+        return records.PrivateConsumption(
             id=UUID(orm.id),
             amount=orm.amount,
             plan_id=UUID(orm.plan_id),

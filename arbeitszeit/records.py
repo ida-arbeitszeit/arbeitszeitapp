@@ -317,7 +317,7 @@ class PlanningStatistics:
 
 
 @dataclass(frozen=True)
-class ConsumerPurchase:
+class PrivateConsumption:
     id: UUID
     plan_id: UUID
     transaction_id: UUID

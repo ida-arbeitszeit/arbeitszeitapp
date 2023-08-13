@@ -42,16 +42,15 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     purchase_generator: PurchaseGenerator,
-    company_generator: CompanyGenerator,
 ):
     member_of_interest = member_generator.create_member()
-    purchase_generator.create_purchase_by_member()
+    purchase_generator.create_private_consumption()
     response = use_case(member_of_interest)
     assert not response.transactions
 
 
 @injection_test
-def test_that_correct_info_is_generated_after_member_pays_product(
+def test_that_correct_info_is_generated_after_member_consumes_product(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
@@ -70,7 +69,9 @@ def test_that_correct_info_is_generated_after_member_pays_product(
         ),
         amount=1,
     )
-    purchase_generator.create_purchase_by_member(buyer=member, amount=1, plan=plan.id)
+    purchase_generator.create_private_consumption(
+        consumer=member, amount=1, plan=plan.id
+    )
     response = use_case(member)
     assert len(response.transactions) == 1
     assert response.transactions[0].peer_name == expected_company_name
@@ -99,7 +100,9 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
         ),
         amount=1,
     )
-    purchase_generator.create_purchase_by_member(buyer=member, amount=1, plan=plan.id)
+    purchase_generator.create_private_consumption(
+        consumer=member, amount=1, plan=plan.id
+    )
     response = use_case(member)
     assert response.transactions[0].transaction_volume == Decimal("0")
     assert str(response.transactions[0].transaction_volume) == "0"
@@ -161,8 +164,8 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
             hours_worked=Decimal("12"),
         )
     )
-    purchase_generator.create_purchase_by_member(
-        buyer=member,
+    purchase_generator.create_private_consumption(
+        consumer=member,
         plan=company1_plan.id,
         amount=1,
     )

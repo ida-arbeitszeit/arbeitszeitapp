@@ -281,18 +281,18 @@ class PlanResult(QueryResultImpl[Plan]):
                     for purchase in self.database.company_purchases.values()
                     if purchase.plan_id == plan.id
                 )
-                member_purchases = (
-                    purchase
-                    for purchase in self.database.consumer_purchases.values()
-                    if purchase.plan_id == plan.id
+                private_consumptions = (
+                    consumption
+                    for consumption in self.database.private_consumptions.values()
+                    if consumption.plan_id == plan.id
                 )
                 amount_purchased_by_companies = sum(
                     purchase.amount for purchase in company_purchases
                 )
-                amount_purchased_by_members = sum(
-                    purchase.amount for purchase in member_purchases
+                amount_consumed_by_members = sum(
+                    consumption.amount for consumption in private_consumptions
                 )
-                yield plan, amount_purchased_by_companies + amount_purchased_by_members
+                yield plan, amount_purchased_by_companies + amount_consumed_by_members
 
         return QueryResultImpl(
             items=items,
@@ -711,7 +711,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
         def transaction_filter(transaction: Transaction) -> bool:
             consumer_purchases = (
-                self.database.indices.consumer_purchase_by_transaction.get(
+                self.database.indices.private_consumption_by_transaction.get(
                     transaction.id
                 )
             )
@@ -721,7 +721,8 @@ class TransactionResult(QueryResultImpl[Transaction]):
                 )
             )
             transaction_plans = {
-                self.database.consumer_purchases[i].plan_id for i in consumer_purchases
+                self.database.private_consumptions[i].plan_id
+                for i in consumer_purchases
             } | {self.database.company_purchases[i].plan_id for i in company_purchases}
             return bool(transaction_plans & plans)
 
@@ -763,30 +764,32 @@ class TransactionResult(QueryResultImpl[Transaction]):
         )
 
 
-class ConsumerPurchaseResult(QueryResultImpl[records.ConsumerPurchase]):
+class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
     def ordered_by_creation_date(
         self, *, ascending: bool = True
-    ) -> ConsumerPurchaseResult:
-        def purchase_sorting_key(purchase: records.ConsumerPurchase) -> datetime:
-            transaction = self.database.transactions[purchase.transaction_id]
+    ) -> PrivateConsumptionResult:
+        def consumption_sorting_key(
+            consumption: records.PrivateConsumption,
+        ) -> datetime:
+            transaction = self.database.transactions[consumption.transaction_id]
             return transaction.date
 
         return replace(
             self,
             items=lambda: sorted(
                 list(self.items()),
-                key=purchase_sorting_key,
+                key=consumption_sorting_key,
                 reverse=not ascending,
             ),
         )
 
-    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
-        def filtered_items() -> Iterator[records.ConsumerPurchase]:
+    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
+        def filtered_items() -> Iterator[records.PrivateConsumption]:
             member_account = self.database.members[member].account
-            for purchase in self.items():
-                transaction = self.database.transactions[purchase.transaction_id]
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
                 if transaction.sending_account == member_account:
-                    yield purchase
+                    yield consumption
 
         return replace(
             self,
@@ -795,9 +798,9 @@ class ConsumerPurchaseResult(QueryResultImpl[records.ConsumerPurchase]):
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResultImpl[Tuple[records.ConsumerPurchase, Transaction, Plan]]:
+    ) -> QueryResultImpl[Tuple[records.PrivateConsumption, Transaction, Plan]]:
         def joined_items() -> (
-            Iterator[Tuple[records.ConsumerPurchase, Transaction, Plan]]
+            Iterator[Tuple[records.PrivateConsumption, Transaction, Plan]]
         ):
             for purchase in self.items():
                 transaction = self.database.transactions[purchase.transaction_id]
@@ -1100,7 +1103,7 @@ class MockDatabase:
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.coordination_tenures: Dict[UUID, records.CoordinationTenure] = dict()
-        self.consumer_purchases: Dict[UUID, records.ConsumerPurchase] = dict()
+        self.private_consumptions: Dict[UUID, records.PrivateConsumption] = dict()
         self.company_purchases: Dict[UUID, records.CompanyPurchase] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, records.EmailAddress] = dict()
@@ -1121,24 +1124,24 @@ class MockDatabase:
     def get_company_by_id(self, company: UUID) -> Optional[Company]:
         return self.companies.get(company)
 
-    def create_consumer_purchase(
+    def create_private_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> records.ConsumerPurchase:
-        purchase = records.ConsumerPurchase(
+    ) -> records.PrivateConsumption:
+        consumption = records.PrivateConsumption(
             id=uuid4(),
             plan_id=plan,
             transaction_id=transaction,
             amount=amount,
         )
-        self.consumer_purchases[purchase.id] = purchase
-        self.indices.consumer_purchase_by_transaction.add(transaction, purchase.id)
-        self.indices.consumer_purchase_by_plan.add(plan, purchase.id)
-        return purchase
+        self.private_consumptions[consumption.id] = consumption
+        self.indices.private_consumption_by_transaction.add(transaction, consumption.id)
+        self.indices.private_consumption_by_plan.add(plan, consumption.id)
+        return consumption
 
-    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
-        return ConsumerPurchaseResult(
+    def get_private_consumptions(self) -> PrivateConsumptionResult:
+        return PrivateConsumptionResult(
             database=self,
-            items=self.consumer_purchases.values,
+            items=self.private_consumptions.values,
         )
 
     def create_company_purchase(
@@ -1438,8 +1441,8 @@ class Indices:
     plan_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
     member_by_account: Index[UUID, UUID] = field(default_factory=Index)
     company_by_account: Index[UUID, UUID] = field(default_factory=Index)
-    consumer_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
-    consumer_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
+    private_consumption_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
+    private_consumption_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     coordination_tenure_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)

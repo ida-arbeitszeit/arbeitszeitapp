@@ -10,6 +10,7 @@ from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
+from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
@@ -55,7 +56,9 @@ from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
 )
-from arbeitszeit_web.www.presenters.member_purchases import MemberPurchasesPresenter
+from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
+    PrivateConsumptionsPresenter,
+)
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
@@ -63,17 +66,17 @@ from arbeitszeit_web.www.presenters.query_companies_presenter import (
 from .blueprint import MemberRoute
 
 
-@MemberRoute("/member/purchases")
-def my_purchases(
-    query_purchases: use_cases.query_member_purchases.QueryMemberPurchases,
+@MemberRoute("/member/consumptions")
+def consumptions(
+    query_consumptions: QueryPrivateConsumptions,
     template_renderer: UserTemplateRenderer,
-    presenter: MemberPurchasesPresenter,
+    presenter: PrivateConsumptionsPresenter,
 ) -> Response:
-    response = query_purchases(UUID(current_user.id))
-    view_model = presenter.present_member_purchases(response)
+    response = query_consumptions(UUID(current_user.id))
+    view_model = presenter.present_private_consumptions(response)
     return FlaskResponse(
         template_renderer.render_template(
-            "member/my_purchases.html",
+            "member/consumptions.html",
             context=dict(view_model=view_model),
         )
     )
