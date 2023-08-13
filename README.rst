@@ -329,6 +329,7 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
     gettext(message: str)
     ngettext(singular: str, plural: str, n)
 
+
 #. Parse code for translatable strings (create a ``.pot`` file):
 
     .. code-block:: bash
@@ -342,9 +343,9 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
 
      python setup.py update_catalog
 
-#. Translate language-specific ``.po`` files. For translation programs, see
-`this page 
-<https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+
+#.	Translate language-specific ``.po`` files. For translation programs, see `this page <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+
 
 #. Compile translation files (.mo-files):
 

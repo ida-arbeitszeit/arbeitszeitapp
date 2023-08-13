@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
-"POT-Creation-Date: 2023-08-01 20:26+0200\n"
-"PO-Revision-Date: 2023-08-01 20:49+0200\n"
+"POT-Creation-Date: 2023-08-13 20:22+0200\n"
+"PO-Revision-Date: 2023-08-13 20:28+0200\n"
 "Last-Translator: Sebastian Loschert <sebastian.loschert@gmx.de>\n"
 "Language: de\n"
 "Language-Team: German <sebastian.loschert@gmx.de>\n"
@@ -37,7 +37,7 @@ msgstr "Dies ist ein Pflichtfeld."
 #: arbeitszeit_flask/forms.py:69 arbeitszeit_flask/forms.py:207
 #: arbeitszeit_flask/forms.py:208 arbeitszeit_flask/forms.py:349
 #: arbeitszeit_flask/templates/company/transfer_to_company.html:27
-#: arbeitszeit_flask/templates/member/pay_consumer_product.html:29
+#: arbeitszeit_flask/templates/member/register_private_consumption.html:29
 #: arbeitszeit_web/formatters/plan_details_formatter.py:44
 msgid "Plan ID"
 msgstr "Plan-ID"
@@ -89,7 +89,7 @@ msgstr "Richtige E-Mail-Adresse erforderlich"
 #: arbeitszeit_flask/templates/company/my_purchases.html:27
 #: arbeitszeit_flask/templates/macros/company_summary.html:20
 #: arbeitszeit_flask/templates/macros/coop_summary.html:18
-#: arbeitszeit_flask/templates/member/my_purchases.html:27
+#: arbeitszeit_flask/templates/member/consumptions.html:27
 msgid "Name"
 msgstr "Name"
 
@@ -134,8 +134,8 @@ msgstr "Login merken?"
 #: arbeitszeit_flask/templates/company/register_hours_worked.html:20
 #: arbeitszeit_flask/templates/company/transfer_to_company.html:33
 #: arbeitszeit_flask/templates/macros/draft_form.html:80
-#: arbeitszeit_flask/templates/member/my_purchases.html:30
-#: arbeitszeit_flask/templates/member/pay_consumer_product.html:35
+#: arbeitszeit_flask/templates/member/consumptions.html:30
+#: arbeitszeit_flask/templates/member/register_private_consumption.html:35
 #: arbeitszeit_web/formatters/plan_details_formatter.py:77
 msgid "Amount"
 msgstr "Menge"
@@ -244,8 +244,8 @@ msgstr "Betriebsansicht"
 
 #: arbeitszeit_flask/templates/base_company.html:47
 #: arbeitszeit_flask/templates/base_member.html:52
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:194
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:199
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:191
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:196
 msgid "Sign up"
 msgstr "Registrieren"
 
@@ -369,8 +369,8 @@ msgstr "Login Buchhalter*in"
 #: arbeitszeit_flask/templates/auth/login_accountant.html:36
 #: arbeitszeit_flask/templates/auth/login_company.html:36
 #: arbeitszeit_flask/templates/auth/login_member.html:36
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:219
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:223
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:216
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:220
 msgid "Login"
 msgstr "Login"
 
@@ -884,13 +884,10 @@ msgid "You don't have expired plans."
 msgstr "Du hast keine abgelaufenen Pläne."
 
 #: arbeitszeit_flask/templates/company/my_purchases.html:4
-#: arbeitszeit_flask/templates/member/dashboard.html:73
-#: arbeitszeit_flask/templates/member/my_purchases.html:4
 msgid "My purchases"
 msgstr "Meine Käufe"
 
 #: arbeitszeit_flask/templates/company/my_purchases.html:12
-#: arbeitszeit_flask/templates/member/my_purchases.html:12
 msgid "My past purchases"
 msgstr "Meine vergangenen Käufe"
 
@@ -899,12 +896,12 @@ msgid "Here you can view your past purchases."
 msgstr "Hier kannst du alle vergangen Käufe einsehen."
 
 #: arbeitszeit_flask/templates/company/my_purchases.html:26
-#: arbeitszeit_flask/templates/member/my_purchases.html:26
+#: arbeitszeit_flask/templates/member/consumptions.html:26
 msgid "Date"
 msgstr "Datum"
 
 #: arbeitszeit_flask/templates/company/my_purchases.html:28
-#: arbeitszeit_flask/templates/member/my_purchases.html:28
+#: arbeitszeit_flask/templates/member/consumptions.html:28
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -917,7 +914,7 @@ msgid "Unit price"
 msgstr "Preis pro Einheit"
 
 #: arbeitszeit_flask/templates/company/my_purchases.html:32
-#: arbeitszeit_flask/templates/member/my_purchases.html:31
+#: arbeitszeit_flask/templates/member/consumptions.html:31
 msgid "Total price"
 msgstr "Gesamtpreis"
 
@@ -933,10 +930,6 @@ msgstr "Aktionen"
 
 #: arbeitszeit_flask/templates/company/plan_details.html:25
 #: arbeitszeit_flask/templates/company/plan_details.html:27
-#: arbeitszeit_flask/templates/member/dashboard.html:59
-#: arbeitszeit_flask/templates/member/pay_consumer_product.html:4
-#: arbeitszeit_flask/templates/member/plan_details.html:22
-#: arbeitszeit_flask/templates/member/plan_details.html:24
 msgid "Pay product"
 msgstr "Produkt bezahlen"
 
@@ -966,6 +959,7 @@ msgid "Worker"
 msgstr "Arbeiter*in"
 
 #: arbeitszeit_flask/templates/company/register_hours_worked.html:42
+#: arbeitszeit_flask/templates/member/register_private_consumption.html:43
 msgid "Register"
 msgstr "Registrieren"
 
@@ -1022,7 +1016,6 @@ msgid "Payment of fixed and liquid means of production"
 msgstr "Bezahlung fester und flüssiger Produktionsmittel"
 
 #: arbeitszeit_flask/templates/company/transfer_to_company.html:53
-#: arbeitszeit_flask/templates/member/pay_consumer_product.html:43
 msgid "Transfer"
 msgstr "Überweisen"
 
@@ -1198,72 +1191,72 @@ msgstr "Aktive Pläne"
 msgid "Search by plan ID or product name"
 msgstr "Nach Plan-ID oder Produktname suchen"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:243
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:247
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:240
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:244
 msgid "Company invites"
 msgstr "Betriebseinladungen"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:267
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:271
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:264
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:268
 msgid "Accepts invitation"
 msgstr "Akzeptiert Einladung"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:291
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:295
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:288
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:292
 msgid "Company sends work certificates"
 msgstr "Betrieb sendet Arbeitszertifikate"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:315
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:319
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:312
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:316
 msgid "Product search"
 msgstr "Produktsuche"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:335
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:339
-msgid "Payment of product"
-msgstr "Produktbezahlung"
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:332
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:336
+msgid "Registration of consumption"
+msgstr "Registrierung von Konsum"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:412
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:409
 msgid "Create plan draft"
 msgstr "Erstelle Planentwurf"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:436
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:433
 msgid "File plan draft"
 msgstr "Reiche Planentwurf ein"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:457
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:454
 msgid "Public accounting approves"
 msgstr "Öffentliche Buchhaltung genehmigt"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:482
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:479
 msgid "Public accounting grants credits"
 msgstr "Öffentliche Buchhaltung gewährt Kredite"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:503
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:500
 msgid "Pay means of production"
 msgstr "Bezahle Produktionsmittel"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:528
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:525
 msgid "Send work certificates to workers"
 msgstr "Sende Arbeitszertifikate zu Arbeiter*innen"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:553
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:550
 msgid "Produce and sell"
 msgstr "Produzieren und verkaufen"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:574
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:571
 msgid "Planning"
 msgstr "Planung"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:595
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:592
 msgid "Approval"
 msgstr "Genehmigung"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:616
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:613
 msgid "Payments"
 msgstr "Bezahlungen"
 
-#: arbeitszeit_flask/templates/macros/start_hilfe.html:637
+#: arbeitszeit_flask/templates/macros/start_hilfe.html:634
 msgid "Production"
 msgstr "Produktion"
 
@@ -1312,6 +1305,27 @@ msgstr "Verfügbare Arbeitszertifikate"
 msgid "Available product (no public products)"
 msgstr "Verfügbares Produkt (keine öffentlichen Produkte)"
 
+#: arbeitszeit_flask/templates/member/consumptions.html:4
+#: arbeitszeit_flask/templates/member/dashboard.html:73
+msgid "My consumptions"
+msgstr "Meine Verbräuche"
+
+#: arbeitszeit_flask/templates/member/consumptions.html:12
+msgid "My past consumptions"
+msgstr "Meine vergangenen Verbräuche"
+
+#: arbeitszeit_flask/templates/member/consumptions.html:17
+msgid "Your past consumptions are shown here."
+msgstr "Deine vergangenen Verbräuche werden hier gezeigt."
+
+#: arbeitszeit_flask/templates/member/consumptions.html:29
+msgid "Price per unit"
+msgstr "Einzelpreis"
+
+#: arbeitszeit_flask/templates/member/consumptions.html:47
+msgid "You have not consumed anything yet."
+msgstr "Du hast noch nichts konsumiert."
+
 #: arbeitszeit_flask/templates/member/dashboard.html:15
 msgid "Your credit"
 msgstr "Dein Guthaben"
@@ -1332,6 +1346,11 @@ msgstr ""
 msgid "My area"
 msgstr "Mein Bereich"
 
+#: arbeitszeit_flask/templates/member/dashboard.html:59
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:86
+msgid "Private consumption"
+msgstr "Privater Konsum"
+
 #: arbeitszeit_flask/templates/member/dashboard.html:66
 #: arbeitszeit_flask/templates/member/my_account.html:4
 msgid "My account"
@@ -1345,18 +1364,6 @@ msgstr "Mein Konto"
 msgid "Current balance"
 msgstr "Aktueller Kontostand"
 
-#: arbeitszeit_flask/templates/member/my_purchases.html:17
-msgid "Your past purchases are shown here."
-msgstr "Hier werden deine vergangenen Käufe angezeigt."
-
-#: arbeitszeit_flask/templates/member/my_purchases.html:29
-msgid "Price per unit"
-msgstr "Einzelpreis"
-
-#: arbeitszeit_flask/templates/member/my_purchases.html:47
-msgid "You have not made any purchases yet."
-msgstr "Du hast noch keine Käufe getätigt."
-
 #: arbeitszeit_flask/templates/member/notification-about-work-invitation.html:2
 #, python-format
 msgid ""
@@ -1367,9 +1374,12 @@ msgstr ""
 "Arbeitszeitapp beizutreten. Nimm an oder lehne ab über diesen Link: "
 "\"%(invitation_url)s\"."
 
-#: arbeitszeit_flask/templates/member/pay_consumer_product.html:14
-msgid "Pay Consumer Product"
-msgstr "Konsumgut bezahlen"
+#: arbeitszeit_flask/templates/member/plan_details.html:22
+#: arbeitszeit_flask/templates/member/plan_details.html:24
+#: arbeitszeit_flask/templates/member/register_private_consumption.html:4
+#: arbeitszeit_flask/templates/member/register_private_consumption.html:14
+msgid "Register consumption"
+msgstr "Registriere Konsum"
 
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
 msgid "Reject"
@@ -1433,29 +1443,29 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nein"
 
-#: arbeitszeit_web/www/authentication.py:26
-#: arbeitszeit_web/www/authentication.py:60
+#: arbeitszeit_web/www/authentication.py:41
+#: arbeitszeit_web/www/authentication.py:89
 msgid "Please log in to view this page."
 msgstr "Bitte logge dich ein, um diese Seite zu sehen."
 
-#: arbeitszeit_web/www/authentication.py:33
-#: arbeitszeit_web/www/authentication.py:67
+#: arbeitszeit_web/www/authentication.py:48
+#: arbeitszeit_web/www/authentication.py:96
 msgid "You are not logged in with the correct account."
 msgstr "Du bist nicht mit dem korrekten Konto angemeldet."
 
-#: arbeitszeit_web/www/controllers/pay_consumer_product_controller.py:23
-msgid "Plan ID is invalid."
-msgstr "Plan-ID ist ungültig."
+#: arbeitszeit_web/www/controllers/pay_means_of_production_controller.py:33
+#: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:37
+msgid "This is not an integer."
+msgstr "Das ist keine ganze Zahl."
 
-#: arbeitszeit_web/www/controllers/pay_consumer_product_controller.py:30
 #: arbeitszeit_web/www/controllers/pay_means_of_production_controller.py:38
+#: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:32
 msgid "Must be a number larger than zero."
 msgstr "Muss eine Nummer größer als Null sein."
 
-#: arbeitszeit_web/www/controllers/pay_consumer_product_controller.py:35
-#: arbeitszeit_web/www/controllers/pay_means_of_production_controller.py:33
-msgid "This is not an integer."
-msgstr "Das ist keine ganze Zahl."
+#: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:25
+msgid "Plan ID is invalid."
+msgstr "Plan-ID ist ungültig."
 
 #: arbeitszeit_web/www/controllers/request_cooperation_controller.py:34
 msgid "Invalid plan ID."
@@ -1565,24 +1575,17 @@ msgstr "Erwartetes Verkaufssoll"
 msgid "Sale of consumer product"
 msgstr "Verkauf Konsumprodukt"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:86
-msgid "Payment of consumer product"
-msgstr "Bezahlung Konsumprodukt"
-
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:89
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:87
 msgid "Sale of fixed means of production"
 msgstr "Verkauf feste Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:92
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:90
 msgid "Sale of liquid means of production"
 msgstr "Verkauf flüssige Produktionsmittel"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:40
-#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:51
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:51
-#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:51
-msgid "Payment"
-msgstr "Bezahlung"
+msgid "Consumption"
+msgstr "Konsum"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:42
 msgid "Wages"
@@ -1649,32 +1652,6 @@ msgstr "Emailadresse inkorrekt. Bist du bereits als Mitglied registriert?"
 #: arbeitszeit_web/www/presenters/notify_accountant_about_new_plan_presenter.py:24
 msgid "Plan was filed"
 msgstr "Plan wurde eingereicht."
-
-#: arbeitszeit_web/www/presenters/pay_consumer_product_presenter.py:27
-msgid "Product successfully paid."
-msgstr "Produkt erfolgreich bezahlt."
-
-#: arbeitszeit_web/www/presenters/pay_consumer_product_presenter.py:32
-msgid ""
-"The specified plan has been expired. Please contact the selling company to "
-"provide you with an up-to-date plan ID."
-msgstr ""
-"Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um "
-"eine aktuelle Plan-ID zu erhalten."
-
-#: arbeitszeit_web/www/presenters/pay_consumer_product_presenter.py:39
-msgid "You do not have enough work certificates."
-msgstr "Du hast nicht genügend Arbeitszertifikate."
-
-#: arbeitszeit_web/www/presenters/pay_consumer_product_presenter.py:44
-msgid "Failed to pay for consumer product. Are you logged in as a member?"
-msgstr ""
-"Bezahlung für Konsumprodukt nicht erfolgreich. Bist du als Mitglied "
-"eingeloggt?"
-
-#: arbeitszeit_web/www/presenters/pay_consumer_product_presenter.py:51
-msgid "There is no plan with the specified ID in the database."
-msgstr "Die Plan-ID existiert nicht im System."
 
 #: arbeitszeit_web/www/presenters/pay_means_of_production_presenter.py:28
 msgid "Successfully paid."
@@ -1749,6 +1726,32 @@ msgstr ""
 "Ein Betrieb mit der selben Email-Adresse existiert bereits, aber das "
 "eingegebene Passwort stimmt nicht überein."
 
+#: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:27
+msgid "Consumption successfully registered."
+msgstr "Konsum erfolgreich registriert."
+
+#: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:32
+msgid ""
+"The specified plan has been expired. Please contact the selling company to "
+"provide you with an up-to-date plan ID."
+msgstr ""
+"Der angegebene Plan ist nicht aktuell. Bitte wende dich an den Verkäufer, um "
+"eine aktuelle Plan-ID zu erhalten."
+
+#: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:39
+msgid "You do not have enough work certificates."
+msgstr "Du hast nicht genügend Arbeitszertifikate."
+
+#: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:47
+msgid "Failed to register private consumption. Are you logged in as a member?"
+msgstr ""
+"Registrierung des privaten Konsums fehlgeschlagen. Bist du als Mitglied "
+"eingeloggt?"
+
+#: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:54
+msgid "There is no plan with the specified ID in the database."
+msgstr "Die Plan-ID existiert nicht im System."
+
 #: arbeitszeit_web/www/presenters/registration_email_presenter.py:41
 msgid "Account confirmation"
 msgstr "Bestätigung des Kontos"
@@ -1793,6 +1796,12 @@ msgid ""
 msgstr ""
 "Hallo %(coordinator)s,<br>ein Betrieb möchte Teil einer Kooperation sein, "
 "die du koordinierst. Bitte überprüfe die Anfrage in der Arbeitszeitapp."
+
+#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:51
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:51
+#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:51
+msgid "Payment"
+msgstr "Bezahlung"
 
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:53
 #: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:53
@@ -2069,3 +2078,26 @@ msgstr "Verkauf"
 
 #~ msgid "Work certificates successfully transferred."
 #~ msgstr "Arbeitszertifikate wurden erfolgreich übertragen."
+
+#~ msgid "Payment of product"
+#~ msgstr "Produktbezahlung"
+
+#~ msgid "Your past purchases are shown here."
+#~ msgstr "Hier werden deine vergangenen Käufe angezeigt."
+
+#~ msgid "You have not made any purchases yet."
+#~ msgstr "Du hast noch keine Käufe getätigt."
+
+#~ msgid "Pay Consumer Product"
+#~ msgstr "Konsumgut bezahlen"
+
+#~ msgid "Payment of consumer product"
+#~ msgstr "Bezahlung Konsumprodukt"
+
+#~ msgid "Product successfully paid."
+#~ msgstr "Produkt erfolgreich bezahlt."
+
+#~ msgid "Failed to pay for consumer product. Are you logged in as a member?"
+#~ msgstr ""
+#~ "Bezahlung für Konsumprodukt nicht erfolgreich. Bist du als Mitglied "
+#~ "eingeloggt?"
