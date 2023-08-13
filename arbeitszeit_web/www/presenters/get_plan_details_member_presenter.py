@@ -14,7 +14,7 @@ from ...translator import Translator
 @dataclass
 class GetPlanDetailsMemberViewModel:
     details: PlanDetailsWeb
-    pay_product_url: str
+    register_private_consumption_url: str
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -33,7 +33,7 @@ class GetPlanDetailsMemberMemberPresenter:
             details=self.plan_details_service.format_plan_details(
                 response.plan_details
             ),
-            pay_product_url=self.url_index.get_pay_consumer_product_url(
+            register_private_consumption_url=self.url_index.get_register_private_consumption_url(
                 amount=None, plan_id=response.plan_details.plan_id
             ),
         )

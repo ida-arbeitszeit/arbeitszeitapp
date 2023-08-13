@@ -15,17 +15,17 @@ from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
-    PayConsumerProductForm,
     PlanSearchForm,
+    RegisterPrivateConsumptionForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     Http404View,
-    PayConsumerProductView,
     QueryCompaniesView,
     QueryPlansView,
+    RegisterPrivateConsumptionView,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.get_member_account_details_controller import (
@@ -118,10 +118,10 @@ def query_companies(
     return view.respond_to_get()
 
 
-@MemberRoute("/member/pay_consumer_product", methods=["GET", "POST"])
+@MemberRoute("/member/register_private_consumption", methods=["GET", "POST"])
 @commit_changes
-def pay_consumer_product(view: PayConsumerProductView) -> Response:
-    form = PayConsumerProductForm(request.form)
+def register_private_consumption(view: RegisterPrivateConsumptionView) -> Response:
+    form = RegisterPrivateConsumptionForm(request.form)
     if request.method == "POST":
         return view.respond_to_post(form)
     else:

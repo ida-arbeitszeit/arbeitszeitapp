@@ -202,7 +202,7 @@ class LoginForm(Form):
         return WtFormField(form=self, field_name="remember")
 
 
-class PayConsumerProductForm(Form):
+class RegisterPrivateConsumptionForm(Form):
     plan_id = StringField(
         trans.lazy_gettext("Plan ID"),
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},

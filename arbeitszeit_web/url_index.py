@@ -77,7 +77,7 @@ class UrlIndex(Protocol):
     def get_line_plot_of_company_a_account(self, company_id: UUID) -> str:
         ...
 
-    def get_pay_consumer_product_url(
+    def get_register_private_consumption_url(
         self, amount: Optional[int] = None, plan_id: Optional[UUID] = None
     ) -> str:
         ...

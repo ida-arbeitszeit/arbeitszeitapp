@@ -227,19 +227,23 @@ class GeneralUrlIndexTests(ViewTestCase):
         assert response.invite_id
         return response.invite_id
 
-    def test_url_for_payment_of_consumer_product_leads_to_functional_url_without_parameters(
+    def test_url_for_registering_private_consumption_leads_to_functional_url_without_parameters(
         self,
     ) -> None:
         self.login_member()
-        url = self.url_index.get_pay_consumer_product_url(amount=None, plan_id=None)
+        url = self.url_index.get_register_private_consumption_url(
+            amount=None, plan_id=None
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_payment_of_consumer_product_leads_to_functional_url_with_parameters(
+    def test_url_for_registering_private_consumption_leads_to_functional_url_with_parameters(
         self,
     ) -> None:
         self.login_member()
-        url = self.url_index.get_pay_consumer_product_url(amount=1, plan_id=uuid4())
+        url = self.url_index.get_register_private_consumption_url(
+            amount=1, plan_id=uuid4()
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

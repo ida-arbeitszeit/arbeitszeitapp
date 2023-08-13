@@ -88,7 +88,7 @@ class DraftForm:
         return self._is_public_service_field
 
 
-class PayConsumerProductFakeForm:
+class RegisterPrivateConsumptionFakeForm:
     def __init__(self) -> None:
         self._amount: str = "1"
         self._plan_id: str = str(uuid4())
