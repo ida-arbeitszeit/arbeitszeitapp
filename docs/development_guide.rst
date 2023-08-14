@@ -63,8 +63,8 @@ protocol. It has two types of methods: ``create_*`` methods to persist
 new data records in the DB and ``get_*`` methods that allow us to
 query existing data records. The kinds of data records that DB
 implementations should understand are defined in
-``arbeitszeit/records.py``. The simple dataclasses defined there are
-called records from now on.
+``arbeitszeit/records.py``. These simple dataclasses defined will be
+called *records*.
 
 Object creation
 ...............
