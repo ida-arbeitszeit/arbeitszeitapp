@@ -17,18 +17,18 @@ class RejectionReason(Exception, Enum):
     plan_inactive = auto()
     plan_not_found = auto()
     insufficient_balance = auto()
-    buyer_does_not_exist = auto()
+    consumer_does_not_exist = auto()
 
 
 @dataclass
-class PayConsumerProductRequest:
-    buyer: UUID
+class RegisterPrivateConsumptionRequest:
+    consumer: UUID
     plan: UUID
     amount: int
 
 
 @dataclass
-class PayConsumerProductResponse:
+class RegisterPrivateConsumptionResponse:
     rejection_reason: Optional[RejectionReason]
 
     @property
@@ -37,32 +37,32 @@ class PayConsumerProductResponse:
 
 
 @dataclass
-class PayConsumerProduct:
+class RegisterPrivateConsumption:
     giro_office: GiroOffice
     datetime_service: DatetimeService
     price_calculator: PriceCalculator
     database_gateway: DatabaseGateway
 
-    def pay_consumer_product(
-        self, request: PayConsumerProductRequest
-    ) -> PayConsumerProductResponse:
+    def register_private_consumption(
+        self, request: RegisterPrivateConsumptionRequest
+    ) -> RegisterPrivateConsumptionResponse:
         try:
-            return self._perform_buying_process(request)
+            return self._perform_registration_process(request)
         except RejectionReason as reason:
-            return PayConsumerProductResponse(rejection_reason=reason)
+            return RegisterPrivateConsumptionResponse(rejection_reason=reason)
         except TransactionRejection:
-            return PayConsumerProductResponse(
+            return RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.insufficient_balance
             )
 
-    def _perform_buying_process(
-        self, request: PayConsumerProductRequest
-    ) -> PayConsumerProductResponse:
+    def _perform_registration_process(
+        self, request: RegisterPrivateConsumptionRequest
+    ) -> RegisterPrivateConsumptionResponse:
         plan = self._get_active_plan(request)
-        buyer = self.database_gateway.get_members().with_id(request.buyer).first()
-        if buyer is None:
-            return PayConsumerProductResponse(
-                rejection_reason=RejectionReason.buyer_does_not_exist
+        consumer = self.database_gateway.get_members().with_id(request.consumer).first()
+        if consumer is None:
+            return RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.consumer_does_not_exist
             )
         coop_price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         individual_price_per_unit = self.price_calculator.calculate_individual_price(
@@ -71,7 +71,7 @@ class PayConsumerProduct:
         transaction = self._transfer_certificates(
             request.amount,
             plan,
-            buyer,
+            consumer,
             coop_price_per_unit=coop_price_per_unit,
             individual_price_per_unit=individual_price_per_unit,
         )
@@ -80,9 +80,9 @@ class PayConsumerProduct:
             plan=plan.id,
             transaction=transaction.id,
         )
-        return PayConsumerProductResponse(rejection_reason=None)
+        return RegisterPrivateConsumptionResponse(rejection_reason=None)
 
-    def _get_active_plan(self, request: PayConsumerProductRequest) -> Plan:
+    def _get_active_plan(self, request: RegisterPrivateConsumptionRequest) -> Plan:
         now = self.datetime_service.now()
         plan = self.database_gateway.get_plans().with_id(request.plan).first()
         if plan is None:
@@ -95,14 +95,14 @@ class PayConsumerProduct:
         self,
         amount: int,
         plan: Plan,
-        buyer: Member,
+        consumer: Member,
         coop_price_per_unit: Decimal,
         individual_price_per_unit: Decimal,
     ) -> Transaction:
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         return self.giro_office.record_transaction_from_member(
-            sender=buyer,
+            sender=consumer,
             receiving_account=planner.product_account,
             amount_sent=coop_price_per_unit * amount,
             amount_received=individual_price_per_unit * amount,

@@ -66,7 +66,7 @@ class DraftForm(Protocol):
         ...
 
 
-class PayConsumerProductForm(Protocol):
+class RegisterPrivateConsumptionForm(Protocol):
     def amount_field(self) -> FormField[str]:
         ...
 

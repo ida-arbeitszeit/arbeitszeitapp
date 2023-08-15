@@ -29,8 +29,7 @@ exchanges products on the basis of labour time.
 
 It provides a planning interface for companies and communities as well
 as a work time management interface for companies and workers.  Plans can get
-filed and approved, products can get published and paid, and work
-certificates can get transferred.
+filed and approved, products can get published, work and consumption can get registered.
 
 This application implements a theory (`"Arbeitszeitrechnung"
 <https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_)
@@ -47,7 +46,7 @@ There are three user roles:
   it will cost.
 
 * **Members** are workers in companies. They receive work certificates
-  for their worked hours. They can use them to purchase products and 
+  for their worked hours. They can use them to consume products and 
   services.
 
 * **Accountants** are delegates of the cooperating network of

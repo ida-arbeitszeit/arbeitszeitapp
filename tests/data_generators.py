@@ -13,11 +13,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import (
-    confirm_member,
-    pay_consumer_product,
-    pay_means_of_production,
-)
+from arbeitszeit.use_cases import confirm_member, pay_means_of_production
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -36,6 +32,11 @@ from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounti
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.use_cases.register_private_consumption import (
+    RegisterPrivateConsumption,
+    RegisterPrivateConsumptionRequest,
+    RegisterPrivateConsumptionResponse,
+)
 from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
@@ -331,7 +332,7 @@ class PurchaseGenerator:
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
     pay_means: pay_means_of_production.PayMeansOfProduction
-    pay_product: pay_consumer_product.PayConsumerProduct
+    register_private_consumption_use_case: RegisterPrivateConsumption
 
     def create_resource_purchase_by_company(
         self,
@@ -390,17 +391,21 @@ class PurchaseGenerator:
         buyer: Optional[UUID] = None,
         amount: int = 1,
         plan: Optional[UUID] = None,
-    ) -> pay_consumer_product.PayConsumerProductResponse:
+    ) -> RegisterPrivateConsumptionResponse:
         if buyer is None:
             buyer = self.member_generator.create_member()
         if plan is None:
             plan = self.plan_generator.create_plan().id
-        request = pay_consumer_product.PayConsumerProductRequest(
+        request = RegisterPrivateConsumptionRequest(
             amount=amount,
             plan=plan,
-            buyer=buyer,
+            consumer=buyer,
         )
-        response = self.pay_product.pay_consumer_product(request)
+        response = (
+            self.register_private_consumption_use_case.register_private_consumption(
+                request
+            )
+        )
         assert (
             response.is_accepted
         ), f"Could not create member purchase. Response was {response}"

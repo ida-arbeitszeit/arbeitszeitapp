@@ -1,9 +1,9 @@
-from arbeitszeit.use_cases.pay_consumer_product import (
-    PayConsumerProductResponse,
+from arbeitszeit.use_cases.register_private_consumption import (
+    RegisterPrivateConsumptionResponse,
     RejectionReason,
 )
-from arbeitszeit_web.www.presenters.pay_consumer_product_presenter import (
-    PayConsumerProductPresenter,
+from arbeitszeit_web.www.presenters.register_private_consumption_presenter import (
+    RegisterPrivateConsumptionPresenter,
 )
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
@@ -11,24 +11,29 @@ from tests.www.base_test_case import BaseTestCase
 from .notifier import NotifierTestImpl
 
 
-class PayConsumerProductPresenterTests(BaseTestCase):
+class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.notifier = self.injector.get(NotifierTestImpl)
         self.translator = self.injector.get(FakeTranslator)
-        self.presenter = self.injector.get(PayConsumerProductPresenter)
+        self.presenter = self.injector.get(RegisterPrivateConsumptionPresenter)
 
-    def test_presenter_shows_correct_notification_when_payment_was_a_success(
+    def test_presenter_shows_correct_notification_when_registration_was_a_success(
         self,
     ) -> None:
-        self.presenter.present(PayConsumerProductResponse(rejection_reason=None))
+        self.presenter.present(
+            RegisterPrivateConsumptionResponse(rejection_reason=None)
+        )
         self.assertIn(
-            self.translator.gettext("Product successfully paid."), self.notifier.infos
+            self.translator.gettext("Consumption successfully registered."),
+            self.notifier.infos,
         )
 
     def test_presenter_shows_correct_notification_when_plan_was_inactive(self) -> None:
         self.presenter.present(
-            PayConsumerProductResponse(rejection_reason=RejectionReason.plan_inactive)
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.plan_inactive
+            )
         )
         self.assertIn(
             self.translator.gettext(
@@ -39,7 +44,9 @@ class PayConsumerProductPresenterTests(BaseTestCase):
 
     def test_presenter_shows_correct_notification_when_plan_was_not_found(self) -> None:
         self.presenter.present(
-            PayConsumerProductResponse(rejection_reason=RejectionReason.plan_not_found)
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.plan_not_found
+            )
         )
         self.assertIn(
             self.translator.gettext(
@@ -52,7 +59,7 @@ class PayConsumerProductPresenterTests(BaseTestCase):
         self,
     ) -> None:
         self.presenter.present(
-            PayConsumerProductResponse(
+            RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.insufficient_balance
             )
         )
@@ -63,19 +70,25 @@ class PayConsumerProductPresenterTests(BaseTestCase):
 
     def test_presenter_returns_404_status_code_when_plan_was_not_found(self) -> None:
         view_model = self.presenter.present(
-            PayConsumerProductResponse(rejection_reason=RejectionReason.plan_not_found)
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.plan_not_found
+            )
         )
         self.assertEqual(view_model.status_code, 404)
 
-    def test_presenter_returns_200_status_code_when_payment_was_accepted(self) -> None:
+    def test_presenter_returns_200_status_code_when_registration_was_accepted(
+        self,
+    ) -> None:
         view_model = self.presenter.present(
-            PayConsumerProductResponse(rejection_reason=None)
+            RegisterPrivateConsumptionResponse(rejection_reason=None)
         )
         self.assertEqual(view_model.status_code, 200)
 
     def test_presenter_returns_410_status_code_when_plan_is_inactive(self) -> None:
         view_model = self.presenter.present(
-            PayConsumerProductResponse(rejection_reason=RejectionReason.plan_inactive)
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.plan_inactive
+            )
         )
         self.assertEqual(view_model.status_code, 410)
 
@@ -83,7 +96,7 @@ class PayConsumerProductPresenterTests(BaseTestCase):
         self,
     ) -> None:
         view_model = self.presenter.present(
-            PayConsumerProductResponse(
+            RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.insufficient_balance
             )
         )
@@ -93,23 +106,23 @@ class PayConsumerProductPresenterTests(BaseTestCase):
         self,
     ) -> None:
         self.presenter.present(
-            PayConsumerProductResponse(
-                rejection_reason=RejectionReason.buyer_does_not_exist
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.consumer_does_not_exist
             )
         )
         self.assertIn(
             self.translator.gettext(
-                "Failed to pay for consumer product. Are you logged in as a member?"
+                "Failed to register private consumption. Are you logged in as a member?"
             ),
             self.notifier.warnings,
         )
 
-    def test_presenter_returns_404_status_code_when_buyer_does_not_exist(
+    def test_presenter_returns_404_status_code_when_consumer_does_not_exist(
         self,
     ) -> None:
         view_model = self.presenter.present(
-            PayConsumerProductResponse(
-                rejection_reason=RejectionReason.buyer_does_not_exist
+            RegisterPrivateConsumptionResponse(
+                rejection_reason=RejectionReason.consumer_does_not_exist
             )
         )
         self.assertEqual(view_model.status_code, 404)

@@ -1,23 +1,25 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProductRequest
-from arbeitszeit_web.www.controllers.pay_consumer_product_controller import (
-    PayConsumerProductController,
+from arbeitszeit.use_cases.register_private_consumption import (
+    RegisterPrivateConsumptionRequest,
 )
-from tests.forms import PayConsumerProductFakeForm
+from arbeitszeit_web.www.controllers.register_private_consumption_controller import (
+    RegisterPrivateConsumptionController,
+)
+from tests.forms import RegisterPrivateConsumptionFakeForm
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
-ControllerResult = Optional[PayConsumerProductRequest]
+ControllerResult = Optional[RegisterPrivateConsumptionRequest]
 
 
-class PayConsumerProductControllerTests(BaseTestCase):
+class RegisterPrivateConsumptionControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.translator = self.injector.get(FakeTranslator)
-        self.controller = self.injector.get(PayConsumerProductController)
-        self.form = PayConsumerProductFakeForm()
+        self.controller = self.injector.get(RegisterPrivateConsumptionController)
+        self.form = RegisterPrivateConsumptionFakeForm()
 
     def test_error_is_raised_when_form_data_is_empty_strings(self) -> None:
         with self.assertRaises(self.controller.FormError):
@@ -130,7 +132,7 @@ class PayConsumerProductControllerTests(BaseTestCase):
         buyer_uuid = uuid4()
         result = self._process_form(buyer=buyer_uuid)
         assert result
-        self.assertEqual(result.buyer, buyer_uuid)
+        self.assertEqual(result.consumer, buyer_uuid)
 
     def _process_form(
         self,

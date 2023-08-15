@@ -1,21 +1,23 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.pay_consumer_product import PayConsumerProductRequest
-from arbeitszeit_web.forms import PayConsumerProductForm
+from arbeitszeit.use_cases.register_private_consumption import (
+    RegisterPrivateConsumptionRequest,
+)
+from arbeitszeit_web.forms import RegisterPrivateConsumptionForm
 from arbeitszeit_web.translator import Translator
 
 
 @dataclass
-class PayConsumerProductController:
+class RegisterPrivateConsumptionController:
     class FormError(Exception):
         pass
 
     translator: Translator
 
     def import_form_data(
-        self, current_user: UUID, form: PayConsumerProductForm
-    ) -> PayConsumerProductRequest:
+        self, current_user: UUID, form: RegisterPrivateConsumptionForm
+    ) -> RegisterPrivateConsumptionRequest:
         try:
             plan_id = UUID(form.plan_id_field().get_value())
         except ValueError:
@@ -35,6 +37,6 @@ class PayConsumerProductController:
                 self.translator.gettext("This is not an integer.")
             )
             raise self.FormError()
-        return PayConsumerProductRequest(
-            buyer=current_user, plan=plan_id, amount=amount
+        return RegisterPrivateConsumptionRequest(
+            consumer=current_user, plan=plan_id, amount=amount
         )
