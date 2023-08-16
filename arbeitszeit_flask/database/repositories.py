@@ -542,15 +542,6 @@ class MemberQueryResult(FlaskQueryResult[records.Member]):
             )
         )
 
-    def that_are_confirmed(self) -> MemberQueryResult:
-        user = aliased(models.User)
-        email_address = aliased(models.Email)
-        return self._with_modified_query(
-            lambda query: query.join(user, models.Member.user_id == user.id)
-            .join(email_address, user.email_address == email_address.address)
-            .filter(email_address.confirmed_on != None)
-        )
-
     def joined_with_email_address(
         self,
     ) -> FlaskQueryResult[Tuple[records.Member, records.EmailAddress]]:
@@ -592,6 +583,23 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
             )
         )
 
+    def that_is_coordinating_cooperation(self, cooperation: UUID) -> Self:
+        coop = aliased(models.Cooperation)
+        most_recent_tenure_holder = (
+            models.CoordinationTenure.query.filter(
+                models.CoordinationTenure.cooperation == coop.id
+            )
+            .order_by(models.CoordinationTenure.start_date.desc())
+            .with_entities(models.CoordinationTenure.company)
+            .limit(1)
+            .scalar_subquery()
+        )
+        return self._with_modified_query(
+            lambda query: query.join(
+                coop, most_recent_tenure_holder == models.Company.id
+            ).filter(coop.id == str(cooperation))
+        )
+
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
         member = models.Member.query.filter(models.Member.id == str(member)).first()
@@ -611,15 +619,6 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
             lambda db_query: db_query.join(models.User).filter(
                 models.User.email_address.ilike(f"%{query}%")
             )
-        )
-
-    def that_are_confirmed(self) -> Self:
-        user = aliased(models.User)
-        email_address = aliased(models.Email)
-        return self._with_modified_query(
-            lambda query: query.join(user, user.id == models.Company.user_id)
-            .join(email_address, email_address.address == user.email_address)
-            .filter(email_address.confirmed_on != None)
         )
 
     def joined_with_email_address(
@@ -655,6 +654,29 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Accountant.id == str(id_))
+        )
+
+    def joined_with_email_address(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Accountant, records.EmailAddress]]:
+        def mapper(orm: Any) -> Tuple[records.Accountant, records.EmailAddress]:
+            return (
+                DatabaseGatewayImpl.accountant_from_orm(orm[0]),
+                DatabaseGatewayImpl.email_address_from_orm(orm[1]),
+            )
+
+        user = aliased(models.User)
+        email = aliased(models.Email)
+        query = (
+            self.query.join(user, user.id == models.Accountant.user_id)
+            .join(email, email.address == user.email_address)
+            .with_entities(models.Accountant, email)
+        )
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
         )
 
 
@@ -1232,6 +1254,24 @@ class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
             lambda query: query.filter(models.Email.address.in_(addresses))
         )
 
+    def that_belong_to_member(self, member: UUID) -> Self:
+        members = aliased(models.Member)
+        user = aliased(models.User)
+        return self._with_modified_query(
+            lambda query: query.join(user, user.email_address == models.Email.address)
+            .join(members, members.user_id == user.id)
+            .filter(members.id == str(member))
+        )
+
+    def that_belong_to_company(self, company: UUID) -> Self:
+        companies = aliased(models.Company)
+        user = aliased(models.User)
+        return self._with_modified_query(
+            lambda query: query.join(user, user.email_address == models.Email.address)
+            .join(companies, companies.user_id == user.id)
+            .filter(companies.id == str(company))
+        )
+
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(db=self.db, query=self.query)
 
@@ -1259,6 +1299,179 @@ class EmailAddressUpdate:
             .execution_options(synchronize_session="fetch")
         )
         return self.db.session.execute(sql_statement).rowcount  # type: ignore
+
+
+class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
+    def with_email_address(self, address: str) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                func.lower(models.User.email_address) == func.lower(address)
+            )
+        )
+
+    def joined_with_accountant(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[records.AccountCredentials, Optional[records.Accountant]]
+    ]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[records.AccountCredentials, Optional[records.Accountant]]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.accountant_from_orm(orm[1]) if orm[1] else None,
+            )
+
+        accountant = aliased(models.Accountant)
+        query = self.query.join(
+            accountant, accountant.user_id == models.User.id, isouter=True
+        ).with_entities(models.User, accountant)
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=mapper,
+        )
+
+    def joined_with_email_address_and_accountant(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Accountant],
+        ]
+    ]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Accountant],
+        ]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.email_address_from_orm(orm[1]),
+                DatabaseGatewayImpl.accountant_from_orm(orm[2]) if orm[2] else None,
+            )
+
+        accountant = aliased(models.Accountant)
+        email = aliased(models.Email)
+        query = (
+            self.query.join(email, email.address == models.User.email_address)
+            .join(accountant, accountant.user_id == models.User.id, isouter=True)
+            .with_entities(models.User, email, accountant)
+        )
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=mapper,
+        )
+
+    def joined_with_member(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.AccountCredentials, Optional[records.Member]]]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[records.AccountCredentials, Optional[records.Member]]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.member_from_orm(orm[1]) if orm[1] else None,
+            )
+
+        member = aliased(models.Member)
+        query = self.query.join(
+            member, member.user_id == models.User.id, isouter=True
+        ).with_entities(models.User, member)
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=mapper,
+        )
+
+    def joined_with_email_address_and_member(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.AccountCredentials, records.EmailAddress, Optional[records.Member]
+        ]
+    ]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[
+            records.AccountCredentials, records.EmailAddress, Optional[records.Member]
+        ]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.email_address_from_orm(orm[1]),
+                DatabaseGatewayImpl.member_from_orm(orm[2]) if orm[2] else None,
+            )
+
+        member = aliased(models.Member)
+        email = aliased(models.Email)
+        query = (
+            self.query.join(email, email.address == models.User.email_address)
+            .join(member, member.user_id == models.User.id, isouter=True)
+            .with_entities(models.User, email, member)
+        )
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=mapper,
+        )
+
+    def joined_with_company(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.AccountCredentials, Optional[records.Company]]]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[records.AccountCredentials, Optional[records.Company]]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.company_from_orm(orm[1]) if orm[1] else None,
+            )
+
+        company = aliased(models.Company)
+        query = self.query.join(
+            company, company.user_id == models.User.id, isouter=True
+        ).with_entities(models.User, company)
+        return FlaskQueryResult(
+            query=query,
+            db=self.db,
+            mapper=mapper,
+        )
+
+    def joined_with_email_address_and_company(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Company],
+        ]
+    ]:
+        def mapper(
+            orm: Any,
+        ) -> Tuple[
+            records.AccountCredentials, records.EmailAddress, Optional[records.Company]
+        ]:
+            return (
+                DatabaseGatewayImpl.account_credentials_from_orm(orm[0]),
+                DatabaseGatewayImpl.email_address_from_orm(orm[1]),
+                DatabaseGatewayImpl.company_from_orm(orm[2]) if orm[2] else None,
+            )
+
+        email = aliased(models.Email)
+        company = aliased(models.Company)
+        query = (
+            self.query.join(email, email.address == models.User.email_address)
+            .join(company, company.user_id == models.User.id, isouter=True)
+            .with_entities(models.User, email, company)
+        )
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
 
 
 @dataclass
@@ -1579,26 +1792,20 @@ class DatabaseGatewayImpl:
             id=UUID(orm_object.id),
             name=orm_object.name,
             account=UUID(orm_object.account),
-            email=orm_object.user.email_address,
             registered_on=orm_object.registered_on,
-            password_hash=orm_object.user.password,
         )
 
     def create_member(
         self,
         *,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         account: records.Account,
         registered_on: datetime,
     ) -> records.Member:
-        user_orm = self._get_or_create_user(
-            email=email, password_hash=password_hash, email_confirmed_on=None
-        )
         orm_member = Member(
             id=str(uuid4()),
-            user=user_orm,
+            user_id=str(account_credentials),
             name=name,
             account=str(account.id),
             registered_on=registered_on,
@@ -1613,67 +1820,39 @@ class DatabaseGatewayImpl:
             db=self.db,
         )
 
-    def _get_or_create_user(
-        self, *, email: str, password_hash: str, email_confirmed_on: Optional[datetime]
-    ) -> models.User:
-        if (
-            user := self.db.session.query(models.User)
-            .filter(func.lower(models.User.email_address) == func.lower(email))
-            .first()
-        ):
-            return user
-        email_address = models.Email.query.filter(models.Email.address == email).first()
-        if not email_address:
-            email_address = models.Email(
-                address=email,
-                confirmed_on=email_confirmed_on,
-            )
-            self.db.session.add(email_address)
-        return models.User(
-            email_address=email_address.address,
-            password=password_hash,
-        )
-
     @classmethod
     def company_from_orm(cls, company_orm: Company) -> records.Company:
         return records.Company(
             id=UUID(company_orm.id),
-            email=company_orm.user.email_address,
             name=company_orm.name,
             means_account=UUID(company_orm.p_account),
             raw_material_account=UUID(company_orm.r_account),
             work_account=UUID(company_orm.a_account),
             product_account=UUID(company_orm.prd_account),
             registered_on=company_orm.registered_on,
-            password_hash=company_orm.user.password,
         )
 
     def create_company(
         self,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         means_account: records.Account,
         labour_account: records.Account,
         resource_account: records.Account,
         products_account: records.Account,
         registered_on: datetime,
     ) -> records.Company:
-        user_orm = self._get_or_create_user(
-            email=email, password_hash=password_hash, email_confirmed_on=None
-        )
         company = models.Company(
             id=str(uuid4()),
             name=name,
             registered_on=registered_on,
-            user=user_orm,
+            user_id=str(account_credentials),
             p_account=str(means_account.id),
             r_account=str(resource_account.id),
             a_account=str(labour_account.id),
             prd_account=str(products_account.id),
         )
         self.db.session.add(company)
-        self.db.session.flush()
         return self.company_from_orm(company)
 
     def get_companies(self) -> CompanyQueryResult:
@@ -1683,18 +1862,16 @@ class DatabaseGatewayImpl:
             db=self.db,
         )
 
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        user_id = uuid4()
-        user_orm = self._get_or_create_user(
-            email=email, password_hash=password_hash, email_confirmed_on=None
-        )
+    def create_accountant(
+        self, account_credentials: UUID, name: str
+    ) -> records.Accountant:
         accountant = models.Accountant(
-            id=str(user_id),
+            id=str(uuid4()),
             name=name,
-            user=user_orm,
+            user_id=str(account_credentials),
         )
         self.db.session.add(accountant)
-        return user_id
+        return self.accountant_from_orm(accountant)
 
     def get_accountants(self) -> AccountantResult:
         return AccountantResult(
@@ -1706,10 +1883,8 @@ class DatabaseGatewayImpl:
     @classmethod
     def accountant_from_orm(self, orm: models.Accountant) -> records.Accountant:
         return records.Accountant(
-            email_address=orm.user.email_address,
             name=orm.name,
             id=UUID(orm.id),
-            password_hash=orm.user.password,
         )
 
     @classmethod
@@ -1811,4 +1986,31 @@ class DatabaseGatewayImpl:
             db=self.db,
             mapper=self.account_from_orm,
             query=models.Account.query,
+        )
+
+    def create_account_credentials(
+        self, email_address: str, password_hash: str
+    ) -> records.AccountCredentials:
+        orm = models.User(
+            id=str(uuid4()),
+            password=password_hash,
+            email_address=email_address,
+        )
+        self.db.session.add(orm)
+        self.db.session.flush()
+        return self.account_credentials_from_orm(orm)
+
+    def get_account_credentials(self) -> AccountCredentialsResult:
+        return AccountCredentialsResult(
+            db=self.db,
+            query=models.User.query,
+            mapper=self.account_credentials_from_orm,
+        )
+
+    @classmethod
+    def account_credentials_from_orm(self, orm: Any) -> records.AccountCredentials:
+        return records.AccountCredentials(
+            id=UUID(orm.id),
+            email_address=orm.email_address,
+            password_hash=orm.password,
         )

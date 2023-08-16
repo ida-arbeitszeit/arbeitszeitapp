@@ -1,67 +1,88 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
+from parameterized import parameterized
 from sqlalchemy.exc import IntegrityError
 
-from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
+from arbeitszeit import records
+from tests.data_generators import AccountantGenerator, CompanyGenerator, EmailGenerator
 
 from ..flask import FlaskTestCase
 from .utility import Utility
 
 
-class RepositoryTests(FlaskTestCase):
+class MemberResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
+        self.db = self.injector.get(SQLAlchemy)
+        self.email_generator = self.injector.get(EmailGenerator)
+
+    def create_member(self, email_address: Optional[str] = None) -> records.Member:
+        if email_address is None:
+            email_address = self.email_generator.get_random_email()
+        self.database_gateway.create_email_address(
+            address=email_address, confirmed_on=None
+        )
+        credentials = self.database_gateway.create_account_credentials(
+            password_hash="", email_address=email_address
+        )
+        return self.create_member_from_credentials(credentials=credentials.id)
+
+    def create_member_from_credentials(self, *, credentials: UUID) -> records.Member:
+        account = self.database_gateway.create_account()
+        return self.database_gateway.create_member(
+            name="karl",
+            account=account,
+            registered_on=datetime.now(),
+            account_credentials=credentials,
+        )
+
+
+class RepositoryTests(MemberResultTests):
+    def setUp(self) -> None:
+        super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_member_can_be_retrieved_by_id(self) -> None:
-        expected_member = self.member_generator.create_member()
+        expected_member = self.create_member()
         retrieved_member = (
-            self.database_gateway.get_members().with_id(expected_member).first()
+            self.database_gateway.get_members().with_id(expected_member.id).first()
         )
         assert retrieved_member
-        assert retrieved_member.id == expected_member
+        assert retrieved_member == expected_member
 
     def test_that_member_can_be_retrieved_by_email(self) -> None:
         expected_mail = "test_mail@testmail.com"
-        expected_member = self.member_generator.create_member(email=expected_mail)
+        expected_member = self.create_member(email_address=expected_mail)
         result = (
             self.database_gateway.get_members()
             .with_email_address(expected_mail)
             .first()
         )
-        assert result
-        assert result.id == expected_member
+        assert result == expected_member
 
     def test_that_member_can_be_retrieved_by_email_case_insensitive(self) -> None:
         expected_mail = "test_mail@testmail.com"
         altered_mail = Utility.mangle_case(expected_mail)
-        expected_member = self.member_generator.create_member(email=expected_mail)
+        expected_member = self.create_member(email_address=expected_mail)
         result = (
             self.database_gateway.get_members().with_email_address(altered_mail).first()
         )
-        assert result
-        assert result.id == expected_member
+        assert result == expected_member
 
     def test_that_random_email_returns_no_member(self) -> None:
         random_email = "xyz123@testmail.com"
-        self.member_generator.create_member(email="test_mail@testmail.com")
+        self.create_member(email_address="test_mail@testmail.com")
         assert not self.database_gateway.get_members().with_email_address(random_email)
 
     def test_cannot_find_member_by_email_before_it_was_added(self) -> None:
         members = self.database_gateway.get_members()
-        assert not members.with_email_address("member@cp.org")
-        account = self.database_gateway.create_account()
-        self.database_gateway.create_member(
-            email="member@cp.org",
-            name="karl",
-            password_hash="password",
-            account=account,
-            registered_on=datetime.now(),
-        )
-        assert members.with_email_address("member@cp.org")
+        expected_email_address = "member@cp.org"
+        assert not members.with_email_address(expected_email_address)
+        self.create_member(email_address=expected_email_address)
+        assert members.with_email_address(expected_email_address)
 
     def test_does_not_identify_random_id_with_member(self) -> None:
         member_id = uuid4()
@@ -72,104 +93,81 @@ class RepositoryTests(FlaskTestCase):
         assert not self.database_gateway.get_members().with_id(company.id)
 
     def test_does_identify_member_id_as_member(self) -> None:
-        account = self.database_gateway.create_account()
-        member = self.database_gateway.create_member(
-            email="member@cp.org",
-            name="karl",
-            password_hash="password",
-            account=account,
-            registered_on=datetime.now(),
-        )
+        member = self.create_member()
         assert self.database_gateway.get_members().with_id(member.id)
 
     def test_member_count_is_0_when_none_were_created(self) -> None:
         assert len(self.database_gateway.get_members()) == 0
 
     def test_count_one_registered_member_when_one_was_created(self) -> None:
-        self.member_generator.create_member()
+        self.create_member()
         assert len(self.database_gateway.get_members()) == 1
 
     def test_with_id_returns_no_members_when_member_does_not_exist(self) -> None:
         assert not self.database_gateway.get_members().with_id(uuid4())
 
 
-class GetAllMembersTests(FlaskTestCase):
+class GetAllMembersTests(MemberResultTests):
     def setUp(self) -> None:
         super().setUp()
-        self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_with_empty_db_the_first_member_is_none(self) -> None:
         assert self.database_gateway.get_members().first() is None
 
     def test_with_one_member_id_db_the_first_element_is_that_member(self) -> None:
-        expected_member_id = self.member_generator.create_member()
+        expected_member = self.create_member()
         member = self.database_gateway.get_members().first()
         assert member
-        assert member.id == expected_member_id
+        assert member.id == expected_member.id
 
     def test_that_all_members_can_be_retrieved(self) -> None:
-        expected_member1 = self.member_generator.create_member()
-        expected_member2 = self.member_generator.create_member()
+        expected_member1 = self.create_member()
+        expected_member2 = self.create_member()
         all_members = list(self.database_gateway.get_members())
-        assert expected_member1 in {m.id for m in all_members}
-        assert expected_member2 in {m.id for m in all_members}
+        assert expected_member1 in all_members
+        assert expected_member2 in all_members
 
+    @parameterized.expand(
+        [
+            (0,),
+            (1,),
+            (10,),
+        ]
+    )
     def test_that_number_of_returned_members_is_equal_to_number_of_created_members(
-        self,
+        self, member_count: int
     ) -> None:
-        expected_number_of_members = 3
-        for i in range(expected_number_of_members):
-            self.member_generator.create_member()
+        for i in range(member_count):
+            self.create_member()
         member_count = len(self.database_gateway.get_members())
-        assert member_count == expected_number_of_members
+        assert member_count == member_count
 
     def test_can_filter_members_by_their_workplace(self) -> None:
-        member = self.member_generator.create_member()
-        self.member_generator.create_member()
-        company = self.company_generator.create_company_record(workers=[member])
+        member = self.create_member()
+        self.create_member()
+        company = self.company_generator.create_company_record(workers=[member.id])
         assert len(self.database_gateway.get_members()) == 2
         assert (
             len(self.database_gateway.get_members().working_at_company(company.id)) == 1
         )
 
 
-class ConfirmMemberTests(FlaskTestCase):
+class ConfirmMemberTests(MemberResultTests):
     def setUp(self) -> None:
         super().setUp()
-        self.account = self.database_gateway.create_account()
         self.timestamp = datetime(2000, 1, 1)
-
-    def test_that_member_is_confirmed_after_confirmation_date_is_set(self) -> None:
-        email_address = "test@test.test"
-        member_id = self.create_member(email=email_address)
-        self.database_gateway.get_email_addresses().with_address(
-            email_address
-        ).update().set_confirmation_timestamp(datetime(2000, 1, 2)).perform()
-        assert (
-            self.database_gateway.get_members().with_id(member_id).that_are_confirmed()
-        )
-
-    def test_that_member_is_not_confirmed_before_setting_confirmation_date(
-        self,
-    ) -> None:
-        member_id = self.create_member()
-        assert (
-            not self.database_gateway.get_members()
-            .that_are_confirmed()
-            .with_id(member_id)
-        )
 
     def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
         expected_timestamp = datetime(2000, 1, 2)
         email_address = "test@test.test"
-        member_id = self.create_member(email=email_address)
+        member = self.create_member(email_address=email_address)
         self.database_gateway.get_email_addresses().with_address(
             email_address
         ).update().set_confirmation_timestamp(expected_timestamp).perform()
         record = (
             self.database_gateway.get_members()
-            .with_id(member_id)
+            .with_id(member.id)
             .joined_with_email_address()
             .first()
         )
@@ -177,72 +175,27 @@ class ConfirmMemberTests(FlaskTestCase):
         _, email = record
         assert email.confirmed_on == expected_timestamp
 
-    def create_member(self, email: str = "test email") -> UUID:
-        return self.database_gateway.create_member(
-            email=email,
-            name="test name",
-            password_hash="test password",
-            account=self.account,
-            registered_on=self.timestamp,
-        ).id
 
-
-class CreateMemberTests(FlaskTestCase):
+class CreateMemberTests(MemberResultTests):
     def setUp(self) -> None:
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
-        self.account = self.database_gateway.create_account()
-        self.timestamp = datetime(2000, 1, 1)
-        self.db = self.injector.get(SQLAlchemy)
 
     def test_can_create_member_with_same_email_as_company(self) -> None:
         email = "test@test.test"
-        self.company_generator.create_company_record(email=email)
-        self.database_gateway.create_member(
-            email=email,
-            name="test name",
-            password_hash="test password",
-            account=self.account,
-            registered_on=self.timestamp,
+        self.company_generator.create_company(email=email)
+        account_credentials = (
+            self.database_gateway.get_account_credentials()
+            .with_email_address(email)
+            .first()
         )
-        self.db.session.flush()
+        assert account_credentials
+        self.create_member_from_credentials(credentials=account_credentials.id)
 
     def test_cannot_create_member_with_same_email_twice(self) -> None:
         email = "test@test.test"
-        self.database_gateway.create_member(
-            email=email,
-            name="test name",
-            password_hash="test password",
-            account=self.account,
-            registered_on=self.timestamp,
-        )
+        self.create_member(email_address=email)
         with self.assertRaises(IntegrityError):
-            self.database_gateway.create_member(
-                email=email,
-                name="test name",
-                password_hash="test password",
-                account=self.account,
-                registered_on=self.timestamp,
-            )
-            self.db.session.flush()
-
-    def test_cannot_create_member_with_similar_email_case_insensitive(self) -> None:
-        email = "test@test.test"
-        self.database_gateway.create_member(
-            email=email,
-            name="test name",
-            password_hash="test password",
-            account=self.account,
-            registered_on=self.timestamp,
-        )
-        altered_email = Utility.mangle_case(email)
-        with self.assertRaises(IntegrityError):
-            self.database_gateway.create_member(
-                email=altered_email,
-                name="test name",
-                password_hash="test password",
-                account=self.account,
-                registered_on=self.timestamp,
-            )
-            self.db.session.flush()
+            self.create_member(email_address=email)
+            self.db.flush()

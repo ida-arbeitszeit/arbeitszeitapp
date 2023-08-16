@@ -1,21 +1,59 @@
 from datetime import datetime
 from typing import List
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit.records import Company
-from tests.data_generators import CompanyGenerator, MemberGenerator
+from arbeitszeit import records
+from tests.data_generators import (
+    CompanyGenerator,
+    CooperationGenerator,
+    MemberGenerator,
+)
 
 from ..flask import FlaskTestCase
 from .utility import Utility
 
 
-def company_in_companies(company: Company, companies: List[Company]) -> bool:
-    return company.id in [c.id for c in companies]
+def company_in_companies(
+    company: records.Company, companies: List[records.Company]
+) -> bool:
+    return company.id in (c.id for c in companies)
 
 
-class RepositoryTester(FlaskTestCase):
+class CompanyResultTests(FlaskTestCase):
+    def create_company(
+        self, *, name: str = "test company name", email_address: str = "test@test.test"
+    ) -> records.Company:
+        self.database_gateway.create_email_address(
+            address=email_address, confirmed_on=None
+        )
+        credentials = self.database_gateway.create_account_credentials(
+            email_address=email_address, password_hash=""
+        )
+        return self.create_company_from_credentials(
+            credentials=credentials.id, name=name
+        )
+
+    def create_company_from_credentials(
+        self, credentials: UUID, *, name: str = "test@test.test"
+    ) -> records.Company:
+        means_account = self.database_gateway.create_account()
+        labour_account = self.database_gateway.create_account()
+        resource_account = self.database_gateway.create_account()
+        products_account = self.database_gateway.create_account()
+        return self.database_gateway.create_company(
+            account_credentials=credentials,
+            name=name,
+            means_account=means_account,
+            labour_account=labour_account,
+            resource_account=resource_account,
+            products_account=products_account,
+            registered_on=datetime.now(),
+        )
+
+
+class RepositoryTester(CompanyResultTests):
     def setUp(self) -> None:
         super().setUp()
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -65,28 +103,15 @@ class RepositoryTester(FlaskTestCase):
         )
 
     def test_can_create_company_with_correct_name(self) -> None:
-        means_account = self.database_gateway.create_account()
-        labour_account = self.database_gateway.create_account()
-        resource_account = self.database_gateway.create_account()
-        products_account = self.database_gateway.create_account()
         expected_name = "Rosa"
-        company = self.database_gateway.create_company(
-            email="rosa@cp.org",
-            name=expected_name,
-            password_hash="testpassword",
-            means_account=means_account,
-            labour_account=labour_account,
-            resource_account=resource_account,
-            products_account=products_account,
-            registered_on=datetime.now(),
-        )
+        company = self.create_company(name=expected_name)
         assert company.name == expected_name
 
     def test_can_detect_if_company_with_email_is_already_present(self) -> None:
         expected_email = "rosa@cp.org"
         companies = self.database_gateway.get_companies()
         assert not companies.with_email_address(expected_email)
-        self.company_generator.create_company_record(email=expected_email)
+        self.create_company(email_address=expected_email)
         assert companies.with_email_address(expected_email)
 
     def test_can_detect_if_company_with_email_is_already_present_case_insensitive(
@@ -130,96 +155,25 @@ class RepositoryTester(FlaskTestCase):
         assert company_in_companies(expected_company2, all_companies)
 
 
-class CreateCompanyTests(FlaskTestCase):
+class CreateCompanyTests(CompanyResultTests):
     def setUp(self) -> None:
         super().setUp()
         self.db = self.injector.get(SQLAlchemy)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.means_account = self.database_gateway.create_account()
-        self.labour_account = self.database_gateway.create_account()
-        self.resource_account = self.database_gateway.create_account()
-        self.products_account = self.database_gateway.create_account()
-        self.timestamp = datetime(2000, 1, 1)
         self.member_generator = self.injector.get(MemberGenerator)
 
     def test_that_company_can_be_created_while_member_with_same_email_exists(
         self,
     ) -> None:
-        email = "test@test.test"
-        self.member_generator.create_member(email=email)
-        self.database_gateway.create_company(
-            email=email,
-            name="test name",
-            password_hash="testpassword",
-            means_account=self.means_account,
-            labour_account=self.labour_account,
-            resource_account=self.resource_account,
-            products_account=self.products_account,
-            registered_on=self.timestamp,
+        expected_email_address = "test@test.test"
+        self.member_generator.create_member(email=expected_email_address)
+        credentials = (
+            self.database_gateway.get_account_credentials()
+            .with_email_address(expected_email_address)
+            .first()
         )
+        assert credentials
+        self.create_company_from_credentials(credentials=credentials.id)
         self.db.session.flush()
-
-    def test_repository_stores_email_address_correctly(self) -> None:
-        email = "test@test.test"
-        company = self.database_gateway.create_company(
-            email=email,
-            name="test name",
-            password_hash="testpassword",
-            means_account=self.means_account,
-            labour_account=self.labour_account,
-            resource_account=self.resource_account,
-            products_account=self.products_account,
-            registered_on=self.timestamp,
-        )
-        self.db.session.flush()
-        retrieved_company = (
-            self.database_gateway.get_companies().with_id(company.id).first()
-        )
-        self.db.session.flush()
-        assert retrieved_company and retrieved_company.email == email
-
-
-class ConfirmCompanyTests(FlaskTestCase):
-    def test_that_newly_created_company_is_not_confirmed(self) -> None:
-        company = self._create_company()
-        self.assertFalse(
-            self.database_gateway.get_companies()
-            .with_id(company.id)
-            .that_are_confirmed()
-        )
-
-    def test_that_company_is_confirmed_after_confirm_was_called(self) -> None:
-        email = "test@test.test"
-        company = self._create_company(email=email)
-        self.database_gateway.get_email_addresses().with_address(
-            email
-        ).update().set_confirmation_timestamp(datetime(2000, 1, 2)).perform()
-        self.assertTrue(
-            self.database_gateway.get_companies()
-            .with_id(company.id)
-            .that_are_confirmed()
-        )
-
-    def test_non_existing_company_counts_as_unconfirmed(self) -> None:
-        self.assertFalse(
-            self.database_gateway.get_companies().with_id(uuid4()).that_are_confirmed()
-        )
-
-    def _create_company(self, email: str = "test@test.test") -> Company:
-        means_account = self.database_gateway.create_account()
-        labour_account = self.database_gateway.create_account()
-        resource_account = self.database_gateway.create_account()
-        products_account = self.database_gateway.create_account()
-        return self.database_gateway.create_company(
-            email=email,
-            name="test name",
-            password_hash="some password",
-            means_account=means_account,
-            labour_account=labour_account,
-            resource_account=resource_account,
-            products_account=products_account,
-            registered_on=datetime(2000, 1, 1),
-        )
 
 
 class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
@@ -347,3 +301,28 @@ class JoinedWithEmailTests(FlaskTestCase):
             .first()
         )
         assert record
+
+
+class ThatIsCoordinatingCooperationTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.company_generator = self.injector.get(CompanyGenerator)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
+
+    def test_that_unrelated_company_is_not_included(self) -> None:
+        company = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation()
+        assert (
+            not self.database_gateway.get_companies()
+            .with_id(company)
+            .that_is_coordinating_cooperation(cooperation.id)
+        )
+
+    def test_that_coordinator_is_included(self) -> None:
+        company = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(coordinator=company)
+        assert (
+            self.database_gateway.get_companies()
+            .with_id(company)
+            .that_is_coordinating_cooperation(cooperation.id)
+        )

@@ -23,38 +23,44 @@ class MemberAuthenticator:
         if not user_id:
             return False
         record = (
-            self.database.get_members()
-            .with_id(user_id)
-            .joined_with_email_address()
-            .first()
+            self.database.get_email_addresses().that_belong_to_member(user_id).first()
         )
         if not record:
             return False
-        _, email = record
+        email = record
         return email.confirmed_on is None
 
     def redirect_user_to_member_login(self) -> Optional[str]:
         user_id = self.session.get_current_user()
         if not user_id:
-            # not an authenticated user
             self.notifier.display_warning(
                 self.translator.gettext("Please log in to view this page.")
             )
             self.session.set_next_url(self.request.get_request_target())
-            return self.url_index.get_start_page_url()
-        elif not self.database.get_members().with_id(user_id):
-            # not a member
-            self.notifier.display_warning(
-                self.translator.gettext(
-                    "You are not logged in with the correct account."
-                )
+            return self._get_start_page_url()
+        else:
+            email = (
+                self.database.get_email_addresses()
+                .that_belong_to_member(user_id)
+                .first()
             )
-            self.session.logout()
-            return self.url_index.get_start_page_url()
-        elif not self.database.get_members().with_id(user_id).that_are_confirmed():
-            # not a confirmed member
-            return self.url_index.get_unconfirmed_member_url()
-        return None
+            if email:
+                if not email.confirmed_on:
+                    return self.url_index.get_unconfirmed_member_url()
+                else:
+                    return None
+            else:
+                self._notify_incorrect_account()
+                self.session.logout()
+                return self._get_start_page_url()
+
+    def _get_start_page_url(self) -> str:
+        return self.url_index.get_start_page_url()
+
+    def _notify_incorrect_account(self) -> None:
+        self.notifier.display_warning(
+            self.translator.gettext("You are not logged in with the correct account.")
+        )
 
 
 @dataclass
@@ -70,36 +76,38 @@ class CompanyAuthenticator:
         user_id = self.session.get_current_user()
         if not user_id:
             return False
-        record = (
-            self.database.get_companies()
-            .with_id(user_id)
-            .joined_with_email_address()
-            .first()
+        email = (
+            self.database.get_email_addresses().that_belong_to_company(user_id).first()
         )
-        if not record:
+        if not email:
             return False
-        _, email = record
         return email.confirmed_on is None
 
     def redirect_user_to_company_login(self) -> Optional[str]:
         user_id = self.session.get_current_user()
-        if not user_id:
+        if user_id:
+            email = (
+                self.database.get_email_addresses()
+                .that_belong_to_company(user_id)
+                .first()
+            )
+            if email:
+                if email.confirmed_on:
+                    return None
+                else:
+                    return self.url_index.get_unconfirmed_company_url()
+            else:
+                self.notifier.display_warning(
+                    self.translator.gettext(
+                        "You are not logged in with the correct account."
+                    )
+                )
+                self.session.logout()
+                return self.url_index.get_start_page_url()
+        else:
             # not an authenticated user
             self.notifier.display_warning(
                 self.translator.gettext("Please log in to view this page.")
             )
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
-        elif not self.database.get_companies().with_id(user_id):
-            # not a company
-            self.notifier.display_warning(
-                self.translator.gettext(
-                    "You are not logged in with the correct account."
-                )
-            )
-            self.session.logout()
-            return self.url_index.get_start_page_url()
-        elif not self.database.get_companies().with_id(user_id).that_are_confirmed():
-            # not a confirmed company
-            return self.url_index.get_unconfirmed_company_url()
-        return None

@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import MemberRegistrationMessagePresenter
@@ -47,40 +48,44 @@ class RegisterMemberUseCase:
             )
 
     def _register_member(self, request: Request) -> Response:
-        if self.database.get_members().with_email_address(request.email):
-            raise self.Response.RejectionReason.member_already_exists
-        company = (
-            self.database.get_companies().with_email_address(request.email).first()
+        credentials: records.AccountCredentials
+        email_address: records.EmailAddress
+        member: Optional[records.Member]
+        record = (
+            self.database.get_account_credentials()
+            .with_email_address(request.email)
+            .joined_with_email_address_and_member()
+            .first()
         )
-        if company:
-            is_company_with_same_email_already_registered = True
+        if record is None:
+            self.database.create_email_address(address=request.email, confirmed_on=None)
+            credentials = self.database.create_account_credentials(
+                password_hash=self.password_hasher.calculate_password_hash(
+                    request.password
+                ),
+                email_address=request.email,
+            )
+            self._create_confirmation_mail(request.email)
+        else:
+            credentials, email_address, member = record
+            if member:
+                raise self.Response.RejectionReason.member_already_exists
             if not self.password_hasher.is_password_matching_hash(
                 password=request.password,
-                password_hash=company.password_hash,
+                password_hash=credentials.password_hash,
             ):
                 raise self.Response.RejectionReason.company_with_different_password_exists
-        else:
-            is_company_with_same_email_already_registered = False
-
         member_account = self.database.create_account()
-        registered_on = self.datetime_service.now()
-        if not self.database.get_email_addresses().with_address(request.email):
-            self.database.create_email_address(address=request.email, confirmed_on=None)
         member = self.database.create_member(
-            email=request.email,
+            account_credentials=credentials.id,
             name=request.name,
-            password_hash=self.password_hasher.calculate_password_hash(
-                request.password
-            ),
             account=member_account,
-            registered_on=registered_on,
+            registered_on=self.datetime_service.now(),
         )
-        if not is_company_with_same_email_already_registered:
-            self._create_confirmation_mail(member.email)
         return self.Response(
             rejection_reason=None,
             user_id=member.id,
-            is_confirmation_required=not is_company_with_same_email_already_registered,
+            is_confirmation_required=not record,
         )
 
     def _create_confirmation_mail(self, email_address: str) -> None:

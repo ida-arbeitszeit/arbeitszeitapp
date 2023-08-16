@@ -26,10 +26,11 @@ class UserAddressBookTests(FlaskTestCase):
         )
 
     def test_that_associated_email_for_company_is_returned(self) -> None:
-        company = self.company_generator.create_company_record()
+        expected_email = "test@test.test"
+        company = self.company_generator.create_company(email=expected_email)
         self.assertEqual(
-            company.email,
-            self.repository.get_user_email_address(company.id),
+            expected_email,
+            self.repository.get_user_email_address(company),
         )
 
     def test_that_associated_email_for_accountant_is_returned(self) -> None:

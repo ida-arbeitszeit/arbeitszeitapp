@@ -140,10 +140,6 @@ def login_member(
 @with_injection(modules=[MemberModule()])
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
-    assert (
-        current_user.user.email_address
-    )  # current user object must have email because it is logged in
-
     request = use_case.Request(user=UUID(current_user.id))
     response = use_case.resend_confirmation_mail(request)
     if response.is_token_sent:
@@ -230,10 +226,6 @@ def confirm_email_company(
 @with_injection(modules=[CompanyModule()])
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
-    assert (
-        current_user.user.email_address
-    )  # current user object must have email because it is logged in
-
     request = use_case.Request(user=UUID(current_user.id))
     response = use_case.resend_confirmation_mail(request)
     if response.is_token_sent:

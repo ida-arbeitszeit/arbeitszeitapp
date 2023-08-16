@@ -36,11 +36,17 @@ class GetCompanyDashboardUseCase:
     datetime_service: DatetimeService
 
     def get_dashboard(self, company_id: UUID) -> Response:
-        company = self.database_gateway.get_companies().with_id(company_id).first()
-        if company is None:
+        record = (
+            self.database_gateway.get_companies()
+            .with_id(company_id)
+            .joined_with_email_address()
+            .first()
+        )
+        if record is None:
             raise self.Failure()
+        company, email = record
         company_info = self.Response.CompanyInfo(
-            id=company.id, name=company.name, email=company.email
+            id=company.id, name=company.name, email=email.address
         )
         has_workers = bool(
             self.database_gateway.get_members().working_at_company(company_id)

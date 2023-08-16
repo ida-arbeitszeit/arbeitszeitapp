@@ -44,16 +44,22 @@ class GetMemberDashboard:
     datetime_service: DatetimeService
 
     def __call__(self, member: UUID) -> Response:
-        _member = self.database_gateway.get_members().with_id(member).first()
-        assert _member is not None
+        record = (
+            self.database_gateway.get_members()
+            .with_id(member)
+            .joined_with_email_address()
+            .first()
+        )
+        assert record
+        _member, email = record
         workplaces = [
             self.Workplace(
                 workplace_name=workplace.name,
-                workplace_email=workplace.email,
+                workplace_email=email.address,
             )
-            for workplace in self.database_gateway.get_companies().that_are_workplace_of_member(
-                member
-            )
+            for workplace, email in self.database_gateway.get_companies()
+            .that_are_workplace_of_member(member)
+            .joined_with_email_address()
         ]
         invites = [
             self._render_company_work_invite(invite)
@@ -67,7 +73,7 @@ class GetMemberDashboard:
             three_latest_plans=self._get_three_latest_plans(),
             account_balance=self._get_account_balance(member),
             name=_member.name,
-            email=_member.email,
+            email=email.address,
             id=_member.id,
         )
 

@@ -38,11 +38,14 @@ class FlaskTestCase(TestCase):
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.db.session.flush()
         self.db.drop_all()
         self.db.create_all()
+        self.db.session.flush()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
 
     def tearDown(self) -> None:
+        self.db.session.flush()
         self.app_context.pop()
         super().tearDown()
 

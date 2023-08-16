@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.presenters import CompanyRegistrationMessagePresenter
@@ -45,34 +46,49 @@ class RegisterCompany:
         return self.Response(rejection_reason=None, company_id=company_id)
 
     def _register_company(self, request: Request) -> UUID:
-        if self.database.get_companies().with_email_address(request.email):
-            raise self.Response.RejectionReason.company_already_exists
-        member = self.database.get_members().with_email_address(request.email).first()
-        if member:
+        company: Optional[records.Company]
+        record = (
+            self.database.get_account_credentials()
+            .with_email_address(request.email)
+            .joined_with_email_address_and_company()
+            .first()
+        )
+        if not record:
+            means_account = self.database.create_account()
+            resources_account = self.database.create_account()
+            labour_account = self.database.create_account()
+            products_account = self.database.create_account()
+            registered_on = self.datetime_service.now()
+            self.database.create_email_address(address=request.email, confirmed_on=None)
+            credentials = self.database.create_account_credentials(
+                email_address=request.email,
+                password_hash=self.password_hasher.calculate_password_hash(
+                    request.password
+                ),
+            )
+            self._create_confirmation_mail(request.email)
+        else:
+            credentials, email, company = record
+            if company:
+                raise self.Response.RejectionReason.company_already_exists
             if not self.password_hasher.is_password_matching_hash(
-                password=request.password, password_hash=member.password_hash
+                password=request.password, password_hash=credentials.password_hash
             ):
                 raise self.Response.RejectionReason.user_password_is_invalid
-        means_account = self.database.create_account()
-        resources_account = self.database.create_account()
-        labour_account = self.database.create_account()
-        products_account = self.database.create_account()
-        registered_on = self.datetime_service.now()
-        if not self.database.get_email_addresses().with_address(request.email):
-            self.database.create_email_address(address=request.email, confirmed_on=None)
+            means_account = self.database.create_account()
+            resources_account = self.database.create_account()
+            labour_account = self.database.create_account()
+            products_account = self.database.create_account()
+            registered_on = self.datetime_service.now()
         company = self.database.create_company(
-            email=request.email,
+            account_credentials=credentials.id,
             name=request.name,
-            password_hash=self.password_hasher.calculate_password_hash(
-                request.password
-            ),
             means_account=means_account,
             labour_account=labour_account,
             resource_account=resources_account,
             products_account=products_account,
             registered_on=registered_on,
         )
-        self._create_confirmation_mail(company.email)
         return company.id
 
     def _create_confirmation_mail(self, email_address: str) -> None:

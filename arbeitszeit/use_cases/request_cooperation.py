@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.records import Company, Cooperation
+from arbeitszeit.records import Company, EmailAddress
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -44,7 +44,7 @@ class RequestCooperation:
         self, request: RequestCooperationRequest
     ) -> RequestCooperationResponse:
         try:
-            _, coordinator = self._validate_request(request)
+            coordinator, email = self._validate_request(request)
         except RequestCooperationResponse.RejectionReason as reason:
             return RequestCooperationResponse(
                 coordinator_name=None, coordinator_email=None, rejection_reason=reason
@@ -54,19 +54,19 @@ class RequestCooperation:
         ).update().set_requested_cooperation(request.cooperation_id).perform()
         return RequestCooperationResponse(
             coordinator_name=coordinator.name,
-            coordinator_email=coordinator.email,
+            coordinator_email=email.address,
             rejection_reason=None,
         )
 
     def _validate_request(
         self, request: RequestCooperationRequest
-    ) -> Tuple[Cooperation, Company]:
+    ) -> Tuple[Company, EmailAddress]:
         now = self.datetime_service.now()
         plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
         cooperation_and_coordinator = (
-            self.database_gateway.get_cooperations()
-            .with_id(request.cooperation_id)
-            .joined_with_current_coordinator()
+            self.database_gateway.get_companies()
+            .that_is_coordinating_cooperation(request.cooperation_id)
+            .joined_with_email_address()
             .first()
         )
         if cooperation_and_coordinator is None:

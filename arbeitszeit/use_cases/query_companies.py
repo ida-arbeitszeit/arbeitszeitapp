@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, TypeVar
 from uuid import UUID
 
-from arbeitszeit.records import Company
-from arbeitszeit.repositories import CompanyResult, DatabaseGateway
+from arbeitszeit.records import Company, EmailAddress
+from arbeitszeit.repositories import CompanyResult, DatabaseGateway, QueryResult
+
+QueryT = TypeVar("QueryT", bound=QueryResult)
 
 
 class CompanyFilter(enum.Enum):
@@ -46,18 +48,24 @@ class QueryCompanies:
         filter_by = request.filter_category
         companies = _filter_companies(self.database.get_companies(), query, filter_by)
         total_results = len(companies)
-        companies = _limit_results(
-            companies, limit=request.limit, offset=request.offset
-        )
-        results = [self._company_to_response_model(company) for company in companies]
+        results = [
+            self._create_response_model(company, mail)
+            for company, mail in _limit_results(
+                companies.joined_with_email_address(),
+                limit=request.limit,
+                offset=request.offset,
+            )
+        ]
         return CompanyQueryResponse(
             results=results, total_results=total_results, request=request
         )
 
-    def _company_to_response_model(self, company: Company) -> QueriedCompany:
+    def _create_response_model(
+        self, company: Company, email: EmailAddress
+    ) -> QueriedCompany:
         return QueriedCompany(
             company_id=company.id,
-            company_email=company.email,
+            company_email=email.address,
             company_name=company.name,
         )
 
@@ -74,11 +82,8 @@ def _filter_companies(
 
 
 def _limit_results(
-    companies: CompanyResult,
-    *,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
-) -> CompanyResult:
+    companies: QueryT, *, limit: Optional[int] = None, offset: Optional[int] = None
+) -> QueryT:
     if offset is not None:
         companies = companies.offset(n=offset)
     if limit is not None:
