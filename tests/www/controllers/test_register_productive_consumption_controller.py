@@ -1,10 +1,10 @@
 from uuid import uuid4
 
 from arbeitszeit.records import PurposesOfPurchases
-from arbeitszeit.use_cases.pay_means_of_production import (
+from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
-from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
+from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
     RegisterProductiveConsumptionController,
 )
 from tests.forms import RegisterProductiveConsumptionFakeForm

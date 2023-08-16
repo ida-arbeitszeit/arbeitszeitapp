@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from arbeitszeit.records import PurposesOfPurchases
-from arbeitszeit.use_cases.pay_means_of_production import (
+from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
 from arbeitszeit_web.forms import RegisterProductiveConsumptionForm

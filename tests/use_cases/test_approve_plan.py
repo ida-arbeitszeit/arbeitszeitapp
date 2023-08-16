@@ -10,16 +10,16 @@ from arbeitszeit.use_cases.get_company_transactions import (
     GetCompanyTransactions,
     TransactionInfo,
 )
-from arbeitszeit.use_cases.pay_means_of_production import (
-    RegisterProductiveConsumption,
-    RegisterProductiveConsumptionRequest,
-)
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanSorting,
     QueriedPlan,
     QueryPlans,
     QueryPlansRequest,
+)
+from arbeitszeit.use_cases.register_productive_consumption import (
+    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionRequest,
 )
 
 from .base_test_case import BaseTestCase

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.pay_means_of_production import (
+from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionResponse,
 )
 from arbeitszeit_web.translator import Translator

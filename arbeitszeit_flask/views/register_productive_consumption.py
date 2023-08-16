@@ -3,14 +3,16 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect
 
-from arbeitszeit.use_cases.pay_means_of_production import RegisterProductiveConsumption
+from arbeitszeit.use_cases.register_productive_consumption import (
+    RegisterProductiveConsumption,
+)
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
-from arbeitszeit_web.www.controllers.pay_means_of_production_controller import (
+from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
     RegisterProductiveConsumptionController,
 )
-from arbeitszeit_web.www.presenters.pay_means_of_production_presenter import (
+from arbeitszeit_web.www.presenters.register_productive_consumption_presenter import (
     RegisterProductiveConsumptionPresenter,
 )
 

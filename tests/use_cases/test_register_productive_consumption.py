@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from arbeitszeit.records import Company, ProductionCosts, PurposesOfPurchases
 from arbeitszeit.use_cases import query_company_purchases
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
-from arbeitszeit.use_cases.pay_means_of_production import (
+from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )

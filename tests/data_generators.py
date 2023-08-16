@@ -13,7 +13,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import confirm_member, pay_means_of_production
+from arbeitszeit.use_cases import confirm_member
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -36,6 +36,11 @@ from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
     RegisterPrivateConsumptionRequest,
     RegisterPrivateConsumptionResponse,
+)
+from arbeitszeit.use_cases.register_productive_consumption import (
+    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionRequest,
+    RegisterProductiveConsumptionResponse,
 )
 from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
@@ -331,7 +336,7 @@ class PurchaseGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
-    register_productive_consumption: pay_means_of_production.RegisterProductiveConsumption
+    register_productive_consumption: RegisterProductiveConsumption
     register_private_consumption_use_case: RegisterPrivateConsumption
 
     def create_resource_consumption_by_company(
@@ -340,7 +345,7 @@ class PurchaseGenerator:
         consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.RegisterProductiveConsumptionResponse:
+    ) -> RegisterProductiveConsumptionResponse:
         return self._create_productive_consumption(
             purpose=records.PurposesOfPurchases.raw_materials,
             consumer=consumer,
@@ -354,7 +359,7 @@ class PurchaseGenerator:
         consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.RegisterProductiveConsumptionResponse:
+    ) -> RegisterProductiveConsumptionResponse:
         return self._create_productive_consumption(
             purpose=records.PurposesOfPurchases.means_of_prod,
             consumer=consumer,
@@ -369,12 +374,12 @@ class PurchaseGenerator:
         consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.RegisterProductiveConsumptionResponse:
+    ) -> RegisterProductiveConsumptionResponse:
         if consumer is None:
             consumer = self.company_generator.create_company()
         if plan is None:
             plan = self.plan_generator.create_plan().id
-        request = pay_means_of_production.RegisterProductiveConsumptionRequest(
+        request = RegisterProductiveConsumptionRequest(
             consumer=consumer,
             plan=plan,
             amount=amount,

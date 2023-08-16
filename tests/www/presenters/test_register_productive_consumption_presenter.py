@@ -1,9 +1,9 @@
 from typing import Optional
 
-from arbeitszeit.use_cases.pay_means_of_production import (
+from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionResponse,
 )
-from arbeitszeit_web.www.presenters.pay_means_of_production_presenter import (
+from arbeitszeit_web.www.presenters.register_productive_consumption_presenter import (
     RegisterProductiveConsumptionPresenter,
 )
 from tests.translator import FakeTranslator
