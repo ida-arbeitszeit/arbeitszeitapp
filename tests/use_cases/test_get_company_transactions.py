@@ -18,7 +18,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         info = self.get_company_transactions(company)
         assert not info.transactions
 
-    def test_that_correct_info_is_generated_after_transaction_of_member_buying_consumer_product(
+    def test_that_correct_info_is_generated_after_member_consumes_product(
         self,
     ) -> None:
         self.control_thresholds.set_allowed_overdraw_of_member_account(10)
@@ -34,7 +34,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         )
         info_company = self.get_company_transactions(company)
         transactions_before = len(info_company.transactions)
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=1)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
         info_company = self.get_company_transactions(company)
         assert len(info_company.transactions) == transactions_before + 1
         transaction = info_company.transactions[0]
@@ -173,7 +173,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         self.datetime_service.advance_time(timedelta(hours=1))
         self.purchase_generator.create_resource_purchase_by_company(buyer=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         self.datetime_service.advance_time(timedelta(hours=1))
         info = self.get_company_transactions(company1)
         # trans1

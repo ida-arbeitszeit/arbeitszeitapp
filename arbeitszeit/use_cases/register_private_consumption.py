@@ -75,7 +75,7 @@ class RegisterPrivateConsumption:
             coop_price_per_unit=coop_price_per_unit,
             individual_price_per_unit=individual_price_per_unit,
         )
-        self.database_gateway.create_consumer_purchase(
+        self.database_gateway.create_private_consumption(
             amount=request.amount,
             plan=plan.id,
             transaction=transaction.id,

@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases import query_member_purchases
+from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
@@ -29,9 +29,7 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         )
         self.mock_database = self.injector.get(MockDatabase)
         self.consumer = self.member_generator.create_member()
-        self.query_member_purchases = self.injector.get(
-            query_member_purchases.QueryMemberPurchases
-        )
+        self.query_private_consumptions = self.injector.get(QueryPrivateConsumptions)
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
     def test_registration_fails_when_plan_does_not_exist(self) -> None:
@@ -95,7 +93,7 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
             transactions_before_registration,
         )
 
-    def test_no_purchase_is_added_when_member_has_insufficient_balance(
+    def test_no_consumption_is_added_when_member_has_insufficient_balance(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
@@ -105,8 +103,8 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, amount=3)
         )
-        user_purchases = list(self.query_member_purchases(self.consumer))
-        assert len(user_purchases) == 0
+        consumptions = list(self.query_private_consumptions(self.consumer))
+        assert len(consumptions) == 0
 
     def test_registration_is_successful_if_member_has_negative_certs_and_consumes_public_product(
         self,
@@ -209,33 +207,33 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
             == costs
         )
 
-    def test_correct_purchase_is_added(self) -> None:
+    def test_correct_consumption_is_added(self) -> None:
         plan = self.plan_generator.create_plan()
         self.make_transaction_to_consumer_account(Decimal("100"))
         pieces = 3
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, pieces)
         )
-        user_purchases = list(self.query_member_purchases(self.consumer))
-        assert len(user_purchases) == 1
-        latest_purchase = user_purchases[0]
-        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
+        consumptions = list(self.query_private_consumptions(self.consumer))
+        assert len(consumptions) == 1
+        latest_consumption = consumptions[0]
+        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert latest_purchase.amount == pieces
-        assert latest_purchase.plan_id == plan.id
+        assert latest_consumption.amount == pieces
+        assert latest_consumption.plan_id == plan.id
 
-    def test_correct_purchase_is_added_when_plan_is_public_service(self) -> None:
+    def test_correct_consumption_is_added_when_plan_is_public_service(self) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
         pieces = 3
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, pieces)
         )
-        user_purchases = list(self.query_member_purchases(self.consumer))
-        assert len(user_purchases) == 1
-        latest_purchase = user_purchases[0]
-        assert latest_purchase.price_per_unit == Decimal(0)
-        assert latest_purchase.plan_id == plan.id
+        consumptions = list(self.query_private_consumptions(self.consumer))
+        assert len(consumptions) == 1
+        latest_consumption = consumptions[0]
+        assert latest_consumption.price_per_unit == Decimal(0)
+        assert latest_consumption.plan_id == plan.id
 
     def make_request(
         self, plan: UUID, amount: int, consumer: Optional[UUID] = None
@@ -268,8 +266,8 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
                     resource_cost=Decimal(0),
                 ),
             )
-            self.purchase_generator.create_purchase_by_member(
-                buyer=self.consumer,
+            self.purchase_generator.create_private_consumption(
+                consumer=self.consumer,
                 plan=plan.id,
                 amount=1,
             )

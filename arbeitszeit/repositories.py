@@ -15,7 +15,6 @@ from arbeitszeit.records import (
     Company,
     CompanyPurchase,
     CompanyWorkInvite,
-    ConsumerPurchase,
     Cooperation,
     CoordinationTenure,
     EmailAddress,
@@ -23,6 +22,7 @@ from arbeitszeit.records import (
     Plan,
     PlanDraft,
     PlanningStatistics,
+    PrivateConsumption,
     ProductionCosts,
     Transaction,
 )
@@ -261,18 +261,18 @@ class MemberResult(QueryResult[Member], Protocol):
         ...
 
 
-class ConsumerPurchaseResult(QueryResult[ConsumerPurchase], Protocol):
+class PrivateConsumptionResult(QueryResult[PrivateConsumption], Protocol):
     def ordered_by_creation_date(
         self, *, ascending: bool = ...
-    ) -> ConsumerPurchaseResult:
+    ) -> PrivateConsumptionResult:
         ...
 
-    def where_buyer_is_member(self, member: UUID) -> ConsumerPurchaseResult:
+    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
         ...
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResult[Tuple[ConsumerPurchase, Transaction, Plan]]:
+    ) -> QueryResult[Tuple[PrivateConsumption, Transaction, Plan]]:
         ...
 
 
@@ -431,12 +431,12 @@ class LanguageRepository(Protocol):
 
 
 class DatabaseGateway(Protocol):
-    def create_consumer_purchase(
+    def create_private_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> ConsumerPurchase:
+    ) -> PrivateConsumption:
         ...
 
-    def get_consumer_purchases(self) -> ConsumerPurchaseResult:
+    def get_private_consumptions(self) -> PrivateConsumptionResult:
         ...
 
     def create_company_purchase(

@@ -42,7 +42,7 @@ class UseCaseTester(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=company)
         response = self.show_a_account_details(company)
         transactions_before_purchase = len(response.transactions)
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         response = self.show_a_account_details(company)
         assert len(response.transactions) == transactions_before_purchase
 

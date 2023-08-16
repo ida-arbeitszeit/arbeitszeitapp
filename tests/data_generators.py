@@ -386,20 +386,20 @@ class PurchaseGenerator:
         ), f"Could not create purchase, response was {response}"
         return response
 
-    def create_purchase_by_member(
+    def create_private_consumption(
         self,
-        buyer: Optional[UUID] = None,
+        consumer: Optional[UUID] = None,
         amount: int = 1,
         plan: Optional[UUID] = None,
     ) -> RegisterPrivateConsumptionResponse:
-        if buyer is None:
-            buyer = self.member_generator.create_member()
+        if consumer is None:
+            consumer = self.member_generator.create_member()
         if plan is None:
             plan = self.plan_generator.create_plan().id
         request = RegisterPrivateConsumptionRequest(
             amount=amount,
             plan=plan,
-            consumer=buyer,
+            consumer=consumer,
         )
         response = (
             self.register_private_consumption_use_case.register_private_consumption(
@@ -408,7 +408,7 @@ class PurchaseGenerator:
         )
         assert (
             response.is_accepted
-        ), f"Could not create member purchase. Response was {response}"
+        ), f"Could not create private consumption. Response was {response}"
         return response
 
 

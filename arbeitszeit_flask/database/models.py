@@ -200,7 +200,7 @@ class Transaction(db.Model):
         return f"Transaction({fields})"
 
 
-class ConsumerPurchase(db.Model):
+class PrivateConsumption(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
     transaction_id = db.Column(

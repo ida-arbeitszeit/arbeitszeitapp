@@ -60,14 +60,14 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
 
     def test_that_transactions_are_shown_in_correct_descending_order(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         transactions = response.transactions
         assert (
@@ -92,9 +92,9 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        self.purchase_generator.create_purchase_by_member(
+        self.purchase_generator.create_private_consumption(
             plan=plan.id,
-            buyer=buyer,
+            consumer=buyer,
             amount=1,
         )
         response = self.show_prd_account_details(planner)
@@ -173,7 +173,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_purchase_by_member(plan=plan.id)
+        self.purchase_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
@@ -191,9 +191,9 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=1)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
         transaction_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=2)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=2)
         response = self.show_prd_account_details(planner)
         assert len(response.plot.timestamps) == 3
         assert len(response.plot.accumulated_volumes) == 3
@@ -215,11 +215,11 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=1)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
         self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=2)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=2)
         transaction_3_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, amount=3)
+        self.purchase_generator.create_private_consumption(plan=plan.id, amount=3)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps[1] == transaction_1_timestamp
         assert response.plot.timestamps[3] == transaction_3_timestamp
@@ -236,11 +236,15 @@ class UseCaseTester(BaseTestCase):
         response = self.show_prd_account_details(planner)
         assert response.transactions[0].buyer is None
 
-    def test_that_correct_buyer_info_is_shown_when_company_sold_to_member(self) -> None:
+    def test_that_correct_consumer_info_is_shown_when_company_sold_to_member(
+        self,
+    ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
         buyer = self.member_generator.create_member_record()
-        self.purchase_generator.create_purchase_by_member(plan=plan.id, buyer=buyer.id)
+        self.purchase_generator.create_private_consumption(
+            plan=plan.id, consumer=buyer.id
+        )
         response = self.show_prd_account_details(planner)
         transaction_of_sale = response.transactions[0]
         assert transaction_of_sale.buyer

@@ -128,11 +128,11 @@ class TestPresenter(BaseTestCase):
         self,
     ):
         response = self.get_use_case_response(
-            [self.get_transaction(type=TransactionTypes.payment_of_consumer_product)]
+            [self.get_transaction(type=TransactionTypes.private_consumption)]
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
-            view_model.transactions[0].type, self.translator.gettext("Payment")
+            view_model.transactions[0].type, self.translator.gettext("Consumption")
         )
 
     def test_that_name_of_peer_is_shown(

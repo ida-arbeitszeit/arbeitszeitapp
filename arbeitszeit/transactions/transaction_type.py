@@ -20,7 +20,7 @@ class TransactionTypes(Enum):
     payment_of_liquid_means = auto()
     expected_sales = auto()
     sale_of_consumer_product = auto()
-    payment_of_consumer_product = auto()
+    private_consumption = auto()
     sale_of_fixed_means = auto()
     sale_of_liquid_means = auto()
 
@@ -79,7 +79,7 @@ _rules_for_sender = _Rules(
         ((at.a, any_type), tt.payment_of_wages),
         ((at.p, any_type), tt.payment_of_fixed_means),
         ((at.r, any_type), tt.payment_of_liquid_means),
-        ((at.member, any_type), tt.payment_of_consumer_product),
+        ((at.member, any_type), tt.private_consumption),
     ]
 )
 
