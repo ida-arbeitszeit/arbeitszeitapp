@@ -85,15 +85,15 @@ class UseCaseTester(BaseTestCase):
         response = self.show_r_account_details(planner)
         assert len(response.transactions) == 1
 
-    def test_that_two_transactions_are_shown_when_credit_for_r_is_granted_and_company_buys_r(
+    def test_that_two_transactions_are_shown_when_credit_for_r_is_granted_and_company_consumes_r(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=planner, amount=2
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=planner, amount=2
         )
         response = self.show_r_account_details(planner)
         assert len(response.transactions) == 2
@@ -103,8 +103,8 @@ class UseCaseTester(BaseTestCase):
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=planner, amount=2
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=planner, amount=2
         )
         response = self.show_r_account_details(planner)
         assert (
@@ -137,7 +137,7 @@ class UseCaseTester(BaseTestCase):
         )
         assert response.account_balance == Decimal(8.5)
 
-    def test_that_correct_info_for_is_generated_after_company_buying_r(self) -> None:
+    def test_that_correct_info_for_is_generated_after_company_consuming_r(self) -> None:
         company1 = self.company_generator.create_company_record()
         company2 = self.company_generator.create_company_record()
 

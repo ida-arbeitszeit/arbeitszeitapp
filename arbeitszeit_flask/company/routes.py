@@ -56,8 +56,8 @@ from arbeitszeit_flask.forms import (
     CreateCooperationForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
-    PayMeansOfProductionForm,
     PlanSearchForm,
+    RegisterProductiveConsumptionForm,
     RequestCooperationForm,
 )
 from arbeitszeit_flask.template import UserTemplateRenderer
@@ -73,7 +73,9 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
-from arbeitszeit_flask.views.pay_means_of_production import PayMeansOfProductionView
+from arbeitszeit_flask.views.pay_means_of_production import (
+    RegisterProductiveConsumptionView,
+)
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
@@ -472,14 +474,14 @@ def register_hours_worked(view: RegisterHoursWorkedView):
         return view.respond_to_post()
 
 
-@CompanyRoute("/company/transfer_to_company", methods=["GET", "POST"])
+@CompanyRoute("/company/register_productive_consumption", methods=["GET", "POST"])
 @commit_changes
-def transfer_to_company(view: PayMeansOfProductionView):
+def register_productive_consumption(view: RegisterProductiveConsumptionView):
     if request.method == "GET":
-        form = PayMeansOfProductionForm(request.args)
+        form = RegisterProductiveConsumptionForm(request.args)
         return view.respond_to_get(form)
     elif request.method == "POST":
-        form = PayMeansOfProductionForm(request.form)
+        form = RegisterProductiveConsumptionForm(request.form)
         return view.respond_to_post(form)
 
 

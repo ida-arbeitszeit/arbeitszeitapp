@@ -27,18 +27,18 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_that_there_are_some_company_purchases_in_db_after_one_was_created(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         assert self.database_gateway.get_company_purchases()
 
     def test_that_retrieved_purchase_contains_specified_plan_id(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
+        self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
         purchase = self.database_gateway.get_company_purchases().first()
         assert purchase
         assert purchase.plan_id == plan.id
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         purchase_1 = self.database_gateway.get_company_purchases().first()
         purchase_2 = self.database_gateway.get_company_purchases().first()
         assert purchase_1
@@ -48,8 +48,8 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_that_transaction_id_for_two_different_purchases_is_also_different(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         purchase_1, purchase_2 = list(self.database_gateway.get_company_purchases())
         assert purchase_1.transaction_id != purchase_2.transaction_id
 
@@ -57,7 +57,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self,
     ) -> None:
         expected_amount = 123
-        self.purchase_generator.create_resource_purchase_by_company(
+        self.purchase_generator.create_resource_consumption_by_company(
             amount=expected_amount
         )
         purchase = self.database_gateway.get_company_purchases().first()
@@ -67,7 +67,7 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_can_filter_purchases_by_company(self) -> None:
         company = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_purchase_by_company(buyer=company)
+        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
         purchases = self.database_gateway.get_company_purchases()
         assert purchases.where_buyer_is_company(company)
         assert not purchases.where_buyer_is_company(other_company)
@@ -75,10 +75,10 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_purchase_by_company(plan=plan_1.id)
+        self.purchase_generator.create_resource_consumption_by_company(plan=plan_1.id)
         self.datetime_service.advance_time(timedelta(days=1))
         plan_2 = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_purchase_by_company(plan=plan_2.id)
+        self.purchase_generator.create_resource_consumption_by_company(plan=plan_2.id)
         purchase_1, purchase_2 = list(
             self.database_gateway.get_company_purchases().ordered_by_creation_date(
                 ascending=True
@@ -95,7 +95,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         assert purchase_2.plan_id == plan_2.id
 
     def test_can_retrieve_plan_and_transaction_with_purchase(self) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         result = (
             self.database_gateway.get_company_purchases()
             .joined_with_transactions_and_plan()
@@ -107,7 +107,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         assert purchase.plan_id == plan.id
 
     def test_can_retrieve_transaction_with_purchase(self) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         result = (
             self.database_gateway.get_company_purchases()
             .joined_with_transaction()
@@ -121,7 +121,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_purchase_by_company(buyer=company)
+        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
         assert (
             self.database_gateway.get_company_purchases()
             .ordered_by_creation_date()
@@ -133,7 +133,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_purchase_by_company(buyer=company)
+        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
         assert (
             self.database_gateway.get_company_purchases()
             .ordered_by_creation_date()
@@ -142,7 +142,7 @@ class CompanyPurchaseTests(FlaskTestCase):
         )
 
     def test_that_purchases_can_be_joined_with_transaction_and_provider(self) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         assert (
             self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
         )
@@ -150,7 +150,7 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_joining_with_transaction_and_provider_yields_same_transaction_as_when_just_joining_with_transaction(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         assert [
             transaction
             for _, transaction, _ in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
@@ -162,7 +162,7 @@ class CompanyPurchaseTests(FlaskTestCase):
     def test_joining_with_transaction_and_provider_yields_same_purchase_as_when_not_joining(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_purchase_by_company()
+        self.purchase_generator.create_resource_consumption_by_company()
         assert [
             purchase
             for purchase, _, _ in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()
@@ -173,7 +173,7 @@ class CompanyPurchaseTests(FlaskTestCase):
     ) -> None:
         provider = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=provider)
-        self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
+        self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
         assert [
             provider.id
             for _, _, provider in self.database_gateway.get_company_purchases().joined_with_transaction_and_provider()

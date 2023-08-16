@@ -135,67 +135,71 @@ class UseCaseTests(BaseTestCase):
         assert response
         assert not response.suppliers_ordered_by_volume
 
-    def test_that_list_of_suppliers_contains_one_supplier_when_company_did_one_purchase(
+    def test_that_list_of_suppliers_contains_one_supplier_when_company_did_one_productive_consumption(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_purchase_by_company(buyer=company)
+        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
         response = self.get_company_summary(company)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 1
 
-    def test_that_list_of_suppliers_contains_one_supplier_when_company_did_two_purchases_from_same_supplier(
+    def test_that_list_of_suppliers_contains_one_supplier_when_company_did_two_consumptions_from_same_supplier(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         seller = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan(planner=seller.id)
         plan2 = self.plan_generator.create_plan(planner=seller.id)
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=plan1.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=plan1.id
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=plan2.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=plan2.id
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 1
 
-    def test_that_list_of_suppliers_contains_two_supplier_when_company_did_two_purchases_from_different_suppliers(
+    def test_that_list_of_suppliers_contains_two_supplier_when_company_did_two_consumptions_from_different_suppliers(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         self.company_generator.create_company_record()
-        self.purchase_generator.create_resource_purchase_by_company(buyer=buyer.id)
-        self.purchase_generator.create_resource_purchase_by_company(buyer=buyer.id)
-        response = self.get_company_summary(buyer.id)
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id
+        )
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id
+        )
+        response = self.get_company_summary(consumer.id)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 2
 
     def test_that_correct_supplier_id_is_shown(self) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         supplier = self.company_generator.create_company_record()
         offered_plan = self.plan_generator.create_plan(planner=supplier.id).id
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=offered_plan
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=offered_plan
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].company_id == supplier.id
 
     def test_that_correct_supplier_name_is_shown(self) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         supplier_name = "supplier coop"
         supplier = self.company_generator.create_company_record(name=supplier_name)
         offered_plan = self.plan_generator.create_plan(planner=supplier.id)
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=offered_plan.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=offered_plan.id
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].company_name == supplier_name
 
-    def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_one_purchase(
+    def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_one_consumption(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(
@@ -207,17 +211,17 @@ class UseCaseTests(BaseTestCase):
             amount=1,
         )
         company = self.company_generator.create_company_record()
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=company.id, plan=plan.id, amount=1
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=company.id, plan=plan.id, amount=1
         )
         response = self.get_company_summary(company.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("6")
 
-    def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_two_purchases_from_same_supplier(
+    def test_that_correct_volume_of_sale_of_supplier_is_calculated_after_two_consumptions_from_same_supplier(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         seller = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan(
             planner=seller.id,
@@ -229,33 +233,33 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(4), Decimal(5), Decimal(6)),
             amount=1,
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=plan1.id, amount=1
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=plan1.id, amount=1
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=plan2.id, amount=1
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=plan2.id, amount=1
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("18")
 
     def test_that_supplier_with_highest_sales_volume_is_listed_before_other_suppliers(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         top_supplier_plan = self.plan_generator.create_plan()
         medium_supplier_plan = self.plan_generator.create_plan()
         low_supplier_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, amount=1, plan=low_supplier_plan.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, amount=1, plan=low_supplier_plan.id
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, amount=20, plan=top_supplier_plan.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, amount=20, plan=top_supplier_plan.id
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, amount=10, plan=medium_supplier_plan.id
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, amount=10, plan=medium_supplier_plan.id
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert (
             response.suppliers_ordered_by_volume[0].company_id
@@ -270,10 +274,10 @@ class UseCaseTests(BaseTestCase):
             == low_supplier_plan.planner
         )
 
-    def test_that_correct_volumes_of_sale_of_suppliers_are_calculated_after_two_purchases_from_different_suppliers(
+    def test_that_correct_volumes_of_sale_of_suppliers_are_calculated_after_two_consumptions_from_different_suppliers(
         self,
     ) -> None:
-        buyer = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
             amount=1,
@@ -282,15 +286,15 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(4), Decimal(5), Decimal(6)),
             amount=1,
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id, plan=plan1.id, amount=1
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id, plan=plan1.id, amount=1
         )
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buyer.id,
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consumer.id,
             plan=plan2.id,
             amount=1,
         )
-        response = self.get_company_summary(buyer.id)
+        response = self.get_company_summary(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("15")
         assert response.suppliers_ordered_by_volume[1].volume_of_sales == Decimal("6")

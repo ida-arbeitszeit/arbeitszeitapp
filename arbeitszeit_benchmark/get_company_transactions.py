@@ -30,8 +30,8 @@ class GetCompanyTransactionsBenchmark:
         for _ in range(100):
             plan = self.plan_generator.create_plan()
             for _ in range(10):
-                self.purchase_generator.create_resource_purchase_by_company(
-                    buyer=self.buyer, plan=plan.id
+                self.purchase_generator.create_resource_consumption_by_company(
+                    consumer=self.buyer, plan=plan.id
                 )
         self.db.session.commit()
         self.db.session.flush()

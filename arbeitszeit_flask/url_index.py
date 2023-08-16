@@ -127,23 +127,23 @@ class GeneralUrlIndex:
             company_id=str(company_id),
         )
 
-    def get_pay_means_of_production_url(
+    def get_register_productive_consumption_url(
         self,
         plan_id: Optional[UUID] = None,
         amount: Optional[int] = None,
-        type_of_payment: Optional[PurposesOfPurchases] = None,
+        type_of_consumption: Optional[PurposesOfPurchases] = None,
     ) -> str:
-        if type_of_payment == PurposesOfPurchases.means_of_prod:
+        if type_of_consumption == PurposesOfPurchases.means_of_prod:
             type_string = "fixed"
-        elif type_of_payment == PurposesOfPurchases.raw_materials:
+        elif type_of_consumption == PurposesOfPurchases.raw_materials:
             type_string = "liquid"
         else:
             type_string = None
         return url_for(
-            endpoint="main_company.transfer_to_company",
+            endpoint="main_company.register_productive_consumption",
             plan_id=plan_id,
             amount=amount,
-            type_of_payment=type_string,
+            type_of_consumption=type_string,
         )
 
     def get_toggle_availability_url(self, plan_id: UUID) -> str:

@@ -11,8 +11,8 @@ from arbeitszeit.use_cases.get_company_transactions import (
     TransactionInfo,
 )
 from arbeitszeit.use_cases.pay_means_of_production import (
-    PayMeansOfProduction,
-    PayMeansOfProductionRequest,
+    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionRequest,
 )
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
@@ -31,7 +31,9 @@ class UseCaseTests(BaseTestCase):
         self.use_case = self.injector.get(ApprovePlanUseCase)
         self.get_company_summary = self.injector.get(GetCompanySummary)
         self.query_plans = self.injector.get(QueryPlans)
-        self.pay_means_of_production = self.injector.get(PayMeansOfProduction)
+        self.register_productive_consumption = self.injector.get(
+            RegisterProductiveConsumption
+        )
         self.get_company_transactions_use_case = self.injector.get(
             GetCompanyTransactions
         )
@@ -66,20 +68,22 @@ class UseCaseTests(BaseTestCase):
             == expected_activation_timestamp
         )
 
-    def test_that_other_company_can_pay_for_approved_plan(self) -> None:
+    def test_that_other_company_can_register_consumption_for_approved_plan(
+        self,
+    ) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         self.use_case.approve_plan(self.create_request(plan=plan.id))
         plan_id = self.get_latest_activated_plan().plan_id
         other_company = self.company_generator.create_company_record()
-        purchase_response = self.pay_means_of_production(
-            PayMeansOfProductionRequest(
-                buyer=other_company.id,
+        consumption_response = self.register_productive_consumption(
+            RegisterProductiveConsumptionRequest(
+                consumer=other_company.id,
                 plan=plan_id,
                 amount=1,
                 purpose=PurposesOfPurchases.means_of_prod,
             )
         )
-        self.assertFalse(purchase_response.is_rejected)
+        self.assertFalse(consumption_response.is_rejected)
 
     def test_that_means_of_production_are_transfered(self) -> None:
         plan = self.plan_generator.create_plan(

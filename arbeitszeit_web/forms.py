@@ -74,14 +74,14 @@ class RegisterPrivateConsumptionForm(Protocol):
         ...
 
 
-class PayMeansOfProductionForm(Protocol):
+class RegisterProductiveConsumptionForm(Protocol):
     def amount_field(self) -> FormField[str]:
         ...
 
     def plan_id_field(self) -> FormField[str]:
         ...
 
-    def type_of_payment_field(self) -> FormField[str]:
+    def type_of_consumption_field(self) -> FormField[str]:
         ...
 
 

@@ -1,7 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">{{ gettext("Payment of means of production") }}</div>
+<div class="navbar-item">{{ gettext("Registration of productive consumption") }}</div>
 {% endblock %}
 
 {% block content %}
@@ -11,7 +11,7 @@
         <div class="column is-6">
             <div class="content">
                 <h1 class="title">
-                    {{ gettext("Payment of fixed and liquid means of production") }}
+                    {{ gettext("Registration of productive consumption") }}
                 </h1>
             </div>
             {% for field_name, field_errors in form.errors|dictsort if field_errors %}
@@ -36,11 +36,11 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label class="label">{{ form.type_of_payment.label }}</label>
+                    <label class="label">{{ form.type_of_consumption.label }}</label>
                     <div class="control">
                         <div class="select">
-                            <select name="type_of_payment" required>
-                                {% for option in form.type_of_payment %}
+                            <select name="type_of_consumption" required>
+                                {% for option in form.type_of_consumption %}
                                 {{ option }}
                                 {% endfor %}
                             </select>
@@ -49,8 +49,8 @@
                 </div>
                 <div class="field">
                     <div class="control">
-                        <button class="button is-primary" name="transfer_type" value="transfer_to_company"
-                            type="submit">{{ gettext("Transfer") }}</button>
+                        <button class="button is-primary" name="transfer_type" value="register_productive_consumption"
+                            type="submit">{{ gettext("Register") }}</button>
                     </div>
                 </div>
             </form>

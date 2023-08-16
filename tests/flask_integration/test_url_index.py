@@ -247,36 +247,40 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_payment_of_means_of_production_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_pay_means_of_production_url()
+        url = self.url_index.get_register_productive_consumption_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_payment_of_means_of_production_with_plan_parameter_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_with_plan_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_pay_means_of_production_url(uuid4())
+        url = self.url_index.get_register_productive_consumption_url(uuid4())
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_payment_of_means_of_production_with_amount_parameter_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_with_amount_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_pay_means_of_production_url(plan_id=uuid4(), amount=3)
+        url = self.url_index.get_register_productive_consumption_url(
+            plan_id=uuid4(), amount=3
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_payment_of_means_of_production_with_type_of_payment_parameter_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_with_type_of_consumption_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_pay_means_of_production_url(
-            plan_id=uuid4(), amount=3, type_of_payment=PurposesOfPurchases.means_of_prod
+        url = self.url_index.get_register_productive_consumption_url(
+            plan_id=uuid4(),
+            amount=3,
+            type_of_consumption=PurposesOfPurchases.means_of_prod,
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
