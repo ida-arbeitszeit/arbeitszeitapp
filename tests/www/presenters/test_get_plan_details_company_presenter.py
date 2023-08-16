@@ -117,7 +117,7 @@ class TestPresenterForPlanner(BaseTestCase):
             self.url_index.get_request_coop_url(),
         )
 
-    def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
+    def test_url_for_consuming_product_is_not_displayed_when_user_is_planner_of_plan(
         self,
     ):
         response = UseCaseResponse(
@@ -126,7 +126,7 @@ class TestPresenterForPlanner(BaseTestCase):
             ),
         )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.show_payment_url)
+        self.assertFalse(view_model.show_productive_consumption_url)
 
 
 class TestPresenterForNonPlanningCompany(BaseTestCase):
@@ -171,7 +171,7 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
             self.plan_details_generator.create_plan_details(),
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(view_model.show_payment_url)
+        self.assertTrue(view_model.show_productive_consumption_url)
 
     def test_correct_url_for_consuming_product_is_displayed(
         self,

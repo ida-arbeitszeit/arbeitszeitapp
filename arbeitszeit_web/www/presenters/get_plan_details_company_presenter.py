@@ -26,7 +26,7 @@ class GetPlanDetailsCompanyViewModel:
     details: PlanDetailsWeb
     show_own_plan_action_section: bool
     own_plan_action: OwnPlanAction
-    show_payment_url: bool
+    show_productive_consumption_url: bool
     productive_consumption_url: str
 
     def to_dict(self) -> Dict[str, Any]:
@@ -53,7 +53,9 @@ class GetPlanDetailsCompanyPresenter:
             details=self.plan_details_service.format_plan_details(plan_details),
             show_own_plan_action_section=show_own_plan_action_section,
             own_plan_action=self._create_own_plan_action_section(plan_details),
-            show_payment_url=True if not current_user_is_planner else False,
+            show_productive_consumption_url=True
+            if not current_user_is_planner
+            else False,
             productive_consumption_url=self.url_index.get_register_productive_consumption_url(
                 plan_details.plan_id
             ),

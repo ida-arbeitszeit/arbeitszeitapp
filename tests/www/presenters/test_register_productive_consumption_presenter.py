@@ -30,7 +30,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext("Successfully registrated."), self.notifier.infos
+            self.trans.gettext("Successfully registered."), self.notifier.infos
         )
 
     def test_missing_plan_show_correct_notification(self) -> None:
