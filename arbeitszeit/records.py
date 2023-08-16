@@ -35,10 +35,8 @@ class SocialAccounting:
 class Member:
     id: UUID
     name: str
-    email: str
     account: UUID
     registered_on: datetime
-    password_hash: str
 
     def accounts(self) -> List[UUID]:
         return [self.account]
@@ -60,22 +58,16 @@ class Member:
     def is_member(self) -> bool:
         return True
 
-    @property
-    def email_address(self) -> str:
-        return self.email
-
 
 @dataclass
 class Company:
     id: UUID
-    email: str
     name: str
     means_account: UUID
     raw_material_account: UUID
     work_account: UUID
     product_account: UUID
     registered_on: datetime
-    password_hash: str
 
     def _accounts_by_type(self) -> Dict[AccountTypes, UUID]:
         return {
@@ -105,10 +97,6 @@ class Company:
 
     def is_member(self) -> bool:
         return False
-
-    @property
-    def email_address(self) -> str:
-        return self.email
 
 
 class AccountTypes(Enum):
@@ -305,9 +293,7 @@ class CompanyWorkInvite:
 @dataclass
 class Accountant:
     id: UUID
-    email_address: str
     name: str
-    password_hash: str
 
 
 @dataclass
@@ -333,6 +319,13 @@ class CompanyPurchase:
 
 
 AccountOwner = Union[Member, Company, SocialAccounting]
+
+
+@dataclass
+class AccountCredentials:
+    id: UUID
+    email_address: str
+    password_hash: str
 
 
 @dataclass

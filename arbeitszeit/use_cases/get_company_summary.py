@@ -67,9 +67,15 @@ class GetCompanySummary:
     datetime_service: DatetimeService
 
     def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
-        company = self.database_gateway.get_companies().with_id(company_id).first()
-        if company is None:
+        record = (
+            self.database_gateway.get_companies()
+            .with_id(company_id)
+            .joined_with_email_address()
+            .first()
+        )
+        if not record:
             return None
+        company, email = record
         plans = (
             self.database_gateway.get_plans()
             .planned_by(company.id)
@@ -86,7 +92,7 @@ class GetCompanySummary:
         return GetCompanySummarySuccess(
             id=company.id,
             name=company.name,
-            email=company.email,
+            email=email.address,
             registered_on=company.registered_on,
             expectations=expectations,
             account_balances=account_balances,

@@ -18,13 +18,7 @@ class TestQueryCompanies(BaseTestCase):
     def company_in_results(
         self, company: Company, response: CompanyQueryResponse
     ) -> bool:
-        return any(
-            (
-                company.name == result.company_name
-                and company.email == result.company_email
-                for result in response.results
-            )
-        )
+        return any((result.company_id == company.id for result in response.results))
 
     def test_that_no_company_is_returned_when_searching_an_empty_repository(self):
         response = self.query_companies(make_request(None, CompanyFilter.by_name))

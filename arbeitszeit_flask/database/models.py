@@ -50,12 +50,6 @@ class Member(UserMixin, db.Model):
     registered_on = db.Column(db.DateTime, nullable=False)
     account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
-    user = db.relationship(
-        "User",
-        lazy=True,
-        uselist=False,
-        backref=db.backref("member"),
-    )
     workplaces = db.relationship(
         "Company",
         secondary=jobs,
@@ -74,13 +68,6 @@ class Company(UserMixin, db.Model):
     a_account = db.Column(db.ForeignKey("account.id"), nullable=False)
     prd_account = db.Column(db.ForeignKey("account.id"), nullable=False)
 
-    user = db.relationship(
-        "User",
-        lazy=True,
-        uselist=False,
-        backref=db.backref("company"),
-    )
-
     def __repr__(self):
         return "<Company(name='%s')>" % (self.name,)
 
@@ -89,13 +76,6 @@ class Accountant(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     user_id = db.Column(db.ForeignKey("user.id"), nullable=False, unique=True)
     name = db.Column(db.String(1000), nullable=False)
-
-    user = db.relationship(
-        "User",
-        lazy=True,
-        uselist=False,
-        backref=db.backref("accountant"),
-    )
 
 
 class PlanDraft(db.Model):

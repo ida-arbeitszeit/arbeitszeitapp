@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit import records
 from arbeitszeit.records import SocialAccounting
 from tests.data_generators import (
     AccountGenerator,
@@ -48,10 +49,10 @@ class AccountResultTests(FlaskTestCase):
 
     def test_that_account_joined_with_owner_yields_original_member(self) -> None:
         account = self.database_gateway.create_account()
+        credentials = self.create_account_credentials()
         member = self.database_gateway.create_member(
-            email="test@test.test",
+            account_credentials=credentials.id,
             name="test name",
-            password_hash="password",
             account=account,
             registered_on=datetime(2000, 1, 1),
         )
@@ -144,10 +145,10 @@ class AccountResultTests(FlaskTestCase):
         self,
     ) -> None:
         expected_account = self.database_gateway.create_account()
+        credentials = self.create_account_credentials()
         self.database_gateway.create_company(
-            email="",
+            account_credentials=credentials.id,
             name="",
-            password_hash="",
             means_account=self.database_gateway.create_account(),
             resource_account=self.database_gateway.create_account(),
             labour_account=self.database_gateway.create_account(),
@@ -170,10 +171,10 @@ class AccountResultTests(FlaskTestCase):
         self,
     ) -> None:
         expected_account = self.database_gateway.create_account()
+        credentials = self.create_account_credentials()
         self.database_gateway.create_company(
-            email="",
+            account_credentials=credentials.id,
             name="",
-            password_hash="",
             means_account=self.database_gateway.create_account(),
             resource_account=self.database_gateway.create_account(),
             labour_account=expected_account,
@@ -265,3 +266,12 @@ class AccountResultTests(FlaskTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         assert len(self.database_gateway.get_accounts().owned_by_company(company)) == 4
+
+    def create_account_credentials(
+        self, address: str = "test@test.test"
+    ) -> records.AccountCredentials:
+        self.database_gateway.create_email_address(address=address, confirmed_on=None)
+        return self.database_gateway.create_account_credentials(
+            email_address=address,
+            password_hash="",
+        )

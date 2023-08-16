@@ -18,9 +18,15 @@ class GetAccountantDashboardUseCase:
     database: DatabaseGateway
 
     def get_dashboard(self, user: UUID) -> Response:
-        accountant = self.database.get_accountants().with_id(user).first()
-        if not accountant:
+        record = (
+            self.database.get_accountants()
+            .with_id(user)
+            .joined_with_email_address()
+            .first()
+        )
+        if not record:
             raise self.Failure()
+        accountant, email = record
         return self.Response(
-            accountant_id=user, name=accountant.name, email=accountant.email_address
+            accountant_id=user, name=accountant.name, email=email.address
         )

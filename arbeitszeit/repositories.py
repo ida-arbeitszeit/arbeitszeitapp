@@ -257,9 +257,6 @@ class MemberResult(QueryResult[Member], Protocol):
     def joined_with_email_address(self) -> QueryResult[Tuple[Member, EmailAddress]]:
         ...
 
-    def that_are_confirmed(self) -> MemberResult:
-        ...
-
 
 class PrivateConsumptionResult(QueryResult[PrivateConsumption], Protocol):
     def ordered_by_creation_date(
@@ -311,6 +308,9 @@ class CompanyResult(QueryResult[Company], Protocol):
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
         ...
 
+    def that_is_coordinating_cooperation(self, cooperation: UUID) -> Self:
+        ...
+
     def add_worker(self, member: UUID) -> int:
         ...
 
@@ -318,9 +318,6 @@ class CompanyResult(QueryResult[Company], Protocol):
         ...
 
     def with_email_containing(self, query: str) -> CompanyResult:
-        ...
-
-    def that_are_confirmed(self) -> Self:
         ...
 
     def joined_with_email_address(self) -> QueryResult[Tuple[Company, EmailAddress]]:
@@ -332,6 +329,9 @@ class AccountantResult(QueryResult[Accountant], Protocol):
         ...
 
     def with_id(self, id_: UUID) -> Self:
+        ...
+
+    def joined_with_email_address(self) -> QueryResult[Tuple[Accountant, EmailAddress]]:
         ...
 
 
@@ -416,12 +416,71 @@ class EmailAddressResult(QueryResult[EmailAddress], Protocol):
     def with_address(self, *addresses: str) -> Self:
         ...
 
+    def that_belong_to_member(self, member: UUID) -> Self:
+        ...
+
+    def that_belong_to_company(self, company: UUID) -> Self:
+        ...
+
     def update(self) -> EmailAddressUpdate:
         ...
 
 
 class EmailAddressUpdate(DatabaseUpdate, Protocol):
     def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
+        ...
+
+
+class AccountCredentialsResult(QueryResult[records.AccountCredentials], Protocol):
+    def with_email_address(self, address: str) -> Self:
+        ...
+
+    def joined_with_accountant(
+        self,
+    ) -> QueryResult[Tuple[records.AccountCredentials, Optional[records.Accountant]]]:
+        ...
+
+    def joined_with_email_address_and_accountant(
+        self,
+    ) -> QueryResult[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Accountant],
+        ]
+    ]:
+        ...
+
+    def joined_with_member(
+        self,
+    ) -> QueryResult[Tuple[records.AccountCredentials, Optional[records.Member]]]:
+        ...
+
+    def joined_with_email_address_and_member(
+        self,
+    ) -> QueryResult[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Member],
+        ]
+    ]:
+        ...
+
+    def joined_with_company(
+        self,
+    ) -> QueryResult[Tuple[records.AccountCredentials, Optional[records.Company]]]:
+        ...
+
+    def joined_with_email_address_and_company(
+        self,
+    ) -> QueryResult[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Company],
+        ]
+    ]:
         ...
 
 
@@ -505,9 +564,8 @@ class DatabaseGateway(Protocol):
     def create_member(
         self,
         *,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         account: Account,
         registered_on: datetime,
     ) -> Member:
@@ -518,9 +576,8 @@ class DatabaseGateway(Protocol):
 
     def create_company(
         self,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         means_account: Account,
         labour_account: Account,
         resource_account: Account,
@@ -532,7 +589,9 @@ class DatabaseGateway(Protocol):
     def get_companies(self) -> CompanyResult:
         ...
 
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
+    def create_accountant(
+        self, account_credentials: UUID, name: str
+    ) -> records.Accountant:
         ...
 
     def get_accountants(self) -> AccountantResult:
@@ -567,4 +626,12 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_accounts(self) -> AccountResult:
+        ...
+
+    def create_account_credentials(
+        self, email_address: str, password_hash: str
+    ) -> records.AccountCredentials:
+        ...
+
+    def get_account_credentials(self) -> AccountCredentialsResult:
         ...

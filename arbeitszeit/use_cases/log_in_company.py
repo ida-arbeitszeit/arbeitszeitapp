@@ -31,27 +31,33 @@ class LogInCompanyUseCase:
     password_hasher: PasswordHasher
 
     def log_in_company(self, request: Request) -> Response:
-        company = (
-            self.database.get_companies()
+        record = (
+            self.database.get_account_credentials()
             .with_email_address(request.email_address.strip())
+            .joined_with_company()
             .first()
         )
-        if company is None:
-            reason = self.RejectionReason.invalid_email_address
-        elif not self.password_hasher.is_password_matching_hash(
-            password=request.password, password_hash=company.password_hash
-        ):
-            reason = self.RejectionReason.invalid_password
-        else:
+        if not record or not record[1]:
             return self.Response(
-                rejection_reason=None,
-                is_logged_in=True,
-                email_address=request.email_address,
-                user_id=company.id,
+                rejection_reason=self.RejectionReason.invalid_email_address,
+                is_logged_in=False,
+                email_address=None,
+                user_id=None,
+            )
+        credentials, company = record
+        assert company
+        if not self.password_hasher.is_password_matching_hash(
+            password=request.password, password_hash=credentials.password_hash
+        ):
+            return self.Response(
+                rejection_reason=self.RejectionReason.invalid_password,
+                is_logged_in=False,
+                email_address=None,
+                user_id=None,
             )
         return self.Response(
-            rejection_reason=reason,
-            is_logged_in=False,
-            email_address=None,
-            user_id=None,
+            rejection_reason=None,
+            is_logged_in=True,
+            email_address=request.email_address,
+            user_id=company.id,
         )

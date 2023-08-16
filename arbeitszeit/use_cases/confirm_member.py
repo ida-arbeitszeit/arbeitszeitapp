@@ -20,16 +20,19 @@ class ConfirmMemberUseCase:
     database: DatabaseGateway
 
     def confirm_member(self, request: Request) -> Response:
-        members = self.database.get_members().with_email_address(request.email_address)
-        if not members:
+        record = (
+            self.database.get_members()
+            .with_email_address(request.email_address)
+            .joined_with_email_address()
+            .first()
+        )
+        if not record:
             return self.Response(is_confirmed=False)
-        if members.that_are_confirmed():
-            pass
+        member, email = record
+        if email.confirmed_on:
+            return self.Response(is_confirmed=False, member=None)
         else:
             self.database.get_email_addresses().with_address(
                 request.email_address
             ).update().set_confirmation_timestamp(datetime.min).perform()
-            member = members.first()
-            assert member
             return self.Response(is_confirmed=True, member=member.id)
-        return self.Response(is_confirmed=False, member=None)

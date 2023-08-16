@@ -560,28 +560,40 @@ class MemberResult(QueryResultImpl[Member]):
     def working_at_company(self, company: UUID) -> MemberResult:
         return self._filter_elements(
             lambda member: member.id
-            in self.database.relationships.company_workers.get_right_values(company),
+            in self.database.relationships.company_to_workers.get_right_values(company),
         )
 
     def with_id(self, member: UUID) -> MemberResult:
         return self._filter_elements(lambda model: model.id == member)
 
     def with_email_address(self, email: str) -> MemberResult:
-        return self._filter_elements(lambda model: model.email == email)
+        def items() -> Iterable[records.Member]:
+            for member in self.items():
+                account_id = self.database.relationships.account_credentials_to_member.get_left_value(
+                    member.id
+                )
+                assert account_id
+                account = self.database.account_credentials[account_id]
+                if account.email_address.lower() == email.lower():
+                    yield member
 
-    def that_are_confirmed(self) -> MemberResult:
-        def filtered(model: records.Member) -> bool:
-            email = self.database.email_addresses[model.email]
-            return email.confirmed_on is not None
-
-        return self._filter_elements(filtered)
+        return replace(
+            self,
+            items=items,
+        )
 
     def joined_with_email_address(
         self,
     ) -> QueryResultImpl[Tuple[records.Member, records.EmailAddress]]:
         def items() -> Iterable[Tuple[records.Member, records.EmailAddress]]:
             for member in self.items():
-                yield member, self.database.email_addresses[member.email]
+                credentials_id = self.database.relationships.account_credentials_to_member.get_left_value(
+                    member.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                email_address = self.database.email_addresses[credentials.email_address]
+                yield member, email_address
 
         return QueryResultImpl(
             items=items,
@@ -597,16 +609,25 @@ class CompanyResult(QueryResultImpl[Company]):
         )
 
     def with_email_address(self, email: str) -> CompanyResult:
-        return replace(
-            self,
-            items=lambda: filter(lambda company: company.email == email, self.items()),
-        )
+        def items() -> Iterable[records.Company]:
+            for company in self.items():
+                credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
+                    company.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                if credentials.email_address.lower() == email.lower():
+                    yield company
+
+        return replace(self, items=items)
 
     def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
         def items() -> Iterable[records.Company]:
             for company in self.items():
-                workers = self.database.relationships.company_workers.get_right_values(
-                    company.id
+                workers = (
+                    self.database.relationships.company_to_workers.get_right_values(
+                        company.id
+                    )
                 )
                 if member in workers:
                     yield company
@@ -616,11 +637,32 @@ class CompanyResult(QueryResultImpl[Company]):
             items=items,
         )
 
+    def that_is_coordinating_cooperation(self, cooperation: UUID) -> Self:
+        def items() -> Iterable[records.Company]:
+            tenures = sorted(
+                [
+                    self.database.coordination_tenures[t]
+                    for t in self.database.indices.coordination_tenure_by_cooperation.get(
+                        cooperation
+                    )
+                ],
+                key=lambda t: t.start_date,
+                reverse=True,
+            )
+            if not tenures:
+                return
+            latest_tenure = tenures[0]
+            for company in self.items():
+                if latest_tenure.company == company.id:
+                    yield company
+
+        return replace(self, items=items)
+
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
         for company in self.items():
             companies_changed += 1
-            self.database.relationships.company_workers.relate(company.id, member)
+            self.database.relationships.company_to_workers.relate(company.id, member)
         return companies_changed
 
     def with_name_containing(self, query: str) -> CompanyResult:
@@ -629,23 +671,29 @@ class CompanyResult(QueryResultImpl[Company]):
         )
 
     def with_email_containing(self, query: str) -> CompanyResult:
-        return self._filter_elements(
-            lambda company: query.lower() in company.email.lower()
-        )
+        def items() -> Iterable[records.Company]:
+            for company in self.items():
+                credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
+                    company.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                if query.lower() in credentials.email_address.lower():
+                    yield company
 
-    def that_are_confirmed(self) -> Self:
-        def filtered(company: records.Company) -> bool:
-            email = self.database.email_addresses[company.email]
-            return email.confirmed_on is not None
-
-        return self._filter_elements(filtered)
+        return replace(self, items=items)
 
     def joined_with_email_address(
         self,
     ) -> QueryResultImpl[Tuple[records.Company, records.EmailAddress]]:
         def items() -> Iterable[Tuple[records.Company, records.EmailAddress]]:
             for company in self.items():
-                yield company, self.database.email_addresses[company.email]
+                credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
+                    company.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                yield company, self.database.email_addresses[credentials.email_address]
 
         return QueryResultImpl(
             items=items,
@@ -655,12 +703,38 @@ class CompanyResult(QueryResultImpl[Company]):
 
 class AccountantResult(QueryResultImpl[Accountant]):
     def with_email_address(self, email: str) -> Self:
-        return self._filter_elements(
-            lambda accountant: accountant.email_address == email
-        )
+        def items() -> Iterable[Accountant]:
+            for accountant in self.items():
+                credentials_id = self.database.relationships.account_credentials_to_accountant.get_left_value(
+                    accountant.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                if credentials.email_address.lower() == email.lower():
+                    yield accountant
+
+        return replace(self, items=items)
 
     def with_id(self, id_: UUID) -> Self:
         return self._filter_elements(lambda accountant: accountant.id == id_)
+
+    def joined_with_email_address(
+        self,
+    ) -> QueryResultImpl[Tuple[Accountant, records.EmailAddress]]:
+        def items() -> Iterable[Tuple[Accountant, records.EmailAddress]]:
+            for accountant in self.items():
+                credentials_id = self.database.relationships.account_credentials_to_accountant.get_left_value(
+                    accountant.id
+                )
+                assert credentials_id
+                credentials = self.database.account_credentials[credentials_id]
+                email_address = self.database.email_addresses[credentials.email_address]
+                yield accountant, email_address
+
+        return QueryResultImpl(
+            database=self.database,
+            items=items,
+        )
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
@@ -1051,6 +1125,38 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
             ),
         )
 
+    def that_belong_to_member(self, member: UUID) -> Self:
+        def items() -> Iterable[records.EmailAddress]:
+            for address in self.items():
+                (
+                    credentials_id,
+                ) = self.database.indices.account_credentials_by_email_address_lowercased.get(
+                    address.address.lower()
+                )
+                member_id = self.database.relationships.account_credentials_to_member.get_right_value(
+                    credentials_id
+                )
+                if member_id and member_id == member:
+                    yield address
+
+        return replace(self, items=items)
+
+    def that_belong_to_company(self, company: UUID) -> Self:
+        def items() -> Iterable[records.EmailAddress]:
+            for address in self.items():
+                (
+                    credentials_id,
+                ) = self.database.indices.account_credentials_by_email_address_lowercased.get(
+                    address.address.lower()
+                )
+                company_id = self.database.relationships.account_credentials_to_company.get_right_value(
+                    credentials_id
+                )
+                if company_id and company_id == company:
+                    yield address
+
+        return replace(self, items=items)
+
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(
             items=self.items,
@@ -1079,6 +1185,177 @@ class EmailAddressUpdate:
         return email_addresses_affected
 
 
+class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
+    def with_email_address(self, address: str) -> Self:
+        def items() -> Iterable[records.AccountCredentials]:
+            for credentials in self.items():
+                if credentials.email_address.lower() == address.lower():
+                    yield credentials
+
+        return replace(self, items=items)
+
+    def joined_with_accountant(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[records.AccountCredentials, Optional[records.Accountant]]
+    ]:
+        def items() -> (
+            Iterable[Tuple[records.AccountCredentials, Optional[records.Accountant]]]
+        ):
+            for credentials in self.items():
+                accountant_id = self.database.relationships.account_credentials_to_accountant.get_right_value(
+                    credentials.id
+                )
+                if accountant_id:
+                    accountant = self.database.accountants[accountant_id]
+                    yield credentials, accountant
+                else:
+                    yield credentials, None
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_email_address_and_accountant(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Accountant],
+        ]
+    ]:
+        def items() -> (
+            Iterable[
+                Tuple[
+                    records.AccountCredentials,
+                    records.EmailAddress,
+                    Optional[records.Accountant],
+                ]
+            ]
+        ):
+            for credentials in self.items():
+                email_address = self.database.email_addresses[credentials.email_address]
+                accountant_id = self.database.relationships.account_credentials_to_accountant.get_right_value(
+                    credentials.id
+                )
+                if accountant_id:
+                    accountant = self.database.accountants[accountant_id]
+                    yield credentials, email_address, accountant
+                else:
+                    yield credentials, email_address, None
+
+        return QueryResultImpl(database=self.database, items=items)
+
+    def joined_with_member(
+        self,
+    ) -> QueryResultImpl[Tuple[records.AccountCredentials, Optional[records.Member]]]:
+        def items() -> (
+            Iterable[Tuple[records.AccountCredentials, Optional[records.Member]]]
+        ):
+            for credentials in self.items():
+                member_id = self.database.relationships.account_credentials_to_member.get_right_value(
+                    credentials.id
+                )
+                if member_id:
+                    member = self.database.members[member_id]
+                    yield credentials, member
+                else:
+                    yield credentials, None
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_email_address_and_member(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Member],
+        ]
+    ]:
+        def items() -> (
+            Iterable[
+                Tuple[
+                    records.AccountCredentials,
+                    records.EmailAddress,
+                    Optional[records.Member],
+                ]
+            ]
+        ):
+            for credentials in self.items():
+                member_id = self.database.relationships.account_credentials_to_member.get_right_value(
+                    credentials.id
+                )
+                email_address = self.database.email_addresses[credentials.email_address]
+                if member_id:
+                    member = self.database.members[member_id]
+                    yield credentials, email_address, member
+                else:
+                    yield credentials, email_address, None
+
+        return QueryResultImpl(database=self.database, items=items)
+
+    def joined_with_company(
+        self,
+    ) -> QueryResultImpl[Tuple[records.AccountCredentials, Optional[records.Company]]]:
+        def items() -> (
+            Iterable[Tuple[records.AccountCredentials, Optional[records.Company]]]
+        ):
+            for credentials in self.items():
+                company_id = self.database.relationships.account_credentials_to_company.get_right_value(
+                    credentials.id
+                )
+                if company_id:
+                    company = self.database.companies[company_id]
+                    yield credentials, company
+                else:
+                    yield credentials, None
+
+        return QueryResultImpl(
+            database=self.database,
+            items=items,
+        )
+
+    def joined_with_email_address_and_company(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[
+            records.AccountCredentials,
+            records.EmailAddress,
+            Optional[records.Company],
+        ]
+    ]:
+        def items() -> (
+            Iterable[
+                Tuple[
+                    records.AccountCredentials,
+                    records.EmailAddress,
+                    Optional[records.Company],
+                ]
+            ]
+        ):
+            for credentials in self.items():
+                email = self.database.email_addresses[credentials.email_address]
+                company_id = self.database.relationships.account_credentials_to_company.get_right_value(
+                    credentials.id
+                )
+                if not company_id:
+                    yield credentials, email, None
+                else:
+                    company = self.database.companies[company_id]
+                    yield credentials, email, company
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+
 @singleton
 class FakeLanguageRepository:
     def __init__(self) -> None:
@@ -1094,6 +1371,7 @@ class FakeLanguageRepository:
 @singleton
 class MockDatabase:
     def __init__(self) -> None:
+        self.account_credentials: Dict[UUID, records.AccountCredentials] = dict()
         self.members: Dict[UUID, Member] = {}
         self.companies: Dict[UUID, Company] = {}
         self.plans: Dict[UUID, Plan] = {}
@@ -1289,17 +1567,20 @@ class MockDatabase:
             database=self,
         )
 
-    def create_accountant(self, email: str, name: str, password_hash: str) -> UUID:
-        assert email in self.email_addresses
+    def create_accountant(
+        self, account_credentials: UUID, name: str
+    ) -> records.Accountant:
+        assert account_credentials in self.account_credentials
         id = uuid4()
         record = Accountant(
-            email_address=email,
             name=name,
-            password_hash=password_hash,
             id=id,
         )
         self.accountants[id] = record
-        return record.id
+        self.relationships.account_credentials_to_accountant.relate(
+            account_credentials, id
+        )
+        return record
 
     def get_accountants(self) -> AccountantResult:
         return AccountantResult(
@@ -1310,25 +1591,23 @@ class MockDatabase:
     def create_member(
         self,
         *,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         account: Account,
         registered_on: datetime,
     ) -> Member:
-        assert email in self.email_addresses
+        assert account_credentials in self.account_credentials
         self.member_accounts.add(account)
         id = uuid4()
         member = Member(
             id=id,
             name=name,
-            email=email,
             account=account.id,
             registered_on=registered_on,
-            password_hash=password_hash,
         )
         self.members[id] = member
         self.indices.member_by_account.add(member.account, member.id)
+        self.relationships.account_credentials_to_member.relate(account_credentials, id)
         return member
 
     def get_members(self) -> MemberResult:
@@ -1339,36 +1618,36 @@ class MockDatabase:
 
     def create_company(
         self,
-        email: str,
+        account_credentials: UUID,
         name: str,
-        password_hash: str,
         means_account: Account,
         labour_account: Account,
         resource_account: Account,
         products_account: Account,
         registered_on: datetime,
     ) -> Company:
-        assert email in self.email_addresses
+        assert account_credentials in self.account_credentials
         self.p_accounts.add(means_account)
         self.r_accounts.add(resource_account)
         self.l_accounts.add(labour_account)
         self.prd_accounts.add(products_account)
         new_company = Company(
             id=uuid4(),
-            email=email,
             name=name,
             means_account=means_account.id,
             raw_material_account=resource_account.id,
             work_account=labour_account.id,
             product_account=products_account.id,
             registered_on=registered_on,
-            password_hash=password_hash,
         )
         self.companies[new_company.id] = new_company
         self.indices.company_by_account.add(means_account.id, new_company.id)
         self.indices.company_by_account.add(labour_account.id, new_company.id)
         self.indices.company_by_account.add(resource_account.id, new_company.id)
         self.indices.company_by_account.add(products_account.id, new_company.id)
+        self.relationships.account_credentials_to_company.relate(
+            account_credentials, new_company.id
+        )
         return new_company
 
     def get_companies(self) -> CompanyResult:
@@ -1427,6 +1706,30 @@ class MockDatabase:
         return AccountResult(
             items=lambda: self.accounts,
             database=self,
+        )
+
+    def create_account_credentials(
+        self, email_address: str, password_hash: str
+    ) -> records.AccountCredentials:
+        assert not self.indices.account_credentials_by_email_address_lowercased.get(
+            email_address.lower()
+        )
+        id_ = uuid4()
+        record = records.AccountCredentials(
+            email_address=email_address,
+            id=id_,
+            password_hash=password_hash,
+        )
+        self.account_credentials[id_] = record
+        self.indices.account_credentials_by_email_address_lowercased.add(
+            email_address.lower(), id_
+        )
+        return record
+
+    def get_account_credentials(self) -> AccountCredentialsResult:
+        return AccountCredentialsResult(
+            database=self,
+            items=self.account_credentials.values,
         )
 
 
@@ -1512,7 +1815,16 @@ class ManyToMany(Generic[S_Hash, T_Hash]):
 
 @dataclass
 class Relationships:
-    company_workers: ManyToMany[UUID, UUID] = field(default_factory=ManyToMany)
+    company_to_workers: ManyToMany[UUID, UUID] = field(default_factory=ManyToMany)
+    account_credentials_to_member: OneToOne[UUID, UUID] = field(
+        default_factory=OneToOne
+    )
+    account_credentials_to_company: OneToOne[UUID, UUID] = field(
+        default_factory=OneToOne
+    )
+    account_credentials_to_accountant: OneToOne[UUID, UUID] = field(
+        default_factory=OneToOne
+    )
 
 
 @dataclass
@@ -1525,3 +1837,6 @@ class Indices:
     company_purchase_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
     company_purchase_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     coordination_tenure_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
+    account_credentials_by_email_address_lowercased: Index[str, UUID] = field(
+        default_factory=Index
+    )
