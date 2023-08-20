@@ -100,11 +100,11 @@ class ExpectationsTestCase(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        buyer = self.company_generator.create_company()
+        consumer = self.company_generator.create_company()
         response_before_sale = self.get_company_summary(planner)
         assert response_before_sale
-        self.purchase_generator.create_fixed_means_purchase(
-            buyer=buyer,
+        self.purchase_generator.create_fixed_means_consumption(
+            consumer=consumer,
             plan=plan.id,
             amount=1,
         )

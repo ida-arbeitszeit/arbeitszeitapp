@@ -90,11 +90,11 @@ class TestPresenter(BaseTestCase):
         assert presentation.purchases[1].price_total == "100000.00"
 
     def test_show_purchases_if_there_is_one_purchase(self) -> None:
-        buying_company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=buying_company
+        consuming_company = self.company_generator.create_company()
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=consuming_company
         )
-        use_case_response = self.query_purchases(company=buying_company)
+        use_case_response = self.query_purchases(company=consuming_company)
         view_model = self.presenter.present(use_case_response)
         assert view_model.show_purchases
 

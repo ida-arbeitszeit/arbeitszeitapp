@@ -117,7 +117,7 @@ class TestPresenterForPlanner(BaseTestCase):
             self.url_index.get_request_coop_url(),
         )
 
-    def test_url_for_paying_product_is_not_displayed_when_user_is_planner_of_plan(
+    def test_url_for_consuming_product_is_not_displayed_when_user_is_planner_of_plan(
         self,
     ):
         response = UseCaseResponse(
@@ -126,7 +126,7 @@ class TestPresenterForPlanner(BaseTestCase):
             ),
         )
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.show_payment_url)
+        self.assertFalse(view_model.show_productive_consumption_url)
 
 
 class TestPresenterForNonPlanningCompany(BaseTestCase):
@@ -164,16 +164,16 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.own_plan_action.is_cooperating)
 
-    def test_url_for_paying_product_is_displayed_when_user_is_not_planner_of_plan(
+    def test_url_for_consuming_product_is_displayed_when_user_is_not_planner_of_plan(
         self,
     ):
         response = UseCaseResponse(
             self.plan_details_generator.create_plan_details(),
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(view_model.show_payment_url)
+        self.assertTrue(view_model.show_productive_consumption_url)
 
-    def test_correct_url_for_paying_product_is_displayed(
+    def test_correct_url_for_consuming_product_is_displayed(
         self,
     ):
         expected_plan_id = uuid4()
@@ -182,6 +182,6 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         self.assertEqual(
-            view_model.payment_url,
-            self.url_index.get_pay_means_of_production_url(expected_plan_id),
+            view_model.productive_consumption_url,
+            self.url_index.get_register_productive_consumption_url(expected_plan_id),
         )

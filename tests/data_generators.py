@@ -13,7 +13,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import confirm_member, pay_means_of_production
+from arbeitszeit.use_cases import confirm_member
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -36,6 +36,11 @@ from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
     RegisterPrivateConsumptionRequest,
     RegisterPrivateConsumptionResponse,
+)
+from arbeitszeit.use_cases.register_productive_consumption import (
+    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionRequest,
+    RegisterProductiveConsumptionResponse,
 )
 from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
@@ -331,59 +336,59 @@ class PurchaseGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
-    pay_means: pay_means_of_production.PayMeansOfProduction
+    register_productive_consumption: RegisterProductiveConsumption
     register_private_consumption_use_case: RegisterPrivateConsumption
 
-    def create_resource_purchase_by_company(
+    def create_resource_consumption_by_company(
         self,
         *,
-        buyer: Optional[UUID] = None,
+        consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.PayMeansOfProductionResponse:
-        return self._create_company_purchase(
+    ) -> RegisterProductiveConsumptionResponse:
+        return self._create_productive_consumption(
             purpose=records.PurposesOfPurchases.raw_materials,
-            buyer=buyer,
+            consumer=consumer,
             plan=plan,
             amount=amount,
         )
 
-    def create_fixed_means_purchase(
+    def create_fixed_means_consumption(
         self,
         *,
-        buyer: Optional[UUID] = None,
+        consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.PayMeansOfProductionResponse:
-        return self._create_company_purchase(
+    ) -> RegisterProductiveConsumptionResponse:
+        return self._create_productive_consumption(
             purpose=records.PurposesOfPurchases.means_of_prod,
-            buyer=buyer,
+            consumer=consumer,
             plan=plan,
             amount=amount,
         )
 
-    def _create_company_purchase(
+    def _create_productive_consumption(
         self,
         *,
         purpose: records.PurposesOfPurchases,
-        buyer: Optional[UUID] = None,
+        consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
-    ) -> pay_means_of_production.PayMeansOfProductionResponse:
-        if buyer is None:
-            buyer = self.company_generator.create_company()
+    ) -> RegisterProductiveConsumptionResponse:
+        if consumer is None:
+            consumer = self.company_generator.create_company()
         if plan is None:
             plan = self.plan_generator.create_plan().id
-        request = pay_means_of_production.PayMeansOfProductionRequest(
-            buyer=buyer,
+        request = RegisterProductiveConsumptionRequest(
+            consumer=consumer,
             plan=plan,
             amount=amount,
             purpose=purpose,
         )
-        response = self.pay_means(request)
+        response = self.register_productive_consumption(request)
         assert (
             not response.is_rejected
-        ), f"Could not create purchase, response was {response}"
+        ), f"Could not create productive consumption, response was {response}"
         return response
 
     def create_private_consumption(

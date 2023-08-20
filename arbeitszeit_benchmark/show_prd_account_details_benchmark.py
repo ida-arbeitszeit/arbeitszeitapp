@@ -32,7 +32,7 @@ class ShowPrdAccountDetailsBenchmark:
         )
         plan = self.plan_generator.create_plan(planner=self.seller)
         for _ in range(1000):
-            self.purchase_generator.create_resource_purchase_by_company(plan=plan.id)
+            self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
         self.use_case = self.injector.get(ShowPRDAccountDetailsUseCase)
         self.db.session.commit()
         self.db.session.flush()

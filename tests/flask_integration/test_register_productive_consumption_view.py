@@ -9,15 +9,15 @@ class CompanyTests(ViewTestCase):
         self.company = self.login_company()
 
     def test_that_logged_in_company_get_200_response(self) -> None:
-        response = self.client.get("/company/transfer_to_company")
+        response = self.client.get("/company/register_productive_consumption")
         self.assertEqual(response.status_code, 200)
 
     def test_that_logged_in_company_receives_200_when_posting_valid_data(
         self,
     ) -> None:
         response = self.client.post(
-            "/company/transfer_to_company",
-            data=dict(plan_id=str(uuid4()), amount=3, type_of_payment="fixed"),
+            "/company/register_productive_consumption",
+            data=dict(plan_id=str(uuid4()), amount=3, type_of_consumption="fixed"),
         )
         self.assertEqual(response.status_code, 200)
 
@@ -25,7 +25,7 @@ class CompanyTests(ViewTestCase):
         self,
     ) -> None:
         response = self.client.post(
-            "/company/transfer_to_company",
-            data=dict(plan_id="no uuid", amount=3, type_of_payment="fixed"),
+            "/company/register_productive_consumption",
+            data=dict(plan_id="no uuid", amount=3, type_of_consumption="fixed"),
         )
         self.assertEqual(response.status_code, 400)

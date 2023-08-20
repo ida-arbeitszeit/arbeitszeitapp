@@ -20,15 +20,15 @@ class UseCaseTests(BaseTestCase):
         for i in range(4):
             assert response.deviations_relative[i] == 0
 
-    def test_show_infinite_relative_deviation_if_company_buyes_fixed_means_without_planning_for_some(
+    def test_show_infinite_relative_deviation_if_company_consumes_fixed_means_without_planning_for_some(
         self,
     ) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(5), Decimal(0), Decimal(0))
         )
-        self.purchase_generator.create_fixed_means_purchase(
-            buyer=company, amount=1, plan=plan.id
+        self.purchase_generator.create_fixed_means_consumption(
+            consumer=company, amount=1, plan=plan.id
         )
         response = self.get_company_summary(company)
         assert response
@@ -67,7 +67,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(amount=2, planner=company)
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id, amount=1)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id, amount=1)
         response = self.get_company_summary(company)
         assert response
         assert response.deviations_relative[3] == Decimal(50)
@@ -81,7 +81,7 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
             amount=1,
         )
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id, amount=2)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id, amount=2)
         response = self.get_company_summary(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal(100)
@@ -104,7 +104,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company, amount=12)
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id, amount=12)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id, amount=12)
         response = self.get_company_summary(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal(0)

@@ -12,21 +12,21 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class PayMeansOfProductionRequest:
-    buyer: UUID
+class RegisterProductiveConsumptionRequest:
+    consumer: UUID
     plan: UUID
     amount: int
     purpose: PurposesOfPurchases
 
 
 @dataclass
-class PayMeansOfProductionResponse:
+class RegisterProductiveConsumptionResponse:
     class RejectionReason(Exception, Enum):
         plan_not_found = auto()
         invalid_purpose = auto()
-        cannot_buy_public_service = auto()
+        cannot_consume_public_service = auto()
         plan_is_not_active = auto()
-        buyer_is_planner = auto()
+        consumer_is_planner = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -36,74 +36,76 @@ class PayMeansOfProductionResponse:
 
 
 @dataclass(frozen=True)
-class PayMeansOfProduction:
+class RegisterProductiveConsumption:
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
     def __call__(
-        self, request: PayMeansOfProductionRequest
-    ) -> PayMeansOfProductionResponse:
+        self, request: RegisterProductiveConsumptionRequest
+    ) -> RegisterProductiveConsumptionResponse:
         try:
-            plan, buyer, purpose = self._validate_request(request)
-        except PayMeansOfProductionResponse.RejectionReason as reason:
-            return PayMeansOfProductionResponse(rejection_reason=reason)
+            plan, consumer, purpose = self._validate_request(request)
+        except RegisterProductiveConsumptionResponse.RejectionReason as reason:
+            return RegisterProductiveConsumptionResponse(rejection_reason=reason)
         self.create_transaction(
-            buyer=buyer, plan=plan, amount=request.amount, purpose=purpose
+            consumer=consumer, plan=plan, amount=request.amount, purpose=purpose
         )
-        return PayMeansOfProductionResponse(rejection_reason=None)
+        return RegisterProductiveConsumptionResponse(rejection_reason=None)
 
     def _validate_request(
-        self, request: PayMeansOfProductionRequest
+        self, request: RegisterProductiveConsumptionRequest
     ) -> Tuple[Plan, Company, PurposesOfPurchases]:
         plan = self._validate_plan(request)
         return (
             plan,
-            self._validate_buyer_is_not_planner(request, plan),
+            self._validate_consumer_is_not_planner(request, plan),
             self._validate_purpose(request),
         )
 
-    def _validate_plan(self, request: PayMeansOfProductionRequest) -> Plan:
+    def _validate_plan(self, request: RegisterProductiveConsumptionRequest) -> Plan:
         now = self.datetime_service.now()
         plan = self.database_gateway.get_plans().with_id(request.plan).first()
         if plan is None:
-            raise PayMeansOfProductionResponse.RejectionReason.plan_not_found
+            raise RegisterProductiveConsumptionResponse.RejectionReason.plan_not_found
         if not plan.is_active_as_of(now):
-            raise PayMeansOfProductionResponse.RejectionReason.plan_is_not_active
+            raise RegisterProductiveConsumptionResponse.RejectionReason.plan_is_not_active
         if plan.is_public_service:
-            raise PayMeansOfProductionResponse.RejectionReason.cannot_buy_public_service
+            raise RegisterProductiveConsumptionResponse.RejectionReason.cannot_consume_public_service
         return plan
 
-    def _validate_buyer_is_not_planner(
-        self, request: PayMeansOfProductionRequest, plan: Plan
+    def _validate_consumer_is_not_planner(
+        self, request: RegisterProductiveConsumptionRequest, plan: Plan
     ) -> Company:
-        if plan.planner == request.buyer:
-            raise PayMeansOfProductionResponse.RejectionReason.buyer_is_planner
-        buyer = self.database_gateway.get_companies().with_id(request.buyer).first()
-        assert buyer is not None
-        return buyer
+        if plan.planner == request.consumer:
+            raise RegisterProductiveConsumptionResponse.RejectionReason.consumer_is_planner
+        consumer = (
+            self.database_gateway.get_companies().with_id(request.consumer).first()
+        )
+        assert consumer is not None
+        return consumer
 
     def _validate_purpose(
-        self, request: PayMeansOfProductionRequest
+        self, request: RegisterProductiveConsumptionRequest
     ) -> PurposesOfPurchases:
         if request.purpose not in (
             PurposesOfPurchases.means_of_prod,
             PurposesOfPurchases.raw_materials,
         ):
-            raise PayMeansOfProductionResponse.RejectionReason.invalid_purpose
+            raise RegisterProductiveConsumptionResponse.RejectionReason.invalid_purpose
         return request.purpose
 
     def create_transaction(
-        self, amount: int, purpose: PurposesOfPurchases, buyer: Company, plan: Plan
+        self, amount: int, purpose: PurposesOfPurchases, consumer: Company, plan: Plan
     ) -> None:
         coop_price = amount * self.price_calculator.calculate_cooperative_price(plan)
         individual_price = amount * self.price_calculator.calculate_individual_price(
             plan
         )
         if purpose == PurposesOfPurchases.means_of_prod:
-            sending_account = buyer.means_account
+            sending_account = consumer.means_account
         elif purpose == PurposesOfPurchases.raw_materials:
-            sending_account = buyer.raw_material_account
+            sending_account = consumer.raw_material_account
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         transaction = self.database_gateway.create_transaction(

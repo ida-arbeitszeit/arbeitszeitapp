@@ -10,7 +10,7 @@
 {{ plan_details(view_model) }}
 
 <div class="section has-text-centered">
-    {% if view_model.show_payment_url %}
+    {% if view_model.show_productive_consumption_url %}
     <div class="content">
         <h1 class="title">
             {{ gettext("Actions") }}
@@ -22,9 +22,9 @@
                 <div class="tile is-vertical">
                     <div class="tile is-parent" href="">
                         <div class="tile is-child box has-background-danger-light">
-                            <h1 class="title is-4">{{ gettext("Pay product") }}</h1>
-                            <a class="button is-primary" href="{{ view_model.payment_url }}">
-                                <span>{{ gettext("Pay product") }}</span>
+                            <h1 class="title is-4">{{ gettext("Register consumption") }}</h1>
+                            <a class="button is-primary" href="{{ view_model.productive_consumption_url }}">
+                                <span>{{ gettext("Register consumption") }}</span>
                             </a>
                         </div>
                     </div>

@@ -43,7 +43,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         assert transaction.transaction_volume == Decimal(3)
         assert transaction.account_type == AccountTypes.prd
 
-    def test_that_correct_info_for_sender_is_generated_after_transaction_of_company_buying_p(
+    def test_that_correct_info_for_sender_is_generated_after_transaction_of_company_consuming_p(
         self,
     ) -> None:
         company1 = self.company_generator.create_company()
@@ -55,8 +55,8 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
                 means_cost=Decimal(0),
             ),
         )
-        self.purchase_generator.create_fixed_means_purchase(
-            buyer=company1, plan=plan.id
+        self.purchase_generator.create_fixed_means_consumption(
+            consumer=company1, plan=plan.id
         )
         info_sender = self.get_company_transactions(company1)
         transaction = info_sender.transactions[0]
@@ -64,7 +64,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         assert transaction.transaction_volume == Decimal(-12)
         assert transaction.account_type == AccountTypes.p
 
-    def test_that_correct_info_for_receiver_is_generated_after_transaction_of_company_buying_p(
+    def test_that_correct_info_for_receiver_is_generated_after_transaction_of_company_consuming_p(
         self,
     ) -> None:
         company1 = self.company_generator.create_company()
@@ -77,7 +77,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             ),
             amount=1,
         )
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
         info_receiver = self.get_company_transactions(company1)
         transaction = info_receiver.transactions[0]
         assert transaction.transaction_type == TransactionTypes.sale_of_fixed_means
@@ -132,23 +132,23 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             == TransactionTypes.credit_for_wages
         )
 
-    def test_correct_info_is_generated_after_several_transactions_where_companies_buy_each_others_product(
+    def test_correct_info_is_generated_after_several_transactions_where_companies_consume_each_others_product(
         self,
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         company1 = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_purchase(
-            buyer=company1,
+        self.purchase_generator.create_fixed_means_consumption(
+            consumer=company1,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_purchase(
+        self.purchase_generator.create_fixed_means_consumption(
             plan=plan.id,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_resource_purchase_by_company(
-            buyer=company1,
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=company1,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
         info_company1 = self.get_company_transactions(company1)
@@ -167,11 +167,13 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         company1 = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_purchase(buyer=company1)
+        self.purchase_generator.create_fixed_means_consumption(consumer=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_resource_purchase_by_company(buyer=company1)
+        self.purchase_generator.create_resource_consumption_by_company(
+            consumer=company1
+        )
         self.datetime_service.advance_time(timedelta(hours=1))
         self.purchase_generator.create_private_consumption(plan=plan.id)
         self.datetime_service.advance_time(timedelta(hours=1))

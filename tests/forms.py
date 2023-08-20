@@ -111,11 +111,11 @@ class RegisterPrivateConsumptionFakeForm:
         self._plan_id = plan_id
 
 
-class PayMeansFakeForm:
-    def __init__(self, amount: str, plan_id: str, type_of_payment: str) -> None:
+class RegisterProductiveConsumptionFakeForm:
+    def __init__(self, amount: str, plan_id: str, type_of_consumption: str) -> None:
         self._amount_field = FormFieldImpl(value=amount)
         self._plan_id_field = FormFieldImpl(value=plan_id)
-        self._type_of_payment_field = FormFieldImpl(value=type_of_payment)
+        self._type_of_consumption_field = FormFieldImpl(value=type_of_consumption)
 
     def amount_field(self) -> FormFieldImpl[str]:
         return self._amount_field
@@ -123,8 +123,8 @@ class PayMeansFakeForm:
     def plan_id_field(self) -> FormFieldImpl[str]:
         return self._plan_id_field
 
-    def type_of_payment_field(self) -> FormFieldImpl[str]:
-        return self._type_of_payment_field
+    def type_of_consumption_field(self) -> FormFieldImpl[str]:
+        return self._type_of_consumption_field
 
 
 class FormFieldImpl(Generic[T]):

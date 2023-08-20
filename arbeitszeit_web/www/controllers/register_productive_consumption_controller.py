@@ -2,14 +2,16 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from arbeitszeit.records import PurposesOfPurchases
-from arbeitszeit.use_cases.pay_means_of_production import PayMeansOfProductionRequest
-from arbeitszeit_web.forms import PayMeansOfProductionForm
+from arbeitszeit.use_cases.register_productive_consumption import (
+    RegisterProductiveConsumptionRequest,
+)
+from arbeitszeit_web.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 
 @dataclass
-class PayMeansOfProductionController:
+class RegisterProductiveConsumptionController:
     class FormError(Exception):
         pass
 
@@ -17,10 +19,10 @@ class PayMeansOfProductionController:
     translator: Translator
 
     def process_input_data(
-        self, form: PayMeansOfProductionForm
-    ) -> PayMeansOfProductionRequest:
-        buyer = self.session.get_current_user()
-        assert buyer
+        self, form: RegisterProductiveConsumptionForm
+    ) -> RegisterProductiveConsumptionRequest:
+        consumer = self.session.get_current_user()
+        assert consumer
         try:
             plan = UUID(form.plan_id_field().get_value().strip())
         except ValueError:
@@ -38,15 +40,15 @@ class PayMeansOfProductionController:
                 self.translator.gettext("Must be a number larger than zero.")
             )
             raise self.FormError()
-        type_of_payment = form.type_of_payment_field().get_value()
-        if not type_of_payment:
-            form.type_of_payment_field().attach_error(
+        type_of_consumption = form.type_of_consumption_field().get_value()
+        if not type_of_consumption:
+            form.type_of_consumption_field().attach_error(
                 self.translator.gettext("This field is required.")
             )
             raise self.FormError()
         purpose = (
             PurposesOfPurchases.means_of_prod
-            if type_of_payment == "fixed"
+            if type_of_consumption == "fixed"
             else PurposesOfPurchases.raw_materials
         )
-        return PayMeansOfProductionRequest(buyer, plan, amount, purpose)
+        return RegisterProductiveConsumptionRequest(consumer, plan, amount, purpose)

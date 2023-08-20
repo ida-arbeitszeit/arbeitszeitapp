@@ -82,11 +82,11 @@ class UrlIndex(Protocol):
     ) -> str:
         ...
 
-    def get_pay_means_of_production_url(
+    def get_register_productive_consumption_url(
         self,
         plan_id: Optional[UUID] = None,
         amount: Optional[int] = None,
-        type_of_payment: Optional[PurposesOfPurchases] = None,
+        type_of_consumption: Optional[PurposesOfPurchases] = None,
     ) -> str:
         ...
 

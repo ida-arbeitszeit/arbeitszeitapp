@@ -344,7 +344,7 @@ class RequestCooperationForm(Form):
         return self.data["cooperation_id"]
 
 
-class PayMeansOfProductionForm(Form):
+class RegisterProductiveConsumptionForm(Form):
     plan_id = StringField(
         render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
         validators=[
@@ -365,8 +365,8 @@ class PayMeansOfProductionForm(Form):
             trans.lazy_gettext("Liquid means of production"),
         ),
     ]
-    type_of_payment = SelectField(
-        trans.lazy_gettext("Type of payment"),
+    type_of_consumption = SelectField(
+        trans.lazy_gettext("Type of consumption"),
         choices=choices,
         validators=[validators.DataRequired()],
     )
@@ -377,8 +377,8 @@ class PayMeansOfProductionForm(Form):
     def plan_id_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="plan_id")
 
-    def type_of_payment_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="type_of_payment")
+    def type_of_consumption_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="type_of_consumption")
 
 
 class AnswerCompanyWorkInviteForm(Form):

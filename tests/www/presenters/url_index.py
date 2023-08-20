@@ -53,7 +53,7 @@ class UrlIndexTestImpl:
     get_line_plot_of_company_p_account = UrlIndexMethod()
     get_line_plot_of_company_a_account = UrlIndexMethod()
     get_register_private_consumption_url = UrlIndexMethod()
-    get_pay_means_of_production_url = UrlIndexMethod()
+    get_register_productive_consumption_url = UrlIndexMethod()
     get_toggle_availability_url = UrlIndexMethod()
     get_request_coop_url = UrlIndexMethod()
     get_end_coop_url = UrlIndexMethod()

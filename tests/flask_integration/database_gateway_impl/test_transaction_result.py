@@ -223,7 +223,7 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_purchase(plan=plan.id)
+        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
         assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
 
     def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_company_purchases_for_other_plans(
@@ -231,7 +231,7 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_purchase(plan=other_plan.id)
+        self.purchase_generator.create_fixed_means_consumption(plan=other_plan.id)
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
             plan.id
         )

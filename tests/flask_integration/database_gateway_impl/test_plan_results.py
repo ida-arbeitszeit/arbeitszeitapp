@@ -776,7 +776,7 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
         for amount in company_purchases:
-            self.purchase_generator.create_fixed_means_purchase(
+            self.purchase_generator.create_fixed_means_consumption(
                 plan=plan.id, amount=amount
             )
         for amount in private_consumptions:
@@ -805,10 +805,10 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         expected_amount: int,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_purchase()
+        self.purchase_generator.create_fixed_means_consumption()
         self.purchase_generator.create_private_consumption()
         for amount in company_purchases:
-            self.purchase_generator.create_fixed_means_purchase(
+            self.purchase_generator.create_fixed_means_consumption(
                 plan=plan.id, amount=amount
             )
         for amount in private_consumptions:
