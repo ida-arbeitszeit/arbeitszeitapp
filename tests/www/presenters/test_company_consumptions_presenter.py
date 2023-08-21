@@ -3,12 +3,12 @@ from typing import Iterator
 from uuid import uuid4
 
 from arbeitszeit.records import PurposesOfPurchases
-from arbeitszeit.use_cases.query_company_purchases import (
-    PurchaseQueryResponse,
-    QueryCompanyPurchases,
+from arbeitszeit.use_cases.query_company_consumptions import (
+    ConsumptionQueryResponse,
+    QueryCompanyConsumptions,
 )
-from arbeitszeit_web.www.presenters.company_purchases_presenter import (
-    CompanyPurchasesPresenter,
+from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
+    CompanyConsumptionsPresenter,
     ViewModel,
 )
 from tests.data_generators import CompanyGenerator, PurchaseGenerator
@@ -20,19 +20,19 @@ from tests.www.base_test_case import BaseTestCase
 class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.query_purchases = self.injector.get(QueryCompanyPurchases)
+        self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
         self.purchase_generator = self.injector.get(PurchaseGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.translator = self.injector.get(FakeTranslator)
-        self.presenter = self.injector.get(CompanyPurchasesPresenter)
+        self.presenter = self.injector.get(CompanyConsumptionsPresenter)
 
-    def test_show_purchases_from_company(self) -> None:
+    def test_show_consumptions_from_company(self) -> None:
         now = self.datetime_service.now()
-        response: Iterator[PurchaseQueryResponse] = iter(
+        response: Iterator[ConsumptionQueryResponse] = iter(
             [
-                PurchaseQueryResponse(
-                    purchase_date=now,
+                ConsumptionQueryResponse(
+                    consumption_date=now,
                     plan_id=uuid4(),
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
@@ -40,8 +40,8 @@ class TestPresenter(BaseTestCase):
                     price_per_unit=Decimal("7.89"),
                     amount=321,
                 ),
-                PurchaseQueryResponse(
-                    purchase_date=now,
+                ConsumptionQueryResponse(
+                    consumption_date=now,
                     plan_id=uuid4(),
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
@@ -55,52 +55,52 @@ class TestPresenter(BaseTestCase):
 
         assert isinstance(presentation, ViewModel)
 
-        assert presentation.purchases[
+        assert presentation.consumptions[
             0
-        ].purchase_date == FakeDatetimeService().format_datetime(
+        ].consumption_date == FakeDatetimeService().format_datetime(
             now, zone="Europe/Berlin"
         )
-        assert presentation.purchases[0].product_name == "Produkt A"
+        assert presentation.consumptions[0].product_name == "Produkt A"
         assert (
-            presentation.purchases[0].product_description
+            presentation.consumptions[0].product_description
             == "Beschreibung für Produkt A."
         )
-        assert presentation.purchases[0].purpose == self.translator.gettext(
+        assert presentation.consumptions[0].purpose == self.translator.gettext(
             "Liquid means of production"
         )
-        assert presentation.purchases[0].price_per_unit == "7.89"
-        assert presentation.purchases[0].amount == "321"
-        assert presentation.purchases[0].price_total == "2532.69"
+        assert presentation.consumptions[0].price_per_unit == "7.89"
+        assert presentation.consumptions[0].amount == "321"
+        assert presentation.consumptions[0].price_total == "2532.69"
 
-        assert presentation.purchases[
+        assert presentation.consumptions[
             1
-        ].purchase_date == FakeDatetimeService().format_datetime(
+        ].consumption_date == FakeDatetimeService().format_datetime(
             now, zone="Europe/Berlin"
         )
-        assert presentation.purchases[1].product_name == "Produkt A"
+        assert presentation.consumptions[1].product_name == "Produkt A"
         assert (
-            presentation.purchases[1].product_description
+            presentation.consumptions[1].product_description
             == "Beschreibung für Produkt A."
         )
-        assert presentation.purchases[1].purpose == self.translator.gettext(
+        assert presentation.consumptions[1].purpose == self.translator.gettext(
             "Fixed means of production"
         )
-        assert presentation.purchases[1].price_per_unit == "100000.00"
-        assert presentation.purchases[1].amount == "1"
-        assert presentation.purchases[1].price_total == "100000.00"
+        assert presentation.consumptions[1].price_per_unit == "100000.00"
+        assert presentation.consumptions[1].amount == "1"
+        assert presentation.consumptions[1].price_total == "100000.00"
 
-    def test_show_purchases_if_there_is_one_purchase(self) -> None:
+    def test_show_consumptions_if_there_is_one_consumption(self) -> None:
         consuming_company = self.company_generator.create_company()
         self.purchase_generator.create_resource_consumption_by_company(
             consumer=consuming_company
         )
-        use_case_response = self.query_purchases(company=consuming_company)
+        use_case_response = self.query_consumptions(company=consuming_company)
         view_model = self.presenter.present(use_case_response)
-        assert view_model.show_purchases
+        assert view_model.show_consumptions
 
-    def test_do_not_show_purchases_if_there_is_no_purchase_of_querying_company(
+    def test_do_not_show_consumptions_if_there_is_no_consumption_of_querying_company(
         self,
     ) -> None:
-        use_case_response: Iterator[PurchaseQueryResponse] = iter([])
+        use_case_response: Iterator[ConsumptionQueryResponse] = iter([])
         view_model = self.presenter.present(use_case_response)
-        assert not view_model.show_purchases
+        assert not view_model.show_consumptions

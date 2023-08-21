@@ -1,7 +1,7 @@
 {% extends "base_company.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">{{ gettext("My purchases") }}</div>
+<div class="navbar-item">{{ gettext("My consumptions") }}</div>
 {% endblock %}
 
 {% block content %}
@@ -9,12 +9,12 @@
 <div class="section has-text-centered">
   <div class="content">
     <h1 class="title">
-      {{ gettext("My past purchases") }}
+      {{ gettext("My past consumptions") }}
     </h1>
     <div class="box has-background-info-light has-text-info-dark has-text-centered">
       <div class="icon"><i class="fas fa-info-circle"></i></div>
       <p>
-        {{ gettext("Here you can view your past purchases.") }}<br>
+        {{ gettext("Here you can view your past consumptions.") }}<br>
       </p>
     </div>
   </div>
@@ -33,20 +33,20 @@
         </tr>
       </thead>
       <tbody>
-        {% if view_model.show_purchases %}
-        {% for purchase in view_model.purchases %}
+        {% if view_model.show_consumptions %}
+        {% for consumption in view_model.consumptions %}
         <tr>
-          <td>{{ purchase.purchase_date }}</td>
-          <td>{{ purchase.product_name }}</td>
-          <td>{{ purchase.product_description }}</td>
-          <td>{{ purchase.purpose }}</td>
-          <td>{{ purchase.price_per_unit }}</td>
-          <th>{{ purchase.amount }}</th>
-          <th>{{ purchase.price_total }}</th>
+          <td>{{ consumption.consumption_date }}</td>
+          <td>{{ consumption.product_name }}</td>
+          <td>{{ consumption.product_description }}</td>
+          <td>{{ consumption.purpose }}</td>
+          <td>{{ consumption.price_per_unit }}</td>
+          <th>{{ consumption.amount }}</th>
+          <th>{{ consumption.price_total }}</th>
         </tr>
         {% endfor %}
         {% else %}
-        <div>{{ gettext("You haven't purchased anything yet.") }}</div>
+        <div>{{ gettext("You haven't consumed anything yet.") }}</div>
         {% endif %}
       </tbody>
     </table>

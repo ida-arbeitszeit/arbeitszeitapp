@@ -8,7 +8,7 @@ from tests.flask_integration.flask import LogInUser, ViewTestCase
 class AuthTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/purchases"
+        self.url = "/company/consumptions"
 
     @parameterized.expand(
         [
@@ -33,7 +33,7 @@ class UnconfirmedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company = self.login_company(confirm_company=False)
-        self.url = "/company/purchases"
+        self.url = "/company/consumptions"
 
     def test_unconfirmed_company_gets_302(self) -> None:
         response = self.client.get(self.url)

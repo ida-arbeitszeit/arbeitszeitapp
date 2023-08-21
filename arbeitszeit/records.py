@@ -325,7 +325,7 @@ class PrivateConsumption:
 
 
 @dataclass(frozen=True)
-class CompanyPurchase:
+class ProductiveConsumption:
     id: UUID
     plan_id: UUID
     transaction_id: UUID

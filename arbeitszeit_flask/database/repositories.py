@@ -977,27 +977,27 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         )
 
 
-class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
-    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption]):
+    def where_consumer_is_company(self, company: UUID) -> ProductiveConsumptionResult:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
-        buying_company = aliased(models.Company)
+        consuming_company = aliased(models.Company)
         return self._with_modified_query(
             lambda query: query.join(transaction)
             .join(account, transaction.sending_account == account.id)
             .join(
-                buying_company,
+                consuming_company,
                 or_(
-                    account.id == buying_company.p_account,
-                    account.id == buying_company.r_account,
+                    account.id == consuming_company.p_account,
+                    account.id == consuming_company.r_account,
                 ),
             )
-            .filter(buying_company.id == str(company))
+            .filter(consuming_company.id == str(company))
         )
 
     def ordered_by_creation_date(
         self, *, ascending: bool = True
-    ) -> CompanyPurchaseResult:
+    ) -> ProductiveConsumptionResult:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
         if not ascending:
@@ -1011,14 +1011,14 @@ class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
-        Tuple[records.CompanyPurchase, records.Transaction, records.Plan]
+        Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[records.CompanyPurchase, records.Transaction, records.Plan]:
+        ) -> Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]:
             purchase_orm, transaction_orm, plan_orm = orm
             return (
-                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                DatabaseGatewayImpl.productive_consumption_from_orm(purchase_orm),
                 DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
@@ -1037,13 +1037,13 @@ class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
 
     def joined_with_transaction(
         self,
-    ) -> FlaskQueryResult[Tuple[records.CompanyPurchase, records.Transaction]]:
+    ) -> FlaskQueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]:
         def mapper(
             orm,
-        ) -> Tuple[records.CompanyPurchase, records.Transaction]:
+        ) -> Tuple[records.ProductiveConsumption, records.Transaction]:
             purchase_orm, transaction_orm = orm
             return (
-                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                DatabaseGatewayImpl.productive_consumption_from_orm(purchase_orm),
                 DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
             )
 
@@ -1059,14 +1059,14 @@ class CompanyPurchaseResult(FlaskQueryResult[records.CompanyPurchase]):
     def joined_with_transaction_and_provider(
         self,
     ) -> FlaskQueryResult[
-        Tuple[records.CompanyPurchase, records.Transaction, records.Company]
+        Tuple[records.ProductiveConsumption, records.Transaction, records.Company]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[records.CompanyPurchase, records.Transaction, records.Company]:
+        ) -> Tuple[records.ProductiveConsumption, records.Transaction, records.Company]:
             purchase_orm, transaction_orm, provider_orm = orm
             return (
-                DatabaseGatewayImpl.company_purchase_from_orm(purchase_orm),
+                DatabaseGatewayImpl.productive_consumption_from_orm(purchase_orm),
                 DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
                 DatabaseGatewayImpl.company_from_orm(provider_orm),
             )
@@ -1325,9 +1325,9 @@ class AccountingRepository:
 class DatabaseGatewayImpl:
     db: SQLAlchemy
 
-    def create_company_purchase(
+    def create_productive_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> records.CompanyPurchase:
+    ) -> records.ProductiveConsumption:
         orm = models.CompanyPurchase(
             plan_id=str(plan),
             transaction_id=str(transaction),
@@ -1335,20 +1335,20 @@ class DatabaseGatewayImpl:
         )
         self.db.session.add(orm)
         self.db.session.flush()
-        return self.company_purchase_from_orm(orm)
+        return self.productive_consumption_from_orm(orm)
 
-    def get_company_purchases(self) -> CompanyPurchaseResult:
-        return CompanyPurchaseResult(
+    def get_productive_consumptions(self) -> ProductiveConsumptionResult:
+        return ProductiveConsumptionResult(
             query=models.CompanyPurchase.query,
-            mapper=self.company_purchase_from_orm,
+            mapper=self.productive_consumption_from_orm,
             db=self.db,
         )
 
     @classmethod
-    def company_purchase_from_orm(
+    def productive_consumption_from_orm(
         cls, orm: models.CompanyPurchase
-    ) -> records.CompanyPurchase:
-        return records.CompanyPurchase(
+    ) -> records.ProductiveConsumption:
+        return records.ProductiveConsumption(
             id=orm.id,
             plan_id=UUID(orm.plan_id),
             transaction_id=UUID(orm.transaction_id),

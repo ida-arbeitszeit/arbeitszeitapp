@@ -45,6 +45,7 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
 )
+from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.request_cooperation import RequestCooperation
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
@@ -98,8 +99,8 @@ from arbeitszeit_web.www.controllers.query_companies_controller import (
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
 )
-from arbeitszeit_web.www.presenters.company_purchases_presenter import (
-    CompanyPurchasesPresenter,
+from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
+    CompanyConsumptionsPresenter,
 )
 from arbeitszeit_web.www.presenters.create_draft_presenter import (
     CreateDraftPresenter,
@@ -202,17 +203,17 @@ def query_companies(
     return view.respond_to_get()
 
 
-@CompanyRoute("/company/purchases")
-def my_purchases(
-    query_purchases: use_cases.query_company_purchases.QueryCompanyPurchases,
+@CompanyRoute("/company/consumptions")
+def my_consumptions(
+    query_consumptions: QueryCompanyConsumptions,
     template_renderer: UserTemplateRenderer,
-    presenter: CompanyPurchasesPresenter,
+    presenter: CompanyConsumptionsPresenter,
 ):
-    response = query_purchases(UUID(current_user.id))
+    response = query_consumptions(UUID(current_user.id))
     view_model = presenter.present(response)
     return FlaskResponse(
         template_renderer.render_template(
-            "company/my_purchases.html",
+            "company/my_consumptions.html",
             context=dict(view_model=view_model),
         )
     )

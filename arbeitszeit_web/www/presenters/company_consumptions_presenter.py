@@ -3,15 +3,15 @@ from typing import Iterator, List
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import PurposesOfPurchases
-from arbeitszeit.use_cases.query_company_purchases import PurchaseQueryResponse
+from arbeitszeit.use_cases.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit_web.translator import Translator
 
 
 @dataclass
 class ViewModel:
     @dataclass
-    class Purchase:
-        purchase_date: str
+    class Consumption:
+        consumption_date: str
         product_name: str
         product_description: str
         purpose: str
@@ -19,24 +19,30 @@ class ViewModel:
         amount: str
         price_total: str
 
-    purchases: List[Purchase]
-    show_purchases: bool
+    consumptions: List[Consumption]
+    show_consumptions: bool
 
 
 @dataclass
-class CompanyPurchasesPresenter:
+class CompanyConsumptionsPresenter:
     datetime_service: DatetimeService
     translator: Translator
 
-    def present(self, use_case_response: Iterator[PurchaseQueryResponse]) -> ViewModel:
-        purchases = [self._format_purchase(purchase) for purchase in use_case_response]
-        show_purchases = True if (len(purchases) > 0) else False
-        return ViewModel(purchases=purchases, show_purchases=show_purchases)
+    def present(
+        self, use_case_response: Iterator[ConsumptionQueryResponse]
+    ) -> ViewModel:
+        consumptions = [
+            self._format_consumption(consumption) for consumption in use_case_response
+        ]
+        show_consumptions = True if (len(consumptions) > 0) else False
+        return ViewModel(consumptions=consumptions, show_consumptions=show_consumptions)
 
-    def _format_purchase(self, purchase: PurchaseQueryResponse) -> ViewModel.Purchase:
-        return ViewModel.Purchase(
-            purchase_date=self.datetime_service.format_datetime(
-                date=purchase.purchase_date,
+    def _format_consumption(
+        self, purchase: ConsumptionQueryResponse
+    ) -> ViewModel.Consumption:
+        return ViewModel.Consumption(
+            consumption_date=self.datetime_service.format_datetime(
+                date=purchase.consumption_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),

@@ -11,7 +11,7 @@ from tests.flask_integration.dependency_injection import get_dependency_injector
 class GetCompanySummaryBenchmark:
     """This benchmark measures the performance of the
     get_company_summary use case with a company that has made 1000
-    purchases and created 1000 approved plans.
+    productive consumptions and created 1000 approved plans.
     """
 
     def __init__(self) -> None:

@@ -116,7 +116,7 @@ class RegisterProductiveConsumption:
             amount_received=individual_price,
             purpose=f"Plan-Id: {plan.id}",
         )
-        self.database_gateway.create_company_purchase(
+        self.database_gateway.create_productive_consumption(
             amount=amount,
             transaction=transaction.id,
             plan=plan.id,

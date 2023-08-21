@@ -6,8 +6,8 @@ from uuid import UUID
 
 from arbeitszeit.records import (
     Company,
-    CompanyPurchase,
     Plan,
+    ProductiveConsumption,
     PurposesOfPurchases,
     Transaction,
 )
@@ -15,8 +15,8 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class PurchaseQueryResponse:
-    purchase_date: datetime
+class ConsumptionQueryResponse:
+    consumption_date: datetime
     plan_id: UUID
     product_name: str
     product_description: str
@@ -26,43 +26,43 @@ class PurchaseQueryResponse:
 
 
 @dataclass
-class QueryCompanyPurchases:
+class QueryCompanyConsumptions:
     database_gateway: DatabaseGateway
 
     def __call__(
         self,
         company: UUID,
-    ) -> Iterator[PurchaseQueryResponse]:
-        purchases = self.database_gateway.get_company_purchases()
-        purchases = purchases.where_buyer_is_company(company=company)
+    ) -> Iterator[ConsumptionQueryResponse]:
+        consumptions = self.database_gateway.get_productive_consumptions()
+        consumptions = consumptions.where_consumer_is_company(company=company)
         company_record = self.database_gateway.get_companies().with_id(company).first()
         assert company_record
         return (
-            self._purchase_to_response_model(
-                purchase, transaction, plan, company_record
+            self._consumption_to_response_model(
+                consumption, transaction, plan, company_record
             )
-            for purchase, transaction, plan in purchases.ordered_by_creation_date(
+            for consumption, transaction, plan in consumptions.ordered_by_creation_date(
                 ascending=False
             ).joined_with_transactions_and_plan()
         )
 
-    def _purchase_to_response_model(
+    def _consumption_to_response_model(
         self,
-        purchase: CompanyPurchase,
+        consumption: ProductiveConsumption,
         transaction: Transaction,
         plan: Plan,
         company: Company,
-    ) -> PurchaseQueryResponse:
+    ) -> ConsumptionQueryResponse:
         if transaction.sending_account == company.raw_material_account:
             purpose = PurposesOfPurchases.raw_materials
         else:
             purpose = PurposesOfPurchases.means_of_prod
-        return PurchaseQueryResponse(
-            purchase_date=transaction.date,
+        return ConsumptionQueryResponse(
+            consumption_date=transaction.date,
             plan_id=plan.id,
             product_name=plan.prd_name,
             product_description=plan.description,
             purpose=purpose,
-            price_per_unit=transaction.amount_sent / purchase.amount,
-            amount=purchase.amount,
+            price_per_unit=transaction.amount_sent / consumption.amount,
+            amount=consumption.amount,
         )

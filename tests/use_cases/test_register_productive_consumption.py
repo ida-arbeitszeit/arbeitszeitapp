@@ -3,8 +3,8 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import Company, ProductionCosts, PurposesOfPurchases
-from arbeitszeit.use_cases import query_company_purchases
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
+from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
@@ -24,9 +24,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             RegisterProductiveConsumption
         )
         self.mock_database = self.injector.get(MockDatabase)
-        self.query_company_purchases = self.injector.get(
-            query_company_purchases.QueryCompanyPurchases
-        )
+        self.query_company_consumptions = self.injector.get(QueryCompanyConsumptions)
 
     def test_reject_registration_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -239,7 +237,9 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
 
-    def test_correct_purchase_added_if_means_of_production_were_consumed(self) -> None:
+    def test_correct_consumption_added_if_means_of_production_were_consumed(
+        self,
+    ) -> None:
         sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.means_of_prod
@@ -247,17 +247,17 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(sender.id, plan.id, pieces, purpose)
         )
-        purchases = list(self.query_company_purchases(sender.id))
-        assert len(purchases) == 1
-        latest_purchase = purchases[0]
-        assert latest_purchase.plan_id == plan.id
-        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
+        consumptions = list(self.query_company_consumptions(sender.id))
+        assert len(consumptions) == 1
+        latest_consumption = consumptions[0]
+        assert latest_consumption.plan_id == plan.id
+        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert latest_purchase.amount == pieces
-        assert latest_purchase.purpose == PurposesOfPurchases.means_of_prod
+        assert latest_consumption.amount == pieces
+        assert latest_consumption.purpose == PurposesOfPurchases.means_of_prod
 
-    def test_correct_purchase_added_if_raw_materials_were_consumed(self) -> None:
+    def test_correct_consumption_added_if_raw_materials_were_consumed(self) -> None:
         sender = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         purpose = PurposesOfPurchases.raw_materials
@@ -265,15 +265,15 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(sender.id, plan.id, pieces, purpose)
         )
-        purchases = list(self.query_company_purchases(sender.id))
-        assert len(purchases) == 1
-        latest_purchase = purchases[0]
-        assert latest_purchase.plan_id == plan.id
-        assert latest_purchase.price_per_unit == self.price_checker.get_unit_price(
+        consumptions = list(self.query_company_consumptions(sender.id))
+        assert len(consumptions) == 1
+        latest_consumption = consumptions[0]
+        assert latest_consumption.plan_id == plan.id
+        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
-        assert latest_purchase.amount == pieces
-        assert latest_purchase.purpose == PurposesOfPurchases.raw_materials
+        assert latest_consumption.amount == pieces
+        assert latest_consumption.purpose == PurposesOfPurchases.raw_materials
 
     def test_plan_not_found_rejects_registration(self) -> None:
         consumer = self.company_generator.create_company_record()
