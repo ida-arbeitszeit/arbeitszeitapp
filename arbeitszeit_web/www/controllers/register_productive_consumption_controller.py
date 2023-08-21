@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
@@ -46,9 +46,11 @@ class RegisterProductiveConsumptionController:
                 self.translator.gettext("This field is required.")
             )
             raise self.FormError()
-        purpose = (
-            PurposesOfPurchases.means_of_prod
+        consumption_type = (
+            ConsumptionType.means_of_prod
             if type_of_consumption == "fixed"
-            else PurposesOfPurchases.raw_materials
+            else ConsumptionType.raw_materials
         )
-        return RegisterProductiveConsumptionRequest(consumer, plan, amount, purpose)
+        return RegisterProductiveConsumptionRequest(
+            consumer, plan, amount, consumption_type
+        )

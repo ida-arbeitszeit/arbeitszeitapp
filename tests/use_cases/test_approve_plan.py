@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.records import ProductionCosts, PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.get_company_transactions import (
@@ -80,7 +80,7 @@ class UseCaseTests(BaseTestCase):
                 consumer=other_company.id,
                 plan=plan_id,
                 amount=1,
-                purpose=PurposesOfPurchases.means_of_prod,
+                consumption_type=ConsumptionType.means_of_prod,
             )
         )
         self.assertFalse(consumption_response.is_rejected)

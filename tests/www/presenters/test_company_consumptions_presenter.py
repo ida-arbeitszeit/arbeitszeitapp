@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import uuid4
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.query_company_consumptions import (
     ConsumptionQueryResponse,
     QueryCompanyConsumptions,
@@ -36,7 +36,7 @@ class TestPresenter(BaseTestCase):
                     plan_id=uuid4(),
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
-                    purpose=PurposesOfPurchases.raw_materials,
+                    consumption_type=ConsumptionType.raw_materials,
                     price_per_unit=Decimal("7.89"),
                     amount=321,
                 ),
@@ -45,7 +45,7 @@ class TestPresenter(BaseTestCase):
                     plan_id=uuid4(),
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
-                    purpose=PurposesOfPurchases.means_of_prod,
+                    consumption_type=ConsumptionType.means_of_prod,
                     price_per_unit=Decimal("100000"),
                     amount=1,
                 ),
@@ -65,7 +65,7 @@ class TestPresenter(BaseTestCase):
             presentation.consumptions[0].product_description
             == "Beschreibung für Produkt A."
         )
-        assert presentation.consumptions[0].purpose == self.translator.gettext(
+        assert presentation.consumptions[0].consumption_type == self.translator.gettext(
             "Liquid means of production"
         )
         assert presentation.consumptions[0].price_per_unit == "7.89"
@@ -82,7 +82,7 @@ class TestPresenter(BaseTestCase):
             presentation.consumptions[1].product_description
             == "Beschreibung für Produkt A."
         )
-        assert presentation.consumptions[1].purpose == self.translator.gettext(
+        assert presentation.consumptions[1].consumption_type == self.translator.gettext(
             "Fixed means of production"
         )
         assert presentation.consumptions[1].price_per_unit == "100000.00"

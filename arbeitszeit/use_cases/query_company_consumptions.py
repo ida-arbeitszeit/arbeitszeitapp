@@ -6,9 +6,9 @@ from uuid import UUID
 
 from arbeitszeit.records import (
     Company,
+    ConsumptionType,
     Plan,
     ProductiveConsumption,
-    PurposesOfPurchases,
     Transaction,
 )
 from arbeitszeit.repositories import DatabaseGateway
@@ -20,7 +20,7 @@ class ConsumptionQueryResponse:
     plan_id: UUID
     product_name: str
     product_description: str
-    purpose: PurposesOfPurchases
+    consumption_type: ConsumptionType
     price_per_unit: Decimal
     amount: int
 
@@ -54,15 +54,15 @@ class QueryCompanyConsumptions:
         company: Company,
     ) -> ConsumptionQueryResponse:
         if transaction.sending_account == company.raw_material_account:
-            purpose = PurposesOfPurchases.raw_materials
+            consumption_type = ConsumptionType.raw_materials
         else:
-            purpose = PurposesOfPurchases.means_of_prod
+            consumption_type = ConsumptionType.means_of_prod
         return ConsumptionQueryResponse(
             consumption_date=transaction.date,
             plan_id=plan.id,
             product_name=plan.prd_name,
             product_description=plan.description,
-            purpose=purpose,
+            consumption_type=consumption_type,
             price_per_unit=transaction.amount_sent / consumption.amount,
             amount=consumption.amount,
         )

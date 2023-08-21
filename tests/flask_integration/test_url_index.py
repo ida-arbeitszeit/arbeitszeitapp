@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -280,7 +280,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_register_productive_consumption_url(
             plan_id=uuid4(),
             amount=3,
-            type_of_consumption=PurposesOfPurchases.means_of_prod,
+            consumption_type=ConsumptionType.means_of_prod,
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

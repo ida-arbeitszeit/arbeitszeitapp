@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Iterator, List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit_web.translator import Translator
 
@@ -14,7 +14,7 @@ class ViewModel:
         consumption_date: str
         product_name: str
         product_description: str
-        purpose: str
+        consumption_type: str
         price_per_unit: str
         amount: str
         price_total: str
@@ -48,14 +48,14 @@ class CompanyConsumptionsPresenter:
             ),
             product_name=purchase.product_name,
             product_description=purchase.product_description,
-            purpose=self._format_purpose(purchase.purpose),
+            consumption_type=self._format_consumption_type(purchase.consumption_type),
             price_per_unit=str(round(purchase.price_per_unit, 2)),
             amount=str(purchase.amount),
             price_total=str(round(purchase.price_per_unit * purchase.amount, 2)),
         )
 
-    def _format_purpose(self, purpose: PurposesOfPurchases) -> str:
-        if purpose == PurposesOfPurchases.raw_materials:
+    def _format_consumption_type(self, consumption_type: ConsumptionType) -> str:
+        if consumption_type == ConsumptionType.raw_materials:
             return self.translator.gettext("Liquid means of production")
         else:
             return self.translator.gettext("Fixed means of production")

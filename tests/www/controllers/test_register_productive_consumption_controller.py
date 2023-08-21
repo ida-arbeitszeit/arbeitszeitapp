@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
@@ -53,19 +53,19 @@ class AuthenticatedCompanyTests(BaseTestCase):
     def test_successfull_use_case_request_has_correct_type_of_consumption_of_fixed_means_of_production(
         self,
     ):
-        expected_type_of_consumption = PurposesOfPurchases.means_of_prod
+        expected_type_of_consumption = ConsumptionType.means_of_prod
         assert self.get_fake_form().type_of_consumption_field().get_value() == "fixed"
         output = self.controller.process_input_data(self.get_fake_form())
-        self.assertEqual(output.purpose, expected_type_of_consumption)
+        self.assertEqual(output.consumption_type, expected_type_of_consumption)
 
     def test_successfull_use_case_request_has_correct_type_of_consumption_of_liquid_means(
         self,
     ):
-        expected_type_of_consumption = PurposesOfPurchases.raw_materials
+        expected_type_of_consumption = ConsumptionType.raw_materials
         output = self.controller.process_input_data(
             self.get_fake_form(type_of_consumption="liquid")
         )
-        self.assertEqual(output.purpose, expected_type_of_consumption)
+        self.assertEqual(output.consumption_type, expected_type_of_consumption)
 
     def test_error_is_raised_if_amount_field_is_empty(self):
         with self.assertRaises(self.controller.FormError):
