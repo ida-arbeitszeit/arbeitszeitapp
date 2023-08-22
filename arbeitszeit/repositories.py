@@ -358,11 +358,11 @@ class TransactionResult(QueryResult[Transaction], Protocol):
 
         If no `plan` argument is specified then the result set will
         contain all previously selected transactions that are part of
-        any purchase.
+        any consumption.
 
         The `plan` argument can be specified multiple times. A
         transaction will be part of the result set if it is the
-        payment for purchase for any plan that was specified by its
+        consumption registration for any plan that was specified by its
         UUID.
         """
 
