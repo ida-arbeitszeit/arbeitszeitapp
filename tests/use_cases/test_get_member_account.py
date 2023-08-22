@@ -9,9 +9,9 @@ from arbeitszeit.use_cases.register_hours_worked import (
 )
 from tests.data_generators import (
     CompanyGenerator,
+    ConsumptionGenerator,
     MemberGenerator,
     PlanGenerator,
-    PurchaseGenerator,
 )
 
 from .dependency_injection import injection_test
@@ -41,10 +41,10 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
 def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
-    purchase_generator: PurchaseGenerator,
+    consumption_generator: ConsumptionGenerator,
 ):
     member_of_interest = member_generator.create_member()
-    purchase_generator.create_private_consumption()
+    consumption_generator.create_private_consumption()
     response = use_case(member_of_interest)
     assert not response.transactions
 
@@ -54,7 +54,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
-    purchase_generator: PurchaseGenerator,
+    consumption_generator: ConsumptionGenerator,
     plan_generator: PlanGenerator,
 ):
     expected_company_name = "test company 123"
@@ -69,7 +69,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
         ),
         amount=1,
     )
-    purchase_generator.create_private_consumption(
+    consumption_generator.create_private_consumption(
         consumer=member, amount=1, plan=plan.id
     )
     response = use_case(member)
@@ -85,7 +85,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
-    purchase_generator: PurchaseGenerator,
+    consumption_generator: ConsumptionGenerator,
     plan_generator: PlanGenerator,
 ):
     expected_company_name = "test company 123"
@@ -100,7 +100,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
         ),
         amount=1,
     )
-    purchase_generator.create_private_consumption(
+    consumption_generator.create_private_consumption(
         consumer=member, amount=1, plan=plan.id
     )
     response = use_case(member)
@@ -142,7 +142,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,
     register_hours_worked: RegisterHoursWorked,
-    purchase_generator: PurchaseGenerator,
+    consumption_generator: ConsumptionGenerator,
     plan_generator: PlanGenerator,
 ):
     company1_name = "test company 1"
@@ -164,7 +164,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
             hours_worked=Decimal("12"),
         )
     )
-    purchase_generator.create_private_consumption(
+    consumption_generator.create_private_consumption(
         consumer=member,
         plan=company1_plan.id,
         amount=1,

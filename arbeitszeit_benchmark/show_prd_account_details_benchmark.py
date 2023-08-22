@@ -4,7 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
-from tests.data_generators import CompanyGenerator, PlanGenerator, PurchaseGenerator
+from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
 
@@ -24,7 +24,7 @@ class ShowPrdAccountDetailsBenchmark:
         self.db.create_all()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.email = "test@test.test"
         self.password = "test1234123"
         self.seller = self.company_generator.create_company(
@@ -32,7 +32,9 @@ class ShowPrdAccountDetailsBenchmark:
         )
         plan = self.plan_generator.create_plan(planner=self.seller)
         for _ in range(1000):
-            self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
+            self.consumption_generator.create_resource_consumption_by_company(
+                plan=plan.id
+            )
         self.use_case = self.injector.get(ShowPRDAccountDetailsUseCase)
         self.db.session.commit()
         self.db.session.flush()

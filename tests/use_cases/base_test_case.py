@@ -5,10 +5,10 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
+    ConsumptionGenerator,
     CooperationGenerator,
     MemberGenerator,
     PlanGenerator,
-    PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 
@@ -69,4 +69,4 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
-    purchase_generator = _lazy_property(PurchaseGenerator)
+    consumption_generator = _lazy_property(ConsumptionGenerator)

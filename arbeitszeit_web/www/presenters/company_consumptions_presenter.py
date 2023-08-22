@@ -38,20 +38,22 @@ class CompanyConsumptionsPresenter:
         return ViewModel(consumptions=consumptions, show_consumptions=show_consumptions)
 
     def _format_consumption(
-        self, purchase: ConsumptionQueryResponse
+        self, consumption: ConsumptionQueryResponse
     ) -> ViewModel.Consumption:
         return ViewModel.Consumption(
             consumption_date=self.datetime_service.format_datetime(
-                date=purchase.consumption_date,
+                date=consumption.consumption_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
-            product_name=purchase.product_name,
-            product_description=purchase.product_description,
-            consumption_type=self._format_consumption_type(purchase.consumption_type),
-            price_per_unit=str(round(purchase.price_per_unit, 2)),
-            amount=str(purchase.amount),
-            price_total=str(round(purchase.price_per_unit * purchase.amount, 2)),
+            product_name=consumption.product_name,
+            product_description=consumption.product_description,
+            consumption_type=self._format_consumption_type(
+                consumption.consumption_type
+            ),
+            price_per_unit=str(round(consumption.price_per_unit, 2)),
+            amount=str(consumption.amount),
+            price_total=str(round(consumption.price_per_unit * consumption.amount, 2)),
         )
 
     def _format_consumption_type(self, consumption_type: ConsumptionType) -> str:

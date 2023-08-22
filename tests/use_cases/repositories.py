@@ -710,7 +710,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
         plans = set(plan)
 
         def transaction_filter(transaction: Transaction) -> bool:
-            consumer_purchases = (
+            private_consumptions = (
                 self.database.indices.private_consumption_by_transaction.get(
                     transaction.id
                 )
@@ -722,7 +722,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             )
             transaction_plans = {
                 self.database.private_consumptions[i].plan_id
-                for i in consumer_purchases
+                for i in private_consumptions
             } | {
                 self.database.productive_consumptions[i].plan_id
                 for i in productive_consumptions
@@ -805,10 +805,10 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
         def joined_items() -> (
             Iterator[Tuple[records.PrivateConsumption, Transaction, Plan]]
         ):
-            for purchase in self.items():
-                transaction = self.database.transactions[purchase.transaction_id]
-                plan = self.database.plans[purchase.plan_id]
-                yield purchase, transaction, plan
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
+                plan = self.database.plans[consumption.plan_id]
+                yield consumption, transaction, plan
 
         return QueryResultImpl(
             items=joined_items,

@@ -18,7 +18,7 @@ class TestQueryPrivateConsumptions(BaseTestCase):
     def test_that_correct_consumptions_are_returned(self) -> None:
         expected_plan = self.plan_generator.create_plan().id
         member = self.member_generator.create_member()
-        self.purchase_generator.create_private_consumption(
+        self.consumption_generator.create_private_consumption(
             consumer=member, plan=expected_plan
         )
         results = list(self.query_consumptions(member))
@@ -30,11 +30,11 @@ class TestQueryPrivateConsumptions(BaseTestCase):
         first_plan = self.plan_generator.create_plan().id
         second_plan = self.plan_generator.create_plan().id
         member = self.member_generator.create_member()
-        self.purchase_generator.create_private_consumption(
+        self.consumption_generator.create_private_consumption(
             consumer=member, plan=first_plan
         )
         self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(
+        self.consumption_generator.create_private_consumption(
             consumer=member, plan=second_plan
         )
         results = list(self.query_consumptions(member))

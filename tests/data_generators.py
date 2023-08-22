@@ -332,7 +332,7 @@ class PlanGenerator:
 
 
 @dataclass
-class PurchaseGenerator:
+class ConsumptionGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator

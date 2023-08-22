@@ -93,7 +93,7 @@ class UseCaseTester(BaseTestCase):
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=planner, amount=2
         )
         response = self.show_p_account_details(planner)
@@ -104,7 +104,7 @@ class UseCaseTester(BaseTestCase):
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=planner, amount=2
         )
         response = self.show_p_account_details(planner)

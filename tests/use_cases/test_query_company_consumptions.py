@@ -21,7 +21,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=plan.id
         )
         results = list(self.query_consumptions(company))
@@ -36,11 +36,11 @@ class UseCaseTests(BaseTestCase):
         first_plan = self.plan_generator.create_plan().id
         second_plan = self.plan_generator.create_plan().id
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=first_plan
         )
         self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=second_plan
         )
         results = list(self.query_consumptions(company))

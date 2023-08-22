@@ -4,9 +4,9 @@ from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     CompanyGenerator,
+    ConsumptionGenerator,
     MemberGenerator,
     PlanGenerator,
-    PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
@@ -16,7 +16,7 @@ class CompanyConsumptionTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
@@ -27,18 +27,18 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_that_there_are_some_company_consumptions_in_db_after_one_was_created(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         assert self.database_gateway.get_productive_consumptions()
 
     def test_that_retrieved_consumption_contains_specified_plan_id(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan.id)
         consumption = self.database_gateway.get_productive_consumptions().first()
         assert consumption
         assert consumption.plan_id == plan.id
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         consumption_1 = self.database_gateway.get_productive_consumptions().first()
         consumption_2 = self.database_gateway.get_productive_consumptions().first()
         assert consumption_1
@@ -48,8 +48,8 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_that_transaction_id_for_two_different_consumptions_is_also_different(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         consumption_1, consumption_2 = list(
             self.database_gateway.get_productive_consumptions()
         )
@@ -59,7 +59,7 @@ class CompanyConsumptionTests(FlaskTestCase):
         self,
     ) -> None:
         expected_amount = 123
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             amount=expected_amount
         )
         consumption = self.database_gateway.get_productive_consumptions().first()
@@ -69,7 +69,9 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_can_filter_consumptions_by_company(self) -> None:
         company = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=company
+        )
         consumptions = self.database_gateway.get_productive_consumptions()
         assert consumptions.where_consumer_is_company(company)
         assert not consumptions.where_consumer_is_company(other_company)
@@ -77,10 +79,14 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_consumption_by_company(plan=plan_1.id)
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=plan_1.id
+        )
         self.datetime_service.advance_time(timedelta(days=1))
         plan_2 = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_consumption_by_company(plan=plan_2.id)
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=plan_2.id
+        )
         consumption_1, consumption_2 = list(
             self.database_gateway.get_productive_consumptions().ordered_by_creation_date(
                 ascending=True
@@ -97,7 +103,7 @@ class CompanyConsumptionTests(FlaskTestCase):
         assert consumption_2.plan_id == plan_2.id
 
     def test_can_retrieve_plan_and_transaction_with_consumption(self) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         result = (
             self.database_gateway.get_productive_consumptions()
             .joined_with_transactions_and_plan()
@@ -109,7 +115,7 @@ class CompanyConsumptionTests(FlaskTestCase):
         assert consumption.plan_id == plan.id
 
     def test_can_retrieve_transaction_with_consumption(self) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         result = (
             self.database_gateway.get_productive_consumptions()
             .joined_with_transaction()
@@ -123,7 +129,9 @@ class CompanyConsumptionTests(FlaskTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=company
+        )
         assert (
             self.database_gateway.get_productive_consumptions()
             .ordered_by_creation_date()
@@ -135,7 +143,9 @@ class CompanyConsumptionTests(FlaskTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=company
+        )
         assert (
             self.database_gateway.get_productive_consumptions()
             .ordered_by_creation_date()
@@ -146,7 +156,7 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_that_consumptions_can_be_joined_with_transaction_and_provider(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         assert (
             self.database_gateway.get_productive_consumptions().joined_with_transaction_and_provider()
         )
@@ -154,7 +164,7 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_joining_with_transaction_and_provider_yields_same_transaction_as_when_just_joining_with_transaction(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         assert [
             transaction
             for _, transaction, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_provider()
@@ -166,7 +176,7 @@ class CompanyConsumptionTests(FlaskTestCase):
     def test_joining_with_transaction_and_provider_yields_same_consumption_as_when_not_joining(
         self,
     ) -> None:
-        self.purchase_generator.create_resource_consumption_by_company()
+        self.consumption_generator.create_resource_consumption_by_company()
         assert [
             consumption
             for consumption, _, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_provider()
@@ -177,7 +187,7 @@ class CompanyConsumptionTests(FlaskTestCase):
     ) -> None:
         provider = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=provider)
-        self.purchase_generator.create_resource_consumption_by_company(plan=plan.id)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan.id)
         assert [
             provider.id
             for _, _, provider in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_provider()
@@ -188,7 +198,7 @@ class PrivateConsumptionTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.member_generator = self.injector.get(MemberGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
@@ -201,18 +211,18 @@ class PrivateConsumptionTests(FlaskTestCase):
     def test_that_there_are_some_private_consumptions_in_db_after_one_was_created(
         self,
     ) -> None:
-        self.purchase_generator.create_private_consumption()
+        self.consumption_generator.create_private_consumption()
         assert self.database_gateway.get_private_consumptions()
 
     def test_that_retrieved_consumption_contains_specified_plan_id(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         consumption = self.database_gateway.get_private_consumptions().first()
         assert consumption
         assert consumption.plan_id == plan.id
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
-        self.purchase_generator.create_private_consumption()
+        self.consumption_generator.create_private_consumption()
         consumption_1 = self.database_gateway.get_private_consumptions().first()
         consumption_2 = self.database_gateway.get_private_consumptions().first()
         assert consumption_1
@@ -222,8 +232,8 @@ class PrivateConsumptionTests(FlaskTestCase):
     def test_that_transaction_id_for_two_different_consumptions_is_also_different(
         self,
     ) -> None:
-        self.purchase_generator.create_private_consumption()
-        self.purchase_generator.create_private_consumption()
+        self.consumption_generator.create_private_consumption()
+        self.consumption_generator.create_private_consumption()
         consumption_1, consumption_2 = list(
             self.database_gateway.get_private_consumptions()
         )
@@ -233,7 +243,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         self,
     ) -> None:
         expected_amount = 123
-        self.purchase_generator.create_private_consumption(amount=expected_amount)
+        self.consumption_generator.create_private_consumption(amount=expected_amount)
         consumption = self.database_gateway.get_private_consumptions().first()
         assert consumption
         assert consumption.amount == expected_amount
@@ -241,7 +251,7 @@ class PrivateConsumptionTests(FlaskTestCase):
     def test_can_filter_consumptions_by_member(self) -> None:
         member = self.member_generator.create_member()
         other_member = self.member_generator.create_member()
-        self.purchase_generator.create_private_consumption(consumer=member)
+        self.consumption_generator.create_private_consumption(consumer=member)
         consumptions = self.database_gateway.get_private_consumptions()
         assert consumptions.where_consumer_is_member(member)
         assert not consumptions.where_consumer_is_member(other_member)
@@ -249,10 +259,10 @@ class PrivateConsumptionTests(FlaskTestCase):
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
-        self.purchase_generator.create_private_consumption(plan=plan_1.id)
+        self.consumption_generator.create_private_consumption(plan=plan_1.id)
         self.datetime_service.advance_time(timedelta(days=1))
         plan_2 = self.plan_generator.create_plan()
-        self.purchase_generator.create_private_consumption(plan=plan_2.id)
+        self.consumption_generator.create_private_consumption(plan=plan_2.id)
         consumption_1, consumption_2 = list(
             self.database_gateway.get_private_consumptions().ordered_by_creation_date(
                 ascending=True
@@ -269,7 +279,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         assert consumption_2.plan_id == plan_2.id
 
     def test_can_retrieve_plan_and_transaction_with_consumption(self) -> None:
-        self.purchase_generator.create_private_consumption()
+        self.consumption_generator.create_private_consumption()
         result = (
             self.database_gateway.get_private_consumptions()
             .joined_with_transactions_and_plan()
@@ -284,7 +294,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         self,
     ) -> None:
         member = self.member_generator.create_member()
-        self.purchase_generator.create_private_consumption(consumer=member)
+        self.consumption_generator.create_private_consumption(consumer=member)
         assert (
             self.database_gateway.get_private_consumptions()
             .ordered_by_creation_date()

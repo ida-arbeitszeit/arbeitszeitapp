@@ -34,7 +34,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         )
         info_company = self.get_company_transactions(company)
         transactions_before = len(info_company.transactions)
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=1)
         info_company = self.get_company_transactions(company)
         assert len(info_company.transactions) == transactions_before + 1
         transaction = info_company.transactions[0]
@@ -55,7 +55,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
                 means_cost=Decimal(0),
             ),
         )
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=company1, plan=plan.id
         )
         info_sender = self.get_company_transactions(company1)
@@ -79,7 +79,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             ),
             amount=1,
         )
-        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
         info_receiver = self.get_company_transactions(company1)
         transaction = info_receiver.transactions[0]
         assert transaction.transaction_type == TransactionTypes.sale_of_fixed_means
@@ -141,15 +141,15 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         company1 = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=company1,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             plan=plan.id,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company1,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
@@ -169,15 +169,15 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         company1 = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_consumption(consumer=company1)
+        self.consumption_generator.create_fixed_means_consumption(consumer=company1)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company1
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         self.datetime_service.advance_time(timedelta(hours=1))
         info = self.get_company_transactions(company1)
         # trans1

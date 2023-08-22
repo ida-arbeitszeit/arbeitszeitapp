@@ -11,7 +11,7 @@ from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
     ViewModel,
 )
-from tests.data_generators import CompanyGenerator, PurchaseGenerator
+from tests.data_generators import CompanyGenerator, ConsumptionGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
@@ -21,7 +21,7 @@ class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.translator = self.injector.get(FakeTranslator)
@@ -91,7 +91,7 @@ class TestPresenter(BaseTestCase):
 
     def test_show_consumptions_if_there_is_one_consumption(self) -> None:
         consuming_company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consuming_company
         )
         use_case_response = self.query_consumptions(company=consuming_company)

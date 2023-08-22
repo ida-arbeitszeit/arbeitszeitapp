@@ -4,7 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
-from tests.data_generators import CompanyGenerator, PlanGenerator, PurchaseGenerator
+from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
 
@@ -24,13 +24,13 @@ class GetCompanyTransactionsBenchmark:
         self.db.create_all()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.get_company_transactions = self.injector.get(GetCompanyTransactions)
         self.buyer = self.company_generator.create_company()
         for _ in range(100):
             plan = self.plan_generator.create_plan()
             for _ in range(10):
-                self.purchase_generator.create_resource_consumption_by_company(
+                self.consumption_generator.create_resource_consumption_by_company(
                     consumer=self.buyer, plan=plan.id
                 )
         self.db.session.commit()

@@ -41,19 +41,19 @@ class UseCaseTester(BaseTestCase):
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
         response = self.show_a_account_details(company)
-        transactions_before_purchase = len(response.transactions)
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        transactions_before_consumption = len(response.transactions)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         response = self.show_a_account_details(company)
-        assert len(response.transactions) == transactions_before_purchase
+        assert len(response.transactions) == transactions_before_consumption
 
     def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
         response = self.show_a_account_details(company)
-        transactions_before_purchase = len(response.transactions)
-        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
+        transactions_before_consumption = len(response.transactions)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
         response = self.show_a_account_details(company)
-        assert len(response.transactions) == transactions_before_purchase
+        assert len(response.transactions) == transactions_before_consumption
 
     def test_after_approving_a_plan_one_transaction_is_recorded(self) -> None:
         company = self.company_generator.create_company()

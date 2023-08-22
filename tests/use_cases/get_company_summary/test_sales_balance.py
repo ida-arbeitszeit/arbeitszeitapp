@@ -37,7 +37,7 @@ class UseCaseTests(BaseTestCase):
             costs=costs,
             amount=2,
         )
-        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
         response = self.get_company_summary(company)
         assert response
         assert response.plan_details[0].sales_balance == -costs.total_cost() / 2
@@ -52,7 +52,7 @@ class UseCaseTests(BaseTestCase):
             planner=planner, costs=costs, product_name=expected_product_name
         )
         other_plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_fixed_means_consumption(plan=other_plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=other_plan.id)
         response = self.get_company_summary(planner)
         assert response
         plan_details = self._find_balance_for_named_product(
