@@ -60,7 +60,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         )
         info_sender = self.get_company_transactions(company1)
         transaction = info_sender.transactions[0]
-        assert transaction.transaction_type == TransactionTypes.payment_of_fixed_means
+        assert (
+            transaction.transaction_type == TransactionTypes.consumption_of_fixed_means
+        )
         assert transaction.transaction_volume == Decimal(-12)
         assert transaction.account_type == AccountTypes.p
 
@@ -153,11 +155,11 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         self.datetime_service.advance_time(timedelta(hours=1))
         info_company1 = self.get_company_transactions(company1)
         trans1 = info_company1.transactions[2]
-        assert trans1.transaction_type == TransactionTypes.payment_of_fixed_means
+        assert trans1.transaction_type == TransactionTypes.consumption_of_fixed_means
         trans2 = info_company1.transactions[1]
         assert trans2.transaction_type == TransactionTypes.sale_of_fixed_means
         trans3 = info_company1.transactions[0]
-        assert trans3.transaction_type == TransactionTypes.payment_of_liquid_means
+        assert trans3.transaction_type == TransactionTypes.consumption_of_liquid_means
 
     def test_that_correct_info_for_company_is_generated_in_correct_order_after_several_transactions_of_different_kind(
         self,
@@ -180,13 +182,13 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         info = self.get_company_transactions(company1)
         # trans1
         trans1 = info.transactions[3]
-        assert trans1.transaction_type == TransactionTypes.payment_of_fixed_means
+        assert trans1.transaction_type == TransactionTypes.consumption_of_fixed_means
         # trans2
         trans2 = info.transactions[2]
         assert trans2.transaction_type == TransactionTypes.sale_of_fixed_means
         # trans3
         trans3 = info.transactions[1]
-        assert trans3.transaction_type == TransactionTypes.payment_of_liquid_means
+        assert trans3.transaction_type == TransactionTypes.consumption_of_liquid_means
         # trans4
         trans4 = info.transactions[0]
         assert trans4.transaction_type == TransactionTypes.sale_of_consumer_product

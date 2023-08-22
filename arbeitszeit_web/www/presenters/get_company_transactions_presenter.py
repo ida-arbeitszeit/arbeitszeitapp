@@ -70,14 +70,14 @@ class GetCompanyTransactionsPresenter:
             credit_for_fixed_means=self.translator.gettext(
                 "Credit for fixed means of production"
             ),
-            payment_of_fixed_means=self.translator.gettext(
-                "Payment of fixed means of production"
+            consumption_of_fixed_means=self.translator.gettext(
+                "Consumption of fixed means of production"
             ),
             credit_for_liquid_means=self.translator.gettext(
                 "Credit for liquid means of production"
             ),
-            payment_of_liquid_means=self.translator.gettext(
-                "Payment of liquid means of production"
+            consumption_of_liquid_means=self.translator.gettext(
+                "Consumption of liquid means of production"
             ),
             expected_sales=self.translator.gettext("Debit expected sales"),
             sale_of_consumer_product=self.translator.gettext(

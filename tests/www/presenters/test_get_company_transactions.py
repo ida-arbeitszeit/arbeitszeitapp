@@ -41,8 +41,8 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             TransactionTypes.credit_for_fixed_means,
             TransactionTypes.credit_for_liquid_means,
             TransactionTypes.credit_for_wages,
-            TransactionTypes.payment_of_fixed_means,
-            TransactionTypes.payment_of_liquid_means,
+            TransactionTypes.consumption_of_fixed_means,
+            TransactionTypes.consumption_of_liquid_means,
             TransactionTypes.payment_of_wages,
             TransactionTypes.expected_sales,
             TransactionTypes.sale_of_consumer_product,
@@ -169,14 +169,14 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             credit_for_fixed_means=self.translator.gettext(
                 "Credit for fixed means of production"
             ),
-            payment_of_fixed_means=self.translator.gettext(
-                "Payment of fixed means of production"
+            consumption_of_fixed_means=self.translator.gettext(
+                "Consumption of fixed means of production"
             ),
             credit_for_liquid_means=self.translator.gettext(
                 "Credit for liquid means of production"
             ),
-            payment_of_liquid_means=self.translator.gettext(
-                "Payment of liquid means of production"
+            consumption_of_liquid_means=self.translator.gettext(
+                "Consumption of liquid means of production"
             ),
             expected_sales=self.translator.gettext("Debit expected sales"),
             sale_of_consumer_product=self.translator.gettext(
