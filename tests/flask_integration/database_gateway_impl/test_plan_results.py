@@ -13,9 +13,9 @@ from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     CompanyGenerator,
+    ConsumptionGenerator,
     CooperationGenerator,
     PlanGenerator,
-    PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
@@ -754,7 +754,7 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         super().setUp()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
@@ -768,19 +768,19 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
             ([1, 1], [1, 1], 4),
         ]
     )
-    def test_that_after_some_purchases_the_correct_amount_of_provided_product_is_calculated(
+    def test_that_after_some_consumptions_the_correct_amount_of_provided_product_is_calculated(
         self,
-        company_purchases: List[int],
+        productive_consumptions: List[int],
         private_consumptions: List[int],
         expected_amount: int,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        for amount in company_purchases:
-            self.purchase_generator.create_fixed_means_consumption(
+        for amount in productive_consumptions:
+            self.consumption_generator.create_fixed_means_consumption(
                 plan=plan.id, amount=amount
             )
         for amount in private_consumptions:
-            self.purchase_generator.create_private_consumption(
+            self.consumption_generator.create_private_consumption(
                 plan=plan.id, amount=amount
             )
         result = (
@@ -798,21 +798,21 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
             ([1], [2], 3),
         ]
     )
-    def test_provided_product_amount_is_correct_even_with_other_plans_having_purchases_too(
+    def test_provided_product_amount_is_correct_even_with_other_plans_having_consumptions_too(
         self,
-        company_purchases: List[int],
+        productive_consumptions: List[int],
         private_consumptions: List[int],
         expected_amount: int,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_consumption()
-        self.purchase_generator.create_private_consumption()
-        for amount in company_purchases:
-            self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption()
+        self.consumption_generator.create_private_consumption()
+        for amount in productive_consumptions:
+            self.consumption_generator.create_fixed_means_consumption(
                 plan=plan.id, amount=amount
             )
         for amount in private_consumptions:
-            self.purchase_generator.create_private_consumption(
+            self.consumption_generator.create_private_consumption(
                 plan=plan.id, amount=amount
             )
         result = (

@@ -59,6 +59,6 @@ class RegisterProductiveConsumptionPresenter:
             )
         else:
             self.user_notifier.display_warning(
-                self.trans.gettext("The specified purpose is invalid.")
+                self.trans.gettext("The specified type of consumption is invalid.")
             )
         return self.ViewModel(redirect_url=redirect_url)

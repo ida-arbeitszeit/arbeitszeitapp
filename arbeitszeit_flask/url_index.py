@@ -4,7 +4,7 @@ from uuid import UUID
 
 from flask import url_for
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.session import UserRole
 
 
@@ -131,11 +131,11 @@ class GeneralUrlIndex:
         self,
         plan_id: Optional[UUID] = None,
         amount: Optional[int] = None,
-        type_of_consumption: Optional[PurposesOfPurchases] = None,
+        consumption_type: Optional[ConsumptionType] = None,
     ) -> str:
-        if type_of_consumption == PurposesOfPurchases.means_of_prod:
+        if consumption_type == ConsumptionType.means_of_prod:
             type_string = "fixed"
-        elif type_of_consumption == PurposesOfPurchases.raw_materials:
+        elif consumption_type == ConsumptionType.raw_materials:
             type_string = "liquid"
         else:
             type_string = None

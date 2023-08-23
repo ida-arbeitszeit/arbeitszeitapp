@@ -103,7 +103,7 @@ class ExpectationsTestCase(BaseTestCase):
         consumer = self.company_generator.create_company()
         response_before_sale = self.get_company_summary(planner)
         assert response_before_sale
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=consumer,
             plan=plan.id,
             amount=1,

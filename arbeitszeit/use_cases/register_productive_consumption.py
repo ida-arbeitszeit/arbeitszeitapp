@@ -7,7 +7,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.records import Company, Plan, PurposesOfPurchases
+from arbeitszeit.records import Company, ConsumptionType, Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -16,14 +16,14 @@ class RegisterProductiveConsumptionRequest:
     consumer: UUID
     plan: UUID
     amount: int
-    purpose: PurposesOfPurchases
+    consumption_type: ConsumptionType
 
 
 @dataclass
 class RegisterProductiveConsumptionResponse:
     class RejectionReason(Exception, Enum):
         plan_not_found = auto()
-        invalid_purpose = auto()
+        invalid_consumption_type = auto()
         cannot_consume_public_service = auto()
         plan_is_not_active = auto()
         consumer_is_planner = auto()
@@ -49,13 +49,16 @@ class RegisterProductiveConsumption:
         except RegisterProductiveConsumptionResponse.RejectionReason as reason:
             return RegisterProductiveConsumptionResponse(rejection_reason=reason)
         self.create_transaction(
-            consumer=consumer, plan=plan, amount=request.amount, purpose=purpose
+            consumer=consumer,
+            plan=plan,
+            amount=request.amount,
+            consumption_type=purpose,
         )
         return RegisterProductiveConsumptionResponse(rejection_reason=None)
 
     def _validate_request(
         self, request: RegisterProductiveConsumptionRequest
-    ) -> Tuple[Plan, Company, PurposesOfPurchases]:
+    ) -> Tuple[Plan, Company, ConsumptionType]:
         plan = self._validate_plan(request)
         return (
             plan,
@@ -87,24 +90,28 @@ class RegisterProductiveConsumption:
 
     def _validate_purpose(
         self, request: RegisterProductiveConsumptionRequest
-    ) -> PurposesOfPurchases:
-        if request.purpose not in (
-            PurposesOfPurchases.means_of_prod,
-            PurposesOfPurchases.raw_materials,
+    ) -> ConsumptionType:
+        if request.consumption_type not in (
+            ConsumptionType.means_of_prod,
+            ConsumptionType.raw_materials,
         ):
-            raise RegisterProductiveConsumptionResponse.RejectionReason.invalid_purpose
-        return request.purpose
+            raise RegisterProductiveConsumptionResponse.RejectionReason.invalid_consumption_type
+        return request.consumption_type
 
     def create_transaction(
-        self, amount: int, purpose: PurposesOfPurchases, consumer: Company, plan: Plan
+        self,
+        amount: int,
+        consumption_type: ConsumptionType,
+        consumer: Company,
+        plan: Plan,
     ) -> None:
         coop_price = amount * self.price_calculator.calculate_cooperative_price(plan)
         individual_price = amount * self.price_calculator.calculate_individual_price(
             plan
         )
-        if purpose == PurposesOfPurchases.means_of_prod:
+        if consumption_type == ConsumptionType.means_of_prod:
             sending_account = consumer.means_account
-        elif purpose == PurposesOfPurchases.raw_materials:
+        elif consumption_type == ConsumptionType.raw_materials:
             sending_account = consumer.raw_material_account
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
@@ -116,7 +123,7 @@ class RegisterProductiveConsumption:
             amount_received=individual_price,
             purpose=f"Plan-Id: {plan.id}",
         )
-        self.database_gateway.create_company_purchase(
+        self.database_gateway.create_productive_consumption(
             amount=amount,
             transaction=transaction.id,
             plan=plan.id,

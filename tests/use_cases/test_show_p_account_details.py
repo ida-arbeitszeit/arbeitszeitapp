@@ -93,7 +93,7 @@ class UseCaseTester(BaseTestCase):
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=planner, amount=2
         )
         response = self.show_p_account_details(planner)
@@ -104,13 +104,13 @@ class UseCaseTester(BaseTestCase):
         self.plan_generator.create_plan(
             planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
         )
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=planner, amount=2
         )
         response = self.show_p_account_details(planner)
         assert (
             response.transactions[0].transaction_type
-            == TransactionTypes.payment_of_fixed_means
+            == TransactionTypes.consumption_of_fixed_means
         )
         assert (
             response.transactions[1].transaction_type
@@ -151,7 +151,9 @@ class UseCaseTester(BaseTestCase):
 
         response = self.show_p_account_details(company1.id)
         transaction = response.transactions[0]
-        assert transaction.transaction_type == TransactionTypes.payment_of_fixed_means
+        assert (
+            transaction.transaction_type == TransactionTypes.consumption_of_fixed_means
+        )
         assert transaction.transaction_volume == -trans.amount_sent
         assert response.account_balance == -trans.amount_sent
 
@@ -163,7 +165,7 @@ class UseCaseTester(BaseTestCase):
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
 
-    def test_that_plotting_info_is_generated_after_paying_of_fixed_means_of_production(
+    def test_that_plotting_info_is_generated_after_consumption_of_fixed_means_of_production(
         self,
     ) -> None:
         own_company = self.company_generator.create_company_record()
@@ -180,7 +182,7 @@ class UseCaseTester(BaseTestCase):
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
-    def test_that_correct_plotting_info_is_generated_after_paying_of_two_fixed_means_of_production(
+    def test_that_correct_plotting_info_is_generated_after_consumption_of_two_fixed_means_of_production(
         self,
     ) -> None:
         own_company = self.company_generator.create_company_record()
@@ -212,7 +214,7 @@ class UseCaseTester(BaseTestCase):
             trans1.amount_sent * (-1) + trans2.amount_sent * (-1)
         ) in response.plot.accumulated_volumes
 
-    def test_that_plotting_info_is_generated_in_the_correct_order_after_paying_of_three_fixed_means_of_production(
+    def test_that_plotting_info_is_generated_in_the_correct_order_after_consumption_of_three_fixed_means_of_production(
         self,
     ) -> None:
         own_company = self.company_generator.create_company_record()

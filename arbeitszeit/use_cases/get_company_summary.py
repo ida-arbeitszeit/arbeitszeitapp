@@ -83,8 +83,8 @@ class GetCompanySummary:
         )
         supply = self._get_suppliers_and_supply_volume(
             (transaction, company)
-            for _, transaction, company in self.database_gateway.get_company_purchases()
-            .where_buyer_is_company(company=company_id)
+            for _, transaction, company in self.database_gateway.get_productive_consumptions()
+            .where_consumer_is_company(company=company_id)
             .joined_with_transaction_and_provider()
         )
         expectations = self._get_expectations(company)

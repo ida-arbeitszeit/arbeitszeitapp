@@ -13,7 +13,6 @@ from arbeitszeit.records import (
     Accountant,
     AccountOwner,
     Company,
-    CompanyPurchase,
     CompanyWorkInvite,
     Cooperation,
     CoordinationTenure,
@@ -24,6 +23,7 @@ from arbeitszeit.records import (
     PlanningStatistics,
     PrivateConsumption,
     ProductionCosts,
+    ProductiveConsumption,
     Transaction,
 )
 
@@ -273,28 +273,28 @@ class PrivateConsumptionResult(QueryResult[PrivateConsumption], Protocol):
         ...
 
 
-class CompanyPurchaseResult(QueryResult[CompanyPurchase], Protocol):
+class ProductiveConsumptionResult(QueryResult[ProductiveConsumption], Protocol):
     def ordered_by_creation_date(
         self, *, ascending: bool = ...
-    ) -> CompanyPurchaseResult:
+    ) -> ProductiveConsumptionResult:
         ...
 
-    def where_buyer_is_company(self, company: UUID) -> CompanyPurchaseResult:
+    def where_consumer_is_company(self, company: UUID) -> ProductiveConsumptionResult:
         ...
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Plan]]:
+    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction, Plan]]:
         ...
 
     def joined_with_transaction_and_provider(
         self,
-    ) -> QueryResult[Tuple[CompanyPurchase, Transaction, Company]]:
+    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction, Company]]:
         ...
 
     def joined_with_transaction(
         self,
-    ) -> QueryResult[Tuple[CompanyPurchase, Transaction]]:
+    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction]]:
         ...
 
 
@@ -358,11 +358,11 @@ class TransactionResult(QueryResult[Transaction], Protocol):
 
         If no `plan` argument is specified then the result set will
         contain all previously selected transactions that are part of
-        any purchase.
+        any consumption.
 
         The `plan` argument can be specified multiple times. A
         transaction will be part of the result set if it is the
-        payment for purchase for any plan that was specified by its
+        consumption registration for any plan that was specified by its
         UUID.
         """
 
@@ -498,12 +498,12 @@ class DatabaseGateway(Protocol):
     def get_private_consumptions(self) -> PrivateConsumptionResult:
         ...
 
-    def create_company_purchase(
+    def create_productive_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> CompanyPurchase:
+    ) -> ProductiveConsumption:
         ...
 
-    def get_company_purchases(self) -> CompanyPurchaseResult:
+    def get_productive_consumptions(self) -> ProductiveConsumptionResult:
         ...
 
     def create_plan(

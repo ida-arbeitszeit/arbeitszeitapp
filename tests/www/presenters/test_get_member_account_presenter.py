@@ -124,7 +124,7 @@ class TestPresenter(BaseTestCase):
             view_model.transactions[0].type, self.translator.gettext("Wages")
         )
 
-    def test_that_transaction_type_is_shown_correctly_for_payment_of_consumer_product(
+    def test_that_transaction_type_is_shown_correctly_for_consumption_of_consumer_product(
         self,
     ):
         response = self.get_use_case_response(

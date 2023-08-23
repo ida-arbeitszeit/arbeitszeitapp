@@ -266,7 +266,7 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
                     resource_cost=Decimal(0),
                 ),
             )
-            self.purchase_generator.create_private_consumption(
+            self.consumption_generator.create_private_consumption(
                 consumer=self.consumer,
                 plan=plan.id,
                 amount=1,

@@ -44,7 +44,9 @@ class UseCaseTests(BaseTestCase):
         assert response
         assert response.registered_on == expected_registration_date
 
-    def test_without_any_plans_or_purchases_account_balances_must_be_zero(self) -> None:
+    def test_without_any_plans_or_consumptions_account_balances_must_be_zero(
+        self,
+    ) -> None:
         company = self.company_generator.create_company_record()
         response = self.get_company_summary(company.id)
         assert response
@@ -127,7 +129,7 @@ class UseCaseTests(BaseTestCase):
         assert response
         assert response.plan_details[0].sales_volume == Decimal(6)
 
-    def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_purchase_anything(
+    def test_that_empty_list_of_suppliers_is_returned_when_company_did_not_consume_anything(
         self,
     ) -> None:
         company = self.company_generator.create_company()
@@ -139,7 +141,9 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(consumer=company)
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=company
+        )
         response = self.get_company_summary(company)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 1
@@ -151,10 +155,10 @@ class UseCaseTests(BaseTestCase):
         seller = self.company_generator.create_company_record()
         plan1 = self.plan_generator.create_plan(planner=seller.id)
         plan2 = self.plan_generator.create_plan(planner=seller.id)
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan1.id
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan2.id
         )
         response = self.get_company_summary(consumer.id)
@@ -166,10 +170,10 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         consumer = self.company_generator.create_company_record()
         self.company_generator.create_company_record()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id
         )
         response = self.get_company_summary(consumer.id)
@@ -180,7 +184,7 @@ class UseCaseTests(BaseTestCase):
         consumer = self.company_generator.create_company_record()
         supplier = self.company_generator.create_company_record()
         offered_plan = self.plan_generator.create_plan(planner=supplier.id).id
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=offered_plan
         )
         response = self.get_company_summary(consumer.id)
@@ -192,7 +196,7 @@ class UseCaseTests(BaseTestCase):
         supplier_name = "supplier coop"
         supplier = self.company_generator.create_company_record(name=supplier_name)
         offered_plan = self.plan_generator.create_plan(planner=supplier.id)
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=offered_plan.id
         )
         response = self.get_company_summary(consumer.id)
@@ -211,7 +215,7 @@ class UseCaseTests(BaseTestCase):
             amount=1,
         )
         company = self.company_generator.create_company_record()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=company.id, plan=plan.id, amount=1
         )
         response = self.get_company_summary(company.id)
@@ -233,10 +237,10 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(4), Decimal(5), Decimal(6)),
             amount=1,
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan1.id, amount=1
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan2.id, amount=1
         )
         response = self.get_company_summary(consumer.id)
@@ -250,13 +254,13 @@ class UseCaseTests(BaseTestCase):
         top_supplier_plan = self.plan_generator.create_plan()
         medium_supplier_plan = self.plan_generator.create_plan()
         low_supplier_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, amount=1, plan=low_supplier_plan.id
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, amount=20, plan=top_supplier_plan.id
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, amount=10, plan=medium_supplier_plan.id
         )
         response = self.get_company_summary(consumer.id)
@@ -286,10 +290,10 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(4), Decimal(5), Decimal(6)),
             amount=1,
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan1.id, amount=1
         )
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id,
             plan=plan2.id,
             amount=1,

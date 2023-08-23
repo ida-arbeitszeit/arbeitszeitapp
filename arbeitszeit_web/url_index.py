@@ -12,7 +12,7 @@ from decimal import Decimal
 from typing import Optional, Protocol
 from uuid import UUID
 
-from arbeitszeit.records import PurposesOfPurchases
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.session import Session, UserRole
 
 
@@ -86,7 +86,7 @@ class UrlIndex(Protocol):
         self,
         plan_id: Optional[UUID] = None,
         amount: Optional[int] = None,
-        type_of_consumption: Optional[PurposesOfPurchases] = None,
+        consumption_type: Optional[ConsumptionType] = None,
     ) -> str:
         ...
 

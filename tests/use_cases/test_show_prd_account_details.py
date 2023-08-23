@@ -38,13 +38,13 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_no_info_is_generated_after_company_consuming_p(self) -> None:
         consumer = self.company_generator.create_company()
-        self.purchase_generator.create_fixed_means_consumption(consumer=consumer)
+        self.consumption_generator.create_fixed_means_consumption(consumer=consumer)
         response = self.show_prd_account_details(consumer)
         assert len(response.transactions) == 0
 
     def test_that_no_info_is_generated_after_company_consuming_r(self) -> None:
         consumer = self.company_generator.create_company()
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer
         )
         response = self.show_prd_account_details(consumer)
@@ -62,14 +62,14 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
 
     def test_that_transactions_are_shown_in_correct_descending_order(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         transactions = response.transactions
         assert (
@@ -94,7 +94,7 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        self.purchase_generator.create_private_consumption(
+        self.consumption_generator.create_private_consumption(
             plan=plan.id,
             consumer=consumer,
             amount=1,
@@ -125,7 +125,7 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             plan=plan.id, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
@@ -151,7 +151,7 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
-        self.purchase_generator.create_resource_consumption_by_company(
+        self.consumption_generator.create_resource_consumption_by_company(
             plan=plan.id, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
@@ -177,7 +177,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
@@ -195,9 +195,9 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=1)
         transaction_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=2)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=2)
         response = self.show_prd_account_details(planner)
         assert len(response.plot.timestamps) == 3
         assert len(response.plot.accumulated_volumes) == 3
@@ -219,11 +219,11 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=1)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=1)
         self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=2)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=2)
         transaction_3_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.purchase_generator.create_private_consumption(plan=plan.id, amount=3)
+        self.consumption_generator.create_private_consumption(plan=plan.id, amount=3)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps[1] == transaction_1_timestamp
         assert response.plot.timestamps[3] == transaction_3_timestamp
@@ -246,7 +246,7 @@ class UseCaseTester(BaseTestCase):
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
         consumer = self.member_generator.create_member_record()
-        self.purchase_generator.create_private_consumption(
+        self.consumption_generator.create_private_consumption(
             plan=plan.id, consumer=consumer.id
         )
         response = self.show_prd_account_details(planner)
@@ -262,7 +262,7 @@ class UseCaseTester(BaseTestCase):
         consumer = self.company_generator.create_company_record()
         planner = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(planner=planner.id)
-        self.purchase_generator.create_fixed_means_consumption(
+        self.consumption_generator.create_fixed_means_consumption(
             consumer=consumer.id, plan=plan.id
         )
         response = self.show_prd_account_details(planner.id)

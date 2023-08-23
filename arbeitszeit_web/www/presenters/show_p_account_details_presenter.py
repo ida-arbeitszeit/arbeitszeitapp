@@ -48,8 +48,9 @@ class ShowPAccountDetailsPresenter:
         self, transaction: ShowPAccountDetailsUseCase.TransactionInfo
     ) -> TransactionInfo:
         transaction_type = (
-            self.trans.gettext("Payment")
-            if transaction.transaction_type == TransactionTypes.payment_of_fixed_means
+            self.trans.gettext("Consumption")
+            if transaction.transaction_type
+            == TransactionTypes.consumption_of_fixed_means
             else self.trans.gettext("Credit")
         )
         return self.TransactionInfo(

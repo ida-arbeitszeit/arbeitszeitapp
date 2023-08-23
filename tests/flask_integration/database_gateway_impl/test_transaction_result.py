@@ -9,9 +9,9 @@ from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     AccountGenerator,
     CompanyGenerator,
+    ConsumptionGenerator,
     MemberGenerator,
     PlanGenerator,
-    PurchaseGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 
@@ -197,7 +197,7 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
         super().setUp()
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator = self.injector.get(PlanGenerator)
-        self.purchase_generator = self.injector.get(PurchaseGenerator)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(1000000)
 
@@ -216,22 +216,22 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
         assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
 
-    def test_with_approved_plan_that_has_a_fixed_means_purchase_that_we_find_some_transactions(
+    def test_with_approved_plan_that_has_a_fixed_means_consumption_that_we_find_some_transactions(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
         assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
 
-    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_company_purchases_for_other_plans(
+    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_productive_consumptions_for_other_plans(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_fixed_means_consumption(plan=other_plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=other_plan.id)
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
             plan.id
         )
@@ -241,7 +241,7 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        self.purchase_generator.create_private_consumption(plan=other_plan.id)
+        self.consumption_generator.create_private_consumption(plan=other_plan.id)
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
             plan.id
         )

@@ -43,14 +43,14 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             self.trans.gettext("Plan does not exist."), self.notifier.warnings
         )
 
-    def test_invalid_purpose_shows_correct_notification(self) -> None:
+    def test_invalid_consumption_type_shows_correct_notification(self) -> None:
         self.presenter.present(
             RegisterProductiveConsumptionResponse(
-                rejection_reason=reasons.invalid_purpose,
+                rejection_reason=reasons.invalid_consumption_type,
             )
         )
         self.assertIn(
-            self.trans.gettext("The specified purpose is invalid."),
+            self.trans.gettext("The specified type of consumption is invalid."),
             self.notifier.warnings,
         )
 

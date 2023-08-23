@@ -332,7 +332,7 @@ class PlanGenerator:
 
 
 @dataclass
-class PurchaseGenerator:
+class ConsumptionGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
@@ -347,7 +347,7 @@ class PurchaseGenerator:
         amount: int = 1,
     ) -> RegisterProductiveConsumptionResponse:
         return self._create_productive_consumption(
-            purpose=records.PurposesOfPurchases.raw_materials,
+            consumption_type=records.ConsumptionType.raw_materials,
             consumer=consumer,
             plan=plan,
             amount=amount,
@@ -361,7 +361,7 @@ class PurchaseGenerator:
         amount: int = 1,
     ) -> RegisterProductiveConsumptionResponse:
         return self._create_productive_consumption(
-            purpose=records.PurposesOfPurchases.means_of_prod,
+            consumption_type=records.ConsumptionType.means_of_prod,
             consumer=consumer,
             plan=plan,
             amount=amount,
@@ -370,7 +370,7 @@ class PurchaseGenerator:
     def _create_productive_consumption(
         self,
         *,
-        purpose: records.PurposesOfPurchases,
+        consumption_type: records.ConsumptionType,
         consumer: Optional[UUID] = None,
         plan: Optional[UUID] = None,
         amount: int = 1,
@@ -383,7 +383,7 @@ class PurchaseGenerator:
             consumer=consumer,
             plan=plan,
             amount=amount,
-            purpose=purpose,
+            consumption_type=consumption_type,
         )
         response = self.register_productive_consumption(request)
         assert (
@@ -425,8 +425,6 @@ class TransactionGenerator:
 
     def create_transaction(
         self,
-        sending_account_type=records.AccountTypes.p,
-        receiving_account_type=records.AccountTypes.prd,
         sending_account: Optional[UUID] = None,
         receiving_account: Optional[UUID] = None,
         amount_sent=None,

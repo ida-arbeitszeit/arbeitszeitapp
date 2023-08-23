@@ -256,7 +256,7 @@ class Plan:
         )
 
 
-class PurposesOfPurchases(Enum):
+class ConsumptionType(Enum):
     means_of_prod = "means_of_prod"
     raw_materials = "raw_materials"
     consumption = "consumption"
@@ -311,7 +311,7 @@ class PrivateConsumption:
 
 
 @dataclass(frozen=True)
-class CompanyPurchase:
+class ProductiveConsumption:
     id: UUID
     plan_id: UUID
     transaction_id: UUID
