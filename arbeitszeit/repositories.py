@@ -144,6 +144,9 @@ class PlanResult(QueryResult[Plan], Protocol):
     ) -> QueryResult[Tuple[records.Plan, int]]:
         ...
 
+    def delete(self) -> None:
+        ...
+
     def update(self) -> PlanUpdate:
         """Prepare an update for all selected Plans."""
 

@@ -305,6 +305,12 @@ class PlanResult(QueryResultImpl[Plan]):
             database=self.database,
         )
 
+    def delete(self) -> None:
+        plans_to_delete = [plan.id for plan in self.items()]
+        for plan in plans_to_delete:
+            if plan in self.database.plans:
+                del self.database.plans[plan]
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             items=self.items,

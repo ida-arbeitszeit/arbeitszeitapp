@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -22,6 +23,7 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftDetailsSuccess(
     resources_cost=Decimal(7),
     labour_cost=Decimal(7),
     is_public_service=False,
+    creation_date=datetime(2001, 1, 1),
 )
 
 

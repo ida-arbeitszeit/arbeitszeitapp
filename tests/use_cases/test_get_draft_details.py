@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Callable
 from uuid import uuid4
@@ -9,6 +10,7 @@ from arbeitszeit.use_cases.get_draft_details import (
     GetDraftDetails,
 )
 from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.datetime_service import FakeDatetimeService
 
 from .dependency_injection import injection_test
 
@@ -98,6 +100,19 @@ def test_that_correct_public_service_is_shown(
     draft = plan_generator.draft_plan(is_public_service=True)
     details = get_draft_details(draft)
     assert_success(details, lambda s: s.is_public_service == True)
+
+
+@injection_test
+def test_that_correct_creation_date_is_shown(
+    plan_generator: PlanGenerator,
+    get_draft_details: GetDraftDetails,
+    datetime_service: FakeDatetimeService,
+):
+    expected_date = datetime(1999, 2, 1)
+    datetime_service.freeze_time(expected_date)
+    draft = plan_generator.draft_plan()
+    details = get_draft_details(draft)
+    assert_success(details, lambda s: s.creation_date == expected_date)
 
 
 @injection_test

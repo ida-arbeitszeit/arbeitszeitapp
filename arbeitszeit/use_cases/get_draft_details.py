@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID
@@ -19,6 +20,7 @@ class DraftDetailsSuccess:
     resources_cost: Decimal
     labour_cost: Decimal
     is_public_service: bool
+    creation_date: datetime
 
 
 DraftDetailsResponse = Optional[DraftDetailsSuccess]
@@ -44,4 +46,5 @@ class GetDraftDetails:
             resources_cost=draft.production_costs.resource_cost,
             labour_cost=draft.production_costs.labour_cost,
             is_public_service=draft.is_public_service,
+            creation_date=draft.creation_date,
         )

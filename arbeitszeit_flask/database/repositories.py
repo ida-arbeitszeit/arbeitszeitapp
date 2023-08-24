@@ -327,6 +327,9 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             ),
         )
 
+    def delete(self) -> None:
+        raise NotImplementedError()
+
     def update(self) -> PlanUpdate:
         return PlanUpdate(
             query=self.query,
