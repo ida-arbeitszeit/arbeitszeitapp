@@ -35,3 +35,15 @@ class AccountantInvitationPresenter(Protocol):
 class InviteWorkerPresenter(Protocol):
     def show_invite_worker_message(self, worker_email: str, invite: UUID) -> None:
         ...
+
+
+class ChangeUserEmailAddressPresenter(Protocol):
+    @dataclass
+    class Notification:
+        old_email_address: str
+        new_email_address: str
+
+    def present_email_change_confirmation_message(
+        self, notification: Notification
+    ) -> None:
+        ...
