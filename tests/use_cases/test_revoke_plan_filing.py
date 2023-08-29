@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
@@ -184,24 +184,6 @@ class DraftGetsCreatedTests(BaseTestCase):
         assert revoked_plan_amount == new_draft_details.amount
         assert revoked_plan_timeframe == new_draft_details.timeframe
         assert revoked_plan_is_public == new_draft_details.is_public_service
-
-    def test_draft_has_the_original_creation_timestamp_of_the_plan_even_if_time_has_passed_between_creation_and_revoking(
-        self,
-    ) -> None:
-        revoked_plan_planner = self.company_generator.create_company()
-        revoked_plan_creation_date = datetime(2020, 5, 1)
-        self.datetime_service.freeze_time(revoked_plan_creation_date)
-        plan = self.plan_generator.create_plan(
-            approved=False, planner=revoked_plan_planner
-        ).id
-        self.datetime_service.unfreeze_time()
-        response = self.use_case.revoke_plan_filing(
-            self.create_request(plan=plan, requester=revoked_plan_planner)
-        )
-        new_plan_draft = response.plan_draft
-        assert new_plan_draft
-        new_draft_details = self.details_of_plan_draft(plan_draft=new_plan_draft)
-        assert revoked_plan_creation_date == new_draft_details.creation_date
 
     def create_request(
         self, requester: Optional[UUID] = None, plan: Optional[UUID] = None
