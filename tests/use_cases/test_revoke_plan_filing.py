@@ -15,30 +15,34 @@ rejection_reason = RevokePlanFilingUseCase.Response.RejectionReason
 class PlanGetsRevokedTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.revoke = self.injector.get(RevokePlanFilingUseCase).revoke_plan_filing
+        self.use_case = self.injector.get(RevokePlanFilingUseCase)
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
 
     def test_use_case_is_unsuccessful_if_requesting_company_does_not_exist(
         self,
     ) -> None:
-        response = self.revoke(self.create_request(requester=uuid4()))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(requester=uuid4())
+        )
         assert response.is_rejected
         assert response.rejection_reason == rejection_reason.requester_not_found
 
     def test_use_case_is_unsuccessful_if_plan_does_not_exist(self) -> None:
-        response = self.revoke(self.create_request(plan=uuid4()))
+        response = self.use_case.revoke_plan_filing(self.create_request(plan=uuid4()))
         assert response.is_rejected
         assert response.rejection_reason == rejection_reason.plan_not_found
 
     def test_use_case_is_unsuccessful_if_requester_is_not_planner_of_plan(self) -> None:
-        response = self.revoke(self.create_request())
+        response = self.use_case.revoke_plan_filing(self.create_request())
         assert response.is_rejected
         assert response.rejection_reason == rejection_reason.requester_is_not_planner
 
     def test_use_case_is_unsuccessful_if_plan_is_approved_and_not_expired(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(approved=True, planner=planner).id
-        response = self.revoke(self.create_request(plan=plan, requester=planner))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(plan=plan, requester=planner)
+        )
         assert response.is_rejected
         assert response.rejection_reason == rejection_reason.plan_is_active
 
@@ -49,26 +53,36 @@ class PlanGetsRevokedTests(BaseTestCase):
             approved=True, planner=planner, timeframe=1
         ).id
         self.datetime_service.advance_time(dt=timedelta(days=2))
-        response = self.revoke(self.create_request(plan=plan, requester=planner))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(plan=plan, requester=planner)
+        )
         assert response.is_rejected
         assert response.rejection_reason == rejection_reason.plan_is_expired
 
     def test_no_draft_id_is_in_response_if_use_case_is_unsuccessful(
         self,
     ) -> None:
-        response = self.revoke(self.create_request(requester=uuid4()))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(requester=uuid4())
+        )
         assert response.plan_draft is None
 
-    def test_revoking_plan_succeeds(self) -> None:
+    def test_revoking_plan_succeeds_if_requester_is_planner_and_plan_is_neither_approved_nor_expired(
+        self,
+    ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(approved=False, planner=planner).id
-        response = self.revoke(self.create_request(plan=plan, requester=planner))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(plan=plan, requester=planner)
+        )
         assert not response.is_rejected
 
     def test_draft_id_is_in_response_if_revoking_plan_succeeds(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(approved=False, planner=planner).id
-        response = self.revoke(self.create_request(plan=plan, requester=planner))
+        response = self.use_case.revoke_plan_filing(
+            self.create_request(plan=plan, requester=planner)
+        )
         assert response.plan_draft is not None
 
     def test_after_revoking_successfully_the_plan_does_not_show_in_companys_plans_anymore(
@@ -77,7 +91,9 @@ class PlanGetsRevokedTests(BaseTestCase):
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(approved=False, planner=planner).id
         assert self.plan_is_a_plan_of_company(company=planner, plan=plan)
-        self.revoke(self.create_request(plan=plan, requester=planner))
+        self.use_case.revoke_plan_filing(
+            self.create_request(plan=plan, requester=planner)
+        )
         assert not self.plan_is_a_plan_of_company(company=planner, plan=plan)
 
     def create_request(
