@@ -1366,6 +1366,48 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
             database=self.database,
         )
 
+    def update(self) -> AccountCredentialsUpdate:
+        return AccountCredentialsUpdate(
+            items=self.items,
+            database=self.database,
+        )
+
+
+@dataclass
+class AccountCredentialsUpdate:
+    items: Callable[[], Iterable[records.AccountCredentials]]
+    database: MockDatabase
+    actions: List[Callable[[MockDatabase, records.AccountCredentials], None]] = field(
+        default_factory=list
+    )
+
+    def perform(self) -> int:
+        item_count = 0
+        for item in self.items():
+            item_count += 1
+            self.perform_all_actions(item)
+        return item_count
+
+    def perform_all_actions(self, item) -> None:
+        for action in self.actions:
+            action(self.database, item)
+
+    def change_email_address(self, new_email_address: str) -> Self:
+        def _change_action(db: MockDatabase, item: records.AccountCredentials) -> None:
+            assert not db.indices.account_credentials_by_email_address_lowercased.get(
+                new_email_address.lower()
+            )
+            assert new_email_address in db.email_addresses
+            db.indices.account_credentials_by_email_address_lowercased.remove(
+                item.email_address.lower(), item.id
+            )
+            item.email_address = new_email_address
+            db.indices.account_credentials_by_email_address_lowercased.add(
+                new_email_address.lower(), item.id
+            )
+
+        return replace(self, actions=self.actions + [_change_action])
+
 
 @singleton
 class FakeLanguageRepository:

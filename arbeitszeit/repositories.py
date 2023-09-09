@@ -486,6 +486,14 @@ class AccountCredentialsResult(QueryResult[records.AccountCredentials], Protocol
     ]:
         ...
 
+    def update(self) -> AccountCredentialsUpdate:
+        ...
+
+
+class AccountCredentialsUpdate(DatabaseUpdate, Protocol):
+    def change_email_address(self, new_email_address: str) -> Self:
+        ...
+
 
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
