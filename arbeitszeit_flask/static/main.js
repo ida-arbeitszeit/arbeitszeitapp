@@ -60,3 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  function copyTextToClipboard(text) {
+    navigator.clipboard.writeText(text);
+  }
