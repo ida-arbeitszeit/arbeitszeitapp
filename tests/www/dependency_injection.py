@@ -37,20 +37,22 @@ from .presenters.url_index import (
 class WwwTestsInjector(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[AccountantInvitationEmailView] = AliasProvider(  # type: ignore
+        binder[AccountantInvitationEmailView] = AliasProvider(
             AccountantInvitationEmailViewImpl
         )
-        binder[EmailConfiguration] = AliasProvider(FakeEmailConfiguration)  # type: ignore
-        binder[AccountantInvitationUrlIndex] = AliasProvider(AccountantInvitationUrlIndexImpl)  # type: ignore
-        binder[Notifier] = AliasProvider(NotifierTestImpl)  # type: ignore
+        binder[EmailConfiguration] = AliasProvider(FakeEmailConfiguration)
+        binder[AccountantInvitationUrlIndex] = AliasProvider(
+            AccountantInvitationUrlIndexImpl
+        )
+        binder[Notifier] = AliasProvider(NotifierTestImpl)
         binder[UrlIndex] = AliasProvider(UrlIndexTestImpl)
-        binder[Session] = AliasProvider(FakeSession)  # type: ignore
-        binder[Request] = AliasProvider(FakeRequest)  # type: ignore
-        binder[LanguageChangerUrlIndex] = AliasProvider(LanguageChangerUrlIndexImpl)  # type: ignore
-        binder[LanguageService] = AliasProvider(FakeLanguageService)  # type: ignore
-        binder[MailService] = AliasProvider(FakeEmailSender)  # type: ignore
-        binder[RenewPlanUrlIndex] = AliasProvider(RenewPlanUrlIndexTestImpl)  # type: ignore
-        binder[HidePlanUrlIndex] = AliasProvider(HidePlanUrlIndexTestImpl)  # type: ignore
+        binder[Session] = AliasProvider(FakeSession)
+        binder[Request] = AliasProvider(FakeRequest)
+        binder[LanguageChangerUrlIndex] = AliasProvider(LanguageChangerUrlIndexImpl)
+        binder[LanguageService] = AliasProvider(FakeLanguageService)
+        binder[MailService] = AliasProvider(FakeEmailSender)
+        binder[RenewPlanUrlIndex] = AliasProvider(RenewPlanUrlIndexTestImpl)
+        binder[HidePlanUrlIndex] = AliasProvider(HidePlanUrlIndexTestImpl)
 
 
 def get_dependency_injector() -> Injector:

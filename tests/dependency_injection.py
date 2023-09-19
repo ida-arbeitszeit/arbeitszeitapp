@@ -27,22 +27,18 @@ from tests.www.presenters.test_colors import ColorsTestImpl
 class TestingModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[CompanyRegistrationMessagePresenter] = AliasProvider(  # type: ignore
+        binder[CompanyRegistrationMessagePresenter] = AliasProvider(
             TokenDeliveryService
         )
-        binder[MemberRegistrationMessagePresenter] = AliasProvider(  # type: ignore
-            TokenDeliveryService
-        )
-        binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
-        binder[Colors] = AliasProvider(ColorsTestImpl)  # type: ignore
-        binder[Plotter] = AliasProvider(FakePlotter)  # type: ignore
-        binder[ControlThresholds] = AliasProvider(  # type: ignore
-            ControlThresholdsTestImpl
-        )
-        binder[Translator] = AliasProvider(FakeTranslator)  # type: ignore
-        binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
+        binder[MemberRegistrationMessagePresenter] = AliasProvider(TokenDeliveryService)
+        binder[TextRenderer] = AliasProvider(TextRendererImpl)
+        binder[Colors] = AliasProvider(ColorsTestImpl)
+        binder[Plotter] = AliasProvider(FakePlotter)
+        binder[ControlThresholds] = AliasProvider(ControlThresholdsTestImpl)
+        binder[Translator] = AliasProvider(FakeTranslator)
+        binder[AccountantInvitationPresenter] = AliasProvider(
             AccountantInvitationPresenterTestImpl
         )
-        binder[DatetimeService] = AliasProvider(FakeDatetimeService)  # type: ignore
-        binder[UserAddressBook] = AliasProvider(FakeAddressBook)  # type: ignore
-        binder[Request] = AliasProvider(FakeRequest)  # type: ignore
+        binder[DatetimeService] = AliasProvider(FakeDatetimeService)
+        binder[UserAddressBook] = AliasProvider(FakeAddressBook)
+        binder[Request] = AliasProvider(FakeRequest)
