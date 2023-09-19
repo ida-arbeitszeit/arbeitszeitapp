@@ -10,17 +10,16 @@ from typing_extensions import Self
 from arbeitszeit import records
 
 T = TypeVar("T", covariant=True)
-QueryResultT = TypeVar("QueryResultT", bound="QueryResult")
 
 
 class QueryResult(Protocol, Generic[T]):
     def __iter__(self) -> Iterator[T]:
         ...
 
-    def limit(self: QueryResultT, n: int) -> QueryResultT:
+    def limit(self, n: int) -> Self:
         ...
 
-    def offset(self: QueryResultT, n: int) -> QueryResultT:
+    def offset(self, n: int) -> Self:
         ...
 
     def first(self) -> Optional[T]:
@@ -38,22 +37,22 @@ class DatabaseUpdate(Protocol):
 
 
 class PlanResult(QueryResult[records.Plan], Protocol):
-    def ordered_by_creation_date(self, ascending: bool = ...) -> PlanResult:
+    def ordered_by_creation_date(self, ascending: bool = ...) -> Self:
         ...
 
-    def ordered_by_activation_date(self, ascending: bool = ...) -> PlanResult:
+    def ordered_by_activation_date(self, ascending: bool = ...) -> Self:
         ...
 
-    def ordered_by_planner_name(self, ascending: bool = ...) -> PlanResult:
+    def ordered_by_planner_name(self, ascending: bool = ...) -> Self:
         ...
 
-    def with_id_containing(self, query: str) -> PlanResult:
+    def with_id_containing(self, query: str) -> Self:
         ...
 
-    def with_product_name_containing(self, query: str) -> PlanResult:
+    def with_product_name_containing(self, query: str) -> Self:
         ...
 
-    def that_are_approved(self) -> PlanResult:
+    def that_are_approved(self) -> Self:
         ...
 
     def that_were_activated_before(self, timestamp: datetime) -> Self:
@@ -69,38 +68,38 @@ class PlanResult(QueryResult[records.Plan], Protocol):
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
         """Plans that will be expired by a given timestamp."""
 
-    def that_are_productive(self) -> PlanResult:
+    def that_are_productive(self) -> Self:
         ...
 
-    def that_are_public(self) -> PlanResult:
+    def that_are_public(self) -> Self:
         ...
 
-    def that_are_cooperating(self) -> PlanResult:
+    def that_are_cooperating(self) -> Self:
         ...
 
-    def planned_by(self, *company: UUID) -> PlanResult:
+    def planned_by(self, *company: UUID) -> Self:
         ...
 
-    def with_id(self, *id_: UUID) -> PlanResult:
+    def with_id(self, *id_: UUID) -> Self:
         ...
 
-    def without_completed_review(self) -> PlanResult:
+    def without_completed_review(self) -> Self:
         ...
 
     def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = ...
-    ) -> PlanResult:
+    ) -> Self:
         ...
 
-    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         ...
 
-    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
         """If no cooperations are specified, then all the repository
         should return plans that are part of any cooperation.
         """
 
-    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> Self:
         """If no companies are specified then the repository should
         return all plans that request cooperation with any
         coordinator.
@@ -138,14 +137,14 @@ class PlanUpdate(DatabaseUpdate, Protocol):
     the DB and execute them all in one.
     """
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
         """Set the associated cooperation of all matching plans to the
         one specified via the cooperation argument. Specifying `None`
         will unset the cooperation field. The return value counts all
         plans that were updated through this method.
         """
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> Self:
         """Set the `requested_cooperation` field of all matching plans
         to the specified value.  A value `None` means that these plans
         are marked as not requesting membership in any
@@ -155,10 +154,10 @@ class PlanUpdate(DatabaseUpdate, Protocol):
 
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
-    ) -> PlanUpdate:
+    ) -> Self:
         """Set the `activation_date` field of all selected plans."""
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
+    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
         """Set the approval date of all matching plans. The return
         value counts all the plans that were changed by this methods.
         """
@@ -230,13 +229,13 @@ class CooperationResult(QueryResult[records.Cooperation], Protocol):
 
 
 class MemberResult(QueryResult[records.Member], Protocol):
-    def working_at_company(self, company: UUID) -> MemberResult:
+    def working_at_company(self, company: UUID) -> Self:
         ...
 
-    def with_id(self, id_: UUID) -> MemberResult:
+    def with_id(self, id_: UUID) -> Self:
         ...
 
-    def with_email_address(self, email: str) -> MemberResult:
+    def with_email_address(self, email: str) -> Self:
         ...
 
     def joined_with_email_address(
@@ -246,12 +245,10 @@ class MemberResult(QueryResult[records.Member], Protocol):
 
 
 class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol):
-    def ordered_by_creation_date(
-        self, *, ascending: bool = ...
-    ) -> PrivateConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = ...) -> Self:
         ...
 
-    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
+    def where_consumer_is_member(self, member: UUID) -> Self:
         ...
 
     def joined_with_transactions_and_plan(
@@ -263,12 +260,10 @@ class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol
 
 
 class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Protocol):
-    def ordered_by_creation_date(
-        self, *, ascending: bool = ...
-    ) -> ProductiveConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = ...) -> Self:
         ...
 
-    def where_consumer_is_company(self, company: UUID) -> ProductiveConsumptionResult:
+    def where_consumer_is_company(self, company: UUID) -> Self:
         ...
 
     def joined_with_transactions_and_plan(
@@ -292,13 +287,13 @@ class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Pr
 
 
 class CompanyResult(QueryResult[records.Company], Protocol):
-    def with_id(self, id_: UUID) -> CompanyResult:
+    def with_id(self, id_: UUID) -> Self:
         ...
 
-    def with_email_address(self, email: str) -> CompanyResult:
+    def with_email_address(self, email: str) -> Self:
         ...
 
-    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+    def that_are_workplace_of_member(self, member: UUID) -> Self:
         ...
 
     def that_is_coordinating_cooperation(self, cooperation: UUID) -> Self:
@@ -307,10 +302,10 @@ class CompanyResult(QueryResult[records.Company], Protocol):
     def add_worker(self, member: UUID) -> int:
         ...
 
-    def with_name_containing(self, query: str) -> CompanyResult:
+    def with_name_containing(self, query: str) -> Self:
         ...
 
-    def with_email_containing(self, query: str) -> CompanyResult:
+    def with_email_containing(self, query: str) -> Self:
         ...
 
     def joined_with_email_address(
@@ -333,19 +328,19 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
 
 
 class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
         ...
 
-    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+    def where_account_is_sender(self, *account: UUID) -> Self:
         ...
 
-    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+    def where_account_is_receiver(self, *account: UUID) -> Self:
         ...
 
-    def ordered_by_transaction_date(self, descending: bool = ...) -> TransactionResult:
+    def ordered_by_transaction_date(self, descending: bool = ...) -> Self:
         ...
 
-    def where_sender_is_social_accounting(self) -> TransactionResult:
+    def where_sender_is_social_accounting(self) -> Self:
         ...
 
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
@@ -372,7 +367,7 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
 
 
 class AccountResult(QueryResult[records.Account], Protocol):
-    def with_id(self, *id_: UUID) -> AccountResult:
+    def with_id(self, *id_: UUID) -> Self:
         ...
 
     def owned_by_member(self, *member: UUID) -> Self:
