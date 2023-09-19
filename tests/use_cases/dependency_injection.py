@@ -41,14 +41,16 @@ def provide_social_accounting_instance(
 class InMemoryModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
-        binder[interfaces.LanguageRepository] = AliasProvider(  # type: ignore
+        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(
+            NotifyAccountantsAboutNewPlanPresenterImpl
+        )
+        binder[interfaces.LanguageRepository] = AliasProvider(
             repositories.FakeLanguageRepository
         )
-        binder[AccountantInvitationPresenter] = AliasProvider(  # type: ignore
+        binder[AccountantInvitationPresenter] = AliasProvider(
             AccountantInvitationPresenterTestImpl
         )
-        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
+        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)
         binder[records.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
         )
@@ -57,15 +59,15 @@ class InMemoryModule(Module):
             to=AliasProvider(ChangeUserEmailAddressPresenterMock),
         )
         binder.bind(
-            interfaces.DatabaseGateway,  # type: ignore
+            interfaces.DatabaseGateway,
             to=AliasProvider(repositories.MockDatabase),
         )
         binder.bind(
-            PasswordHasher,  # type: ignore
+            PasswordHasher,
             to=AliasProvider(PasswordHasherImpl),
         )
         binder.bind(
-            TokenService,  # type: ignore
+            TokenService,
             to=AliasProvider(FakeTokenService),
         )
 
