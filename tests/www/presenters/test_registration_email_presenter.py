@@ -7,10 +7,7 @@ from tests.datetime_service import FakeDatetimeService
 from tests.email import Email, FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
 from tests.token import FakeTokenService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class MemberPresenterTests(BaseTestCase):
@@ -18,8 +15,6 @@ class MemberPresenterTests(BaseTestCase):
         super().setUp()
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
         self.text_renderer = self.injector.get(TextRendererImpl)
         self.email_address = "test@test.test"
@@ -73,8 +68,6 @@ class CompanyPresenterTests(BaseTestCase):
         super().setUp()
         self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
         self.text_renderer = self.injector.get(TextRendererImpl)
         self.email_address = "test@test.test"

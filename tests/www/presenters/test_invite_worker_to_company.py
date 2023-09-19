@@ -2,14 +2,12 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from arbeitszeit_web.www.presenters.invite_worker_to_company_presenter import (
     InviteWorkerToCompanyPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 
 class InviteWorkerToCompanyPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(InviteWorkerToCompanyPresenter)
 
     def test_successfule_invitation_response_displays_proper_notification(self) -> None:

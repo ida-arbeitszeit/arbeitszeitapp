@@ -9,8 +9,6 @@ from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import UrlIndexTestImpl
-
 TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     requester_is_coordinator=True,
     coop_id=uuid4(),
@@ -32,7 +30,6 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
 class GetCoopSummarySuccessPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetCoopSummarySuccessPresenter)
         self.session.login_company(company=uuid4())
 

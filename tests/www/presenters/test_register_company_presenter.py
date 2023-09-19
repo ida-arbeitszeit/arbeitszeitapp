@@ -6,7 +6,6 @@ from arbeitszeit_web.www.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )
 from tests.forms import RegisterFormImpl
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 RejectionReason = RegisterCompany.Response.RejectionReason
@@ -16,7 +15,6 @@ class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(RegisterCompanyPresenter)
-        self.translator = self.injector.get(FakeTranslator)
         self.form = RegisterFormImpl.create()
 
     def test_that_correct_error_message_is_displayed_when_email_is_already_registered(

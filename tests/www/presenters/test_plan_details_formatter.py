@@ -4,18 +4,13 @@ from uuid import uuid4
 from arbeitszeit_web.formatters.plan_details_formatter import PlanDetailsFormatter
 from arbeitszeit_web.session import UserRole
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
-
-from .url_index import UrlIndexTestImpl
 
 
 class PlanDetailsFormatterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.formatter = self.injector.get(PlanDetailsFormatter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.plan_details = self.plan_details_generator.create_plan_details()

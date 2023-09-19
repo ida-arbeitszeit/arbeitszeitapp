@@ -4,8 +4,6 @@ from arbeitszeit.use_cases.hide_plan import HidePlanResponse
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 from tests.www.base_test_case import BaseTestCase
 
-from .notifier import NotifierTestImpl
-
 SUCCESSFUL_DELETE_RESPONSE = HidePlanResponse(
     plan_id=uuid4(),
     is_success=True,
@@ -19,7 +17,6 @@ FAILED_DELETE_RESPONSE = HidePlanResponse(
 class HidePlanPresenterTests(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(HidePlanPresenter)
 
     def test_that_a_notification_is_shown_when_deletion_was_successful(self):

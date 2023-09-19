@@ -23,10 +23,7 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
     coordinations=[
@@ -107,8 +104,6 @@ def get_coop_plans_response_length_1(
 class ShowMyCooperationsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = FakeTranslator()
         self.presenter = self.injector.get(ShowMyCooperationsPresenter)
 
     def test_coordinations_are_presented_correctly(self):
@@ -283,7 +278,6 @@ class InboundTest(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ShowMyCooperationsPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.COOP_ID = uuid4()
         self.PLAN_ID = uuid4()
         self.PLANNER_ID = uuid4()
@@ -347,7 +341,6 @@ class OutboundTest(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ShowMyCooperationsPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.COOP_ID = uuid4()
         self.PLAN_ID = uuid4()
         self.view_model = self.presenter.present(
@@ -395,7 +388,6 @@ class CooperatingPlansTest(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ShowMyCooperationsPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.COOP_ID = uuid4()
         self.PLAN_ID = uuid4()
         self.view_model = self.presenter.present(

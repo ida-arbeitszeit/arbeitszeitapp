@@ -9,18 +9,13 @@ from arbeitszeit_web.www.presenters.log_in_company_presenter import (
     LogInCompanyPresenter,
 )
 from tests.forms import LoginForm
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(LogInCompanyPresenter)
-        self.translator = self.injector.get(FakeTranslator)
         self.form = LoginForm()
 
     def test_that_user_is_logged_into_session_on_successful_login(self) -> None:

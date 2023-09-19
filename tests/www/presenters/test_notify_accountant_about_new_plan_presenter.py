@@ -6,7 +6,6 @@ from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter i
 )
 from tests.email import FakeAddressBook, FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 Notification = Interface.Notification
@@ -18,7 +17,6 @@ class PresenterTests(BaseTestCase):
         self.presenter = self.injector.get(NotifyAccountantsAboutNewPlanPresenterImpl)
         self.email_sender = self.injector.get(FakeEmailSender)
         self.address_book = self.injector.get(FakeAddressBook)
-        self.translator = self.injector.get(FakeTranslator)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.text_renderer = self.injector.get(TextRendererImpl)
 

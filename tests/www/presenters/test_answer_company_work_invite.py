@@ -6,11 +6,7 @@ from arbeitszeit.use_cases.answer_company_work_invite import (
 from arbeitszeit_web.www.presenters.answer_company_work_invite_presenter import (
     AnswerCompanyWorkInvitePresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .notifier import NotifierTestImpl
-from .url_index import UrlIndexTestImpl
 
 COMPANY_NAME = "test company"
 
@@ -41,9 +37,6 @@ def get_response(
 class SuccessfulResponseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
     def test_info_notification_is_displayed_on_success(self) -> None:
@@ -96,9 +89,6 @@ class SuccessfulResponseTests(BaseTestCase):
 class UnsuccessfulResponseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(AnswerCompanyWorkInvitePresenter)
 
     def test_warning_notification_is_displayed_on_failure(self) -> None:

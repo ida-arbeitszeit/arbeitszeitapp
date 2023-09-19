@@ -5,18 +5,13 @@ from arbeitszeit_web.www.presenters.register_member_presenter import (
     RegisterMemberPresenter,
 )
 from tests.forms import RegisterFormImpl
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(RegisterMemberPresenter)
-        self.translator = self.injector.get(FakeTranslator)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_no_errors_are_rendered_when_registration_was_a_success(self) -> None:
         form = RegisterFormImpl.create()

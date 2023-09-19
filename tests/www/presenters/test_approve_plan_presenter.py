@@ -1,19 +1,12 @@
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase as UseCase
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.notifier import NotifierTestImpl
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ApprovePlanPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
 
     def test_that_view_model_redirects_to_list_view_for_unreviewed_plans(self) -> None:
         response = UseCase.Response(is_approved=True)

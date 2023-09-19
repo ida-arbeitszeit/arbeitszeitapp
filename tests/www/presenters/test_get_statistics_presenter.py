@@ -6,7 +6,6 @@ from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 TESTING_RESPONSE_MODEL = StatisticsResponse(
@@ -29,7 +28,6 @@ class GetStatisticsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(GetStatisticsPresenter)
 
     def test_planned_resources_hours_are_truncated_at_2_digits_after_comma(
