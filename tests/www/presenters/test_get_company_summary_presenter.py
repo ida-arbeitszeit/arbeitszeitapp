@@ -16,10 +16,7 @@ from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
@@ -64,7 +61,6 @@ class GetCompanySummaryPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
-        self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.session.login_company(uuid4())
 
@@ -113,8 +109,6 @@ class PlansOfCompanyTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetCompanySummarySuccessPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.session.login_company(uuid4())
 

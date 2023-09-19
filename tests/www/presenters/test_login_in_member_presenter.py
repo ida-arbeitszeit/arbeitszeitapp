@@ -5,18 +5,13 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from tests.forms import LoginForm
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(LogInMemberPresenter)
-        self.translator = self.injector.get(FakeTranslator)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.form = LoginForm()
 
     def test_that_user_is_logged_into_session_on_success(self) -> None:

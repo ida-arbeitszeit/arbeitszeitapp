@@ -8,7 +8,6 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
 from tests.forms import DraftForm
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
-from tests.www.presenters.url_index import UrlIndexTestImpl
 
 TEST_DRAFT_SUMMARY_SUCCESS = DraftDetailsSuccess(
     draft_id=uuid4(),
@@ -29,7 +28,6 @@ class PlanDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.plan_details = self.plan_details_generator.create_plan_details()
 
@@ -72,7 +70,6 @@ class DraftDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_correct_form_data_is_returned_for_draft_details(self) -> None:
         form = DraftForm()

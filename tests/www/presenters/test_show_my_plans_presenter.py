@@ -13,29 +13,20 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.notifier import NotifierTestImpl
 
-from .url_index import (
-    HidePlanUrlIndexTestImpl,
-    RenewPlanUrlIndexTestImpl,
-    UrlIndexTestImpl,
-)
+from .url_index import HidePlanUrlIndexTestImpl, RenewPlanUrlIndexTestImpl
 
 
 class ShowMyPlansPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.notifier = self.injector.get(NotifierTestImpl)
         self.session.login_company(uuid4())
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
         self.datetime_service.freeze_time(datetime(2000, 1, 1))

@@ -2,19 +2,13 @@ from uuid import uuid4
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftResponse
 from arbeitszeit_web.www.presenters.create_draft_presenter import CreateDraftPresenter
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.notifier import NotifierTestImpl
-from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(CreateDraftPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
 
     def test_on_successful_draft_creation_redirect_to_my_drafts_page(self) -> None:
         draft_id = uuid4()

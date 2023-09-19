@@ -6,7 +6,6 @@ from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
-from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
@@ -16,7 +15,6 @@ class PresenterTests(BaseTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsMemberMemberPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
 

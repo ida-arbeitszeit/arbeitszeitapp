@@ -7,15 +7,10 @@ from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedPlanGenerator
 
-from .notifier import NotifierTestImpl
-from .url_index import UrlIndexTestImpl
-
 
 class QueryPlansPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryPlansPresenter)
         self.queried_plan_generator = QueriedPlanGenerator()
         self.session.login_member(uuid4())

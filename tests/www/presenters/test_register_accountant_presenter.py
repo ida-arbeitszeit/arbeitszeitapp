@@ -7,20 +7,13 @@ from arbeitszeit_web.www.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
 )
 from tests.session import FakeSession
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.notifier import NotifierTestImpl
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(RegisterAccountantPresenter)
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_that_registration_rejection_results_in_error_message_shown(self) -> None:
         response = self.create_rejected_response()

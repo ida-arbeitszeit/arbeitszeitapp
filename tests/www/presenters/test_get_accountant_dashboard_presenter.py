@@ -6,14 +6,11 @@ from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import UrlIndexTestImpl
-
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetAccountantDashboardPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_that_view_model_contains_url_to_unreviewed_plans_list_view(self) -> None:
         response = self.get_use_case_response()

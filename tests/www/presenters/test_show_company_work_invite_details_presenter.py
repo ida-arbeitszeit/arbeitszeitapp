@@ -7,17 +7,12 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
 from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter import (
     ShowCompanyWorkInviteDetailsPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowCompanyWorkInviteDetailsPresenter)
 
     def test_use_case_response_without_details_doesnt_render_to_view_model(

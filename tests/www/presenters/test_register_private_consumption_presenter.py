@@ -5,17 +5,12 @@ from arbeitszeit.use_cases.register_private_consumption import (
 from arbeitszeit_web.www.presenters.register_private_consumption_presenter import (
     RegisterPrivateConsumptionPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .notifier import NotifierTestImpl
 
 
 class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegisterPrivateConsumptionPresenter)
 
     def test_presenter_shows_correct_notification_when_registration_was_a_success(

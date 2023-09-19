@@ -7,11 +7,7 @@ from arbeitszeit_web.www.presenters.end_cooperation_presenter import (
     EndCooperationPresenter,
 )
 from tests.request import FakeRequest
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .notifier import NotifierTestImpl
-from .url_index import UrlIndexTestImpl
 
 SUCCESSFUL_RESPONSE = EndCooperationResponse(rejection_reason=None)
 
@@ -28,9 +24,6 @@ class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.request = self.injector.get(FakeRequest)
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session.login_company(company=uuid4())
 

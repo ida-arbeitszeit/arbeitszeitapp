@@ -13,7 +13,6 @@ from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
 )
 from tests.data_generators import ConsumptionGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -23,7 +22,6 @@ class TestPresenter(BaseTestCase):
         self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(CompanyConsumptionsPresenter)
 
     def test_show_consumptions_from_company(self) -> None:

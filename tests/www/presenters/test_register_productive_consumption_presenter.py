@@ -6,11 +6,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
 from arbeitszeit_web.www.presenters.register_productive_consumption_presenter import (
     RegisterProductiveConsumptionPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .notifier import NotifierTestImpl
-from .url_index import UrlIndexTestImpl
 
 reasons = RegisterProductiveConsumptionResponse.RejectionReason
 
@@ -18,10 +14,7 @@ reasons = RegisterProductiveConsumptionResponse.RejectionReason
 class RegisterProductiveConsumptionTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.trans = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RegisterProductiveConsumptionPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_show_confirmation_when_registration_was_successful(self) -> None:
         self.presenter.present(
@@ -30,7 +23,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext("Successfully registered."), self.notifier.infos
+            self.translator.gettext("Successfully registered."), self.notifier.infos
         )
 
     def test_missing_plan_show_correct_notification(self) -> None:
@@ -40,7 +33,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext("Plan does not exist."), self.notifier.warnings
+            self.translator.gettext("Plan does not exist."), self.notifier.warnings
         )
 
     def test_invalid_consumption_type_shows_correct_notification(self) -> None:
@@ -50,7 +43,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext("The specified type of consumption is invalid."),
+            self.translator.gettext("The specified type of consumption is invalid."),
             self.notifier.warnings,
         )
 
@@ -61,7 +54,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext(
+            self.translator.gettext(
                 "The specified plan has expired. Please contact the provider to obtain a current plan ID."
             ),
             self.notifier.warnings,
@@ -74,7 +67,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext(
+            self.translator.gettext(
                 "Registration failed. Companies cannot acquire public products."
             ),
             self.notifier.warnings,
@@ -87,7 +80,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             )
         )
         self.assertIn(
-            self.trans.gettext(
+            self.translator.gettext(
                 "Registration failed. Companies cannot acquire their own products."
             ),
             self.notifier.warnings,

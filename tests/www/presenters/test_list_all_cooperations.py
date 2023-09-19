@@ -11,13 +11,10 @@ from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import UrlIndexTestImpl
-
 
 class ListMessagesPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(ListAllCooperationsPresenter)
         self.session.login_company(company=uuid4())
 

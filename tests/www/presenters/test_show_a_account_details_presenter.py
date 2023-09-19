@@ -9,7 +9,6 @@ from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = ShowAAccountDetailsUseCase.TransactionInfo(
@@ -30,7 +29,6 @@ DEFAULT_INFO2 = ShowAAccountDetailsUseCase.TransactionInfo(
 class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowAAccountDetailsPresenter)
 
