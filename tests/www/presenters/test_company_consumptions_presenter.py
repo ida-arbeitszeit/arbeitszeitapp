@@ -11,7 +11,7 @@ from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
     ViewModel,
 )
-from tests.data_generators import CompanyGenerator, ConsumptionGenerator
+from tests.data_generators import ConsumptionGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
@@ -22,7 +22,6 @@ class TestPresenter(BaseTestCase):
         super().setUp()
         self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(CompanyConsumptionsPresenter)
