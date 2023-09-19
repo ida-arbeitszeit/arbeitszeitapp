@@ -8,24 +8,6 @@ from uuid import UUID
 from typing_extensions import Self
 
 from arbeitszeit import records
-from arbeitszeit.records import (
-    Account,
-    Accountant,
-    AccountOwner,
-    Company,
-    CompanyWorkInvite,
-    Cooperation,
-    CoordinationTenure,
-    EmailAddress,
-    Member,
-    Plan,
-    PlanDraft,
-    PlanningStatistics,
-    PrivateConsumption,
-    ProductionCosts,
-    ProductiveConsumption,
-    Transaction,
-)
 
 T = TypeVar("T", covariant=True)
 QueryResultT = TypeVar("QueryResultT", bound="QueryResult")
@@ -55,7 +37,7 @@ class DatabaseUpdate(Protocol):
         """
 
 
-class PlanResult(QueryResult[Plan], Protocol):
+class PlanResult(QueryResult[records.Plan], Protocol):
     def ordered_by_creation_date(self, ascending: bool = ...) -> PlanResult:
         ...
 
@@ -124,7 +106,7 @@ class PlanResult(QueryResult[Plan], Protocol):
         coordinator.
         """
 
-    def get_statistics(self) -> PlanningStatistics:
+    def get_statistics(self) -> records.PlanningStatistics:
         """Return aggregate planning information for all plans
         included in a result set.
         """
@@ -188,7 +170,7 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         ...
 
 
-class PlanDraftResult(QueryResult[PlanDraft], Protocol):
+class PlanDraftResult(QueryResult[records.PlanDraft], Protocol):
     def with_id(self, id_: UUID) -> Self:
         ...
 
@@ -231,7 +213,7 @@ class PlanDraftUpdate(DatabaseUpdate, Protocol):
         ...
 
 
-class CooperationResult(QueryResult[Cooperation], Protocol):
+class CooperationResult(QueryResult[records.Cooperation], Protocol):
     def with_id(self, id_: UUID) -> Self:
         ...
 
@@ -243,11 +225,11 @@ class CooperationResult(QueryResult[Cooperation], Protocol):
 
     def joined_with_current_coordinator(
         self,
-    ) -> QueryResult[Tuple[Cooperation, Company]]:
+    ) -> QueryResult[Tuple[records.Cooperation, records.Company]]:
         ...
 
 
-class MemberResult(QueryResult[Member], Protocol):
+class MemberResult(QueryResult[records.Member], Protocol):
     def working_at_company(self, company: UUID) -> MemberResult:
         ...
 
@@ -257,11 +239,13 @@ class MemberResult(QueryResult[Member], Protocol):
     def with_email_address(self, email: str) -> MemberResult:
         ...
 
-    def joined_with_email_address(self) -> QueryResult[Tuple[Member, EmailAddress]]:
+    def joined_with_email_address(
+        self,
+    ) -> QueryResult[Tuple[records.Member, records.EmailAddress]]:
         ...
 
 
-class PrivateConsumptionResult(QueryResult[PrivateConsumption], Protocol):
+class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol):
     def ordered_by_creation_date(
         self, *, ascending: bool = ...
     ) -> PrivateConsumptionResult:
@@ -272,11 +256,13 @@ class PrivateConsumptionResult(QueryResult[PrivateConsumption], Protocol):
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResult[Tuple[PrivateConsumption, Transaction, Plan]]:
+    ) -> QueryResult[
+        Tuple[records.PrivateConsumption, records.Transaction, records.Plan]
+    ]:
         ...
 
 
-class ProductiveConsumptionResult(QueryResult[ProductiveConsumption], Protocol):
+class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Protocol):
     def ordered_by_creation_date(
         self, *, ascending: bool = ...
     ) -> ProductiveConsumptionResult:
@@ -287,21 +273,25 @@ class ProductiveConsumptionResult(QueryResult[ProductiveConsumption], Protocol):
 
     def joined_with_transactions_and_plan(
         self,
-    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction, Plan]]:
+    ) -> QueryResult[
+        Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]
+    ]:
         ...
 
     def joined_with_transaction_and_provider(
         self,
-    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction, Company]]:
+    ) -> QueryResult[
+        Tuple[records.ProductiveConsumption, records.Transaction, records.Company]
+    ]:
         ...
 
     def joined_with_transaction(
         self,
-    ) -> QueryResult[Tuple[ProductiveConsumption, Transaction]]:
+    ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]:
         ...
 
 
-class CompanyResult(QueryResult[Company], Protocol):
+class CompanyResult(QueryResult[records.Company], Protocol):
     def with_id(self, id_: UUID) -> CompanyResult:
         ...
 
@@ -323,22 +313,26 @@ class CompanyResult(QueryResult[Company], Protocol):
     def with_email_containing(self, query: str) -> CompanyResult:
         ...
 
-    def joined_with_email_address(self) -> QueryResult[Tuple[Company, EmailAddress]]:
+    def joined_with_email_address(
+        self,
+    ) -> QueryResult[Tuple[records.Company, records.EmailAddress]]:
         ...
 
 
-class AccountantResult(QueryResult[Accountant], Protocol):
+class AccountantResult(QueryResult[records.Accountant], Protocol):
     def with_email_address(self, email: str) -> Self:
         ...
 
     def with_id(self, id_: UUID) -> Self:
         ...
 
-    def joined_with_email_address(self) -> QueryResult[Tuple[Accountant, EmailAddress]]:
+    def joined_with_email_address(
+        self,
+    ) -> QueryResult[Tuple[records.Accountant, records.EmailAddress]]:
         ...
 
 
-class TransactionResult(QueryResult[Transaction], Protocol):
+class TransactionResult(QueryResult[records.Transaction], Protocol):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
         ...
 
@@ -371,11 +365,13 @@ class TransactionResult(QueryResult[Transaction], Protocol):
 
     def joined_with_sender_and_receiver(
         self,
-    ) -> QueryResult[Tuple[Transaction, AccountOwner, AccountOwner]]:
+    ) -> QueryResult[
+        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
+    ]:
         ...
 
 
-class AccountResult(QueryResult[Account], Protocol):
+class AccountResult(QueryResult[records.Account], Protocol):
     def with_id(self, *id_: UUID) -> AccountResult:
         ...
 
@@ -394,14 +390,16 @@ class AccountResult(QueryResult[Account], Protocol):
     def that_are_labour_accounts(self) -> Self:
         ...
 
-    def joined_with_owner(self) -> QueryResult[Tuple[Account, AccountOwner]]:
+    def joined_with_owner(
+        self,
+    ) -> QueryResult[Tuple[records.Account, records.AccountOwner]]:
         ...
 
-    def joined_with_balance(self) -> QueryResult[Tuple[Account, Decimal]]:
+    def joined_with_balance(self) -> QueryResult[Tuple[records.Account, Decimal]]:
         ...
 
 
-class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
+class CompanyWorkInviteResult(QueryResult[records.CompanyWorkInvite], Protocol):
     def issued_by(self, company: UUID) -> Self:
         ...
 
@@ -415,7 +413,7 @@ class CompanyWorkInviteResult(QueryResult[CompanyWorkInvite], Protocol):
         ...
 
 
-class EmailAddressResult(QueryResult[EmailAddress], Protocol):
+class EmailAddressResult(QueryResult[records.EmailAddress], Protocol):
     def with_address(self, *addresses: str) -> Self:
         ...
 
@@ -503,7 +501,7 @@ class LanguageRepository(Protocol):
 class DatabaseGateway(Protocol):
     def create_private_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> PrivateConsumption:
+    ) -> records.PrivateConsumption:
         ...
 
     def get_private_consumptions(self) -> PrivateConsumptionResult:
@@ -511,7 +509,7 @@ class DatabaseGateway(Protocol):
 
     def create_productive_consumption(
         self, transaction: UUID, amount: int, plan: UUID
-    ) -> ProductiveConsumption:
+    ) -> records.ProductiveConsumption:
         ...
 
     def get_productive_consumptions(self) -> ProductiveConsumptionResult:
@@ -521,14 +519,14 @@ class DatabaseGateway(Protocol):
         self,
         creation_timestamp: datetime,
         planner: UUID,
-        production_costs: ProductionCosts,
+        production_costs: records.ProductionCosts,
         product_name: str,
         distribution_unit: str,
         amount_produced: int,
         product_description: str,
         duration_in_days: int,
         is_public_service: bool,
-    ) -> Plan:
+    ) -> records.Plan:
         ...
 
     def get_plans(self) -> PlanResult:
@@ -539,7 +537,7 @@ class DatabaseGateway(Protocol):
         creation_timestamp: datetime,
         name: str,
         definition: str,
-    ) -> Cooperation:
+    ) -> records.Cooperation:
         ...
 
     def get_cooperations(self) -> CooperationResult:
@@ -547,7 +545,7 @@ class DatabaseGateway(Protocol):
 
     def create_coordination_tenure(
         self, company: UUID, cooperation: UUID, start_date: datetime
-    ) -> CoordinationTenure:
+    ) -> records.CoordinationTenure:
         ...
 
     def get_transactions(self) -> TransactionResult:
@@ -561,12 +559,12 @@ class DatabaseGateway(Protocol):
         amount_sent: Decimal,
         amount_received: Decimal,
         purpose: str,
-    ) -> Transaction:
+    ) -> records.Transaction:
         ...
 
     def create_company_work_invite(
         self, company: UUID, member: UUID
-    ) -> CompanyWorkInvite:
+    ) -> records.CompanyWorkInvite:
         ...
 
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
@@ -577,9 +575,9 @@ class DatabaseGateway(Protocol):
         *,
         account_credentials: UUID,
         name: str,
-        account: Account,
+        account: records.Account,
         registered_on: datetime,
-    ) -> Member:
+    ) -> records.Member:
         ...
 
     def get_members(self) -> MemberResult:
@@ -589,12 +587,12 @@ class DatabaseGateway(Protocol):
         self,
         account_credentials: UUID,
         name: str,
-        means_account: Account,
-        labour_account: Account,
-        resource_account: Account,
-        products_account: Account,
+        means_account: records.Account,
+        labour_account: records.Account,
+        resource_account: records.Account,
+        products_account: records.Account,
         registered_on: datetime,
-    ) -> Company:
+    ) -> records.Company:
         ...
 
     def get_companies(self) -> CompanyResult:
@@ -610,7 +608,7 @@ class DatabaseGateway(Protocol):
 
     def create_email_address(
         self, *, address: str, confirmed_on: Optional[datetime]
-    ) -> EmailAddress:
+    ) -> records.EmailAddress:
         ...
 
     def get_email_addresses(self) -> EmailAddressResult:
@@ -621,19 +619,19 @@ class DatabaseGateway(Protocol):
         planner: UUID,
         product_name: str,
         description: str,
-        costs: ProductionCosts,
+        costs: records.ProductionCosts,
         production_unit: str,
         amount: int,
         timeframe_in_days: int,
         is_public_service: bool,
         creation_timestamp: datetime,
-    ) -> PlanDraft:
+    ) -> records.PlanDraft:
         ...
 
     def get_plan_drafts(self) -> PlanDraftResult:
         ...
 
-    def create_account(self) -> Account:
+    def create_account(self) -> records.Account:
         ...
 
     def get_accounts(self) -> AccountResult:
