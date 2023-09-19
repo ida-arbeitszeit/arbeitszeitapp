@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.show_my_plans import (
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
@@ -38,7 +38,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.notifier = self.injector.get(NotifierTestImpl)
         self.session.login_company(uuid4())
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
 
     def test_show_correct_notification_when_user_has_no_plans(self) -> None:

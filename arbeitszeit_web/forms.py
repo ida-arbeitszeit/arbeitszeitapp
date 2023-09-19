@@ -4,6 +4,12 @@ from typing import Protocol
 from arbeitszeit_web.fields import FormField
 
 
+class RequestEmailAddressChangeForm(Protocol):
+    @property
+    def new_email_field(self) -> FormField[str]:
+        ...
+
+
 class LoginMemberForm(Protocol):
     def email_field(self) -> FormField[str]:
         ...

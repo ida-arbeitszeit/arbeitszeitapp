@@ -1,6 +1,7 @@
 from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
+from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 from tests.session import FakeSession
 
 from .dependency_injection import get_dependency_injector
@@ -48,4 +49,7 @@ class BaseTestCase(TestCase):
 
     # It would be nice to have the following list sorted
     # alphabetically
+    accountant_generator = _lazy_property(AccountantGenerator)
+    company_generator = _lazy_property(CompanyGenerator)
+    member_generator = _lazy_property(MemberGenerator)
     session = _lazy_property(FakeSession)

@@ -5,6 +5,8 @@ from decimal import Decimal
 from typing import Generic, List, Optional, TypeVar
 from uuid import uuid4
 
+from typing_extensions import Self
+
 T = TypeVar("T")
 
 
@@ -171,3 +173,12 @@ class RegisterFormImpl:
             + self.password_field.errors
             + self.name_field.errors
         )
+
+
+@dataclass
+class RequestEmailAddressChangeFormImpl:
+    new_email_field: FormFieldImpl[str]
+
+    @classmethod
+    def from_values(cls, new_email_address: str) -> Self:
+        return cls(new_email_field=FormFieldImpl(value=new_email_address))
