@@ -1,6 +1,8 @@
 from typing import Any, Callable, TypeVar, cast
 
+import arbeitszeit.email_notifications
 import arbeitszeit.repositories as interfaces
+import tests.email_notifications
 from arbeitszeit import records
 from arbeitszeit.injector import (
     AliasProvider,
@@ -10,26 +12,12 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.presenters import (
-    AccountantInvitationPresenter,
-    ChangeUserEmailAddressPresenter,
-    InviteWorkerPresenter,
-    NotifyAccountantsAboutNewPlanPresenter,
-)
 from arbeitszeit_web.token import TokenService
-from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.dependency_injection import TestingModule
 from tests.password_hasher import PasswordHasherImpl
 from tests.token import FakeTokenService
-from tests.work_invitation_presenter import InviteWorkerPresenterImpl
 
 from . import repositories
-from .change_user_email_address_presenter_mock import (
-    ChangeUserEmailAddressPresenterMock,
-)
-from .notify_accountant_about_new_plan_presenter import (
-    NotifyAccountantsAboutNewPlanPresenterImpl,
-)
 
 
 def provide_social_accounting_instance(
@@ -38,25 +26,18 @@ def provide_social_accounting_instance(
     return mock_database.social_accounting
 
 
+def provide_email_sender() -> tests.email_notifications.EmailSenderTestImpl:
+    return tests.email_notifications.EmailSenderTestImpl()
+
+
 class InMemoryModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(
-            NotifyAccountantsAboutNewPlanPresenterImpl
-        )
         binder[interfaces.LanguageRepository] = AliasProvider(
             repositories.FakeLanguageRepository
         )
-        binder[AccountantInvitationPresenter] = AliasProvider(
-            AccountantInvitationPresenterTestImpl
-        )
-        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)
         binder[records.SocialAccounting] = CallableProvider(
             provide_social_accounting_instance
-        )
-        binder.bind(
-            ChangeUserEmailAddressPresenter,
-            to=AliasProvider(ChangeUserEmailAddressPresenterMock),
         )
         binder.bind(
             interfaces.DatabaseGateway,
@@ -69,6 +50,12 @@ class InMemoryModule(Module):
         binder.bind(
             TokenService,
             to=AliasProvider(FakeTokenService),
+        )
+        binder[arbeitszeit.email_notifications.EmailSender] = AliasProvider(
+            tests.email_notifications.EmailSenderTestImpl
+        )
+        binder[tests.email_notifications.EmailSenderTestImpl] = CallableProvider(
+            provide_email_sender, is_singleton=True
         )
 
 

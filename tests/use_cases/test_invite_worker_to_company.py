@@ -1,7 +1,7 @@
 from uuid import uuid4
 
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from tests.work_invitation_presenter import InviteWorkerPresenterImpl
 
 from .base_test_case import BaseTestCase
 
@@ -100,7 +100,6 @@ class NotificationTests(BaseTestCase):
         super().setUp()
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
-        self.invite_worker_presenter = self.injector.get(InviteWorkerPresenterImpl)
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_no_invite_gets_send_if_invite_was_not_successful(self) -> None:
@@ -110,7 +109,7 @@ class NotificationTests(BaseTestCase):
                 worker=uuid4(),
             )
         )
-        invites = self.invite_worker_presenter.invites
+        invites = self.get_sent_notifications()
         self.assertEqual(len(invites), 0)
 
     def test_one_worker_gets_notified_on_successful_invite(self) -> None:
@@ -120,7 +119,7 @@ class NotificationTests(BaseTestCase):
                 worker=self.member,
             )
         )
-        invites = self.invite_worker_presenter.invites
+        invites = self.get_sent_notifications()
         self.assertEqual(len(invites), 1)
 
     def test_correct_worker_gets_notified_on_successful_invite(self) -> None:
@@ -133,8 +132,9 @@ class NotificationTests(BaseTestCase):
                 worker=member,
             )
         )
-        invites = self.invite_worker_presenter.invites
-        self.assertEqual(invites[0].worker_email, expected_email)
+        self.assertEqual(
+            self.get_latest_invite_notification().worker_email, expected_email
+        )
 
     def test_worker_gets_notified_about_correct_invite(self) -> None:
         response = self.invite_worker_to_company(
@@ -143,5 +143,18 @@ class NotificationTests(BaseTestCase):
                 worker=self.member,
             )
         )
-        invites = self.invite_worker_presenter.invites
-        self.assertEqual(invites[0].id, response.invite_id)
+        self.assertEqual(
+            self.get_latest_invite_notification().invite, response.invite_id
+        )
+
+    def get_latest_invite_notification(self) -> email_notifications.WorkerInvitation:
+        notifications = self.get_sent_notifications()
+        assert notifications
+        return notifications[-1]
+
+    def get_sent_notifications(self) -> list[email_notifications.WorkerInvitation]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.WorkerInvitation)
+        ]

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.presenters import InviteWorkerPresenter as Presenter
+from arbeitszeit.email_notifications import EmailSender, WorkerInvitation
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -21,7 +21,7 @@ class InviteWorkerToCompanyUseCase:
         invite_id: Optional[UUID] = None
 
     database_gateway: DatabaseGateway
-    presenter: Presenter
+    email_sender: EmailSender
 
     def __call__(self, request: Request) -> Response:
         addressee = self.database_gateway.get_members().with_id(request.worker).first()
@@ -51,6 +51,6 @@ class InviteWorkerToCompanyUseCase:
         )
         if record is not None:
             _, member_email = record
-            self.presenter.show_invite_worker_message(
-                worker_email=member_email.address, invite=invite
+            self.email_sender.send_email(
+                WorkerInvitation(worker_email=member_email.address, invite=invite)
             )
