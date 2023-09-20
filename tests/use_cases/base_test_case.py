@@ -11,6 +11,7 @@ from tests.data_generators import (
     PlanGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
+from tests.email_notifications import EmailSenderTestImpl
 
 from .balance_checker import BalanceChecker
 from .dependency_injection import get_dependency_injector
@@ -62,11 +63,12 @@ class BaseTestCase(TestCase):
     accountant_generator = _lazy_property(AccountantGenerator)
     balance_checker = _lazy_property(BalanceChecker)
     company_generator = _lazy_property(CompanyGenerator)
+    consumption_generator = _lazy_property(ConsumptionGenerator)
     control_thresholds = _lazy_property(ControlThresholdsTestImpl)
     coop_generator = _lazy_property(CooperationGenerator)
     cooperation_generator = _lazy_property(CooperationGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)
+    email_sender = _lazy_property(EmailSenderTestImpl)
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
-    consumption_generator = _lazy_property(ConsumptionGenerator)

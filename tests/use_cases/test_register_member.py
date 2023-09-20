@@ -1,8 +1,8 @@
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
-from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
 
@@ -17,14 +17,13 @@ class RegisterMemberTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(RegisterMemberUseCase)
-        self.token_delivery = self.injector.get(TokenDeliveryService)
         self.login_use_case = self.injector.get(LogInMemberUseCase)
         self.get_member_dashboard = self.injector.get(GetMemberDashboard)
         self.confirm_company_use_case = self.injector.get(ConfirmCompanyUseCase)
 
     def test_that_a_token_is_sent_out_when_a_member_registers(self) -> None:
         self.use_case.register_member(RegisterMemberUseCase.Request(**DEFAULT))
-        self.assertTrue(self.token_delivery.presented_member_tokens)
+        self.assertTrue(self.delivered_registration_mails())
 
     def test_that_token_was_delivered_to_registering_user(self) -> None:
         expected_email_address = "test@test.test"
@@ -34,7 +33,7 @@ class RegisterMemberTests(BaseTestCase):
             RegisterMemberUseCase.Request(email=expected_email_address, **request_args)
         )
         self.assertEqual(
-            self.token_delivery.presented_member_tokens[0].email_address,
+            self.latest_delivered_registration_mail().email_address,
             expected_email_address,
         )
 
@@ -152,9 +151,7 @@ class RegisterMemberTests(BaseTestCase):
             email=expected_email,
             password=expected_password,
         )
-        pre_registration_confirmation_tokens = len(
-            self.token_delivery.presented_member_tokens
-        )
+        pre_registration_confirmation_tokens = len(self.delivered_registration_mails())
         self.use_case.register_member(
             RegisterMemberUseCase.Request(
                 email=expected_email,
@@ -163,7 +160,7 @@ class RegisterMemberTests(BaseTestCase):
             )
         )
         assert (
-            len(self.token_delivery.presented_member_tokens)
+            len(self.delivered_registration_mails())
             == pre_registration_confirmation_tokens
         )
 
@@ -184,3 +181,19 @@ class RegisterMemberTests(BaseTestCase):
             )
         )
         assert not response.is_confirmation_required
+
+    def latest_delivered_registration_mail(
+        self,
+    ) -> email_notifications.MemberRegistration:
+        mails = self.delivered_registration_mails()
+        assert mails
+        return mails[-1]
+
+    def delivered_registration_mails(
+        self,
+    ) -> list[email_notifications.MemberRegistration]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.MemberRegistration)
+        ]

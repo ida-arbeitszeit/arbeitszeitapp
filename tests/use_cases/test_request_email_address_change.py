@@ -1,18 +1,15 @@
 from parameterized import parameterized
 
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases import request_email_address_change as use_case
 
 from .base_test_case import BaseTestCase
-from .change_user_email_address_presenter_mock import (
-    ChangeUserEmailAddressPresenterMock,
-)
 
 
 class RequestEmailAddressChangeTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(use_case.RequestEmailAddressChangeUseCase)
-        self.presenter = self.injector.get(ChangeUserEmailAddressPresenterMock)
 
     @parameterized.expand(
         [
@@ -112,7 +109,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             new_email_address=new_address,
         )
         self.use_case.request_email_address_change(request)
-        assert self.presenter.has_notifications_delivered()
+        assert self.delivered_notifications()
 
     @parameterized.expand(
         [
@@ -130,7 +127,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             new_email_address=new_address,
         )
         self.use_case.request_email_address_change(request)
-        notification = self.presenter.get_latest_notification_delivered()
+        notification = self.get_latest_notification_delivered()
         assert notification.old_email_address == original_address
 
     @parameterized.expand(
@@ -149,7 +146,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             new_email_address=new_address,
         )
         self.use_case.request_email_address_change(request)
-        notification = self.presenter.get_latest_notification_delivered()
+        notification = self.get_latest_notification_delivered()
         assert notification.new_email_address == new_address
 
     def test_that_no_notifiation_is_delivered_if_email_address_is_unkown(self) -> None:
@@ -158,4 +155,20 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             new_email_address="new@test.test",
         )
         self.use_case.request_email_address_change(request)
-        assert not self.presenter.has_notifications_delivered()
+        assert not self.delivered_notifications()
+
+    def get_latest_notification_delivered(
+        self,
+    ) -> email_notifications.EmailChangeConfirmation:
+        notifications = self.delivered_notifications()
+        assert notifications
+        return notifications[-1]
+
+    def delivered_notifications(
+        self,
+    ) -> list[email_notifications.EmailChangeConfirmation]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.EmailChangeConfirmation)
+        ]

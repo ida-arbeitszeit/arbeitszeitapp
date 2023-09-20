@@ -30,3 +30,10 @@ def get_locale() -> Any:
         return request.accept_languages.best_match(
             current_app.config["LANGUAGES"].keys()
         )
+    except RuntimeError:
+        # Unfortunately flask raises a runtime error if we try to
+        # access the session outside of a request context. Since we
+        # don't want to crash the application for such a silly reason
+        # we return None here so that Flask-Babel resorts to choosing
+        # the default locale.
+        return None

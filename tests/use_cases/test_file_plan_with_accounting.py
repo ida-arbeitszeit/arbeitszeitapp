@@ -1,6 +1,7 @@
 from typing import Callable, Optional
 from uuid import UUID, uuid4
 
+from arbeitszeit import email_notifications
 from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
@@ -10,9 +11,6 @@ from arbeitszeit.use_cases.list_plans_with_pending_review import (
 )
 
 from .base_test_case import BaseTestCase
-from .notify_accountant_about_new_plan_presenter import (
-    NotifyAccountantsAboutNewPlanPresenterImpl,
-)
 
 
 class BaseUseCaseTestCase(BaseTestCase):
@@ -24,9 +22,6 @@ class BaseUseCaseTestCase(BaseTestCase):
         )
         self.get_plan_details_use_case = self.injector.get(GetPlanDetailsUseCase)
         self.planner = self.company_generator.create_company()
-        self.notify_accountants_presenter = self.injector.get(
-            NotifyAccountantsAboutNewPlanPresenterImpl
-        )
 
     def file_draft(self, draft: UUID) -> UUID:
         request = self.create_request(draft=draft)
@@ -186,7 +181,7 @@ class NotificationTests(BaseUseCaseTestCase):
 
     def test_that_accountants_are_notified_about_new_plan_on_success(self) -> None:
         self.use_case.file_plan_with_accounting(request=self.create_request())
-        self.assertTrue(self.notify_accountants_presenter.sent_notifications)
+        self.assertTrue(self.get_sent_accountant_notifications())
         self.accountant_generator.create_accountant()
 
     def test_that_notification_to_accountants_contains_correct_product_name(
@@ -198,8 +193,13 @@ class NotificationTests(BaseUseCaseTestCase):
                 draft=self.create_draft(product_name=expected_product_name)
             )
         )
+        latest_notification = self.email_sender.get_latest_message_sent()
+        assert isinstance(
+            latest_notification,
+            email_notifications.AccountantNotificationAboutNewPlan,
+        )
         self.assertEqual(
-            self.notify_accountants_presenter.latest_notification.product_name,
+            latest_notification.product_name,
             expected_product_name,
         )
 
@@ -209,8 +209,13 @@ class NotificationTests(BaseUseCaseTestCase):
         response = self.use_case.file_plan_with_accounting(
             request=self.create_request()
         )
+        latest_notification = self.email_sender.get_latest_message_sent()
+        assert isinstance(
+            latest_notification,
+            email_notifications.AccountantNotificationAboutNewPlan,
+        )
         self.assertEqual(
-            self.notify_accountants_presenter.latest_notification.plan_id,
+            latest_notification.plan_id,
             response.plan_id,
         )
 
@@ -219,7 +224,7 @@ class NotificationTests(BaseUseCaseTestCase):
     ) -> None:
         self.accountant_generator.create_accountant()
         self.use_case.file_plan_with_accounting(request=self.create_request())
-        assert len(self.notify_accountants_presenter.sent_notifications) == 2
+        assert len(self.get_sent_accountant_notifications()) == 2
 
     def test_that_with_three_accountants_three_notifications_are_sent_out(
         self,
@@ -227,11 +232,26 @@ class NotificationTests(BaseUseCaseTestCase):
         self.accountant_generator.create_accountant()
         self.accountant_generator.create_accountant()
         self.use_case.file_plan_with_accounting(request=self.create_request())
-        assert len(self.notify_accountants_presenter.sent_notifications) == 3
+        assert len(self.get_sent_accountant_notifications()) == 3
 
     def test_that_notifications_are_sent_to_correct_user(self) -> None:
         self.use_case.file_plan_with_accounting(request=self.create_request())
         assert (
-            self.notify_accountants_presenter.latest_notification.accountant_id
-            == self.accountant
+            self.get_latest_accountant_notification().accountant_id == self.accountant
         )
+
+    def get_sent_accountant_notifications(
+        self,
+    ) -> list[email_notifications.AccountantNotificationAboutNewPlan]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.AccountantNotificationAboutNewPlan)
+        ]
+
+    def get_latest_accountant_notification(
+        self,
+    ) -> email_notifications.AccountantNotificationAboutNewPlan:
+        notifications = self.get_sent_accountant_notifications()
+        assert notifications
+        return notifications[-1]

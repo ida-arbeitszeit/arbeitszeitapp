@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.presenters import NotifyAccountantsAboutNewPlanPresenter as Interface
+from arbeitszeit.email_notifications import AccountantNotificationAboutNewPlan
 from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
 )
@@ -8,7 +8,7 @@ from tests.email import FakeAddressBook, FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
 from tests.www.base_test_case import BaseTestCase
 
-Notification = Interface.Notification
+Notification = AccountantNotificationAboutNewPlan
 
 
 class PresenterTests(BaseTestCase):

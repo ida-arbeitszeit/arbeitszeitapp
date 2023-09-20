@@ -49,7 +49,6 @@ from arbeitszeit.use_cases.request_cooperation import (
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 
@@ -498,7 +497,6 @@ class CooperationGenerator:
 @dataclass
 class AccountantGenerator:
     invite_accountant_use_case: SendAccountantRegistrationTokenUseCase
-    invite_accountant_presenter: AccountantInvitationPresenterTestImpl
     register_accountant_use_case: RegisterAccountantUseCase
     email_generator: EmailGenerator
 

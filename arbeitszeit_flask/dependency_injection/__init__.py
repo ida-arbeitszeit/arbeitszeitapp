@@ -7,6 +7,7 @@ from arbeitszeit import records
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.email_notifications import EmailSender
 from arbeitszeit.injector import (
     AliasProvider,
     Binder,
@@ -15,13 +16,6 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.presenters import (
-    AccountantInvitationPresenter,
-    CompanyRegistrationMessagePresenter,
-    InviteWorkerPresenter,
-    MemberRegistrationMessagePresenter,
-    NotifyAccountantsAboutNewPlanPresenter,
-)
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -59,7 +53,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
+from arbeitszeit_web.email_sender import EmailSender as EmailSenderImpl
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -76,14 +70,7 @@ from arbeitszeit_web.url_index import (
     UrlIndex,
 )
 from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailPresenter,
     AccountantInvitationEmailView,
-)
-from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
-    NotifyAccountantsAboutNewPlanPresenterImpl,
-)
-from arbeitszeit_web.www.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
 )
 
 
@@ -123,10 +110,6 @@ class FlaskModule(Module):
             to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
         )
         binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))
-        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(
-            NotifyAccountantsAboutNewPlanPresenterImpl
-        )
-        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)
         binder[TextRenderer] = AliasProvider(TextRendererImpl)
         binder[Request] = AliasProvider(FlaskRequest)
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)
@@ -146,16 +129,6 @@ class FlaskModule(Module):
         binder[Colors] = AliasProvider(FlaskColors)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
         binder[LanguageChangerUrlIndex] = AliasProvider(GeneralUrlIndex)
-        binder[CompanyRegistrationMessagePresenter] = AliasProvider(
-            RegistrationEmailPresenter
-        )
-        binder[MemberRegistrationMessagePresenter] = AliasProvider(
-            RegistrationEmailPresenter
-        )
-        binder.bind(
-            AccountantInvitationPresenter,
-            to=AliasProvider(AccountantInvitationEmailPresenter),
-        )
         binder.bind(
             AccountantInvitationEmailView,
             to=AliasProvider(AccountantInvitationEmailViewImpl),
@@ -171,6 +144,10 @@ class FlaskModule(Module):
         binder.bind(
             TokenService,
             to=AliasProvider(FlaskTokenService),
+        )
+        binder.bind(
+            EmailSender,
+            to=AliasProvider(EmailSenderImpl),
         )
 
     @staticmethod
