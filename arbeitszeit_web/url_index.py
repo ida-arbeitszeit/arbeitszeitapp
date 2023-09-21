@@ -111,6 +111,9 @@ class UrlIndex(Protocol):
     def get_file_plan_url(self, draft_id: UUID) -> str:
         ...
 
+    def get_revoke_plan_filing_url(self, plan_id: UUID) -> str:
+        ...
+
     def get_unreviewed_plans_list_view_url(self) -> str:
         ...
 
