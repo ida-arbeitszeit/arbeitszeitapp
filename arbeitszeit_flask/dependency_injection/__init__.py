@@ -53,7 +53,10 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.email_sender import EmailSender as EmailSenderImpl
+from arbeitszeit_web.email.accountant_invitation_presenter import (
+    AccountantInvitationEmailView,
+)
+from arbeitszeit_web.email.email_sender import EmailSender as EmailSenderImpl
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -68,9 +71,6 @@ from arbeitszeit_web.url_index import (
     LanguageChangerUrlIndex,
     RenewPlanUrlIndex,
     UrlIndex,
-)
-from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailView,
 )
 
 

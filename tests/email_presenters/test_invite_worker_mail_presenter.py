@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
+from arbeitszeit_web.email.invite_worker_presenter import InviteWorkerPresenterImpl
 from tests.email import FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
 from tests.www.base_test_case import BaseTestCase

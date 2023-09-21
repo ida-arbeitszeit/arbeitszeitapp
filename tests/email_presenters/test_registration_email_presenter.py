@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from arbeitszeit_web.www.presenters.registration_email_presenter import (
+from arbeitszeit_web.email.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
 from tests.datetime_service import FakeDatetimeService

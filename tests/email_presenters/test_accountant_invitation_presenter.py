@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Callable
 
-from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
+from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     ViewModel,
 )
@@ -9,9 +9,9 @@ from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailConfiguration
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
+from tests.www.presenters.url_index import AccountantInvitationUrlIndexImpl
 
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
-from .url_index import AccountantInvitationUrlIndexImpl
 
 
 class PresenterTests(BaseTestCase):
