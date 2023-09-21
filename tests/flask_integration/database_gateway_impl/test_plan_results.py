@@ -9,6 +9,7 @@ from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
@@ -89,6 +90,17 @@ class PlanResultTests(FlaskTestCase):
         ).perform()
         changed_plan: Plan = self.database_gateway.get_plans().with_id(plan.id).first()  # type: ignore
         assert changed_plan.approval_date == expected_approval_date
+
+    def test_that_plan_gets_deleted(self) -> None:
+        plan = self.create_plan()
+        self.database_gateway.get_plans().with_id(plan.id).delete()
+        assert not len(self.database_gateway.get_plans().with_id(plan.id))
+
+    def test_that_plan_review_gets_deleted_when_plan_gets_deleted(self) -> None:
+        plan = self.create_plan()
+        assert self.database_gateway.db.session.query(models.PlanReview).all()
+        self.database_gateway.get_plans().with_id(plan.id).delete()
+        assert not self.database_gateway.db.session.query(models.PlanReview).all()
 
     def create_plan(self) -> Plan:
         return self.database_gateway.create_plan(

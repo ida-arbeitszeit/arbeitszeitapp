@@ -61,6 +61,7 @@ class UrlIndexTestImpl:
     get_accountant_dashboard_url = UrlIndexMethod()
     get_my_plans_url = UrlIndexMethod()
     get_file_plan_url = UrlIndexMethod()
+    get_revoke_plan_filing_url = UrlIndexMethod()
     get_unreviewed_plans_list_view_url = UrlIndexMethod()
     get_approve_plan_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()

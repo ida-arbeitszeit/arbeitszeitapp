@@ -15,6 +15,7 @@ from tests.data_generators import (
     CompanyGenerator,
     EmailGenerator,
     MemberGenerator,
+    PlanGenerator,
 )
 from tests.markers import database_required
 
@@ -61,6 +62,7 @@ class ViewTestCase(FlaskTestCase):
         self.company_generator = self.injector.get(CompanyGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
 
     def login_member(
         self,

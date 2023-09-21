@@ -149,6 +149,16 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         )
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
 
+    def test_non_active_plan_has_correct_revocation_url(self) -> None:
+        plan = self.plan_generator.create_plan(approved=False)
+        use_case_response = self.response_with_one_non_active_plan(plan)
+        view_model = self.presenter.present(use_case_response)
+        row = view_model.non_active_plans.rows[0]
+        self.assertEqual(
+            row.revoke_plan_filing_url,
+            self.url_index.get_revoke_plan_filing_url(plan.id),
+        )
+
     def test_that_relative_expiration_is_calculated_correctly(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan = self._create_active_plan(timeframe=5)
