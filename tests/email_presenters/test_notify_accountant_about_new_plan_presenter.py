@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit.email_notifications import AccountantNotificationAboutNewPlan
-from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
+from arbeitszeit_web.email.notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
 )
 from tests.email import FakeAddressBook, FakeEmailConfiguration, FakeEmailSender

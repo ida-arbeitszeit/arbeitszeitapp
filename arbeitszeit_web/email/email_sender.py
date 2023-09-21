@@ -1,16 +1,13 @@
 from dataclasses import dataclass
 
 from arbeitszeit import email_notifications as interface
-from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
-from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailPresenter,
-)
-from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
+
+from .accountant_invitation_presenter import AccountantInvitationEmailPresenter
+from .invite_worker_presenter import InviteWorkerPresenterImpl
+from .notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
 )
-from arbeitszeit_web.www.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
-)
+from .registration_email_presenter import RegistrationEmailPresenter
 
 
 @dataclass
