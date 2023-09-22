@@ -43,15 +43,23 @@ class EmailChangeConfirmation:
     new_email_address: str
 
 
+@dataclass
+class CooperationRequestEmail:
+    coordinator_email_address: str
+    coordinator_name: str
+
+
 # This type definition can be used by implementations of the
-# EmailSender protocol for static type checking purposes.
+# EmailSender protocol for static type checking purposes. Keep this
+# list alphabetically sorted.
 Message: TypeAlias = Union[
-    MemberRegistration,
-    CompanyRegistration,
-    AccountantNotificationAboutNewPlan,
     AccountantInvitation,
-    WorkerInvitation,
+    AccountantNotificationAboutNewPlan,
+    CompanyRegistration,
+    CooperationRequestEmail,
     EmailChangeConfirmation,
+    MemberRegistration,
+    WorkerInvitation,
 ]
 # Implementations can rely on this set to contain all possible message
 # types.

@@ -4,7 +4,7 @@ from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
 from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )
-from tests.email import FakeEmailSender
+from tests.email import FakeEmailService
 from tests.www.base_test_case import BaseTestCase
 
 RejectionReason = RequestCooperationResponse.RejectionReason
@@ -14,7 +14,7 @@ class RequestCooperationPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(RequestCooperationPresenter)
-        self.mail_service = self.injector.get(FakeEmailSender)
+        self.mail_service = self.injector.get(FakeEmailService)
 
     def test_do_not_show_as_error_if_request_was_successful(self):
         presentation = self.presenter.present(self.get_successful_request())
@@ -25,29 +25,9 @@ class RequestCooperationPresenterTests(BaseTestCase):
         expected = self.translator.gettext("Request has been sent.")
         self.assertEqual(presentation.notifications[0], expected)
 
-    def test_mail_gets_sent_if_request_was_successful(self):
+    def test_that_no_mail_was_sent_after_successful_request(self) -> None:
         self.presenter.present(self.get_successful_request())
-        self.assertTrue(self.mail_service.sent_mails)
-
-    def test_mail_gets_sent_to_coordinator_if_request_was_successful(self):
-        recipient = "company@comp.any"
-        self.presenter.present(self.get_successful_request(coordinator_mail=recipient))
-        self.assertEqual(self.mail_service.sent_mails[0].recipients, [recipient])
-
-    def test_mail_gets_sent_and_subject_and_html_body_are_not_empty(self):
-        self.presenter.present(self.get_successful_request())
-        self.assertTrue(self.mail_service.sent_mails[0].subject)
-        self.assertTrue(self.mail_service.sent_mails[0].html)
-
-    def test_mail_html_body_has_name_of_coordinator_safely_escaped(self):
-        coordinator_name = '<a href="dangerous site">coordinator</a>'
-        self.presenter.present(
-            self.get_successful_request(coordinator_name=coordinator_name)
-        )
-        self.assertIn(
-            "&lt;a href=&quot;dangerous site&quot;&gt;coordinator&lt;/a&gt;",
-            self.mail_service.sent_mails[0].html,
-        )
+        assert not self.mail_service.sent_mails
 
     def test_show_as_error_if_request_was_rejected(self):
         presentation = self.presenter.present(

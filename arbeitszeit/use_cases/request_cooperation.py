@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.email_notifications import CooperationRequestEmail, EmailSender
 from arbeitszeit.records import Company, EmailAddress
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -39,6 +40,7 @@ class RequestCooperationResponse:
 class RequestCooperation:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
+    email_sender: EmailSender
 
     def __call__(
         self, request: RequestCooperationRequest
@@ -49,6 +51,12 @@ class RequestCooperation:
             return RequestCooperationResponse(
                 coordinator_name=None, coordinator_email=None, rejection_reason=reason
             )
+        self.email_sender.send_email(
+            CooperationRequestEmail(
+                coordinator_email_address=email.address,
+                coordinator_name=coordinator.name,
+            )
+        )
         self.database_gateway.get_plans().with_id(
             request.plan_id
         ).update().set_requested_cooperation(request.cooperation_id).perform()

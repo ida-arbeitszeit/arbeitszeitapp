@@ -15,7 +15,7 @@ from arbeitszeit_web.url_index import (
     UrlIndex,
 )
 from tests.dependency_injection import TestingModule
-from tests.email import FakeEmailConfiguration, FakeEmailSender
+from tests.email import FakeEmailConfiguration, FakeEmailService
 from tests.email_presenters.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
@@ -50,7 +50,7 @@ class WwwTestsInjector(Module):
         binder[Request] = AliasProvider(FakeRequest)
         binder[LanguageChangerUrlIndex] = AliasProvider(LanguageChangerUrlIndexImpl)
         binder[LanguageService] = AliasProvider(FakeLanguageService)
-        binder[MailService] = AliasProvider(FakeEmailSender)
+        binder[MailService] = AliasProvider(FakeEmailService)
         binder[RenewPlanUrlIndex] = AliasProvider(RenewPlanUrlIndexTestImpl)
         binder[HidePlanUrlIndex] = AliasProvider(HidePlanUrlIndexTestImpl)
 

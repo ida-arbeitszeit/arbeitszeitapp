@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit_web.email.invite_worker_presenter import InviteWorkerPresenterImpl
-from tests.email import FakeEmailConfiguration, FakeEmailSender
+from tests.email import FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
 from tests.www.base_test_case import BaseTestCase
 
@@ -10,7 +10,6 @@ class SendMailTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(InviteWorkerPresenterImpl)
-        self.email_service = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.text_renderer = self.injector.get(TextRendererImpl)
 
