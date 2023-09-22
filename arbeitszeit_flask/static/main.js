@@ -60,3 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  function copyTextToClipboard(text) {
+    navigator.clipboard.writeText(text);
+  }
+
+  function changeElementIconToCheckIcon(elementId) {
+    let element = document.getElementById(elementId); 
+    element.classList.toggle("fa-check");
+  }

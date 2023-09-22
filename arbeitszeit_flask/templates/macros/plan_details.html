@@ -13,7 +13,15 @@
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification">
                                 <p class="title is-4">{{ view_model.details.plan_id[0] }}</p>
-                                <p class="subtitle">{{ view_model.details.plan_id[1] }}</p>
+                                <p class="subtitle">
+                                    {{ view_model.details.plan_id[1] }}&nbsp;
+                                    <a  
+                                    role="button" 
+                                    onclick="copyTextToClipboard('{{ view_model.details.plan_id[1] }}'); 
+                                    changeElementIconToCheckIcon('changeableIcon')">
+                                        <span class="icon"><i id="changeableIcon" class="fa-regular fa-copy"></i></span>
+                                    </a>
+                                </p>
                             </article>
                             <div class="tile">
                                 <div class="tile is-parent">
