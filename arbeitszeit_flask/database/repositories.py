@@ -35,7 +35,6 @@ from arbeitszeit_flask.database.models import (
 )
 
 T = TypeVar("T", covariant=True)
-FlaskQueryResultT = TypeVar("FlaskQueryResultT", bound="FlaskQueryResult")
 
 
 class FlaskQueryResult(Generic[T]):
@@ -44,10 +43,10 @@ class FlaskQueryResult(Generic[T]):
         self.mapper = mapper
         self.db = db
 
-    def limit(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
+    def limit(self, n: int) -> Self:
         return type(self)(query=self.query.limit(n), mapper=self.mapper, db=self.db)
 
-    def offset(self: FlaskQueryResultT, n: int) -> FlaskQueryResultT:
+    def offset(self, n: int) -> Self:
         return type(self)(query=self.query.offset(n), mapper=self.mapper, db=self.db)
 
     def first(self) -> Optional[T]:
@@ -69,19 +68,19 @@ class FlaskQueryResult(Generic[T]):
 
 
 class PlanQueryResult(FlaskQueryResult[records.Plan]):
-    def ordered_by_creation_date(self, ascending: bool = True) -> PlanQueryResult:
+    def ordered_by_creation_date(self, ascending: bool = True) -> Self:
         ordering = models.Plan.plan_creation_date
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> PlanQueryResult:
+    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
         ordering = models.Plan.activation_date
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def ordered_by_planner_name(self, ascending: bool = True) -> PlanQueryResult:
+    def ordered_by_planner_name(self, ascending: bool = True) -> Self:
         ordering = models.Company.name
         if not ascending:
             ordering = ordering.desc()
@@ -89,17 +88,17 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             lambda query: self.query.join(models.Company).order_by(func.lower(ordering))
         )
 
-    def with_id_containing(self, query: str) -> PlanQueryResult:
+    def with_id_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Plan.id.contains(query))
         )
 
-    def with_product_name_containing(self, query: str) -> PlanQueryResult:
+    def with_product_name_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Plan.prd_name.ilike(f"%{query}%"))
         )
 
-    def that_are_approved(self) -> PlanQueryResult:
+    def that_are_approved(self) -> Self:
         return self._with_modified_query(
             lambda query: self.query.join(models.PlanReview).filter(
                 models.PlanReview.approval_date != None
@@ -129,34 +128,34 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             lambda query: query.filter(expiration_date <= timestamp)
         )
 
-    def that_are_productive(self) -> PlanQueryResult:
+    def that_are_productive(self) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.is_public_service == False)
         )
 
-    def that_are_public(self) -> PlanQueryResult:
+    def that_are_public(self) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.is_public_service == True)
         )
 
-    def that_are_cooperating(self) -> PlanQueryResult:
+    def that_are_cooperating(self) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.cooperation != None)
         )
 
-    def planned_by(self, *company: UUID) -> PlanQueryResult:
+    def planned_by(self, *company: UUID) -> Self:
         companies = list(map(str, company))
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.planner.in_(companies))
         )
 
-    def with_id(self, *id_: UUID) -> PlanQueryResult:
+    def with_id(self, *id_: UUID) -> Self:
         ids = list(map(str, id_))
         return self._with_modified_query(
             lambda query: query.filter(models.Plan.id.in_(ids))
         )
 
-    def without_completed_review(self) -> PlanQueryResult:
+    def without_completed_review(self) -> Self:
         return self._with_modified_query(
             lambda query: self.query.join(models.PlanReview).filter(
                 models.PlanReview.approval_date == None
@@ -165,7 +164,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
-    ) -> PlanQueryResult:
+    ) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(
                 models.Plan.requested_cooperation == str(cooperation)
@@ -174,7 +173,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             )
         )
 
-    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanQueryResult:
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(
                 or_(
@@ -191,7 +190,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             )
         )
 
-    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanQueryResult:
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
         cooperations = list(map(str, cooperation))
         if not cooperation:
             return self._with_modified_query(
@@ -202,9 +201,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
                 lambda query: query.filter(models.Plan.cooperation.in_(cooperations))
             )
 
-    def that_request_cooperation_with_coordinator(
-        self, *company: UUID
-    ) -> PlanQueryResult:
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> Self:
         companies = list(map(str, company))
 
         cooperation = aliased(models.Cooperation)
@@ -328,7 +325,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def delete(self) -> None:
-        raise NotImplementedError()
+        self.query.delete()
 
     def update(self) -> PlanUpdate:
         return PlanUpdate(
@@ -399,7 +396,7 @@ class PlanUpdate:
             row_count = max(row_count, result.rowcount)  # type: ignore
         return row_count
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
         return replace(
             self,
             plan_update_values=dict(
@@ -408,7 +405,7 @@ class PlanUpdate:
             ),
         )
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> Self:
         return replace(
             self,
             plan_update_values=dict(
@@ -417,7 +414,7 @@ class PlanUpdate:
             ),
         )
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
+    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
         return replace(
             self,
             review_update_values=dict(
@@ -427,7 +424,7 @@ class PlanUpdate:
 
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
-    ) -> PlanUpdate:
+    ) -> Self:
         return replace(
             self,
             plan_update_values=dict(
@@ -528,17 +525,17 @@ class PlanDraftUpdate:
 
 
 class MemberQueryResult(FlaskQueryResult[records.Member]):
-    def working_at_company(self, company: UUID) -> MemberQueryResult:
+    def working_at_company(self, company: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.workplaces.any(id=str(company)))
         )
 
-    def with_id(self, member: UUID) -> MemberQueryResult:
+    def with_id(self, member: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.id == str(member))
         )
 
-    def with_email_address(self, email: str) -> MemberQueryResult:
+    def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
             lambda query: query.join(user).filter(
@@ -568,19 +565,19 @@ class MemberQueryResult(FlaskQueryResult[records.Member]):
 
 
 class CompanyQueryResult(FlaskQueryResult[records.Company]):
-    def with_id(self, id_: UUID) -> CompanyQueryResult:
+    def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Company.id == str(id_))
         )
 
-    def with_email_address(self, email: str) -> CompanyQueryResult:
+    def with_email_address(self, email: str) -> Self:
         return self._with_modified_query(
             lambda query: query.join(models.User).filter(
                 func.lower(models.User.email_address) == func.lower(email)
             )
         )
 
-    def that_are_workplace_of_member(self, member: UUID) -> CompanyQueryResult:
+    def that_are_workplace_of_member(self, member: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(
                 models.Company.workers.any(models.Member.id == str(member))
@@ -613,12 +610,12 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
             company.workers.append(member)
         return companies_changed
 
-    def with_name_containing(self, query: str) -> CompanyQueryResult:
+    def with_name_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Company.name.ilike(f"%{query}%"))
         )
 
-    def with_email_containing(self, query: str) -> CompanyQueryResult:
+    def with_email_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.join(models.User).filter(
                 models.User.email_address.ilike(f"%{query}%")
@@ -685,9 +682,7 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
 
 
 class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
-    def where_account_is_sender_or_receiver(
-        self, *account: UUID
-    ) -> TransactionQueryResult:
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
         accounts = list(map(str, account))
         return self._with_modified_query(
             lambda query: query.filter(
@@ -698,7 +693,7 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             )
         )
 
-    def where_account_is_sender(self, *account: UUID) -> TransactionQueryResult:
+    def where_account_is_sender(self, *account: UUID) -> Self:
         accounts = map(str, account)
         return self._with_modified_query(
             lambda query: query.filter(
@@ -706,7 +701,7 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             )
         )
 
-    def where_account_is_receiver(self, *account: UUID) -> TransactionQueryResult:
+    def where_account_is_receiver(self, *account: UUID) -> Self:
         accounts = map(str, account)
         return self._with_modified_query(
             lambda query: query.filter(
@@ -714,15 +709,13 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             )
         )
 
-    def ordered_by_transaction_date(
-        self, descending: bool = False
-    ) -> TransactionQueryResult:
+    def ordered_by_transaction_date(self, descending: bool = False) -> Self:
         ordering = models.Transaction.date
         if descending:
             ordering = ordering.desc()
         return self._with_modified_query(lambda query: self.query.order_by(ordering))
 
-    def where_sender_is_social_accounting(self) -> TransactionQueryResult:
+    def where_sender_is_social_accounting(self) -> Self:
         return self._with_modified_query(
             lambda query: self.query.join(
                 models.SocialAccounting,
@@ -866,7 +859,7 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
 
 
 class AccountQueryResult(FlaskQueryResult[records.Account]):
-    def with_id(self, *id_: UUID) -> AccountQueryResult:
+    def with_id(self, *id_: UUID) -> Self:
         ids = list(map(str, id_))
         return self._with_modified_query(
             lambda query: query.filter(models.Account.id.in_(ids))
@@ -1004,7 +997,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
 
 
 class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption]):
-    def where_consumer_is_company(self, company: UUID) -> ProductiveConsumptionResult:
+    def where_consumer_is_company(self, company: UUID) -> Self:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
         consuming_company = aliased(models.Company)
@@ -1021,9 +1014,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             .filter(consuming_company.id == str(company))
         )
 
-    def ordered_by_creation_date(
-        self, *, ascending: bool = True
-    ) -> ProductiveConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
         if not ascending:
@@ -1117,7 +1108,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
 
 class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
-    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
+    def where_consumer_is_member(self, member: UUID) -> Self:
         transaction = aliased(models.Transaction)
         account = aliased(models.Account)
         consuming_member = aliased(models.Member)
@@ -1131,9 +1122,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
             .filter(consuming_member.id == str(member))
         )
 
-    def ordered_by_creation_date(
-        self, *, ascending: bool = True
-    ) -> PrivateConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
         if not ascending:
@@ -1185,7 +1174,7 @@ class CooperationResult(FlaskQueryResult[records.Cooperation]):
             )
         )
 
-    def coordinated_by_company(self, company_id: UUID) -> FlaskQueryResult:
+    def coordinated_by_company(self, company_id: UUID) -> Self:
         most_recent_tenure_holder = (
             models.CoordinationTenure.query.filter(
                 models.CoordinationTenure.cooperation == models.Cooperation.id
@@ -1196,11 +1185,7 @@ class CooperationResult(FlaskQueryResult[records.Cooperation]):
             .scalar_subquery()
         )
         query = self.query.filter(most_recent_tenure_holder == str(company_id))
-        return FlaskQueryResult(
-            db=self.db,
-            query=query,
-            mapper=self.mapper,
-        )
+        return self._with_modified_query(lambda _: query)
 
     def joined_with_current_coordinator(
         self,

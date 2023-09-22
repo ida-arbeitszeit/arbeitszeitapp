@@ -11,15 +11,12 @@ from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
-from .url_index import UrlIndexTestImpl
-
 UseCaseResponse = GetPlanDetailsUseCase.Response
 
 
 class TestPresenterForPlanner(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.expected_planner = uuid4()
@@ -132,7 +129,6 @@ class TestPresenterForPlanner(BaseTestCase):
 class TestPresenterForNonPlanningCompany(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.presenter = self.injector.get(GetPlanDetailsCompanyPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.session.login_company(uuid4())

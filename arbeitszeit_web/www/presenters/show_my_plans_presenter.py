@@ -40,6 +40,7 @@ class NonActivePlansRow:
     price_per_unit: str
     type_of_plan: str
     plan_creation_date: str
+    revoke_plan_filing_url: str
 
 
 @dataclass
@@ -151,6 +152,9 @@ class ShowMyPlansPresenter:
                     price_per_unit=self.__format_price(plan.price_per_unit),
                     type_of_plan=self.__get_type_of_plan(plan.is_public_service),
                     plan_creation_date=self.__format_date(plan.plan_creation_date),
+                    revoke_plan_filing_url=self.url_index.get_revoke_plan_filing_url(
+                        plan.id
+                    ),
                 )
                 for plan in response.non_active_plans
             ],

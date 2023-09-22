@@ -6,20 +6,13 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .notifier import NotifierTestImpl
-from .url_index import UrlIndexTestImpl
 
 
 class Tests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(FilePlanWithAccountingPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.notifier = self.injector.get(NotifierTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.session.login_company(company=uuid4())
 
     def test_view_model_has_redirect_url_with_successful_responses(self) -> None:

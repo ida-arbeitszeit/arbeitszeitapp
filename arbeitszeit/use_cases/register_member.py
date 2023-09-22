@@ -7,15 +7,15 @@ from uuid import UUID
 
 from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.email_notifications import EmailSender, MemberRegistration
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.presenters import MemberRegistrationMessagePresenter
 from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
 class RegisterMemberUseCase:
     datetime_service: DatetimeService
-    member_registration_message_presenter: MemberRegistrationMessagePresenter
+    email_sender: EmailSender
     password_hasher: PasswordHasher
     database: DatabaseGateway
 
@@ -89,6 +89,4 @@ class RegisterMemberUseCase:
         )
 
     def _create_confirmation_mail(self, email_address: str) -> None:
-        self.member_registration_message_presenter.show_member_registration_message(
-            email_address=email_address
-        )
+        self.email_sender.send_email(MemberRegistration(email_address=email_address))

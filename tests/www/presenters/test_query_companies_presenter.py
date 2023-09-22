@@ -7,18 +7,13 @@ from arbeitszeit_web.www.presenters.query_companies_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedCompanyGenerator
-from tests.www.presenters.url_index import UrlIndexTestImpl
-
-from .notifier import NotifierTestImpl
 
 
 class QueryCompaniesPresenterTests(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.queried_company_generator = self.injector.get(QueriedCompanyGenerator)
-        self.notifier = self.injector.get(NotifierTestImpl)
         self.presenter = self.injector.get(QueryCompaniesPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.session.login_member(uuid4())
 
     def test_empty_view_model_does_not_show_results(self):

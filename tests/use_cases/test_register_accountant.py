@@ -1,29 +1,19 @@
-from unittest import TestCase
-
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
-from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.use_case = self.injector.get(RegisterAccountantUseCase)
         self.send_registration_token_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
-        self.invitation_presenter = self.injector.get(
-            AccountantInvitationPresenterTestImpl
-        )
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.accountant_generator = self.injector.get(AccountantGenerator)
         self.confirm_company_use_case = self.injector.get(ConfirmCompanyUseCase)
 
     def test_that_user_that_was_invited_can_register(self) -> None:

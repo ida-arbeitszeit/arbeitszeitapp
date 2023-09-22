@@ -1,9 +1,9 @@
 from uuid import uuid4
 
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.resend_confirmation_mail import (
     ResendConfirmationMailUseCase as UseCase,
 )
-from tests.token import FakeTokenService, TokenDeliveryService
 
 from .base_test_case import BaseTestCase
 
@@ -12,8 +12,6 @@ class MemberTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(UseCase)
-        self.token_presenter = self.injector.get(TokenDeliveryService)
-        self.token_service = self.injector.get(FakeTokenService)
 
     def test_that_token_will_be_sent_for_unconfirmed_member(self) -> None:
         member = self.member_generator.create_member(confirmed=False)
@@ -31,12 +29,20 @@ class MemberTests(BaseTestCase):
 
     def test_that_confirmation_message_is_sent_out_for_unconfirmed_member(self) -> None:
         member = self.member_generator.create_member(confirmed=False)
-        tokens_delivered_so_far = len(self.token_presenter.presented_member_tokens)
+        tokens_delivered_so_far = len(self.delivered_registration_messages())
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=member))
         assert (
-            len(self.token_presenter.presented_member_tokens)
-            == tokens_delivered_so_far + 1
+            len(self.delivered_registration_messages()) == tokens_delivered_so_far + 1
         )
+
+    def delivered_registration_messages(
+        self,
+    ) -> list[email_notifications.MemberRegistration]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.MemberRegistration)
+        ]
 
 
 class NoValidUserTests(BaseTestCase):
@@ -55,8 +61,6 @@ class CompanyTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(UseCase)
-        self.token_presenter = self.injector.get(TokenDeliveryService)
-        self.token_service = self.injector.get(FakeTokenService)
 
     def test_can_resend_confirmation_email_for_unapproved_companies(self) -> None:
         company = self.company_generator.create_company(confirmed=False)
@@ -76,9 +80,17 @@ class CompanyTests(BaseTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company(confirmed=False)
-        tokens_delivered_so_far = len(self.token_presenter.presented_company_tokens)
+        tokens_delivered_so_far = len(self.delivered_registration_messages())
         self.use_case.resend_confirmation_mail(request=UseCase.Request(user=company))
         assert (
-            len(self.token_presenter.presented_company_tokens)
-            == tokens_delivered_so_far + 1
+            len(self.delivered_registration_messages()) == tokens_delivered_so_far + 1
         )
+
+    def delivered_registration_messages(
+        self,
+    ) -> list[email_notifications.CompanyRegistration]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.CompanyRegistration)
+        ]

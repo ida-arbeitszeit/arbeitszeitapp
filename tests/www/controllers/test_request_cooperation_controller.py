@@ -6,7 +6,6 @@ from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
 )
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -30,7 +29,6 @@ fake_form = FakeRequestCooperationForm(
 class RequestCooperationControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.controller = self.injector.get(RequestCooperationController)
 
     def test_when_user_is_not_authenticated_then_we_cannot_get_a_use_case_request(

@@ -64,6 +64,7 @@
           <th>{{ gettext("Costs")}}</th>
           <th>{{ gettext("Type")}}</th>
           <th>{{ gettext("Plan created")}}</th>
+          <th>{{ gettext("Revoke") }}</th>
         </tr>
       </thead>
       <tbody>
@@ -73,6 +74,16 @@
           <td>{{ plan.price_per_unit }}</td>
           <td>{{ plan.type_of_plan }}</td>
           <td>{{ plan.plan_creation_date }}</td>
+          <td><form method="post" action="{{ plan.revoke_plan_filing_url }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button is-ghost" type="submit" title="{{ gettext('Revoke plan filing') }}">
+            <i class="fas fa-times"></i>
+          </button>
+          </form>
+          </td>
+
+          
+          
         </tr>
         {% endfor %}
       </tbody>

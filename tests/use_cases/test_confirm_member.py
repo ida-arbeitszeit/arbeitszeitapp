@@ -1,5 +1,4 @@
 from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase as UseCase
-from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
 
@@ -8,7 +7,6 @@ class ConfirmMemberTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(UseCase)
-        self.token_deliverer = self.injector.get(TokenDeliveryService)
 
     def test_cannot_confirm_random_email_address(self) -> None:
         response = self.use_case.confirm_member(

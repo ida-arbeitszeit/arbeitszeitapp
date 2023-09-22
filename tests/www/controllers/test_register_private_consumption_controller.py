@@ -8,7 +8,6 @@ from arbeitszeit_web.www.controllers.register_private_consumption_controller imp
     RegisterPrivateConsumptionController,
 )
 from tests.forms import RegisterPrivateConsumptionFakeForm
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 ControllerResult = Optional[RegisterPrivateConsumptionRequest]
@@ -17,7 +16,6 @@ ControllerResult = Optional[RegisterPrivateConsumptionRequest]
 class RegisterPrivateConsumptionControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.controller = self.injector.get(RegisterPrivateConsumptionController)
         self.form = RegisterPrivateConsumptionFakeForm()
 

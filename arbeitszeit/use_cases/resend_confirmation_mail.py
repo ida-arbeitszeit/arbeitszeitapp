@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.presenters import (
-    CompanyRegistrationMessagePresenter,
-    MemberRegistrationMessagePresenter,
+from arbeitszeit.email_notifications import (
+    CompanyRegistration,
+    EmailSender,
+    MemberRegistration,
 )
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -18,8 +19,7 @@ class ResendConfirmationMailUseCase:
     class Response:
         is_token_sent: bool = False
 
-    company_registration_message_presenter: CompanyRegistrationMessagePresenter
-    member_registration_message_presenter: MemberRegistrationMessagePresenter
+    email_sender: EmailSender
     database: DatabaseGateway
 
     def resend_confirmation_mail(self, request: Request) -> Response:
@@ -32,8 +32,8 @@ class ResendConfirmationMailUseCase:
         if member_record is not None:
             _, email = member_record
             if email.confirmed_on is None:
-                self.member_registration_message_presenter.show_member_registration_message(
-                    email.address,
+                self.email_sender.send_email(
+                    MemberRegistration(email_address=email.address)
                 )
                 return self.Response(is_token_sent=True)
         company_record = (
@@ -45,8 +45,8 @@ class ResendConfirmationMailUseCase:
         if company_record is not None:
             _, email = company_record
             if email.confirmed_on is None:
-                self.company_registration_message_presenter.show_company_registration_message(
-                    email.address,
+                self.email_sender.send_email(
+                    CompanyRegistration(email_address=email.address)
                 )
                 return self.Response(is_token_sent=True)
         return self.Response()

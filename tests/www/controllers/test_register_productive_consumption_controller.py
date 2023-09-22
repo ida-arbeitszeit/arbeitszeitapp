@@ -8,14 +8,12 @@ from arbeitszeit_web.www.controllers.register_productive_consumption_controller 
     RegisterProductiveConsumptionController,
 )
 from tests.forms import RegisterProductiveConsumptionFakeForm
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 
 class AuthenticatedCompanyTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.expected_user_id = uuid4()
         self.session.login_company(self.expected_user_id)
         self.controller = RegisterProductiveConsumptionController(

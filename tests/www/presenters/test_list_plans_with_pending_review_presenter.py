@@ -10,14 +10,11 @@ from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter imp
 )
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import UrlIndexTestImpl
-
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ListPlansWithPendingReviewPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_that_plan_overview_is_not_shown_when_there_are_no_plans_in_response(
         self,

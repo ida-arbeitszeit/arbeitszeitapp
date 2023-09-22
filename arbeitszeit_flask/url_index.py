@@ -168,6 +168,9 @@ class GeneralUrlIndex:
     def get_file_plan_url(self, draft_id: UUID) -> str:
         return url_for("main_company.file_plan", draft_id=draft_id)
 
+    def get_revoke_plan_filing_url(self, plan_id: UUID) -> str:
+        return url_for("main_company.revoke_plan_filing", plan_id=plan_id)
+
     def get_unreviewed_plans_list_view_url(self) -> str:
         return url_for("main_accountant.list_plans_with_pending_review")
 
@@ -207,6 +210,15 @@ class GeneralUrlIndex:
 
     def get_start_page_url(self) -> str:
         return url_for(endpoint="auth.start")
+
+    def get_member_account_details_url(self) -> str:
+        return url_for("main_member.get_member_account_details")
+
+    def get_company_account_details_url(self) -> str:
+        return url_for("main_company.get_company_account_details")
+
+    def get_accountant_account_details_url(self) -> str:
+        return url_for("main_accountant.get_accountant_account_details")
 
 
 class CompanyUrlIndex:

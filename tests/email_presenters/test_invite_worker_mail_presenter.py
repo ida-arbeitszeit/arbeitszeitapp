@@ -1,11 +1,9 @@
 from uuid import uuid4
 
-from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
+from arbeitszeit_web.email.invite_worker_presenter import InviteWorkerPresenterImpl
 from tests.email import FakeEmailConfiguration, FakeEmailSender
 from tests.text_renderer import TextRendererImpl
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.url_index import UrlIndexTestImpl
 
 
 class SendMailTests(BaseTestCase):
@@ -14,9 +12,7 @@ class SendMailTests(BaseTestCase):
         self.presenter = self.injector.get(InviteWorkerPresenterImpl)
         self.email_service = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
-        self.translator = self.injector.get(FakeTranslator)
         self.text_renderer = self.injector.get(TextRendererImpl)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
 
     def test_one_mail_gets_send(self) -> None:
         self.presenter.show_invite_worker_message(

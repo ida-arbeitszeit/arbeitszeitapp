@@ -47,6 +47,7 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
 )
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.request_cooperation import RequestCooperation
+from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
 from arbeitszeit_flask.database import commit_changes
@@ -99,6 +100,9 @@ from arbeitszeit_web.www.controllers.query_companies_controller import (
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
 )
+from arbeitszeit_web.www.controllers.revoke_plan_filing_controller import (
+    RevokePlanFilingController,
+)
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
 )
@@ -138,6 +142,9 @@ from arbeitszeit_web.www.presenters.query_companies_presenter import (
 )
 from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
+)
+from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
+    RevokePlanFilingPresenter,
 )
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -367,6 +374,20 @@ def my_plans(
         "company/my_plans.html",
         context=view_model.to_dict(),
     )
+
+
+@CompanyRoute("/company/plan/revoke/<uuid:plan_id>", methods=["POST"])
+@commit_changes
+def revoke_plan_filing(
+    plan_id: UUID,
+    controller: RevokePlanFilingController,
+    use_case: RevokePlanFilingUseCase,
+    presenter: RevokePlanFilingPresenter,
+):
+    request = controller.create_request(plan_id=plan_id)
+    response = use_case.revoke_plan_filing(request=request)
+    presenter.present(response)
+    return redirect(url_for("main_company.my_plans"))
 
 
 @CompanyRoute("/company/toggle_availability/<uuid:plan_id>", methods=["GET"])

@@ -120,7 +120,9 @@ class Plan(db.Model):
 class PlanReview(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
-    plan_id = db.Column(db.String, db.ForeignKey("plan.id"), nullable=False)
+    plan_id = db.Column(
+        db.String, db.ForeignKey("plan.id", ondelete="CASCADE"), nullable=False
+    )
 
     plan = db.relationship("Plan", back_populates="review")
 

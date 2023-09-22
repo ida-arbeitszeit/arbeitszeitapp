@@ -7,18 +7,13 @@ from arbeitszeit_web.www.presenters.log_in_accountant_presenter import (
     LogInAccountantPresenter,
 )
 from tests.forms import LoginForm
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-
-from .url_index import UrlIndexTestImpl
 
 
 class PresenterTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(LogInAccountantPresenter)
-        self.url_index = self.injector.get(UrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
 
     def test_user_gets_redirected_when_login_was_successful(self) -> None:
         response = self._create_success_response()

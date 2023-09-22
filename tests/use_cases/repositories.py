@@ -48,8 +48,6 @@ T_Hash = TypeVar("T_Hash", bound=Hashable)
 Key = TypeVar("Key", bound=Hashable)
 Value = TypeVar("Value", bound=Hashable)
 
-QueryResultT = TypeVar("QueryResultT", bound="QueryResultImpl")
-
 
 @dataclass
 class QueryResultImpl(Generic[T]):
@@ -89,7 +87,7 @@ class QueryResultImpl(Generic[T]):
 
 
 class PlanResult(QueryResultImpl[Plan]):
-    def ordered_by_creation_date(self, ascending: bool = True) -> PlanResult:
+    def ordered_by_creation_date(self, ascending: bool = True) -> Self:
         return replace(
             self,
             items=lambda: sorted(
@@ -99,7 +97,7 @@ class PlanResult(QueryResultImpl[Plan]):
             ),
         )
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> PlanResult:
+    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
         return replace(
             self,
             items=lambda: sorted(
@@ -111,7 +109,7 @@ class PlanResult(QueryResultImpl[Plan]):
             ),
         )
 
-    def ordered_by_planner_name(self, ascending: bool = True) -> PlanResult:
+    def ordered_by_planner_name(self, ascending: bool = True) -> Self:
         def get_company_name(planner_id: UUID) -> str:
             planner = self.database.get_company_by_id(planner_id)
             assert planner
@@ -127,15 +125,15 @@ class PlanResult(QueryResultImpl[Plan]):
             ),
         )
 
-    def with_id_containing(self, query: str) -> PlanResult:
+    def with_id_containing(self, query: str) -> Self:
         return self._filter_elements(lambda plan: query in str(plan.id))
 
-    def with_product_name_containing(self, query: str) -> PlanResult:
+    def with_product_name_containing(self, query: str) -> Self:
         return self._filter_elements(
             lambda plan: query.lower() in plan.prd_name.lower()
         )
 
-    def that_are_approved(self) -> PlanResult:
+    def that_are_approved(self) -> Self:
         return self._filter_elements(lambda plan: plan.approval_date is not None)
 
     def that_were_activated_before(self, timestamp: datetime) -> Self:
@@ -156,34 +154,34 @@ class PlanResult(QueryResultImpl[Plan]):
             and plan.approval_date + timedelta(days=plan.timeframe) <= timestamp
         )
 
-    def that_are_productive(self) -> PlanResult:
+    def that_are_productive(self) -> Self:
         return self._filter_elements(lambda plan: not plan.is_public_service)
 
-    def that_are_public(self) -> PlanResult:
+    def that_are_public(self) -> Self:
         return self._filter_elements(lambda plan: plan.is_public_service)
 
-    def that_are_cooperating(self) -> PlanResult:
+    def that_are_cooperating(self) -> Self:
         return self._filter_elements(lambda plan: plan.cooperation is not None)
 
-    def planned_by(self, *company: UUID) -> PlanResult:
+    def planned_by(self, *company: UUID) -> Self:
         return self._filter_elements(lambda plan: plan.planner in company)
 
-    def with_id(self, *id_: UUID) -> PlanResult:
+    def with_id(self, *id_: UUID) -> Self:
         return self._filter_elements(lambda plan: plan.id in id_)
 
-    def without_completed_review(self) -> PlanResult:
+    def without_completed_review(self) -> Self:
         return self._filter_elements(lambda plan: plan.approval_date is None)
 
     def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
-    ) -> PlanResult:
+    ) -> Self:
         return self._filter_elements(
             lambda plan: plan.requested_cooperation == cooperation
             if cooperation
             else plan.requested_cooperation is not None
         )
 
-    def that_are_in_same_cooperation_as(self, plan: UUID) -> PlanResult:
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         def items_generator() -> Iterator[records.Plan]:
             plan_record = self.database.plans.get(plan)
             if not plan_record:
@@ -204,14 +202,14 @@ class PlanResult(QueryResultImpl[Plan]):
             items=items_generator,
         )
 
-    def that_are_part_of_cooperation(self, *cooperation: UUID) -> PlanResult:
+    def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
         return self._filter_elements(
             (lambda plan: plan.cooperation in cooperation)
             if cooperation
             else (lambda plan: plan.cooperation is not None)
         )
 
-    def that_request_cooperation_with_coordinator(self, *company: UUID) -> PlanResult:
+    def that_request_cooperation_with_coordinator(self, *company: UUID) -> Self:
         def new_items() -> Iterator[Plan]:
             cooperations: Set[UUID] = {
                 coop.id
@@ -325,7 +323,7 @@ class PlanUpdate:
     update_functions: List[Callable[[Plan], None]]
     records: MockDatabase
 
-    def set_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
         def update(plan: Plan) -> None:
             if plan.cooperation:
                 self.records.indices.plan_by_cooperation.remove(
@@ -337,13 +335,13 @@ class PlanUpdate:
 
         return self._add_update(update)
 
-    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> PlanUpdate:
+    def set_requested_cooperation(self, cooperation: Optional[UUID]) -> Self:
         def update(plan: Plan) -> None:
             plan.requested_cooperation = cooperation
 
         return self._add_update(update)
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> PlanUpdate:
+    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
         def update(plan: Plan) -> None:
             plan.approval_date = approval_date
 
@@ -351,7 +349,7 @@ class PlanUpdate:
 
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
-    ) -> PlanUpdate:
+    ) -> Self:
         def update(plan: Plan) -> None:
             plan.activation_date = activation_timestamp
 
@@ -563,16 +561,16 @@ class CooperationResult(QueryResultImpl[Cooperation]):
 
 
 class MemberResult(QueryResultImpl[Member]):
-    def working_at_company(self, company: UUID) -> MemberResult:
+    def working_at_company(self, company: UUID) -> Self:
         return self._filter_elements(
             lambda member: member.id
             in self.database.relationships.company_to_workers.get_right_values(company),
         )
 
-    def with_id(self, member: UUID) -> MemberResult:
+    def with_id(self, member: UUID) -> Self:
         return self._filter_elements(lambda model: model.id == member)
 
-    def with_email_address(self, email: str) -> MemberResult:
+    def with_email_address(self, email: str) -> Self:
         def items() -> Iterable[records.Member]:
             for member in self.items():
                 account_id = self.database.relationships.account_credentials_to_member.get_left_value(
@@ -608,13 +606,13 @@ class MemberResult(QueryResultImpl[Member]):
 
 
 class CompanyResult(QueryResultImpl[Company]):
-    def with_id(self, id_: UUID) -> CompanyResult:
+    def with_id(self, id_: UUID) -> Self:
         return replace(
             self,
             items=lambda: filter(lambda company: company.id == id_, self.items()),
         )
 
-    def with_email_address(self, email: str) -> CompanyResult:
+    def with_email_address(self, email: str) -> Self:
         def items() -> Iterable[records.Company]:
             for company in self.items():
                 credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
@@ -627,7 +625,7 @@ class CompanyResult(QueryResultImpl[Company]):
 
         return replace(self, items=items)
 
-    def that_are_workplace_of_member(self, member: UUID) -> CompanyResult:
+    def that_are_workplace_of_member(self, member: UUID) -> Self:
         def items() -> Iterable[records.Company]:
             for company in self.items():
                 workers = (
@@ -671,12 +669,12 @@ class CompanyResult(QueryResultImpl[Company]):
             self.database.relationships.company_to_workers.relate(company.id, member)
         return companies_changed
 
-    def with_name_containing(self, query: str) -> CompanyResult:
+    def with_name_containing(self, query: str) -> Self:
         return self._filter_elements(
             lambda company: query.lower() in company.name.lower()
         )
 
-    def with_email_containing(self, query: str) -> CompanyResult:
+    def with_email_containing(self, query: str) -> Self:
         def items() -> Iterable[records.Company]:
             for company in self.items():
                 credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
@@ -744,7 +742,7 @@ class AccountantResult(QueryResultImpl[Accountant]):
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> TransactionResult:
+    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
         return replace(
             self,
             items=lambda: filter(
@@ -754,7 +752,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
-    def where_account_is_sender(self, *account: UUID) -> TransactionResult:
+    def where_account_is_sender(self, *account: UUID) -> Self:
         return replace(
             self,
             items=lambda: filter(
@@ -763,7 +761,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
-    def where_account_is_receiver(self, *account: UUID) -> TransactionResult:
+    def where_account_is_receiver(self, *account: UUID) -> Self:
         return replace(
             self,
             items=lambda: filter(
@@ -772,9 +770,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
-    def ordered_by_transaction_date(
-        self, descending: bool = False
-    ) -> TransactionResult:
+    def ordered_by_transaction_date(self, descending: bool = False) -> Self:
         return replace(
             self,
             items=lambda: sorted(
@@ -784,7 +780,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             ),
         )
 
-    def where_sender_is_social_accounting(self) -> TransactionResult:
+    def where_sender_is_social_accounting(self) -> Self:
         return replace(
             self,
             items=lambda: filter(
@@ -856,9 +852,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
 
 class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
-    def ordered_by_creation_date(
-        self, *, ascending: bool = True
-    ) -> PrivateConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         def consumption_sorting_key(
             consumption: records.PrivateConsumption,
         ) -> datetime:
@@ -874,7 +868,7 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
             ),
         )
 
-    def where_consumer_is_member(self, member: UUID) -> PrivateConsumptionResult:
+    def where_consumer_is_member(self, member: UUID) -> Self:
         def filtered_items() -> Iterator[records.PrivateConsumption]:
             member_account = self.database.members[member].account
             for consumption in self.items():
@@ -905,9 +899,7 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
 
 
 class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]):
-    def ordered_by_creation_date(
-        self, *, ascending: bool = True
-    ) -> ProductiveConsumptionResult:
+    def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         def consumption_sorting_key(
             consumption: records.ProductiveConsumption,
         ) -> datetime:
@@ -923,7 +915,7 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
             ),
         )
 
-    def where_consumer_is_company(self, company: UUID) -> ProductiveConsumptionResult:
+    def where_consumer_is_company(self, company: UUID) -> Self:
         def filtered_items() -> Iterator[records.ProductiveConsumption]:
             company_record = self.database.get_company_by_id(company)
             if company_record is None:
@@ -992,7 +984,7 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
 
 
 class AccountResult(QueryResultImpl[Account]):
-    def with_id(self, *id_: UUID) -> AccountResult:
+    def with_id(self, *id_: UUID) -> Self:
         return replace(
             self,
             items=lambda: filter(lambda account: account.id in id_, self.items()),
@@ -1365,6 +1357,48 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
             items=items,
             database=self.database,
         )
+
+    def update(self) -> AccountCredentialsUpdate:
+        return AccountCredentialsUpdate(
+            items=self.items,
+            database=self.database,
+        )
+
+
+@dataclass
+class AccountCredentialsUpdate:
+    items: Callable[[], Iterable[records.AccountCredentials]]
+    database: MockDatabase
+    actions: List[Callable[[MockDatabase, records.AccountCredentials], None]] = field(
+        default_factory=list
+    )
+
+    def perform(self) -> int:
+        item_count = 0
+        for item in self.items():
+            item_count += 1
+            self.perform_all_actions(item)
+        return item_count
+
+    def perform_all_actions(self, item) -> None:
+        for action in self.actions:
+            action(self.database, item)
+
+    def change_email_address(self, new_email_address: str) -> Self:
+        def _change_action(db: MockDatabase, item: records.AccountCredentials) -> None:
+            assert not db.indices.account_credentials_by_email_address_lowercased.get(
+                new_email_address.lower()
+            )
+            assert new_email_address in db.email_addresses
+            db.indices.account_credentials_by_email_address_lowercased.remove(
+                item.email_address.lower(), item.id
+            )
+            item.email_address = new_email_address
+            db.indices.account_credentials_by_email_address_lowercased.add(
+                new_email_address.lower(), item.id
+            )
+
+        return replace(self, actions=self.actions + [_change_action])
 
 
 @singleton

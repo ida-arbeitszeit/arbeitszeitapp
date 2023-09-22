@@ -11,34 +11,24 @@ from arbeitszeit.use_cases.show_my_plans import (
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.notifier import NotifierTestImpl
 
-from .url_index import (
-    HidePlanUrlIndexTestImpl,
-    RenewPlanUrlIndexTestImpl,
-    UrlIndexTestImpl,
-)
+from .url_index import HidePlanUrlIndexTestImpl, RenewPlanUrlIndexTestImpl
 
 
 class ShowMyPlansPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(UrlIndexTestImpl)
         self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
         self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.notifier = self.injector.get(NotifierTestImpl)
         self.session.login_company(uuid4())
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
 
     def test_show_correct_notification_when_user_has_no_plans(self) -> None:
@@ -158,6 +148,16 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             "10.00",
         )
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
+
+    def test_non_active_plan_has_correct_revocation_url(self) -> None:
+        plan = self.plan_generator.create_plan(approved=False)
+        use_case_response = self.response_with_one_non_active_plan(plan)
+        view_model = self.presenter.present(use_case_response)
+        row = view_model.non_active_plans.rows[0]
+        self.assertEqual(
+            row.revoke_plan_filing_url,
+            self.url_index.get_revoke_plan_filing_url(plan.id),
+        )
 
     def test_that_relative_expiration_is_calculated_correctly(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))

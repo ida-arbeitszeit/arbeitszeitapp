@@ -61,6 +61,7 @@ class UrlIndexTestImpl:
     get_accountant_dashboard_url = UrlIndexMethod()
     get_my_plans_url = UrlIndexMethod()
     get_file_plan_url = UrlIndexMethod()
+    get_revoke_plan_filing_url = UrlIndexMethod()
     get_unreviewed_plans_list_view_url = UrlIndexMethod()
     get_approve_plan_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()
@@ -70,6 +71,9 @@ class UrlIndexTestImpl:
     get_member_query_companies_url = UrlIndexMethod()
     get_company_query_companies_url = UrlIndexMethod()
     get_unconfirmed_member_url = UrlIndexMethod()
+    get_member_account_details_url = UrlIndexMethod()
+    get_company_account_details_url = UrlIndexMethod()
+    get_accountant_account_details_url = UrlIndexMethod()
 
     def get_member_confirmation_url(self, *, token: str) -> str:
         return f"get_member_confirmation_url {token}"

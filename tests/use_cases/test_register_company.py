@@ -1,9 +1,9 @@
 from uuid import UUID
 
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
-from tests.token import TokenDeliveryService
 
 from .base_test_case import BaseTestCase
 
@@ -12,7 +12,6 @@ class RegisterCompanyTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(RegisterCompany)
-        self.token_delivery = self.injector.get(TokenDeliveryService)
         self.get_company_dashboard_use_case = self.injector.get(
             GetCompanyDashboardUseCase
         )
@@ -20,7 +19,7 @@ class RegisterCompanyTests(BaseTestCase):
 
     def test_that_a_token_is_sent_out_when_a_company_registers(self) -> None:
         self.use_case.register_company(self._create_request())
-        self.assertTrue(self.token_delivery.presented_company_tokens)
+        self.assertTrue(self.delivered_registration_mails())
 
     def test_registration_message_was_delivered_to_user(self) -> None:
         expected_mail = "mailtest321@cp.org"
@@ -126,8 +125,17 @@ class RegisterCompanyTests(BaseTestCase):
         return response.company_info
 
     def _assert_company_received_registration_message(self, email: str) -> None:
-        for token in self.token_delivery.presented_company_tokens:
-            if token.email_address == email:
+        for mail in self.delivered_registration_mails():
+            if mail.email_address == email:
                 break
         else:
             assert False, "Token was not delivered to registering user"
+
+    def delivered_registration_mails(
+        self,
+    ) -> list[email_notifications.CompanyRegistration]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.CompanyRegistration)
+        ]

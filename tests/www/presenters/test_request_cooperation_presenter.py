@@ -5,7 +5,6 @@ from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )
 from tests.email import FakeEmailSender
-from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 RejectionReason = RequestCooperationResponse.RejectionReason
@@ -14,7 +13,6 @@ RejectionReason = RequestCooperationResponse.RejectionReason
 class RequestCooperationPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.translator = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(RequestCooperationPresenter)
         self.mail_service = self.injector.get(FakeEmailSender)
 

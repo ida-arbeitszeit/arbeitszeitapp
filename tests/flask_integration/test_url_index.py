@@ -6,9 +6,9 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
+from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
-from tests.accountant_invitation_presenter import AccountantInvitationPresenterTestImpl
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
 from .flask import ViewTestCase
@@ -115,9 +115,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
-        self.invitation_presenter = self.injector.get(
-            AccountantInvitationPresenterTestImpl
-        )
+        self.token_service = self.injector.get(FlaskTokenService)
 
     def test_invite_url_for_existing_invite_leads_to_functional_url_for_member(
         self,
@@ -156,7 +154,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_can_create_valid_url_from_valid_token(self) -> None:
-        token = self.invite_accountant(email="test@test.test")
+        token = self.token_service.generate_token("test text")
         url = self.url_index.get_accountant_invitation_url(token=token)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -169,12 +167,6 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_draft_details_url(draft_id=draft)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-    def invite_accountant(self, email: str) -> str:
-        self.invite_accountant_use_case.send_accountant_registration_token(
-            request=SendAccountantRegistrationTokenUseCase.Request(email=email)
-        )
-        return self.invitation_presenter.invitations[-1].token
 
     def test_coop_summary_url_for_existing_coop_leads_to_functional_url_for_companies(
         self,

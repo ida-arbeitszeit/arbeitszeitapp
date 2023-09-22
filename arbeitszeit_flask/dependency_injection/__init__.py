@@ -7,6 +7,7 @@ from arbeitszeit import records
 from arbeitszeit import repositories as interfaces
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.email_notifications import EmailSender
 from arbeitszeit.injector import (
     AliasProvider,
     Binder,
@@ -15,13 +16,6 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit.presenters import (
-    AccountantInvitationPresenter,
-    CompanyRegistrationMessagePresenter,
-    InviteWorkerPresenter,
-    MemberRegistrationMessagePresenter,
-    NotifyAccountantsAboutNewPlanPresenter,
-)
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import (
@@ -59,7 +53,10 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
 )
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
-from arbeitszeit_web.invite_worker_presenter import InviteWorkerPresenterImpl
+from arbeitszeit_web.email.accountant_invitation_presenter import (
+    AccountantInvitationEmailView,
+)
+from arbeitszeit_web.email.email_sender import EmailSender as EmailSenderImpl
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -75,36 +72,26 @@ from arbeitszeit_web.url_index import (
     RenewPlanUrlIndex,
     UrlIndex,
 )
-from arbeitszeit_web.www.presenters.accountant_invitation_presenter import (
-    AccountantInvitationEmailPresenter,
-    AccountantInvitationEmailView,
-)
-from arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter import (
-    NotifyAccountantsAboutNewPlanPresenterImpl,
-)
-from arbeitszeit_web.www.presenters.registration_email_presenter import (
-    RegistrationEmailPresenter,
-)
 
 
 class AccountantModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[TemplateIndex] = AliasProvider(AccountantTemplateIndex)  # type: ignore
+        binder[TemplateIndex] = AliasProvider(AccountantTemplateIndex)
 
 
 class MemberModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[TemplateIndex] = AliasProvider(MemberTemplateIndex)  # type: ignore
+        binder[TemplateIndex] = AliasProvider(MemberTemplateIndex)
 
 
 class CompanyModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
-        binder[RenewPlanUrlIndex] = AliasProvider(CompanyUrlIndex)  # type: ignore
-        binder[HidePlanUrlIndex] = AliasProvider(CompanyUrlIndex)  # type: ignore
-        binder[TemplateIndex] = AliasProvider(CompanyTemplateIndex)  # type: ignore
+        binder[RenewPlanUrlIndex] = AliasProvider(CompanyUrlIndex)
+        binder[HidePlanUrlIndex] = AliasProvider(CompanyUrlIndex)
+        binder[TemplateIndex] = AliasProvider(CompanyTemplateIndex)
 
 
 class FlaskModule(Module):
@@ -115,60 +102,52 @@ class FlaskModule(Module):
             to=CallableProvider(get_social_accounting),
         )
         binder.bind(
-            DatetimeService,  # type: ignore
+            DatetimeService,
             to=AliasProvider(RealtimeDatetimeService),
         )
         binder.bind(
             SQLAlchemy,
             to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
         )
-        binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))  # type: ignore
-        binder[NotifyAccountantsAboutNewPlanPresenter] = AliasProvider(NotifyAccountantsAboutNewPlanPresenterImpl)  # type: ignore
-        binder[InviteWorkerPresenter] = AliasProvider(InviteWorkerPresenterImpl)  # type: ignore
-        binder[TextRenderer] = AliasProvider(TextRendererImpl)  # type: ignore
-        binder[Request] = AliasProvider(FlaskRequest)  # type: ignore
-        binder[UrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
-        binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
-        binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)  # type: ignore
-        binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)  # type: ignore
+        binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))
+        binder[TextRenderer] = AliasProvider(TextRendererImpl)
+        binder[Request] = AliasProvider(FlaskRequest)
+        binder[UrlIndex] = AliasProvider(GeneralUrlIndex)
+        binder[interfaces.LanguageRepository] = AliasProvider(LanguageRepositoryImpl)
+        binder[LanguageService] = AliasProvider(LanguageRepositoryImpl)
+        binder[EmailConfiguration] = AliasProvider(FlaskEmailConfiguration)
         binder.bind(
-            interfaces.DatabaseGateway,  # type: ignore
+            interfaces.DatabaseGateway,
             to=AliasProvider(DatabaseGatewayImpl),
         )
-        binder[TemplateRenderer] = AliasProvider(FlaskTemplateRenderer)  # type: ignore
-        binder[Session] = AliasProvider(FlaskSession)  # type: ignore
-        binder[Notifier] = AliasProvider(FlaskFlashNotifier)  # type: ignore
-        binder[MailService] = CallableProvider(get_mail_service)  # type: ignore
-        binder[Translator] = AliasProvider(FlaskTranslator)  # type: ignore
-        binder[Plotter] = AliasProvider(FlaskPlotter)  # type: ignore
-        binder[Colors] = AliasProvider(FlaskColors)  # type: ignore
-        binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)  # type: ignore
-        binder[LanguageChangerUrlIndex] = AliasProvider(GeneralUrlIndex)  # type: ignore
-        binder[CompanyRegistrationMessagePresenter] = AliasProvider(  # type: ignore
-            RegistrationEmailPresenter
-        )
-        binder[MemberRegistrationMessagePresenter] = AliasProvider(  # type: ignore
-            RegistrationEmailPresenter
-        )
+        binder[TemplateRenderer] = AliasProvider(FlaskTemplateRenderer)
+        binder[Session] = AliasProvider(FlaskSession)
+        binder[Notifier] = AliasProvider(FlaskFlashNotifier)
+        binder[MailService] = CallableProvider(get_mail_service)
+        binder[Translator] = AliasProvider(FlaskTranslator)
+        binder[Plotter] = AliasProvider(FlaskPlotter)
+        binder[Colors] = AliasProvider(FlaskColors)
+        binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
+        binder[LanguageChangerUrlIndex] = AliasProvider(GeneralUrlIndex)
         binder.bind(
-            AccountantInvitationPresenter,  # type: ignore
-            to=AliasProvider(AccountantInvitationEmailPresenter),
-        )
-        binder.bind(
-            AccountantInvitationEmailView,  # type: ignore
+            AccountantInvitationEmailView,
             to=AliasProvider(AccountantInvitationEmailViewImpl),
         )
         binder.bind(
-            AccountantInvitationUrlIndex,  # type: ignore
+            AccountantInvitationUrlIndex,
             to=AliasProvider(GeneralUrlIndex),
         )
         binder.bind(
-            PasswordHasher,  # type: ignore
+            PasswordHasher,
             to=AliasProvider(PasswordHasherImpl),
         )
         binder.bind(
-            TokenService,  # type: ignore
+            TokenService,
             to=AliasProvider(FlaskTokenService),
+        )
+        binder.bind(
+            EmailSender,
+            to=AliasProvider(EmailSenderImpl),
         )
 
     @staticmethod
