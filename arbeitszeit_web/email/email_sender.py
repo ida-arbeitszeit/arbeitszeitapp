@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from arbeitszeit import email_notifications as interface
 
 from .accountant_invitation_presenter import AccountantInvitationEmailPresenter
+from .cooperation_request_email_presenter import CooperationRequestEmailPresenter
 from .invite_worker_presenter import InviteWorkerPresenterImpl
 from .notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
@@ -16,6 +17,7 @@ class EmailSender:
     notify_accountants_about_new_plan: NotifyAccountantsAboutNewPlanPresenterImpl
     accountant_invitation_presenter: AccountantInvitationEmailPresenter
     invite_worker_presenter: InviteWorkerPresenterImpl
+    request_cooperation_presenter: CooperationRequestEmailPresenter
 
     def send_email(self, message: interface.Message) -> None:
         if isinstance(message, interface.MemberRegistration):
@@ -39,5 +41,7 @@ class EmailSender:
                 worker_email=message.worker_email,
                 invite=message.invite,
             )
+        elif isinstance(message, interface.CooperationRequestEmail):
+            self.request_cooperation_presenter.present(message)
         elif isinstance(message, interface.EmailChangeConfirmation):
             raise NotImplementedError()

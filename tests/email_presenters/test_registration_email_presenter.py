@@ -4,7 +4,7 @@ from arbeitszeit_web.email.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
 from tests.datetime_service import FakeDatetimeService
-from tests.email import Email, FakeEmailConfiguration, FakeEmailSender
+from tests.email import Email, FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
@@ -13,7 +13,6 @@ from tests.www.base_test_case import BaseTestCase
 class MemberPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
         self.text_renderer = self.injector.get(TextRendererImpl)
@@ -23,7 +22,7 @@ class MemberPresenterTests(BaseTestCase):
 
     def test_that_some_email_is_sent_out(self) -> None:
         self.presenter.show_member_registration_message(self.email_address)
-        self.assertTrue(self.email_sender.sent_mails)
+        self.assertTrue(self.email_service.sent_mails)
 
     def test_that_email_is_sent_to_exactly_one_recipient(self) -> None:
         self.presenter.show_member_registration_message(self.email_address)
@@ -60,13 +59,12 @@ class MemberPresenterTests(BaseTestCase):
         self.assertEqual(email.subject, self.translator.gettext("Account confirmation"))
 
     def get_sent_email(self) -> Email:
-        return self.email_sender.sent_mails[0]
+        return self.email_service.sent_mails[0]
 
 
 class CompanyPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.email_sender = self.injector.get(FakeEmailSender)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
         self.presenter = self.injector.get(RegistrationEmailPresenter)
         self.text_renderer = self.injector.get(TextRendererImpl)
@@ -76,7 +74,7 @@ class CompanyPresenterTests(BaseTestCase):
 
     def test_that_some_email_is_sent_out(self) -> None:
         self.presenter.show_company_registration_message(self.email_address)
-        self.assertTrue(self.email_sender.sent_mails)
+        self.assertTrue(self.email_service.sent_mails)
 
     def test_that_email_is_sent_to_exactly_one_recipient(self) -> None:
         self.presenter.show_company_registration_message(self.email_address)
@@ -113,4 +111,4 @@ class CompanyPresenterTests(BaseTestCase):
         self.assertEqual(email.subject, self.translator.gettext("Account confirmation"))
 
     def get_sent_email(self) -> Email:
-        return self.email_sender.sent_mails[0]
+        return self.email_service.sent_mails[0]

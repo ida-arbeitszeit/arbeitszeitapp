@@ -14,7 +14,7 @@ class Email:
 
 
 @singleton
-class FakeEmailSender:
+class FakeEmailService:
     def __init__(self) -> None:
         self.sent_mails: List[Email] = []
 

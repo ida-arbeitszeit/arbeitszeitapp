@@ -1,9 +1,7 @@
 from dataclasses import dataclass
-from html import escape
 from typing import List
 
 from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
-from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.translator import Translator
 
 
@@ -16,8 +14,6 @@ class RequestCooperationViewModel:
 @dataclass
 class RequestCooperationPresenter:
     translator: Translator
-    mail_service: MailService
-    email_configuration: EmailConfiguration
 
     def present(
         self, use_case_response: RequestCooperationResponse
@@ -31,7 +27,6 @@ class RequestCooperationPresenter:
         notifications = []
         if not use_case_response.is_rejected:
             is_error = False
-            self._send_mail_to_coordinator(use_case_response)
             notifications.append(self.translator.gettext("Request has been sent."))
         else:
             is_error = True
@@ -77,21 +72,4 @@ class RequestCooperationPresenter:
                 )
         return RequestCooperationViewModel(
             notifications=notifications, is_error=is_error
-        )
-
-    def _send_mail_to_coordinator(
-        self, use_case_response: RequestCooperationResponse
-    ) -> None:
-        coordinator_email = use_case_response.coordinator_email
-        coordinator_name = use_case_response.coordinator_name
-        assert coordinator_email
-        assert coordinator_name
-        self.mail_service.send_message(
-            subject=self.translator.gettext("A company requests cooperation"),
-            recipients=[coordinator_email],
-            html=self.translator.gettext(
-                "Hello %(coordinator)s,<br>A company wants to be part of a cooperation that you are coordinating. Please check the request in the Arbeitszeitapp."
-            )
-            % dict(coordinator=escape(coordinator_name)),
-            sender=self.email_configuration.get_sender_address(),
         )

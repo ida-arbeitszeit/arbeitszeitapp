@@ -1,6 +1,8 @@
-from unittest import TestCase
 from uuid import uuid4
 
+from parameterized import parameterized
+
+from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -10,22 +12,16 @@ from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperationRequest,
     RequestCooperationResponse,
 )
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class RequestCooperationTests(TestCase):
+class RequestCooperationTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
+        super().setUp()
         self.request_cooperation = self.injector.get(RequestCooperation)
         self.accept_cooperation = self.injector.get(AcceptCooperation)
-        self.coop_generator = self.injector.get(CooperationGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.requester = self.company_generator.create_company()
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
         cooperation = self.coop_generator.create_cooperation()
@@ -153,3 +149,93 @@ class RequestCooperationTests(TestCase):
             AcceptCooperationRequest(requester, plan.id, plan.requested_cooperation)
         )
         assert not accept_cooperation_response.is_rejected
+
+    def test_that_after_requesting_successfully_an_email_was_sent_out(self) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=requester)
+        cooperation = self.coop_generator.create_cooperation()
+        request = RequestCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        messages_before_request = len(self.email_sender.get_messages_sent())
+        response = self.request_cooperation(request)
+        assert not response.is_rejected
+        assert len(self.email_sender.get_messages_sent()) == messages_before_request + 1
+
+    def test_that_after_requesting_successfully_a_cooperation_request_email_was_sent(
+        self,
+    ) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=requester)
+        cooperation = self.coop_generator.create_cooperation()
+        request = RequestCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        messages_before_request = len(self.get_cooperation_request_emails())
+        response = self.request_cooperation(request)
+        assert not response.is_rejected
+        assert len(self.get_cooperation_request_emails()) == messages_before_request + 1
+
+    @parameterized.expand(
+        [
+            ("test@test.test",),
+            ("other@test.test",),
+        ]
+    )
+    def test_that_after_requesting_successfully_the_email_sent_contains_the_expected_coordinator_email_address(
+        self, expected_email_address: str
+    ) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=requester)
+        coordinator = self.company_generator.create_company(
+            email=expected_email_address
+        )
+        cooperation = self.coop_generator.create_cooperation(coordinator=coordinator)
+        request = RequestCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        response = self.request_cooperation(request)
+        assert not response.is_rejected
+        assert (
+            self.get_latest_cooperation_request_email().coordinator_email_address
+            == expected_email_address
+        )
+
+    @parameterized.expand(
+        [
+            ("test name",),
+            ("other name",),
+        ]
+    )
+    def test_that_after_requesting_successfully_the_email_sent_contains_the_expected_coordinator_name(
+        self, expected_name: str
+    ) -> None:
+        requester = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=requester)
+        coordinator = self.company_generator.create_company(name=expected_name)
+        cooperation = self.coop_generator.create_cooperation(coordinator=coordinator)
+        request = RequestCooperationRequest(
+            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation.id
+        )
+        response = self.request_cooperation(request)
+        assert not response.is_rejected
+        assert (
+            self.get_latest_cooperation_request_email().coordinator_name
+            == expected_name
+        )
+
+    def get_latest_cooperation_request_email(
+        self,
+    ) -> email_notifications.CooperationRequestEmail:
+        emails = self.get_cooperation_request_emails()
+        assert emails
+        return emails[-1]
+
+    def get_cooperation_request_emails(
+        self,
+    ) -> list[email_notifications.CooperationRequestEmail]:
+        return [
+            m
+            for m in self.email_sender.get_messages_sent()
+            if isinstance(m, email_notifications.CooperationRequestEmail)
+        ]
