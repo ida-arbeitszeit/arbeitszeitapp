@@ -428,6 +428,20 @@ how to set this up locally.  The benefit of this for you is that you
 can avoid building dependencies that are already built once in the 
 continuous integration (CI) pipeline.
 
+Invite Accountants
+-------------------
+
+When manually filing plans in the development environment, you need 
+at least one accountant to approve these files. You can invite 
+accountants from the terminal, using the following command:
+
+  .. code-block:: bash
+
+   flask invite-accountant example@mail.de
+
+An invitation mail will be printed to ``stdout`` containing an invite link.
+
+
 Web API
 --------
 
