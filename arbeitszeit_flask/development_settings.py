@@ -1,5 +1,6 @@
-from os import environ, path
+from os import environ
 
+PREFERRED_URL_SCHEME = "http"
 DEBUG_DETAILS = environ.get("DEBUG_DETAILS") in ("true", "True", "1", "t")
 TESTING = True
 SQLALCHEMY_DATABASE_URI = environ.get("DEV_DATABASE_URI")
