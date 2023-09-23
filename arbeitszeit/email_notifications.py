@@ -23,7 +23,8 @@ class CompanyRegistration:
 class AccountantNotificationAboutNewPlan:
     product_name: str
     plan_id: UUID
-    accountant_id: UUID
+    accountant_name: str
+    accountant_email_address: str
 
 
 @dataclass

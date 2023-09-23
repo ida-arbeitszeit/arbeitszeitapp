@@ -15,11 +15,12 @@ class TextRendererImpl:
         )
 
     def render_accountant_notification_about_new_plan(
-        self, *, product_name: str
+        self, *, product_name: str, accountant_name: str
     ) -> str:
         return render_template(
             "accountant/notification-about-new-plan.html",
             product_name=product_name,
+            accountant_name=accountant_name,
         )
 
     def render_member_notfication_about_work_invitation(

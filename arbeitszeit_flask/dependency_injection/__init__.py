@@ -18,10 +18,7 @@ from arbeitszeit.injector import (
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
-from arbeitszeit_flask.database.repositories import (
-    DatabaseGatewayImpl,
-    UserAddressBookImpl,
-)
+from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import db
 from arbeitszeit_flask.flask_colors import FlaskColors
@@ -52,7 +49,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
 from arbeitszeit_web.colors import Colors
-from arbeitszeit_web.email import EmailConfiguration, UserAddressBook
+from arbeitszeit_web.email import EmailConfiguration
 from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
@@ -109,7 +106,6 @@ class FlaskModule(Module):
             SQLAlchemy,
             to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
         )
-        binder.bind(UserAddressBook, to=AliasProvider(UserAddressBookImpl))
         binder[TextRenderer] = AliasProvider(TextRendererImpl)
         binder[Request] = AliasProvider(FlaskRequest)
         binder[UrlIndex] = AliasProvider(GeneralUrlIndex)

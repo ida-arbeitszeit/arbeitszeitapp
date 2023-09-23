@@ -1468,29 +1468,6 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
 
 @dataclass
-class UserAddressBookImpl:
-    db: SQLAlchemy
-
-    def get_user_email_address(self, user: UUID) -> Optional[str]:
-        user_orm = (
-            self.db.session.query(models.User)
-            .join(models.Member, isouter=True)
-            .join(models.Company, isouter=True)
-            .join(models.Accountant, isouter=True)
-            .filter(
-                (models.Member.id == str(user))
-                | (models.Company.id == str(user))
-                | (models.Accountant.id == str(user))
-            )
-            .first()
-        )
-        if user_orm:
-            return user_orm.email_address
-        else:
-            return None
-
-
-@dataclass
 class AccountingRepository:
     database_gateway: DatabaseGatewayImpl
     db: SQLAlchemy
