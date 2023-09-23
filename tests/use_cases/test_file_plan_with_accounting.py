@@ -1,6 +1,8 @@
 from typing import Callable, Optional
 from uuid import UUID, uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit import email_notifications
 from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.records import ProductionCosts
@@ -177,16 +179,16 @@ class UseCaseTests(BaseUseCaseTestCase):
 class NotificationTests(BaseUseCaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accountant = self.accountant_generator.create_accountant()
 
     def test_that_accountants_are_notified_about_new_plan_on_success(self) -> None:
+        self.accountant_generator.create_accountant()
         self.use_case.file_plan_with_accounting(request=self.create_request())
         self.assertTrue(self.get_sent_accountant_notifications())
-        self.accountant_generator.create_accountant()
 
     def test_that_notification_to_accountants_contains_correct_product_name(
         self,
     ) -> None:
+        self.accountant_generator.create_accountant()
         expected_product_name = "test product name 53"
         self.use_case.file_plan_with_accounting(
             request=self.create_request(
@@ -206,6 +208,7 @@ class NotificationTests(BaseUseCaseTestCase):
     def test_that_notification_contains_correct_plan_id(
         self,
     ) -> None:
+        self.accountant_generator.create_accountant()
         response = self.use_case.file_plan_with_accounting(
             request=self.create_request()
         )
@@ -223,6 +226,7 @@ class NotificationTests(BaseUseCaseTestCase):
         self,
     ) -> None:
         self.accountant_generator.create_accountant()
+        self.accountant_generator.create_accountant()
         self.use_case.file_plan_with_accounting(request=self.create_request())
         assert len(self.get_sent_accountant_notifications()) == 2
 
@@ -231,13 +235,41 @@ class NotificationTests(BaseUseCaseTestCase):
     ) -> None:
         self.accountant_generator.create_accountant()
         self.accountant_generator.create_accountant()
+        self.accountant_generator.create_accountant()
         self.use_case.file_plan_with_accounting(request=self.create_request())
         assert len(self.get_sent_accountant_notifications()) == 3
 
-    def test_that_notifications_are_sent_to_correct_user(self) -> None:
+    @parameterized.expand(
+        [
+            ("test accountant name",),
+            ("other accountant name",),
+        ]
+    )
+    def test_that_accountant_is_addressed_by_their_correct_name(
+        self, expected_name: str
+    ) -> None:
+        self.accountant_generator.create_accountant(name=expected_name)
         self.use_case.file_plan_with_accounting(request=self.create_request())
         assert (
-            self.get_latest_accountant_notification().accountant_id == self.accountant
+            self.get_latest_accountant_notification().accountant_name == expected_name
+        )
+
+    @parameterized.expand(
+        [
+            ("test@test.test",),
+            ("other@test.test",),
+        ]
+    )
+    def test_that_notifiations_are_sent_to_accountant_email_address(
+        self, expected_email_address: str
+    ) -> None:
+        self.accountant_generator.create_accountant(
+            email_address=expected_email_address
+        )
+        self.use_case.file_plan_with_accounting(request=self.create_request())
+        assert (
+            self.get_latest_accountant_notification().accountant_email_address
+            == expected_email_address
         )
 
     def get_sent_accountant_notifications(

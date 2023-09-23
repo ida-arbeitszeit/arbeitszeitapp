@@ -9,7 +9,7 @@ class TextRenderer(Protocol):
         ...
 
     def render_accountant_notification_about_new_plan(
-        self, *, product_name: str
+        self, *, product_name: str, accountant_name: str
     ) -> str:
         ...
 
