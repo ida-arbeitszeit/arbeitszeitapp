@@ -10,6 +10,7 @@ mkShell {
     types-dateutil
     types-pytz
     coverage
+    pip
   ]) ++ [ nixfmt sqlite ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
