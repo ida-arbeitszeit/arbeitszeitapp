@@ -21,7 +21,7 @@
     <div class="columns is-centered">
         <div class="column"></div>
         <div class="column is-8 has-text-centered">
-            {% if view_model %}
+            {% if view_model is defined %}
             <div class="box">
                 {% for notification in view_model.notifications %}
                 <div {% if view_model.is_error %}class="notification is-danger" {% else
@@ -30,7 +30,7 @@
             </div>
             {% endif %}
 
-            {% if form %}
+            {% if form is defined %}
             {% for field_name, field_errors in form.errors|dictsort if field_errors %}
             {% for error in field_errors %}
             <div class="notification is-danger">
