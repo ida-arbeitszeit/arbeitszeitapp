@@ -22,7 +22,7 @@
       </div>
 
       <div class="content">
-        {% if view_model.is_show_workers %}
+        {% if view_model.is_show_workers is defined and view_model.is_show_workers %}
         <h1 class="title">{{ gettext("Workers of the company") }}</h1>
         <div class="table-container">
           <table class="table has-text-left mx-auto">
