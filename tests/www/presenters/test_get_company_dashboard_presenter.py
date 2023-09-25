@@ -7,7 +7,6 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
@@ -16,7 +15,6 @@ class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetCompanyDashboardPresenter)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.plan_index = self.injector.get(UrlIndexTestImpl)
 
     def test_presenter_successfully_presents_a_use_case_response(self):

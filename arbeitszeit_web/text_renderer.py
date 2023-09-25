@@ -17,3 +17,6 @@ class TextRenderer(Protocol):
         self, *, invitation_url: str
     ) -> str:
         ...
+
+    def render_email_change_notification(self, *, change_email_url: str) -> str:
+        ...

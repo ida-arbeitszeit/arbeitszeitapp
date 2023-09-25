@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from arbeitszeit_web.formatters.plan_details_formatter import PlanDetailsFormatter
 from arbeitszeit_web.session import UserRole
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
@@ -14,7 +13,6 @@ class PlanDetailsFormatterTests(BaseTestCase):
         self.formatter = self.injector.get(PlanDetailsFormatter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.plan_details = self.plan_details_generator.create_plan_details()
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.session.login_company(company=uuid4())
 
     def test_plan_id_is_displayed_correctly_as_tuple_of_strings(self):

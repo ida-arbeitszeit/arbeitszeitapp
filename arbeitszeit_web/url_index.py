@@ -159,6 +159,9 @@ class UrlIndex(Protocol):
     def get_accountant_account_details_url(self) -> str:
         ...
 
+    def get_change_email_url(self, *, token: str) -> str:
+        ...
+
 
 class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:

@@ -74,6 +74,7 @@ class UrlIndexTestImpl:
     get_member_account_details_url = UrlIndexMethod()
     get_company_account_details_url = UrlIndexMethod()
     get_accountant_account_details_url = UrlIndexMethod()
+    get_change_email_url = UrlIndexMethod()
 
     def get_member_confirmation_url(self, *, token: str) -> str:
         return f"get_member_confirmation_url {token}"
