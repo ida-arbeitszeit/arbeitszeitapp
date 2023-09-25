@@ -2,6 +2,7 @@ from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
+from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailService
 from tests.session import FakeSession
 from tests.translator import FakeTranslator
@@ -55,6 +56,7 @@ class BaseTestCase(TestCase):
     # alphabetically
     accountant_generator = _lazy_property(AccountantGenerator)
     company_generator = _lazy_property(CompanyGenerator)
+    datetime_service = _lazy_property(FakeDatetimeService)
     email_service = _lazy_property(FakeEmailService)
     member_generator = _lazy_property(MemberGenerator)
     notifier = _lazy_property(NotifierTestImpl)

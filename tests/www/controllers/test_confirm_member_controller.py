@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from arbeitszeit_web.www.controllers.confirm_member_controller import (
     ConfirmMemberController,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
 
@@ -13,7 +12,6 @@ class ConfirmMemberControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ConfirmMemberController)
         self.token_service = self.injector.get(FakeTokenService)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_invalid_token_yields_no_use_case_request(self) -> None:
         assert self.controller.process_request(token="testtoken 123") is None

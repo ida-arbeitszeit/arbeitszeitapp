@@ -4,6 +4,7 @@ from arbeitszeit import email_notifications as interface
 
 from .accountant_invitation_presenter import AccountantInvitationEmailPresenter
 from .cooperation_request_email_presenter import CooperationRequestEmailPresenter
+from .email_change_confirmation_presenter import EmailChangeConfirmationPresenter
 from .invite_worker_presenter import InviteWorkerPresenterImpl
 from .notify_accountant_about_new_plan_presenter import (
     NotifyAccountantsAboutNewPlanPresenterImpl,
@@ -18,6 +19,7 @@ class EmailSender:
     accountant_invitation_presenter: AccountantInvitationEmailPresenter
     invite_worker_presenter: InviteWorkerPresenterImpl
     request_cooperation_presenter: CooperationRequestEmailPresenter
+    email_change_confirmation_presenter: EmailChangeConfirmationPresenter
 
     def send_email(self, message: interface.Message) -> None:
         if isinstance(message, interface.MemberRegistration):
@@ -44,4 +46,6 @@ class EmailSender:
         elif isinstance(message, interface.CooperationRequestEmail):
             self.request_cooperation_presenter.present(message)
         elif isinstance(message, interface.EmailChangeConfirmation):
-            raise NotImplementedError()
+            self.email_change_confirmation_presenter.present_email_change_confirmation(
+                message
+            )

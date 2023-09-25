@@ -3,7 +3,6 @@ from datetime import datetime
 from arbeitszeit_web.email.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.email import Email, FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
 from tests.token import FakeTokenService
@@ -18,7 +17,6 @@ class MemberPresenterTests(BaseTestCase):
         self.text_renderer = self.injector.get(TextRendererImpl)
         self.email_address = "test@test.test"
         self.token_service = self.injector.get(FakeTokenService)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_some_email_is_sent_out(self) -> None:
         self.presenter.show_member_registration_message(self.email_address)
@@ -70,7 +68,6 @@ class CompanyPresenterTests(BaseTestCase):
         self.text_renderer = self.injector.get(TextRendererImpl)
         self.email_address = "test@test.test"
         self.token_service = self.injector.get(FakeTokenService)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_some_email_is_sent_out(self) -> None:
         self.presenter.show_company_registration_message(self.email_address)

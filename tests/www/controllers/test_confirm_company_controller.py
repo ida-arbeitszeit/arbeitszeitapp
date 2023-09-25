@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from arbeitszeit_web.www.controllers.confirm_company_controller import (
     ConfirmCompanyController,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
 
@@ -13,7 +12,6 @@ class ConfirmCompanyControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ConfirmCompanyController)
         self.token_service = self.injector.get(FakeTokenService)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_no_request_is_yielded_if_token_is_a_random_string(self) -> None:
         assert self.controller.process_request(token="random string 123") is None

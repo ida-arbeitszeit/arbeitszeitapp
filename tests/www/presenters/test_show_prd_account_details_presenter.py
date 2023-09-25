@@ -8,14 +8,12 @@ from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetails
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 
 class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):

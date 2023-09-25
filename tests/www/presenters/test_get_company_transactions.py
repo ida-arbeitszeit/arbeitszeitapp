@@ -13,7 +13,6 @@ from arbeitszeit.use_cases.get_company_transactions import (
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -21,7 +20,6 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(GetCompanyTransactionsPresenter)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
         response = GetCompanyTransactionsResponse(transactions=[])

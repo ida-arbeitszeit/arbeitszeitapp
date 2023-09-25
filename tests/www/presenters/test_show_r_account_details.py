@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseC
 from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
@@ -31,7 +30,6 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.trans = self.injector.get(FakeTranslator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowRAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):
