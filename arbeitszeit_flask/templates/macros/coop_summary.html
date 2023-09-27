@@ -38,6 +38,7 @@
             <thead>
                 <tr>
                     <th>{{ gettext("Plan") }}</th>
+                    <th>{{ gettext("Planner") }}</th>
                     <th>{{ gettext("Individual price") }}</th>
                     <th>{{ gettext("Cooperation price") }}</th>
                     {% if view_model.show_end_coop_button %}
@@ -49,6 +50,7 @@
                 {% for plan in view_model.plans %}
                 <tr>
                     <td><a href="{{ plan.plan_url }}">{{ plan.plan_name }}</a></td>
+                    <td><a href="{{ plan.planner_url }}">{{ plan.planner_name }}</a></td>
                     <td>{{ plan.plan_individual_price }}</td>
                     <td>{{ plan.plan_coop_price }}</td>
                     {% if view_model.show_end_coop_button %}

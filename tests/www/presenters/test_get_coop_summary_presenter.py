@@ -22,6 +22,8 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
             plan_name="plan_name",
             plan_individual_price=Decimal("1"),
             plan_coop_price=Decimal(50.005),
+            planner_id=uuid4(),
+            planner_name="A Cooperating Company Coop.",
         )
     ],
 )
@@ -108,5 +110,24 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             self.url_index.get_end_coop_url(
                 plan_id=TESTING_RESPONSE_MODEL.plans[0].plan_id,
                 cooperation_id=TESTING_RESPONSE_MODEL.coop_id,
+            ),
+        )
+
+    def test_first_plans_planner_name_is_displayed_correctly(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.plans[0].planner_name,
+            "A Cooperating Company Coop.",
+        )
+
+    def test_url_to_first_plans_planner_company_summary_page_is_displayed_correctly(
+        self,
+    ):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.plans[0].planner_url,
+            self.url_index.get_company_summary_url(
+                user_role=UserRole.company,
+                company_id=TESTING_RESPONSE_MODEL.plans[0].planner_id,
             ),
         )
