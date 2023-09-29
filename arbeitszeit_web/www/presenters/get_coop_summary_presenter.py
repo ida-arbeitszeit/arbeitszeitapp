@@ -13,7 +13,6 @@ class AssociatedPlan:
     plan_name: str
     plan_url: str
     plan_individual_price: str
-    plan_coop_price: str
     end_coop_url: str
     planner_name: str
     planner_url: str
@@ -28,6 +27,7 @@ class GetCoopSummaryViewModel:
     current_coordinator_id: str
     current_coordinator_name: str
     current_coordinator_url: str
+    coop_price: str
 
     plans: List[AssociatedPlan]
 
@@ -54,6 +54,9 @@ class GetCoopSummarySuccessPresenter:
                 user_role=user_role,
                 company_id=response.current_coordinator,
             ),
+            coop_price="-"
+            if response.coop_price is None
+            else self.__format_price(response.coop_price),
             plans=[
                 AssociatedPlan(
                     plan_name=plan.plan_name,
@@ -61,7 +64,6 @@ class GetCoopSummarySuccessPresenter:
                     plan_individual_price=self.__format_price(
                         plan.plan_individual_price
                     ),
-                    plan_coop_price=self.__format_price(plan.plan_coop_price),
                     end_coop_url=self.url_index.get_end_coop_url(
                         plan_id=plan.plan_id, cooperation_id=response.coop_id
                     ),
