@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.show_a_account_details import ShowAAccountDetailsUseC
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = ShowAAccountDetailsUseCase.TransactionInfo(
@@ -29,7 +28,6 @@ DEFAULT_INFO2 = ShowAAccountDetailsUseCase.TransactionInfo(
 class CompanyTransactionsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(ShowAAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self):

@@ -10,14 +10,12 @@ from arbeitszeit.use_cases.get_member_account import (
 from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 
 class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(GetMemberAccountPresenter)
 
     def test_that_empty_transaction_list_is_shown_if_no_transactions_took_place(

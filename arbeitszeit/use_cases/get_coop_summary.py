@@ -4,8 +4,9 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.repositories import DatabaseGateway, PlanResult
+from arbeitszeit.price_calculator import PriceCalculator, calculate_average_costs
+from arbeitszeit.records import Plan
+from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
@@ -61,7 +62,7 @@ class GetCoopSummary:
             .that_are_part_of_cooperation(request.coop_id)
             .that_will_expire_after(now)
         )
-        plans = self._create_associated_plans(plan_result)
+        plans = list(plan_result)
         return GetCoopSummarySuccess(
             requester_is_coordinator=coordinator.id == request.requester_id,
             coop_id=coop.id,
@@ -69,8 +70,8 @@ class GetCoopSummary:
             coop_definition=coop.definition,
             current_coordinator=coordinator.id,
             current_coordinator_name=coordinator.name,
-            coop_price=self._get_cooperative_price(plan_result),
-            plans=plans,
+            coop_price=self._get_cooperative_price(plans),
+            plans=self._get_associated_plans(plans),
         )
 
     def _get_planner_name(self, planner_id: UUID) -> str:
@@ -78,15 +79,13 @@ class GetCoopSummary:
         assert planner
         return planner.name
 
-    def _get_cooperative_price(self, plan_result: PlanResult) -> Optional[Decimal]:
-        if not len(plan_result):
+    def _get_cooperative_price(self, plans: list[Plan]) -> Optional[Decimal]:
+        if not plans:
             return None
-        first_plan = plan_result.first()
-        assert first_plan
-        coop_price = self.price_calculator.calculate_cooperative_price(plan=first_plan)
+        coop_price = calculate_average_costs(plans=[p.to_summary() for p in plans])
         return coop_price
 
-    def _create_associated_plans(self, plan_result: PlanResult) -> list[AssociatedPlan]:
+    def _get_associated_plans(self, plans: list[Plan]) -> list[AssociatedPlan]:
         return [
             AssociatedPlan(
                 plan_id=plan.id,
@@ -97,5 +96,5 @@ class GetCoopSummary:
                 planner_id=plan.planner,
                 planner_name=self._get_planner_name(plan.planner),
             )
-            for plan in plan_result
+            for plan in plans
         ]

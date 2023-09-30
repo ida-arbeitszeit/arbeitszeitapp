@@ -9,7 +9,6 @@ from arbeitszeit.use_cases.query_private_consumptions import (
 from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
     PrivateConsumptionsPresenter,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -17,7 +16,6 @@ class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(PrivateConsumptionsPresenter)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_date_is_formatted_properly(self) -> None:
         response = self.create_response_with_one_consumption(

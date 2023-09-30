@@ -103,7 +103,7 @@ class GetCoopSummaryTests(BaseTestCase):
     def test_that_coop_price_equals_individual_price_when_there_is_one_plan_in_a_cooperation(
         self,
     ) -> None:
-        expected_price = Decimal(2)
+        expected_price = approx(Decimal(2))
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
             amount=10,

@@ -5,7 +5,6 @@ from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailPresenter,
     ViewModel,
 )
-from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailConfiguration
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
@@ -23,7 +22,6 @@ class PresenterTests(BaseTestCase):
         self.accountant_invitation_url_index = self.injector.get(
             AccountantInvitationUrlIndexImpl
         )
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.token_service = self.injector.get(FakeTokenService)
 
     def test_that_token_recipient_is_also_mail_recipient(self) -> None:

@@ -12,7 +12,6 @@ from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     ViewModel,
 )
 from tests.data_generators import ConsumptionGenerator
-from tests.datetime_service import FakeDatetimeService
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -21,7 +20,6 @@ class TestPresenter(BaseTestCase):
         super().setUp()
         self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.presenter = self.injector.get(CompanyConsumptionsPresenter)
 
     def test_show_consumptions_from_company(self) -> None:
@@ -54,7 +52,7 @@ class TestPresenter(BaseTestCase):
 
         assert presentation.consumptions[
             0
-        ].consumption_date == FakeDatetimeService().format_datetime(
+        ].consumption_date == self.datetime_service.format_datetime(
             now, zone="Europe/Berlin"
         )
         assert presentation.consumptions[0].product_name == "Produkt A"
@@ -71,7 +69,7 @@ class TestPresenter(BaseTestCase):
 
         assert presentation.consumptions[
             1
-        ].consumption_date == FakeDatetimeService().format_datetime(
+        ].consumption_date == self.datetime_service.format_datetime(
             now, zone="Europe/Berlin"
         )
         assert presentation.consumptions[1].product_name == "Produkt A"
