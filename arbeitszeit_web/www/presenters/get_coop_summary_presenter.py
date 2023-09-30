@@ -9,12 +9,14 @@ from ...url_index import UrlIndex, UserUrlIndex
 
 
 @dataclass
-class AssociatedPlanPresentation:
+class AssociatedPlan:
     plan_name: str
     plan_url: str
     plan_individual_price: str
     plan_coop_price: str
     end_coop_url: str
+    planner_name: str
+    planner_url: str
 
 
 @dataclass
@@ -27,7 +29,7 @@ class GetCoopSummaryViewModel:
     current_coordinator_name: str
     current_coordinator_url: str
 
-    plans: List[AssociatedPlanPresentation]
+    plans: List[AssociatedPlan]
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -40,6 +42,7 @@ class GetCoopSummarySuccessPresenter:
     session: Session
 
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
+        user_role = self.session.get_user_role()
         return GetCoopSummaryViewModel(
             show_end_coop_button=response.requester_is_coordinator,
             coop_id=str(response.coop_id),
@@ -48,11 +51,11 @@ class GetCoopSummarySuccessPresenter:
             current_coordinator_id=str(response.current_coordinator),
             current_coordinator_name=response.current_coordinator_name,
             current_coordinator_url=self.url_index.get_company_summary_url(
-                user_role=self.session.get_user_role(),
+                user_role=user_role,
                 company_id=response.current_coordinator,
             ),
             plans=[
-                AssociatedPlanPresentation(
+                AssociatedPlan(
                     plan_name=plan.plan_name,
                     plan_url=self.user_url_index.get_plan_details_url(plan.plan_id),
                     plan_individual_price=self.__format_price(
@@ -61,6 +64,10 @@ class GetCoopSummarySuccessPresenter:
                     plan_coop_price=self.__format_price(plan.plan_coop_price),
                     end_coop_url=self.url_index.get_end_coop_url(
                         plan_id=plan.plan_id, cooperation_id=response.coop_id
+                    ),
+                    planner_name=plan.planner_name,
+                    planner_url=self.url_index.get_company_summary_url(
+                        user_role=user_role, company_id=plan.planner_id
                     ),
                 )
                 for plan in response.plans

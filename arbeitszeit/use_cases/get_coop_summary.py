@@ -20,6 +20,8 @@ class AssociatedPlan:
     plan_name: str
     plan_individual_price: Decimal
     plan_coop_price: Decimal
+    planner_id: UUID
+    planner_name: str
 
 
 @dataclass
@@ -63,6 +65,8 @@ class GetCoopSummary:
                 if not plan.is_public_service
                 else Decimal(0),
                 plan_coop_price=self.price_calculator.calculate_cooperative_price(plan),
+                planner_id=plan.planner,
+                planner_name=self._get_planner_name(plan.planner),
             )
             for plan in self.database_gateway.get_plans()
             .that_are_part_of_cooperation(request.coop_id)
@@ -77,3 +81,8 @@ class GetCoopSummary:
             current_coordinator_name=coordinator.name,
             plans=plans,
         )
+
+    def _get_planner_name(self, planner_id: UUID) -> str:
+        planner = self.database_gateway.get_companies().with_id(planner_id).first()
+        assert planner
+        return planner.name
