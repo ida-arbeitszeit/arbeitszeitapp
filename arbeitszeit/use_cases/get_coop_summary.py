@@ -22,6 +22,7 @@ class AssociatedPlan:
     plan_individual_price: Decimal
     planner_id: UUID
     planner_name: str
+    requester_is_planner: bool
 
 
 @dataclass
@@ -71,7 +72,7 @@ class GetCoopSummary:
             current_coordinator=coordinator.id,
             current_coordinator_name=coordinator.name,
             coop_price=self._get_cooperative_price(plans),
-            plans=self._get_associated_plans(plans),
+            plans=self._get_associated_plans(plans, request.requester_id),
         )
 
     def _get_planner_name(self, planner_id: UUID) -> str:
@@ -85,7 +86,9 @@ class GetCoopSummary:
         coop_price = calculate_average_costs(plans=[p.to_summary() for p in plans])
         return coop_price
 
-    def _get_associated_plans(self, plans: list[Plan]) -> list[AssociatedPlan]:
+    def _get_associated_plans(
+        self, plans: list[Plan], requester: UUID
+    ) -> list[AssociatedPlan]:
         return [
             AssociatedPlan(
                 plan_id=plan.id,
@@ -95,6 +98,7 @@ class GetCoopSummary:
                 ),
                 planner_id=plan.planner,
                 planner_name=self._get_planner_name(plan.planner),
+                requester_is_planner=plan.planner == requester,
             )
             for plan in plans
         ]

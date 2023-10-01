@@ -16,11 +16,11 @@ class AssociatedPlan:
     end_coop_url: str
     planner_name: str
     planner_url: str
+    show_end_coop_button: bool
 
 
 @dataclass
 class GetCoopSummaryViewModel:
-    show_end_coop_button: bool
     coop_id: str
     coop_name: str
     coop_definition: List[str]
@@ -44,7 +44,6 @@ class GetCoopSummarySuccessPresenter:
     def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
         user_role = self.session.get_user_role()
         return GetCoopSummaryViewModel(
-            show_end_coop_button=response.requester_is_coordinator,
             coop_id=str(response.coop_id),
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
@@ -71,6 +70,8 @@ class GetCoopSummarySuccessPresenter:
                     planner_url=self.url_index.get_company_summary_url(
                         user_role=user_role, company_id=plan.planner_id
                     ),
+                    show_end_coop_button=response.requester_is_coordinator
+                    or plan.requester_is_planner,
                 )
                 for plan in response.plans
             ],
