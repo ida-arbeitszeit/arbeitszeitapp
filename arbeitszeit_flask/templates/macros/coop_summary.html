@@ -29,44 +29,57 @@
                     <td class="has-text-left"><a
                             href="{{ view_model.current_coordinator_url }}">{{ view_model.current_coordinator_name }}</a></td>
                 </tr>
-            </tbody>
-        </table>
-        <h1 class="title is-4">
-            {{ gettext("Participating plans") }}
-        </h1>
-        <table class="table has-text-left mx-auto">
-            <thead>
                 <tr>
-                    <th>{{ gettext("Plan") }}</th>
-                    <th>{{ gettext("Planner") }}</th>
-                    <th>{{ gettext("Individual price") }}</th>
-                    <th>{{ gettext("Cooperation price") }}</th>
-                    {% if view_model.show_end_coop_button %}
-                    <th>{{ gettext("End cooperation") }}</th>
-                    {% endif %}
+                    <td class="has-text-left has-text-weight-semibold">{{ gettext("Cooperation price") }}</td>
+                    <td class="has-text-left">{{ view_model.coop_price }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for plan in view_model.plans %}
-                <tr>
-                    <td><a href="{{ plan.plan_url }}">{{ plan.plan_name }}</a></td>
-                    <td><a href="{{ plan.planner_url }}">{{ plan.planner_name }}</a></td>
-                    <td>{{ plan.plan_individual_price }}</td>
-                    <td>{{ plan.plan_coop_price }}</td>
-                    {% if view_model.show_end_coop_button %}
-                    <td>
-                        <a class="button is-small is-danger" href="{{ plan.end_coop_url }}">
-                            <span class="icon">
-                                <i class="fas fa-times"></i>
-                            </span>
-                            <span>{{ gettext("End") }}</span>
-                        </a>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<div class="section">
+    <h1 class="title is-4 has-text-centered">
+        {{ gettext("Participating plans") }}
+    </h1>
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            {% for plan in view_model.plans %}
+            <article class="media">
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                <a href="{{ plan.plan_url }}">{{ plan.plan_name }}</a>
+                            </strong>
+                            <br>
+                            <small><a href="{{ plan.planner_url }}">@{{ plan.planner_name }}</a></small>
+                        </p>
+                    </div>
+                    <div>
+                        {% if view_model.show_end_coop_button %}
+                        <a class="button is-small is-danger" href="{{ plan.end_coop_url }}">
+                            <span class="icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>{{ gettext("End cooperation") }}</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="media-right">
+                    <p class="is-size-5 has-text-right">
+                        {{ plan.plan_individual_price }}
+                        <br>
+                    </p>
+                    <p>
+                        <small>{{ gettext("Individual price") }}</small>
+                    </p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endmacro %}

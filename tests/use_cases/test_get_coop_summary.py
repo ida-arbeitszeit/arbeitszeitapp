@@ -95,6 +95,39 @@ class GetCoopSummaryTests(BaseTestCase):
         summary = self.get_coop_summary(GetCoopSummaryRequest(requester, coop.id))
         self.assert_success(summary, lambda s: len(s.plans) == 0)
 
+    def test_that_coop_price_is_none_if_there_are_no_plans_associated(self) -> None:
+        coop = self.cooperation_generator.create_cooperation(plans=None)
+        summary = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
+        self.assert_success(summary, lambda s: s.coop_price is None)
+
+    def test_that_coop_price_equals_individual_price_when_there_is_one_plan_in_a_cooperation(
+        self,
+    ) -> None:
+        expected_price = approx(Decimal(2))
+        plan = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(10), Decimal(5), Decimal(5)),
+            amount=10,
+        )
+        coop = self.cooperation_generator.create_cooperation(plans=[plan])
+        summary = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
+        self.assert_success(summary, lambda s: s.coop_price == expected_price)
+
+    def test_that_correct_coop_price_is_calculated_when_there_are_two_plans_in_a_cooperation(
+        self,
+    ) -> None:
+        expected_price = approx(Decimal("0.75"))
+        plan1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),
+            amount=10,
+        )
+        plan2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(4), Decimal(4), Decimal(2)),
+            amount=10,
+        )
+        coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
+        summary = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
+        self.assert_success(summary, lambda s: s.coop_price == expected_price)
+
     def assert_success(
         self,
         response: GetCoopSummaryResponse,
@@ -163,23 +196,6 @@ class AssociatedPlansTests(BaseTestCase):
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
         assert isinstance(response, GetCoopSummarySuccess)
         assert response.plans[0].plan_individual_price == expected_price
-
-    def test_that_associated_plan_in_a_summary_has_correct_coop_price_when_there_is_a_second_plan_that_is_cooperating(
-        self,
-    ) -> None:
-        expected_price = approx(Decimal("0.75"))
-        plan1 = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(1)),
-            amount=10,
-        )
-        plan2 = self.plan_generator.create_plan(
-            costs=ProductionCosts(Decimal(4), Decimal(4), Decimal(2)),
-            amount=10,
-        )
-        coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
-        response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
-        assert isinstance(response, GetCoopSummarySuccess)
-        assert response.plans[0].plan_coop_price == expected_price
 
     def test_that_associated_plan_in_a_summary_has_correct_planner_id(self) -> None:
         expected_planner = self.company_generator.create_company()

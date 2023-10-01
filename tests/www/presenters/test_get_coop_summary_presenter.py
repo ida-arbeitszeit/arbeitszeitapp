@@ -16,12 +16,12 @@ TESTING_RESPONSE_MODEL = GetCoopSummarySuccess(
     coop_definition="coop def\ncoop def2",
     current_coordinator=uuid4(),
     current_coordinator_name="coordinator name",
+    coop_price=Decimal(50.005),
     plans=[
         AssociatedPlan(
             plan_id=uuid4(),
             plan_name="plan_name",
             plan_individual_price=Decimal("1"),
-            plan_coop_price=Decimal(50.005),
             planner_id=uuid4(),
             planner_name="A Cooperating Company Coop.",
         )
@@ -83,6 +83,21 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             ),
         )
 
+    def test_coop_price_is_displayed_correctly_if_it_is_not_none(self):
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.coop_price,
+            "50.01",
+        )
+
+    def test_coop_price_is_displayed_as_a_dash_if_coop_price_is_none(self):
+        response = replace(TESTING_RESPONSE_MODEL, coop_price=None)
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.coop_price,
+            "-",
+        )
+
     def test_first_plans_name_is_displayed_correctly(self):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
@@ -94,13 +109,6 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
         self.assertEqual(
             view_model.plans[0].plan_individual_price,
             "1.00",
-        )
-
-    def test_first_plans_coop_price_is_displayed_correctly(self):
-        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
-        self.assertEqual(
-            view_model.plans[0].plan_coop_price,
-            "50.01",
         )
 
     def test_first_plans_end_coop_url_is_displayed_correctly(self):
