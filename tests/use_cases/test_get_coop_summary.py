@@ -213,3 +213,27 @@ class AssociatedPlansTests(BaseTestCase):
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop.id))
         assert isinstance(response, GetCoopSummarySuccess)
         assert response.plans[0].planner_name == expected_planner_name
+
+    def test_that_associated_plan_shows_that_planner_is_also_requester_of_coop_summary(
+        self,
+    ) -> None:
+        expected_planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=expected_planner)
+        coop = self.cooperation_generator.create_cooperation(plans=[plan])
+        response = self.get_coop_summary(
+            GetCoopSummaryRequest(requester_id=plan.planner, coop_id=coop.id)
+        )
+        assert isinstance(response, GetCoopSummarySuccess)
+        assert response.plans[0].requester_is_planner == True
+
+    def test_that_associated_plan_shows_that_planner_is_not_requester_of_coop_summary(
+        self,
+    ) -> None:
+        expected_planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=expected_planner)
+        coop = self.cooperation_generator.create_cooperation(plans=[plan])
+        response = self.get_coop_summary(
+            GetCoopSummaryRequest(requester_id=uuid4(), coop_id=coop.id)
+        )
+        assert isinstance(response, GetCoopSummarySuccess)
+        assert response.plans[0].requester_is_planner == False
