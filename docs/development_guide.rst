@@ -221,6 +221,99 @@ single UPDATE statement to the SQL database server since only the
 ``perform`` method at the end of the method chain will send commands
 to it.
 
+Presenters
+----------
+
+One of the design approaches of the arbeitszeitapp is a separation of
+business logic and presentational logic. We have previously learned
+about use case classes. We have seen that the responses returned by
+calling to those use case objects are pretty abstract, hence we need a
+way to turn those abstract use case responses into something we can
+present to the user. This presentation can take different forms,
+e.g. a http response, command line output or an email. This is the job
+of **presenters**.
+
+Presenters are classes that, when instantiated are responsible for
+rendering abstract use case responses into more concrete data. Each
+individual presenter class is specific to the use case response it
+handles and the output format that it produces. So if we need to
+render the same use case response into two diferent formats there
+should be 2 different presenter classes respectivly.
+
+A presenter produces a view model object when handling use case
+responses. These view model objects are simple data types instead of
+proper objects. Their attributes are mostly booleans and strings which
+represent concrete output shown to the user, e.g. messages that should
+be displayed on a web page, the recipients of an email or a flag that
+decides if a submit button should be rendered. Note that potential
+strings in those view models are already localized, e.g. text is
+already translated into the proper language, dates are already
+formatted.
+
+Presenters return structured data that is not serialized yet.  E.g. a
+presenter that targets the web will not render proper html but only
+provide the concrete content that should be rendered into html. The
+view model will be passed into a view function. The corresponding view
+function is then responsible for serializing the strings and booleans
+from the view model into the final output format, e.g. html, an email
+or text on the screen.
+
+Let us revisit the example from the use case chapter earlier where we
+looked at an example for a use case object. Our example use case
+object returned a simple response object that was supposed to
+represent whether a filed plan was approved or rejected.::
+
+  class FilePlanUseCase:
+      @dataclass
+      class Request:
+	  company_id: UUID
+	  planned_hours: Decimal
+	  plan_duration_in_days: int
+
+      @dataclass
+      class Response:
+	  is_granted: bool
+
+      def file_plan(self, request: Request) -> Response:
+	  response = business_logic(request)
+	  return response
+
+Let us imagine that the response objects returned by this use case are
+supposed to be rendered into an http response containing html. If a
+plan is approved (denoted by `response.is_granted == True`) we want to
+show to the user an html document with white text on green
+background. When a plan is rejected we want to show an html document
+with black text on red background. An example presenter could like
+this::
+
+  @dataclass
+  class FilePlanPresenter:
+      translator: Translator
+
+      @dataclass
+      class ViewModel:
+	  text_color: str
+	  background_color: str
+	  message_text: str
+
+      def render_response(self, response: FilePlanUseCase.Response) -> ViewModel:
+	  if response.is_granted:
+	      return self.ViewModel(
+		  text_color='#ffffff',
+		  background_color='#00ff00',
+		  message_text=self.translator.gettext(
+		      'Your plan was accepted by public accounting'
+		  ),
+	      )
+	  else:
+	      return self.ViewModel(
+		  text_color='#000000',
+		  background_color='#ff0000',
+		  message_text=self.translator.gettext(
+		      'Your plan was rejected by public accounting'
+		  ),
+	      )
+
 User identification
 -------------------
 
