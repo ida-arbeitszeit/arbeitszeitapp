@@ -4,9 +4,9 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.accept_cooperation import AcceptCooperationResponse
 from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
-from arbeitszeit.use_cases.list_coordinations import (
+from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
-    ListCoordinationsResponse,
+    ListCoordinationsOfCompanyResponse,
 )
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListedInboundCoopRequest,
@@ -25,7 +25,7 @@ from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsResponse(
+LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
     coordinations=[
         CooperationInfo(
             id=uuid4(),

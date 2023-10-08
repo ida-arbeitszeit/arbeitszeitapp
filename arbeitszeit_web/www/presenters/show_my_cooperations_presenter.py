@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from arbeitszeit.use_cases.accept_cooperation import AcceptCooperationResponse
 from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
-from arbeitszeit.use_cases.list_coordinations import (
+from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
-    ListCoordinationsResponse,
+    ListCoordinationsOfCompanyResponse,
 )
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListedInboundCoopRequest,
@@ -105,7 +105,7 @@ class ShowMyCooperationsPresenter:
 
     def present(
         self,
-        list_coord_response: ListCoordinationsResponse,
+        list_coord_response: ListCoordinationsOfCompanyResponse,
         list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         accept_cooperation_response: Optional[AcceptCooperationResponse],
         deny_cooperation_response: Optional[DenyCooperationResponse],
