@@ -30,9 +30,9 @@ from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetails
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
 from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
-from arbeitszeit.use_cases.list_coordinations import (
-    ListCoordinations,
-    ListCoordinationsRequest,
+from arbeitszeit.use_cases.list_coordinations_of_company import (
+    ListCoordinationsOfCompany,
+    ListCoordinationsOfCompanyRequest,
 )
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
@@ -625,7 +625,7 @@ def request_cooperation(
 @commit_changes
 def my_cooperations(
     template_renderer: UserTemplateRenderer,
-    list_coordinations: ListCoordinations,
+    list_coordinations: ListCoordinationsOfCompany,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
     deny_cooperation: DenyCooperation,
@@ -660,7 +660,7 @@ def my_cooperations(
             )
 
     list_coord_response = list_coordinations(
-        ListCoordinationsRequest(UUID(current_user.id))
+        ListCoordinationsOfCompanyRequest(UUID(current_user.id))
     )
     list_inbound_coop_requests_response = list_inbound_coop_requests(
         ListInboundCoopRequestsRequest(UUID(current_user.id))

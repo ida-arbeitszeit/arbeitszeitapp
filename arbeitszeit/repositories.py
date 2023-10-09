@@ -228,6 +228,19 @@ class CooperationResult(QueryResult[records.Cooperation], Protocol):
         ...
 
 
+class CoordinationTenureResult(QueryResult[records.CoordinationTenure], Protocol):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
+    def of_cooperation(self, cooperation_id: UUID) -> Self:
+        ...
+
+    def joined_with_coordinator(
+        self,
+    ) -> QueryResult[Tuple[records.CoordinationTenure, records.Company]]:
+        ...
+
+
 class MemberResult(QueryResult[records.Member], Protocol):
     def working_at_company(self, company: UUID) -> Self:
         ...
@@ -541,6 +554,9 @@ class DatabaseGateway(Protocol):
     def create_coordination_tenure(
         self, company: UUID, cooperation: UUID, start_date: datetime
     ) -> records.CoordinationTenure:
+        ...
+
+    def get_coordination_tenures(self) -> CoordinationTenureResult:
         ...
 
     def get_transactions(self) -> TransactionResult:

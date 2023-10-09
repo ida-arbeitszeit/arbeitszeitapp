@@ -8,7 +8,7 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class ListCoordinationsRequest:
+class ListCoordinationsOfCompanyRequest:
     company: UUID
 
 
@@ -22,18 +22,20 @@ class CooperationInfo:
 
 
 @dataclass
-class ListCoordinationsResponse:
+class ListCoordinationsOfCompanyResponse:
     coordinations: List[CooperationInfo]
 
 
 @dataclass
-class ListCoordinations:
+class ListCoordinationsOfCompany:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def __call__(self, request: ListCoordinationsRequest) -> ListCoordinationsResponse:
+    def __call__(
+        self, request: ListCoordinationsOfCompanyRequest
+    ) -> ListCoordinationsOfCompanyResponse:
         if not self.database_gateway.get_companies().with_id(request.company):
-            return ListCoordinationsResponse(coordinations=[])
+            return ListCoordinationsOfCompanyResponse(coordinations=[])
         now = self.datetime_service.now()
         cooperations = [
             CooperationInfo(
@@ -52,4 +54,4 @@ class ListCoordinations:
             )
         ]
 
-        return ListCoordinationsResponse(coordinations=cooperations)
+        return ListCoordinationsOfCompanyResponse(coordinations=cooperations)

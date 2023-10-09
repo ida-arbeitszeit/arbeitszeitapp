@@ -31,6 +31,7 @@ from arbeitszeit.records import (
     Company,
     CompanyWorkInvite,
     Cooperation,
+    CoordinationTenure,
     Member,
     Plan,
     PlanDraft,
@@ -553,6 +554,27 @@ class CooperationResult(QueryResultImpl[Cooperation]):
                 tenures.sort(key=lambda t: t.start_date, reverse=True)
                 if tenures:
                     yield cooperation, self.database.companies[tenures[0].company]
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+
+class CoordinationTenureResult(QueryResultImpl[CoordinationTenure]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._filter_elements(lambda model: model.id == id_)
+
+    def of_cooperation(self, cooperation_id: UUID) -> Self:
+        return self._filter_elements(lambda model: model.cooperation == cooperation_id)
+
+    def joined_with_coordinator(
+        self,
+    ) -> QueryResultImpl[Tuple[records.CoordinationTenure, records.Company]]:
+        def items() -> Iterable[Tuple[records.CoordinationTenure, records.Company]]:
+            for tenure in self.items():
+                company = self.database.companies[tenure.company]
+                yield tenure, company
 
         return QueryResultImpl(
             items=items,
@@ -1571,6 +1593,12 @@ class MockDatabase:
         self.coordination_tenures[tenure_id] = tenure
         self.indices.coordination_tenure_by_cooperation.add(cooperation, tenure_id)
         return tenure
+
+    def get_coordination_tenures(self) -> CoordinationTenureResult:
+        return CoordinationTenureResult(
+            items=lambda: self.coordination_tenures.values(),
+            database=self,
+        )
 
     def create_transaction(
         self,
