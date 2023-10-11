@@ -300,13 +300,16 @@ arbeitszeit_development.update_dependencies``.
 Translation
 -----------
 
-We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translation.
+We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_
+for translation.
 
 #. Add a new language:
 
    .. code-block::  bash
 
-    python setup.py init_catalog -l LANGUAGE_CODE
+    python -m build_support.translations initialize LOCALE
+    # For example for adding french
+    python -m build_support.translations initialize fr
 
 
 #. Add the new language to the LANGUAGES variable in
@@ -334,24 +337,29 @@ We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_ for translat
 
     .. code-block:: bash
 
-     python setup.py extract_messages
+     python -m build_support.translations extract
 
 
 #. Update language-specific ``.po`` files:
 
    .. code-block::  bash
 
-     python setup.py update_catalog
+     python -m build_support.translations update
 
 
-#.	Translate language-specific ``.po`` files. For translation programs, see `this page <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+#. Translate language-specific ``.po`` files. For translation
+   programs, see `this page
+   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
 
 
-#. Compile translation files (.mo-files):
+#. Compile translation files (.mo-files): This is necessary if you
+   want to update the translations in your local development
+   environment only. For creating build artifacts (binary and source
+   distributions) this step is automatically done by the build system.
 
    .. code-block::  bash
 
-    python setup.py compile_catalog
+    python -m build_support.translations compile
 
 
 E-mail Configuration

@@ -10,4 +10,4 @@ sphinx-apidoc \
     -f \
     -o docs/modules \
     . \
-    '*_settings.py' 'setup.py' 'format_code.py' 'tests/*'
+    '*_settings.py' 'format_code.py' 'tests/*'

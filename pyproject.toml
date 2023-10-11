@@ -1,7 +1,7 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "backend"
-backend-path = ["build_support"]
+requires = ["setuptools", "wheel", "Babel"]
+build-backend = "build_support.backend"
+backend-path = ["."]
 
 [project]
 name = "arbeitszeitapp"
@@ -42,7 +42,8 @@ files = [
     "arbeitszeit_development",
     "arbeitszeit_flask",
     "arbeitszeit_web",
-    "tests",
+    "build_support",
+    "tests"
 ]
 mypy_path = "type_stubs"
 exclude = '''

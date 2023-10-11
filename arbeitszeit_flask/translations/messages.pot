@@ -1,0 +1,1204 @@
+# Translations template for arbeitszeitapp.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-10-11 23:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_accountant.html:15
+msgid "Accountant view"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_accountant.html:32
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:32
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:36
+msgid "Dashboard"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_accountant.html:43
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:42
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:47
+msgid "Sign in"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_accountant.html:48
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:52
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:57
+msgid "Back"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_accountant.html:54
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:58
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:63
+msgid "Sign out"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:15
+msgid "Company view"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:47
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:52
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:191
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:196
+msgid "Sign up"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_company.html:63
+msgid "?"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_general_pages.html:17
+msgid "Language"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_general_pages.html:32
+msgid "Help"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/base_member.html:19
+msgid "Member view"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/company_summary.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/company_summary.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:7
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/company_summary.html:4
+msgid "Company overview"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/dashboard.html:7
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:7
+#, python-format
+msgid "Welcome, %(name)s!"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/dashboard.html:12
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:12
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:11
+msgid "Your ID"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/dashboard.html:14
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:14
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:13
+msgid "Your email"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/dashboard.html:23
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:32
+msgid "Frequent actions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/dashboard.html:30
+msgid "List unreviewed plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/get_company_account_details.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/get_member_account_details.html:4
+msgid "User Account Data"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:7
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/get_company_account_details.html:7
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/get_member_account_details.html:7
+msgid "Account ID:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:10
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/get_company_account_details.html:10
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/get_member_account_details.html:10
+msgid "Email address:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/notification-about-new-plan.html:2
+#, python-format
+msgid "Hello %(accountant_name)s,"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/notification-about-new-plan.html:7
+#, python-format
+msgid ""
+"A company filed a new plan for \"%(product_name)s\". Log in as an "
+"accountant to conduct a review."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/plan_details.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/plan_details.html:6
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/plan_details.html:4
+msgid "Plan information"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/plans-to-review-list.html:6
+msgid "Unreviewed plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/plans-to-review-list.html:25
+msgid "Approve plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/accountant/plans-to-review-list.html:35
+msgid "There are currently no plans waiting for review"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/accountant_invitation.html:3
+#, python-format
+msgid ""
+"Hello. You were invited to be a public accountant at Arbeitszeitapp. Go "
+"to %(link)s to register."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/activate.html:1
+msgid ""
+"Welcome and thank you for registering! Please follow this link to "
+"activate your account:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_accountant.html:8
+msgid "Login accountant"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_accountant.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_company.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_member.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_accountant.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_company.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_member.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:24
+msgid "Email"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_accountant.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_company.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_member.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_accountant.html:36
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_company.html:34
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_member.html:36
+msgid "Password"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_accountant.html:36
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_company.html:36
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_member.html:36
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:216
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:220
+msgid "Login"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_company.html:8
+msgid "Login company"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/login_member.html:8
+msgid "Login member"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_accountant.html:8
+msgid "Sign up accountant"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_accountant.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_member.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:31
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_cooperations.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:20
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:27
+msgid "Name"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_accountant.html:43
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_company.html:40
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_member.html:43
+msgid "Sign Up"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_company.html:8
+msgid "Sign up company"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_company.html:26
+msgid "Company name"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/signup_member.html:8
+msgid "Sign up member"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start.html:23
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:9
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:9
+msgid "A platform for working time calculation."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start.html:26
+msgid "Member"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:66
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:86
+msgid "Company"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start.html:28
+msgid "Accountant"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start.html:31
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:120
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:86
+msgid "Latest plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/start_hilfe.html:7
+msgid "Start"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:14
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:13
+msgid "Welcome!"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:16
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:15
+msgid "Please confirm your account."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:17
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:15
+msgid ""
+"Check your mailbox (and your spam folder) - you should have received an "
+"email with a confirmation link."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:18
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:16
+msgid "You did not get an email?"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_company.html:19
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/auth/unconfirmed_member.html:17
+msgid "Resend mail"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_a.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_p.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_prd.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_r.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:82
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_transactions.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:11
+msgid "Accounts"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_a.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_a.html:13
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:54
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:52
+msgid "Account a"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_a.html:21
+msgid "Your account for work certificates"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_a.html:23
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_p.html:23
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_prd.html:19
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_r.html:23
+msgid "Balance:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_p.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_p.html:13
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:32
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:48
+msgid "Account p"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_p.html:21
+msgid "Your account for fixed means of production."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_prd.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_prd.html:13
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:65
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:55
+msgid "Account prd"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_prd.html:17
+msgid "Your account for product transfers (sales)."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_r.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_r.html:13
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:43
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:50
+msgid "Account r"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/account_r.html:21
+msgid "Your account for liquid means of production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/coop_summary.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:144
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:185
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:6
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/coop_summary.html:4
+msgid "Cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:10
+msgid "My cooperations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:11
+msgid "Create Cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:18
+msgid "Here you can create a new cooperation."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:20
+msgid ""
+"A cooperation contains similar products.  The prices for all products in "
+"a cooperation are averaged to reduce price competition.  All producers "
+"still receive the credits on sale corresponding to how they planned "
+"production."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:27
+msgid "Cooperation name"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:35
+msgid "Definition of the cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_cooperation.html:44
+msgid "Create cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_draft.html:6
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_draft.html:12
+msgid "Create plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_draft.html:19
+msgid "Load a draft"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_draft.html:32
+msgid "Save as draft"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/create_draft.html:42
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:153
+msgid "Cancel"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:21
+msgid "No workers are registered with your company. Click here to add some."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:39
+msgid "Create new plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:47
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:500
+msgid "Register productive consumption"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:54
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:13
+msgid "Register hours worked"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:60
+msgid "Company accounting"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:68
+msgid "Your company"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:73
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:107
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:24
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:45
+msgid "Plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:76
+msgid "Your plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:83
+msgid "You have four accounts"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:91
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:30
+msgid "Cooperations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:93
+msgid "Your cooperations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:99
+msgid "Consumptions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:101
+msgid "Your consumptions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:107
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:18
+msgid "Workers"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:108
+msgid "Members of your collective"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:113
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:79
+msgid "Public accounting"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:139
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/statistics.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:105
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/statistics.html:4
+msgid "Global statistics"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:147
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/query_companies.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:113
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/query_companies.html:4
+msgid "All companies"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:154
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/query_plans.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:120
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/query_plans.html:4
+msgid "All plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/dashboard.html:163
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_cooperations.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_cooperations.html:11
+msgid "All cooperations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:14
+msgid "Invite worker"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:19
+msgid "Invite"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:26
+msgid "Workers of the company"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/invite_worker_to_company.html:30
+msgid "Member ID"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_cooperations.html:19
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:59
+msgid "Number of plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_cooperations.html:34
+msgid "No cooperations found"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_transactions.html:5
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_transactions.html:13
+msgid "All transactions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/list_all_transactions.html:18
+msgid "Here are all transactions you have made or received so far."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:16
+msgid "You have four different accounts."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:35
+msgid "Account for fixed means of production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:46
+msgid "Account for liquid means of production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:57
+msgid "Account for work certificates (wages)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:67
+msgid "Account for product transfers (sales)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_accounts.html:76
+msgid "List all transactions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:73
+msgid "My consumptions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:12
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:12
+msgid "My past consumptions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:17
+msgid "Here you can view your past consumptions."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:26
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:26
+msgid "Date"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:28
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:28
+msgid "Description"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:29
+msgid "Purpose"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:30
+msgid "Unit price"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:31
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:20
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_productive_consumption.html:33
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:80
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:30
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/register_private_consumption.html:35
+msgid "Amount"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:32
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:31
+msgid "Total price"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_consumptions.html:49
+msgid "You haven't consumed anything yet."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:20
+msgid "Create cooperation "
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:29
+msgid "Cooperations that I coordinate"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:66
+msgid "You do not coordinate any cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:74
+msgid "Incoming cooperation request (by others)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:91
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:140
+msgid "Plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:95
+msgid "My cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:104
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/show_company_work_invite_details.html:10
+msgid "Accept"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:109
+msgid "Decline"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:121
+msgid "You don't have open requests"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:128
+msgid "Outgoing cooperation requests (own requests)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:162
+msgid "You haven't requested any cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:170
+msgid "My cooperating plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_cooperations.html:192
+msgid "You don't have any cooperating plans."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:9
+msgid "My plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:13
+msgid "Active"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:32
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:67
+msgid "Product not available"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:35
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:70
+msgid "Cooperating plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:38
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:73
+msgid "Public"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:52
+msgid "You don't have active plans."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:57
+msgid "Waiting"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:64
+msgid "Costs"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:65
+msgid "Type"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:66
+msgid "Plan created"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:67
+msgid "Revoke"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:79
+msgid "Revoke plan filing"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:92
+msgid "You don't have plans waiting for activation."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:99
+msgid "Drafts"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:120
+msgid "File plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:126
+msgid "Delete plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:132
+msgid "Edit plan"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:142
+msgid "You don't have any drafts saved."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:147
+msgid "Expired"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/my_plans.html:176
+msgid "You don't have expired plans."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:16
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:39
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/plan_details.html:13
+msgid "Actions"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:25
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/plan_details.html:22
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/plan_details.html:24
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/register_private_consumption.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/register_private_consumption.html:14
+msgid "Register consumption"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:48
+msgid "Change availability:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:60
+msgid "End cooperation:"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:62
+msgid "End"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:65
+msgid "Join a cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/plan_details.html:67
+msgid "Join"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:31
+msgid "Worker"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:42
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_productive_consumption.html:52
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/register_private_consumption.html:42
+msgid "Register"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:47
+msgid "You can register workers here"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_hours_worked.html:50
+msgid "No workers registered yet"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_productive_consumption.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_productive_consumption.html:14
+msgid "Registration of productive consumption"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/register_productive_consumption.html:27
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/register_private_consumption.html:29
+msgid "Plan ID"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:4
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:10
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:71
+msgid "Request cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:16
+msgid "Here you can request a cooperation."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:17
+msgid ""
+"The coordinator of the cooperation decides if they add your plan to the "
+"cooperation."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:18
+msgid "All plans in a cooperation should offer the same or a similar product."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:51
+msgid "My plan..."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:65
+msgid "Cooperation ID"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/company/request_cooperation.html:77
+msgid "No plans yet."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:16
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:14
+msgid "ID"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:28
+msgid "Registered since"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:39
+msgid "Metrics"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:61
+msgid "Expectations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:67
+msgid "Balances"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:73
+msgid "Deviation (&percnt;)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:87
+msgid "Suppliers"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:99
+msgid "This company has no suppliers."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:116
+msgid "Status"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:117
+msgid "Planned sales"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:118
+msgid "Sales deviation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/company_summary.html:119
+msgid "Sales deviation (&percnt;)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:22
+msgid "Definition"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:28
+msgid "Current coordinator"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:33
+msgid "Cooperation price"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:43
+msgid "Participating plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:65
+msgid "End cooperation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/coop_summary.html:76
+msgid "Individual price"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:15
+msgid "Product name"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:22
+msgid "Product description"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:34
+msgid "Planning timeframe (days)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:46
+msgid "Costs for fixed means of production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:53
+msgid "Costs for liquid means of production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:60
+msgid "Costs for labour"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:72
+msgid "Smallest delivery unit"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:75
+msgid ""
+"E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, "
+"etc."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:98
+msgid "Specify product name and description."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:99
+msgid ""
+"Choose a planning timeframe in which you are planning to produce and "
+"deliver your product."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:100
+msgid "Estimate what costs you will have in the given timeframe."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:101
+msgid ""
+"Describe the smallest delivery unit and what amount of these units you "
+"will produce."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/draft_form.html:102
+msgid "The type of plan. Productive plans are the norm."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/plan_details.html:83
+msgid "Plan creation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/plan_details.html:86
+msgid "Plan approval"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/plan_details.html:89
+msgid "Plan expiration"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_companies.html:6
+msgid "Search companies"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_companies.html:17
+msgid "Search by name or email"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_companies.html:25
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:34
+msgid "Search"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_companies.html:31
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:40
+msgid "Results"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:8
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:71
+msgid "Active plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/query_plans.html:17
+msgid "Search by plan ID or product name"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:240
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:244
+msgid "Company invites"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:264
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:268
+msgid "Accepts invitation"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:288
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:292
+msgid "Company registers worked hours"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:312
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:316
+msgid "Product search"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:332
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:336
+msgid "Registration of consumption"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:409
+msgid "Create plan draft"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:433
+msgid "File plan draft"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:454
+msgid "Public accounting approves"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:479
+msgid "Public accounting grants credits"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:525
+msgid "Register worked hours"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:550
+msgid "Produce and sell"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:571
+msgid "Planning"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:592
+msgid "Approval"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:613
+msgid "Registrations"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/start_hilfe.html:634
+msgid "Production"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:12
+msgid "Companies"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:38
+msgid "FIC (Payout factor)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:53
+msgid "Planned ressources"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:61
+msgid "Certificates and products"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:72
+msgid "Public active plans"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:73
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:84
+msgid "Average plan duration"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:74
+msgid "Currently planned fixed means"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:75
+msgid "Currently planned liquid means"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:76
+msgid "Currently planned work"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:77
+msgid "Available work certificates"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/macros/statistics.html:78
+msgid "Available product (no public products)"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:17
+msgid "Your past consumptions are shown here."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:29
+msgid "Price per unit"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/consumptions.html:47
+msgid "You have not consumed anything yet."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:15
+msgid "Your credit"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:17
+msgid "Your workplace"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:30
+msgid ""
+"You are not registered with any company. Tell your company your member ID"
+" so that they register you."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:53
+msgid "My area"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:59
+msgid "Private consumption"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/dashboard.html:66
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/my_account.html:4
+msgid "My account"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/my_account.html:12
+msgid "My Account"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/my_account.html:15
+msgid "Current balance"
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/notification-about-work-invitation.html:2
+#, python-format
+msgid ""
+"You have been invited by a company to join them as a member on "
+"Arbeitszeitapp. Accept or reject via this link: \"%(invitation_url)s\"."
+msgstr ""
+
+#: /home/me/src/arbeitszeitapp/arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
+msgid "Reject"
+msgstr ""
+
