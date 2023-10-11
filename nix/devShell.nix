@@ -2,15 +2,17 @@
 mkShell {
   packages = (with python3.pkgs; [
     black
+    build
+    coverage
     flake8
-    mypy
-    isort
-    psycopg2
     gunicorn
+    isort
+    mypy
+    pip
+    psycopg2
     types-dateutil
     types-pytz
-    coverage
-    pip
+    types-setuptools
   ]) ++ [ nixfmt sqlite ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
