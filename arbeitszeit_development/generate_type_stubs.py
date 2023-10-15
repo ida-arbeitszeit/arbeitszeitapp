@@ -1,7 +1,8 @@
 import shutil
-import subprocess
 from logging import getLogger
 from typing import Generator, Iterable, TypeVar
+
+from .command import Shell, Subprocess, SubprocessRunner
 
 LOGGER = getLogger(__name__)
 
@@ -25,11 +26,13 @@ TARGET_PACKAGES = [
 T = TypeVar("T")
 
 
-def main():
+def main(subprocess_runner: SubprocessRunner):
     LOGGER.info("Update type stubs from dependencies")
     packages = list(flatten(["-p", package_name] for package_name in TARGET_PACKAGES))
     shutil.rmtree("type_stubs")
-    subprocess.run(["stubgen", "-o", "type_stubs"] + packages)
+    subprocess_runner.run_command(
+        Subprocess(command=["stubgen", "-o", "type_stubs"] + packages)
+    )
 
 
 def flatten(list_of_lists: Iterable[Iterable[T]]) -> Generator[T, None, None]:
@@ -38,4 +41,4 @@ def flatten(list_of_lists: Iterable[Iterable[T]]) -> Generator[T, None, None]:
 
 
 if __name__ == "__main__":
-    main()
+    main(subprocess_runner=Shell())

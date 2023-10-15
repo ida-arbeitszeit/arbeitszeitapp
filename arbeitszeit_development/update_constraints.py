@@ -3,21 +3,21 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, Optional, Tuple
 
+from .command import Shell, Subprocess, SubprocessRunner
 
-def main() -> None:
-    parse_arguments()
+
+def main(subprocess_runner: SubprocessRunner) -> None:
     controller = RequirementsUpdater(
         requirements_file=RequirementsFile(
             packages=dict(),
             path=Path("constraints.txt"),
             version_string_cleaner=VersionStringCleaner(),
         ),
-        python_environment=PythonEnvironment(),
+        python_environment=PythonEnvironment(subprocess_runner),
         package_filter=PackageFilter(),
     )
     controller.process_requirements_file()
@@ -67,19 +67,25 @@ class PythonPackage:
     version: str
 
 
+@dataclass
 class PythonEnvironment:
+    subprocess_runner: SubprocessRunner
+
     def get_installed_packages(self) -> Iterator[PythonPackage]:
-        process_info = subprocess.run(
-            [
-                "pip",
-                "list",
-                "--exclude-editable",
-                "--format",
-                "json",
-            ],
-            capture_output=True,
-            check=True,
+        process_info = self.subprocess_runner.run_command(
+            Subprocess(
+                [
+                    "pip",
+                    "list",
+                    "--exclude-editable",
+                    "--format",
+                    "json",
+                ],
+                capture_output=True,
+                check=True,
+            )
         )
+        assert process_info.stdout is not None
         packages = json.loads(process_info.stdout)
         for package in packages:
             yield PythonPackage(
@@ -131,4 +137,5 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-    main()
+    parse_arguments()
+    main(Shell())

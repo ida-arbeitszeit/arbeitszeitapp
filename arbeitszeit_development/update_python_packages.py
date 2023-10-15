@@ -1,23 +1,29 @@
 import json
 import logging
 import re
-import subprocess
 import urllib.request
 from urllib.parse import quote
 
-logging.basicConfig(level=logging.INFO)
+from .command import Shell, Subprocess, SubprocessRunner
+
 logger = logging.getLogger(name=__name__)
 
 
-def main() -> None:
-    update_python_package("nix/pythonPackages/flask-restx.json", "flask-restx")
-    update_python_package("nix/pythonPackages/is-safe-url.json", "is_safe_url")
+def main(subprocess_runner: SubprocessRunner) -> None:
+    update_python_package(
+        subprocess_runner, "nix/pythonPackages/flask-restx.json", "flask-restx"
+    )
+    update_python_package(
+        subprocess_runner, "nix/pythonPackages/is-safe-url.json", "is_safe_url"
+    )
 
 
-def update_python_package(path: str, package: str) -> None:
+def update_python_package(
+    subprocess_runner: SubprocessRunner, path: str, package: str
+) -> None:
     version = detect_latest_package_version(package)
     logger.info("Detected version %s as latest for %s", version, package)
-    sha256_sum = detect_sha256_sum_for_version(package, version)
+    sha256_sum = detect_sha256_sum_for_version(subprocess_runner, package, version)
     logger.info("Tarball sha256 sum is %s", sha256_sum)
     write_source_json(
         path=path,
@@ -39,19 +45,21 @@ def detect_latest_package_version(package: str) -> str:
     return version
 
 
-def detect_sha256_sum_for_version(package: str, version: str) -> str:
-    completed_process = subprocess.run(
-        [
+def detect_sha256_sum_for_version(
+    subprocess_runner: SubprocessRunner, package: str, version: str
+) -> str:
+    subprocess = Subprocess(
+        command=[
             "nix-build",
             "-E",
             source_expression(package, version),
             "--no-out-link",
         ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
         check=False,
+        capture_output=True,
     )
+    completed_process = subprocess_runner.run_command(subprocess)
+    assert completed_process.stderr is not None
     for line in completed_process.stderr.splitlines():
         if match := re.search(r"got:\s+(?P<hash>.*)", line):
             return match["hash"].strip()
@@ -83,4 +91,5 @@ def source_expression(package: str, version: str) -> str:
 
 
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(level=logging.INFO)
+    main(Shell())
