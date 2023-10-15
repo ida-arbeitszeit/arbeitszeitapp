@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import annotations
 
 import json
@@ -12,12 +10,12 @@ from pathlib import Path
 from typing import Any, Generator, List
 from urllib.request import urlopen
 
+logger = logging.getLogger(name=__name__)
+
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(name="update_bulma")
-    zip_factory = ZipFactory(logger=logger)
-    github_api = GithubApi(logger=logger)
+    zip_factory = ZipFactory()
+    github_api = GithubApi()
     updater = BulmaUpdater(
         github_api=github_api,
         logger=logger,
@@ -63,21 +61,18 @@ class BulmaUpdater:
 
 @dataclass
 class GithubApi:
-    logger: logging.Logger
-
     def get_latest_release(self, owner: str, repo: str) -> GithubRelease:
         url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
         with urlopen(url) as response:
             encoding = response.info().get_content_charset("utf-8")
             content_data = response.read()
         content_json = json.loads(content_data.decode(encoding))
-        return GithubRelease(release_json=content_json, logger=self.logger)
+        return GithubRelease(release_json=content_json)
 
 
 @dataclass
 class GithubRelease:
     release_json: Any
-    logger: logging.Logger
 
     @property
     def asset_names(self) -> List[str]:
@@ -89,7 +84,7 @@ class GithubRelease:
 
     @contextmanager
     def download_asset(self, name: str) -> Generator[Path, None, None]:
-        self.logger.info(f"Downloading release asset {name}")
+        logger.info(f"Downloading release asset {name}")
         download_url = self.get_zip_download_url(name)
         with tempfile.TemporaryDirectory() as directory:
             zip_file = Path(directory) / f"asset-{name}.zip"
@@ -111,23 +106,21 @@ class GithubRelease:
 
 @dataclass
 class ZipFactory:
-    logger: logging.Logger
-
     def create_zip_archive(self, path: Path) -> ZipArchive:
-        return ZipArchive(path=path, logger=self.logger)
+        return ZipArchive(path=path)
 
 
 @dataclass
 class ZipArchive:
     path: Path
-    logger: logging.Logger
 
     def unpack_archive_member(self, source_path: str, target_path: Path) -> None:
-        self.logger.info(f"Unpacking {source_path} to {target_path}")
+        logger.info(f"Unpacking {source_path} to {target_path}")
         with zipfile.ZipFile(self.path) as zip_handle:
             with open(target_path, "wb") as write_handle:
                 write_handle.write(zip_handle.read(source_path))
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()
