@@ -21,9 +21,10 @@
             overlays = [ self.overlays.default ];
           };
         in {
-          devShells = {
-            default = pkgs.callPackage nix/devShell.nix { };
+          devShells = rec {
+            default = nixos-unstable;
             nixos-23-05 = pkgs-23-05.callPackage nix/devShell.nix { };
+            nixos-unstable = pkgs.callPackage nix/devShell.nix { };
           };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
