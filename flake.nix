@@ -30,6 +30,12 @@
             inherit (pkgs) python3;
           };
           checks = {
+            # It is okay to have identical versions of python in this
+            # list since nix is smart enough to notice and reuse build
+            # artifacts. This is why we can test for the system
+            # python3 interpreter and also explicitly list all
+            # versions we want to support.
+            arbeitszeit-python3 = pkgs.python3.pkgs.arbeitszeitapp;
             arbeitszeit-python311 = pkgs.python311.pkgs.arbeitszeitapp;
             arbeitszeit-python310 = pkgs.python310.pkgs.arbeitszeitapp;
             arbeitszeit-python39 = pkgs.python39.pkgs.arbeitszeitapp;
