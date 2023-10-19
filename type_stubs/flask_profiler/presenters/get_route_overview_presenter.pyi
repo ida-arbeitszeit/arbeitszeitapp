@@ -1,18 +1,27 @@
 from flask_profiler.use_cases import get_route_overview as use_case
-from typing import List, Optional
+from typing import Iterable, List, Optional
+
+class Plot:
+    data_points: list[Point]
+    x_axis: Line
+    y_axis: Line
+    x_markings: list[Line]
+    y_markings: list[Line]
+    @property
+    def point_connections(self) -> Iterable[Line]: ...
+    def transform(self, transformation: Conversion) -> Plot: ...
+    def __init__(self, data_points, x_axis, y_axis, x_markings, y_markings) -> None: ...
 
 class Point:
-    color: str
     @property
     def x(self) -> str: ...
     @property
     def y(self) -> str: ...
-    def __init__(self, _x, _y, color) -> None: ...
+    def __init__(self, _x, _y) -> None: ...
 
 class Line:
     p1: Point
     p2: Point
-    color: str
     label: Optional[str]
     @property
     def x1(self) -> str: ...
@@ -22,15 +31,14 @@ class Line:
     def x2(self) -> str: ...
     @property
     def y2(self) -> str: ...
-    def __init__(self, p1, p2, color, label) -> None: ...
+    def __init__(self, p1, p2, label) -> None: ...
 
 class Graph:
     title: str
     width: str
     height: str
-    points: List[Point]
-    lines: List[Line]
-    def __init__(self, title, width, height, points, lines) -> None: ...
+    plot: Plot
+    def __init__(self, title, width, height, plot) -> None: ...
 
 class ViewModel:
     headline: str
