@@ -25,6 +25,12 @@
             default = nixos-unstable;
             nixos-23-05 = pkgs-23-05.callPackage nix/devShell.nix { };
             nixos-unstable = pkgs.callPackage nix/devShell.nix { };
+            python39 =
+              pkgs.callPackage nix/devShell.nix { python3 = pkgs.python39; };
+            python310 =
+              pkgs.callPackage nix/devShell.nix { python3 = pkgs.python310; };
+            python311 =
+              pkgs.callPackage nix/devShell.nix { python3 = pkgs.python311; };
           };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
