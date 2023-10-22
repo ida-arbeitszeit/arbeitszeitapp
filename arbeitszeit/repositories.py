@@ -240,6 +240,19 @@ class CoordinationTenureResult(QueryResult[records.CoordinationTenure], Protocol
     ) -> QueryResult[Tuple[records.CoordinationTenure, records.Company]]:
         ...
 
+    def ordered_by_start_date(self, *, ascending: bool = ...) -> Self:
+        ...
+
+
+class CoordinationTransferRequestResult(
+    QueryResult[records.CoordinationTransferRequest], Protocol
+):
+    def requested_by(self, coordination_tenure: UUID) -> Self:
+        ...
+
+    def that_are_open(self) -> Self:
+        ...
+
 
 class MemberResult(QueryResult[records.Member], Protocol):
     def working_at_company(self, company: UUID) -> Self:
@@ -557,6 +570,17 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_coordination_tenures(self) -> CoordinationTenureResult:
+        ...
+
+    def create_coordination_transfer_request(
+        self,
+        requesting_coordination_tenure: UUID,
+        candidate: UUID,
+        request_date: datetime,
+    ) -> records.CoordinationTransferRequest:
+        ...
+
+    def get_coordination_transfer_requests(self) -> CoordinationTransferRequestResult:
         ...
 
     def get_transactions(self) -> TransactionResult:

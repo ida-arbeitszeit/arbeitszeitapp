@@ -50,6 +50,14 @@ class CooperationRequestEmail:
     coordinator_name: str
 
 
+@dataclass
+class CoordinationTransferRequest:
+    candidate_email: str
+    candidate_name: str
+    cooperation_name: str
+    cooperation_id: UUID
+
+
 # This type definition can be used by implementations of the
 # EmailSender protocol for static type checking purposes. Keep this
 # list alphabetically sorted.
@@ -58,6 +66,7 @@ Message: TypeAlias = Union[
     AccountantNotificationAboutNewPlan,
     CompanyRegistration,
     CooperationRequestEmail,
+    CoordinationTransferRequest,
     EmailChangeConfirmation,
     MemberRegistration,
     WorkerInvitation,

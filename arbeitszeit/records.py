@@ -130,6 +130,19 @@ class CoordinationTenure:
 
 
 @dataclass
+class CoordinationTransferRequest:
+    id: UUID
+    requesting_coordination_tenure: UUID
+    candidate: UUID
+    request_date: datetime
+    transfer_date: Optional[datetime]
+
+    @property
+    def is_open(self) -> bool:
+        return self.transfer_date is None
+
+
+@dataclass
 class ProductionCosts:
     labour_cost: Decimal
     resource_cost: Decimal

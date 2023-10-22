@@ -495,6 +495,46 @@ class CooperationGenerator:
 
 
 @dataclass
+class CoordinationTenureGenerator:
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+    database_gateway: DatabaseGateway
+    create_cooperation_use_case: CreateCooperation
+
+    def create_coordination_tenure(
+        self, cooperation: Optional[UUID] = None, coordinator: Optional[UUID] = None
+    ) -> UUID:
+        if coordinator is None:
+            coordinator = self.company_generator.create_company()
+        if cooperation is None:
+            cooperation = self._create_coop(coordinator=coordinator)
+        tenure = self._create_tenure(cooperation=cooperation, coordinator=coordinator)
+        return tenure
+
+    def _create_coop(self, coordinator: UUID) -> UUID:
+        uc_request = CreateCooperationRequest(
+            coordinator_id=coordinator, name=f"name_{uuid4()}", definition="test info"
+        )
+        uc_response = self.create_cooperation_use_case(uc_request)
+        assert uc_response.cooperation_id
+        cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(uc_response.cooperation_id)
+            .first()
+        )
+        assert cooperation
+        return cooperation.id
+
+    def _create_tenure(self, cooperation: UUID, coordinator: UUID) -> UUID:
+        tenure = self.database_gateway.create_coordination_tenure(
+            company=coordinator,
+            cooperation=cooperation,
+            start_date=self.datetime_service.now(),
+        )
+        return tenure.id
+
+
+@dataclass
 class AccountantGenerator:
     invite_accountant_use_case: SendAccountantRegistrationTokenUseCase
     register_accountant_use_case: RegisterAccountantUseCase
