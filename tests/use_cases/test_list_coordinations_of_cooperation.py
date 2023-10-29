@@ -66,6 +66,18 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         )
         assert response.coordinations[0].start_time == expected_time
 
+    def test_that_coordination_has_no_end_time_when_there_is_only_one_coordination(
+        self,
+    ) -> None:
+        expected_time = datetime(2021, 10, 5, 10)
+        self.datetime_service.freeze_time(expected_time)
+        coop = self.cooperation_generator.create_cooperation()
+        self.datetime_service.advance_time(timedelta(days=2))
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop.id)
+        )
+        assert response.coordinations[0].end_time is None
+
     def create_use_case_request(
         self, coop: UUID
     ) -> ListCoordinationsOfCooperationUseCase.Request:
