@@ -247,10 +247,21 @@ class CoordinationTenureResult(QueryResult[records.CoordinationTenure], Protocol
 class CoordinationTransferRequestResult(
     QueryResult[records.CoordinationTransferRequest], Protocol
 ):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
     def requested_by(self, coordination_tenure: UUID) -> Self:
         ...
 
     def that_are_open(self) -> Self:
+        ...
+
+    def update(self) -> CoordinationTransferRequestUpdate:
+        ...
+
+
+class CoordinationTransferRequestUpdate(DatabaseUpdate, Protocol):
+    def set_transfer_date(self, date: datetime) -> Self:
         ...
 
 

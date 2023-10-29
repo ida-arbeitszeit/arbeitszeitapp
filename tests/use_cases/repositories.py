@@ -594,6 +594,9 @@ class CoordinationTenureResult(QueryResultImpl[CoordinationTenure]):
 
 
 class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequest]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._filter_elements(lambda model: model.id == id_)
+
     def requested_by(self, coordination_tenure: UUID) -> Self:
         return self._filter_elements(
             lambda tenure_request: tenure_request.requesting_coordination_tenure
@@ -602,6 +605,35 @@ class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequ
 
     def that_are_open(self) -> Self:
         return self._filter_elements(lambda tenure_request: tenure_request.is_open)
+
+    def update(self) -> CoordinationTransferRequestUpdate:
+        return CoordinationTransferRequestUpdate(
+            database=self.database,
+            items=self.items,
+        )
+
+
+@dataclass
+class CoordinationTransferRequestUpdate:
+    database: MockDatabase
+    items: Callable[[], Iterable[CoordinationTransferRequest]]
+    changes: Callable[[CoordinationTransferRequest], None] = lambda _: None
+
+    def set_transfer_date(self, transfer_date: datetime) -> Self:
+        def update(request: CoordinationTransferRequest) -> None:
+            request.transfer_date = transfer_date
+
+        return replace(
+            self,
+            changes=update,
+        )
+
+    def perform(self) -> int:
+        items_affected = 0
+        for item in self.items():
+            self.changes(item)
+            items_affected += 1
+        return items_affected
 
 
 class MemberResult(QueryResultImpl[Member]):

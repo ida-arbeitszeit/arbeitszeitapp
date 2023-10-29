@@ -6,6 +6,7 @@ rule though. Feel free to change them so that they comply.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
@@ -17,6 +18,9 @@ from arbeitszeit.use_cases import confirm_member
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
+)
+from arbeitszeit.use_cases.accept_coordination_transfer import (
+    AcceptCoordinationTransferUseCase,
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
@@ -45,6 +49,9 @@ from arbeitszeit.use_cases.register_productive_consumption import (
 from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
+)
+from arbeitszeit.use_cases.request_coordination_transfer import (
+    RequestCoordinationTransferUseCase,
 )
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
@@ -532,6 +539,50 @@ class CoordinationTenureGenerator:
             start_date=self.datetime_service.now(),
         )
         return tenure.id
+
+
+@dataclass
+class CoordinationTransferRequestGenerator:
+    datetime_service: FakeDatetimeService
+    coordination_tenure_generator: CoordinationTenureGenerator
+    company_generator: CompanyGenerator
+    request_transfer_use_case: RequestCoordinationTransferUseCase
+    accept_transfer_use_case: AcceptCoordinationTransferUseCase
+
+    def create_coordination_transfer_request(
+        self,
+        requesting_coordination_tenure: Optional[UUID] = None,
+        candidate: Optional[UUID] = None,
+        request_date: Optional[datetime] = None,
+        is_closed: bool = False,
+    ) -> UUID:
+        if requesting_coordination_tenure is None:
+            requesting_coordination_tenure = (
+                self.coordination_tenure_generator.create_coordination_tenure()
+            )
+        if candidate is None:
+            candidate = self.company_generator.create_company()
+        if request_date is None:
+            request_date = self.datetime_service.now()
+        request_response = self.request_transfer_use_case.request_transfer(
+            RequestCoordinationTransferUseCase.Request(
+                requesting_coordination_tenure=requesting_coordination_tenure,
+                candidate=candidate,
+            )
+        )
+        assert not request_response.is_rejected
+        assert request_response.transfer_request
+        transfer_request = request_response.transfer_request
+        if is_closed:
+            accept_response = (
+                self.accept_transfer_use_case.accept_coordination_transfer(
+                    AcceptCoordinationTransferUseCase.Request(
+                        transfer_request_id=transfer_request
+                    )
+                )
+            )
+            assert not accept_response.is_rejected
+        return transfer_request
 
 
 @dataclass
