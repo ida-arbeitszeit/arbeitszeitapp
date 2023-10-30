@@ -25,6 +25,8 @@ class ListCoordinationsOfCooperationUseCase:
     @dataclass
     class Response:
         coordinations: list[CoordinationInfo]
+        cooperation_id: UUID
+        cooperation_name: str
 
     def list_coordinations(self, request: Request) -> Response:
         tenures_and_coordinators = list(
@@ -45,4 +47,15 @@ class ListCoordinationsOfCooperationUseCase:
             )
             coordinations.append(info)
         assert coordinations  # there cannot be a cooperation without at least one coordination_tenure
-        return self.Response(coordinations=coordinations)
+        cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(request.cooperation)
+            .first()
+        )
+        assert cooperation
+
+        return self.Response(
+            coordinations=coordinations,
+            cooperation_id=request.cooperation,
+            cooperation_name=cooperation.name,
+        )

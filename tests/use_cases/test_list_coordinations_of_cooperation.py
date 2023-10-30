@@ -37,6 +37,21 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         )
         assert len(response.coordinations) == 1
 
+    def test_that_coordination_info_shows_correct_name_of_cooperation(self) -> None:
+        expected_name = "Cooperation Coop."
+        coop = self.cooperation_generator.create_cooperation(name=expected_name)
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop.id)
+        )
+        assert response.cooperation_name == expected_name
+
+    def test_that_coordination_info_shows_correct_id_of_cooperation(self) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop.id)
+        )
+        assert response.cooperation_id == coop.id
+
     def test_that_coordination_info_shows_correct_name_of_coordinator(self) -> None:
         expected_name = "Coordinator Coop."
         coordinator = self.company_generator.create_company(name=expected_name)
