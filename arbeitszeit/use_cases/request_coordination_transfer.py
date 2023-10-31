@@ -115,4 +115,4 @@ class RequestCoordinationTransferUseCase:
             .requested_by(requesting_tenure.id)
             .that_are_open()
         )
-        return True if len(transfer_requests) > 0 else False
+        return len(transfer_requests) > 0

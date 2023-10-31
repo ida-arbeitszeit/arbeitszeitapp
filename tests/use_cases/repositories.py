@@ -604,7 +604,7 @@ class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequ
         )
 
     def that_are_open(self) -> Self:
-        return self._filter_elements(lambda tenure_request: tenure_request.is_open)
+        return self._filter_elements(lambda tenure_request: tenure_request.is_open())
 
     def update(self) -> CoordinationTransferRequestUpdate:
         return CoordinationTransferRequestUpdate(

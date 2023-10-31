@@ -48,7 +48,7 @@ class AcceptCoordinationTransferUseCase:
         )
         if transfer_request is None:
             raise self.Response.RejectionReason.transfer_request_not_found
-        if not transfer_request.is_open:
+        if not transfer_request.is_open():
             raise self.Response.RejectionReason.transfer_request_closed
         return transfer_request
 
