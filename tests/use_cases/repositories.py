@@ -32,6 +32,7 @@ from arbeitszeit.records import (
     CompanyWorkInvite,
     Cooperation,
     CoordinationTenure,
+    CoordinationTransferRequest,
     Member,
     Plan,
     PlanDraft,
@@ -580,6 +581,27 @@ class CoordinationTenureResult(QueryResultImpl[CoordinationTenure]):
             items=items,
             database=self.database,
         )
+
+    def ordered_by_start_date(self, *, ascending: bool = True) -> Self:
+        return replace(
+            self,
+            items=lambda: sorted(
+                list(self.items()),
+                key=lambda tenure: tenure.start_date,
+                reverse=not ascending,
+            ),
+        )
+
+
+class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequest]):
+    def requested_by(self, coordination_tenure: UUID) -> Self:
+        return self._filter_elements(
+            lambda tenure_request: tenure_request.requesting_coordination_tenure
+            == coordination_tenure
+        )
+
+    def that_are_open(self) -> Self:
+        return self._filter_elements(lambda tenure_request: tenure_request.is_open())
 
 
 class MemberResult(QueryResultImpl[Member]):
@@ -1456,6 +1478,9 @@ class MockDatabase:
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.coordination_tenures: Dict[UUID, records.CoordinationTenure] = dict()
+        self.coordination_transfer_requests: Dict[
+            UUID, records.CoordinationTransferRequest
+        ] = dict()
         self.private_consumptions: Dict[UUID, records.PrivateConsumption] = dict()
         self.productive_consumptions: Dict[UUID, records.ProductiveConsumption] = dict()
         self.company_work_invites: List[CompanyWorkInvite] = list()
@@ -1597,6 +1622,29 @@ class MockDatabase:
     def get_coordination_tenures(self) -> CoordinationTenureResult:
         return CoordinationTenureResult(
             items=lambda: self.coordination_tenures.values(),
+            database=self,
+        )
+
+    def create_coordination_transfer_request(
+        self,
+        requesting_coordination_tenure: UUID,
+        candidate: UUID,
+        request_date: datetime,
+    ) -> records.CoordinationTransferRequest:
+        request_id = uuid4()
+        request = records.CoordinationTransferRequest(
+            id=request_id,
+            requesting_coordination_tenure=requesting_coordination_tenure,
+            candidate=candidate,
+            request_date=request_date,
+            transfer_date=None,
+        )
+        self.coordination_transfer_requests[request_id] = request
+        return request
+
+    def get_coordination_transfer_requests(self) -> CoordinationTransferRequestResult:
+        return CoordinationTransferRequestResult(
+            items=lambda: self.coordination_transfer_requests.values(),
             database=self,
         )
 
