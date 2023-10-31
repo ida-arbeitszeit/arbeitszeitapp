@@ -137,7 +137,6 @@ class CoordinationTransferRequest:
     request_date: datetime
     transfer_date: Optional[datetime]
 
-    @property
     def is_open(self) -> bool:
         return self.transfer_date is None
 
