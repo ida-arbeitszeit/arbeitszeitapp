@@ -173,7 +173,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.company, coop.id)
+        url = self.url_index.get_coop_summary_url(UserRole.company, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -182,7 +182,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.member, coop.id)
+        url = self.url_index.get_coop_summary_url(UserRole.member, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -302,7 +302,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         coop = self.cooperation_generator.create_cooperation(
             coordinator=company, plans=[plan]
         )
-        url = self.url_index.get_end_coop_url(plan.id, coop.id)
+        url = self.url_index.get_end_coop_url(plan.id, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 

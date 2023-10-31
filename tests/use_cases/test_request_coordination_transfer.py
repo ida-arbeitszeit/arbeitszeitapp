@@ -88,11 +88,11 @@ class RequestCoordinationTransferTests(BaseTestCase):
         self.datetime_service.freeze_time(timestamp=datetime(2020, 5, 1))
         cooperation = self.cooperation_generator.create_cooperation()
         old_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation.id
+            cooperation=cooperation
         )
         self.datetime_service.advance_time(dt=timedelta(days=1))
         self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation.id
+            cooperation=cooperation
         )
 
         response = self.use_case.request_transfer(
@@ -109,7 +109,7 @@ class RequestCoordinationTransferTests(BaseTestCase):
     ) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation.id
+            cooperation=cooperation
         )
         self.use_case.request_transfer(
             request=self.get_use_case_request(requesting_tenure=current_tenure)
@@ -126,7 +126,7 @@ class RequestCoordinationTransferTests(BaseTestCase):
     def test_requesting_transfer_can_succeed(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation.id
+            cooperation=cooperation
         )
         response = self.use_case.request_transfer(
             request=self.get_use_case_request(requesting_tenure=current_tenure)
@@ -156,12 +156,12 @@ class RequestCoordinationTransferTests(BaseTestCase):
     def test_that_delivered_notification_contains_cooperation_name(self) -> None:
         expected_name = "Cooperation Coop."
         cooperation = self.cooperation_generator.create_cooperation(name=expected_name)
-        self.successfully_request_a_transfer(cooperation=cooperation.id)
+        self.successfully_request_a_transfer(cooperation=cooperation)
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_name, expected_name)
 
     def test_that_delivered_notification_contains_cooperation_id(self) -> None:
-        expected_cooperation_id = self.cooperation_generator.create_cooperation().id
+        expected_cooperation_id = self.cooperation_generator.create_cooperation()
         self.successfully_request_a_transfer(cooperation=expected_cooperation_id)
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_id, expected_cooperation_id)
@@ -183,7 +183,7 @@ class RequestCoordinationTransferTests(BaseTestCase):
         self, cooperation: Optional[UUID] = None, candidate: Optional[UUID] = None
     ) -> None:
         if cooperation is None:
-            cooperation = self.cooperation_generator.create_cooperation().id
+            cooperation = self.cooperation_generator.create_cooperation()
         current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
             cooperation=cooperation
         )

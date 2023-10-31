@@ -23,7 +23,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
     ) -> None:
         coop = self.cooperation_generator.create_cooperation()
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert len(response.coordinations) == 1
 
@@ -33,7 +33,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         coop = self.cooperation_generator.create_cooperation()
         self.cooperation_generator.create_cooperation()
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert len(response.coordinations) == 1
 
@@ -42,7 +42,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         coordinator = self.company_generator.create_company(name=expected_name)
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert response.coordinations[0].coordinator_name == expected_name
 
@@ -50,7 +50,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         coordinator = self.company_generator.create_company()
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert response.coordinations[0].coordinator_id == coordinator
 
@@ -62,7 +62,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         coop = self.cooperation_generator.create_cooperation()
         self.datetime_service.advance_time(timedelta(days=2))
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert response.coordinations[0].start_time == expected_time
 

@@ -66,7 +66,6 @@ class BaseTestCase(TestCase):
     company_generator = _lazy_property(CompanyGenerator)
     consumption_generator = _lazy_property(ConsumptionGenerator)
     control_thresholds = _lazy_property(ControlThresholdsTestImpl)
-    coop_generator = _lazy_property(CooperationGenerator)
     cooperation_generator = _lazy_property(CooperationGenerator)
     coordination_tenure_generator = _lazy_property(CoordinationTenureGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)

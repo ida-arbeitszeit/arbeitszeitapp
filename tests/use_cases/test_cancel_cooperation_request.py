@@ -26,7 +26,7 @@ class UseCaseTests(BaseTestCase):
         assert response == False
 
     def test_that_true_is_returned_when_coop_request_gets_canceled(self) -> None:
-        coop = self.coop_generator.create_cooperation()
+        coop = self.cooperation_generator.create_cooperation()
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             planner=company, requested_cooperation=coop
