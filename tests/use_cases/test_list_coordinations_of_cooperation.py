@@ -41,16 +41,16 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         expected_name = "Cooperation Coop."
         coop = self.cooperation_generator.create_cooperation(name=expected_name)
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert response.cooperation_name == expected_name
 
     def test_that_coordination_info_shows_correct_id_of_cooperation(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
-        assert response.cooperation_id == coop.id
+        assert response.cooperation_id == coop
 
     def test_that_coordination_info_shows_correct_name_of_coordinator(self) -> None:
         expected_name = "Coordinator Coop."
@@ -89,7 +89,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         coop = self.cooperation_generator.create_cooperation()
         self.datetime_service.advance_time(timedelta(days=2))
         response = self.use_case.list_coordinations(
-            self.create_use_case_request(coop=coop.id)
+            self.create_use_case_request(coop=coop)
         )
         assert response.coordinations[0].end_time is None
 
