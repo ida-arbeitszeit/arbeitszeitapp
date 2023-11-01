@@ -103,7 +103,7 @@ class CoordinatedByCompanyTests(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         self.db_gateway.create_coordination_tenure(
             company=coordinator,
-            cooperation=cooperation.id,
+            cooperation=cooperation,
             start_date=datetime(2000, 1, 2),
         )
         cooperations = self.db_gateway.get_cooperations()
@@ -118,10 +118,10 @@ class CoordinatedByCompanyTests(FlaskTestCase):
         coop_2 = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         tenure_start_date = datetime(2000, 1, 2)
         self.db_gateway.create_coordination_tenure(
-            company=coordinator, cooperation=coop_1.id, start_date=tenure_start_date
+            company=coordinator, cooperation=coop_1, start_date=tenure_start_date
         )
         self.db_gateway.create_coordination_tenure(
-            company=coordinator, cooperation=coop_2.id, start_date=tenure_start_date
+            company=coordinator, cooperation=coop_2, start_date=tenure_start_date
         )
         assert (
             len(self.db_gateway.get_cooperations().coordinated_by_company(coordinator))
@@ -136,7 +136,7 @@ class CoordinatedByCompanyTests(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         self.db_gateway.create_coordination_tenure(
             company=coordinator,
-            cooperation=cooperation.id,
+            cooperation=cooperation,
             start_date=datetime(2000, 1, 1),
         )
         cooperations = self.db_gateway.get_cooperations()
@@ -163,7 +163,7 @@ class JoinedWithCurrentCoordinatorTests(FlaskTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
         expected_coordination = self.db_gateway.create_coordination_tenure(
             company=coordinator_id,
-            cooperation=coop.id,
+            cooperation=coop,
             start_date=self.datetime_service.now(),
         )
         cooperations = self.db_gateway.get_cooperations()
@@ -189,7 +189,7 @@ class JoinedWithCurrentCoordinatorTests(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         self.db_gateway.create_coordination_tenure(
             company=new_coordinator,
-            cooperation=cooperation.id,
+            cooperation=cooperation,
             start_date=datetime(2000, 1, 2),
         )
         assert (

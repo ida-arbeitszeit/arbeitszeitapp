@@ -365,7 +365,7 @@ class GetAllPlans(FlaskTestCase):
             requested_cooperation=other_coop
         )
         results = self.database_gateway.get_plans().with_open_cooperation_request(
-            cooperation=coop.id
+            cooperation=coop
         )
         assert plan_requesting_at_coop.id in [plan.id for plan in results]
         assert plan_requesting_at_other_coop.id not in [plan.id for plan in results]
@@ -414,7 +414,7 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(cooperation=cooperation1)
         self.plan_generator.create_plan(cooperation=cooperation2)
         plans = self.database_gateway.get_plans().that_are_part_of_cooperation(
-            cooperation1.id, cooperation2.id
+            cooperation1, cooperation2
         )
         assert len(plans) == 2
 
@@ -423,7 +423,7 @@ class GetAllPlans(FlaskTestCase):
         plan1 = self.plan_generator.create_plan(cooperation=coop)
         plan2 = self.plan_generator.create_plan(cooperation=coop)
         plan3 = self.plan_generator.create_plan(requested_cooperation=None)
-        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop)
         assert len(plans) == 2
         assert plans.with_id(plan1.id)
         assert plans.with_id(plan2.id)
@@ -432,7 +432,7 @@ class GetAllPlans(FlaskTestCase):
     def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=None)
-        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop.id)
+        plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop)
         assert len(plans) == 0
 
     def test_possible_to_add_and_to_remove_plan_to_cooperation(self) -> None:
@@ -440,11 +440,11 @@ class GetAllPlans(FlaskTestCase):
         plan = self.plan_generator.create_plan()
 
         self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
-            cooperation.id
+            cooperation
         ).perform()
         plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
         assert plan_from_orm
-        assert plan_from_orm.cooperation == cooperation.id
+        assert plan_from_orm.cooperation == cooperation
 
         self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
             None
@@ -851,7 +851,7 @@ class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
         plan_result = self.database_gateway.get_plans().with_id(plan.id)
-        plan_result.update().set_requested_cooperation(cooperation.id).perform()
+        plan_result.update().set_requested_cooperation(cooperation).perform()
         assert plan_result.that_request_cooperation_with_coordinator()
         plan_result.update().set_requested_cooperation(None).perform()
         assert not plan_result.that_request_cooperation_with_coordinator()
@@ -882,7 +882,7 @@ class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
         self.database_gateway.create_coordination_tenure(
             company=new_coordinator,
-            cooperation=cooperation.id,
+            cooperation=cooperation,
             start_date=self.datetime_service.now(),
         )
         self.datetime_service.advance_time(timedelta(days=1))

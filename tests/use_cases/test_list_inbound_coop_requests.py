@@ -23,7 +23,7 @@ class UseCaseTest(BaseTestCase):
         self,
     ):
         coordinator = self.company_generator.create_company_record()
-        coop = self.coop_generator.create_cooperation()
+        coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=coop)
         response = self.use_case(ListInboundCoopRequestsRequest(coordinator.id))
         assert len(response.cooperation_requests) == 0
@@ -32,7 +32,7 @@ class UseCaseTest(BaseTestCase):
         self,
     ):
         coordinator = self.company_generator.create_company()
-        coop = self.coop_generator.create_cooperation(coordinator=coordinator)
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
         requesting_plan2 = self.plan_generator.create_plan(requested_cooperation=coop)
         response = self.use_case(ListInboundCoopRequestsRequest(coordinator))
@@ -45,7 +45,7 @@ class UseCaseTest(BaseTestCase):
     ):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coordinator = self.company_generator.create_company_record()
-        coop = self.coop_generator.create_cooperation(coordinator=coordinator)
+        coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         self.plan_generator.create_plan(requested_cooperation=coop, timeframe=1)
         self.plan_generator.create_plan(requested_cooperation=coop, timeframe=5)
         self.datetime_service.advance_time(timedelta(days=2))

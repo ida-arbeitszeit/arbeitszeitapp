@@ -315,7 +315,7 @@ class ThatIsCoordinatingCooperationTests(FlaskTestCase):
         assert (
             not self.database_gateway.get_companies()
             .with_id(company)
-            .that_is_coordinating_cooperation(cooperation.id)
+            .that_is_coordinating_cooperation(cooperation)
         )
 
     def test_that_coordinator_is_included(self) -> None:
@@ -324,5 +324,5 @@ class ThatIsCoordinatingCooperationTests(FlaskTestCase):
         assert (
             self.database_gateway.get_companies()
             .with_id(company)
-            .that_is_coordinating_cooperation(cooperation.id)
+            .that_is_coordinating_cooperation(cooperation)
         )
