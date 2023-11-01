@@ -4,7 +4,7 @@ from typing import Any, Callable
 from flask import Blueprint, redirect
 
 from arbeitszeit_flask import types
-from arbeitszeit_flask.dependency_injection import MemberModule, with_injection
+from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.www.authentication import MemberAuthenticator
 
 main_member = Blueprint(
@@ -28,12 +28,11 @@ class MemberRoute:
         return self._apply_decorators(_wrapper)
 
     def _apply_decorators(self, function):
-        injection = with_injection([MemberModule()])
         return main_member.route(self.route_string, methods=self.methods)(
-            injection((self._check_is_member_and_confirmed)(function))
+            with_injection()((self._check_is_member_and_confirmed)(function))
         )
 
-    @with_injection([MemberModule()])
+    @with_injection()
     def _check_is_member_and_confirmed(
         self,
         func,

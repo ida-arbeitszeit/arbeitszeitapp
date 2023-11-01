@@ -16,26 +16,6 @@ class TemplateRenderer(Protocol):
         ...
 
 
-class TemplateIndex(Protocol):
-    def get_template_by_name(self, name: str) -> str:
-        ...
-
-
-class MemberTemplateIndex:
-    def get_template_by_name(self, name: str) -> str:
-        return f"member/{name}.html"
-
-
-class CompanyTemplateIndex:
-    def get_template_by_name(self, name: str) -> str:
-        return f"company/{name}.html"
-
-
-class AccountantTemplateIndex:
-    def get_template_by_name(self, name: str) -> str:
-        return f"accountant/{name}.html"
-
-
 class FlaskTemplateRenderer:
     _EMPTY_CONTEXT: Dict[str, Any] = dict()
 
