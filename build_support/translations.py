@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+from pathlib import Path
 from typing import Protocol
 
-from . import project
+from build_support import project
 
-TRANSLATIONS_DIRECTORY = project.PATH / "arbeitszeit_flask" / "translations"
+TRANSLATIONS_DIRECTORY = Path("arbeitszeit_flask") / "translations"
 TEMPLATE_FILE = TRANSLATIONS_DIRECTORY / "messages.pot"
 WIDTH = 78
 
@@ -44,16 +45,16 @@ def compile_messages(arguments: object = None) -> None:
         "compile",
         f"--directory={TRANSLATIONS_DIRECTORY}",
     ]
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=project.PATH)
 
 
 def extract_messages(arguments: object = None) -> None:
-    mapping_file = project.PATH / "babel.cfg"
+    mapping_file = "babel.cfg"
     keywords = ["lazy_gettext"]
     input_paths = [
-        project.PATH / "arbeitszeit",
-        project.PATH / "arbeitszeit_flask",
-        project.PATH / "arbeitszeit_web",
+        "arbeitszeit",
+        "arbeitszeit_flask",
+        "arbeitszeit_web",
     ]
     command = ["python", "-m", "babel.messages.frontend", "extract"]
     for keyword in keywords:
@@ -63,7 +64,7 @@ def extract_messages(arguments: object = None) -> None:
     command.append(f"--mapping-file={mapping_file}")
     for path in input_paths:
         command.append(str(path))
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=project.PATH)
 
 
 def update_catalog(arguments: object = None) -> None:
@@ -77,7 +78,7 @@ def update_catalog(arguments: object = None) -> None:
     command.append(f"--output-dir={TRANSLATIONS_DIRECTORY}")
     command.append(f"--width={WIDTH}")
     command.append(f"--input-file={TEMPLATE_FILE}")
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=project.PATH)
 
 
 def initialize_catalog(arguments: InitializeArguments) -> None:
@@ -86,7 +87,7 @@ def initialize_catalog(arguments: InitializeArguments) -> None:
     command.append(f"--output-dir={TRANSLATIONS_DIRECTORY}")
     command.append(f"--locale={arguments.locale}")
     command.append(f"--width={WIDTH}")
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=project.PATH)
 
 
 class InitializeArguments(Protocol):
