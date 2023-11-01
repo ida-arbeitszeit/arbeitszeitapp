@@ -62,7 +62,7 @@ def test_cooperation_is_listed_when_requester_is_coordinator_of_cooperation(
     )
     response = use_case(ListCoordinationsOfCompanyRequest(company.id))
     assert len(response.coordinations) == 1
-    assert response.coordinations[0].id == cooperation.id
+    assert response.coordinations[0].id == cooperation
 
 
 @injection_test
@@ -83,7 +83,7 @@ def test_only_cooperations_are_listed_where_requester_is_coordinator(
     )
     response = use_case(ListCoordinationsOfCompanyRequest(company.id))
     assert len(response.coordinations) == 1
-    assert response.coordinations[0].id == expected_cooperation.id
+    assert response.coordinations[0].id == expected_cooperation
 
 
 @injection_test

@@ -125,7 +125,7 @@ class PlanDetailsServiceTests(TestCase):
         details = self.service.get_details_from_plan(plan.id)
         assert details
         self.assertTrue(details.is_cooperating)
-        self.assertEqual(details.cooperation, coop.id)
+        self.assertEqual(details.cooperation, coop)
 
     def test_that_zero_active_days_is_shown_if_plan_is_not_active_yet(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)

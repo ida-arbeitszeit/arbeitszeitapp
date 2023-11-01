@@ -202,8 +202,8 @@ class PlanGenerator:
         product_name: str = "Produkt A",
         production_unit: str = "500 Gramm",
         timeframe: Optional[int] = None,
-        requested_cooperation: Optional[records.Cooperation] = None,
-        cooperation: Optional[records.Cooperation] = None,
+        requested_cooperation: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
         is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> records.Plan:
@@ -247,9 +247,7 @@ class PlanGenerator:
         assert plan.is_approved
         if requested_cooperation:
             request_cooperation_response = self.request_cooperation(
-                RequestCooperationRequest(
-                    plan.planner, plan.id, requested_cooperation.id
-                )
+                RequestCooperationRequest(plan.planner, plan.id, requested_cooperation)
             )
             assert (
                 not request_cooperation_response.is_rejected
@@ -257,17 +255,17 @@ class PlanGenerator:
         if cooperation:
             coop_and_coordinator = (
                 self.database_gateway.get_cooperations()
-                .with_id(cooperation.id)
+                .with_id(cooperation)
                 .joined_with_current_coordinator()
                 .first()
             )
             assert coop_and_coordinator
             _, coordinator = coop_and_coordinator
             self.request_cooperation(
-                RequestCooperationRequest(plan.planner, plan.id, cooperation.id)
+                RequestCooperationRequest(plan.planner, plan.id, cooperation)
             )
             self.accept_cooperation(
-                AcceptCooperationRequest(coordinator.id, plan.id, cooperation.id)
+                AcceptCooperationRequest(coordinator.id, plan.id, cooperation)
             )
         selected_plan = self.database_gateway.get_plans().with_id(
             file_plan_response.plan_id
@@ -465,7 +463,7 @@ class CooperationGenerator:
         name: Optional[str] = None,
         coordinator: Optional[Union[records.Company, UUID]] = None,
         plans: Optional[List[records.Plan]] = None,
-    ) -> records.Cooperation:
+    ) -> UUID:
         if name is None:
             name = f"name_{uuid4()}"
         if coordinator is None:
@@ -491,7 +489,47 @@ class CooperationGenerator:
             self.database_gateway.get_cooperations().with_id(cooperation_id).first()
         )
         assert cooperation_record
-        return cooperation_record
+        return cooperation_record.id
+
+
+@dataclass
+class CoordinationTenureGenerator:
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+    database_gateway: DatabaseGateway
+    create_cooperation_use_case: CreateCooperation
+
+    def create_coordination_tenure(
+        self, cooperation: Optional[UUID] = None, coordinator: Optional[UUID] = None
+    ) -> UUID:
+        if coordinator is None:
+            coordinator = self.company_generator.create_company()
+        if cooperation is None:
+            cooperation = self._create_coop(coordinator=coordinator)
+        tenure = self._create_tenure(cooperation=cooperation, coordinator=coordinator)
+        return tenure
+
+    def _create_coop(self, coordinator: UUID) -> UUID:
+        uc_request = CreateCooperationRequest(
+            coordinator_id=coordinator, name=f"name_{uuid4()}", definition="test info"
+        )
+        uc_response = self.create_cooperation_use_case(uc_request)
+        assert uc_response.cooperation_id
+        cooperation = (
+            self.database_gateway.get_cooperations()
+            .with_id(uc_response.cooperation_id)
+            .first()
+        )
+        assert cooperation
+        return cooperation.id
+
+    def _create_tenure(self, cooperation: UUID, coordinator: UUID) -> UUID:
+        tenure = self.database_gateway.create_coordination_tenure(
+            company=coordinator,
+            cooperation=cooperation,
+            start_date=self.datetime_service.now(),
+        )
+        return tenure.id
 
 
 @dataclass

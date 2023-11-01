@@ -46,14 +46,15 @@ class AuthenticatedCompanyTests(ViewTestCase):
         )
 
     def test_returns_400_when_posting_already_existing_coop_name(self) -> None:
-        exiting_coop = self.cooperation_generator.create_cooperation()
+        name_of_existing_coop = "Existing Cooperation"
+        self.cooperation_generator.create_cooperation(name=name_of_existing_coop)
         self.assert_response_has_expected_code(
             method="post",
             url=self.url,
             login=LogInUser.company,
             expected_code=400,
             data={
-                "name": exiting_coop.name.title(),
+                "name": name_of_existing_coop,
                 "definition": "Coop definition",
             },
         )

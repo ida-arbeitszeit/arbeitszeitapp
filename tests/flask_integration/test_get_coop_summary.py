@@ -18,7 +18,7 @@ class AuthenticatedMemberTests(ViewTestCase):
 
     def test_get_200_when_coop_exists(self) -> None:
         coop = self.coop_generator.create_cooperation()
-        url = f"/member/cooperation_summary/{coop.id}"
+        url = f"/member/cooperation_summary/{coop}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -36,6 +36,6 @@ class AuthenticatedCompanyTests(ViewTestCase):
 
     def test_get_200_when_coop_exists(self) -> None:
         coop = self.coop_generator.create_cooperation()
-        url = f"/company/cooperation_summary/{coop.id}"
+        url = f"/company/cooperation_summary/{coop}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
