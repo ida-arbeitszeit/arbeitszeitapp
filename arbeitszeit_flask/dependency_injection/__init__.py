@@ -33,14 +33,7 @@ from arbeitszeit_flask.mail_service import (
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.password_hasher import PasswordHasherImpl
-from arbeitszeit_flask.template import (
-    AccountantTemplateIndex,
-    CompanyTemplateIndex,
-    FlaskTemplateRenderer,
-    MemberTemplateIndex,
-    TemplateIndex,
-    TemplateRenderer,
-)
+from arbeitszeit_flask.template import FlaskTemplateRenderer, TemplateRenderer
 from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
@@ -71,24 +64,11 @@ from arbeitszeit_web.url_index import (
 )
 
 
-class AccountantModule(Module):
-    def configure(self, binder: Binder) -> None:
-        super().configure(binder)
-        binder[TemplateIndex] = AliasProvider(AccountantTemplateIndex)
-
-
-class MemberModule(Module):
-    def configure(self, binder: Binder) -> None:
-        super().configure(binder)
-        binder[TemplateIndex] = AliasProvider(MemberTemplateIndex)
-
-
 class CompanyModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder[RenewPlanUrlIndex] = AliasProvider(CompanyUrlIndex)
         binder[HidePlanUrlIndex] = AliasProvider(CompanyUrlIndex)
-        binder[TemplateIndex] = AliasProvider(CompanyTemplateIndex)
 
 
 class FlaskModule(Module):

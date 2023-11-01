@@ -11,11 +11,7 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.dependency_injection import (
-    CompanyModule,
-    MemberModule,
-    with_injection,
-)
+from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
@@ -82,7 +78,7 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
 
 
 @auth.route("/member/signup", methods=["GET", "POST"])
-@with_injection(modules=[MemberModule()])
+@with_injection()
 @commit_changes
 def signup_member(view: SignupMemberView):
     return view.handle_request()
@@ -137,7 +133,7 @@ def login_member(
 
 
 @auth.route("/member/resend")
-@with_injection(modules=[MemberModule()])
+@with_injection()
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
     request = use_case.Request(user=UUID(current_user.id))
