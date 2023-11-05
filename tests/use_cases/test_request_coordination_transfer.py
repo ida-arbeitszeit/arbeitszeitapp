@@ -120,7 +120,7 @@ class RequestCoordinationTransferTests(BaseTestCase):
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
-            RequestCoordinationTransferUseCase.Response.RejectionReason.requesting_tenure_has_open_transfer_request,
+            RequestCoordinationTransferUseCase.Response.RejectionReason.requesting_tenure_has_pending_transfer_request,
         )
 
     def test_requesting_transfer_can_succeed(self) -> None:

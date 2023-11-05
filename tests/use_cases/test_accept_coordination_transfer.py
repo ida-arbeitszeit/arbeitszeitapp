@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.accept_coordination_transfer import (
     AcceptCoordinationTransferUseCase,
 )
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase,
 )
@@ -20,6 +21,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         self.list_coordinations_use_case = self.injector.get(
             ListCoordinationsOfCooperationUseCase
         )
+        self.get_coop_summary_use_case = self.injector.get(GetCoopSummary)
         self.request_transfer_use_case = self.injector.get(
             RequestCoordinationTransferUseCase
         )
@@ -35,10 +37,10 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
             is AcceptCoordinationTransferUseCase.Response.RejectionReason.transfer_request_not_found
         )
 
-    def test_use_case_fails_if_coordination_transfer_request_is_closed(
+    def test_use_case_fails_if_coordination_transfer_request_has_already_been_accepted(
         self,
     ) -> None:
-        request = self.create_use_case_request(is_closed=True)
+        request = self.create_use_case_request(is_accepted=True)
         response = self.use_case.accept_coordination_transfer(request)
         assert response.is_rejected
         self.assertTrue(
@@ -71,7 +73,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
 
         request = self.create_use_case_request(transfer_request_id=transfer_request)
         self.use_case.accept_coordination_transfer(request)
-        self.assertCompanyIsCoordinatorOfCooperation(
+        self.assertCompanyHasCoordinatedCooperation(
             candidate_and_expected_coordinator, cooperation
         )
 
@@ -98,17 +100,17 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         )
 
     def create_use_case_request(
-        self, transfer_request_id: Optional[UUID] = None, is_closed: bool = False
+        self, transfer_request_id: Optional[UUID] = None, is_accepted: bool = False
     ) -> AcceptCoordinationTransferUseCase.Request:
         if transfer_request_id is None:
             transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-                is_closed=is_closed
+                is_accepted=is_accepted
             )
         return AcceptCoordinationTransferUseCase.Request(
             transfer_request_id=transfer_request_id
         )
 
-    def assertCompanyIsCoordinatorOfCooperation(
+    def assertCompanyHasCoordinatedCooperation(
         self, company: UUID, cooperation: UUID
     ) -> None:
         list_coordinations_response = (
@@ -123,15 +125,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def assertCompanyIsCurrentCoordinatorOfCooperation(
         self, company: UUID, cooperation: UUID
     ) -> None:
-        list_coordinations_response = (
-            self.list_coordinations_use_case.list_coordinations(
-                ListCoordinationsOfCooperationUseCase.Request(cooperation=cooperation)
-            )
+        get_coop_summary_response = self.get_coop_summary_use_case(
+            GetCoopSummaryRequest(requester_id=uuid4(), coop_id=cooperation)
         )
-        coordinations = list_coordinations_response.coordinations
-        current_coordinator = [
-            c.coordinator_id
-            for c in coordinations
-            if c.start_time == max([c.start_time for c in coordinations])
-        ][0]
-        self.assertEqual(company, current_coordinator)
+        self.assertEqual(get_coop_summary_response.current_coordinator, company)

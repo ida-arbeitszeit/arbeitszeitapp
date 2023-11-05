@@ -603,37 +603,21 @@ class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequ
             == coordination_tenure
         )
 
-    def that_are_open(self) -> Self:
-        return self._filter_elements(lambda tenure_request: tenure_request.is_open())
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResultImpl[Tuple[CoordinationTransferRequest, Cooperation]]:
+        def items() -> Iterable[Tuple[CoordinationTransferRequest, Cooperation]]:
+            for transfer_request in self.items():
+                requesting_tenure = self.database.coordination_tenures[
+                    transfer_request.requesting_coordination_tenure
+                ]
+                cooperation = self.database.cooperations[requesting_tenure.cooperation]
+                yield transfer_request, cooperation
 
-    def update(self) -> CoordinationTransferRequestUpdate:
-        return CoordinationTransferRequestUpdate(
+        return QueryResultImpl(
+            items=items,
             database=self.database,
-            items=self.items,
         )
-
-
-@dataclass
-class CoordinationTransferRequestUpdate:
-    database: MockDatabase
-    items: Callable[[], Iterable[CoordinationTransferRequest]]
-    changes: Callable[[CoordinationTransferRequest], None] = lambda _: None
-
-    def set_transfer_date(self, transfer_date: datetime) -> Self:
-        def update(request: CoordinationTransferRequest) -> None:
-            request.transfer_date = transfer_date
-
-        return replace(
-            self,
-            changes=update,
-        )
-
-    def perform(self) -> int:
-        items_affected = 0
-        for item in self.items():
-            self.changes(item)
-            items_affected += 1
-        return items_affected
 
 
 class MemberResult(QueryResultImpl[Member]):
@@ -1669,7 +1653,6 @@ class MockDatabase:
             requesting_coordination_tenure=requesting_coordination_tenure,
             candidate=candidate,
             request_date=request_date,
-            transfer_date=None,
         )
         self.coordination_transfer_requests[request_id] = request
         return request

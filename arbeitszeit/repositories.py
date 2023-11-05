@@ -253,15 +253,9 @@ class CoordinationTransferRequestResult(
     def requested_by(self, coordination_tenure: UUID) -> Self:
         ...
 
-    def that_are_open(self) -> Self:
-        ...
-
-    def update(self) -> CoordinationTransferRequestUpdate:
-        ...
-
-
-class CoordinationTransferRequestUpdate(DatabaseUpdate, Protocol):
-    def set_transfer_date(self, date: datetime) -> Self:
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResult[Tuple[records.CoordinationTransferRequest, records.Cooperation]]:
         ...
 
 

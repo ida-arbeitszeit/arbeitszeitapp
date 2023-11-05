@@ -6,7 +6,6 @@ rule though. Feel free to change them so that they comply.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
@@ -553,8 +552,7 @@ class CoordinationTransferRequestGenerator:
         self,
         requesting_coordination_tenure: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
-        request_date: Optional[datetime] = None,
-        is_closed: bool = False,
+        is_accepted: bool = False,
     ) -> UUID:
         if requesting_coordination_tenure is None:
             requesting_coordination_tenure = (
@@ -562,8 +560,6 @@ class CoordinationTransferRequestGenerator:
             )
         if candidate is None:
             candidate = self.company_generator.create_company()
-        if request_date is None:
-            request_date = self.datetime_service.now()
         request_response = self.request_transfer_use_case.request_transfer(
             RequestCoordinationTransferUseCase.Request(
                 requesting_coordination_tenure=requesting_coordination_tenure,
@@ -573,7 +569,7 @@ class CoordinationTransferRequestGenerator:
         assert not request_response.is_rejected
         assert request_response.transfer_request
         transfer_request = request_response.transfer_request
-        if is_closed:
+        if is_accepted:
             accept_response = (
                 self.accept_transfer_use_case.accept_coordination_transfer(
                     AcceptCoordinationTransferUseCase.Request(
