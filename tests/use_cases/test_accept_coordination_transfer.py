@@ -58,7 +58,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def test_after_accepting_transfer_the_candidate_is_coordinator_of_cooperation(
         self,
     ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation().id
+        cooperation = self.cooperation_generator.create_cooperation()
         candidate_and_expected_coordinator = self.company_generator.create_company()
         requesting_coordination_tenure = (
             self.coordination_tenure_generator.create_coordination_tenure(
@@ -80,7 +80,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def test_after_accepting_transfer_the_candidate_is_current_coordinator_of_cooperation(
         self,
     ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation().id
+        cooperation = self.cooperation_generator.create_cooperation()
         candidate_and_expected_coordinator = self.company_generator.create_company()
         requesting_coordination_tenure = (
             self.coordination_tenure_generator.create_coordination_tenure(
