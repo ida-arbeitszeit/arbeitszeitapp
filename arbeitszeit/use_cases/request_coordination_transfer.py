@@ -27,7 +27,7 @@ class RequestCoordinationTransferUseCase:
             requesting_tenure_not_found = auto()
             candidate_is_current_coordinator = auto()
             requesting_tenure_is_not_current_tenure = auto()
-            requesting_tenure_has_open_transfer_request = auto()
+            requesting_tenure_has_pending_transfer_request = auto()
 
         rejection_reason: Optional[RejectionReason]
         transfer_request: Optional[UUID]
@@ -89,8 +89,10 @@ class RequestCoordinationTransferUseCase:
             raise self.Response.RejectionReason.candidate_is_current_coordinator
         if not self._requesting_coordination_tenure_is_current(requesting_tenure):
             raise self.Response.RejectionReason.requesting_tenure_is_not_current_tenure
-        if self._requesting_tenure_has_open_transfer_request(requesting_tenure):
-            raise self.Response.RejectionReason.requesting_tenure_has_open_transfer_request
+        if self._there_is_a_pending_transfer_request_by_requesting_tenure(
+            requesting_tenure
+        ):
+            raise self.Response.RejectionReason.requesting_tenure_has_pending_transfer_request
         return candidate, candidate_email, requesting_tenure
 
     def _requesting_coordination_tenure_is_current(
@@ -107,12 +109,11 @@ class RequestCoordinationTransferUseCase:
             return True
         return False
 
-    def _requesting_tenure_has_open_transfer_request(
+    def _there_is_a_pending_transfer_request_by_requesting_tenure(
         self, requesting_tenure: CoordinationTenure
     ) -> bool:
-        transfer_requests = (
-            self.database_gateway.get_coordination_transfer_requests()
-            .requested_by(requesting_tenure.id)
-            .that_are_open()
+        return bool(
+            self.database_gateway.get_coordination_transfer_requests().requested_by(
+                requesting_tenure.id
+            )
         )
-        return len(transfer_requests) > 0

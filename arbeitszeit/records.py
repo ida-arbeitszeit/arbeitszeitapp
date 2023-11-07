@@ -135,10 +135,6 @@ class CoordinationTransferRequest:
     requesting_coordination_tenure: UUID
     candidate: UUID
     request_date: datetime
-    transfer_date: Optional[datetime]
-
-    def is_open(self) -> bool:
-        return self.transfer_date is None
 
 
 @dataclass

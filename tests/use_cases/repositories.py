@@ -594,14 +594,30 @@ class CoordinationTenureResult(QueryResultImpl[CoordinationTenure]):
 
 
 class CoordinationTransferRequestResult(QueryResultImpl[CoordinationTransferRequest]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._filter_elements(lambda model: model.id == id_)
+
     def requested_by(self, coordination_tenure: UUID) -> Self:
         return self._filter_elements(
             lambda tenure_request: tenure_request.requesting_coordination_tenure
             == coordination_tenure
         )
 
-    def that_are_open(self) -> Self:
-        return self._filter_elements(lambda tenure_request: tenure_request.is_open())
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResultImpl[Tuple[CoordinationTransferRequest, Cooperation]]:
+        def items() -> Iterable[Tuple[CoordinationTransferRequest, Cooperation]]:
+            for transfer_request in self.items():
+                requesting_tenure = self.database.coordination_tenures[
+                    transfer_request.requesting_coordination_tenure
+                ]
+                cooperation = self.database.cooperations[requesting_tenure.cooperation]
+                yield transfer_request, cooperation
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
 
 
 class MemberResult(QueryResultImpl[Member]):
@@ -1637,7 +1653,6 @@ class MockDatabase:
             requesting_coordination_tenure=requesting_coordination_tenure,
             candidate=candidate,
             request_date=request_date,
-            transfer_date=None,
         )
         self.coordination_transfer_requests[request_id] = request
         return request

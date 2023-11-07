@@ -247,10 +247,15 @@ class CoordinationTenureResult(QueryResult[records.CoordinationTenure], Protocol
 class CoordinationTransferRequestResult(
     QueryResult[records.CoordinationTransferRequest], Protocol
 ):
+    def with_id(self, id_: UUID) -> Self:
+        ...
+
     def requested_by(self, coordination_tenure: UUID) -> Self:
         ...
 
-    def that_are_open(self) -> Self:
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResult[Tuple[records.CoordinationTransferRequest, records.Cooperation]]:
         ...
 
 
