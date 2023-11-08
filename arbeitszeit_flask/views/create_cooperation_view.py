@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from flask import redirect, url_for
+from flask import redirect, render_template, url_for
 
 from arbeitszeit.use_cases.create_cooperation import (
     CreateCooperation,
@@ -9,7 +9,6 @@ from arbeitszeit.use_cases.create_cooperation import (
 )
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import CreateCooperationForm
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )
@@ -19,7 +18,6 @@ from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
 class CreateCooperationView:
     create_cooperation: CreateCooperation
     presenter: CreateCooperationPresenter
-    template_renderer: UserTemplateRenderer
     session: FlaskSession
 
     def respond_to_get(self, form: CreateCooperationForm):
@@ -40,6 +38,4 @@ class CreateCooperationView:
         return redirect(url_for("main_company.my_cooperations"))
 
     def _render_template(self, form: CreateCooperationForm) -> str:
-        return self.template_renderer.render_template(
-            "company/create_cooperation.html", context=dict(form=form)
-        )
+        return render_template("company/create_cooperation.html", form=form)

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 
-from flask import Response, redirect, request
+from flask import Response, redirect, render_template, request
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_flask import types
 from arbeitszeit_flask.forms import RegisterAccountantForm
-from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
@@ -16,7 +15,6 @@ from arbeitszeit_web.www.presenters.register_accountant_presenter import (
 
 @dataclass
 class SignupAccountantView:
-    template_renderer: AnonymousUserTemplateRenderer
     controller: RegisterAccountantController
     presenter: RegisterAccountantPresenter
     use_case: RegisterAccountantUseCase
@@ -37,20 +35,18 @@ class SignupAccountantView:
             if view_model.redirect_url:
                 return redirect(view_model.redirect_url)
         return Response(
-            response=self.template_renderer.render_template(
+            response=render_template(
                 "auth/signup_accountant.html",
-                context=dict(form=form),
+                form=form,
             ),
             status=400,
         )
 
     def handle_get_request(self) -> types.Response:
         return Response(
-            response=self.template_renderer.render_template(
+            response=render_template(
                 "auth/signup_accountant.html",
-                context=dict(
-                    form=RegisterAccountantForm(),
-                ),
+                form=RegisterAccountantForm(),
             ),
             status=200,
         )

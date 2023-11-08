@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 
-from flask import Response
+from flask import Response, render_template
 
 from arbeitszeit.use_cases import query_plans as use_case
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import PlanSearchForm
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.query_plans import (
     QueryPlansController,
     QueryPlansPresenter,
@@ -19,7 +18,6 @@ class QueryPlansView:
     presenter: QueryPlansPresenter
     controller: QueryPlansController
     template_name: str
-    template_renderer: TemplateRenderer
 
     def respond_to_get(self, form: PlanSearchForm, request: FlaskRequest) -> Response:
         if not form.validate():
@@ -51,7 +49,8 @@ class QueryPlansView:
     def _render_response_content(
         self, view_model: QueryPlansViewModel, form: PlanSearchForm
     ) -> str:
-        return self.template_renderer.render_template(
+        return render_template(
             self.template_name,
-            context=dict(form=form, view_model=view_model),
+            form=form,
+            view_model=view_model,
         )
