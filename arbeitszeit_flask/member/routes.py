@@ -3,7 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import request
+from flask import render_template, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -19,7 +19,6 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
     RegisterPrivateConsumptionForm,
 )
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -69,15 +68,14 @@ from .blueprint import MemberRoute
 @MemberRoute("/member/consumptions")
 def consumptions(
     query_consumptions: QueryPrivateConsumptions,
-    template_renderer: UserTemplateRenderer,
     presenter: PrivateConsumptionsPresenter,
 ) -> Response:
     response = query_consumptions(UUID(current_user.id))
     view_model = presenter.present_private_consumptions(response)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "member/consumptions.html",
-            context=dict(view_model=view_model),
+            view_model=view_model,
         )
     )
 
@@ -86,7 +84,6 @@ def consumptions(
 def query_plans(
     query_plans: use_cases.query_plans.QueryPlans,
     controller: QueryPlansController,
-    template_renderer: UserTemplateRenderer,
     presenter: QueryPlansPresenter,
 ) -> Response:
     template_name = "member/query_plans.html"
@@ -96,7 +93,6 @@ def query_plans(
         presenter,
         controller,
         template_name,
-        template_renderer,
     )
     return view.respond_to_get(search_form, FlaskRequest())
 
@@ -105,7 +101,6 @@ def query_plans(
 def query_companies(
     query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
-    template_renderer: UserTemplateRenderer,
     presenter: QueryCompaniesPresenter,
 ):
     template_name = "member/query_companies.html"
@@ -116,7 +111,6 @@ def query_companies(
         presenter,
         controller,
         template_name,
-        template_renderer,
     )
     return view.respond_to_get()
 
@@ -135,14 +129,13 @@ def register_private_consumption(view: RegisterPrivateConsumptionView) -> Respon
 def dashboard(
     get_member_dashboard: use_cases.get_member_dashboard.GetMemberDashboard,
     presenter: GetMemberDashboardPresenter,
-    template_renderer: UserTemplateRenderer,
 ) -> Response:
     response = get_member_dashboard(UUID(current_user.id))
     view_model = presenter.present(response)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "member/dashboard.html",
-            dict(view_model=view_model),
+            view_model=view_model,
         )
     )
 
@@ -150,15 +143,14 @@ def dashboard(
 @MemberRoute("/member/my_account")
 def my_account(
     get_member_account: use_cases.get_member_account.GetMemberAccount,
-    template_renderer: UserTemplateRenderer,
     presenter: GetMemberAccountPresenter,
 ) -> Response:
     response = get_member_account(UUID(current_user.id))
     view_model = presenter.present_member_account(response)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "member/my_account.html",
-            context=dict(view_model=view_model),
+            view_model=view_model,
         )
     )
 
@@ -167,14 +159,11 @@ def my_account(
 def statistics(
     get_statistics: use_cases.get_statistics.GetStatistics,
     presenter: GetStatisticsPresenter,
-    template_renderer: UserTemplateRenderer,
 ) -> Response:
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
     return FlaskResponse(
-        template_renderer.render_template(
-            "member/statistics.html", context=dict(view_model=view_model)
-        )
+        render_template("member/statistics.html", view_model=view_model)
     )
 
 
@@ -182,7 +171,6 @@ def statistics(
 def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: GetPlanDetailsMemberMemberPresenter,
     http_404_view: Http404View,
 ) -> Response:
@@ -191,9 +179,9 @@ def plan_details(
     if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
-            template_renderer.render_template(
+            render_template(
                 "member/plan_details.html",
-                context=dict(view_model=view_model.to_dict()),
+                view_model=view_model.to_dict(),
             )
         )
     else:
@@ -204,7 +192,6 @@ def plan_details(
 def company_summary(
     company_id: UUID,
     get_company_summary: GetCompanySummary,
-    template_renderer: UserTemplateRenderer,
     presenter: GetCompanySummarySuccessPresenter,
     http_404_view: Http404View,
 ):
@@ -213,9 +200,9 @@ def company_summary(
         use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
     ):
         view_model = presenter.present(use_case_response)
-        return template_renderer.render_template(
+        return render_template(
             "member/company_summary.html",
-            context=dict(view_model=view_model.to_dict()),
+            view_model=view_model.to_dict(),
         )
     else:
         return http_404_view.get_response()
@@ -226,7 +213,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    template_renderer: UserTemplateRenderer,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
@@ -234,16 +220,16 @@ def coop_summary(
     )
     if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
         view_model = presenter.present(use_case_response)
-        return template_renderer.render_template(
-            "member/coop_summary.html", context=dict(view_model=view_model.to_dict())
+        return render_template(
+            "member/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
         return http_404_view.get_response()
 
 
 @MemberRoute("/member/hilfe")
-def hilfe(template_renderer: UserTemplateRenderer) -> Response:
-    return FlaskResponse(template_renderer.render_template("member/help.html"))
+def hilfe() -> Response:
+    return FlaskResponse(render_template("member/help.html"))
 
 
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
@@ -260,14 +246,14 @@ def get_member_account_details(
     controller: GetMemberAccountDetailsController,
     presenter: GetMemberAccountDetailsPresenter,
     use_case: GetUserAccountDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
 ):
     uc_request = controller.parse_web_request()
     uc_response = use_case.get_user_account_details(uc_request)
     view_model = presenter.render_member_account_details(uc_response)
     return FlaskResponse(
-        template_renderer.render_template(
-            "member/get_member_account_details.html", dict(view_model=view_model)
+        render_template(
+            "member/get_member_account_details.html",
+            view_model=view_model,
         ),
         status=200,
     )

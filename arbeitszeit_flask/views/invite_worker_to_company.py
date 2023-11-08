@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from flask import Response, flash
+from flask import Response, flash, render_template
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import InviteWorkerToCompanyForm
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.www.controllers.invite_worker_to_company_controller import (
     InviteWorkerToCompanyController,
 )
@@ -36,7 +35,6 @@ class InviteWorkerToCompanyView:
 
 @dataclass
 class InviteWorkerGetRequestHandler:
-    template_renderer: TemplateRenderer
     controller: ListWorkersController
     use_case: ListWorkers
     presenter: ListWorkersPresenter
@@ -47,9 +45,10 @@ class InviteWorkerGetRequestHandler:
         use_case_response = self.use_case(use_case_request)
         view_model = self.presenter.show_workers_list(use_case_response)
         return Response(
-            self.template_renderer.render_template(
+            render_template(
                 template_name,
-                context=dict(form=form, view_model=view_model),
+                form=form,
+                view_model=view_model,
             )
         )
 
@@ -59,7 +58,6 @@ class InviteWorkerPostRequestHandler:
     use_case: InviteWorkerToCompanyUseCase
     presenter: InviteWorkerToCompanyPresenter
     controller: InviteWorkerToCompanyController
-    template_renderer: TemplateRenderer
 
     @commit_changes
     def respond_to_post(self, form: InviteWorkerToCompanyForm) -> Response:
@@ -75,9 +73,7 @@ class InviteWorkerPostRequestHandler:
         for notification in view_model.notifications:
             flash(notification)
         return Response(
-            self.template_renderer.render_template(
-                template_name, context=dict(form=form, view_model=view_model)
-            ),
+            render_template(template_name, form=form, view_model=view_model),
             status=200,
         )
 
@@ -86,8 +82,6 @@ class InviteWorkerPostRequestHandler:
     ) -> Response:
         view_model = ViewModel(notifications=["Ungültiges Formular"])
         return Response(
-            self.template_renderer.render_template(
-                template_name, context=dict(form=form, view_model=view_model)
-            ),
+            render_template(template_name, form=form, view_model=view_model),
             status=400,
         )

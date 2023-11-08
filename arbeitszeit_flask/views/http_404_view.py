@@ -1,20 +1,18 @@
 from dataclasses import dataclass
 
-from flask import Response
+from flask import Response, render_template
 
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.session import Session, UserRole
 
 
 @dataclass
 class Http404View:
     session: Session
-    template_renderer: TemplateRenderer
 
     def get_response(self) -> Response:
         template = self._get_html_template_name()
         return Response(
-            self.template_renderer.render_template(template),
+            render_template(template),
             status=404,
         )
 

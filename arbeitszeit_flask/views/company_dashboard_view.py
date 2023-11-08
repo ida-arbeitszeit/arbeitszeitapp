@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
+from flask import render_template
 
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
@@ -16,7 +16,6 @@ from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
 class CompanyDashboardView:
     get_company_dashboard_use_case: GetCompanyDashboardUseCase
     get_company_dashboard_presenter: GetCompanyDashboardPresenter
-    template_renderer: UserTemplateRenderer
     flask_session: FlaskSession
     http_404_view: Http404View
 
@@ -29,8 +28,8 @@ class CompanyDashboardView:
             return self.http_404_view.get_response()
         view_model = self.get_company_dashboard_presenter.present(response)
         return FlaskResponse(
-            self.template_renderer.render_template(
+            render_template(
                 "company/dashboard.html",
-                context=dict(view_model=view_model),
+                view_model=view_model,
             )
         )

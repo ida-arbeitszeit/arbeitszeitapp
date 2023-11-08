@@ -33,7 +33,6 @@ from arbeitszeit_flask.mail_service import (
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.password_hasher import PasswordHasherImpl
-from arbeitszeit_flask.template import FlaskTemplateRenderer, TemplateRenderer
 from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
@@ -96,7 +95,6 @@ class FlaskModule(Module):
             interfaces.DatabaseGateway,
             to=AliasProvider(DatabaseGatewayImpl),
         )
-        binder[TemplateRenderer] = AliasProvider(FlaskTemplateRenderer)
         binder[Session] = AliasProvider(FlaskSession)
         binder[Notifier] = AliasProvider(FlaskFlashNotifier)
         binder[MailService] = CallableProvider(get_mail_service)

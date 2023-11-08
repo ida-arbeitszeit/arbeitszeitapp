@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response
+from flask import Response, render_template
 from flask_login import current_user
 
 from arbeitszeit.use_cases.list_workers import ListWorkers, ListWorkersRequest
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
     RegisterHoursWorkedController,
@@ -18,7 +17,6 @@ from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
 
 @dataclass
 class RegisterHoursWorkedView:
-    template_renderer: TemplateRenderer
     register_hours_worked: RegisterHoursWorked
     controller: RegisterHoursWorkedController
     presenter: RegisterHoursWorkedPresenter
@@ -42,9 +40,9 @@ class RegisterHoursWorkedView:
             ListWorkersRequest(company=UUID(current_user.id))
         )
         return Response(
-            self.template_renderer.render_template(
+            render_template(
                 "company/register_hours_worked.html",
-                context=dict(workers_list=workers_list.workers),
+                workers_list=workers_list.workers,
             ),
             status=status,
         )

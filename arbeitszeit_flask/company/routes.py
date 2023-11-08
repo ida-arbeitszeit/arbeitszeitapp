@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect, request, url_for
+from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -62,7 +62,6 @@ from arbeitszeit_flask.forms import (
     RegisterProductiveConsumptionForm,
     RequestCooperationForm,
 )
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
@@ -175,7 +174,6 @@ def dashboard(view: CompanyDashboardView):
 def query_plans(
     query_plans: use_cases.query_plans.QueryPlans,
     controller: QueryPlansController,
-    template_renderer: UserTemplateRenderer,
     presenter: QueryPlansPresenter,
 ):
     template_name = "company/query_plans.html"
@@ -185,7 +183,6 @@ def query_plans(
         presenter,
         controller,
         template_name,
-        template_renderer,
     )
     return view.respond_to_get(search_form, FlaskRequest())
 
@@ -194,7 +191,6 @@ def query_plans(
 def query_companies(
     query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
-    template_renderer: UserTemplateRenderer,
     presenter: QueryCompaniesPresenter,
 ):
     template_name = "company/query_companies.html"
@@ -205,7 +201,6 @@ def query_companies(
         presenter,
         controller,
         template_name,
-        template_renderer,
     )
     return view.respond_to_get()
 
@@ -213,15 +208,14 @@ def query_companies(
 @CompanyRoute("/company/consumptions")
 def my_consumptions(
     query_consumptions: QueryCompanyConsumptions,
-    template_renderer: UserTemplateRenderer,
     presenter: CompanyConsumptionsPresenter,
 ):
     response = query_consumptions(UUID(current_user.id))
     view_model = presenter.present(response)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "company/my_consumptions.html",
-            context=dict(view_model=view_model),
+            view_model=view_model,
         )
     )
 
@@ -254,7 +248,6 @@ def create_draft_from_plan(
     create_draft_controller: CreateDraftController,
     create_draft_presenter: CreateDraftPresenter,
     not_found_view: Http404View,
-    template_renderer: UserTemplateRenderer,
     url_index: UrlIndex,
 ) -> Response:
     form = CreateDraftForm(request.form)
@@ -267,12 +260,10 @@ def create_draft_from_plan(
             draft_data=response.plan_details, form=form
         )
         return FlaskResponse(
-            template_renderer.render_template(
+            render_template(
                 "company/create_draft.html",
-                context=dict(
-                    form=form,
-                    view_model=view_model_get,
-                ),
+                form=form,
+                view_model=view_model_get,
             ),
             status=200,
         )
@@ -288,15 +279,13 @@ def create_draft_from_plan(
             else:
                 return redirect(view_model_post.redirect_url)
         return FlaskResponse(
-            template_renderer.render_template(
+            render_template(
                 "company/create_draft.html",
-                context=dict(
-                    form=form,
-                    view_model=dict(
-                        load_draft_url=url_index.get_my_plan_drafts_url(),
-                        save_draft_url=url_index.get_create_draft_url(),
-                        cancel_url=url_index.get_create_draft_url(),
-                    ),
+                form=form,
+                view_model=dict(
+                    load_draft_url=url_index.get_my_plan_drafts_url(),
+                    save_draft_url=url_index.get_create_draft_url(),
+                    cancel_url=url_index.get_create_draft_url(),
                 ),
             ),
             status=400,
@@ -342,7 +331,6 @@ def get_draft_details(
     draft_id: str,
     use_case: GetDraftDetails,
     presenter: GetPrefilledDraftDataPresenter,
-    template_renderer: UserTemplateRenderer,
     not_found_view: Http404View,
 ) -> Response:
     use_case_response = use_case(UUID(draft_id))
@@ -351,12 +339,10 @@ def get_draft_details(
     form = CreateDraftForm()
     view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "company/create_draft.html",
-            context=dict(
-                view_model=view_model,
-                form=form,
-            ),
+            view_model=view_model,
+            form=form,
         )
     )
 
@@ -364,15 +350,14 @@ def get_draft_details(
 @CompanyRoute("/company/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
-    template_renderer: UserTemplateRenderer,
     show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
     response = show_my_plans_use_case.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
-    return template_renderer.render_template(
+    return render_template(
         "company/my_plans.html",
-        context=view_model.to_dict(),
+        **view_model.to_dict(),
     )
 
 
@@ -413,77 +398,65 @@ def my_accounts(view: ShowMyAccountsView):
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
     get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
-    template_renderer: UserTemplateRenderer,
     presenter: GetCompanyTransactionsPresenter,
 ):
     response = get_company_transactions(UUID(current_user.id))
     view_model = presenter.present(response)
-
-    return template_renderer.render_template(
+    return render_template(
         "company/list_all_transactions.html",
-        context=dict(
-            all_transactions=view_model.transactions,
-        ),
+        all_transactions=view_model.transactions,
     )
 
 
 @CompanyRoute("/company/my_accounts/account_p")
 def account_p(
     show_p_account_details: use_cases.show_p_account_details.ShowPAccountDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: ShowPAccountDetailsPresenter,
 ):
     response = show_p_account_details(UUID(current_user.id))
     view_model = presenter.present(response)
-
-    return template_renderer.render_template(
+    return render_template(
         "company/account_p.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
 @CompanyRoute("/company/my_accounts/account_r")
 def account_r(
     show_r_account_details: use_cases.show_r_account_details.ShowRAccountDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: ShowRAccountDetailsPresenter,
 ):
     response = show_r_account_details(UUID(current_user.id))
     view_model = presenter.present(response)
-
-    return template_renderer.render_template(
+    return render_template(
         "company/account_r.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
 @CompanyRoute("/company/my_accounts/account_a")
 def account_a(
     show_a_account_details: use_cases.show_a_account_details.ShowAAccountDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: ShowAAccountDetailsPresenter,
 ):
     response = show_a_account_details(UUID(current_user.id))
     view_model = presenter.present(response)
-
-    return template_renderer.render_template(
+    return render_template(
         "company/account_a.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
 @CompanyRoute("/company/my_accounts/account_prd")
 def account_prd(
     show_prd_account_details: use_cases.show_prd_account_details.ShowPRDAccountDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: ShowPRDAccountDetailsPresenter,
 ):
     response = show_prd_account_details(UUID(current_user.id))
     view_model = presenter.present(response)
-
-    return template_renderer.render_template(
+    return render_template(
         "company/account_prd.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
@@ -511,20 +484,16 @@ def register_productive_consumption(view: RegisterProductiveConsumptionView):
 def statistics(
     get_statistics: use_cases.get_statistics.GetStatistics,
     presenter: GetStatisticsPresenter,
-    template_renderer: UserTemplateRenderer,
 ):
     use_case_response = get_statistics()
     view_model = presenter.present(use_case_response)
-    return template_renderer.render_template(
-        "company/statistics.html", context=dict(view_model=view_model)
-    )
+    return render_template("company/statistics.html", view_model=view_model)
 
 
 @CompanyRoute("/company/plan_details/<uuid:plan_id>")
 def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: GetPlanDetailsCompanyPresenter,
     http_404_view: Http404View,
 ):
@@ -533,16 +502,13 @@ def plan_details(
     if not use_case_response:
         return http_404_view.get_response()
     view_model = presenter.present(use_case_response)
-    return template_renderer.render_template(
-        "company/plan_details.html", context=dict(view_model=view_model.to_dict())
-    )
+    return render_template("company/plan_details.html", view_model=view_model.to_dict())
 
 
 @CompanyRoute("/company/company_summary/<uuid:company_id>")
 def company_summary(
     company_id: UUID,
     get_company_summary: GetCompanySummary,
-    template_renderer: UserTemplateRenderer,
     presenter: GetCompanySummarySuccessPresenter,
     http_404_view: Http404View,
 ):
@@ -551,9 +517,9 @@ def company_summary(
         use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
     ):
         view_model = presenter.present(use_case_response)
-        return template_renderer.render_template(
+        return render_template(
             "company/company_summary.html",
-            context=dict(view_model=view_model.to_dict()),
+            view_model=view_model.to_dict(),
         )
     else:
         return http_404_view.get_response()
@@ -564,7 +530,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    template_renderer: UserTemplateRenderer,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
@@ -572,8 +537,8 @@ def coop_summary(
     )
     if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
         view_model = presenter.present(use_case_response)
-        return template_renderer.render_template(
-            "company/coop_summary.html", context=dict(view_model=view_model.to_dict())
+        return render_template(
+            "company/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
         return http_404_view.get_response()
@@ -597,7 +562,6 @@ def request_cooperation(
     request_cooperation: RequestCooperation,
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
-    template_renderer: UserTemplateRenderer,
     http_404_view: Http404View,
 ):
     form = RequestCooperationForm(request.form)
@@ -611,7 +575,6 @@ def request_cooperation(
         presenter=presenter,
         not_found_view=http_404_view,
         template_name="company/request_cooperation.html",
-        template_renderer=template_renderer,
     )
 
     if request.method == "POST":
@@ -624,7 +587,6 @@ def request_cooperation(
 @CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
 @commit_changes
 def my_cooperations(
-    template_renderer: UserTemplateRenderer,
     list_coordinations: ListCoordinationsOfCompany,
     list_inbound_coop_requests: ListInboundCoopRequests,
     accept_cooperation: AcceptCooperation,
@@ -681,28 +643,23 @@ def my_cooperations(
         cancel_cooperation_solicitation_response,
         list_my_coop_plans_response,
     )
-    return template_renderer.render_template(
-        "company/my_cooperations.html", context=view_model.to_dict()
-    )
+    return render_template("company/my_cooperations.html", **view_model.to_dict())
 
 
 @CompanyRoute("/company/list_all_cooperations")
 @commit_changes
 def list_all_cooperations(
     use_case: ListAllCooperations,
-    template_renderer: UserTemplateRenderer,
     presenter: ListAllCooperationsPresenter,
 ):
     response = use_case()
     view_model = presenter.present(response)
-    return template_renderer.render_template(
-        "company/list_all_cooperations.html", context=dict(view_model=view_model)
-    )
+    return render_template("company/list_all_cooperations.html", view_model=view_model)
 
 
 @CompanyRoute("/company/hilfe")
-def hilfe(template_renderer: UserTemplateRenderer):
-    return template_renderer.render_template("company/help.html")
+def hilfe():
+    return render_template("company/help.html")
 
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
@@ -729,14 +686,14 @@ def get_company_account_details(
     controller: GetCompanyAccountDetailsController,
     use_case: GetUserAccountDetailsUseCase,
     presenter: GetCompanyAccountDetailsPresenter,
-    template_renderer: UserTemplateRenderer,
 ) -> Response:
     uc_request = controller.parse_web_request()
     uc_response = use_case.get_user_account_details(uc_request)
     view_model = presenter.render_company_account_details(uc_response)
     return FlaskResponse(
-        template_renderer.render_template(
-            "company/get_company_account_details.html", dict(view_model=view_model)
+        render_template(
+            "company/get_company_account_details.html",
+            view_model=view_model,
         ),
         status=200,
     )

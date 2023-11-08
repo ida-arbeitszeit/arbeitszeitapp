@@ -3,14 +3,12 @@ from dataclasses import dataclass
 from flask import render_template
 
 from arbeitszeit_flask.mail_service import MailService
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.email.accountant_invitation_presenter import ViewModel
 
 
 @dataclass
 class AccountantInvitationEmailViewImpl:
     mail_service: MailService
-    template_renderer: TemplateRenderer
 
     def render_accountant_invitation_email(self, view_model: ViewModel) -> None:
         html = render_template(

@@ -3,11 +3,10 @@ from typing import Union
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect
+from flask import redirect, render_template
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit_flask.forms import CreateDraftForm
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_flask.views.http_404_view import Http404View
@@ -26,7 +25,6 @@ class CreateDraftView:
     translator: Translator
     prefilled_data_controller: CreateDraftController
     create_draft: CreatePlanDraft
-    template_renderer: UserTemplateRenderer
     http_404_view: Http404View
     url_index: GeneralUrlIndex
 
@@ -55,15 +53,13 @@ class CreateDraftView:
 
     def respond_to_get(self) -> Response:
         return FlaskResponse(
-            self.template_renderer.render_template(
+            render_template(
                 "company/create_draft.html",
-                context=dict(
-                    form=CreateDraftForm(),
-                    view_model=dict(
-                        load_draft_url=GeneralUrlIndex().get_my_plan_drafts_url(),
-                        save_draft_url="",
-                        cancel_url="",
-                    ),
+                form=CreateDraftForm(),
+                view_model=dict(
+                    load_draft_url=GeneralUrlIndex().get_my_plan_drafts_url(),
+                    save_draft_url="",
+                    cancel_url="",
                 ),
             )
         )

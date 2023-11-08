@@ -2,14 +2,13 @@ from dataclasses import dataclass
 from typing import Optional
 
 from flask import Response as FlaskResponse
-from flask import redirect, request, url_for
+from flask import redirect, render_template, request, url_for
 
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
 )
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterPrivateConsumptionForm
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_private_consumption_controller import (
     RegisterPrivateConsumptionController,
@@ -25,7 +24,6 @@ class RegisterPrivateConsumptionView:
     register_private_consumption: RegisterPrivateConsumption
     controller: RegisterPrivateConsumptionController
     presenter: RegisterPrivateConsumptionPresenter
-    template_renderer: TemplateRenderer
 
     def respond_to_get(self, form: RegisterPrivateConsumptionForm) -> Response:
         amount: Optional[str] = request.args.get("amount")
@@ -56,9 +54,7 @@ class RegisterPrivateConsumptionView:
         )
 
     def _render_template(self, form: RegisterPrivateConsumptionForm) -> str:
-        return self.template_renderer.render_template(
-            "member/register_private_consumption.html", context=dict(form=form)
-        )
+        return render_template("member/register_private_consumption.html", form=form)
 
     def _handle_invalid_form(self, form: RegisterPrivateConsumptionForm) -> Response:
         return FlaskResponse(self._render_template(form), status=400)
