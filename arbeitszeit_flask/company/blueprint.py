@@ -4,7 +4,7 @@ from typing import Any, Callable
 from flask import Blueprint, redirect
 
 from arbeitszeit_flask import types
-from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
+from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.www.authentication import CompanyAuthenticator
 
 main_company = Blueprint(
@@ -28,12 +28,12 @@ class CompanyRoute:
         return self._apply_decorators(_wrapper)
 
     def _apply_decorators(self, function):
-        injection = with_injection([CompanyModule()])
+        injection = with_injection()
         return main_company.route(self.route_string, methods=self.methods)(
             injection(self._check_is_company_and_confirmed(function))
         )
 
-    @with_injection([CompanyModule()])
+    @with_injection()
     def _check_is_company_and_confirmed(
         self,
         func,

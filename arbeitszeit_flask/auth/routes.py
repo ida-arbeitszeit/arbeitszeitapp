@@ -11,7 +11,7 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.dependency_injection import CompanyModule, with_injection
+from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
 from arbeitszeit_flask.types import Response
@@ -188,7 +188,7 @@ def login_company(
 
 @auth.route("/company/signup", methods=["GET", "POST"])
 @commit_changes
-@with_injection(modules=[CompanyModule()])
+@with_injection()
 def signup_company(view: SignupCompanyView):
     return view.handle_request(request)
 
@@ -215,7 +215,7 @@ def confirm_email_company(
 
 
 @auth.route("/company/resend")
-@with_injection(modules=[CompanyModule()])
+@with_injection()
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
     request = use_case.Request(user=UUID(current_user.id))

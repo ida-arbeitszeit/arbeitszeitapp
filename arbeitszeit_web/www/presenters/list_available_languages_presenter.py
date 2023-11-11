@@ -5,7 +5,7 @@ from typing import List
 
 from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
 from arbeitszeit_web.language_service import LanguageService
-from arbeitszeit_web.url_index import LanguageChangerUrlIndex
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -20,7 +20,7 @@ class ListAvailableLanguagesPresenter:
         show_language_listing: bool
         languages_listing: List[ListAvailableLanguagesPresenter.LanguageListItem]
 
-    language_changer_url_index: LanguageChangerUrlIndex
+    url_index: UrlIndex
     language_service: LanguageService
 
     def present_available_languages_list(
@@ -30,9 +30,7 @@ class ListAvailableLanguagesPresenter:
             show_language_listing=bool(response.available_language_codes),
             languages_listing=[
                 self.LanguageListItem(
-                    change_url=self.language_changer_url_index.get_language_change_url(
-                        code
-                    ),
+                    change_url=self.url_index.get_language_change_url(code),
                     label=self.language_service.get_language_name(code) or code,
                 )
                 for code in response.available_language_codes
