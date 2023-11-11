@@ -37,7 +37,7 @@ from arbeitszeit_flask.template import FlaskTemplateRenderer, TemplateRenderer
 from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
+from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
@@ -55,20 +55,7 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.text_renderer import TextRenderer
 from arbeitszeit_web.token import TokenService
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import (
-    AccountantInvitationUrlIndex,
-    HidePlanUrlIndex,
-    LanguageChangerUrlIndex,
-    RenewPlanUrlIndex,
-    UrlIndex,
-)
-
-
-class CompanyModule(Module):
-    def configure(self, binder: Binder) -> None:
-        super().configure(binder)
-        binder[RenewPlanUrlIndex] = AliasProvider(CompanyUrlIndex)
-        binder[HidePlanUrlIndex] = AliasProvider(CompanyUrlIndex)
+from arbeitszeit_web.url_index import UrlIndex
 
 
 class FlaskModule(Module):
@@ -104,14 +91,9 @@ class FlaskModule(Module):
         binder[Plotter] = AliasProvider(FlaskPlotter)
         binder[Colors] = AliasProvider(FlaskColors)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
-        binder[LanguageChangerUrlIndex] = AliasProvider(GeneralUrlIndex)
         binder.bind(
             AccountantInvitationEmailView,
             to=AliasProvider(AccountantInvitationEmailViewImpl),
-        )
-        binder.bind(
-            AccountantInvitationUrlIndex,
-            to=AliasProvider(GeneralUrlIndex),
         )
         binder.bind(
             PasswordHasher,

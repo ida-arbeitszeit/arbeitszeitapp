@@ -8,7 +8,6 @@ from arbeitszeit_web.email.accountant_invitation_presenter import (
 from tests.email import FakeEmailConfiguration
 from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
-from tests.www.presenters.url_index import AccountantInvitationUrlIndexImpl
 
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
 
@@ -19,9 +18,6 @@ class PresenterTests(BaseTestCase):
         self.view = self.injector.get(AccountantInvitationEmailViewImpl)
         self.presenter = self.injector.get(AccountantInvitationEmailPresenter)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
-        self.accountant_invitation_url_index = self.injector.get(
-            AccountantInvitationUrlIndexImpl
-        )
         self.token_service = self.injector.get(FakeTokenService)
 
     def test_that_token_recipient_is_also_mail_recipient(self) -> None:
@@ -52,9 +48,7 @@ class PresenterTests(BaseTestCase):
         self.presenter.send_accountant_invitation(email="test@test.test")
         self.assertViewModel(
             lambda model: model.registration_link_url
-            == self.accountant_invitation_url_index.get_accountant_invitation_url(
-                expected_token
-            )
+            == self.url_index.get_accountant_invitation_url(expected_token)
         )
 
     def assertViewModel(self, condition: Callable[[ViewModel], bool]) -> None:
