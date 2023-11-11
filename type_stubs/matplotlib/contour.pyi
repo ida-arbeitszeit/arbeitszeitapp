@@ -1,6 +1,8 @@
-import matplotlib.cm as cm
+import matplotlib.collections as mcoll
 from _typeshed import Incomplete
 from matplotlib.backend_bases import MouseButton as MouseButton
+from matplotlib.lines import Line2D as Line2D
+from matplotlib.path import Path as Path
 from matplotlib.text import Text as Text
 
 class ClabelText(Text):
@@ -35,36 +37,36 @@ class ContourLabeler:
     def labels(self, inline, inline_spacing) -> None: ...
     def remove(self) -> None: ...
 
-class ContourSet(cm.ScalarMappable, ContourLabeler):
+class ContourSet(ContourLabeler, mcoll.Collection):
     axes: Incomplete
     levels: Incomplete
     filled: Incomplete
-    linewidths: Incomplete
-    linestyles: Incomplete
     hatches: Incomplete
-    alpha: Incomplete
     origin: Incomplete
     extent: Incomplete
     colors: Incomplete
     extend: Incomplete
-    antialiased: Incomplete
     nchunk: Incomplete
     locator: Incomplete
     logscale: bool
     negative_linestyles: Incomplete
-    collections: Incomplete
     labelTexts: Incomplete
     labelCValues: Incomplete
+    def __init__(self, ax, *args, levels: Incomplete | None = ..., filled: bool = ..., linewidths: Incomplete | None = ..., linestyles: Incomplete | None = ..., hatches=..., alpha: Incomplete | None = ..., origin: Incomplete | None = ..., extent: Incomplete | None = ..., cmap: Incomplete | None = ..., colors: Incomplete | None = ..., norm: Incomplete | None = ..., vmin: Incomplete | None = ..., vmax: Incomplete | None = ..., extend: str = ..., antialiased: Incomplete | None = ..., nchunk: int = ..., locator: Incomplete | None = ..., transform: Incomplete | None = ..., negative_linestyles: Incomplete | None = ..., clip_path: Incomplete | None = ..., **kwargs) -> None: ...
+    allsegs: Incomplete
     allkinds: Incomplete
+    tcolors: Incomplete
     tlinewidths: Incomplete
-    def __init__(self, ax, *args, levels: Incomplete | None = ..., filled: bool = ..., linewidths: Incomplete | None = ..., linestyles: Incomplete | None = ..., hatches=..., alpha: Incomplete | None = ..., origin: Incomplete | None = ..., extent: Incomplete | None = ..., cmap: Incomplete | None = ..., colors: Incomplete | None = ..., norm: Incomplete | None = ..., vmin: Incomplete | None = ..., vmax: Incomplete | None = ..., extend: str = ..., antialiased: Incomplete | None = ..., nchunk: int = ..., locator: Incomplete | None = ..., transform: Incomplete | None = ..., negative_linestyles: Incomplete | None = ..., **kwargs) -> None: ...
+    alpha: Incomplete
+    linestyles: Incomplete
+    @property
+    def antialiased(self): ...
+    @property
+    def collections(self): ...
     def get_transform(self): ...
     def legend_elements(self, variable_name: str = ..., str_format=...): ...
-    tcolors: Incomplete
     def changed(self) -> None: ...
-    def get_alpha(self): ...
-    def set_alpha(self, alpha) -> None: ...
     def find_nearest_contour(self, x, y, indices: Incomplete | None = ..., pixel: bool = ...): ...
-    def remove(self) -> None: ...
+    def draw(self, renderer) -> None: ...
 
 class QuadContourSet(ContourSet): ...

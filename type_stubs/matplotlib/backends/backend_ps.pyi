@@ -21,10 +21,9 @@ class PsBackendHelper:
 
 class __getattr__:
     ps_backend_helper: Incomplete
+    psDefs: Incomplete
 
 papersize: Incomplete
-
-def quote_ps_string(s): ...
 
 class RendererPS(_backend_pdf_ps.RendererPDFPSBase):
     textcnt: int
@@ -70,13 +69,11 @@ class FigureCanvasPS(FigureCanvasBase):
     print_eps: Incomplete
     def draw(self): ...
 
-def convert_psfrags(tmpfile, psfrags, font_preamble, custom_preamble, paper_width, paper_height, orientation): ...
 def gs_distill(tmpfile, eps: bool = ..., ptype: str = ..., bbox: Incomplete | None = ..., rotated: bool = ...) -> None: ...
 def xpdf_distill(tmpfile, eps: bool = ..., ptype: str = ..., bbox: Incomplete | None = ..., rotated: bool = ...) -> None: ...
 def get_bbox_header(lbrt, rotated: bool = ...): ...
 def pstoeps(tmpfile, bbox: Incomplete | None = ..., rotated: bool = ...) -> None: ...
 FigureManagerPS = FigureManagerBase
-psDefs: Incomplete
 
 class _BackendPS(_Backend):
     backend_version: str

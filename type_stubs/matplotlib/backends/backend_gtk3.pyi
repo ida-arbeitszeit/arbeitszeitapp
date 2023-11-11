@@ -4,10 +4,6 @@ from gi.repository import Gtk
 from matplotlib import backend_tools as backend_tools, cbook as cbook
 from matplotlib.backend_bases import CloseEvent as CloseEvent, KeyEvent as KeyEvent, LocationEvent as LocationEvent, MouseEvent as MouseEvent, ResizeEvent as ResizeEvent, ToolContainerBase as ToolContainerBase
 
-class __getattr__:
-    icon_filename: Incomplete
-    window_icon: Incomplete
-
 class FigureCanvasGTK3(_FigureCanvasGTK, Gtk.DrawingArea):
     required_interactive_framework: str
     manager_class: Incomplete
@@ -32,8 +28,7 @@ class FigureCanvasGTK3(_FigureCanvasGTK, Gtk.DrawingArea):
 
 class NavigationToolbar2GTK3(_NavigationToolbar2GTK, Gtk.Toolbar):
     message: Incomplete
-    def __init__(self, canvas, window: Incomplete | None = ...) -> None: ...
-    win: Incomplete
+    def __init__(self, canvas) -> None: ...
     def save_figure(self, *args) -> None: ...
 
 class ToolbarGTK3(ToolContainerBase, Gtk.Box):
@@ -51,8 +46,6 @@ class HelpGTK3(backend_tools.ToolHelpBase):
 
 class ToolCopyToClipboardGTK3(backend_tools.ToolCopyToClipboardBase):
     def trigger(self, *args, **kwargs) -> None: ...
-
-def error_msg_gtk(msg, parent: Incomplete | None = ...) -> None: ...
 Toolbar = ToolbarGTK3
 
 class FigureManagerGTK3(_FigureManagerGTK): ...
