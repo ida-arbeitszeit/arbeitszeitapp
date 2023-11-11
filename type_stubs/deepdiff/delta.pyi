@@ -36,7 +36,9 @@ class Delta:
     log_errors: Incomplete
     serializer: Incomplete
     deserializer: Incomplete
-    def __init__(self, diff: Incomplete | None = ..., delta_path: Incomplete | None = ..., delta_file: Incomplete | None = ..., deserializer=..., log_errors: bool = ..., mutate: bool = ..., raise_errors: bool = ..., safe_to_import: Incomplete | None = ..., serializer=..., verify_symmetry: bool = ...) -> None: ...
+    force: Incomplete
+    get_nested_obj: Incomplete
+    def __init__(self, diff: Incomplete | None = ..., delta_path: Incomplete | None = ..., delta_file: Incomplete | None = ..., deserializer=..., log_errors: bool = ..., mutate: bool = ..., raise_errors: bool = ..., safe_to_import: Incomplete | None = ..., serializer=..., verify_symmetry: bool = ..., force: bool = ...) -> None: ...
     post_process_paths_to_convert: Incomplete
     def reset(self) -> None: ...
     root: Incomplete

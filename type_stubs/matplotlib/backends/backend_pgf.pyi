@@ -6,20 +6,11 @@ from matplotlib.backends.backend_mixed import MixedModeRenderer as MixedModeRend
 from matplotlib.figure import Figure as Figure
 from matplotlib.path import Path as Path
 
-class __getattr__:
-    NO_ESCAPE: Incomplete
-    re_mathsep: Incomplete
-
-def get_fontspec(): ...
-def get_preamble(): ...
-
 latex_pt_to_in: Incomplete
 latex_in_to_pt: Incomplete
 mpl_pt_to_in: Incomplete
 mpl_in_to_pt: Incomplete
 
-def common_texification(text): ...
-def writeln(fh, line): ...
 def make_pdf_to_png_converter(): ...
 
 class LatexError(Exception):
@@ -30,8 +21,6 @@ class LatexManager:
     tmpdir: Incomplete
     latex: Incomplete
     def __init__(self) -> None: ...
-    texcommand: Incomplete
-    latex_header: Incomplete
     def get_width_height_descent(self, text, prop): ...
 
 class RendererPgf(RendererBase):
@@ -66,8 +55,8 @@ class _BackendPgf(_Backend):
     FigureCanvas = FigureCanvasPgf
 
 class PdfPages:
+    def __init__(self, filename, *, keep_empty=..., metadata: Incomplete | None = ...) -> None: ...
     keep_empty: Incomplete
-    def __init__(self, filename, *, keep_empty: bool = ..., metadata: Incomplete | None = ...) -> None: ...
     def __enter__(self): ...
     def __exit__(self, exc_type, exc_val, exc_tb) -> None: ...
     def close(self) -> None: ...

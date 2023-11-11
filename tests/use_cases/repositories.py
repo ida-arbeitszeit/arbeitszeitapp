@@ -14,6 +14,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Protocol,
     Set,
     Tuple,
     TypeVar,
@@ -49,6 +50,11 @@ T_Hash = TypeVar("T_Hash", bound=Hashable)
 
 Key = TypeVar("Key", bound=Hashable)
 Value = TypeVar("Value", bound=Hashable)
+
+
+class Sortable(Protocol):
+    def __lt__(self, other: Self) -> bool:
+        ...
 
 
 @dataclass
@@ -87,28 +93,31 @@ class QueryResultImpl(Generic[T]):
             items=lambda: filter(condition, self.items()),
         )
 
+    def sorted_by(self, key: Callable[[T], Sortable], reverse: bool = False) -> Self:
+        return replace(
+            self,
+            items=lambda: sorted(list(self.items()), key=key, reverse=reverse),
+        )
+
+    def from_iterable(self, items: Callable[[], Iterable[T]]) -> Self:
+        return replace(
+            self,
+            items=items,
+        )
+
 
 class PlanResult(QueryResultImpl[Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> Self:
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda plan: plan.plan_creation_date,
-                reverse=not ascending,
-            ),
+        return self.sorted_by(
+            key=lambda plan: plan.plan_creation_date, reverse=not ascending
         )
 
     def ordered_by_activation_date(self, ascending: bool = True) -> Self:
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda plan: plan.activation_date
-                if plan.activation_date
-                else datetime.min,
-                reverse=not ascending,
-            ),
+        return self.sorted_by(
+            key=lambda plan: plan.activation_date
+            if plan.activation_date
+            else datetime.min,
+            reverse=not ascending,
         )
 
     def ordered_by_planner_name(self, ascending: bool = True) -> Self:
@@ -118,13 +127,9 @@ class PlanResult(QueryResultImpl[Plan]):
             planner_name = planner.name
             return planner_name.casefold()
 
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda plan: get_company_name(plan.planner),
-                reverse=not ascending,
-            ),
+        return self.sorted_by(
+            key=lambda plan: get_company_name(plan.planner),
+            reverse=not ascending,
         )
 
     def with_id_containing(self, query: str) -> Self:
@@ -199,10 +204,7 @@ class PlanResult(QueryResultImpl[Plan]):
                     if plan.cooperation == plan_record.cooperation
                 )
 
-        return replace(
-            self,
-            items=items_generator,
-        )
+        return self.from_iterable(items_generator)
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
         return self._filter_elements(
@@ -225,10 +227,7 @@ class PlanResult(QueryResultImpl[Plan]):
                 self.items(),
             )
 
-        return replace(
-            self,
-            items=new_items,
-        )
+        return self.from_iterable(items=new_items)
 
     def get_statistics(self) -> records.PlanningStatistics:
         """Return aggregate planning information for all plans
@@ -383,22 +382,12 @@ class PlanUpdate:
 
 class PlanDraftResult(QueryResultImpl[records.PlanDraft]):
     def with_id(self, id_: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda draft: draft.id == id_,
-                self.items(),
-            ),
+        return self._filter_elements(
+            lambda draft: draft.id == id_,
         )
 
     def planned_by(self, *company: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda draft: draft.planner in company,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(lambda draft: draft.planner in company)
 
     def delete(self) -> int:
         drafts_to_delete = [draft.id for draft in self.items()]
@@ -513,18 +502,10 @@ class PlanDraftUpdate:
 
 class CooperationResult(QueryResultImpl[Cooperation]):
     def with_id(self, id_: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(lambda coop: coop.id == id_, self.items()),
-        )
+        return self._filter_elements(lambda coop: coop.id == id_)
 
     def with_name_ignoring_case(self, name: str) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda coop: coop.name.lower() == name.lower(), self.items()
-            ),
-        )
+        return self._filter_elements(lambda coop: coop.name.lower() == name.lower())
 
     def coordinated_by_company(self, company_id: UUID) -> Self:
         def items() -> Iterable[records.Cooperation]:
@@ -539,7 +520,7 @@ class CooperationResult(QueryResultImpl[Cooperation]):
                 if tenures and tenures[0].company == company_id:
                     yield cooperation
 
-        return replace(self, items=items)
+        return self.from_iterable(items)
 
     def joined_with_current_coordinator(
         self,
@@ -583,13 +564,8 @@ class CoordinationTenureResult(QueryResultImpl[CoordinationTenure]):
         )
 
     def ordered_by_start_date(self, *, ascending: bool = True) -> Self:
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda tenure: tenure.start_date,
-                reverse=not ascending,
-            ),
+        return self.sorted_by(
+            key=lambda tenure: tenure.start_date, reverse=not ascending
         )
 
 
@@ -641,10 +617,7 @@ class MemberResult(QueryResultImpl[Member]):
                 if account.email_address.lower() == email.lower():
                     yield member
 
-        return replace(
-            self,
-            items=items,
-        )
+        return self.from_iterable(items=items)
 
     def joined_with_email_address(
         self,
@@ -667,10 +640,7 @@ class MemberResult(QueryResultImpl[Member]):
 
 class CompanyResult(QueryResultImpl[Company]):
     def with_id(self, id_: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(lambda company: company.id == id_, self.items()),
-        )
+        return self._filter_elements(lambda company: company.id == id_)
 
     def with_email_address(self, email: str) -> Self:
         def items() -> Iterable[records.Company]:
@@ -683,7 +653,7 @@ class CompanyResult(QueryResultImpl[Company]):
                 if credentials.email_address.lower() == email.lower():
                     yield company
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def that_are_workplace_of_member(self, member: UUID) -> Self:
         def items() -> Iterable[records.Company]:
@@ -696,10 +666,7 @@ class CompanyResult(QueryResultImpl[Company]):
                 if member in workers:
                     yield company
 
-        return replace(
-            self,
-            items=items,
-        )
+        return self.from_iterable(items=items)
 
     def that_is_coordinating_cooperation(self, cooperation: UUID) -> Self:
         def items() -> Iterable[records.Company]:
@@ -720,7 +687,7 @@ class CompanyResult(QueryResultImpl[Company]):
                 if latest_tenure.company == company.id:
                     yield company
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
@@ -745,7 +712,7 @@ class CompanyResult(QueryResultImpl[Company]):
                 if query.lower() in credentials.email_address.lower():
                     yield company
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def joined_with_email_address(
         self,
@@ -777,7 +744,7 @@ class AccountantResult(QueryResultImpl[Accountant]):
                 if credentials.email_address.lower() == email.lower():
                     yield accountant
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def with_id(self, id_: UUID) -> Self:
         return self._filter_elements(lambda accountant: accountant.id == id_)
@@ -803,51 +770,31 @@ class AccountantResult(QueryResultImpl[Accountant]):
 
 class TransactionResult(QueryResultImpl[Transaction]):
     def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda transaction: transaction.sending_account in account
-                or transaction.receiving_account in account,
-                self.items(),
-            ),
+        return self._filter_elements(
+            lambda transaction: transaction.sending_account in account
+            or transaction.receiving_account in account
         )
 
     def where_account_is_sender(self, *account: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda transaction: transaction.sending_account in account,
-                self.items(),
-            ),
+        return self._filter_elements(
+            lambda transaction: transaction.sending_account in account
         )
 
     def where_account_is_receiver(self, *account: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda transaction: transaction.receiving_account in account,
-                self.items(),
-            ),
+        return self._filter_elements(
+            lambda transaction: transaction.receiving_account in account
         )
 
     def ordered_by_transaction_date(self, descending: bool = False) -> Self:
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=lambda transaction: transaction.date,
-                reverse=descending,
-            ),
+        return self.sorted_by(
+            key=lambda transaction: transaction.date,
+            reverse=descending,
         )
 
     def where_sender_is_social_accounting(self) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda transaction: transaction.sending_account
-                == self.database.social_accounting.account,
-                self.items(),
-            ),
+        return self._filter_elements(
+            lambda transaction: transaction.sending_account
+            == self.database.social_accounting.account
         )
 
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
@@ -873,13 +820,7 @@ class TransactionResult(QueryResultImpl[Transaction]):
             }
             return bool(transaction_plans & plans)
 
-        return replace(
-            self,
-            items=lambda: filter(
-                transaction_filter,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(transaction_filter)
 
     def joined_with_sender_and_receiver(
         self,
@@ -919,14 +860,7 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
             transaction = self.database.transactions[consumption.transaction_id]
             return transaction.date
 
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=consumption_sorting_key,
-                reverse=not ascending,
-            ),
-        )
+        return self.sorted_by(key=consumption_sorting_key, reverse=not ascending)
 
     def where_consumer_is_member(self, member: UUID) -> Self:
         def filtered_items() -> Iterator[records.PrivateConsumption]:
@@ -936,10 +870,7 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
                 if transaction.sending_account == member_account:
                     yield consumption
 
-        return replace(
-            self,
-            items=filtered_items,
-        )
+        return self.from_iterable(items=filtered_items)
 
     def joined_with_transactions_and_plan(
         self,
@@ -966,14 +897,7 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
             transaction = self.database.transactions[consumption.transaction_id]
             return transaction.date
 
-        return replace(
-            self,
-            items=lambda: sorted(
-                list(self.items()),
-                key=consumption_sorting_key,
-                reverse=not ascending,
-            ),
-        )
+        return self.sorted_by(key=consumption_sorting_key, reverse=not ascending)
 
     def where_consumer_is_company(self, company: UUID) -> Self:
         def filtered_items() -> Iterator[records.ProductiveConsumption]:
@@ -989,10 +913,7 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
                 ):
                     yield consumption
 
-        return replace(
-            self,
-            items=filtered_items,
-        )
+        return self.from_iterable(filtered_items)
 
     def joined_with_transactions_and_plan(
         self,
@@ -1005,9 +926,9 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
                 plan = self.database.plans[consumption.plan_id]
                 yield consumption, transaction, plan
 
-        return replace(
-            self,  # type: ignore
+        return QueryResultImpl(
             items=joined_items,
+            database=self.database,
         )
 
     def joined_with_transaction(
@@ -1020,9 +941,9 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
                 transaction = self.database.transactions[consumption.transaction_id]
                 yield consumption, transaction
 
-        return replace(
-            self,  # type: ignore
+        return QueryResultImpl(
             items=joined_items,
+            database=self.database,
         )
 
     def joined_with_transaction_and_provider(
@@ -1045,10 +966,7 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
 
 class AccountResult(QueryResultImpl[Account]):
     def with_id(self, *id_: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(lambda account: account.id in id_, self.items()),
-        )
+        return self._filter_elements(lambda account: account.id in id_)
 
     def owned_by_member(self, *member: UUID) -> Self:
         def items():
@@ -1071,33 +989,21 @@ class AccountResult(QueryResultImpl[Account]):
                 if companies & owner_ids:
                     yield account
 
-        return replace(
-            self,
-            items=items,
-        )
+        return self.from_iterable(items=items)
 
     def that_are_member_accounts(self) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda account: account in self.database.member_accounts, self.items()
-            ),
+        return self._filter_elements(
+            lambda account: account in self.database.member_accounts
         )
 
     def that_are_product_accounts(self) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda account: account in self.database.prd_accounts, self.items()
-            ),
+        return self._filter_elements(
+            lambda account: account in self.database.prd_accounts
         )
 
     def that_are_labour_accounts(self) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda account: account in self.database.l_accounts, self.items()
-            ),
+        return self._filter_elements(
+            lambda account: account in self.database.l_accounts
         )
 
     def joined_with_owner(
@@ -1143,31 +1049,13 @@ class AccountResult(QueryResultImpl[Account]):
 
 class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
     def issued_by(self, company: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda invite: invite.company == company,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(lambda invite: invite.company == company)
 
     def addressing(self, member: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda invite: invite.member == member,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(lambda invite: invite.member == member)
 
     def with_id(self, id: UUID) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda invite: invite.id == id,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(lambda invite: invite.id == id)
 
     def delete(self) -> None:
         invites_to_delete = set(invite.id for invite in self.items())
@@ -1180,13 +1068,7 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
 
 class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
-        return replace(
-            self,
-            items=lambda: filter(
-                lambda a: a.address in addresses,
-                self.items(),
-            ),
-        )
+        return self._filter_elements(lambda a: a.address in addresses)
 
     def that_belong_to_member(self, member: UUID) -> Self:
         def items() -> Iterable[records.EmailAddress]:
@@ -1202,7 +1084,7 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
                 if member_id and member_id == member:
                     yield address
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def that_belong_to_company(self, company: UUID) -> Self:
         def items() -> Iterable[records.EmailAddress]:
@@ -1218,7 +1100,7 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
                 if company_id and company_id == company:
                     yield address
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(
@@ -1255,7 +1137,7 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
                 if credentials.email_address.lower() == address.lower():
                     yield credentials
 
-        return replace(self, items=items)
+        return self.from_iterable(items=items)
 
     def joined_with_accountant(
         self,
