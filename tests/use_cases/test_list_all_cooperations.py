@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
+from uuid import UUID
 
-from arbeitszeit.records import Cooperation
 from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperations,
     ListAllCooperationsResponse,
@@ -11,15 +11,8 @@ from tests.datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
 
 
-def coop_in_response(
-    cooperation: Cooperation, response: ListAllCooperationsResponse
-) -> bool:
-    return any(
-        (
-            cooperation.id == result.id and cooperation.name == result.name
-            for result in response.cooperations
-        )
-    )
+def coop_in_response(cooperation: UUID, response: ListAllCooperationsResponse) -> bool:
+    return any(cooperation == result.id for result in response.cooperations)
 
 
 @injection_test
@@ -47,14 +40,17 @@ def test_one_returned_cooperation_shows_correct_info(
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
+    expected_cooperation_name = "Test Cooperation"
     plan = plan_generator.create_plan()
-    cooperation = cooperation_generator.create_cooperation(plans=[plan])
+    cooperation = cooperation_generator.create_cooperation(
+        plans=[plan], name=expected_cooperation_name
+    )
     response = use_case()
     assert len(response.cooperations) == 1
     assert coop_in_response(cooperation, response)
     assert response.cooperations[0].plan_count == 1
-    assert response.cooperations[0].id == cooperation.id
-    assert response.cooperations[0].name == cooperation.name
+    assert response.cooperations[0].id == cooperation
+    assert response.cooperations[0].name == expected_cooperation_name
 
 
 @injection_test

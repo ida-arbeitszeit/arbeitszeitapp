@@ -220,15 +220,8 @@ class GeneralUrlIndex:
     def get_accountant_account_details_url(self) -> str:
         return url_for("main_accountant.get_accountant_account_details")
 
-
-class CompanyUrlIndex:
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.create_draft_from_plan", plan_id=plan_id)
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)
-
-    def get_work_invite_url(self, invite_id: UUID) -> str:
-        # since invites don't make sense for a company, we redirect
-        # them in this case to their dashboard page.
-        return url_for("main_company.dashboard")

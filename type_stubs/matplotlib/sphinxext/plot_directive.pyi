@@ -16,7 +16,8 @@ class PlotDirective(Directive):
 def setup(app): ...
 def contains_doctest(text): ...
 
-TEMPLATE: str
+TEMPLATE_SRCSET: Incomplete
+TEMPLATE: Incomplete
 exception_template: str
 plot_context: Incomplete
 

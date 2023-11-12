@@ -125,8 +125,12 @@ class VersionStringCleaner:
 class PackageFilter:
     def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:
         # Since we use a custom flask-profiler package we need to
-        # exclude it from constraints.txt
-        return package_name not in ["flask-profiler"]
+        # exclude it from constraints.txt.  Unfortunately jsonschema
+        # packages with nixpkgs is not officially supported by
+        # flask-restx. That's why we exclude it here. docutils as
+        # distributed by nixpkgs is not officially supported by the
+        # current sphinx version.
+        return package_name not in ["flask-profiler", "jsonschema", "docutils"]
 
 
 def parse_arguments():

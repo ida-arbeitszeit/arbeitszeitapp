@@ -4,6 +4,7 @@ from _typeshed import Incomplete
 class Pagination:
     page: Incomplete
     per_page: Incomplete
+    max_per_page: Incomplete
     items: Incomplete
     total: Incomplete
     def __init__(self, page: int | None = ..., per_page: int | None = ..., max_per_page: int | None = ..., error_out: bool = ..., count: bool = ..., **kwargs: t.Any) -> None: ...

@@ -1,6 +1,6 @@
 from _typeshed import Incomplete
 
-def cubehelix(gamma: float = ..., s: float = ..., r=..., h: float = ...): ...
+def cubehelix(gamma: float = ..., s: float = ..., r: float = ..., h: float = ...): ...
 
 gfunc: Incomplete
 datad: Incomplete

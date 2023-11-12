@@ -14,14 +14,10 @@ from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPr
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import HidePlanUrlIndexTestImpl, RenewPlanUrlIndexTestImpl
-
 
 class ShowMyPlansPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.renew_plan_url_index = self.injector.get(RenewPlanUrlIndexTestImpl)
-        self.hide_plan_url_index = self.injector.get(HidePlanUrlIndexTestImpl)
         self.presenter = self.injector.get(ShowMyPlansPresenter)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
@@ -118,11 +114,11 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertEqual(row1.is_public_service, expected_plan.is_public_service)
         self.assertEqual(
             row1.renew_plan_url,
-            self.renew_plan_url_index.get_renew_plan_url(expected_plan.id),
+            self.url_index.get_renew_plan_url(expected_plan.id),
         )
         self.assertEqual(
             row1.hide_plan_url,
-            self.hide_plan_url_index.get_hide_plan_url(expected_plan.id),
+            self.url_index.get_hide_plan_url(expected_plan.id),
         )
 
     def test_presenter_shows_correct_info_of_one_single_non_active_plan(self) -> None:

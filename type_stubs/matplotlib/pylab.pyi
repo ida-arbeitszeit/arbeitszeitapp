@@ -10,6 +10,7 @@ from matplotlib.dates import DAILY as DAILY, DateFormatter as DateFormatter, Dat
 from matplotlib.mlab import detrend as detrend, detrend_linear as detrend_linear, detrend_mean as detrend_mean, detrend_none as detrend_none, window_hanning as window_hanning, window_none as window_none
 
 bytes: Incomplete
+abs: Incomplete
 max: Incomplete
 min: Incomplete
 round: Incomplete

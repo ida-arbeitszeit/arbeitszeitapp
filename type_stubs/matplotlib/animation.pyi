@@ -82,10 +82,6 @@ class FFMpegFileWriter(FFMpegBase, FileMovieWriter):
     supported_formats: Incomplete
 
 class ImageMagickBase:
-    @property
-    def delay(self): ...
-    @property
-    def output_args(self): ...
     @classmethod
     def bin_path(cls): ...
     @classmethod

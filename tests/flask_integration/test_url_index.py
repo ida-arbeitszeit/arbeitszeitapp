@@ -7,37 +7,11 @@ from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
 from arbeitszeit_flask.token import FlaskTokenService
-from arbeitszeit_flask.url_index import CompanyUrlIndex, GeneralUrlIndex
+from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
-from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
+from tests.data_generators import CooperationGenerator, PlanGenerator
 
 from .flask import ViewTestCase
-
-
-class CompanyUrlIndexTests(ViewTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.url_index = CompanyUrlIndex()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.company = self.login_company()
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-
-    def test_renew_plan_url_for_existing_plan_leads_to_functional_url(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        url = self.url_index.get_renew_plan_url(plan.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_hide_plan_url_for_existing_plan_leads_to_functional_url(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        url = self.url_index.get_hide_plan_url(plan.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
 
 
 class PlotUrlIndexTests(ViewTestCase):
@@ -173,7 +147,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.company, coop.id)
+        url = self.url_index.get_coop_summary_url(UserRole.company, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -182,7 +156,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.member, coop.id)
+        url = self.url_index.get_coop_summary_url(UserRole.member, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -302,7 +276,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         coop = self.cooperation_generator.create_cooperation(
             coordinator=company, plans=[plan]
         )
-        url = self.url_index.get_end_coop_url(plan.id, coop.id)
+        url = self.url_index.get_end_coop_url(plan.id, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
@@ -367,3 +341,21 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_unconfirmed_member_url()
         response = self.client.get(url)
         assert response.status_code < 400
+
+    def test_renew_plan_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_renew_plan_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_hide_plan_url_for_existing_plan_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        plan = self.plan_generator.create_plan()
+        url = self.url_index.get_hide_plan_url(plan.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)

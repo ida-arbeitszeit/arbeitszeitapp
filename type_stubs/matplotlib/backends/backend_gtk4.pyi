@@ -27,8 +27,7 @@ class FigureCanvasGTK4(_FigureCanvasGTK, Gtk.DrawingArea):
 
 class NavigationToolbar2GTK4(_NavigationToolbar2GTK, Gtk.Box):
     message: Incomplete
-    def __init__(self, canvas, window: Incomplete | None = ...) -> None: ...
-    win: Incomplete
+    def __init__(self, canvas) -> None: ...
     def save_figure(self, *args) -> None: ...
 
 class ToolbarGTK4(ToolContainerBase, Gtk.Box):

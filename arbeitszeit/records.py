@@ -130,6 +130,14 @@ class CoordinationTenure:
 
 
 @dataclass
+class CoordinationTransferRequest:
+    id: UUID
+    requesting_coordination_tenure: UUID
+    candidate: UUID
+    request_date: datetime
+
+
+@dataclass
 class ProductionCosts:
     labour_cost: Decimal
     resource_cost: Decimal

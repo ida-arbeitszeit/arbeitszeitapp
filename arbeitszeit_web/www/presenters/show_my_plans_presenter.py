@@ -7,12 +7,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.url_index import (
-    HidePlanUrlIndex,
-    RenewPlanUrlIndex,
-    UrlIndex,
-    UserUrlIndex,
-)
+from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
 
 @dataclass
@@ -97,8 +92,6 @@ class ShowMyPlansViewModel:
 class ShowMyPlansPresenter:
     url_index: UrlIndex
     user_url_index: UserUrlIndex
-    renew_plan_url_index: RenewPlanUrlIndex
-    hide_plan_url_index: HidePlanUrlIndex
     translator: Translator
     datetime_service: DatetimeService
     notifier: Notifier
@@ -170,10 +163,8 @@ class ShowMyPlansPresenter:
                     prd_name=f"{plan.prd_name}",
                     is_public_service=plan.is_public_service,
                     plan_creation_date=self.__format_date(plan.plan_creation_date),
-                    renew_plan_url=self.renew_plan_url_index.get_renew_plan_url(
-                        plan.id
-                    ),
-                    hide_plan_url=self.hide_plan_url_index.get_hide_plan_url(plan.id),
+                    renew_plan_url=self.url_index.get_renew_plan_url(plan.id),
+                    hide_plan_url=self.url_index.get_hide_plan_url(plan.id),
                 )
                 for plan in response.expired_plans
             ],

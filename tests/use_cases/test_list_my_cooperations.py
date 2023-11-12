@@ -46,7 +46,7 @@ class UseCaseTest(BaseTestCase):
     def test_one_plan_is_returned_if_requester_has_one_active_cooperating_plan(
         self,
     ) -> None:
-        coop = self.coop_generator.create_cooperation()
+        coop = self.cooperation_generator.create_cooperation()
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
         self.plan_generator.create_plan(planner=company, cooperation=coop)
@@ -54,21 +54,22 @@ class UseCaseTest(BaseTestCase):
         assert len(result.cooperating_plans) == 1
 
     def test_returned_plan_has_correct_attributes(self) -> None:
-        coop = self.coop_generator.create_cooperation()
+        expected_coop_name = "Test Cooperation"
+        coop = self.cooperation_generator.create_cooperation(name=expected_coop_name)
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
         plan = self.plan_generator.create_plan(planner=company, cooperation=coop)
         result = self.use_case.list_cooperations(request=request)
         cooperating_plan = result.cooperating_plans[0]
-        assert cooperating_plan.coop_id == coop.id
-        assert cooperating_plan.coop_name == coop.name
+        assert cooperating_plan.coop_id == coop
+        assert cooperating_plan.coop_name == expected_coop_name
         assert cooperating_plan.plan_id == plan.id
         assert cooperating_plan.plan_name == plan.prd_name
 
     def test_two_plans_are_returned_if_requester_has_two_active_cooperating_plan(
         self,
     ) -> None:
-        coop = self.coop_generator.create_cooperation()
+        coop = self.cooperation_generator.create_cooperation()
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
         self.plan_generator.create_plan(planner=company, cooperation=coop)
