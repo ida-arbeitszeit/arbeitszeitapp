@@ -91,7 +91,47 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
         response = self.use_case.list_coordinations(
             self.create_use_case_request(coop=coop)
         )
+        assert len(response.coordinations) == 1
         assert response.coordinations[0].end_time is None
+
+    def test_that_first_coordination_of_two_in_response_has_no_end_time(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        self.coordination_tenure_generator.create_coordination_tenure(cooperation=coop)
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop)
+        )
+        assert len(response.coordinations) == 2
+        assert response.coordinations[0].end_time is None
+
+    def test_that_second_coordination_of_two_in_response_has_correct_end_time(
+        self,
+    ) -> None:
+        first_timestamp = datetime(2021, 10, 5, 10)
+        self.datetime_service.freeze_time(first_timestamp)
+        coop = self.cooperation_generator.create_cooperation()
+        self.datetime_service.advance_time(timedelta(days=2))
+        self.coordination_tenure_generator.create_coordination_tenure(cooperation=coop)
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop)
+        )
+        assert len(response.coordinations) == 2
+        assert response.coordinations[1].end_time == first_timestamp + timedelta(days=2)
+
+    def test_that_of_three_coordinations_only_the_first_in_response_has_no_end_time(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        self.coordination_tenure_generator.create_coordination_tenure(cooperation=coop)
+        self.coordination_tenure_generator.create_coordination_tenure(cooperation=coop)
+        response = self.use_case.list_coordinations(
+            self.create_use_case_request(coop=coop)
+        )
+        assert len(response.coordinations) == 3
+        assert response.coordinations[0].end_time is None
+        assert response.coordinations[1].end_time
+        assert response.coordinations[2].end_time
 
     def create_use_case_request(
         self, coop: UUID
