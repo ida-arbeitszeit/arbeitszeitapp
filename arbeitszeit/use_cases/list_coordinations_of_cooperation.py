@@ -32,20 +32,20 @@ class ListCoordinationsOfCooperationUseCase:
         tenures_and_coordinators = list(
             self.database_gateway.get_coordination_tenures()
             .of_cooperation(request.cooperation)
+            .ordered_by_start_date(ascending=False)
             .joined_with_coordinator()
         )
-        tenures_and_coordinators.sort(key=lambda t: t[0].start_date, reverse=True)
         coordinations: list[CoordinationInfo] = []
-        for index, (tenure, coordinator) in enumerate(tenures_and_coordinators):
-            info = CoordinationInfo(
-                coordinator_id=coordinator.id,
-                coordinator_name=coordinator.name,
-                start_time=tenure.start_date,
-                end_time=None
-                if index == 0
-                else tenures_and_coordinators[index - 1][0].start_date,
+        end_timestamp = None
+        for tenure, coordinator in tenures_and_coordinators:
+            coordinations.append(
+                CoordinationInfo(
+                    coordinator_id=coordinator.id,
+                    coordinator_name=coordinator.name,
+                    start_time=tenure.start_date,
+                    end_time=end_timestamp,
+                )
             )
-            coordinations.append(info)
         assert coordinations  # there cannot be a cooperation without at least one coordination_tenure
         cooperation = (
             self.database_gateway.get_cooperations()
