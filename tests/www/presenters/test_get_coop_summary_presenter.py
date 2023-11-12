@@ -66,6 +66,17 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             ),
         )
 
+    def test_link_to_list_of_coordinators_is_displayed_correctly(self):
+        coop_summary = self.get_coop_summary()
+        view_model = self.presenter.present(coop_summary)
+        self.assertEqual(
+            view_model.list_of_coordinators_url,
+            self.url_index.get_list_of_coordinators_url(
+                cooperation_id=coop_summary.coop_id,
+                user_role=UserRole.company,
+            ),
+        )
+
     def test_coop_price_is_displayed_correctly_if_it_is_not_none(self):
         coop_price = Decimal(50.005)
         expected_coop_price = f"{round(coop_price, 2)}"

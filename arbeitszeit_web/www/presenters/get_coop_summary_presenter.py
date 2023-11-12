@@ -27,6 +27,7 @@ class GetCoopSummaryViewModel:
     current_coordinator_id: str
     current_coordinator_name: str
     current_coordinator_url: str
+    list_of_coordinators_url: str
     coop_price: str
 
     plans: List[AssociatedPlan]
@@ -52,6 +53,10 @@ class GetCoopSummarySuccessPresenter:
             current_coordinator_url=self.url_index.get_company_summary_url(
                 user_role=user_role,
                 company_id=response.current_coordinator,
+            ),
+            list_of_coordinators_url=self.url_index.get_list_of_coordinators_url(
+                user_role=user_role,
+                cooperation_id=response.coop_id,
             ),
             coop_price="-"
             if response.coop_price is None

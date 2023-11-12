@@ -1,0 +1,13 @@
+{% extends "base_member.html" %}
+
+{% block navbar_start %}
+{% from 'macros/navbar.html' import navbar %}
+{{ navbar(view_model.navbar_items) }}
+{% endblock %}
+
+{% block content %}
+{% from 'macros/list_coordinations_of_cooperation.html' import list_coordinations_of_cooperation %}
+{{ list_coordinations_of_cooperation(view_model) }}
+{% endblock %}
+
+

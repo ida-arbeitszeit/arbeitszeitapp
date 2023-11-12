@@ -13,6 +13,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
+    CooperationGenerator,
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
@@ -60,6 +61,7 @@ class ViewTestCase(FlaskTestCase):
         self.client = self.app.test_client()
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
+        self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.email_generator = self.injector.get(EmailGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)

@@ -160,6 +160,24 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_list_coordinations_url_for_existing_coop_leads_to_functional_url_for_companies(
+        self,
+    ) -> None:
+        self.login_company()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_list_of_coordinators_url(UserRole.company, coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_coordinations_url_for_existing_coop_leads_to_functional_url_for_member(
+        self,
+    ) -> None:
+        self.login_member()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_list_of_coordinators_url(UserRole.member, coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_company_summary_url_for_existing_company_leads_to_functional_url_for_company(
         self,
     ) -> None:
