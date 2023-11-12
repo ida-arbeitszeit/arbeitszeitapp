@@ -21,11 +21,9 @@ class ToolBase:
     name: Incomplete
     toolmanager: Incomplete
     canvas: Incomplete
-    @property
-    def figure(self): ...
-    set_figure: Incomplete
+    def set_figure(self, figure) -> None: ...
+    figure: Incomplete
     def trigger(self, sender, event, data: Incomplete | None = ...) -> None: ...
-    def destroy(self) -> None: ...
 
 class ToolToggleBase(ToolBase):
     radio_group: Incomplete

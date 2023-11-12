@@ -1,8 +1,13 @@
 from _typeshed import Incomplete
-from wtforms import FileField as _FileField
+from wtforms import FileField as _FileField, MultipleFileField as _MultipleFileField
 from wtforms.validators import DataRequired
 
 class FileField(_FileField):
+    data: Incomplete
+    raw_data: Incomplete
+    def process_formdata(self, valuelist) -> None: ...
+
+class MultipleFileField(_MultipleFileField):
     data: Incomplete
     raw_data: Incomplete
     def process_formdata(self, valuelist) -> None: ...

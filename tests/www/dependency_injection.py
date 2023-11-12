@@ -7,13 +7,7 @@ from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.url_index import (
-    AccountantInvitationUrlIndex,
-    HidePlanUrlIndex,
-    LanguageChangerUrlIndex,
-    RenewPlanUrlIndex,
-    UrlIndex,
-)
+from arbeitszeit_web.url_index import UrlIndex
 from tests.dependency_injection import TestingModule
 from tests.email import FakeEmailConfiguration, FakeEmailService
 from tests.email_presenters.accountant_invitation_email_view import (
@@ -25,13 +19,7 @@ from tests.session import FakeSession
 from tests.use_cases.dependency_injection import InMemoryModule
 
 from .presenters.notifier import NotifierTestImpl
-from .presenters.url_index import (
-    AccountantInvitationUrlIndexImpl,
-    HidePlanUrlIndexTestImpl,
-    LanguageChangerUrlIndexImpl,
-    RenewPlanUrlIndexTestImpl,
-    UrlIndexTestImpl,
-)
+from .presenters.url_index import UrlIndexTestImpl
 
 
 class WwwTestsInjector(Module):
@@ -41,18 +29,12 @@ class WwwTestsInjector(Module):
             AccountantInvitationEmailViewImpl
         )
         binder[EmailConfiguration] = AliasProvider(FakeEmailConfiguration)
-        binder[AccountantInvitationUrlIndex] = AliasProvider(
-            AccountantInvitationUrlIndexImpl
-        )
         binder[Notifier] = AliasProvider(NotifierTestImpl)
         binder[UrlIndex] = AliasProvider(UrlIndexTestImpl)
         binder[Session] = AliasProvider(FakeSession)
         binder[Request] = AliasProvider(FakeRequest)
-        binder[LanguageChangerUrlIndex] = AliasProvider(LanguageChangerUrlIndexImpl)
         binder[LanguageService] = AliasProvider(FakeLanguageService)
         binder[MailService] = AliasProvider(FakeEmailService)
-        binder[RenewPlanUrlIndex] = AliasProvider(RenewPlanUrlIndexTestImpl)
-        binder[HidePlanUrlIndex] = AliasProvider(HidePlanUrlIndexTestImpl)
 
 
 def get_dependency_injector() -> Injector:

@@ -11,14 +11,9 @@ from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.dependency_injection import (
-    CompanyModule,
-    MemberModule,
-    with_injection,
-)
+from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
-from arbeitszeit_flask.template import AnonymousUserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.signup_accountant_view import SignupAccountantView
 from arbeitszeit_flask.views.signup_company_view import SignupCompanyView
@@ -48,21 +43,18 @@ auth = Blueprint("auth", __name__, template_folder="templates", static_folder="s
 @auth.route("/")
 @with_injection()
 def start(
-    template_renderer: AnonymousUserTemplateRenderer,
     start_page: StartPageUseCase,
     start_page_presenter: StartPagePresenter,
 ):
     response = start_page.show_start_page()
     view_model = start_page_presenter.show_start_page(response)
-    return template_renderer.render_template(
-        "auth/start.html", context=dict(view_model=view_model)
-    )
+    return render_template("auth/start.html", view_model=view_model)
 
 
 @auth.route("/help")
 @with_injection()
-def help(template_renderer: AnonymousUserTemplateRenderer):
-    return template_renderer.render_template("auth/start_hilfe.html")
+def help():
+    return render_template("auth/start_hilfe.html")
 
 
 @auth.route("/language=<language>")
@@ -82,7 +74,7 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
 
 
 @auth.route("/member/signup", methods=["GET", "POST"])
-@with_injection(modules=[MemberModule()])
+@with_injection()
 @commit_changes
 def signup_member(view: SignupMemberView):
     return view.handle_request()
@@ -137,7 +129,7 @@ def login_member(
 
 
 @auth.route("/member/resend")
-@with_injection(modules=[MemberModule()])
+@with_injection()
 @login_required
 def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
     request = use_case.Request(user=UUID(current_user.id))
@@ -196,7 +188,7 @@ def login_company(
 
 @auth.route("/company/signup", methods=["GET", "POST"])
 @commit_changes
-@with_injection(modules=[CompanyModule()])
+@with_injection()
 def signup_company(view: SignupCompanyView):
     return view.handle_request(request)
 
@@ -223,7 +215,7 @@ def confirm_email_company(
 
 
 @auth.route("/company/resend")
-@with_injection(modules=[CompanyModule()])
+@with_injection()
 @login_required
 def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
     request = use_case.Request(user=UUID(current_user.id))

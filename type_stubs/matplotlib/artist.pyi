@@ -2,7 +2,7 @@ from . import cbook as cbook
 from .cm import ScalarMappable as ScalarMappable
 from .colors import BoundaryNorm as BoundaryNorm
 from .path import Path as Path
-from .transforms import Bbox as Bbox, IdentityTransform as IdentityTransform, Transform as Transform, TransformedBbox as TransformedBbox, TransformedPatchPath as TransformedPatchPath, TransformedPath as TransformedPath
+from .transforms import Bbox as Bbox, BboxBase as BboxBase, IdentityTransform as IdentityTransform, Transform as Transform, TransformedBbox as TransformedBbox, TransformedPatchPath as TransformedPatchPath, TransformedPath as TransformedPath
 from _typeshed import Incomplete
 from typing import NamedTuple
 

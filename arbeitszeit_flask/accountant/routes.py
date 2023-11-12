@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect
+from flask import redirect, render_template
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
@@ -14,7 +14,6 @@ from arbeitszeit.use_cases.list_plans_with_pending_review import (
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_404_view import Http404View
 from arbeitszeit_web.www.controllers.approve_plan_controller import (
@@ -47,30 +46,28 @@ from .blueprint import AccountantRoute
 def dashboard(
     flask_session: FlaskSession,
     use_case: GetAccountantDashboardUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: GetAccountantDashboardPresenter,
 ) -> Response:
     current_user = flask_session.get_current_user()
     assert current_user
     response = use_case.get_dashboard(current_user)
     view_model = presenter.create_dashboard_view_model(response)
-    return template_renderer.render_template(
+    return render_template(
         "accountant/dashboard.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
 @AccountantRoute("/accountant/plans/unreviewed")
 def list_plans_with_pending_review(
-    template_renderer: UserTemplateRenderer,
     use_case: ListPlansWithPendingReviewUseCase,
     presenter: ListPlansWithPendingReviewPresenter,
 ) -> Response:
     response = use_case.list_plans_with_pending_review(request=use_case.Request())
     view_model = presenter.list_plans_with_pending_review(response)
-    return template_renderer.render_template(
+    return render_template(
         "accountant/plans-to-review-list.html",
-        context=dict(view_model=view_model),
+        view_model=view_model,
     )
 
 
@@ -92,7 +89,6 @@ def approve_plan(
 def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
-    template_renderer: UserTemplateRenderer,
     presenter: GetPlanDetailsAccountantPresenter,
     http_404_view: Http404View,
 ) -> Response:
@@ -101,9 +97,9 @@ def plan_details(
     if use_case_response:
         view_model = presenter.present(use_case_response)
         return FlaskResponse(
-            template_renderer.render_template(
+            render_template(
                 "accountant/plan_details.html",
-                context=dict(view_model=view_model.to_dict()),
+                view_model=view_model.to_dict(),
             )
         )
     else:
@@ -114,7 +110,6 @@ def plan_details(
 def company_summary(
     company_id: UUID,
     get_company_summary: GetCompanySummary,
-    template_renderer: UserTemplateRenderer,
     presenter: GetCompanySummarySuccessPresenter,
     http_404_view: Http404View,
 ):
@@ -123,9 +118,9 @@ def company_summary(
         use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
     ):
         view_model = presenter.present(use_case_response)
-        return template_renderer.render_template(
+        return render_template(
             "accountant/company_summary.html",
-            context=dict(view_model=view_model.to_dict()),
+            view_model=view_model.to_dict(),
         )
     else:
         return http_404_view.get_response()
@@ -136,15 +131,14 @@ def get_accountant_account_details(
     use_case: GetUserAccountDetailsUseCase,
     controller: GetAccountantAccountDetailsController,
     presenter: GetAccountantAccountDetailsPresenter,
-    template_renderer: UserTemplateRenderer,
 ):
     uc_request = controller.parse_web_request()
     uc_response = use_case.get_user_account_details(uc_request)
     view_model = presenter.render_accountant_account_details(uc_response)
     return FlaskResponse(
-        template_renderer.render_template(
+        render_template(
             "accountant/get_accountant_account_details.html",
-            dict(view_model=view_model),
+            view_model=view_model,
         ),
         status=200,
     )

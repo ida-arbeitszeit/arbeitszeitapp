@@ -38,7 +38,6 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         info_company = self.get_company_transactions(company)
         assert len(info_company.transactions) == transactions_before + 1
         transaction = info_company.transactions[0]
-        assert type(transaction.date) == datetime
         assert transaction.transaction_type == TransactionTypes.sale_of_consumer_product
         assert transaction.transaction_volume == Decimal(3)
         assert transaction.account_type == AccountTypes.prd

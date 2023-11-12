@@ -8,9 +8,6 @@ from matplotlib.backend_bases import CloseEvent as CloseEvent, FigureCanvasBase 
 SPECIAL_KEYS: Incomplete
 cursord: Incomplete
 
-class __getattr__:
-    qApp: Incomplete
-
 class TimerQT(TimerBase):
     def __init__(self, *args, **kwargs) -> None: ...
     def __del__(self) -> None: ...

@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from flask import redirect
+from flask import redirect, render_template
 
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
 )
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
-from arbeitszeit_flask.template import UserTemplateRenderer
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
     RegisterProductiveConsumptionController,
@@ -22,7 +21,6 @@ class RegisterProductiveConsumptionView:
     controller: RegisterProductiveConsumptionController
     register_productive_consumption: RegisterProductiveConsumption
     presenter: RegisterProductiveConsumptionPresenter
-    template_renderer: UserTemplateRenderer
 
     def respond_to_get(self, form: RegisterProductiveConsumptionForm) -> Response:
         return FlaskResponse(self._render_template(form), status=200)
@@ -41,8 +39,8 @@ class RegisterProductiveConsumptionView:
         return FlaskResponse(self._render_template(form), status=200)
 
     def _render_template(self, form: RegisterProductiveConsumptionForm) -> str:
-        return self.template_renderer.render_template(
-            "company/register_productive_consumption.html", context=dict(form=form)
+        return render_template(
+            "company/register_productive_consumption.html", form=form
         )
 
     def _handle_invalid_form(self, form: RegisterProductiveConsumptionForm) -> Response:

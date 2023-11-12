@@ -1,8 +1,8 @@
-import sqlalchemy as sa
+import sqlalchemy.orm as sa_orm
 import typing as t
 from .pagination import Pagination as Pagination, QueryPagination as QueryPagination
 
-class Query(sa.orm.Query):
+class Query(sa_orm.Query):
     def get_or_404(self, ident: t.Any, description: str | None = ...) -> t.Any: ...
     def first_or_404(self, description: str | None = ...) -> t.Any: ...
     def one_or_404(self, description: str | None = ...) -> t.Any: ...

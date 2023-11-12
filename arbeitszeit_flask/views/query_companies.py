@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from flask import Response
+from flask import Response, render_template
 
 from arbeitszeit.use_cases import query_companies as use_case
 from arbeitszeit_flask.forms import CompanySearchForm
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
@@ -21,7 +20,6 @@ class QueryCompaniesView:
     presenter: QueryCompaniesPresenter
     controller: QueryCompaniesController
     template_name: str
-    template_renderer: TemplateRenderer
 
     def respond_to_get(self) -> Response:
         if not self.search_form.validate():
@@ -46,7 +44,8 @@ class QueryCompaniesView:
         return Response(self._render_response_content(view_model))
 
     def _render_response_content(self, view_model: QueryCompaniesViewModel) -> str:
-        return self.template_renderer.render_template(
+        return render_template(
             self.template_name,
-            context=dict(form=self.search_form, view_model=view_model),
+            form=self.search_form,
+            view_model=view_model,
         )

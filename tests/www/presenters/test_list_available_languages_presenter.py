@@ -5,14 +5,11 @@ from arbeitszeit_web.www.presenters.list_available_languages_presenter import (
 from tests.language_service import FakeLanguageService
 from tests.www.base_test_case import BaseTestCase
 
-from .url_index import LanguageChangerUrlIndexImpl
-
 
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ListAvailableLanguagesPresenter)
-        self.language_url_index = self.injector.get(LanguageChangerUrlIndexImpl)
         self.language_service = self.injector.get(FakeLanguageService)
 
     def test_dont_show_language_listing_if_no_languages_are_available(self) -> None:
@@ -54,7 +51,7 @@ class PresenterTests(BaseTestCase):
         view_model = self.presenter.present_available_languages_list(use_case_response)
         self.assertEqual(
             view_model.languages_listing[0].change_url,
-            self.language_url_index.get_language_change_url("ru"),
+            self.url_index.get_language_change_url("ru"),
         )
 
     def test_that_language_code_en_is_resolved_to_correct_change_link(self) -> None:
@@ -64,7 +61,7 @@ class PresenterTests(BaseTestCase):
         view_model = self.presenter.present_available_languages_list(use_case_response)
         self.assertEqual(
             view_model.languages_listing[0].change_url,
-            self.language_url_index.get_language_change_url("en"),
+            self.url_index.get_language_change_url("en"),
         )
 
     def test_language_name_is_properly_rendered_if_it_can_be_retrieved(self) -> None:

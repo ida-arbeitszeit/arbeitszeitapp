@@ -11,7 +11,7 @@
                 <div class="notification is-danger">{{ error }}</div>
                 {% endfor %}
                 {% endfor %}
-                <form method="POST" action="/company/login">
+                <form method="POST" action="{{ url_for('.login_company') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
                         <div class="control has-icons-left">

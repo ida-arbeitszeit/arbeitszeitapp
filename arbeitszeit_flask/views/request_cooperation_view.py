@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response
+from flask import Response, render_template
 
 from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
 from arbeitszeit.use_cases.request_cooperation import RequestCooperation
 from arbeitszeit_flask.forms import RequestCooperationForm
-from arbeitszeit_flask.template import TemplateRenderer
 from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
@@ -30,14 +29,13 @@ class RequestCooperationView:
     presenter: RequestCooperationPresenter
     not_found_view: Http404View
     template_name: str
-    template_renderer: TemplateRenderer
 
     def respond_to_get(self) -> Response:
         list_plans_view_model = self._get_list_plans_view_model()
         return Response(
-            self.template_renderer.render_template(
+            render_template(
                 self.template_name,
-                context=dict(list_plans_view_model=list_plans_view_model),
+                list_plans_view_model=list_plans_view_model,
             )
         )
 
@@ -51,11 +49,10 @@ class RequestCooperationView:
         use_case_response = self.request_cooperation(use_case_request)
         view_model = self.presenter.present(use_case_response)
         return Response(
-            self.template_renderer.render_template(
+            render_template(
                 self.template_name,
-                context=dict(
-                    view_model=view_model, list_plans_view_model=list_plans_view_model
-                ),
+                view_model=view_model,
+                list_plans_view_model=list_plans_view_model,
             )
         )
 
@@ -63,9 +60,7 @@ class RequestCooperationView:
         field = getattr(self.form, result.field)
         field.errors += (result.message,)
         return Response(
-            self.template_renderer.render_template(
-                self.template_name, context=dict(form=self.form)
-            ),
+            render_template(self.template_name, form=self.form),
             status=400,
         )
 

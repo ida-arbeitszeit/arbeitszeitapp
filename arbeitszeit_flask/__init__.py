@@ -104,6 +104,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         from . import accountant, company, member
         from .api import blueprint as api_blueprint
         from .auth import routes as auth_routes
+        from .context_processors import add_template_variables
         from .plots import routes as plots_routes
 
         app.register_blueprint(auth_routes.auth)
@@ -112,6 +113,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(member.blueprint.main_member)
         app.register_blueprint(accountant.blueprint.main_accountant)
         app.register_blueprint(api_blueprint)
+        app.context_processor(add_template_variables)
 
         if app.config["DEBUG_DETAILS"] == True:
             show_profile_info(app)

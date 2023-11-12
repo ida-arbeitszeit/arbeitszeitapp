@@ -162,23 +162,15 @@ class UrlIndex(Protocol):
     def get_change_email_url(self, *, token: str) -> str:
         ...
 
-
-class RenewPlanUrlIndex(Protocol):
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         ...
 
-
-class HidePlanUrlIndex(Protocol):
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         ...
 
-
-class AccountantInvitationUrlIndex(Protocol):
     def get_accountant_invitation_url(self, token: str) -> str:
         ...
 
-
-class LanguageChangerUrlIndex(Protocol):
     def get_language_change_url(self, language_code: str) -> str:
         ...
 

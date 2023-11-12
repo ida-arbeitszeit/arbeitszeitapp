@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import cast
 from uuid import UUID
 
-from flask import Response, redirect
+from flask import Response, redirect, render_template
 
 from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInvite,
@@ -12,7 +12,6 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.template import TemplateIndex, TemplateRenderer
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInviteForm,
@@ -39,8 +38,6 @@ class CompanyWorkInviteView:
     answer_presenter: AnswerCompanyWorkInvitePresenter
     answer_use_case: AnswerCompanyWorkInvite
     http_404_view: Http404View
-    template_renderer: TemplateRenderer
-    template_index: TemplateIndex
 
     def respond_to_get(self, invite_id: UUID) -> Response:
         use_case_request = self.details_controller.create_use_case_request(invite_id)
@@ -52,13 +49,9 @@ class CompanyWorkInviteView:
         view_model = self.details_presenter.render_response(use_case_response)
         if view_model is None:
             return self.http_404_view.get_response()
-        template = self.template_index.get_template_by_name(
-            "show_company_work_invite_details"
-        )
+        template = "member/show_company_work_invite_details.html"
         return Response(
-            self.template_renderer.render_template(
-                template, dict(view_model=view_model)
-            ),
+            render_template(template, view_model=view_model),
             status=200,
         )
 

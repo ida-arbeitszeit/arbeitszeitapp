@@ -5,6 +5,7 @@ from ordered_set import OrderedSet
 from typing import NamedTuple
 
 class np_type: ...
+class pydantic_base_model_type: ...
 
 np_array_factory: str
 np_ndarray = np_type
@@ -35,6 +36,7 @@ numpy_numbers: Incomplete
 numpy_complex_numbers: Incomplete
 numpy_dtypes: Incomplete
 numpy_dtype_str_to_type: Incomplete
+PydanticBaseModel = pydantic_base_model_type
 logger: Incomplete
 py_major_version: Incomplete
 py_minor_version: Incomplete
@@ -43,6 +45,8 @@ py2: Incomplete
 py3: Incomplete
 py4: Incomplete
 NUMERICS: Incomplete
+
+def get_semvar_as_integer(version): ...
 dict_ = dict
 pypy3: Incomplete
 strings: Incomplete
