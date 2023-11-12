@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.records import CoordinationTenure
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.data_generators import CompanyGenerator, CooperationGenerator
+from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -14,6 +15,7 @@ class CoordinationTenureResultTests(FlaskTestCase):
         self.db_gateway = self.injector.get(DatabaseGatewayImpl)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_a_priori_no_coordination_tenures_are_in_db(self) -> None:
         coordination_tenures = self.db_gateway.get_coordination_tenures()
@@ -62,11 +64,26 @@ class CoordinationTenureResultTests(FlaskTestCase):
             coordination_tenures.with_id(coordination_tenure.id)
         )
 
+    def test_coordinations_can_be_ordered_by_start_date_in_descending_order(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        first_coordination_tenure = self.create_coordination_tenure()
+        self.datetime_service.advance_time(dt=timedelta(days=1))
+        second_coordination_tenure = self.create_coordination_tenure()
+        coordination_tenures = list(
+            self.db_gateway.get_coordination_tenures().ordered_by_start_date(
+                ascending=False
+            )
+        )
+        assert coordination_tenures[1] == second_coordination_tenure
+        assert coordination_tenures[3] == first_coordination_tenure
+
     def create_coordination_tenure(self) -> CoordinationTenure:
         return self.db_gateway.create_coordination_tenure(
             company=self.company_generator.create_company(),
             cooperation=self.cooperation_generator.create_cooperation(),
-            start_date=datetime(2000, 1, 1),
+            start_date=self.datetime_service.now(),
         )
 
 

@@ -1257,6 +1257,12 @@ class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
             mapper=mapper,
         )
 
+    def ordered_by_start_date(self, *, ascending: bool = True) -> Self:
+        ordering = models.CoordinationTenure.start_date
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
 
 class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
     def with_id(self, id: UUID) -> Self:
