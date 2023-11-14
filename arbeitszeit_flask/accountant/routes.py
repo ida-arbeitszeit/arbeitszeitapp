@@ -2,6 +2,7 @@ from uuid import UUID
 
 from flask import Response as FlaskResponse
 from flask import redirect, render_template
+from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
@@ -31,6 +32,9 @@ from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
 )
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
+    GetCoopSummarySuccessPresenter,
 )
 from arbeitszeit_web.www.presenters.get_plan_details_accountant_presenter import (
     GetPlanDetailsAccountantPresenter,
@@ -121,6 +125,25 @@ def company_summary(
         return render_template(
             "accountant/company_summary.html",
             view_model=view_model.to_dict(),
+        )
+    else:
+        return http_404_view.get_response()
+
+
+@AccountantRoute("/accountant/cooperation_summary/<uuid:coop_id>")
+def coop_summary(
+    coop_id: UUID,
+    get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
+    presenter: GetCoopSummarySuccessPresenter,
+    http_404_view: Http404View,
+):
+    use_case_response = get_coop_summary(
+        use_cases.get_coop_summary.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+    )
+    if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
+        view_model = presenter.present(use_case_response)
+        return render_template(
+            "accountant/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
         return http_404_view.get_response()
