@@ -182,3 +182,15 @@ class RequestEmailAddressChangeFormImpl:
     @classmethod
     def from_values(cls, new_email_address: str) -> Self:
         return cls(new_email_field=FormFieldImpl(value=new_email_address))
+
+
+class RequestCoordinationTransferFormImpl:
+    def __init__(self, candidate: str, requesting_tenure: str) -> None:
+        self._candidate_field = FormFieldImpl(value=candidate)
+        self._requesting_tenure_field = FormFieldImpl(value=requesting_tenure)
+
+    def candidate_field(self) -> FormFieldImpl[str]:
+        return self._candidate_field
+
+    def requesting_tenure_field(self) -> FormFieldImpl[str]:
+        return self._requesting_tenure_field

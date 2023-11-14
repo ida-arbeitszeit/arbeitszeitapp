@@ -103,3 +103,11 @@ class RegisterForm(Protocol):
     @property
     def name_field(self) -> FormField[str]:
         ...
+
+
+class RequestCoordinationTransferForm(Protocol):
+    def candidate_field(self) -> FormField[str]:
+        ...
+
+    def requesting_tenure_field(self) -> FormField[str]:
+        ...
