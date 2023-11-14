@@ -46,6 +46,7 @@ class ListCoordinationsOfCooperationUseCase:
                     end_time=end_timestamp,
                 )
             )
+            end_timestamp = tenure.start_date
         assert coordinations  # there cannot be a cooperation without at least one coordination_tenure
         cooperation = (
             self.database_gateway.get_cooperations()
