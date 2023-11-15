@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
 from arbeitszeit_web.session import Session
 
 from ...url_index import UrlIndex, UserUrlIndex
@@ -41,7 +41,7 @@ class GetCoopSummarySuccessPresenter:
     url_index: UrlIndex
     session: Session
 
-    def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
+    def present(self, response: GetCoopSummaryResponse) -> GetCoopSummaryViewModel:
         user_role = self.session.get_user_role()
         return GetCoopSummaryViewModel(
             coop_id=str(response.coop_id),
