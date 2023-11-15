@@ -69,7 +69,6 @@ class ListCoordinationsOfCooperationPresenter:
             navbar_items=[
                 NavbarItem(
                     text=self.translator.gettext("Cooperation"),
-                    has_url=True,
                     url=self.url_index.get_coop_summary_url(
                         coop_id=response.cooperation_id,
                         user_role=self.session.get_user_role(),
@@ -77,7 +76,6 @@ class ListCoordinationsOfCooperationPresenter:
                 ),
                 NavbarItem(
                     text=self.translator.gettext("Coordinators"),
-                    has_url=False,
                     url=None,
                 ),
             ],

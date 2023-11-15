@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
@@ -139,7 +138,6 @@ class ListCoordinationsPresenterTests(BaseTestCase):
                 user_role=self.session.get_user_role(),
             ),
         )
-        self.assertEqual(view_model.navbar_items[0].has_url, True)
         self.assertEqual(
             view_model.navbar_items[0].text, self.translator.gettext("Cooperation")
         )
@@ -148,7 +146,6 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         response = self.get_use_case_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertEqual(view_model.navbar_items[1].url, None)
-        self.assertEqual(view_model.navbar_items[1].has_url, False)
         self.assertEqual(
             view_model.navbar_items[1].text, self.translator.gettext("Coordinators")
         )
@@ -164,25 +161,13 @@ class ListCoordinationsPresenterTests(BaseTestCase):
 
     def get_use_case_response_with_one_coordination(
         self,
-        coordinator_id: Optional[UUID] = None,
-        coordinator_name: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        cooperation_id: Optional[UUID] = None,
-        cooperation_name: Optional[str] = None,
+        coordinator_id: UUID = uuid4(),
+        coordinator_name: str = "fake coordinator name",
+        start_time: datetime = datetime(2020, 1, 1, 12, 0),
+        end_time: datetime = datetime(2022, 3, 10, 13, 0),
+        cooperation_id: UUID = uuid4(),
+        cooperation_name: str = "Some coop test name",
     ) -> ListCoordinationsOfCooperationUseCase.Response:
-        if coordinator_id is None:
-            coordinator_id = uuid4()
-        if coordinator_name is None:
-            coordinator_name = "fake coordinator name"
-        if start_time is None:
-            start_time = datetime(2020, 1, 1, 12, 0)
-        if end_time is None:
-            end_time = datetime(2022, 3, 10, 13, 0)
-        if cooperation_id is None:
-            cooperation_id = uuid4()
-        if cooperation_name is None:
-            cooperation_name = "Some coop test name"
         return ListCoordinationsOfCooperationUseCase.Response(
             coordinations=[
                 CoordinationInfo(
