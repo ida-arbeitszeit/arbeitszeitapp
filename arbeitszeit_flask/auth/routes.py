@@ -54,7 +54,7 @@ def start(
 @auth.route("/help")
 @with_injection()
 def help():
-    return render_template("auth/start_hilfe.html")
+    return render_template("auth/help.html")
 
 
 @auth.route("/language=<language>")

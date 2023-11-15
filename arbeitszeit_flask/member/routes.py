@@ -228,11 +228,6 @@ def coop_summary(
         return http_404_view.get_response()
 
 
-@MemberRoute("/member/hilfe")
-def hilfe() -> Response:
-    return FlaskResponse(render_template("member/help.html"))
-
-
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
 def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
     form = AnswerCompanyWorkInviteForm(request.form)

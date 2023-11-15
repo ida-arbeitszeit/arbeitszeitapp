@@ -658,11 +658,6 @@ def list_all_cooperations(
     return render_template("company/list_all_cooperations.html", view_model=view_model)
 
 
-@CompanyRoute("/company/hilfe")
-def hilfe():
-    return render_template("company/help.html")
-
-
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
 def invite_worker_to_company(
     view: InviteWorkerToCompanyView,
