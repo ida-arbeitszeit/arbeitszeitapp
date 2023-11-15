@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, Optional
 from uuid import uuid4
 
 from pytest import approx
@@ -10,7 +10,6 @@ from arbeitszeit.use_cases.get_coop_summary import (
     GetCoopSummary,
     GetCoopSummaryRequest,
     GetCoopSummaryResponse,
-    GetCoopSummarySuccess,
 )
 
 from .base_test_case import BaseTestCase
@@ -130,10 +129,10 @@ class GetCoopSummaryTests(BaseTestCase):
 
     def assert_success(
         self,
-        response: GetCoopSummaryResponse,
-        assertion: Callable[[GetCoopSummarySuccess], bool],
+        response: Optional[GetCoopSummaryResponse],
+        assertion: Callable[[GetCoopSummaryResponse], bool],
     ) -> None:
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert assertion(response)
 
 
@@ -149,14 +148,14 @@ class AssociatedPlansTests(BaseTestCase):
         plan2 = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert len(response.plans) == 2
 
     def test_that_associated_plan_in_a_summary_has_correct_plan_id(self) -> None:
         plan = self.plan_generator.create_plan()
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].plan_id == plan.id
 
     def test_that_associated_plan_in_a_summary_has_correct_plan_name(self) -> None:
@@ -164,7 +163,7 @@ class AssociatedPlansTests(BaseTestCase):
         plan = self.plan_generator.create_plan(product_name=expected_prd_name)
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].plan_name == expected_prd_name
 
     def test_that_associated_plan_in_a_summary_has_correct_individual_price(
@@ -177,7 +176,7 @@ class AssociatedPlansTests(BaseTestCase):
         )
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].plan_individual_price == expected_price
 
     def test_that_associated_plan_in_a_summary_has_correct_individual_price_when_there_is_a_second_plan(
@@ -194,7 +193,7 @@ class AssociatedPlansTests(BaseTestCase):
         )
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].plan_individual_price == expected_price
 
     def test_that_associated_plan_in_a_summary_has_correct_planner_id(self) -> None:
@@ -202,7 +201,7 @@ class AssociatedPlansTests(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=expected_planner)
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].planner_id == expected_planner
 
     def test_that_associated_plan_in_a_summary_has_correct_planner_name(self) -> None:
@@ -211,7 +210,7 @@ class AssociatedPlansTests(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=planner)
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].planner_name == expected_planner_name
 
     def test_that_associated_plan_shows_that_planner_is_also_requester_of_coop_summary(
@@ -223,7 +222,7 @@ class AssociatedPlansTests(BaseTestCase):
         response = self.get_coop_summary(
             GetCoopSummaryRequest(requester_id=plan.planner, coop_id=coop)
         )
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].requester_is_planner == True
 
     def test_that_associated_plan_shows_that_planner_is_not_requester_of_coop_summary(
@@ -235,5 +234,5 @@ class AssociatedPlansTests(BaseTestCase):
         response = self.get_coop_summary(
             GetCoopSummaryRequest(requester_id=uuid4(), coop_id=coop)
         )
-        assert isinstance(response, GetCoopSummarySuccess)
+        assert response
         assert response.plans[0].requester_is_planner == False

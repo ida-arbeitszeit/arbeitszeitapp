@@ -24,6 +24,7 @@ from arbeitszeit.use_cases.deny_cooperation import (
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
@@ -528,14 +529,14 @@ def company_summary(
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
 def coop_summary(
     coop_id: UUID,
-    get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
+    get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
-        use_cases.get_coop_summary.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+        GetCoopSummaryRequest(UUID(current_user.id), coop_id)
     )
-    if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
+    if use_case_response:
         view_model = presenter.present(use_case_response)
         return render_template(
             "company/coop_summary.html", view_model=view_model.to_dict()

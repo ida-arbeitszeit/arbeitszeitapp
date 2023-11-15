@@ -5,7 +5,10 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_coop_summary import AssociatedPlan, GetCoopSummarySuccess
+from arbeitszeit.use_cases.get_coop_summary import (
+    AssociatedPlan,
+    GetCoopSummaryResponse,
+)
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
@@ -193,7 +196,7 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
         coop_definition: Optional[str] = None,
         coordinator_name: Optional[str] = None,
         coop_price: Optional[Decimal] = None,
-    ) -> GetCoopSummarySuccess:
+    ) -> GetCoopSummaryResponse:
         if plans is None:
             plans = [self.get_associated_plan()]
         if requester_is_coordinator is None:
@@ -204,7 +207,7 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             coordinator_name = "coordinator name"
         if coop_price is None:
             coop_price = Decimal(50.005)
-        return GetCoopSummarySuccess(
+        return GetCoopSummaryResponse(
             requester_is_coordinator=requester_is_coordinator,
             coop_id=uuid4(),
             coop_name="coop name",
