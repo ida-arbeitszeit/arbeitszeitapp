@@ -1,5 +1,5 @@
 {% extends "base_general_pages.html" %}
-{% from 'macros/start_hilfe.html' import start_hilfe %}
+{% from 'macros/help.html' import help %}
 
 {% block navigation_items %}
 <div class="navbar-item">
@@ -10,5 +10,5 @@
 {% endblock %}
 
 {% block content %}
-{{ start_hilfe() }}
+{{ help() }}
 {% endblock %}
