@@ -26,7 +26,7 @@ class AssociatedPlan:
 
 
 @dataclass
-class GetCoopSummarySuccess:
+class GetCoopSummaryResponse:
     requester_is_coordinator: bool
     coop_id: UUID
     coop_name: str
@@ -38,16 +38,15 @@ class GetCoopSummarySuccess:
     plans: List[AssociatedPlan]
 
 
-GetCoopSummaryResponse = Optional[GetCoopSummarySuccess]
-
-
 @dataclass
 class GetCoopSummary:
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
-    def __call__(self, request: GetCoopSummaryRequest) -> GetCoopSummaryResponse:
+    def __call__(
+        self, request: GetCoopSummaryRequest
+    ) -> Optional[GetCoopSummaryResponse]:
         coop_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.coop_id)
@@ -64,7 +63,7 @@ class GetCoopSummary:
             .that_will_expire_after(now)
         )
         plans = list(plan_result)
-        return GetCoopSummarySuccess(
+        return GetCoopSummaryResponse(
             requester_is_coordinator=coordinator.id == request.requester_id,
             coop_id=coop.id,
             coop_name=coop.name,
