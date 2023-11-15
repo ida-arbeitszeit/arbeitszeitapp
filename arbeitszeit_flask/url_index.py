@@ -64,6 +64,11 @@ class GeneralUrlIndex:
             return url_for(
                 "main_company.list_coordinators_of_cooperation", coop_id=cooperation_id
             )
+        elif user_role == UserRole.accountant:
+            return url_for(
+                "main_accountant.list_coordinators_of_cooperation",
+                coop_id=cooperation_id,
+            )
         else:
             raise ValueError(f"list of coordinators url not available for {user_role}")
 

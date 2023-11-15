@@ -11,6 +11,9 @@ from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
+from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
+    ListCoordinationsOfCooperationUseCase,
+)
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
@@ -39,6 +42,9 @@ from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
 )
 from arbeitszeit_web.www.presenters.get_plan_details_accountant_presenter import (
     GetPlanDetailsAccountantPresenter,
+)
+from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
+    ListCoordinationsOfCooperationPresenter,
 )
 from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
@@ -148,6 +154,24 @@ def coop_summary(
         )
     else:
         return http_404_view.get_response()
+
+
+@AccountantRoute(
+    "/accountant/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
+)
+def list_coordinators_of_cooperation(
+    coop_id: UUID,
+    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
+    presenter: ListCoordinationsOfCooperationPresenter,
+):
+    use_case_response = list_coordinations_of_cooperation.list_coordinations(
+        ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
+    )
+    view_model = presenter.list_coordinations_of_cooperation(use_case_response)
+    return render_template(
+        "accountant/list_coordinators_of_cooperation.html",
+        view_model=view_model,
+    )
 
 
 @AccountantRoute("/accountant/account")

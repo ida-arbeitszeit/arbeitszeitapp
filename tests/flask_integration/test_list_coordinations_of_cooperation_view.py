@@ -25,3 +25,16 @@ class MemberViewTests(ViewTestCase):
             f"/member/cooperation_summary/{self.cooperation}/coordinators"
         )
         self.assertEqual(response.status_code, 200)
+
+
+class AccountantViewTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.cooperation = self.cooperation_generator.create_cooperation()
+        self.login_accountant()
+
+    def test_that_requesting_view_results_in_200_status_code(self) -> None:
+        response = self.client.get(
+            f"/accountant/cooperation_summary/{self.cooperation}/coordinators"
+        )
+        self.assertEqual(response.status_code, 200)
