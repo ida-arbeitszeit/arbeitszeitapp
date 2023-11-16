@@ -8,13 +8,13 @@ from .flask import LogInUser, ViewTestCase
 class UserAccessTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/"
+        self.url = "/member/my_account"
 
     @parameterized.expand(
         [
-            (LogInUser.accountant, 200),
-            (None, 200),
-            (LogInUser.company, 200),
+            (LogInUser.accountant, 302),
+            (None, 302),
+            (LogInUser.company, 302),
             (LogInUser.member, 200),
         ]
     )
