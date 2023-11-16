@@ -48,8 +48,10 @@
 
   {{ show_notifications() }}
 
-  {% block content %}
-  {% endblock content %}
+  <div class="{% block content_class %}container{% endblock %}">
+    {% block content %}
+    {% endblock content %}
+  </div>
   {% endblock body %}
 </body>
 
