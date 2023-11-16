@@ -169,6 +169,33 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_list_coordinations_url_for_existing_coop_leads_to_functional_url_for_companies(
+        self,
+    ) -> None:
+        self.login_company()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_list_of_coordinators_url(UserRole.company, coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_coordinations_url_for_existing_coop_leads_to_functional_url_for_member(
+        self,
+    ) -> None:
+        self.login_member()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_list_of_coordinators_url(UserRole.member, coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_coordinations_url_for_existing_coop_leads_to_functional_url_for_accountant(
+        self,
+    ) -> None:
+        self.login_accountant()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_list_of_coordinators_url(UserRole.accountant, coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_company_summary_url_for_existing_company_leads_to_functional_url_for_company(
         self,
     ) -> None:
@@ -187,6 +214,17 @@ class GeneralUrlIndexTests(ViewTestCase):
         company = self.company_generator.create_company_record()
         url = self.url_index.get_company_summary_url(
             user_role=UserRole.member, company_id=company.id
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_summary_url_for_existing_company_leads_to_functional_url_for_accountant(
+        self,
+    ) -> None:
+        self.login_accountant()
+        company = self.company_generator.create_company_record()
+        url = self.url_index.get_company_summary_url(
+            user_role=UserRole.accountant, company_id=company.id
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

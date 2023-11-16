@@ -1221,6 +1221,49 @@ class CooperationResult(FlaskQueryResult[records.Cooperation]):
         )
 
 
+class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.CoordinationTenure.id == str(id_))
+        )
+
+    def of_cooperation(self, cooperation_id: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.CoordinationTenure.cooperation == str(cooperation_id)
+            )
+        )
+
+    def joined_with_coordinator(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.CoordinationTenure, records.Company]]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.CoordinationTenure, records.Company]:
+            tenure_orm, company_orm = orm
+            return (
+                DatabaseGatewayImpl.coordination_tenure_from_orm(tenure_orm),
+                DatabaseGatewayImpl.company_from_orm(company_orm),
+            )
+
+        company = aliased(models.Company)
+        query = self.query.join(
+            company, models.CoordinationTenure.company == company.id
+        ).with_entities(models.CoordinationTenure, company)
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
+    def ordered_by_start_date(self, *, ascending: bool = True) -> Self:
+        ordering = models.CoordinationTenure.start_date
+        if not ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
+
 class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
     def with_id(self, id: UUID) -> Self:
         return self._with_modified_query(
@@ -1675,6 +1718,13 @@ class DatabaseGatewayImpl:
         self.db.session.add(coordination)
         self.db.session.flush()
         return self.coordination_tenure_from_orm(coordination)
+
+    def get_coordination_tenures(self) -> CoordinationTenureResult:
+        return CoordinationTenureResult(
+            mapper=self.coordination_tenure_from_orm,
+            query=models.CoordinationTenure.query,
+            db=self.db,
+        )
 
     @classmethod
     def coordination_tenure_from_orm(
