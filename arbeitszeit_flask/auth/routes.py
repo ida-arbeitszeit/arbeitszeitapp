@@ -58,9 +58,10 @@ def help():
 
 
 @auth.route("/language=<language>")
-def set_language(language=None):
+def set_language(language: str):
+    redirection_url = request.headers.get("Referer") or url_for("auth.start")
     session["language"] = language
-    return redirect(url_for("auth.start"))
+    return redirect(redirection_url)
 
 
 # Member
