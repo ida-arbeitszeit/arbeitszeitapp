@@ -395,8 +395,8 @@ class GeneralUrlIndexTests(ViewTestCase):
         self.login_company()
         plan = self.plan_generator.create_plan()
         url = self.url_index.get_renew_plan_url(plan.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
 
     def test_hide_plan_url_for_existing_plan_leads_to_functional_url(
         self,

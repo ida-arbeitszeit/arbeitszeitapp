@@ -15,7 +15,7 @@ from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
 )
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperation,
@@ -84,9 +84,8 @@ from arbeitszeit_flask.views.register_productive_consumption import (
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.url_index import UrlIndex
-from arbeitszeit_web.www.controllers.create_draft_controller import (
-    CreateDraftController,
+from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
+    CreateDraftFromPlanController,
 )
 from arbeitszeit_web.www.controllers.delete_draft_controller import (
     DeleteDraftController,
@@ -109,8 +108,10 @@ from arbeitszeit_web.www.controllers.revoke_plan_filing_controller import (
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
 )
+from arbeitszeit_web.www.presenters.create_draft_from_plan_presenter import (
+    CreateDraftFromPlanPresenter,
+)
 from arbeitszeit_web.www.presenters.create_draft_presenter import (
-    CreateDraftPresenter,
     GetPrefilledDraftDataPresenter,
 )
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
@@ -245,58 +246,18 @@ def delete_draft(
     return redirect(view_model.redirect_target)
 
 
-@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["POST"])
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
-    get_plan_details_use_case: GetPlanDetailsUseCase,
-    get_plan_details_presenter: GetPrefilledDraftDataPresenter,
-    create_plan_draft_use_case: CreatePlanDraft,
-    create_draft_controller: CreateDraftController,
-    create_draft_presenter: CreateDraftPresenter,
-    not_found_view: Http404View,
-    url_index: UrlIndex,
+    use_case: CreateDraftFromPlanUseCase,
+    controller: CreateDraftFromPlanController,
+    presenter: CreateDraftFromPlanPresenter,
 ) -> Response:
-    form = CreateDraftForm(request.form)
-    if request.method == "GET":
-        use_case_request_get = GetPlanDetailsUseCase.Request(plan_id)
-        response = get_plan_details_use_case.get_plan_details(use_case_request_get)
-        if not response:
-            return not_found_view.get_response()
-        view_model_get = get_plan_details_presenter.show_prefilled_draft_data(
-            draft_data=response.plan_details, form=form
-        )
-        return FlaskResponse(
-            render_template(
-                "company/create_draft.html",
-                form=form,
-                view_model=view_model_get,
-            ),
-            status=200,
-        )
-    else:
-        if form.validate():
-            use_case_request = create_draft_controller.import_form_data(draft_form=form)
-            use_case_response = create_plan_draft_use_case(use_case_request)
-            view_model_post = create_draft_presenter.present_plan_creation(
-                use_case_response
-            )
-            if view_model_post.redirect_url is None:
-                return not_found_view.get_response()
-            else:
-                return redirect(view_model_post.redirect_url)
-        return FlaskResponse(
-            render_template(
-                "company/create_draft.html",
-                form=form,
-                view_model=dict(
-                    load_draft_url=url_index.get_my_plan_drafts_url(),
-                    save_draft_url=url_index.get_create_draft_url(),
-                    cancel_url=url_index.get_create_draft_url(),
-                ),
-            ),
-            status=400,
-        )
+    uc_request = controller.create_use_case_request(plan_id)
+    uc_response = use_case.create_draft_from_plan(uc_request)
+    view_model = presenter.render_response(uc_response)
+    return redirect(view_model.redirect_url)
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
