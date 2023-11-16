@@ -1,0 +1,18 @@
+{% macro language_selection() %}
+
+<div class="navbar-item has-dropdown is-hoverable">
+  <a class="navbar-link">
+    {{ gettext('Language') }}
+  </a>
+  <div class="navbar-dropdown">
+    {% if languages.show_language_listing %}
+    {% for language in languages.languages_listing %}
+    <a href="{{ language.change_url }}" class="navbar-item">
+      {{ language.label }}
+    </a>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+{% endmacro %}
