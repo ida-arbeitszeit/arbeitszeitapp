@@ -16,31 +16,31 @@ class RequestCoordinationTransferControllerTests(BaseTestCase):
         self.controller = self.injector.get(RequestCoordinationTransferController)
 
     @parameterized.expand([("invalid",), ("",), ("123",)])
-    def test_import_form_data_returns_none_if_candidate_is_invalid(
+    def test_that_none_gets_returned_if_candidate_field_in_form_is_invalid(
         self, candidate: str
     ) -> None:
         form = self.get_fake_form(candidate=candidate)
         self.assertIsNone(self.controller.import_form_data(form))
 
     @parameterized.expand([("invalid",), ("",), ("123",)])
-    def test_import_form_data_returns_none_if_requesting_tenure_is_invalid(
+    def test_that_none_gets_returned_if_requesting_tenure_field_in_form_is_invalid(
         self, requesting_tenure: str
     ) -> None:
         form = self.get_fake_form(requesting_tenure=requesting_tenure)
         self.assertIsNone(self.controller.import_form_data(form))
 
-    def test_import_form_data_returns_request_if_form_is_valid(self) -> None:
+    def test_that_a_request_gets_returned_if_form_is_valid(self) -> None:
         form = self.get_fake_form()
         self.assertIsNotNone(self.controller.import_form_data(form))
 
-    def test_import_form_data_returns_request_with_correct_candidate(self) -> None:
+    def test_that_request_has_candiate_specified_in_form(self) -> None:
         candidate = uuid4()
         form = self.get_fake_form(candidate=str(candidate))
         request = self.controller.import_form_data(form)
         assert request
         self.assertEqual(request.candidate, candidate)
 
-    def test_import_form_data_returns_request_with_correct_requesting_tenure(
+    def test_that_request_has_tenure_specified_in_form(
         self,
     ) -> None:
         requesting_tenure = uuid4()
