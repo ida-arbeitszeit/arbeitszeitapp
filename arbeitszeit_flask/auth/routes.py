@@ -37,7 +37,7 @@ from arbeitszeit_web.www.presenters.log_in_company_presenter import (
 from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
 
-auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
+auth = Blueprint("auth", __name__)
 
 
 @auth.route("/")

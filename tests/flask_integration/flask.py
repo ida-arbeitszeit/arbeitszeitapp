@@ -173,7 +173,7 @@ class ViewTestCase(FlaskTestCase):
         data: Optional[dict[Any, Any]] = None,
     ) -> None:
         if login:
-            self._conduct_login(login)
+            self.login_user(login)
         if method.lower() == "get":
             response = self.client.get(url, query_string=data)
         elif method.lower() == "post":
@@ -185,14 +185,14 @@ class ViewTestCase(FlaskTestCase):
             response.status_code == expected_code
         ), f"Expected status code {expected_code} but got {response.status_code}"
 
-    def _conduct_login(self, login: LogInUser) -> None:
+    def login_user(self, login: LogInUser) -> UUID:
         if login == LogInUser.member:
-            self.login_member()
+            return self.login_member()
         elif login == LogInUser.unconfirmed_member:
-            self.login_member(confirm_member=False)
+            return self.login_member(confirm_member=False)
         elif login == LogInUser.company:
-            self.login_company()
+            return self.login_company().id
         elif login == LogInUser.unconfirmed_company:
-            self.login_company(confirm_company=False)
+            return self.login_company(confirm_company=False).id
         elif login == LogInUser.accountant:
-            self.login_accountant()
+            return self.login_accountant()

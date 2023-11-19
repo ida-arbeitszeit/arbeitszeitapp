@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, List, Optional
 
 from flask import Blueprint, redirect
 
@@ -7,13 +7,11 @@ from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.www.authentication import MemberAuthenticator
 
-main_member = Blueprint(
-    "main_member", __name__, template_folder="templates", static_folder="static"
-)
+main_member = Blueprint("main_member", __name__)
 
 
 class MemberRoute:
-    def __init__(self, route_string: str, methods=None):
+    def __init__(self, route_string: str, methods: Optional[List[str]] = None) -> None:
         self.route_string = route_string
         if methods is None:
             self.methods = ["GET"]

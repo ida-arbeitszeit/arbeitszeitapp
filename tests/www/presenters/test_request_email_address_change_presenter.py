@@ -20,9 +20,7 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=False)
         view_model = self.presenter.render_response(response)
-        assert (
-            view_model.redirect_url == self.url_index.get_member_account_details_url()
-        )
+        assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_success_redirect_logged_in_company_to_account_details_page(
         self,
@@ -30,9 +28,7 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
         self.session.login_company(self.company_generator.create_company())
         response = use_case.Response(is_rejected=False)
         view_model = self.presenter.render_response(response)
-        assert (
-            view_model.redirect_url == self.url_index.get_company_account_details_url()
-        )
+        assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_success_redirect_logged_in_accountant_to_account_details_page(
         self,
@@ -40,10 +36,7 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
         self.session.login_accountant(self.accountant_generator.create_accountant())
         response = use_case.Response(is_rejected=False)
         view_model = self.presenter.render_response(response)
-        assert (
-            view_model.redirect_url
-            == self.url_index.get_accountant_account_details_url()
-        )
+        assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_failure_dont_redirect_logged_in_member(self) -> None:
         self.session.login_member(self.member_generator.create_member())
