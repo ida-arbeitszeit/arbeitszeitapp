@@ -1,3 +1,7 @@
+{% from 'macros/accountant_navigation.html' import accountant_navigation with context %}
+{% from 'macros/company_navigation.html' import company_navigation with context %}
+{% from 'macros/member_navigation.html' import member_navigation with context %}
+{% from 'macros/anonymous_navigation.html' import anonymous_navigation with context%}
 {% from 'macros/show_notifications.html' import show_notifications %}
 
 <!DOCTYPE html>
@@ -20,13 +24,35 @@
 <body>
   {% block body %}
   {% block navigation %}
+
+  {% if session['user_type'] == 'company' %}
+  {% set user_navigation = company_navigation %}
+
+  {% elif session['user_type'] == 'member' %}
+  {% set user_navigation = member_navigation %}
+
+  {% elif session['user_type'] == 'accountant' %}
+  {% set user_navigation = accountant_navigation %}
+
+  {% else %}
+  {% set user_navigation = anonymous_navigation %}
+
+  {% endif %}
+
+  {% call user_navigation() %}
+  {% block navbar_start %}
   {% endblock %}
+  {% endcall %}
+
+  {% endblock navigation%}
 
   {{ show_notifications() }}
 
-  {% block content %}
-  {% endblock %}
-  {% endblock %}
+  <div class="{% block content_class %}container{% endblock %}">
+    {% block content %}
+    {% endblock content %}
+  </div>
+  {% endblock body %}
 </body>
 
 </html>

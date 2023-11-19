@@ -54,13 +54,14 @@ def start(
 @auth.route("/help")
 @with_injection()
 def help():
-    return render_template("auth/start_hilfe.html")
+    return render_template("auth/help.html")
 
 
 @auth.route("/language=<language>")
-def set_language(language=None):
+def set_language(language: str):
+    redirection_url = request.headers.get("Referer") or url_for("auth.start")
     session["language"] = language
-    return redirect(url_for("auth.start"))
+    return redirect(redirection_url)
 
 
 # Member

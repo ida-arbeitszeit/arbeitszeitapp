@@ -30,6 +30,11 @@
                             href="{{ view_model.current_coordinator_url }}">{{ view_model.current_coordinator_name }}</a></td>
                 </tr>
                 <tr>
+                    <td class="has-text-left has-text-weight-semibold">{{ gettext("History of coordinators") }}</td>
+                    <td class="has-text-left"><a
+                            href="{{ view_model.list_of_coordinators_url }}">History</a></td>
+                </tr>
+                <tr>
                     <td class="has-text-left has-text-weight-semibold">{{ gettext("Cooperation price") }}</td>
                     <td class="has-text-left">{{ view_model.coop_price }}</td>
                 </tr>

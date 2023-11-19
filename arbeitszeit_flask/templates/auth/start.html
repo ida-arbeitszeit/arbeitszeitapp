@@ -1,4 +1,4 @@
-{% extends "base_general_pages.html" %}
+{% extends "base.html" %}
 
 {% block body %}
 <section class="hero is-fullheight">
@@ -10,6 +10,10 @@
 <div class="hero-head">
   {{ super() }}
 </div>
+{% endblock %}
+
+{% block content_class %}
+hero-body
 {% endblock %}
 
 {% block content %}

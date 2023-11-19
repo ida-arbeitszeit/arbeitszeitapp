@@ -25,8 +25,12 @@ class FakeRequest:
     def set_form(self, key: str, value: str) -> None:
         self._form[key] = value
 
-    def set_header(self, key: str, value: str) -> None:
-        self._environ[key] = value
+    def set_header(self, key: str, value: Optional[str]) -> None:
+        if value is None:
+            if key in self._environ:
+                del self._environ[key]
+        else:
+            self._environ[key] = value
 
     def get_request_target(self) -> str:
         return "/"

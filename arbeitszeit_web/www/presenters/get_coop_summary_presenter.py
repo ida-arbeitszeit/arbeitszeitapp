@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummarySuccess
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
 from arbeitszeit_web.session import Session
 
 from ...url_index import UrlIndex, UserUrlIndex
@@ -27,6 +27,7 @@ class GetCoopSummaryViewModel:
     current_coordinator_id: str
     current_coordinator_name: str
     current_coordinator_url: str
+    list_of_coordinators_url: str
     coop_price: str
 
     plans: List[AssociatedPlan]
@@ -41,7 +42,7 @@ class GetCoopSummarySuccessPresenter:
     url_index: UrlIndex
     session: Session
 
-    def present(self, response: GetCoopSummarySuccess) -> GetCoopSummaryViewModel:
+    def present(self, response: GetCoopSummaryResponse) -> GetCoopSummaryViewModel:
         user_role = self.session.get_user_role()
         return GetCoopSummaryViewModel(
             coop_id=str(response.coop_id),
@@ -52,6 +53,10 @@ class GetCoopSummarySuccessPresenter:
             current_coordinator_url=self.url_index.get_company_summary_url(
                 user_role=user_role,
                 company_id=response.current_coordinator,
+            ),
+            list_of_coordinators_url=self.url_index.get_list_of_coordinators_url(
+                user_role=user_role,
+                cooperation_id=response.coop_id,
             ),
             coop_price="-"
             if response.coop_price is None

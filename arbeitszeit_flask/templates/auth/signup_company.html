@@ -1,4 +1,4 @@
-{% extends "base_company.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="section is-medium">
@@ -39,6 +39,11 @@
                     </div>
                     <button class="button is-block is-primary is-large is-fullwidth">{{ gettext("Sign Up") }}</button>
                 </form>
+            </div>
+            <div class="box has-text-centered">
+              <a href="{{ url_for('.login_company') }}">
+                {{ gettext("Click here to log in with an existing account.") }}
+              </a>
             </div>
         </div>
     </div>

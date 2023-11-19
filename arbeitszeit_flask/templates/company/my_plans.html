@@ -1,4 +1,4 @@
-{% extends "base_company.html" %}
+{% extends "base.html" %}
 
 {% block navbar_start %}
 <div class="navbar-item">{{ gettext("My plans") }}</div>
@@ -163,7 +163,12 @@
         </div>
         <div class="media-right">
           <div class="content pt-1">
-            <a href="{{ plan.renew_plan_url }}"><i class="fas fa-redo"></i></a>
+            <form method="post" action="{{ plan.renew_plan_url }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="button is-ghost" type="submit" title="{{ gettext('Renew plan') }}">
+                <i class="fas fa-redo"></i>
+              </button>
+            </form>
             &nbsp;
             <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
           </div>

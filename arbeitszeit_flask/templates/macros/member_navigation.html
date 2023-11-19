@@ -1,23 +1,17 @@
-{% extends "base.html" %}
+{% from 'macros/language_selection.html' import language_selection with context %}
 
-{% block navigation %}
+{% macro member_navigation() %}
+
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary has-text-white">
       <a href="{{ url_for('main_member.get_member_account_details') }}"
          class="navbar-item"
          >
-        {% if current_user.is_authenticated %}
         <span class="icon">
           <i class="fas fa-user"></i>
         </span>&nbsp;
         {{ current_user.name|truncate(20, True) }}
-        {% else %}
-        <span class="icon">
-          <i class="fas fa-user"></i>
-        </span>&nbsp;
-        {{ gettext("Member view") }}
-        {% endif %}
       </a>
     </div>
 
@@ -31,45 +25,26 @@
 
   <div id="navbarOnTop" class="navbar-menu">
     <div class="navbar-start">
-      {% if current_user.is_authenticated %}
       <a href="{{ url_for('main_member.dashboard') }}" class="navbar-item">
         {{ gettext("Dashboard") }}
       </a>
-      {% block navbar_start %}
-      {% endblock %}
-      {% endif %}
+      {{ caller() }}
     </div>
 
     <div class="navbar-end">
-      {% if not current_user.is_authenticated %}
-      <div class="navbar-item">
-        <a class="button" href="{{ url_for('auth.login_member') }}">
-          {{ gettext("Sign in")}}
-        </a>
-      </div>
-      <div class="navbar-item">
-        <a class="button" href="{{ url_for('auth.signup_member') }}">
-          {{ gettext("Sign up")}}
-        </a>
-      </div>
-      <div class="navbar-item">
-        <a class="button" href="{{ url_for('auth.zurueck') }}">
-          {{ gettext("Back")}}
-        </a>
-      </div>
-      {% else %}
+      {{ language_selection() }}
       <div class="navbar-item">
         <a class="button" href="{{ url_for('auth.logout') }}">
           {{ gettext("Sign out")}}
         </a>
       </div>
       <div class="navbar-item">
-        <a class="button" href="{{ url_for('main_member.hilfe') }}">
+        <a class="button" href="{{ url_for('auth.help') }}">
           ?
         </a>
       </div>
-      {% endif %}
     </div>
   </div>
 </nav>
-{% endblock %}
+
+{% endmacro %}

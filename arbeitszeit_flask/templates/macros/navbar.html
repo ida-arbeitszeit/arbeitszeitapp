@@ -1,0 +1,9 @@
+{% macro navbar(navbar_items) %}
+    {% for navbar_item in navbar_items %}
+        {% if navbar_item.url is not none %}
+        <a class="navbar-item" href="{{ navbar_item.url }}">{{ navbar_item.text }}</a>
+        {% else %}
+        <div class="navbar-item">{{ navbar_item.text }}</div>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}

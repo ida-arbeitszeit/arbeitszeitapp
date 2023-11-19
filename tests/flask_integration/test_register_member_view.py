@@ -1,36 +1,76 @@
+from typing import Optional
+
+from parameterized import parameterized
+
 from arbeitszeit_flask.extensions import mail
 
-from .flask import ViewTestCase
+from .flask import LogInUser, ViewTestCase
 
 
-class AuthenticatedCompanyTests(ViewTestCase):
+class UserAccessTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company()
         self.url = "/member/signup"
 
-    def test_authenticated_company_gets_200_when_accessing_member_page(self) -> None:
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+    @parameterized.expand(
+        [
+            (LogInUser.accountant, 200),
+            (None, 200),
+            (LogInUser.company, 200),
+            (LogInUser.member, 302),
+        ]
+    )
+    def test_correct_status_codes_on_get_requests(
+        self, login: Optional[LogInUser], expected_code: int
+    ) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=login,
+            expected_code=expected_code,
+        )
 
-    def test_user_type_in_session_is_set_to_none_when_company_accesses_member_page(
+
+class UserTypeChangesTests(ViewTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.url = "/member/signup"
+
+    def test_user_type_in_session_is_set_to_none_when_company_accesses_page(
         self,
     ) -> None:
+        self.login_company()
         with self.client.session_transaction() as session:
             self.assertEqual(session["user_type"], "company")
         self.client.get(self.url)
         with self.client.session_transaction() as session:
             self.assertIsNone(session["user_type"])
 
+    def test_user_type_in_session_is_set_to_none_when_accountant_accesses_page(
+        self,
+    ) -> None:
+        self.login_accountant()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["user_type"], "accountant")
+        self.client.get(self.url)
+        with self.client.session_transaction() as session:
+            self.assertIsNone(session["user_type"])
+
+    def test_user_type_in_session_does_not_change_when_member_accesses_page(
+        self,
+    ) -> None:
+        self.login_member()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["user_type"], "member")
+        self.client.get(self.url)
+        with self.client.session_transaction() as session:
+            self.assertEqual(session["user_type"], "member")
+
 
 class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
     def setUp(self):
         super().setUp()
         self.url = "/member/signup"
-
-    def test_unauthenticated_and_unconfirmed_users_get_200(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
 
     def test_correct_posting_is_possible_and_redirects_user(self):
         response = self.client.post(

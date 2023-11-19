@@ -1,8 +1,17 @@
-{% extends "base.html" %}
+{% from 'macros/language_selection.html' import language_selection with context %}
 
-{% block navigation %}
+{% macro anonymous_navigation(user_name) %}
+
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
+    <div class="navbar-item has-background-primary has-text-white">
+      <a href="{{ url_for('auth.start') }}"
+         class="navbar-item"
+         >
+        Arbeitszeitapp
+      </a>
+    </div>
+
     <a role="button" class="navbar-burger" onclick="expandMenu()" aria-label="menu" aria-expanded="false"
       data-target="navbarOnTop">
       <span aria-hidden="true"></span>
@@ -10,30 +19,25 @@
       <span aria-hidden="true"></span>
     </a>
   </div>
+
   <div id="navbarOnTop" class="navbar-menu">
+    <div class="navbar-start">
+      {{ caller() }}
+    </div>
     <div class="navbar-end">
-      <div class="navbar-item has-dropdown is-hoverable">
-	<a class="navbar-link">
-	  {{ gettext('Language') }}
-	</a>
-	<div class="navbar-dropdown">
-	  {% if languages.show_language_listing %}
-	  {% for language in languages.languages_listing %}
-	  <a href="{{ language.change_url }}" class="navbar-item">
-	    {{ language.label }}
-	  </a>
-	  {% endfor %}
-	  {% endif %}
-	</div>
-      </div>
-      {% block navigation_items %}
+      {{ language_selection() }}
       <div class="navbar-item">
 	<a class="button is-primary" href="{{ url_for('auth.help') }}">
 	  {{ gettext('Help') }}
 	</a>
       </div>
-      {% endblock %}
+      <div class="navbar-item">
+        <a class="button" href="{{ url_for('auth.zurueck') }}">
+          {{ gettext("Back")}}
+        </a>
+      </div>
     </div>
   </div>
 </nav>
-{% endblock %}
+
+{% endmacro %}

@@ -8,8 +8,12 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
+from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
+    ListCoordinationsOfCooperationUseCase,
+)
 from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -54,6 +58,9 @@ from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
 )
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
+)
+from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
+    ListCoordinationsOfCooperationPresenter,
 )
 from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
     PrivateConsumptionsPresenter,
@@ -211,14 +218,14 @@ def company_summary(
 @MemberRoute("/member/cooperation_summary/<uuid:coop_id>")
 def coop_summary(
     coop_id: UUID,
-    get_coop_summary: use_cases.get_coop_summary.GetCoopSummary,
+    get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
     http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
-        use_cases.get_coop_summary.GetCoopSummaryRequest(UUID(current_user.id), coop_id)
+        GetCoopSummaryRequest(UUID(current_user.id), coop_id)
     )
-    if isinstance(use_case_response, use_cases.get_coop_summary.GetCoopSummarySuccess):
+    if use_case_response:
         view_model = presenter.present(use_case_response)
         return render_template(
             "member/coop_summary.html", view_model=view_model.to_dict()
@@ -227,9 +234,20 @@ def coop_summary(
         return http_404_view.get_response()
 
 
-@MemberRoute("/member/hilfe")
-def hilfe() -> Response:
-    return FlaskResponse(render_template("member/help.html"))
+@MemberRoute("/member/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])
+def list_coordinators_of_cooperation(
+    coop_id: UUID,
+    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
+    presenter: ListCoordinationsOfCooperationPresenter,
+):
+    use_case_response = list_coordinations_of_cooperation.list_coordinations(
+        ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
+    )
+    view_model = presenter.list_coordinations_of_cooperation(use_case_response)
+    return render_template(
+        "member/list_coordinators_of_cooperation.html",
+        view_model=view_model,
+    )
 
 
 @MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])

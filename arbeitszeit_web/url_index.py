@@ -38,6 +38,11 @@ class UrlIndex(Protocol):
     ) -> str:
         ...
 
+    def get_list_of_coordinators_url(
+        self, *, user_role: Optional[UserRole], cooperation_id: UUID
+    ) -> str:
+        ...
+
     def get_company_dashboard_url(self) -> str:
         ...
 
