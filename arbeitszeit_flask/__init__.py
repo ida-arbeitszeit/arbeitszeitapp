@@ -101,7 +101,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
                     return Accountant.query.get(user_id)
 
         # register blueprints
-        from . import accountant, company, member
+        from . import accountant, company, member, user
         from .api import blueprint as api_blueprint
         from .auth import routes as auth_routes
         from .context_processors import add_template_variables
@@ -112,6 +112,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.register_blueprint(company.blueprint.main_company)
         app.register_blueprint(member.blueprint.main_member)
         app.register_blueprint(accountant.blueprint.main_accountant)
+        app.register_blueprint(user.blueprint, url_prefix="/user")
         app.register_blueprint(api_blueprint)
         app.context_processor(add_template_variables)
 

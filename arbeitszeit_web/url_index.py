@@ -155,13 +155,7 @@ class UrlIndex(Protocol):
     def get_start_page_url(self) -> str:
         ...
 
-    def get_member_account_details_url(self) -> str:
-        ...
-
-    def get_company_account_details_url(self) -> str:
-        ...
-
-    def get_accountant_account_details_url(self) -> str:
+    def get_user_account_details_url(self) -> str:
         ...
 
     def get_change_email_url(self, *, token: str) -> str:

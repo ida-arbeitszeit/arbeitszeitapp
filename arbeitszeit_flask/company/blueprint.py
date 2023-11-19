@@ -7,9 +7,7 @@ from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.www.authentication import CompanyAuthenticator
 
-main_company = Blueprint(
-    "main_company", __name__, template_folder="templates", static_folder="static"
-)
+main_company = Blueprint("main_company", __name__)
 
 
 class CompanyRoute:

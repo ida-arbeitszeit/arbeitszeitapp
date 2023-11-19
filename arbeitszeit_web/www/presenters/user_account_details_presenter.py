@@ -9,8 +9,8 @@ class ViewModel:
     email_address: str
 
 
-class GetMemberAccountDetailsPresenter:
-    def render_member_account_details(self, response: use_case.Response) -> ViewModel:
+class UserAccountDetailsPresenter:
+    def render_user_account_details(self, response: use_case.Response) -> ViewModel:
         assert response.user_info
         return ViewModel(
             user_id=str(response.user_info.id),

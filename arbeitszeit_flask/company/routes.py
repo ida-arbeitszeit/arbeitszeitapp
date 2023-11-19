@@ -27,7 +27,6 @@ from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
 from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
@@ -93,9 +92,6 @@ from arbeitszeit_web.www.controllers.delete_draft_controller import (
 from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
 )
-from arbeitszeit_web.www.controllers.get_company_account_details_controller import (
-    GetCompanyAccountDetailsController,
-)
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
@@ -117,9 +113,6 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_account_details_presenter import (
-    GetCompanyAccountDetailsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
@@ -659,21 +652,3 @@ def end_cooperation(
     view: EndCooperationView,
 ) -> Response:
     return view.respond_to_get()
-
-
-@CompanyRoute("/company/account")
-def get_company_account_details(
-    controller: GetCompanyAccountDetailsController,
-    use_case: GetUserAccountDetailsUseCase,
-    presenter: GetCompanyAccountDetailsPresenter,
-) -> Response:
-    uc_request = controller.parse_web_request()
-    uc_response = use_case.get_user_account_details(uc_request)
-    view_model = presenter.render_company_account_details(uc_response)
-    return FlaskResponse(
-        render_template(
-            "company/get_company_account_details.html",
-            view_model=view_model,
-        ),
-        status=200,
-    )

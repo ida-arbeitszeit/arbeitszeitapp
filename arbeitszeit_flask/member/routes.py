@@ -10,7 +10,6 @@ from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase,
 )
@@ -32,9 +31,6 @@ from arbeitszeit_flask.views import (
     RegisterPrivateConsumptionView,
 )
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.www.controllers.get_member_account_details_controller import (
-    GetMemberAccountDetailsController,
-)
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
@@ -43,9 +39,6 @@ from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
 )
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
-)
-from arbeitszeit_web.www.presenters.get_member_account_details_presenter import (
-    GetMemberAccountDetailsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
@@ -257,21 +250,3 @@ def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
         return view.respond_to_post(form, invite_id)
     else:
         return view.respond_to_get(invite_id)
-
-
-@MemberRoute("/member/account")
-def get_member_account_details(
-    controller: GetMemberAccountDetailsController,
-    presenter: GetMemberAccountDetailsPresenter,
-    use_case: GetUserAccountDetailsUseCase,
-):
-    uc_request = controller.parse_web_request()
-    uc_response = use_case.get_user_account_details(uc_request)
-    view_model = presenter.render_member_account_details(uc_response)
-    return FlaskResponse(
-        render_template(
-            "member/get_member_account_details.html",
-            view_model=view_model,
-        ),
-        status=200,
-    )
