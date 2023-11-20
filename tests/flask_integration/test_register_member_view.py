@@ -10,7 +10,7 @@ from .flask import LogInUser, ViewTestCase
 class UserAccessTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/member/signup"
+        self.url = "/signup-member"
 
     @parameterized.expand(
         [
@@ -34,7 +34,7 @@ class UserAccessTests(ViewTestCase):
 class UserTypeChangesTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/member/signup"
+        self.url = "/signup-member"
 
     def test_user_type_in_session_is_set_to_none_when_company_accesses_page(
         self,
@@ -70,7 +70,7 @@ class UserTypeChangesTests(ViewTestCase):
 class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/member/signup"
+        self.url = "/signup-member"
 
     def test_correct_posting_is_possible_and_redirects_user(self):
         response = self.client.post(

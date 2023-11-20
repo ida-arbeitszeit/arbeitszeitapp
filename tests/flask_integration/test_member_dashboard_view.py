@@ -48,7 +48,7 @@ class UnconfirmedMemberTests(ViewTestCase):
 
     def test_redirects_to_page_for_unconfirmed_members(self) -> None:
         response = self.client.get(self.url)
-        assert response.location == "/member/unconfirmed"
+        assert response.location == "/unconfirmed-member"
 
 
 class ConfirmedMemberTests(ViewTestCase):

@@ -8,7 +8,7 @@ from .flask import LogInUser, ViewTestCase
 class RedirectionTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/member/unconfirmed"
+        self.url = "/unconfirmed-member"
 
     @parameterized.expand(
         [

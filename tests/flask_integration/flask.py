@@ -82,7 +82,7 @@ class ViewTestCase(FlaskTestCase):
                 password=password, email=email, confirmed=False
             )
         response = self.client.post(
-            "/member/login",
+            "/login-member",
             data=dict(
                 email=email,
                 password=password,
@@ -100,7 +100,7 @@ class ViewTestCase(FlaskTestCase):
     ) -> None:
         token = FlaskTokenService().generate_token(email)
         response = self.client.get(
-            f"/member/confirm/{token}",
+            f"/confirm-member/{token}",
             follow_redirects=True,
         )
         assert response.status_code < 400
