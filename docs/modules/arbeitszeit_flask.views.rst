@@ -68,22 +68,6 @@ arbeitszeit\_flask.views.invite\_worker\_to\_company module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_flask.views.pay\_consumer\_product module
-------------------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.pay_consumer_product
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_flask.views.pay\_means\_of\_production module
-----------------------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.pay_means_of_production
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_flask.views.query\_companies module
 ------------------------------------------------
 
@@ -96,6 +80,30 @@ arbeitszeit\_flask.views.query\_plans module
 --------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.query_plans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.register\_hours\_worked\_view module
+-------------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.register_hours_worked_view
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.register\_private\_consumption module
+--------------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.register_private_consumption
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_flask.views.register\_productive\_consumption module
+-----------------------------------------------------------------
+
+.. automodule:: arbeitszeit_flask.views.register_productive_consumption
    :members:
    :undoc-members:
    :show-inheritance:
@@ -136,14 +144,6 @@ arbeitszeit\_flask.views.signup\_member\_view module
 ----------------------------------------------------
 
 .. automodule:: arbeitszeit_flask.views.signup_member_view
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_flask.views.transfer\_to\_worker\_view module
-----------------------------------------------------------
-
-.. automodule:: arbeitszeit_flask.views.transfer_to_worker_view
    :members:
    :undoc-members:
    :show-inheritance:

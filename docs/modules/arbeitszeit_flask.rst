@@ -44,6 +44,14 @@ arbeitszeit\_flask.configuration\_base module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_flask.context\_processors module
+---------------------------------------------
+
+.. automodule:: arbeitszeit_flask.context_processors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.control\_thresholds module
 ---------------------------------------------
 
@@ -124,14 +132,6 @@ arbeitszeit\_flask.mail\_service module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_flask.models module
---------------------------------
-
-.. automodule:: arbeitszeit_flask.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_flask.notifications module
 ---------------------------------------
 
@@ -152,14 +152,6 @@ arbeitszeit\_flask.profiling module
 -----------------------------------
 
 .. automodule:: arbeitszeit_flask.profiling
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_flask.template module
-----------------------------------
-
-.. automodule:: arbeitszeit_flask.template
    :members:
    :undoc-members:
    :show-inheritance:

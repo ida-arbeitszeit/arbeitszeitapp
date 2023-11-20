@@ -12,6 +12,14 @@ arbeitszeit\_flask.api.auth module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_flask.api.authentication module
+--------------------------------------------
+
+.. automodule:: arbeitszeit_flask.api.authentication
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_flask.api.companies module
 ---------------------------------------
 
