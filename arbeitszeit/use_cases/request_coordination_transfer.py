@@ -17,17 +17,18 @@ class RequestCoordinationTransferUseCase:
 
     @dataclass
     class Request:
-        requesting_coordination_tenure: UUID
+        current_user: UUID
+        cooperation: UUID
         candidate: UUID
 
     @dataclass
     class Response:
         class RejectionReason(Exception, Enum):
             candidate_is_not_a_company = auto()
-            requesting_tenure_not_found = auto()
+            current_user_is_not_coordinator = auto()
             candidate_is_current_coordinator = auto()
-            requesting_tenure_is_not_current_tenure = auto()
-            requesting_tenure_has_pending_transfer_request = auto()
+            coordination_tenure_has_pending_transfer_request = auto()
+            cooperation_not_found = auto()
 
         rejection_reason: Optional[RejectionReason]
         transfer_request: Optional[UUID]
@@ -38,19 +39,22 @@ class RequestCoordinationTransferUseCase:
 
     def request_transfer(self, request: Request) -> Response:
         try:
-            candidate, candidate_email, requesting_tenure = self._validate_request(
+            candidate, candidate_email, coordination_tenure = self._validate_request(
                 request
             )
         except self.Response.RejectionReason as reason:
-            return self.Response(rejection_reason=reason, transfer_request=None)
+            return self.Response(
+                rejection_reason=reason,
+                transfer_request=None,
+            )
         transfer_request = self.database_gateway.create_coordination_transfer_request(
-            requesting_coordination_tenure=request.requesting_coordination_tenure,
+            requesting_coordination_tenure=coordination_tenure.id,
             candidate=request.candidate,
             request_date=self.datetime_service.now(),
         )
         cooperation = (
             self.database_gateway.get_cooperations()
-            .with_id(requesting_tenure.cooperation)
+            .with_id(coordination_tenure.cooperation)
             .first()
         )
         assert cooperation
@@ -63,57 +67,52 @@ class RequestCoordinationTransferUseCase:
             )
         )
         return self.Response(
-            rejection_reason=None, transfer_request=transfer_request.id
+            rejection_reason=None,
+            transfer_request=transfer_request.id,
         )
 
     def _validate_request(
         self, request: Request
     ) -> tuple[Company, EmailAddress, CoordinationTenure]:
-        record = (
+        candidate_record = (
             self.database_gateway.get_companies()
             .with_id(request.candidate)
             .joined_with_email_address()
             .first()
         )
-        if not record:
+        if not candidate_record:
             raise self.Response.RejectionReason.candidate_is_not_a_company
-        candidate, candidate_email = record
-        requesting_tenure = (
-            self.database_gateway.get_coordination_tenures()
-            .with_id(request.requesting_coordination_tenure)
-            .first()
-        )
-        if not requesting_tenure:
-            raise self.Response.RejectionReason.requesting_tenure_not_found
-        if requesting_tenure.company == candidate.id:
-            raise self.Response.RejectionReason.candidate_is_current_coordinator
-        if not self._requesting_coordination_tenure_is_current(requesting_tenure):
-            raise self.Response.RejectionReason.requesting_tenure_is_not_current_tenure
-        if self._there_is_a_pending_transfer_request_by_requesting_tenure(
-            requesting_tenure
-        ):
-            raise self.Response.RejectionReason.requesting_tenure_has_pending_transfer_request
-        return candidate, candidate_email, requesting_tenure
+        candidate, candidate_email = candidate_record
 
-    def _requesting_coordination_tenure_is_current(
-        self, requesting_tenure: CoordinationTenure
-    ) -> bool:
-        latest_tenure = (
+        coordination_tenures_and_coordinators = list(
             self.database_gateway.get_coordination_tenures()
-            .of_cooperation(requesting_tenure.cooperation)
+            .of_cooperation(request.cooperation)
             .ordered_by_start_date(ascending=False)
-            .first()
+            .joined_with_coordinator()
         )
-        assert latest_tenure
-        if requesting_tenure.id == latest_tenure.id:
-            return True
-        return False
+        if not coordination_tenures_and_coordinators:
+            raise self.Response.RejectionReason.cooperation_not_found
 
-    def _there_is_a_pending_transfer_request_by_requesting_tenure(
-        self, requesting_tenure: CoordinationTenure
+        latest_coordination_tenure_and_coordinator = (
+            coordination_tenures_and_coordinators[0]
+        )
+
+        coordination_tenure, coordinator = latest_coordination_tenure_and_coordinator
+        if coordinator.id != request.current_user:
+            raise self.Response.RejectionReason.current_user_is_not_coordinator
+        if coordination_tenure.company == candidate.id:
+            raise self.Response.RejectionReason.candidate_is_current_coordinator
+        if self._there_is_a_pending_transfer_request_by_coordination_tenure(
+            coordination_tenure
+        ):
+            raise self.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
+        return candidate, candidate_email, coordination_tenure
+
+    def _there_is_a_pending_transfer_request_by_coordination_tenure(
+        self, coordination_tenure: CoordinationTenure
     ) -> bool:
         return bool(
             self.database_gateway.get_coordination_transfer_requests().requested_by(
-                requesting_tenure.id
+                coordination_tenure.id
             )
         )

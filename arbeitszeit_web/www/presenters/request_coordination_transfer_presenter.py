@@ -1,17 +1,21 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase as UseCase,
 )
 from arbeitszeit_web.notification import Notifier
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.navbar import NavbarItem
 
 ERROR_MESSAGES = {
     UseCase.Response.RejectionReason.candidate_is_not_a_company: "The candidate is not a company.",
-    UseCase.Response.RejectionReason.requesting_tenure_not_found: "Requesting coordination tenure not found.",
+    UseCase.Response.RejectionReason.current_user_is_not_coordinator: "Your are not the coordinator.",
+    UseCase.Response.RejectionReason.cooperation_not_found: "Cooperation not found.",
     UseCase.Response.RejectionReason.candidate_is_current_coordinator: "The candidate is already the coordinator.",
-    UseCase.Response.RejectionReason.requesting_tenure_is_not_current_tenure: "The requesting coordination tenure is not the current tenure.",
-    UseCase.Response.RejectionReason.requesting_tenure_has_pending_transfer_request: "The requesting coordination tenure has a pending transfer request.",
+    UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request: "The requesting coordination tenure has a pending transfer request.",
 }
 
 
@@ -19,8 +23,25 @@ ERROR_MESSAGES = {
 class RequestCoordinationTransferPresenter:
     translator: Translator
     notifier: Notifier
+    url_index: UrlIndex
+    session: Session
 
-    def present(self, use_case_response: UseCase.Response) -> None:
+    def create_navbar_items(self, coop_id: UUID) -> list[NavbarItem]:
+        return [
+            NavbarItem(
+                text=self.translator.gettext("Cooperation"),
+                url=self.url_index.get_coop_summary_url(
+                    coop_id=coop_id,
+                    user_role=self.session.get_user_role(),
+                ),
+            ),
+            NavbarItem(
+                text=self.translator.gettext("Request Coordination Transfer"),
+                url=None,
+            ),
+        ]
+
+    def present_use_case_response(self, use_case_response: UseCase.Response) -> None:
         if use_case_response.is_rejected:
             assert use_case_response.rejection_reason
             if message := ERROR_MESSAGES.get(use_case_response.rejection_reason):
