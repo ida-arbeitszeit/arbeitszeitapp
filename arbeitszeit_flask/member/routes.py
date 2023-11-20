@@ -65,7 +65,7 @@ from arbeitszeit_web.www.presenters.query_companies_presenter import (
 from .blueprint import MemberRoute
 
 
-@MemberRoute("/member/consumptions")
+@MemberRoute("/consumptions")
 def consumptions(
     query_consumptions: QueryPrivateConsumptions,
     presenter: PrivateConsumptionsPresenter,
@@ -80,7 +80,7 @@ def consumptions(
     )
 
 
-@MemberRoute("/member/query_plans", methods=["GET"])
+@MemberRoute("/query_plans", methods=["GET"])
 def query_plans(
     query_plans: use_cases.query_plans.QueryPlans,
     controller: QueryPlansController,
@@ -97,7 +97,7 @@ def query_plans(
     return view.respond_to_get(search_form, FlaskRequest())
 
 
-@MemberRoute("/member/query_companies", methods=["GET", "POST"])
+@MemberRoute("/query_companies", methods=["GET", "POST"])
 def query_companies(
     query_companies: use_cases.query_companies.QueryCompanies,
     controller: QueryCompaniesController,
@@ -115,7 +115,7 @@ def query_companies(
     return view.respond_to_get()
 
 
-@MemberRoute("/member/register_private_consumption", methods=["GET", "POST"])
+@MemberRoute("/register_private_consumption", methods=["GET", "POST"])
 @commit_changes
 def register_private_consumption(view: RegisterPrivateConsumptionView) -> Response:
     form = RegisterPrivateConsumptionForm(request.form)
@@ -125,7 +125,7 @@ def register_private_consumption(view: RegisterPrivateConsumptionView) -> Respon
         return view.respond_to_get(form)
 
 
-@MemberRoute("/member/dashboard")
+@MemberRoute("/dashboard")
 def dashboard(
     get_member_dashboard: use_cases.get_member_dashboard.GetMemberDashboard,
     presenter: GetMemberDashboardPresenter,
@@ -140,7 +140,7 @@ def dashboard(
     )
 
 
-@MemberRoute("/member/my_account")
+@MemberRoute("/my_account")
 def my_account(
     get_member_account: use_cases.get_member_account.GetMemberAccount,
     presenter: GetMemberAccountPresenter,
@@ -155,7 +155,7 @@ def my_account(
     )
 
 
-@MemberRoute("/member/statistics")
+@MemberRoute("/statistics")
 def statistics(
     get_statistics: use_cases.get_statistics.GetStatistics,
     presenter: GetStatisticsPresenter,
@@ -167,7 +167,7 @@ def statistics(
     )
 
 
-@MemberRoute("/member/plan_details/<uuid:plan_id>")
+@MemberRoute("/plan_details/<uuid:plan_id>")
 def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
@@ -188,7 +188,7 @@ def plan_details(
         return http_404_view.get_response()
 
 
-@MemberRoute("/member/company_summary/<uuid:company_id>")
+@MemberRoute("/company_summary/<uuid:company_id>")
 def company_summary(
     company_id: UUID,
     get_company_summary: GetCompanySummary,
@@ -208,7 +208,7 @@ def company_summary(
         return http_404_view.get_response()
 
 
-@MemberRoute("/member/cooperation_summary/<uuid:coop_id>")
+@MemberRoute("/cooperation_summary/<uuid:coop_id>")
 def coop_summary(
     coop_id: UUID,
     get_coop_summary: GetCoopSummary,
@@ -227,7 +227,7 @@ def coop_summary(
         return http_404_view.get_response()
 
 
-@MemberRoute("/member/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])
+@MemberRoute("/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])
 def list_coordinators_of_cooperation(
     coop_id: UUID,
     list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
@@ -243,7 +243,7 @@ def list_coordinators_of_cooperation(
     )
 
 
-@MemberRoute("/member/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
+@MemberRoute("/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
 def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
     form = AnswerCompanyWorkInviteForm(request.form)
     if request.method == "POST":

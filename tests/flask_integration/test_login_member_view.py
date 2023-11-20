@@ -14,7 +14,7 @@ class StartViewTests(ViewTestCase):
         response = self.client.get(expected_target_url)
         assert response.location == "/"
         response = self.client.post(
-            "/member/login",
+            "/login-member",
             data=dict(
                 email=expected_email,
                 password=expected_password,
@@ -34,7 +34,7 @@ class StartViewTests(ViewTestCase):
         )
         self.client.get(company_route)
         self.client.post(
-            "/member/login",
+            "/login-member",
             data=dict(
                 email=expected_email,
                 password=expected_password,
@@ -42,7 +42,7 @@ class StartViewTests(ViewTestCase):
             follow_redirects=True,
         )
         response2 = self.client.post(
-            "/member/login",
+            "/login-member",
             data=dict(
                 email=expected_email,
                 password=expected_password,
