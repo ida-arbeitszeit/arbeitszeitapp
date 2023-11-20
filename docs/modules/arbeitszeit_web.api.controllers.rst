@@ -20,6 +20,14 @@ arbeitszeit\_web.api.controllers.get\_plan\_api\_controller module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.api.controllers.login\_company\_api\_controller module
+-----------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.api.controllers.login_company_api_controller
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.api.controllers.login\_member\_api\_controller module
 ----------------------------------------------------------------------
 

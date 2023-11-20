@@ -4,6 +4,30 @@ arbeitszeit\_development package
 Submodules
 ----------
 
+arbeitszeit\_development.command module
+---------------------------------------
+
+.. automodule:: arbeitszeit_development.command
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_development.generate\_type\_stubs module
+-----------------------------------------------------
+
+.. automodule:: arbeitszeit_development.generate_type_stubs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_development.nix module
+-----------------------------------
+
+.. automodule:: arbeitszeit_development.nix
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_development.update\_bulma module
 ---------------------------------------------
 

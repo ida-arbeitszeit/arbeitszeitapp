@@ -20,6 +20,14 @@ arbeitszeit\_web.api.presenters.interfaces module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.api.presenters.login\_company\_api\_presenter module
+---------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.api.presenters.login_company_api_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.api.presenters.login\_member\_api\_presenter module
 --------------------------------------------------------------------
 

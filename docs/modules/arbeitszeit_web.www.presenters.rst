@@ -4,14 +4,6 @@ arbeitszeit\_web.www.presenters package
 Submodules
 ----------
 
-arbeitszeit\_web.www.presenters.accountant\_invitation\_presenter module
-------------------------------------------------------------------------
-
-.. automodule:: arbeitszeit_web.www.presenters.accountant_invitation_presenter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.www.presenters.answer\_company\_work\_invite\_presenter module
 -------------------------------------------------------------------------------
 
@@ -28,10 +20,10 @@ arbeitszeit\_web.www.presenters.approve\_plan\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.company\_purchases\_presenter module
---------------------------------------------------------------------
+arbeitszeit\_web.www.presenters.company\_consumptions\_presenter module
+-----------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.company_purchases_presenter
+.. automodule:: arbeitszeit_web.www.presenters.company_consumptions_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,6 +32,14 @@ arbeitszeit\_web.www.presenters.create\_cooperation\_presenter module
 ---------------------------------------------------------------------
 
 .. automodule:: arbeitszeit_web.www.presenters.create_cooperation_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.www.presenters.create\_draft\_from\_plan\_presenter module
+---------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.create_draft_from_plan_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -76,10 +76,26 @@ arbeitszeit\_web.www.presenters.file\_plan\_with\_accounting\_presenter module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.www.presenters.get\_accountant\_account\_details\_presenter module
+-----------------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.get_accountant_account_details_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.www.presenters.get\_accountant\_dashboard\_presenter module
 ----------------------------------------------------------------------------
 
 .. automodule:: arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.www.presenters.get\_company\_account\_details\_presenter module
+--------------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.get_company_account_details_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -140,26 +156,26 @@ arbeitszeit\_web.www.presenters.get\_member\_dashboard\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.get\_plan\_summary\_accountant\_presenter module
+arbeitszeit\_web.www.presenters.get\_plan\_details\_accountant\_presenter module
 --------------------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.get_plan_summary_accountant_presenter
+.. automodule:: arbeitszeit_web.www.presenters.get_plan_details_accountant_presenter
    :members:
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.get\_plan\_summary\_company\_presenter module
+arbeitszeit\_web.www.presenters.get\_plan\_details\_company\_presenter module
 -----------------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.get_plan_summary_company_presenter
+.. automodule:: arbeitszeit_web.www.presenters.get_plan_details_company_presenter
    :members:
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.get\_plan\_summary\_member\_presenter module
+arbeitszeit\_web.www.presenters.get\_plan\_details\_member\_presenter module
 ----------------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.get_plan_summary_member_presenter
+.. automodule:: arbeitszeit_web.www.presenters.get_plan_details_member_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -200,6 +216,14 @@ arbeitszeit\_web.www.presenters.list\_available\_languages\_presenter module
 ----------------------------------------------------------------------------
 
 .. automodule:: arbeitszeit_web.www.presenters.list_available_languages_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.www.presenters.list\_coordinations\_of\_cooperation\_presenter module
+--------------------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -252,34 +276,10 @@ arbeitszeit\_web.www.presenters.log\_in\_member\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.member\_purchases module
---------------------------------------------------------
+arbeitszeit\_web.www.presenters.private\_consumptions\_presenter module
+-----------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.member_purchases
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.www.presenters.notify\_accountant\_about\_new\_plan\_presenter module
---------------------------------------------------------------------------------------
-
-.. automodule:: arbeitszeit_web.www.presenters.notify_accountant_about_new_plan_presenter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.www.presenters.pay\_consumer\_product\_presenter module
-------------------------------------------------------------------------
-
-.. automodule:: arbeitszeit_web.www.presenters.pay_consumer_product_presenter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.www.presenters.pay\_means\_of\_production\_presenter module
-----------------------------------------------------------------------------
-
-.. automodule:: arbeitszeit_web.www.presenters.pay_means_of_production_presenter
+.. automodule:: arbeitszeit_web.www.presenters.private_consumptions_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -308,6 +308,14 @@ arbeitszeit\_web.www.presenters.register\_company\_presenter module
    :undoc-members:
    :show-inheritance:
 
+arbeitszeit\_web.www.presenters.register\_hours\_worked\_presenter module
+-------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.register_hours_worked_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.www.presenters.register\_member\_presenter module
 ------------------------------------------------------------------
 
@@ -316,10 +324,18 @@ arbeitszeit\_web.www.presenters.register\_member\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.registration\_email\_presenter module
----------------------------------------------------------------------
+arbeitszeit\_web.www.presenters.register\_private\_consumption\_presenter module
+--------------------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.registration_email_presenter
+.. automodule:: arbeitszeit_web.www.presenters.register_private_consumption_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.www.presenters.register\_productive\_consumption\_presenter module
+-----------------------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.register_productive_consumption_presenter
    :members:
    :undoc-members:
    :show-inheritance:
@@ -332,10 +348,18 @@ arbeitszeit\_web.www.presenters.request\_cooperation\_presenter module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit\_web.www.presenters.send\_work\_certificates\_to\_worker\_presenter module
---------------------------------------------------------------------------------------
+arbeitszeit\_web.www.presenters.request\_email\_address\_change\_presenter module
+---------------------------------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.www.presenters.send_work_certificates_to_worker_presenter
+.. automodule:: arbeitszeit_web.www.presenters.request_email_address_change_presenter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+arbeitszeit\_web.www.presenters.revoke\_plan\_filing\_presenter module
+----------------------------------------------------------------------
+
+.. automodule:: arbeitszeit_web.www.presenters.revoke_plan_filing_presenter
    :members:
    :undoc-members:
    :show-inheritance:

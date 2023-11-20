@@ -9,3 +9,4 @@ arbeitszeitapp
    arbeitszeit_development
    arbeitszeit_flask
    arbeitszeit_web
+   build_support

@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   arbeitszeit.transactions
    arbeitszeit.use_cases
 
 Submodules
@@ -44,18 +45,18 @@ arbeitszeit.decimal module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.entities module
----------------------------
+arbeitszeit.email module
+------------------------
 
-.. automodule:: arbeitszeit.entities
+.. automodule:: arbeitszeit.email
    :members:
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.errors module
--------------------------
+arbeitszeit.email\_notifications module
+---------------------------------------
 
-.. automodule:: arbeitszeit.errors
+.. automodule:: arbeitszeit.email_notifications
    :members:
    :undoc-members:
    :show-inheritance:
@@ -92,18 +93,10 @@ arbeitszeit.payout\_factor module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.plan\_summary module
+arbeitszeit.plan\_details module
 --------------------------------
 
-.. automodule:: arbeitszeit.plan_summary
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit.presenters module
------------------------------
-
-.. automodule:: arbeitszeit.presenters
+.. automodule:: arbeitszeit.plan_details
    :members:
    :undoc-members:
    :show-inheritance:
@@ -116,18 +109,18 @@ arbeitszeit.price\_calculator module
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.repositories module
--------------------------------
+arbeitszeit.records module
+--------------------------
 
-.. automodule:: arbeitszeit.repositories
+.. automodule:: arbeitszeit.records
    :members:
    :undoc-members:
    :show-inheritance:
 
-arbeitszeit.transactions module
+arbeitszeit.repositories module
 -------------------------------
 
-.. automodule:: arbeitszeit.transactions
+.. automodule:: arbeitszeit.repositories
    :members:
    :undoc-members:
    :show-inheritance:

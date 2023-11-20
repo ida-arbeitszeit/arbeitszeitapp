@@ -4,10 +4,10 @@ arbeitszeit\_web.formatters package
 Submodules
 ----------
 
-arbeitszeit\_web.formatters.plan\_summary\_formatter module
+arbeitszeit\_web.formatters.plan\_details\_formatter module
 -----------------------------------------------------------
 
-.. automodule:: arbeitszeit_web.formatters.plan_summary_formatter
+.. automodule:: arbeitszeit_web.formatters.plan_details_formatter
    :members:
    :undoc-members:
    :show-inheritance:
