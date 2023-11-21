@@ -65,6 +65,7 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
     RegisterProductiveConsumptionForm,
     RequestCooperationForm,
+    RequestCoordinationTransferForm,
 )
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
@@ -81,6 +82,9 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
+)
+from arbeitszeit_flask.views.request_coordination_transfer_view import (
+    RequestCoordinationTransferView,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
@@ -510,6 +514,24 @@ def coop_summary(
         )
     else:
         return http_404_view.get_response()
+
+
+@CompanyRoute(
+    "/company/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
+    methods=["GET", "POST"],
+)
+def request_coordination_transfer(
+    coop_id: UUID,
+    view: RequestCoordinationTransferView,
+):
+    if request.method == "GET":
+        form = RequestCoordinationTransferForm()
+        form.cooperation_field().set_value(str(coop_id))
+        return view.respond_to_get(form=form, coop_id=coop_id)
+
+    elif request.method == "POST":
+        form = RequestCoordinationTransferForm(request.form)
+        return view.respond_to_post(form=form, coop_id=coop_id)
 
 
 @CompanyRoute(
