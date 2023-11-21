@@ -12,7 +12,7 @@ from arbeitszeit_web.www.navbar import NavbarItem
 
 ERROR_MESSAGES = {
     UseCase.Response.RejectionReason.candidate_is_not_a_company: "The candidate is not a company.",
-    UseCase.Response.RejectionReason.current_user_is_not_coordinator: "Your are not the coordinator.",
+    UseCase.Response.RejectionReason.requester_is_not_coordinator: "You are not the coordinator.",
     UseCase.Response.RejectionReason.cooperation_not_found: "Cooperation not found.",
     UseCase.Response.RejectionReason.candidate_is_current_coordinator: "The candidate is already the coordinator.",
     UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request: "The requesting coordination tenure has a pending transfer request.",

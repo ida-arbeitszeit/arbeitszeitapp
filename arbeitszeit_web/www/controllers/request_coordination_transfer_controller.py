@@ -35,7 +35,7 @@ class RequestCoordinationTransferController:
         current_user = self.session.get_current_user()
         assert current_user
         return UseCase.Request(
-            current_user=current_user,
+            requester=current_user,
             cooperation=cooperation,
             candidate=candidate,
         )

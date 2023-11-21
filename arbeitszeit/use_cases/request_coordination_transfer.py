@@ -17,7 +17,7 @@ class RequestCoordinationTransferUseCase:
 
     @dataclass
     class Request:
-        current_user: UUID
+        requester: UUID
         cooperation: UUID
         candidate: UUID
 
@@ -25,7 +25,7 @@ class RequestCoordinationTransferUseCase:
     class Response:
         class RejectionReason(Exception, Enum):
             candidate_is_not_a_company = auto()
-            current_user_is_not_coordinator = auto()
+            requester_is_not_coordinator = auto()
             candidate_is_current_coordinator = auto()
             coordination_tenure_has_pending_transfer_request = auto()
             cooperation_not_found = auto()
@@ -98,8 +98,8 @@ class RequestCoordinationTransferUseCase:
         )
 
         coordination_tenure, coordinator = latest_coordination_tenure_and_coordinator
-        if coordinator.id != request.current_user:
-            raise self.Response.RejectionReason.current_user_is_not_coordinator
+        if coordinator.id != request.requester:
+            raise self.Response.RejectionReason.requester_is_not_coordinator
         if coordination_tenure.company == candidate.id:
             raise self.Response.RejectionReason.candidate_is_current_coordinator
         if self._there_is_a_pending_transfer_request_by_coordination_tenure(

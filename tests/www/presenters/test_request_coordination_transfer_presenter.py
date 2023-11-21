@@ -67,17 +67,17 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
             self.translator.gettext("Cooperation not found."),
         )
 
-    def test_correct_notification_when_rejected_because_current_user_is_not_coordinator(
+    def test_correct_notification_when_rejected_because_requester_is_not_coordinator(
         self,
     ):
         self.presenter.present_use_case_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.current_user_is_not_coordinator
+                rejection_reason=UseCase.Response.RejectionReason.requester_is_not_coordinator
             )
         )
         self.assertEqual(
             self.notifier.warnings[0],
-            self.translator.gettext("Your are not the coordinator."),
+            self.translator.gettext("You are not the coordinator."),
         )
 
     def test_correct_notification_when_rejected_because_candidate_is_current_coordinator(

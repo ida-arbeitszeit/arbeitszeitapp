@@ -65,11 +65,11 @@ class AuthenticatedCompanyTests(BaseTestCase):
         assert request
         self.assertEqual(request.cooperation, cooperation)
 
-    def test_that_request_has_current_user_in_request(self) -> None:
+    def test_that_request_has_current_user_as_requester_in_request(self) -> None:
         form = self.get_fake_form()
         request = self.controller.import_form_data(form)
         assert request
-        self.assertEqual(request.current_user, self.company)
+        self.assertEqual(request.requester, self.company)
 
     def get_fake_form(
         self, candidate: Optional[str] = None, cooperation: Optional[str] = None

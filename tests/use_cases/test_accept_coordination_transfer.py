@@ -68,7 +68,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         candidate_and_expected_coordinator = self.company_generator.create_company()
 
         transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            current_user=present_coordinator,
+            requester=present_coordinator,
             cooperation=cooperation,
             candidate=candidate_and_expected_coordinator,
         )
@@ -91,7 +91,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         candidate_and_expected_coordinator = self.company_generator.create_company()
 
         transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            current_user=present_coordinator,
+            requester=present_coordinator,
             cooperation=cooperation,
             candidate=candidate_and_expected_coordinator,
         )
@@ -113,7 +113,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         )
         if transfer_request_id is None:
             transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-                current_user=coordinator,
+                requester=coordinator,
                 cooperation=cooperation,
             )
         return AcceptCoordinationTransferUseCase.Request(
