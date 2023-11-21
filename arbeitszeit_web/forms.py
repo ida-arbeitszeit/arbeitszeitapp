@@ -109,5 +109,5 @@ class RequestCoordinationTransferForm(Protocol):
     def candidate_field(self) -> FormField[str]:
         ...
 
-    def requesting_tenure_field(self) -> FormField[str]:
+    def cooperation_field(self) -> FormField[str]:
         ...

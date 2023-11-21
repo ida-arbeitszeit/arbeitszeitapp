@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -48,32 +47,31 @@ class RequestCoordinationTransferTests(BaseTestCase):
             RequestCoordinationTransferUseCase.Response.RejectionReason.candidate_is_not_a_company,
         )
 
-    def test_requesting_transfer_fails_if_requesting_tenure_does_not_exist(
+    def test_requesting_transfer_fails_if_requster_is_not_coordinator(
         self,
     ) -> None:
-        candidate = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation()
         response = self.use_case.request_transfer(
-            self.get_use_case_request(requesting_tenure=uuid4(), candidate=candidate)
+            self.get_use_case_request(cooperation=cooperation)
         )
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
-            RequestCoordinationTransferUseCase.Response.RejectionReason.requesting_tenure_not_found,
+            RequestCoordinationTransferUseCase.Response.RejectionReason.requester_is_not_coordinator,
         )
 
-    def test_requesting_transfer_fails_if_candidate_is_current_coordinator_of_requesting_tenure(
+    def test_requesting_transfer_fails_if_candidate_is_current_coordinator_of_cooperation(
         self,
     ) -> None:
         candidate_and_coordinator = self.company_generator.create_company()
-        coordination_tenure = (
-            self.coordination_tenure_generator.create_coordination_tenure(
-                coordinator=candidate_and_coordinator
-            )
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=candidate_and_coordinator
         )
         response = self.use_case.request_transfer(
-            self.get_use_case_request(
-                requesting_tenure=coordination_tenure,
+            RequestCoordinationTransferUseCase.Request(
+                requester=candidate_and_coordinator,
                 candidate=candidate_and_coordinator,
+                cooperation=cooperation,
             )
         )
         self.assertTrue(response.is_rejected)
@@ -82,56 +80,42 @@ class RequestCoordinationTransferTests(BaseTestCase):
             RequestCoordinationTransferUseCase.Response.RejectionReason.candidate_is_current_coordinator,
         )
 
-    def test_requesting_transfer_fails_if_requesting_tenure_is_not_current_tenure(
+    def test_requesting_transfer_fails_if_current_coordinator_has_already_requested_a_transfer_that_is_still_pending(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(timestamp=datetime(2020, 5, 1))
-        cooperation = self.cooperation_generator.create_cooperation()
-        old_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation
-        )
-        self.datetime_service.advance_time(dt=timedelta(days=1))
-        self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation
-        )
-
-        response = self.use_case.request_transfer(
-            request=self.get_use_case_request(requesting_tenure=old_tenure)
-        )
-        self.assertTrue(response.is_rejected)
-        self.assertEqual(
-            response.rejection_reason,
-            RequestCoordinationTransferUseCase.Response.RejectionReason.requesting_tenure_is_not_current_tenure,
-        )
-
-    def test_requesting_transfer_fails_if_requesting_tenure_has_already_requested_a_transfer(
-        self,
-    ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation
+        coordinator = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=coordinator
         )
         self.use_case.request_transfer(
-            request=self.get_use_case_request(requesting_tenure=current_tenure)
+            RequestCoordinationTransferUseCase.Request(
+                requester=coordinator,
+                candidate=self.company_generator.create_company(),
+                cooperation=cooperation,
+            )
         )
         response = self.use_case.request_transfer(
-            request=self.get_use_case_request(requesting_tenure=current_tenure)
+            RequestCoordinationTransferUseCase.Request(
+                requester=coordinator,
+                candidate=self.company_generator.create_company(),
+                cooperation=cooperation,
+            )
         )
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
-            RequestCoordinationTransferUseCase.Response.RejectionReason.requesting_tenure_has_pending_transfer_request,
+            RequestCoordinationTransferUseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request,
         )
 
-    def test_requesting_transfer_can_succeed(self) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation
-        )
+    def test_requesting_transfer_fails_if_cooperation_does_not_exist(self) -> None:
         response = self.use_case.request_transfer(
-            request=self.get_use_case_request(requesting_tenure=current_tenure)
+            self.get_use_case_request(cooperation=uuid4())
         )
-        self.assertFalse(response.is_rejected)
+        self.assertTrue(response.is_rejected)
+        self.assertEqual(
+            response.rejection_reason,
+            RequestCoordinationTransferUseCase.Response.RejectionReason.cooperation_not_found,
+        )
 
     def test_that_a_notification_gets_sent_after_successfull_transfer_request(
         self,
@@ -155,41 +139,58 @@ class RequestCoordinationTransferTests(BaseTestCase):
 
     def test_that_delivered_notification_contains_cooperation_name(self) -> None:
         expected_name = "Cooperation Coop."
-        cooperation = self.cooperation_generator.create_cooperation(name=expected_name)
-        self.successfully_request_a_transfer(cooperation=cooperation)
+        coordinator = self.company_generator.create_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            name=expected_name, coordinator=coordinator
+        )
+        self.successfully_request_a_transfer(
+            current_user=coordinator, cooperation=cooperation
+        )
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_name, expected_name)
 
     def test_that_delivered_notification_contains_cooperation_id(self) -> None:
-        expected_cooperation_id = self.cooperation_generator.create_cooperation()
-        self.successfully_request_a_transfer(cooperation=expected_cooperation_id)
+        coordinator = self.company_generator.create_company()
+        expected_cooperation_id = self.cooperation_generator.create_cooperation(
+            coordinator=coordinator
+        )
+        self.successfully_request_a_transfer(
+            current_user=coordinator, cooperation=expected_cooperation_id
+        )
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_id, expected_cooperation_id)
 
     def get_use_case_request(
-        self, requesting_tenure: Optional[UUID] = None, candidate: Optional[UUID] = None
+        self,
+        requester: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
+        candidate: Optional[UUID] = None,
     ) -> RequestCoordinationTransferUseCase.Request:
-        if requesting_tenure is None:
-            requesting_tenure = (
-                self.coordination_tenure_generator.create_coordination_tenure()
-            )
+        if requester is None:
+            requester = self.company_generator.create_company()
+        if cooperation is None:
+            cooperation = self.cooperation_generator.create_cooperation()
         if candidate is None:
             candidate = self.company_generator.create_company()
         return RequestCoordinationTransferUseCase.Request(
-            requesting_coordination_tenure=requesting_tenure, candidate=candidate
+            requester=requester, cooperation=cooperation, candidate=candidate
         )
 
     def successfully_request_a_transfer(
-        self, cooperation: Optional[UUID] = None, candidate: Optional[UUID] = None
+        self,
+        current_user: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
+        candidate: Optional[UUID] = None,
     ) -> None:
+        if current_user is None:
+            current_user = self.company_generator.create_company()
         if cooperation is None:
-            cooperation = self.cooperation_generator.create_cooperation()
-        current_tenure = self.coordination_tenure_generator.create_coordination_tenure(
-            cooperation=cooperation
-        )
+            cooperation = self.cooperation_generator.create_cooperation(
+                coordinator=current_user
+            )
         response = self.use_case.request_transfer(
             request=self.get_use_case_request(
-                requesting_tenure=current_tenure, candidate=candidate
+                requester=current_user, cooperation=cooperation, candidate=candidate
             )
         )
         self.assertFalse(response.is_rejected)

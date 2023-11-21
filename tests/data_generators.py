@@ -18,9 +18,6 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
 )
-from arbeitszeit.use_cases.accept_coordination_transfer import (
-    AcceptCoordinationTransferUseCase,
-)
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.create_cooperation import (
@@ -540,42 +537,32 @@ class CoordinationTenureGenerator:
 
 @dataclass
 class CoordinationTransferRequestGenerator:
-    datetime_service: FakeDatetimeService
-    coordination_tenure_generator: CoordinationTenureGenerator
+    cooperation_generator: CooperationGenerator
     company_generator: CompanyGenerator
     request_transfer_use_case: RequestCoordinationTransferUseCase
-    accept_transfer_use_case: AcceptCoordinationTransferUseCase
 
     def create_coordination_transfer_request(
         self,
-        requesting_coordination_tenure: Optional[UUID] = None,
+        requester: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
-        is_accepted: bool = False,
     ) -> UUID:
-        if requesting_coordination_tenure is None:
-            requesting_coordination_tenure = (
-                self.coordination_tenure_generator.create_coordination_tenure()
-            )
+        if requester is None:
+            requester = self.company_generator.create_company()
+        if cooperation is None:
+            cooperation = self.cooperation_generator.create_cooperation()
         if candidate is None:
             candidate = self.company_generator.create_company()
         request_response = self.request_transfer_use_case.request_transfer(
             RequestCoordinationTransferUseCase.Request(
-                requesting_coordination_tenure=requesting_coordination_tenure,
+                requester=requester,
+                cooperation=cooperation,
                 candidate=candidate,
             )
         )
         assert not request_response.is_rejected
         assert request_response.transfer_request
         transfer_request = request_response.transfer_request
-        if is_accepted:
-            accept_response = (
-                self.accept_transfer_use_case.accept_coordination_transfer(
-                    AcceptCoordinationTransferUseCase.Request(
-                        transfer_request_id=transfer_request
-                    )
-                )
-            )
-            assert not accept_response.is_rejected
         return transfer_request
 
 
