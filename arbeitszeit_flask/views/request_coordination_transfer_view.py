@@ -44,9 +44,9 @@ class RequestCoordinationTransferView:
             )
         else:
             uc_response = self.use_case.request_transfer(uc_request)
-            self.presenter.present_use_case_response(uc_response)
+            view_model = self.presenter.present_use_case_response(uc_response)
             return self._create_response(
-                navbar_items=navbar_items, form=form, status=200
+                navbar_items=navbar_items, form=form, status=view_model.status_code
             )
 
     def _create_response(

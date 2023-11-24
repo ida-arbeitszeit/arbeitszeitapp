@@ -27,6 +27,12 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
         expected = self.translator.gettext("Request has been sent.")
         self.assertEqual(self.notifier.infos[0], expected)
 
+    def test_correct_status_code_if_transfer_request_was_successful(self):
+        response = self.presenter.present_use_case_response(
+            self.get_successful_transfer_request()
+        )
+        self.assertEqual(response.status_code, 200)
+
     def test_no_info_notification_gets_issued_if_request_was_rejected(self):
         self.presenter.present_use_case_response(
             self.get_rejected_transfer_request(
@@ -56,6 +62,16 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
             self.translator.gettext("The candidate is not a company."),
         )
 
+    def test_correct_status_code_when_rejected_because_candidate_is_not_a_company(
+        self,
+    ):
+        response = self.presenter.present_use_case_response(
+            self.get_rejected_transfer_request(
+                rejection_reason=UseCase.Response.RejectionReason.candidate_is_not_a_company
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_correct_notification_when_rejected_because_cooperation_was_not_found(self):
         self.presenter.present_use_case_response(
             self.get_rejected_transfer_request(
@@ -66,6 +82,16 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
             self.notifier.warnings[0],
             self.translator.gettext("Cooperation not found."),
         )
+
+    def test_correct_status_code_when_rejected_because_cooperation_was_not_found(
+        self,
+    ):
+        response = self.presenter.present_use_case_response(
+            self.get_rejected_transfer_request(
+                rejection_reason=UseCase.Response.RejectionReason.cooperation_not_found
+            )
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_correct_notification_when_rejected_because_requester_is_not_coordinator(
         self,
@@ -80,6 +106,16 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
             self.translator.gettext("You are not the coordinator."),
         )
 
+    def test_correct_status_code_when_rejected_because_requester_is_not_coordinator(
+        self,
+    ):
+        response = self.presenter.present_use_case_response(
+            self.get_rejected_transfer_request(
+                rejection_reason=UseCase.Response.RejectionReason.requester_is_not_coordinator
+            )
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_correct_notification_when_rejected_because_candidate_is_current_coordinator(
         self,
     ):
@@ -92,6 +128,16 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
             self.notifier.warnings[0],
             self.translator.gettext("The candidate is already the coordinator."),
         )
+
+    def test_correct_status_code_when_rejected_because_candidate_is_current_coordinator(
+        self,
+    ):
+        response = self.presenter.present_use_case_response(
+            self.get_rejected_transfer_request(
+                rejection_reason=UseCase.Response.RejectionReason.candidate_is_current_coordinator
+            )
+        )
+        self.assertEqual(response.status_code, 409)
 
     def test_correct_notification_when_rejected_because_coordination_has_pending_transfer_request(
         self,
@@ -107,6 +153,16 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
                 "The requesting coordination tenure has a pending transfer request."
             ),
         )
+
+    def test_correct_status_code_when_rejected_because_coordination_has_pending_transfer_request(
+        self,
+    ):
+        response = self.presenter.present_use_case_response(
+            self.get_rejected_transfer_request(
+                rejection_reason=UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
+            )
+        )
+        self.assertEqual(response.status_code, 409)
 
     def get_rejected_transfer_request(
         self, rejection_reason: UseCase.Response.RejectionReason

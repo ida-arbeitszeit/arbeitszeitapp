@@ -520,6 +520,7 @@ def coop_summary(
     "/company/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
     methods=["GET", "POST"],
 )
+@commit_changes
 def request_coordination_transfer(
     coop_id: UUID,
     view: RequestCoordinationTransferView,

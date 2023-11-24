@@ -39,7 +39,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
             login=LogInUser.company,
         )
 
-    def test_company_gets_code_200_on_post_request_when_current_user_is_not_coordinator(
+    def test_company_gets_code_403_on_post_request_when_current_user_is_not_coordinator(
         self,
     ) -> None:
         self.login_company().id
@@ -50,7 +50,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
             f"company/cooperation_summary/{cooperation}/request_coordination_transfer",
             data=data,
         )
-        assert response.status_code == 200
+        assert response.status_code == 403
 
     def test_no_request_mail_is_sent_when_current_user_is_not_coordinator(
         self,
@@ -64,7 +64,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
                 f"company/cooperation_summary/{cooperation}/request_coordination_transfer",
                 data=data,
             )
-            assert response.status_code == 200
+            assert response.status_code == 403
             assert len(outbox) == 0
 
     def test_request_mail_is_sent_when_current_user_is_coordinator(
@@ -85,3 +85,25 @@ class RequestCoordinationTransferTests(ViewTestCase):
             assert response.status_code == 200
             assert len(outbox) == 1
             assert outbox[0].recipients[0] == candidate_mail
+
+    def test_second_request_with_identical_data_will_fail_with_code_409(
+        self,
+    ) -> None:
+        current_user = self.login_company()
+        cooperation = self.cooperation_generator.create_cooperation(
+            coordinator=current_user.id
+        )
+        candidate_mail = "candidate@mail.org"
+        candidate = self.company_generator.create_company(email=candidate_mail)
+        data = {"candidate": str(candidate), "cooperation": str(cooperation)}
+        response = self.client.post(
+            f"company/cooperation_summary/{cooperation}/request_coordination_transfer",
+            data=data,
+        )
+        assert response.status_code == 200
+
+        response = self.client.post(
+            f"company/cooperation_summary/{cooperation}/request_coordination_transfer",
+            data=data,
+        )
+        assert response.status_code == 409
