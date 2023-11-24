@@ -78,6 +78,7 @@ class UrlIndexTestImpl:
     get_register_productive_consumption_url = UrlIndexMethod()
     get_renew_plan_url = UrlIndexMethod()
     get_request_coop_url = UrlIndexMethod()
+    get_request_coordination_transfer_url = UrlIndexMethod()
     get_revoke_plan_filing_url = UrlIndexMethod()
     get_toggle_availability_url = UrlIndexMethod()
     get_unconfirmed_member_url = UrlIndexMethod()

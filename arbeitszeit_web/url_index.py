@@ -179,6 +179,9 @@ class UrlIndex(Protocol):
     def get_language_change_url(self, language_code: str) -> str:
         ...
 
+    def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
+        ...
+
 
 @dataclass
 class UserUrlIndex:

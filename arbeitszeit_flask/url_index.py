@@ -246,3 +246,6 @@ class GeneralUrlIndex:
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)
+
+    def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
+        return url_for("main_company.request_coordination_transfer", coop_id=coop_id)

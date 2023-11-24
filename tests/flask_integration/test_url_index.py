@@ -406,3 +406,12 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_hide_plan_url(plan.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_request_coordination_transfer_url_for_existing_coop_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        coop = self.cooperation_generator.create_cooperation()
+        url = self.url_index.get_request_coordination_transfer_url(coop)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
