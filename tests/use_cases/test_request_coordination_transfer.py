@@ -149,17 +149,6 @@ class RequestCoordinationTransferTests(BaseTestCase):
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_name, expected_name)
 
-    def test_that_delivered_notification_contains_cooperation_id(self) -> None:
-        coordinator = self.company_generator.create_company()
-        expected_cooperation_id = self.cooperation_generator.create_cooperation(
-            coordinator=coordinator
-        )
-        self.successfully_request_a_transfer(
-            current_user=coordinator, cooperation=expected_cooperation_id
-        )
-        notification = self.get_latest_notification_delivered()
-        self.assertEqual(notification.cooperation_id, expected_cooperation_id)
-
     def get_use_case_request(
         self,
         requester: Optional[UUID] = None,

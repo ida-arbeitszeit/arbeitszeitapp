@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
 from arbeitszeit import email_notifications as interface
+from arbeitszeit_web.email.request_coordination_transfer_presenter import (
+    RequestCoordinationTransferEmailPresenter,
+)
 
 from .accountant_invitation_presenter import AccountantInvitationEmailPresenter
 from .cooperation_request_email_presenter import CooperationRequestEmailPresenter
@@ -20,6 +23,7 @@ class EmailSender:
     invite_worker_presenter: InviteWorkerPresenterImpl
     request_cooperation_presenter: CooperationRequestEmailPresenter
     email_change_confirmation_presenter: EmailChangeConfirmationPresenter
+    request_coordination_transfer_email_presenter: RequestCoordinationTransferEmailPresenter
 
     def send_email(self, message: interface.Message) -> None:
         if isinstance(message, interface.MemberRegistration):
@@ -49,3 +53,7 @@ class EmailSender:
             self.email_change_confirmation_presenter.present_email_change_confirmation(
                 message
             )
+        elif isinstance(message, interface.CoordinationTransferRequest):
+            self.request_coordination_transfer_email_presenter.present(message)
+        else:
+            raise NotImplementedError()
