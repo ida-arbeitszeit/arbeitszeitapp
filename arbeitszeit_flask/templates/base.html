@@ -22,9 +22,6 @@
 </head>
 
 <body>
-  {% block body %}
-  {% block navigation %}
-
   {% if session['user_type'] == 'company' %}
   {% set user_navigation = company_navigation %}
 
@@ -41,18 +38,15 @@
 
   {% call user_navigation() %}
   {% block navbar_start %}
-  {% endblock %}
+  {% endblock navbar_start %}
   {% endcall %}
-
-  {% endblock navigation%}
 
   {{ show_notifications() }}
 
-  <div class="{% block content_class %}container{% endblock %}">
+  <div class="container">
     {% block content %}
     {% endblock content %}
   </div>
-  {% endblock body %}
 </body>
 
 </html>
