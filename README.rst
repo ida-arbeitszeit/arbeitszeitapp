@@ -442,9 +442,9 @@ Developing with different python versions
 You can access a development environment with any of the supported
 python versions via ``nix develop``. Check `flake.nix` for the
 supported environments under the key ``devShells``. For example to
-enter a development shell with ``python3.9`` set as the default
-interpreter run ``nix develop .#python39``. This will drop you into a
-shell with python3.9 as the default python interpreter. This won't
+enter a development shell with ``python3.11`` set as the default
+interpreter run ``nix develop .#python311``. This will drop you into a
+shell with python3.11 as the default python interpreter. This won't
 change anything else on your machine and the respective python
 interpreter will be garbage collected the next time you run
 ``nix-collect-garbage``.
