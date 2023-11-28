@@ -193,7 +193,7 @@ msgstr "Name Betrieb"
 #: arbeitszeit_flask/templates/auth/signup_company.html:45
 #: arbeitszeit_flask/templates/auth/signup_member.html:48
 msgid "Click here to log in with an existing account."
-msgstr "Klicke hier um mit dich mit einem existierenden Konto anzumelden."
+msgstr "Klicke hier um dich mit einem existierenden Konto anzumelden."
 
 #: arbeitszeit_flask/templates/auth/signup_member.html:8
 msgid "Sign up member"
@@ -910,7 +910,7 @@ msgstr "Aktuelle*r Koordinator*in"
 #: arbeitszeit_flask/templates/macros/coop_summary.html:33
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:5
 msgid "History of coordinators"
-msgstr "Historie von Koordinator*innen"
+msgstr "Abfolge von Koordinator*innen"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:38
 msgid "Cooperation price"
@@ -1227,15 +1227,15 @@ msgstr "Ablehnen"
 
 #: arbeitszeit_flask/templates/user/account_details.html:5
 msgid "User Account Data"
-msgstr "Nutzerkonto Daten"
+msgstr "Nutzerkontodaten"
 
 #: arbeitszeit_flask/templates/user/account_details.html:8
 msgid "Account ID:"
-msgstr "Konto ID:"
+msgstr "Konto-ID:"
 
 #: arbeitszeit_flask/templates/user/account_details.html:11
 msgid "Email address:"
-msgstr "Email Adresse:"
+msgstr "E-Mail-Adresse:"
 
 #~ msgid "Statistics"
 #~ msgstr "Statistiken"
