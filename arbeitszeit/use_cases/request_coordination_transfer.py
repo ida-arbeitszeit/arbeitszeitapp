@@ -62,7 +62,6 @@ class RequestCoordinationTransferUseCase:
             CoordinationTransferRequest(
                 candidate_name=candidate.name,
                 candidate_email=candidate_email.address,
-                cooperation_id=cooperation.id,
                 cooperation_name=cooperation.name,
             )
         )

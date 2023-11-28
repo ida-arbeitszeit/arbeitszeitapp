@@ -10,13 +10,10 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
 
-ERROR_MESSAGES = {
-    UseCase.Response.RejectionReason.candidate_is_not_a_company: "The candidate is not a company.",
-    UseCase.Response.RejectionReason.requester_is_not_coordinator: "You are not the coordinator.",
-    UseCase.Response.RejectionReason.cooperation_not_found: "Cooperation not found.",
-    UseCase.Response.RejectionReason.candidate_is_current_coordinator: "The candidate is already the coordinator.",
-    UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request: "The requesting coordination tenure has a pending transfer request.",
-}
+
+@dataclass
+class RequestCoordinationTransferViewModel:
+    status_code: int
 
 
 @dataclass
@@ -41,18 +38,62 @@ class RequestCoordinationTransferPresenter:
             ),
         ]
 
-    def present_use_case_response(self, use_case_response: UseCase.Response) -> None:
+    def present_use_case_response(
+        self, use_case_response: UseCase.Response
+    ) -> RequestCoordinationTransferViewModel:
         if use_case_response.is_rejected:
             assert use_case_response.rejection_reason
-            if message := ERROR_MESSAGES.get(use_case_response.rejection_reason):
-                self.notifier.display_warning(self.translator.gettext(message))
+            if (
+                use_case_response.rejection_reason
+                == UseCase.Response.RejectionReason.candidate_is_not_a_company
+            ):
+                self.notifier.display_warning(
+                    self.translator.gettext("The candidate is not a company.")
+                )
+                return RequestCoordinationTransferViewModel(status_code=404)
+            elif (
+                use_case_response.rejection_reason
+                == UseCase.Response.RejectionReason.requester_is_not_coordinator
+            ):
+                self.notifier.display_warning(
+                    self.translator.gettext("You are not the coordinator.")
+                )
+                return RequestCoordinationTransferViewModel(status_code=403)
+            elif (
+                use_case_response.rejection_reason
+                == UseCase.Response.RejectionReason.candidate_is_current_coordinator
+            ):
+                self.notifier.display_warning(
+                    self.translator.gettext("The candidate is already the coordinator.")
+                )
+                return RequestCoordinationTransferViewModel(status_code=409)
+            elif (
+                use_case_response.rejection_reason
+                == UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
+            ):
+                self.notifier.display_warning(
+                    self.translator.gettext(
+                        "The requesting coordination tenure has a pending transfer request."
+                    )
+                )
+                return RequestCoordinationTransferViewModel(status_code=409)
+            elif (
+                use_case_response.rejection_reason
+                == UseCase.Response.RejectionReason.cooperation_not_found
+            ):
+                self.notifier.display_warning(
+                    self.translator.gettext("Cooperation not found.")
+                )
+                return RequestCoordinationTransferViewModel(status_code=404)
             else:
                 self.notifier.display_warning(
                     self.translator.gettext(
                         "Unknown error ocurred. Request has not been sent."
                     )
                 )
+                return RequestCoordinationTransferViewModel(status_code=500)
         else:
             self.notifier.display_info(
                 self.translator.gettext("Request has been sent.")
             )
+            return RequestCoordinationTransferViewModel(status_code=200)

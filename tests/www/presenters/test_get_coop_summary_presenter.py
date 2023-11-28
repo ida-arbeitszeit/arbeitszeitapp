@@ -41,6 +41,32 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
         view_model = self.presenter.present(coop_summary)
         self.assertEqual(view_model.coop_definition, expected_definition)
 
+    def test_no_url_to_request_coordination_transfer_page_is_displayed_if_user_is_not_coordinator(
+        self,
+    ):
+        coop_summary = self.get_coop_summary(requester_is_coordinator=False)
+        view_model = self.presenter.present(coop_summary)
+        self.assertIsNone(view_model.transfer_coordination_url)
+
+    def test_url_to_request_coordination_transfer_page_is_displayed_if_user_is_coordinator(
+        self,
+    ):
+        coop_summary = self.get_coop_summary(requester_is_coordinator=True)
+        view_model = self.presenter.present(coop_summary)
+        self.assertIsNotNone(view_model.transfer_coordination_url)
+
+    def test_correct_url_to_request_coordination_transfer_page_is_displayed_if_user_is_coordinator(
+        self,
+    ):
+        coop_summary = self.get_coop_summary(requester_is_coordinator=True)
+        view_model = self.presenter.present(coop_summary)
+        self.assertEqual(
+            view_model.transfer_coordination_url,
+            self.url_index.get_request_coordination_transfer_url(
+                coop_id=coop_summary.coop_id,
+            ),
+        )
+
     def test_coordinator_id_is_displayed_correctly(self):
         coop_summary = self.get_coop_summary()
         view_model = self.presenter.present(coop_summary)

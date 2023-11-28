@@ -218,3 +218,12 @@ class CoordinationTenure(db.Model):
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
     cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
+
+
+class CoordinationTransferRequest(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    requesting_coordination_tenure = db.Column(
+        db.String, db.ForeignKey("coordination_tenure.id"), nullable=False
+    )
+    candidate = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    request_date = db.Column(db.DateTime, nullable=False)

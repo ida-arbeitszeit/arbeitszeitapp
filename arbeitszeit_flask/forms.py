@@ -386,3 +386,14 @@ class AnswerCompanyWorkInviteForm(Form):
 
     def get_is_accepted_field(self) -> bool:
         return self.data["is_accepted"]
+
+
+class RequestCoordinationTransferForm(Form):
+    candidate = StringField()
+    cooperation = StringField()
+
+    def candidate_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="candidate")
+
+    def cooperation_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="cooperation")

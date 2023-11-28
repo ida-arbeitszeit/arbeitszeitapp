@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+{% from 'macros/navbar.html' import navbar %}
+{{ navbar(navbar_items) }}
+{% endblock %}
+
+{% block content %}
+<div class="section is-medium has-text-centered">
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-6">
+            <h1 class="title">
+                {{ gettext("Request coordination transfer")}}
+            </h1>
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+            <div class="notification is-danger">
+                {{ form[field_name].label }}: {{ error }}
+            </div>
+            {% endfor %}
+            {% endfor %}
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label class="label">{{ gettext("Cooperation") }}</label>
+                    <div class="control">
+                        {{ form.cooperation(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">{{ gettext("Candidate ID") }}</label>
+                    <div class="control">
+                        {{ form.candidate(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">{{ gettext("Request transfer") }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="column"></div>
+    </div>
+</div>
+
+{% endblock %}
