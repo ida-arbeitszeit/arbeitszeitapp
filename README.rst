@@ -333,7 +333,7 @@ for translation.
     ngettext(singular: str, plural: str, n)
 
 
-#. Parse code for translatable strings (create a ``.pot`` file):
+#. Parse code for translatable strings (update ``.pot`` file):
 
     .. code-block:: bash
 

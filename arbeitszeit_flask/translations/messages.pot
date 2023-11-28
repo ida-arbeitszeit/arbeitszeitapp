@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-20 01:44+0100\n"
+"POT-Creation-Date: 2023-11-27 21:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,24 +60,6 @@ msgstr ""
 #: arbeitszeit_flask/templates/accountant/dashboard.html:30
 #: arbeitszeit_flask/templates/accountant/plans-to-review-list.html:4
 msgid "List unreviewed plans"
-msgstr ""
-
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:4
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:4
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:4
-msgid "User Account Data"
-msgstr ""
-
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:7
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:7
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:7
-msgid "Account ID:"
-msgstr ""
-
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:10
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:10
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:10
-msgid "Email address:"
 msgstr ""
 
 #: arbeitszeit_flask/templates/accountant/notification-about-new-plan.html:2
@@ -1212,5 +1194,17 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
 msgid "Reject"
+msgstr ""
+
+#: arbeitszeit_flask/templates/user/account_details.html:5
+msgid "User Account Data"
+msgstr ""
+
+#: arbeitszeit_flask/templates/user/account_details.html:8
+msgid "Account ID:"
+msgstr ""
+
+#: arbeitszeit_flask/templates/user/account_details.html:11
+msgid "Email address:"
 msgstr ""
 

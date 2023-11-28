@@ -2,17 +2,16 @@
 # Copyright (C) 2022 ORGANIZATION
 # This file is distributed under the same license as the  project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
-# Sebastian Loschert <sebastian.loschert@gmx.de>, 2022-2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
-"POT-Creation-Date: 2023-11-20 01:44+0100\n"
-"PO-Revision-Date: 2023-08-22 16:43+0200\n"
-"Last-Translator: Sebastian Loschert <sebastian.loschert@gmx.de>\n"
+"POT-Creation-Date: 2023-11-27 23:43+0100\n"
+"PO-Revision-Date: 2023-11-27 23:40+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
-"Language-Team: German <sebastian.loschert@gmx.de>\n"
+"Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -64,28 +63,10 @@ msgstr "Häufige Aktionen"
 msgid "List unreviewed plans"
 msgstr "Ungeprüfte Pläne auflisten"
 
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:4
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:4
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:4
-msgid "User Account Data"
-msgstr "Nutzerkonto Daten"
-
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:7
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:7
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:7
-msgid "Account ID:"
-msgstr "Konto ID:"
-
-#: arbeitszeit_flask/templates/accountant/get_accountant_account_details.html:10
-#: arbeitszeit_flask/templates/company/get_company_account_details.html:10
-#: arbeitszeit_flask/templates/member/get_member_account_details.html:10
-msgid "Email address:"
-msgstr "Email Adresse:"
-
 #: arbeitszeit_flask/templates/accountant/notification-about-new-plan.html:2
 #, python-format
 msgid "Hello %(accountant_name)s,"
-msgstr ""
+msgstr "Hallo %(accountant_name)s,"
 
 #: arbeitszeit_flask/templates/accountant/notification-about-new-plan.html:7
 #, python-format
@@ -174,7 +155,7 @@ msgstr "Login Betrieb"
 #: arbeitszeit_flask/templates/auth/login_company.html:41
 #: arbeitszeit_flask/templates/auth/login_member.html:41
 msgid "Click here to create a new account."
-msgstr ""
+msgstr "Klicke hier um ein neues Konto zu erstellen."
 
 #: arbeitszeit_flask/templates/auth/login_member.html:8
 msgid "Login member"
@@ -212,7 +193,7 @@ msgstr "Name Betrieb"
 #: arbeitszeit_flask/templates/auth/signup_company.html:45
 #: arbeitszeit_flask/templates/auth/signup_member.html:48
 msgid "Click here to log in with an existing account."
-msgstr ""
+msgstr "Klicke hier um dich mit einem existierenden Konto anzumelden."
 
 #: arbeitszeit_flask/templates/auth/signup_member.html:8
 msgid "Sign up member"
@@ -580,7 +561,7 @@ msgstr "Beschreibung"
 
 #: arbeitszeit_flask/templates/company/my_consumptions.html:29
 msgid "Purpose"
-msgstr ""
+msgstr "Zweck"
 
 #: arbeitszeit_flask/templates/company/my_consumptions.html:30
 msgid "Unit price"
@@ -704,11 +685,11 @@ msgstr "Plan erstellt"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:67
 msgid "Revoke"
-msgstr ""
+msgstr "Widerrufen"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:79
 msgid "Revoke plan filing"
-msgstr ""
+msgstr "Planeinreichung widerrufen"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:92
 msgid "You don't have plans waiting for activation."
@@ -740,7 +721,7 @@ msgstr "Abgelaufen"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:168
 msgid "Renew plan"
-msgstr ""
+msgstr "Plan erneuern"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:181
 msgid "You don't have expired plans."
@@ -924,12 +905,12 @@ msgstr "Definition"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:28
 msgid "Current coordinator"
-msgstr ""
+msgstr "Aktuelle*r Koordinator*in"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:33
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:5
 msgid "History of coordinators"
-msgstr ""
+msgstr "Abfolge von Koordinator*innen"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:38
 msgid "Cooperation price"
@@ -1087,15 +1068,15 @@ msgstr "Sprache"
 
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:30
 msgid "Start of coordination"
-msgstr ""
+msgstr "Beginn der Koordination"
 
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:32
 msgid "End of coordination"
-msgstr ""
+msgstr "Ende der Koordination"
 
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:41
 msgid "No coordinators found."
-msgstr ""
+msgstr "Keine Koordinator*innen gefunden."
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:83
 msgid "Plan creation"
@@ -1244,6 +1225,18 @@ msgstr ""
 msgid "Reject"
 msgstr "Ablehnen"
 
+#: arbeitszeit_flask/templates/user/account_details.html:5
+msgid "User Account Data"
+msgstr "Nutzerkontodaten"
+
+#: arbeitszeit_flask/templates/user/account_details.html:8
+msgid "Account ID:"
+msgstr "Konto-ID:"
+
+#: arbeitszeit_flask/templates/user/account_details.html:11
+msgid "Email address:"
+msgstr "E-Mail-Adresse:"
+
 #~ msgid "Statistics"
 #~ msgstr "Statistiken"
 
@@ -1312,9 +1305,6 @@ msgstr "Ablehnen"
 
 #~ msgid "Product available"
 #~ msgstr "Produkt verfügbar"
-
-#~ msgid "Renew plan"
-#~ msgstr "Plan erneuern"
 
 #~ msgid "Hide plan"
 #~ msgstr "Plan verbergen"
@@ -1515,9 +1505,6 @@ msgstr "Ablehnen"
 
 #~ msgid "Here you can view your past purchases."
 #~ msgstr "Hier kannst du alle vergangen Käufe einsehen."
-
-#~ msgid "Purpose"
-#~ msgstr "Zweck"
 
 #~ msgid "You haven't purchased anything yet."
 #~ msgstr "Du hast bisher noch nichts gekauft."
