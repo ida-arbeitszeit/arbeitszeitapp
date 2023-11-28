@@ -1,44 +1,27 @@
 {% extends "base.html" %}
 
-{% block body %}
-<section class="hero is-fullheight">
-  {{ super() }}
-</section>
-{% endblock %}
-
-{% block navigation %}
-<div class="hero-head">
-  {{ super() }}
-</div>
-{% endblock %}
-
-{% block content_class %}
-hero-body
-{% endblock %}
-
 {% block content %}
-<div class="hero-body">
-  <div class="container has-text-centered">
-    <h1 class="title">
-      <!-- do not translate -->
-      Arbeitszeit
-    </h1>
-    <h2 class="subtitle">
-      {{ gettext('A platform for working time calculation.') }}
-    </h2>
-    <div class="buttons is-centered">
-      <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
-      <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
-      <a class="button" href="{{ url_for('auth.login_accountant') }}">{{ gettext('Accountant') }}</a>
-    </div>
-    <div class="pt-5">
-      <span class="is-italic">{{ gettext("Latest plans") }}</span><br>
-      {% if view_model.show_plans %}
-      {% for plan in view_model.plans %}
-      <span class="has-text-weight-semibold">{{ plan.activation_date }}</span> {{ plan.prd_name }} <br>
-      {% endfor %}
-      {% endif %}
-    </div>
+<div class="section is-medium has-text-centered">
+  <h1 class="title">
+    <!-- do not translate -->
+    Arbeitszeit
+  </h1>
+  <h2 class="subtitle">
+    {{ gettext('A platform for working time calculation.') }}
+  </h2>
+  <div class="buttons is-centered">
+    <a class="button" href="{{ url_for('auth.login_member') }}">{{ gettext('Member') }}</a>
+    <a class="button" href="{{ url_for('auth.login_company') }}">{{ gettext('Company') }}</a>
+    <a class="button" href="{{ url_for('auth.login_accountant') }}">{{ gettext('Accountant') }}</a>
+  </div>
+  <div class="pt-5">
+    <span class="is-italic">{{ gettext("Latest plans") }}</span><br>
+    {% if view_model.show_plans %}
+    {% for plan in view_model.plans %}
+    <span class="has-text-weight-semibold">{{ plan.activation_date }}</span> {{ plan.prd_name }} <br>
+    {% endfor %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}
+

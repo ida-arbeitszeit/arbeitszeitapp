@@ -5,10 +5,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="section"> 
-  <div class="content has-text-centered">
-    <h1>{{ gettext("Unreviewed plans") }}</h1>
-  </div>
+<section class="section has-text-centered"> 
+    <h1 class="title">{{ gettext("Unreviewed plans") }}</h1>
 </section>
 <section class="section">
   {% if view_model.show_plan_list %}
