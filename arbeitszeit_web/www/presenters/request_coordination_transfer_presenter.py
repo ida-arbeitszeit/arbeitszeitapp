@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from uuid import UUID
 
+from typing_extensions import assert_never
+
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase as UseCase,
 )
@@ -85,13 +87,7 @@ class RequestCoordinationTransferPresenter:
                     self.translator.gettext("Cooperation not found.")
                 )
                 return RequestCoordinationTransferViewModel(status_code=404)
-            else:
-                self.notifier.display_warning(
-                    self.translator.gettext(
-                        "Unknown error ocurred. Request has not been sent."
-                    )
-                )
-                return RequestCoordinationTransferViewModel(status_code=500)
+            assert_never(use_case_response.rejection_reason)
         else:
             self.notifier.display_info(
                 self.translator.gettext("Request has been sent.")
