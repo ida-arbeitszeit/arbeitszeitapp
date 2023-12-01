@@ -560,7 +560,7 @@ class CoordinationTransferRequestGenerator:
                 candidate=candidate,
             )
         )
-        assert not request_response.is_rejected
+        assert not request_response.is_rejected, request_response.rejection_reason
         assert request_response.transfer_request
         transfer_request = request_response.transfer_request
         return transfer_request
