@@ -133,6 +133,26 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
             candidate_and_expected_coordinator, cooperation
         )
 
+    def test_original_coordination_transfer_id_is_returned_if_use_case_succeeds(
+        self,
+    ) -> None:
+        request = self.create_use_case_request()
+        response = self.use_case.accept_coordination_transfer(request)
+        self.assertFalse(response.is_rejected)
+        self.assertEqual(response.transfer_request_id, request.transfer_request_id)
+
+    def test_original_coordination_transfer_id_is_returned_if_use_case_fails(
+        self,
+    ) -> None:
+        response = self.use_case.accept_coordination_transfer(
+            AcceptCoordinationTransferUseCase.Request(
+                transfer_request_id=uuid4(),
+                accepting_company=self.company_generator.create_company(),
+            )
+        )
+        self.assertTrue(response.is_rejected)
+        self.assertEqual(response.transfer_request_id, response.transfer_request_id)
+
     def create_use_case_request(self) -> AcceptCoordinationTransferUseCase.Request:
         coordinator = self.company_generator.create_company()
         candidate_and_accepting_company = self.company_generator.create_company()

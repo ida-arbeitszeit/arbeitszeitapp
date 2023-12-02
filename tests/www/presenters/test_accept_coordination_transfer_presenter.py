@@ -138,5 +138,7 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         cooperation_id: Optional[UUID] = None,
     ) -> AcceptCoordinationTransferUseCase.Response:
         return AcceptCoordinationTransferUseCase.Response(
-            rejection_reason=rejection_reason, cooperation_id=cooperation_id
+            rejection_reason=rejection_reason,
+            cooperation_id=cooperation_id,
+            transfer_request_id=uuid4(),
         )

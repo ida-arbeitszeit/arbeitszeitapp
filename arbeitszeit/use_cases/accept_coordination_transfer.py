@@ -27,6 +27,7 @@ class AcceptCoordinationTransferUseCase:
 
         rejection_reason: Optional[RejectionReason]
         cooperation_id: Optional[UUID]
+        transfer_request_id: UUID
 
         @property
         def is_rejected(self) -> bool:
@@ -36,11 +37,19 @@ class AcceptCoordinationTransferUseCase:
         try:
             transfer_request, cooperation = self._validate_request(request)
         except self.Response.RejectionReason as reason:
-            return self.Response(rejection_reason=reason, cooperation_id=None)
+            return self.Response(
+                rejection_reason=reason,
+                cooperation_id=None,
+                transfer_request_id=request.transfer_request_id,
+            )
         cooperation_id = self._create_new_coordination_tenure(
             transfer_request, cooperation
         )
-        return self.Response(rejection_reason=None, cooperation_id=cooperation_id)
+        return self.Response(
+            rejection_reason=None,
+            cooperation_id=cooperation_id,
+            transfer_request_id=request.transfer_request_id,
+        )
 
     def _validate_request(
         self, request: Request
