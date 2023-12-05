@@ -19,7 +19,6 @@ class AcceptCoordinationTransferUseCase:
 
     @dataclass
     class Response:
-        @dataclass
         class RejectionReason(Exception, Enum):
             transfer_request_not_found = auto()
             transfer_request_closed = auto()
@@ -53,7 +52,7 @@ class AcceptCoordinationTransferUseCase:
         if result is None:
             raise self.Response.RejectionReason.transfer_request_not_found
         transfer_request, cooperation = result
-        if self._cooperation_has_a_coordination_tenure_after_transfer_request(
+        if self._cooperation_has_a_coordination_tenure_starting_after_transfer_request(
             cooperation=cooperation, transfer_request=transfer_request
         ):
             raise self.Response.RejectionReason.transfer_request_closed
@@ -69,7 +68,7 @@ class AcceptCoordinationTransferUseCase:
         )
         return new_tenure.cooperation
 
-    def _cooperation_has_a_coordination_tenure_after_transfer_request(
+    def _cooperation_has_a_coordination_tenure_starting_after_transfer_request(
         self, transfer_request: CoordinationTransferRequest, cooperation: Cooperation
     ) -> bool:
         latest_coordination_tenure_of_cooperation = (
