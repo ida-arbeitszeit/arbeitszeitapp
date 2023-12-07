@@ -55,22 +55,18 @@ from tests.datetime_service import FakeDatetimeService
 
 @dataclass
 class MemberGenerator:
-    account_generator: AccountGenerator
     email_generator: EmailGenerator
-    database: DatabaseGateway
-    datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
     confirm_member_use_case: confirm_member.ConfirmMemberUseCase
-    password_hasher: PasswordHasher
 
-    def create_member_record(
+    def create_member(
         self,
         *,
         email: Optional[str] = None,
         name: str = "test member name",
         password: str = "password",
         confirmed: bool = True,
-    ) -> records.Member:
+    ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
         register_response = self.register_member_use_case.register_member(
@@ -86,25 +82,7 @@ class MemberGenerator:
                 )
             )
             assert confirm_response.is_confirmed
-        member = self.database.get_members().with_id(register_response.user_id).first()
-        assert member
-        return member
-
-    def create_member(
-        self,
-        *,
-        email: Optional[str] = None,
-        name: str = "test member name",
-        password: str = "password",
-        confirmed: bool = True,
-    ) -> UUID:
-        member = self.create_member_record(
-            email=email,
-            name=name,
-            password=password,
-            confirmed=confirmed,
-        )
-        return member.id
+        return register_response.user_id
 
 
 @dataclass
