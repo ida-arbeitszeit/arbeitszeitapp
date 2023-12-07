@@ -9,7 +9,7 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class CreatePlanDraftRequest:
+class Request:
     costs: ProductionCosts
     product_name: str
     production_unit: str
@@ -20,12 +20,13 @@ class CreatePlanDraftRequest:
     planner: UUID
 
 
-@dataclass
-class CreatePlanDraftResponse:
-    class RejectionReason(Exception, Enum):
-        negative_plan_input = auto()
-        planner_does_not_exist = auto()
+class RejectionReason(Exception, Enum):
+    negative_plan_input = auto()
+    planner_does_not_exist = auto()
 
+
+@dataclass
+class Response:
     draft_id: Optional[UUID]
     rejection_reason: Optional[RejectionReason]
 
@@ -39,7 +40,7 @@ class CreatePlanDraft:
     database: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, request: CreatePlanDraftRequest) -> CreatePlanDraftResponse:
+    def __call__(self, request: Request) -> Response:
         if (
             request.costs.labour_cost < 0
             or request.costs.means_cost < 0
@@ -47,14 +48,14 @@ class CreatePlanDraft:
             or request.production_amount < 0
             or request.timeframe_in_days < 0
         ):
-            return CreatePlanDraftResponse(
+            return Response(
                 draft_id=None,
-                rejection_reason=CreatePlanDraftResponse.RejectionReason.negative_plan_input,
+                rejection_reason=RejectionReason.negative_plan_input,
             )
         if not self.database.get_companies().with_id(request.planner):
-            return CreatePlanDraftResponse(
+            return Response(
                 draft_id=None,
-                rejection_reason=CreatePlanDraftResponse.RejectionReason.planner_does_not_exist,
+                rejection_reason=RejectionReason.planner_does_not_exist,
             )
 
         draft = self.database.create_plan_draft(
@@ -68,4 +69,4 @@ class CreatePlanDraft:
             is_public_service=request.is_public_service,
             creation_timestamp=self.datetime_service.now(),
         )
-        return CreatePlanDraftResponse(draft_id=draft.id, rejection_reason=None)
+        return Response(draft_id=draft.id, rejection_reason=None)

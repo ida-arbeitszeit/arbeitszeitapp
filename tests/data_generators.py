@@ -24,10 +24,7 @@ from arbeitszeit.use_cases.create_cooperation import (
     CreateCooperation,
     CreateCooperationRequest,
 )
-from arbeitszeit.use_cases.create_plan_draft import (
-    CreatePlanDraft,
-    CreatePlanDraftRequest,
-)
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft, Request
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -315,7 +312,7 @@ class PlanGenerator:
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
-            request=CreatePlanDraftRequest(
+            request=Request(
                 costs=costs,
                 product_name=product_name,
                 production_unit=production_unit,
