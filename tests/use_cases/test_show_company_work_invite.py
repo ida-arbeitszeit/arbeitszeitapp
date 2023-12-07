@@ -34,20 +34,20 @@ class TestExistingMemberWithNonMatchingInvite(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.invited_member = self.member_generator.create_member_record()
-        self.other_member = self.member_generator.create_member_record()
+        self.invited_member = self.member_generator.create_member()
+        self.other_member = self.member_generator.create_member()
         self.company = self.company_generator.create_company_record()
         invite_response = self.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
-                worker=self.invited_member.id,
+                worker=self.invited_member,
             )
         )
         self.invite_id = invite_response.invite_id
         assert self.invite_id
         request = ShowCompanyWorkInviteDetailsRequest(
             invite=self.invite_id,
-            member=self.other_member.id,
+            member=self.other_member,
         )
         self.response = self.use_case.show_company_work_invite_details(request)
 
@@ -60,10 +60,10 @@ class TestExistingMemberWithoutAnyInviteTest(TestCase):
         self.injector = get_dependency_injector()
         self.use_case = self.injector.get(ShowCompanyWorkInviteDetailsUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
-        self.invited_member = self.member_generator.create_member_record()
+        self.invited_member = self.member_generator.create_member()
         request = ShowCompanyWorkInviteDetailsRequest(
             invite=uuid4(),
-            member=self.invited_member.id,
+            member=self.invited_member,
         )
         self.response = self.use_case.show_company_work_invite_details(request)
 
@@ -79,21 +79,21 @@ class TestExistingMemberWithMatchingInvite(TestCase):
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.member = self.member_generator.create_member_record()
+        self.member = self.member_generator.create_member()
         self.company = self.company_generator.create_company_record(
             name=self.expected_company_name
         )
         invite_response = self.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
-                worker=self.member.id,
+                worker=self.member,
             )
         )
         self.invite_id = invite_response.invite_id
         assert self.invite_id
         request = ShowCompanyWorkInviteDetailsRequest(
             invite=self.invite_id,
-            member=self.member.id,
+            member=self.member,
         )
         self.response = self.use_case.show_company_work_invite_details(request)
 
