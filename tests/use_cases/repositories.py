@@ -398,6 +398,32 @@ class PlanDraftResult(QueryResultImpl[records.PlanDraft]):
                 drafts_deleted += 1
         return drafts_deleted
 
+    def joined_with_planner_and_email_address(
+        self,
+    ) -> QueryResultImpl[
+        tuple[records.PlanDraft, records.Company, records.EmailAddress]
+    ]:
+        def items() -> (
+            Iterable[tuple[records.PlanDraft, records.Company, records.EmailAddress]]
+        ):
+            for draft in self.items():
+                planner = self.database.companies[draft.planner]
+                credentials_id = self.database.relationships.account_credentials_to_company.get_left_value(
+                    planner.id
+                )
+                if not credentials_id:
+                    continue
+                account_credentials = self.database.account_credentials[credentials_id]
+                email_address = self.database.email_addresses[
+                    account_credentials.email_address
+                ]
+                yield draft, planner, email_address
+
+        return QueryResultImpl(
+            database=self.database,
+            items=items,
+        )
+
     def update(self) -> PlanDraftUpdate:
         return PlanDraftUpdate(
             database=self.database,

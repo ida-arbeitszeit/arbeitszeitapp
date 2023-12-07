@@ -175,6 +175,13 @@ class UseCaseTests(BaseUseCaseTestCase):
             response.is_plan_successfully_filed,
         )
 
+    def test_cannot_file_plan_if_planner_is_not_confirmed(self) -> None:
+        planner = self.company_generator.create_company(confirmed=False)
+        draft = self.plan_generator.draft_plan(planner=planner)
+        request = self.create_request(draft=draft, filing_company=planner)
+        response = self.use_case.file_plan_with_accounting(request)
+        assert not response.is_plan_successfully_filed
+
 
 class NotificationTests(BaseUseCaseTestCase):
     def setUp(self) -> None:

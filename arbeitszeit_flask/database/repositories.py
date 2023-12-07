@@ -471,6 +471,35 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
     def update(self) -> PlanDraftUpdate:
         return PlanDraftUpdate(db=self.db, query=self.query)
 
+    def joined_with_planner_and_email_address(
+        self,
+    ) -> FlaskQueryResult[
+        tuple[records.PlanDraft, records.Company, records.EmailAddress]
+    ]:
+        def mapper(
+            row: Any,
+        ) -> tuple[records.PlanDraft, records.Company, records.EmailAddress]:
+            return (
+                DatabaseGatewayImpl.plan_draft_from_orm(row[0]),
+                DatabaseGatewayImpl.company_from_orm(row[1]),
+                DatabaseGatewayImpl.email_address_from_orm(row[2]),
+            )
+
+        company = aliased(models.Company)
+        user = aliased(models.User)
+        email = aliased(models.Email)
+        query = (
+            self.query.join(company, models.PlanDraft.planner == company.id)
+            .join(user, company.user_id == user.id)
+            .join(email, user.email_address == email.address)
+            .with_entities(models.PlanDraft, company, email)
+        )
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=query,
+        )
+
 
 @dataclass
 class PlanDraftUpdate:
