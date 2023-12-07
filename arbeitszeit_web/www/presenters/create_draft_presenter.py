@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 from arbeitszeit.plan_details import PlanDetails
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftResponse
+from arbeitszeit.use_cases.create_plan_draft import Response
 from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.notification import Notifier
@@ -51,7 +51,7 @@ class CreateDraftPresenter:
     notifier: Notifier
     translator: Translator
 
-    def present_plan_creation(self, response: CreatePlanDraftResponse) -> ViewModel:
+    def present_plan_creation(self, response: Response) -> ViewModel:
         redirect_url: Optional[str]
         if response.draft_id is None:
             redirect_url = None
