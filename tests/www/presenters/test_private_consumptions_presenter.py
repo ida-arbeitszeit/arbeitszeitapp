@@ -1,11 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
 from uuid import uuid4
 
-from arbeitszeit.use_cases.query_private_consumptions import (
-    PrivateConsumptionsQueryResponse,
-)
+from arbeitszeit.use_cases import query_private_consumptions as use_case
 from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
     PrivateConsumptionsPresenter,
 )
@@ -32,15 +29,17 @@ class PresenterTests(BaseTestCase):
 
     def create_response_with_one_consumption(
         self, consumption_timestamp: datetime = datetime(2020, 1, 1)
-    ) -> List[PrivateConsumptionsQueryResponse]:
-        return [
-            PrivateConsumptionsQueryResponse(
-                consumption_date=consumption_timestamp,
-                plan_id=uuid4(),
-                product_name="test product",
-                product_description="test product description",
-                price_per_unit=Decimal("1"),
-                amount=1,
-                price_total=Decimal("1"),
-            )
-        ]
+    ) -> use_case.Response:
+        return use_case.Response(
+            consumptions=[
+                use_case.Consumption(
+                    consumption_date=consumption_timestamp,
+                    plan_id=uuid4(),
+                    product_name="test product",
+                    product_description="test product description",
+                    price_per_unit=Decimal("1"),
+                    amount=1,
+                    price_total=Decimal("1"),
+                )
+            ]
+        )

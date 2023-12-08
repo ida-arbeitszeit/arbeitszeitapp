@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-from typing import Iterable, List
+from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.query_private_consumptions import (
-    PrivateConsumptionsQueryResponse,
-)
+from arbeitszeit.use_cases.query_private_consumptions import Response
 
 
 @dataclass
@@ -25,12 +23,9 @@ class PrivateConsumptionsPresenter:
 
     datetime_service: DatetimeService
 
-    def present_private_consumptions(
-        self, use_case_response: Iterable[PrivateConsumptionsQueryResponse]
-    ) -> ViewModel:
-        consumptions = list(use_case_response)
+    def present_private_consumptions(self, response: Response) -> ViewModel:
         return self.ViewModel(
-            is_consumptions_visible=bool(consumptions),
+            is_consumptions_visible=bool(response.consumptions),
             consumptions=[
                 self.ViewModel.Consumption(
                     consumption_date=self.datetime_service.format_datetime(
@@ -43,6 +38,6 @@ class PrivateConsumptionsPresenter:
                     consumption_amount=str(consumption.amount),
                     price_total=str(consumption.price_total),
                 )
-                for consumption in consumptions
+                for consumption in response.consumptions
             ],
         )
