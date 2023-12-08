@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.accept_coordination_transfer import (
@@ -29,10 +30,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         self,
     ) -> None:
         response = self.use_case.accept_coordination_transfer(
-            AcceptCoordinationTransferUseCase.Request(
-                transfer_request_id=uuid4(),
-                accepting_company=self.company_generator.create_company(),
-            )
+            self.create_use_case_request(transfer_request_id=uuid4())
         )
         assert response.is_rejected
         self.assertTrue(
@@ -55,21 +53,8 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def test_use_case_fails_if_accepting_company_is_not_candidate(
         self,
     ) -> None:
-        accepting_company = self.company_generator.create_company()
-        candidate = self.company_generator.create_company()
-        requester_and_coordinator = self.company_generator.create_company()
-        transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            requester=requester_and_coordinator,
-            cooperation=self.cooperation_generator.create_cooperation(
-                coordinator=requester_and_coordinator
-            ),
-            candidate=candidate,
-        )
         response = self.use_case.accept_coordination_transfer(
-            request=AcceptCoordinationTransferUseCase.Request(
-                transfer_request_id=transfer_request,
-                accepting_company=accepting_company,
-            )
+            self.create_use_case_request(accepting_company_is_candidate=False)
         )
         assert response.is_rejected
         self.assertTrue(
@@ -87,50 +72,19 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def test_after_accepting_the_candidate_is_one_of_the_coordinators_of_cooperation(
         self,
     ) -> None:
-        present_coordinator = self.company_generator.create_company()
-        cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=present_coordinator
-        )
-        candidate_and_expected_coordinator = self.company_generator.create_company()
-
-        transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            requester=present_coordinator,
-            cooperation=cooperation,
-            candidate=candidate_and_expected_coordinator,
-        )
-
-        self.use_case.accept_coordination_transfer(
-            request=AcceptCoordinationTransferUseCase.Request(
-                transfer_request_id=transfer_request,
-                accepting_company=candidate_and_expected_coordinator,
-            )
-        )
-        self.assertCompanyHasCoordinatedCooperation(
-            candidate_and_expected_coordinator, cooperation
-        )
+        candidate = self.company_generator.create_company()
+        request = self.create_use_case_request(candidate=candidate)
+        response = self.use_case.accept_coordination_transfer(request=request)
+        self.assertCompanyHasCoordinatedCooperation(candidate, response.cooperation_id)
 
     def test_after_accepting_the_candidate_is_current_coordinator_of_cooperation(
         self,
     ) -> None:
-        present_coordinator = self.company_generator.create_company()
-        cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=present_coordinator
-        )
-        candidate_and_expected_coordinator = self.company_generator.create_company()
-
-        transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            requester=present_coordinator,
-            cooperation=cooperation,
-            candidate=candidate_and_expected_coordinator,
-        )
-        self.use_case.accept_coordination_transfer(
-            request=AcceptCoordinationTransferUseCase.Request(
-                transfer_request_id=transfer_request,
-                accepting_company=candidate_and_expected_coordinator,
-            )
-        )
+        candidate = self.company_generator.create_company()
+        request = self.create_use_case_request(candidate=candidate)
+        response = self.use_case.accept_coordination_transfer(request=request)
         self.assertCompanyIsCurrentCoordinatorOfCooperation(
-            candidate_and_expected_coordinator, cooperation
+            candidate, response.cooperation_id
         )
 
     def test_original_coordination_transfer_id_is_returned_if_use_case_succeeds(
@@ -145,27 +99,38 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         self,
     ) -> None:
         response = self.use_case.accept_coordination_transfer(
-            AcceptCoordinationTransferUseCase.Request(
-                transfer_request_id=uuid4(),
-                accepting_company=self.company_generator.create_company(),
-            )
+            self.create_use_case_request(transfer_request_id=uuid4())
         )
         self.assertTrue(response.is_rejected)
         self.assertEqual(response.transfer_request_id, response.transfer_request_id)
 
-    def create_use_case_request(self) -> AcceptCoordinationTransferUseCase.Request:
+    def create_use_case_request(
+        self,
+        transfer_request_id: Optional[UUID] = None,
+        candidate: Optional[UUID] = None,
+        accepting_company: Optional[UUID] = None,
+        accepting_company_is_candidate: bool = True,
+    ) -> AcceptCoordinationTransferUseCase.Request:
         coordinator = self.company_generator.create_company()
-        candidate_and_accepting_company = self.company_generator.create_company()
-        transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
-            requester=coordinator,
-            cooperation=self.cooperation_generator.create_cooperation(
-                coordinator=coordinator
-            ),
-            candidate=candidate_and_accepting_company,
-        )
+        if candidate is None:
+            candidate = self.company_generator.create_company()
+        if accepting_company is None:
+            accepting_company = (
+                candidate
+                if accepting_company_is_candidate
+                else self.company_generator.create_company()
+            )
+        if transfer_request_id is None:
+            transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
+                requester=coordinator,
+                cooperation=self.cooperation_generator.create_cooperation(
+                    coordinator=coordinator
+                ),
+                candidate=candidate,
+            )
         return AcceptCoordinationTransferUseCase.Request(
             transfer_request_id=transfer_request_id,
-            accepting_company=candidate_and_accepting_company,
+            accepting_company=accepting_company,
         )
 
     def assertCompanyHasCoordinatedCooperation(
