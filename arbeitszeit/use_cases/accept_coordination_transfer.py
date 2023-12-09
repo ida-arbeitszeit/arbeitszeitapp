@@ -16,15 +16,18 @@ class AcceptCoordinationTransferUseCase:
     @dataclass
     class Request:
         transfer_request_id: UUID
+        accepting_company: UUID
 
     @dataclass
     class Response:
         class RejectionReason(Exception, Enum):
             transfer_request_not_found = auto()
             transfer_request_closed = auto()
+            accepting_company_is_not_candidate = auto()
 
         rejection_reason: Optional[RejectionReason]
         cooperation_id: Optional[UUID]
+        transfer_request_id: UUID
 
         @property
         def is_rejected(self) -> bool:
@@ -34,11 +37,19 @@ class AcceptCoordinationTransferUseCase:
         try:
             transfer_request, cooperation = self._validate_request(request)
         except self.Response.RejectionReason as reason:
-            return self.Response(rejection_reason=reason, cooperation_id=None)
+            return self.Response(
+                rejection_reason=reason,
+                cooperation_id=None,
+                transfer_request_id=request.transfer_request_id,
+            )
         cooperation_id = self._create_new_coordination_tenure(
             transfer_request, cooperation
         )
-        return self.Response(rejection_reason=None, cooperation_id=cooperation_id)
+        return self.Response(
+            rejection_reason=None,
+            cooperation_id=cooperation_id,
+            transfer_request_id=request.transfer_request_id,
+        )
 
     def _validate_request(
         self, request: Request
@@ -52,6 +63,8 @@ class AcceptCoordinationTransferUseCase:
         if result is None:
             raise self.Response.RejectionReason.transfer_request_not_found
         transfer_request, cooperation = result
+        if transfer_request.candidate != request.accepting_company:
+            raise self.Response.RejectionReason.accepting_company_is_not_candidate
         if self._cooperation_has_a_coordination_tenure_starting_after_transfer_request(
             cooperation=cooperation, transfer_request=transfer_request
         ):

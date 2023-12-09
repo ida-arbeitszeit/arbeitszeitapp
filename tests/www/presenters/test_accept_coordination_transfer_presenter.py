@@ -70,6 +70,37 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         expected = self.translator.gettext("This request is not valid anymore.")
         self.assertEqual(self.notifier.warnings[0], expected)
 
+    def test_that_no_redirect_url_is_returned_if_accepting_company_is_not_candidate(
+        self,
+    ) -> None:
+        response = self.presenter.present(
+            self.uc_response(
+                rejection_reason=rejection_reason.accepting_company_is_not_candidate
+            )
+        )
+        self.assertIsNone(response.redirect_url)
+
+    def test_that_status_code_is_403_if_accepting_company_is_not_candidate(
+        self,
+    ) -> None:
+        response = self.presenter.present(
+            self.uc_response(
+                rejection_reason=rejection_reason.accepting_company_is_not_candidate
+            )
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_that_correct_warning_is_displayed_if_accepting_company_is_not_candidate(
+        self,
+    ) -> None:
+        self.presenter.present(
+            self.uc_response(
+                rejection_reason=rejection_reason.accepting_company_is_not_candidate
+            )
+        )
+        expected = self.translator.gettext("You are not the candidate of this request.")
+        self.assertEqual(self.notifier.warnings[0], expected)
+
     def test_that_a_redirect_url_is_returned_if_transfer_request_was_accepted(
         self,
     ) -> None:
@@ -107,5 +138,7 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         cooperation_id: Optional[UUID] = None,
     ) -> AcceptCoordinationTransferUseCase.Response:
         return AcceptCoordinationTransferUseCase.Response(
-            rejection_reason=rejection_reason, cooperation_id=cooperation_id
+            rejection_reason=rejection_reason,
+            cooperation_id=cooperation_id,
+            transfer_request_id=uuid4(),
         )

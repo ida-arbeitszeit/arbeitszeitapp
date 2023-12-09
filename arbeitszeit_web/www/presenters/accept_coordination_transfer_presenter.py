@@ -66,4 +66,13 @@ class AcceptCoordinationTransferPresenter:
             warning = self.translator.gettext("This request is not valid anymore.")
             status_code = 409
             return warning, status_code
+        elif (
+            rejection_reason
+            is AcceptCoordinationTransferUseCase.Response.RejectionReason.accepting_company_is_not_candidate
+        ):
+            warning = self.translator.gettext(
+                "You are not the candidate of this request."
+            )
+            status_code = 403
+            return warning, status_code
         assert_never(rejection_reason)

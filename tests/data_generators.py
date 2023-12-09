@@ -544,13 +544,18 @@ class CoordinationTransferRequestGenerator:
     def create_coordination_transfer_request(
         self,
         requester: Optional[UUID] = None,
+        coordinator: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
     ) -> UUID:
         if requester is None:
             requester = self.company_generator.create_company()
         if cooperation is None:
-            cooperation = self.cooperation_generator.create_cooperation()
+            if coordinator is None:
+                coordinator = self.company_generator.create_company()
+            cooperation = self.cooperation_generator.create_cooperation(
+                coordinator=coordinator
+            )
         if candidate is None:
             candidate = self.company_generator.create_company()
         request_response = self.request_transfer_use_case.request_transfer(
@@ -560,7 +565,7 @@ class CoordinationTransferRequestGenerator:
                 candidate=candidate,
             )
         )
-        assert not request_response.is_rejected
+        assert not request_response.is_rejected, request_response.rejection_reason
         assert request_response.transfer_request
         transfer_request = request_response.transfer_request
         return transfer_request
