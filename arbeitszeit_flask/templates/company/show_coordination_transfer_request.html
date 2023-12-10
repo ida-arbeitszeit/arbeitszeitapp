@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="section has-text-centered">
+        <h1 class="title">{{ gettext("Coordination Transfer Request") }}</h1>
+        <br>
+        <div class="table-container">
+            <table class="table has-text-left mx-auto">
+                <tbody>
+                    <tr>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Request date") }}</td>
+                        <td class="has-text-left">{{ request_details.request_date }}</td>
+                    </tr>
+                    <tr>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Status") }}</td>
+                        <td class="has-text-left">{{ request_details.request_status }}</td>
+                    </tr>
+                    <tr>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Cooperation") }}</td>
+                        <td class="has-text-left">
+                            <a href="{{ request_details.cooperation_url }}">{{ request_details.cooperation_name }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="has-text-left has-text-weight-semibold">{{ gettext("Candidate") }}</td>
+                        <td class="has-text-left">
+                            <a href="{{ request_details.candidate_url }}">{{ request_details.candidate_name }}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% if request_details.current_user_is_candidate and request_details.request_is_pending %}
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="label">{{ gettext("You are the candidate. Do you accept?") }}</div>
+            <button class="button is-primary">{{ gettext("Accept coordination transfer") }}</button>
+        </form>
+        {% endif %}
+
+    </section>
+{% endblock %}

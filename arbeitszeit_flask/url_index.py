@@ -243,3 +243,9 @@ class GeneralUrlIndex:
 
     def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
         return url_for("main_company.request_coordination_transfer", coop_id=coop_id)
+
+    def get_show_coordination_transfer_request_url(self, transfer_request: UUID) -> str:
+        return url_for(
+            "main_company.show_coordination_transfer_request",
+            transfer_request=transfer_request,
+        )

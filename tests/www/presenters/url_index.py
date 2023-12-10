@@ -82,3 +82,4 @@ class UrlIndexTestImpl:
     get_unreviewed_plans_list_view_url = UrlIndexMethod()
     get_user_account_details_url = UrlIndexMethod()
     get_work_invite_url = UrlIndexMethod()
+    get_show_coordination_transfer_request_url = UrlIndexMethod()

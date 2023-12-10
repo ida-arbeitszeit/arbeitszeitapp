@@ -7,7 +7,6 @@ from arbeitszeit.use_cases.accept_coordination_transfer import (
     AcceptCoordinationTransferUseCase,
 )
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -33,7 +32,10 @@ class AcceptCoordinationTransferPresenter:
                 use_case_response.rejection_reason
             )
             self.notifier.display_warning(warning)
-            return ViewModel(status_code=status_code, redirect_url=None)
+            return ViewModel(
+                status_code=status_code,
+                redirect_url=None,
+            )
         else:
             assert use_case_response.cooperation_id
             self.notifier.display_info(
@@ -42,9 +44,9 @@ class AcceptCoordinationTransferPresenter:
                 )
             )
             return ViewModel(
-                status_code=304,
-                redirect_url=self.url_index.get_coop_summary_url(
-                    coop_id=use_case_response.cooperation_id, user_role=UserRole.company
+                status_code=302,
+                redirect_url=self.url_index.get_show_coordination_transfer_request_url(
+                    transfer_request=use_case_response.transfer_request_id,
                 ),
             )
 

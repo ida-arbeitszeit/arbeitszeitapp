@@ -176,6 +176,9 @@ class UrlIndex(Protocol):
     def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
         ...
 
+    def get_show_coordination_transfer_request_url(self, transfer_request: UUID) -> str:
+        ...
+
 
 @dataclass
 class UserUrlIndex:
