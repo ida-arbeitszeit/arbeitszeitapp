@@ -141,7 +141,7 @@ environment variables:
      export FLASK_DEBUG=1
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
-     export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
+     export ARBEITSZEIT_APP_SERVER_NAME=127.0.0.1:5000
      export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 You may find it useful to copy these shell commands into a script file and 
@@ -161,7 +161,8 @@ directory of the repo (where ``.envrc`` resides), Direnv will automatically
 set the environment variables for you.  If you then add the line ``use flake`` 
 at the top of your ``.envrc`` file, Direnv will first invoke Nix and install 
 all dependencies in the virtual environment ---
-automatically, every time you enter the root code directory. Note that the
+automatically, every time you enter the root code directory (for the line ``use flake`` 
+to have effect you might need to install nix-direnv). Note that the
 first time you use Direnv, and any time you change ``.envrc``, you will need
 to run the command ``direnv allow`` to enable Direnv to proceed.
 
@@ -209,21 +210,20 @@ Then, here is a sample ``custom_settings.py``:
      
      SECRET_KEY = 'somesecretkey'
      SQLALCHEMY_DATABASE_URI = 'postgresql:///<name_of_your_development_DB>'
-     SERVER_NAME = "localhost:5000"
+     SERVER_NAME = "127.0.0.1:5000"
 
 After configuring the database connection, you need to run the database
 migrations via ``flask db upgrade``. It is mandatory to run this command 
 once before developing for the first time.
 
-Afterwards, you can start the development server with ``python -m flask
-run -h localhost``.  Unfortunately ``flask run`` might not work due to
-a bug in the ``werkzeug`` library.
+Afterwards, you can start the development server with ``flask
+run``.
 
 Create a user by signing up and providing the required fields.  You
 will be redirected to a site that asks to confirm your account
 creating with the link provided in your e-mail.  This link can be found
-in the command line when you run ``python -m flask run`` starting with
-*<p><a href="* until the closing quotation marks.  Copy this link to your
+in the command line starting with
+*<p><a href="* until the closing quotation marks. Visit this link in your
 browser, and your account will be activated.
 
 

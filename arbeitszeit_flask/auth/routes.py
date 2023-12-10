@@ -65,7 +65,7 @@ def set_language(language: str):
 
 
 # Member
-@auth.route("/member/unconfirmed")
+@auth.route("/unconfirmed-member")
 @with_injection()
 @login_required
 def unconfirmed_member(authenticator: MemberAuthenticator):
@@ -74,14 +74,14 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
     return redirect(url_for("auth.start"))
 
 
-@auth.route("/member/signup", methods=["GET", "POST"])
+@auth.route("/signup-member", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
 def signup_member(view: SignupMemberView):
     return view.handle_request()
 
 
-@auth.route("/member/confirm/<token>")
+@auth.route("/confirm-member/<token>")
 @commit_changes
 @with_injection()
 def confirm_email_member(
@@ -96,7 +96,7 @@ def confirm_email_member(
     return redirect(url_for("auth.unconfirmed_member"))
 
 
-@auth.route("/member/login", methods=["GET", "POST"])
+@auth.route("/login-member", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
 def login_member(

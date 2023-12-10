@@ -4,7 +4,7 @@ from typing import Any, Callable
 from flask import Blueprint, redirect
 
 from arbeitszeit_flask import types
-from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.dependency_injection import create_dependency_injector
 from arbeitszeit_web.www.authentication import CompanyAuthenticator
 
 main_company = Blueprint("main_company", __name__)
@@ -21,27 +21,19 @@ class CompanyRoute:
     def __call__(self, view_function: Callable[..., types.Response]):
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
-            return view_function(*args, **kwargs)
-
-        return self._apply_decorators(_wrapper)
-
-    def _apply_decorators(self, function):
-        injection = with_injection()
-        return main_company.route(self.route_string, methods=self.methods)(
-            injection(self._check_is_company_and_confirmed(function))
-        )
-
-    @with_injection()
-    def _check_is_company_and_confirmed(
-        self,
-        func,
-        authenticator: CompanyAuthenticator,
-    ):
-        @wraps(func)
-        def decorated_function(*args, **kwargs):
+            injector = create_dependency_injector()
+            authenticator = injector.get(CompanyAuthenticator)
             redirect_url = authenticator.redirect_user_to_company_login()
             if redirect_url:
                 return redirect(redirect_url)
-            return func(*args, **kwargs)
+            return injector.call_with_injection(
+                view_function,
+                args=args,
+                kwargs=kwargs,
+            )
 
-        return decorated_function
+        main_company.route(self.route_string, methods=self.methods)(_wrapper)
+        # We return the original view_function to mimic the behavior
+        # of flask itself in this regard. The flask @route decorator
+        # also returns the original function that was passed into it.
+        return view_function
