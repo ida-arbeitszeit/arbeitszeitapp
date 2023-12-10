@@ -35,9 +35,7 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         expected_date = datetime(2020, 1, 4)
         self.datetime_service.freeze_time(expected_date)
         response = self.use_case.get_details(
-            self.use_case_request(
-                requester=requester, coordinator=coordinator, cooperation=cooperation
-            )
+            self.use_case_request(requester=requester, cooperation=cooperation)
         )
         assert response
         self.assertEqual(expected_date, response.request_date)
@@ -53,7 +51,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         response = self.use_case.get_details(
             self.use_case_request(
                 requester=requester,
-                coordinator=coordinator,
                 cooperation=cooperation,
             )
         )
@@ -73,7 +70,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         response = self.use_case.get_details(
             self.use_case_request(
                 requester=requester,
-                coordinator=coordinator,
                 cooperation=cooperation,
             )
         )
@@ -90,7 +86,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         response = self.use_case.get_details(
             self.use_case_request(
                 requester=requester,
-                coordinator=coordinator,
                 cooperation=cooperation,
                 candidate=candidate,
             )
@@ -110,7 +105,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         response = self.use_case.get_details(
             self.use_case_request(
                 requester=requester,
-                coordinator=coordinator,
                 cooperation=cooperation,
                 candidate=candidate,
             )
@@ -125,9 +119,7 @@ class GetTransferRequestDetailsTests(BaseTestCase):
             coordinator=coordinator
         )
         response = self.use_case.get_details(
-            self.use_case_request(
-                requester=requester, coordinator=coordinator, cooperation=cooperation
-            )
+            self.use_case_request(requester=requester, cooperation=cooperation)
         )
         assert response
         self.assertTrue(response.request_is_pending)
@@ -141,7 +133,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         candidate = self.company_generator.create_company()
         transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
             requester=requester,
-            coordinator=coordinator,
             cooperation=cooperation,
             candidate=candidate,
         )
@@ -160,7 +151,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
     def use_case_request(
         self,
         requester: UUID,
-        coordinator: UUID,
         cooperation: UUID,
         candidate: Optional[UUID] = None,
     ) -> UseCase.Request:
@@ -168,7 +158,6 @@ class GetTransferRequestDetailsTests(BaseTestCase):
             candidate = self.company_generator.create_company()
         transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
             requester=requester,
-            coordinator=coordinator,
             cooperation=cooperation,
             candidate=candidate,
         )
