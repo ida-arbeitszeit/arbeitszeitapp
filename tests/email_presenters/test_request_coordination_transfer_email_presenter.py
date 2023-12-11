@@ -1,4 +1,6 @@
 from html import escape
+from typing import Optional
+from uuid import UUID, uuid4
 
 from arbeitszeit import email_notifications
 from arbeitszeit_web.email.request_coordination_transfer_presenter import (
@@ -77,14 +79,26 @@ class RequestCoordinationTransferEmailPresenterTests(BaseTestCase):
             escape(dangerous_candidate_name), self.mail_service.sent_mails[0].html
         )
 
+    def test_that_link_to_transfer_request_appears_in_mail_body(self) -> None:
+        transfer_request = uuid4()
+        expected_link = self.url_index.get_show_coordination_transfer_request_url(
+            transfer_request
+        )
+        self.presenter.present(self.create_email(transfer_request=transfer_request))
+        self.assertIn(expected_link, self.mail_service.sent_mails[0].html)
+
     def create_email(
         self,
         candidate_mail: str = "candidate@comp.any",
         candidate_name: str = "candidate xy",
         cooperation_name: str = "cooperation name",
+        transfer_request: Optional[UUID] = None,
     ) -> email_notifications.CoordinationTransferRequest:
+        if transfer_request is None:
+            transfer_request = uuid4()
         return email_notifications.CoordinationTransferRequest(
             candidate_email=candidate_mail,
             candidate_name=candidate_name,
             cooperation_name=cooperation_name,
+            transfer_request=transfer_request,
         )

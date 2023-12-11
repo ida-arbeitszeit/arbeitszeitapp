@@ -55,6 +55,7 @@ class CoordinationTransferRequest:
     candidate_email: str
     candidate_name: str
     cooperation_name: str
+    transfer_request: UUID
 
 
 # This type definition can be used by implementations of the

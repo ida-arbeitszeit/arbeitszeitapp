@@ -248,4 +248,5 @@ class GeneralUrlIndex:
         return url_for(
             "main_company.show_coordination_transfer_request",
             transfer_request=transfer_request,
+            _external=True,
         )
