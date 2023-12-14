@@ -241,3 +241,6 @@ class GeneralUrlIndex:
             transfer_request=transfer_request,
             _external=True,
         )
+
+    def get_change_email_url(self, *, token: str) -> str:
+        return url_for("main_user.change_email_address", token=token, _external=True)

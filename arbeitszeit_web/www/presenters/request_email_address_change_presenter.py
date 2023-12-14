@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.use_cases import request_email_address_change as use_case
+from arbeitszeit_web.forms import RequestEmailAddressChangeForm
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -20,9 +21,16 @@ class RequestEmailAddressChangePresenter:
     notifier: Notifier
     translator: Translator
 
-    def render_response(self, uc_response: use_case.Response) -> ViewModel:
+    def render_response(
+        self, uc_response: use_case.Response, form: RequestEmailAddressChangeForm
+    ) -> ViewModel:
         redirect_url: Optional[str]
         if uc_response.is_rejected:
+            form.new_email_field.attach_error(
+                self.translator.gettext(
+                    "The email address seems to be invalid or already taken."
+                )
+            )
             redirect_url = None
             self.notifier.display_warning(
                 self.translator.gettext(
