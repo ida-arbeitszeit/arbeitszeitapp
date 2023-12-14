@@ -201,9 +201,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         company = self.company_generator.create_company_record()
-        url = self.url_index.get_company_summary_url(
-            user_role=UserRole.company, company_id=company.id
-        )
+        url = self.url_index.get_company_summary_url(company_id=company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -212,9 +210,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         company = self.company_generator.create_company_record()
-        url = self.url_index.get_company_summary_url(
-            user_role=UserRole.member, company_id=company.id
-        )
+        url = self.url_index.get_company_summary_url(company_id=company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -223,9 +219,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_accountant()
         company = self.company_generator.create_company_record()
-        url = self.url_index.get_company_summary_url(
-            user_role=UserRole.accountant, company_id=company.id
-        )
+        url = self.url_index.get_company_summary_url(company_id=company.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

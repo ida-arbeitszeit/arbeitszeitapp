@@ -67,9 +67,7 @@ class QueryPlansPresenterTests(BaseTestCase):
         table_row = presentation.results.rows[0]
         self.assertEqual(
             table_row.company_summary_url,
-            self.url_index.get_company_summary_url(
-                user_role=UserRole.member, company_id=company_id
-            ),
+            self.url_index.get_company_summary_url(company_id=company_id),
         )
 
     def test_correct_company_name_is_shown(self) -> None:
