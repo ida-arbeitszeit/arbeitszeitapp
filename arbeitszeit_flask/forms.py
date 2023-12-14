@@ -397,3 +397,18 @@ class RequestCoordinationTransferForm(Form):
 
     def cooperation_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="cooperation")
+
+
+class RequestEmailAddressChangeForm(Form):
+    new_email = StringField(
+        default="",
+        validators=[
+            validators.InputRequired(
+                message=trans.lazy_gettext("Email address is required.")
+            )
+        ],
+    )
+
+    @property
+    def new_email_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="new_email")

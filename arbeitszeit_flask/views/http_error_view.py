@@ -21,3 +21,7 @@ def http_403() -> Response:
 
 def http_409() -> Response:
     return http_error(code=409, reason="CONFLICT")
+
+
+def http_501() -> Response:
+    return http_error(code=501, reason="NOT IMPLEMENTED")
