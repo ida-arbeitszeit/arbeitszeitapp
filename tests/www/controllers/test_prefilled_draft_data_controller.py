@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftRequest
+from arbeitszeit.use_cases.create_plan_draft import Request
 from arbeitszeit_web.www.controllers.create_draft_controller import (
     CreateDraftController,
 )
@@ -28,7 +28,7 @@ class ControllerTests(BaseTestCase):
 
     def test_import_of_data_returns_a_request_object(self):
         request = self.controller.import_form_data(self.fake_form)
-        assert isinstance(request, CreatePlanDraftRequest)
+        assert isinstance(request, Request)
 
     def test_import_of_data_transforms_prd_name_string_to_correct_string(self):
         request = self.controller.import_form_data(self.fake_form)

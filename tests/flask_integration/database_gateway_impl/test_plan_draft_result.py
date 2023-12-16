@@ -3,6 +3,8 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit.records import PlanDraft, ProductionCosts
 from tests.data_generators import CompanyGenerator
 from tests.datetime_service import FakeDatetimeService
@@ -137,6 +139,52 @@ class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
         self,
     ) -> None:
         assert not self.database_gateway.get_plan_drafts().planned_by(self.planner.id)
+
+
+class JoinedWithPlannerAndEmailAddressTests(PlanDraftRepositoryBaseTests):
+    def test_that_no_results_are_returned_if_no_drafts_where_created(self) -> None:
+        assert (
+            not self.database_gateway.get_plan_drafts().joined_with_planner_and_email_address()
+        )
+
+    def test_that_one_result_is_returned_when_there_is_one_plan_draft(self) -> None:
+        self.create_plan_draft()
+        assert (
+            len(
+                self.database_gateway.get_plan_drafts().joined_with_planner_and_email_address()
+            )
+            == 1
+        )
+
+    def test_that_the_planner_is_the_company_that_created_the_draft(self) -> None:
+        planner = self.company_generator.create_company()
+        self.create_plan_draft(planner=planner)
+        result = (
+            self.database_gateway.get_plan_drafts()
+            .joined_with_planner_and_email_address()
+            .first()
+        )
+        assert result
+        assert result[1].id == planner
+
+    @parameterized.expand(
+        [
+            "test@test.test",
+            "test2@test2.test",
+        ]
+    )
+    def test_that_email_address_is_the_email_address_of_the_planner(
+        self, expected_email_address: str
+    ) -> None:
+        planner = self.company_generator.create_company(email=expected_email_address)
+        self.create_plan_draft(planner=planner)
+        result = (
+            self.database_gateway.get_plan_drafts()
+            .joined_with_planner_and_email_address()
+            .first()
+        )
+        assert result
+        assert result[2].address == expected_email_address
 
 
 class PlanDraftUpdateTests(PlanDraftRepositoryBaseTests):

@@ -13,9 +13,7 @@ from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
 
-plots = Blueprint(
-    "plots", __name__, template_folder="templates", static_folder="static"
-)
+plots = Blueprint("plots", __name__)
 
 
 @plots.route("/plots/global_barplot_for_certificates")

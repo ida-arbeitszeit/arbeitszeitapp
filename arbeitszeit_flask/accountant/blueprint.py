@@ -2,10 +2,9 @@ from functools import wraps
 from typing import Any, Callable, Iterable, Optional
 
 from flask import Blueprint, redirect, session, url_for
-from flask_login import login_required
 
 from arbeitszeit_flask import types
-from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.dependency_injection import create_dependency_injector
 
 main_accountant = Blueprint(
     "main_accountant",
@@ -26,16 +25,20 @@ class AccountantRoute:
     def __call__(self, view_function: Callable[..., types.Response]):
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
+            injector = create_dependency_injector()
             if not user_is_accountant():
                 return redirect(url_for("auth.zurueck"))
-            return view_function(*args, **kwargs)
+            return injector.call_with_injection(
+                view_function,
+                args=args,
+                kwargs=kwargs,
+            )
 
-        return self._apply_decorators(_wrapper)
-
-    def _apply_decorators(self, function):
-        return main_accountant.route(self.route_string, methods=self.methods)(
-            with_injection()(login_required(function))
-        )
+        main_accountant.route(self.route_string, methods=self.methods)(_wrapper)
+        # We return the original view_function to mimic the behavior
+        # of flask itself in this regard. The flask @route decorator
+        # also returns the original function that was passed into it.
+        return view_function
 
 
 def user_is_accountant():

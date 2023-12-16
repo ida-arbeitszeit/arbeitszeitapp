@@ -8,32 +8,17 @@ Subpackages
    :maxdepth: 4
 
    arbeitszeit_web.api
+   arbeitszeit_web.email
    arbeitszeit_web.formatters
    arbeitszeit_web.www
 
 Submodules
 ----------
 
-arbeitszeit\_web.authentication module
---------------------------------------
-
-.. automodule:: arbeitszeit_web.authentication
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arbeitszeit\_web.colors module
 ------------------------------
 
 .. automodule:: arbeitszeit_web.colors
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arbeitszeit\_web.email module
------------------------------
-
-.. automodule:: arbeitszeit_web.email
    :members:
    :undoc-members:
    :show-inheritance:

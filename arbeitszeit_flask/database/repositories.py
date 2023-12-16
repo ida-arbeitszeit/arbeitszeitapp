@@ -471,6 +471,35 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
     def update(self) -> PlanDraftUpdate:
         return PlanDraftUpdate(db=self.db, query=self.query)
 
+    def joined_with_planner_and_email_address(
+        self,
+    ) -> FlaskQueryResult[
+        tuple[records.PlanDraft, records.Company, records.EmailAddress]
+    ]:
+        def mapper(
+            row: Any,
+        ) -> tuple[records.PlanDraft, records.Company, records.EmailAddress]:
+            return (
+                DatabaseGatewayImpl.plan_draft_from_orm(row[0]),
+                DatabaseGatewayImpl.company_from_orm(row[1]),
+                DatabaseGatewayImpl.email_address_from_orm(row[2]),
+            )
+
+        company = aliased(models.Company)
+        user = aliased(models.User)
+        email = aliased(models.Email)
+        query = (
+            self.query.join(company, models.PlanDraft.planner == company.id)
+            .join(user, company.user_id == user.id)
+            .join(email, user.email_address == email.address)
+            .with_entities(models.PlanDraft, company, email)
+        )
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=query,
+        )
+
 
 @dataclass
 class PlanDraftUpdate:
@@ -1264,6 +1293,57 @@ class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
 
+class CoordinationTransferRequestResult(
+    FlaskQueryResult[records.CoordinationTransferRequest]
+):
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.CoordinationTransferRequest.id == str(id_)
+            )
+        )
+
+    def requested_by(self, coordination_tenure: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.CoordinationTransferRequest.requesting_coordination_tenure
+                == str(coordination_tenure)
+            )
+        )
+
+    def joined_with_cooperation(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[records.CoordinationTransferRequest, records.Cooperation]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.CoordinationTransferRequest, records.Cooperation]:
+            request_orm, cooperation_orm = orm
+            return (
+                DatabaseGatewayImpl.coordination_transfer_request_from_orm(request_orm),
+                DatabaseGatewayImpl.cooperation_from_orm(cooperation_orm),
+            )
+
+        cooperation = aliased(models.Cooperation)
+        coordination_tenure = aliased(models.CoordinationTenure)
+        query = (
+            self.query.join(
+                coordination_tenure,
+                coordination_tenure.id
+                == models.CoordinationTransferRequest.requesting_coordination_tenure,
+            )
+            .join(cooperation, cooperation.id == coordination_tenure.cooperation)
+            .with_entities(models.CoordinationTransferRequest, cooperation)
+        )
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
+
 class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
     def with_id(self, id: UUID) -> Self:
         return self._with_modified_query(
@@ -1735,6 +1815,42 @@ class DatabaseGatewayImpl:
             company=UUID(orm.company),
             cooperation=UUID(orm.cooperation),
             start_date=orm.start_date,
+        )
+
+    def create_coordination_transfer_request(
+        self,
+        requesting_coordination_tenure: UUID,
+        candidate: UUID,
+        request_date: datetime,
+    ) -> records.CoordinationTransferRequest:
+        orm = models.CoordinationTransferRequest(
+            id=str(uuid4()),
+            requesting_coordination_tenure=str(requesting_coordination_tenure),
+            candidate=str(candidate),
+            request_date=request_date,
+        )
+        self.db.session.add(orm)
+        self.db.session.flush()
+        return self.coordination_transfer_request_from_orm(orm)
+
+    def get_coordination_transfer_requests(self) -> CoordinationTransferRequestResult:
+        return CoordinationTransferRequestResult(
+            mapper=self.coordination_transfer_request_from_orm,
+            query=models.CoordinationTransferRequest.query,
+            db=self.db,
+        )
+
+    @classmethod
+    def coordination_transfer_request_from_orm(
+        cls, coordination_transfer_request: models.CoordinationTransferRequest
+    ) -> records.CoordinationTransferRequest:
+        return records.CoordinationTransferRequest(
+            id=UUID(coordination_transfer_request.id),
+            requesting_coordination_tenure=UUID(
+                coordination_transfer_request.requesting_coordination_tenure
+            ),
+            candidate=UUID(coordination_transfer_request.candidate),
+            request_date=coordination_transfer_request.request_date,
         )
 
     @classmethod

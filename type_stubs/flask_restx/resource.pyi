@@ -1,5 +1,5 @@
 from .model import ModelBase as ModelBase
-from .utils import unpack as unpack
+from .utils import BaseResponse as BaseResponse, unpack as unpack
 from _typeshed import Incomplete
 from flask.views import MethodView
 

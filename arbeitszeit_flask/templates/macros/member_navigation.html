@@ -1,9 +1,11 @@
+{% from 'macros/language_selection.html' import language_selection with context %}
+
 {% macro member_navigation() %}
 
 <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item has-background-primary has-text-white">
-      <a href="{{ url_for('main_member.get_member_account_details') }}"
+      <a href="{{ url_for('main_user.account_details') }}"
          class="navbar-item"
          >
         <span class="icon">
@@ -30,6 +32,7 @@
     </div>
 
     <div class="navbar-end">
+      {{ language_selection() }}
       <div class="navbar-item">
         <a class="button" href="{{ url_for('auth.logout') }}">
           {{ gettext("Sign out")}}

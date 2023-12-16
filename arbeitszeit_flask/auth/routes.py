@@ -37,7 +37,7 @@ from arbeitszeit_web.www.presenters.log_in_company_presenter import (
 from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
 
-auth = Blueprint("auth", __name__, template_folder="templates", static_folder="static")
+auth = Blueprint("auth", __name__)
 
 
 @auth.route("/")
@@ -58,13 +58,14 @@ def help():
 
 
 @auth.route("/language=<language>")
-def set_language(language=None):
+def set_language(language: str):
+    redirection_url = request.headers.get("Referer") or url_for("auth.start")
     session["language"] = language
-    return redirect(url_for("auth.start"))
+    return redirect(redirection_url)
 
 
 # Member
-@auth.route("/member/unconfirmed")
+@auth.route("/unconfirmed-member")
 @with_injection()
 @login_required
 def unconfirmed_member(authenticator: MemberAuthenticator):
@@ -73,14 +74,14 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
     return redirect(url_for("auth.start"))
 
 
-@auth.route("/member/signup", methods=["GET", "POST"])
+@auth.route("/signup-member", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
 def signup_member(view: SignupMemberView):
     return view.handle_request()
 
 
-@auth.route("/member/confirm/<token>")
+@auth.route("/confirm-member/<token>")
 @commit_changes
 @with_injection()
 def confirm_email_member(
@@ -95,7 +96,7 @@ def confirm_email_member(
     return redirect(url_for("auth.unconfirmed_member"))
 
 
-@auth.route("/member/login", methods=["GET", "POST"])
+@auth.route("/login-member", methods=["GET", "POST"])
 @with_injection()
 @commit_changes
 def login_member(

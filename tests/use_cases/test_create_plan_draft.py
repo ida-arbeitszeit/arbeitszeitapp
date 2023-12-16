@@ -6,13 +6,13 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import get_draft_details
 from arbeitszeit.use_cases.create_plan_draft import (
     CreatePlanDraft,
-    CreatePlanDraftRequest,
-    CreatePlanDraftResponse,
+    RejectionReason,
+    Request,
 )
 
 from .base_test_case import BaseTestCase
 
-REQUEST = CreatePlanDraftRequest(
+REQUEST = Request(
     planner=uuid4(),
     costs=ProductionCosts(
         Decimal(1),
@@ -57,10 +57,7 @@ class UseCaseTests(BaseTestCase):
         )
         response = self.create_plan_draft(request)
         assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == CreatePlanDraftResponse.RejectionReason.planner_does_not_exist
-        )
+        assert response.rejection_reason == RejectionReason.planner_does_not_exist
         assert not response.draft_id
 
     def test_that_create_plan_gets_rejected_with_negative_production_costs(
@@ -74,10 +71,7 @@ class UseCaseTests(BaseTestCase):
         )
         response = self.create_plan_draft(request)
         assert response.is_rejected
-        assert (
-            response.rejection_reason
-            == CreatePlanDraftResponse.RejectionReason.negative_plan_input
-        )
+        assert response.rejection_reason == RejectionReason.negative_plan_input
         assert not response.draft_id
 
     def test_that_create_plan_gets_rejected_with_negative_production_amount(

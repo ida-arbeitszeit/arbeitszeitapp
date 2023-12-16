@@ -13,6 +13,14 @@ Subpackages
 Submodules
 ----------
 
+arbeitszeit\_web.api.authentication module
+------------------------------------------
+
+.. automodule:: arbeitszeit_web.api.authentication
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arbeitszeit\_web.api.response\_errors module
 --------------------------------------------
 

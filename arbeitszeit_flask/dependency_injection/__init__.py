@@ -113,11 +113,7 @@ class FlaskModule(Module):
 
 class with_injection:
     def __init__(self, modules: Optional[List[Module]] = None) -> None:
-        self._modules = modules if modules is not None else []
-        all_modules: List[Module] = []
-        all_modules.append(FlaskModule())
-        all_modules += self._modules
-        self._injector = Injector(all_modules)
+        self._injector = create_dependency_injector(modules)
 
     def __call__(self, original_function):
         """When you wrap a function, make sure that the parameters to be
@@ -136,3 +132,11 @@ class with_injection:
     @property
     def injector(self) -> Injector:
         return self._injector
+
+
+def create_dependency_injector(
+    additional_modules: Optional[List[Module]] = None,
+) -> Injector:
+    return Injector(
+        [FlaskModule()] + (additional_modules if additional_modules else [])
+    )

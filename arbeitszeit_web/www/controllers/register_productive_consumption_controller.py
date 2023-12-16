@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
+from arbeitszeit_web.fields import ParsingFailure, ParsingSuccess, parse_formfield
 from arbeitszeit_web.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.www.formfield_parsers import PositiveIntegerParser, UuidParser
 
 
 @dataclass
@@ -16,6 +19,9 @@ class RegisterProductiveConsumptionController:
         pass
 
     session: Session
+    uuid_parser: UuidParser
+    positive_integer_parser: PositiveIntegerParser
+    type_of_consumption_parser: TypeOfConsumptionParser
     translator: Translator
 
     def process_input_data(
@@ -23,34 +29,34 @@ class RegisterProductiveConsumptionController:
     ) -> RegisterProductiveConsumptionRequest:
         consumer = self.session.get_current_user()
         assert consumer
-        try:
-            plan = UUID(form.plan_id_field().get_value().strip())
-        except ValueError:
-            form.plan_id_field().attach_error(self.translator.gettext("Invalid ID."))
-            raise self.FormError()
-        try:
-            amount = int(form.amount_field().get_value())
-        except ValueError:
-            form.amount_field().attach_error(
-                self.translator.gettext("This is not an integer.")
-            )
-            raise self.FormError()
-        if amount <= 0:
-            form.amount_field().attach_error(
-                self.translator.gettext("Must be a number larger than zero.")
-            )
-            raise self.FormError()
-        type_of_consumption = form.type_of_consumption_field().get_value()
-        if not type_of_consumption:
-            form.type_of_consumption_field().attach_error(
-                self.translator.gettext("This field is required.")
-            )
-            raise self.FormError()
-        consumption_type = (
-            ConsumptionType.means_of_prod
-            if type_of_consumption == "fixed"
-            else ConsumptionType.raw_materials
+        plan = parse_formfield(
+            form.plan_id_field(),
+            self.uuid_parser.with_invalid_uuid_message(
+                self.translator.gettext("Invalid ID.")
+            ),
         )
+        amount = parse_formfield(form.amount_field(), self.positive_integer_parser)
+        type_of_consumption = parse_formfield(
+            form.type_of_consumption_field(), self.type_of_consumption_parser
+        )
+        if not (plan and amount and type_of_consumption):
+            raise self.FormError()
         return RegisterProductiveConsumptionRequest(
-            consumer, plan, amount, consumption_type
+            consumer, plan.value, amount.value, type_of_consumption.value
+        )
+
+
+@dataclass
+class TypeOfConsumptionParser:
+    translator: Translator
+
+    def __call__(
+        self, candidate: str
+    ) -> ParsingSuccess[ConsumptionType] | ParsingFailure:
+        if not candidate:
+            return ParsingFailure([self.translator.gettext("This field is required.")])
+        return ParsingSuccess(
+            ConsumptionType.means_of_prod
+            if candidate == "fixed"
+            else ConsumptionType.raw_materials
         )

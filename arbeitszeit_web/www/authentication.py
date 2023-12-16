@@ -111,3 +111,11 @@ class CompanyAuthenticator:
             )
             self.session.set_next_url(self.request.get_request_target())
             return self.url_index.get_start_page_url()
+
+
+@dataclass
+class UserAuthenticator:
+    session: Session
+
+    def is_user_authenticated(self) -> bool:
+        return bool(self.session.get_current_user())

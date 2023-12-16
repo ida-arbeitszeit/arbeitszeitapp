@@ -13,18 +13,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- do not translate -->
   <title>Arbeitszeit</title>
-  <link rel="stylesheet" href="{{ url_for('.static', filename='bulma.css') }}">
-  <link rel="stylesheet" href="{{ url_for('.static', filename='main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='bulma.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
   {% block style %}
   {% endblock %}
   <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
-  <script src="{{ url_for('.static', filename='main.js') }}"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
 </head>
 
 <body>
-  {% block body %}
-  {% block navigation %}
-
   {% if session['user_type'] == 'company' %}
   {% set user_navigation = company_navigation %}
 
@@ -41,16 +38,15 @@
 
   {% call user_navigation() %}
   {% block navbar_start %}
-  {% endblock %}
+  {% endblock navbar_start %}
   {% endcall %}
-
-  {% endblock navigation%}
 
   {{ show_notifications() }}
 
-  {% block content %}
-  {% endblock content %}
-  {% endblock body %}
+  <div class="container">
+    {% block content %}
+    {% endblock content %}
+  </div>
 </body>
 
 </html>

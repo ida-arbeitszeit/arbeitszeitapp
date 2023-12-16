@@ -243,18 +243,19 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_consumer_info_is_shown_when_company_sold_to_member(
         self,
     ) -> None:
+        expected_consumer_name = "test 123 name"
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        consumer = self.member_generator.create_member_record()
+        consumer = self.member_generator.create_member(name=expected_consumer_name)
         self.consumption_generator.create_private_consumption(
-            plan=plan.id, consumer=consumer.id
+            plan=plan.id, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
         transaction_of_sale = response.transactions[0]
         assert transaction_of_sale.buyer
         assert transaction_of_sale.buyer.buyer_is_member == True
-        assert transaction_of_sale.buyer.buyer_id == consumer.id
-        assert transaction_of_sale.buyer.buyer_name == consumer.name
+        assert transaction_of_sale.buyer.buyer_id == consumer
+        assert transaction_of_sale.buyer.buyer_name == expected_consumer_name
 
     def test_that_correct_consumer_info_is_shown_when_company_sold_to_company(
         self,

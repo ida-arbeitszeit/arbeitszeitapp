@@ -1,18 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 
 from parameterized import parameterized
 
 from arbeitszeit import records
 from arbeitszeit.records import SocialAccounting
-from tests.data_generators import (
-    AccountGenerator,
-    CompanyGenerator,
-    MemberGenerator,
-    TransactionGenerator,
-)
+from tests.data_generators import MemberGenerator, TransactionGenerator
 
 from ..flask import FlaskTestCase
 
@@ -20,12 +15,10 @@ from ..flask import FlaskTestCase
 class AccountResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.account_generator: AccountGenerator = self.injector.get(AccountGenerator)
         self.transaction_generator: TransactionGenerator = self.injector.get(
             TransactionGenerator
         )
         self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
 
     def test_that_a_priori_there_is_only_one_account_for_social_accounting(
@@ -38,12 +31,12 @@ class AccountResultTests(FlaskTestCase):
         ]
 
     def test_there_are_accounts_to_be_queried_when_one_was_created(self) -> None:
-        self.account_generator.create_account()
+        self.database_gateway.create_account()
         assert self.database_gateway.get_accounts()
 
     def test_only_include_relevant_account_when_filtering_by_id(self) -> None:
         random_id = uuid4()
-        actual_id = self.account_generator.create_account().id
+        actual_id = self.database_gateway.create_account().id
         assert not self.database_gateway.get_accounts().with_id(random_id)
         assert self.database_gateway.get_accounts().with_id(actual_id)
 
@@ -66,11 +59,11 @@ class AccountResultTests(FlaskTestCase):
         assert member == result[1]
 
     def test_that_p_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_record()
-        assert company
+        account = self.database_gateway.create_account()
+        company = self.create_company(means_account=account)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(company.means_account)
+            .with_id(account.id)
             .joined_with_owner()
             .first()
         )
@@ -78,11 +71,11 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_r_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_record()
-        assert company
+        account = self.database_gateway.create_account()
+        company = self.create_company(resource_account=account)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(company.raw_material_account)
+            .with_id(account.id)
             .joined_with_owner()
             .first()
         )
@@ -90,11 +83,11 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_a_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_record()
-        assert company
+        account = self.database_gateway.create_account()
+        company = self.create_company(labour_account=account)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(company.work_account)
+            .with_id(account.id)
             .joined_with_owner()
             .first()
         )
@@ -102,11 +95,11 @@ class AccountResultTests(FlaskTestCase):
         assert company == result[1]
 
     def test_that_prd_account_joined_with_owner_yields_original_company(self) -> None:
-        company = self.company_generator.create_company_record()
-        assert company
+        account = self.database_gateway.create_account()
+        company = self.create_company(products_account=account)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(company.product_account)
+            .with_id(account.id)
             .joined_with_owner()
             .first()
         )
@@ -136,7 +129,7 @@ class AccountResultTests(FlaskTestCase):
         assert not self.database_gateway.get_accounts().that_are_product_accounts()
 
     def test_with_one_company_there_is_one_prd_accounts(self) -> None:
-        self.company_generator.create_company()
+        self.create_company()
         assert (
             len(self.database_gateway.get_accounts().that_are_product_accounts()) == 1
         )
@@ -145,16 +138,7 @@ class AccountResultTests(FlaskTestCase):
         self,
     ) -> None:
         expected_account = self.database_gateway.create_account()
-        credentials = self.create_account_credentials()
-        self.database_gateway.create_company(
-            account_credentials=credentials.id,
-            name="",
-            means_account=self.database_gateway.create_account(),
-            resource_account=self.database_gateway.create_account(),
-            labour_account=self.database_gateway.create_account(),
-            products_account=expected_account,
-            registered_on=datetime(2000, 1, 1),
-        )
+        self.create_company(products_account=expected_account)
         assert (
             expected_account
             in self.database_gateway.get_accounts().that_are_product_accounts()
@@ -164,23 +148,14 @@ class AccountResultTests(FlaskTestCase):
         assert not self.database_gateway.get_accounts().that_are_labour_accounts()
 
     def test_with_one_company_there_is_one_labour_accounts(self) -> None:
-        self.company_generator.create_company()
+        self.create_company()
         assert len(self.database_gateway.get_accounts().that_are_labour_accounts()) == 1
 
     def test_filtering_by_labour_account_yields_the_labour_account_of_previously_created_company(
         self,
     ) -> None:
         expected_account = self.database_gateway.create_account()
-        credentials = self.create_account_credentials()
-        self.database_gateway.create_company(
-            account_credentials=credentials.id,
-            name="",
-            means_account=self.database_gateway.create_account(),
-            resource_account=self.database_gateway.create_account(),
-            labour_account=expected_account,
-            products_account=self.database_gateway.create_account(),
-            registered_on=datetime(2000, 1, 1),
-        )
+        self.create_company(labour_account=expected_account)
         assert (
             expected_account
             in self.database_gateway.get_accounts().that_are_labour_accounts()
@@ -200,7 +175,7 @@ class AccountResultTests(FlaskTestCase):
     def test_when_joining_with_account_balance_the_proper_value_is_calculated(
         self, transactions: List[float], expected_total: float
     ) -> None:
-        account = self.account_generator.create_account()
+        account = self.database_gateway.create_account()
         for amount in transactions:
             if amount > 0:
                 self.transaction_generator.create_transaction(
@@ -223,7 +198,7 @@ class AccountResultTests(FlaskTestCase):
     def test_when_joining_with_balance_account_objects_are_deserialized_properly(
         self,
     ) -> None:
-        self.company_generator.create_company()
+        self.create_company()
         accounts = set(self.database_gateway.get_accounts())
         assert (
             set(
@@ -235,7 +210,7 @@ class AccountResultTests(FlaskTestCase):
     def test_when_joining_with_account_balance_and_having_multiple_transactions_we_get_one_result_for_one_account(
         self,
     ) -> None:
-        account = self.account_generator.create_account()
+        account = self.database_gateway.create_account()
         self.transaction_generator.create_transaction(receiving_account=account.id)
         self.transaction_generator.create_transaction(receiving_account=account.id)
         assert (
@@ -258,14 +233,16 @@ class AccountResultTests(FlaskTestCase):
     def test_owned_by_company_yields_no_accounts_if_no_company_was_supplied(
         self,
     ) -> None:
-        self.company_generator.create_company()
+        self.create_company()
         assert len(self.database_gateway.get_accounts().owned_by_company()) == 0
 
     def test_owned_by_company_yields_company_accounts_for_supplied_company(
         self,
     ) -> None:
-        company = self.company_generator.create_company()
-        assert len(self.database_gateway.get_accounts().owned_by_company(company)) == 4
+        company = self.create_company()
+        assert (
+            len(self.database_gateway.get_accounts().owned_by_company(company.id)) == 4
+        )
 
     def create_account_credentials(
         self, address: str = "test@test.test"
@@ -274,4 +251,21 @@ class AccountResultTests(FlaskTestCase):
         return self.database_gateway.create_account_credentials(
             email_address=address,
             password_hash="",
+        )
+
+    def create_company(
+        self,
+        means_account: Optional[records.Account] = None,
+        labour_account: Optional[records.Account] = None,
+        resource_account: Optional[records.Account] = None,
+        products_account: Optional[records.Account] = None,
+    ) -> records.Company:
+        return self.database_gateway.create_company(
+            account_credentials=self.create_account_credentials().id,
+            name="test company",
+            means_account=means_account or self.database_gateway.create_account(),
+            labour_account=labour_account or self.database_gateway.create_account(),
+            resource_account=resource_account or self.database_gateway.create_account(),
+            products_account=products_account or self.database_gateway.create_account(),
+            registered_on=datetime(2000, 1, 1),
         )

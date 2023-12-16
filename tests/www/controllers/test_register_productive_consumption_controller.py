@@ -16,9 +16,7 @@ class AuthenticatedCompanyTests(BaseTestCase):
         super().setUp()
         self.expected_user_id = uuid4()
         self.session.login_company(self.expected_user_id)
-        self.controller = RegisterProductiveConsumptionController(
-            self.session, self.translator
-        )
+        self.controller = self.injector.get(RegisterProductiveConsumptionController)
 
     def test_use_case_request_gets_returned_when_correct_input_data(self):
         output = self.controller.process_input_data(self.get_fake_form())

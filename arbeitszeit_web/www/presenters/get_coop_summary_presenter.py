@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
 from arbeitszeit_web.session import Session
@@ -24,6 +24,7 @@ class GetCoopSummaryViewModel:
     coop_id: str
     coop_name: str
     coop_definition: List[str]
+    transfer_coordination_url: Optional[str]
     current_coordinator_id: str
     current_coordinator_name: str
     current_coordinator_url: str
@@ -48,6 +49,11 @@ class GetCoopSummarySuccessPresenter:
             coop_id=str(response.coop_id),
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
+            transfer_coordination_url=self.url_index.get_request_coordination_transfer_url(
+                coop_id=response.coop_id
+            )
+            if response.requester_is_coordinator
+            else None,
             current_coordinator_id=str(response.current_coordinator),
             current_coordinator_name=response.current_coordinator_name,
             current_coordinator_url=self.url_index.get_company_summary_url(

@@ -1,11 +1,9 @@
 {% macro coop_summary(view_model) %}
 
 <div class="section has-text-centered">
-    <div class="content">
-        <h1 class="title">
-            {{ gettext("Cooperation") }}
-        </h1>
-    </div>
+    <h1 class="title">
+        {{ gettext("Cooperation") }}
+    </h1>
     <br>
     <div class="table-container">
         <table class="table has-text-left mx-auto">
@@ -26,8 +24,19 @@
                 </tr>
                 <tr>
                     <td class="has-text-left has-text-weight-semibold">{{ gettext("Current coordinator") }}</td>
-                    <td class="has-text-left"><a
-                            href="{{ view_model.current_coordinator_url }}">{{ view_model.current_coordinator_name }}</a></td>
+                    <td class="has-text-left">
+                        <a href="{{ view_model.current_coordinator_url }}">{{ view_model.current_coordinator_name }}</a>
+                        <div>
+                            {% if view_model.transfer_coordination_url is not none %}
+                            <a class="button is-small is-primary" href="{{ view_model.transfer_coordination_url }}">
+                                <span class="icon">
+                                    <i class="fas fa-square-arrow-up-right"></i>
+                                </span>
+                                <span>{{ gettext("Transfer coordination") }}</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <td class="has-text-left has-text-weight-semibold">{{ gettext("History of coordinators") }}</td>

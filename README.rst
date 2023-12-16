@@ -141,7 +141,7 @@ environment variables:
      export FLASK_DEBUG=1
      export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
      export DEV_SECRET_KEY=my_secret_key
-     export ARBEITSZEIT_APP_SERVER_NAME=localhost:5000
+     export ARBEITSZEIT_APP_SERVER_NAME=127.0.0.1:5000
      export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 You may find it useful to copy these shell commands into a script file and 
@@ -161,7 +161,8 @@ directory of the repo (where ``.envrc`` resides), Direnv will automatically
 set the environment variables for you.  If you then add the line ``use flake`` 
 at the top of your ``.envrc`` file, Direnv will first invoke Nix and install 
 all dependencies in the virtual environment ---
-automatically, every time you enter the root code directory. Note that the
+automatically, every time you enter the root code directory (for the line ``use flake`` 
+to have effect you might need to install nix-direnv). Note that the
 first time you use Direnv, and any time you change ``.envrc``, you will need
 to run the command ``direnv allow`` to enable Direnv to proceed.
 
@@ -209,21 +210,20 @@ Then, here is a sample ``custom_settings.py``:
      
      SECRET_KEY = 'somesecretkey'
      SQLALCHEMY_DATABASE_URI = 'postgresql:///<name_of_your_development_DB>'
-     SERVER_NAME = "localhost:5000"
+     SERVER_NAME = "127.0.0.1:5000"
 
 After configuring the database connection, you need to run the database
 migrations via ``flask db upgrade``. It is mandatory to run this command 
 once before developing for the first time.
 
-Afterwards, you can start the development server with ``python -m flask
-run -h localhost``.  Unfortunately ``flask run`` might not work due to
-a bug in the ``werkzeug`` library.
+Afterwards, you can start the development server with ``flask
+run``.
 
 Create a user by signing up and providing the required fields.  You
 will be redirected to a site that asks to confirm your account
 creating with the link provided in your e-mail.  This link can be found
-in the command line when you run ``python -m flask run`` starting with
-*<p><a href="* until the closing quotation marks.  Copy this link to your
+in the command line starting with
+*<p><a href="* until the closing quotation marks. Visit this link in your
 browser, and your account will be activated.
 
 
@@ -333,7 +333,7 @@ for translation.
     ngettext(singular: str, plural: str, n)
 
 
-#. Parse code for translatable strings (create a ``.pot`` file):
+#. Parse code for translatable strings (update ``.pot`` file):
 
     .. code-block:: bash
 
@@ -442,9 +442,9 @@ Developing with different python versions
 You can access a development environment with any of the supported
 python versions via ``nix develop``. Check `flake.nix` for the
 supported environments under the key ``devShells``. For example to
-enter a development shell with ``python3.9`` set as the default
-interpreter run ``nix develop .#python39``. This will drop you into a
-shell with python3.9 as the default python interpreter. This won't
+enter a development shell with ``python3.11`` set as the default
+interpreter run ``nix develop .#python311``. This will drop you into a
+shell with python3.11 as the default python interpreter. This won't
 change anything else on your machine and the respective python
 interpreter will be garbage collected the next time you run
 ``nix-collect-garbage``.

@@ -15,7 +15,7 @@ from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
 )
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperation,
@@ -27,7 +27,6 @@ from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
 from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
@@ -65,6 +64,7 @@ from arbeitszeit_flask.forms import (
     PlanSearchForm,
     RegisterProductiveConsumptionForm,
     RequestCooperationForm,
+    RequestCoordinationTransferForm,
 )
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
@@ -82,20 +82,19 @@ from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWork
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
 )
+from arbeitszeit_flask.views.request_coordination_transfer_view import (
+    RequestCoordinationTransferView,
+)
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
-from arbeitszeit_web.url_index import UrlIndex
-from arbeitszeit_web.www.controllers.create_draft_controller import (
-    CreateDraftController,
+from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
+    CreateDraftFromPlanController,
 )
 from arbeitszeit_web.www.controllers.delete_draft_controller import (
     DeleteDraftController,
 )
 from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
-)
-from arbeitszeit_web.www.controllers.get_company_account_details_controller import (
-    GetCompanyAccountDetailsController,
 )
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
@@ -109,16 +108,15 @@ from arbeitszeit_web.www.controllers.revoke_plan_filing_controller import (
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
 )
+from arbeitszeit_web.www.presenters.create_draft_from_plan_presenter import (
+    CreateDraftFromPlanPresenter,
+)
 from arbeitszeit_web.www.presenters.create_draft_presenter import (
-    CreateDraftPresenter,
     GetPrefilledDraftDataPresenter,
 )
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_account_details_presenter import (
-    GetCompanyAccountDetailsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
@@ -245,58 +243,18 @@ def delete_draft(
     return redirect(view_model.redirect_target)
 
 
-@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["POST"])
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
-    get_plan_details_use_case: GetPlanDetailsUseCase,
-    get_plan_details_presenter: GetPrefilledDraftDataPresenter,
-    create_plan_draft_use_case: CreatePlanDraft,
-    create_draft_controller: CreateDraftController,
-    create_draft_presenter: CreateDraftPresenter,
-    not_found_view: Http404View,
-    url_index: UrlIndex,
+    use_case: CreateDraftFromPlanUseCase,
+    controller: CreateDraftFromPlanController,
+    presenter: CreateDraftFromPlanPresenter,
 ) -> Response:
-    form = CreateDraftForm(request.form)
-    if request.method == "GET":
-        use_case_request_get = GetPlanDetailsUseCase.Request(plan_id)
-        response = get_plan_details_use_case.get_plan_details(use_case_request_get)
-        if not response:
-            return not_found_view.get_response()
-        view_model_get = get_plan_details_presenter.show_prefilled_draft_data(
-            draft_data=response.plan_details, form=form
-        )
-        return FlaskResponse(
-            render_template(
-                "company/create_draft.html",
-                form=form,
-                view_model=view_model_get,
-            ),
-            status=200,
-        )
-    else:
-        if form.validate():
-            use_case_request = create_draft_controller.import_form_data(draft_form=form)
-            use_case_response = create_plan_draft_use_case(use_case_request)
-            view_model_post = create_draft_presenter.present_plan_creation(
-                use_case_response
-            )
-            if view_model_post.redirect_url is None:
-                return not_found_view.get_response()
-            else:
-                return redirect(view_model_post.redirect_url)
-        return FlaskResponse(
-            render_template(
-                "company/create_draft.html",
-                form=form,
-                view_model=dict(
-                    load_draft_url=url_index.get_my_plan_drafts_url(),
-                    save_draft_url=url_index.get_create_draft_url(),
-                    cancel_url=url_index.get_create_draft_url(),
-                ),
-            ),
-            status=400,
-        )
+    uc_request = controller.create_use_case_request(plan_id)
+    uc_response = use_case.create_draft_from_plan(uc_request)
+    view_model = presenter.render_response(uc_response)
+    return redirect(view_model.redirect_url)
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
@@ -552,6 +510,25 @@ def coop_summary(
 
 
 @CompanyRoute(
+    "/company/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
+    methods=["GET", "POST"],
+)
+@commit_changes
+def request_coordination_transfer(
+    coop_id: UUID,
+    view: RequestCoordinationTransferView,
+):
+    if request.method == "GET":
+        form = RequestCoordinationTransferForm()
+        form.cooperation_field().set_value(str(coop_id))
+        return view.respond_to_get(form=form, coop_id=coop_id)
+
+    elif request.method == "POST":
+        form = RequestCoordinationTransferForm(request.form)
+        return view.respond_to_post(form=form, coop_id=coop_id)
+
+
+@CompanyRoute(
     "/company/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
 )
 def list_coordinators_of_cooperation(
@@ -698,21 +675,3 @@ def end_cooperation(
     view: EndCooperationView,
 ) -> Response:
     return view.respond_to_get()
-
-
-@CompanyRoute("/company/account")
-def get_company_account_details(
-    controller: GetCompanyAccountDetailsController,
-    use_case: GetUserAccountDetailsUseCase,
-    presenter: GetCompanyAccountDetailsPresenter,
-) -> Response:
-    uc_request = controller.parse_web_request()
-    uc_response = use_case.get_user_account_details(uc_request)
-    view_model = presenter.render_company_account_details(uc_response)
-    return FlaskResponse(
-        render_template(
-            "company/get_company_account_details.html",
-            view_model=view_model,
-        ),
-        status=200,
-    )

@@ -18,19 +18,13 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
 )
-from arbeitszeit.use_cases.accept_coordination_transfer import (
-    AcceptCoordinationTransferUseCase,
-)
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.create_cooperation import (
     CreateCooperation,
     CreateCooperationRequest,
 )
-from arbeitszeit.use_cases.create_plan_draft import (
-    CreatePlanDraft,
-    CreatePlanDraftRequest,
-)
+from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft, Request
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -61,22 +55,18 @@ from tests.datetime_service import FakeDatetimeService
 
 @dataclass
 class MemberGenerator:
-    account_generator: AccountGenerator
     email_generator: EmailGenerator
-    database: DatabaseGateway
-    datetime_service: FakeDatetimeService
     register_member_use_case: RegisterMemberUseCase
     confirm_member_use_case: confirm_member.ConfirmMemberUseCase
-    password_hasher: PasswordHasher
 
-    def create_member_record(
+    def create_member(
         self,
         *,
         email: Optional[str] = None,
         name: str = "test member name",
         password: str = "password",
         confirmed: bool = True,
-    ) -> records.Member:
+    ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
         register_response = self.register_member_use_case.register_member(
@@ -92,25 +82,7 @@ class MemberGenerator:
                 )
             )
             assert confirm_response.is_confirmed
-        member = self.database.get_members().with_id(register_response.user_id).first()
-        assert member
-        return member
-
-    def create_member(
-        self,
-        *,
-        email: Optional[str] = None,
-        name: str = "test member name",
-        password: str = "password",
-        confirmed: bool = True,
-    ) -> UUID:
-        member = self.create_member_record(
-            email=email,
-            name=name,
-            password=password,
-            confirmed=confirmed,
-        )
-        return member.id
+        return register_response.user_id
 
 
 @dataclass
@@ -318,7 +290,7 @@ class PlanGenerator:
         if timeframe is None:
             timeframe = 14
         response = self.create_plan_draft_use_case(
-            request=CreatePlanDraftRequest(
+            request=Request(
                 costs=costs,
                 product_name=product_name,
                 production_unit=production_unit,
@@ -540,42 +512,32 @@ class CoordinationTenureGenerator:
 
 @dataclass
 class CoordinationTransferRequestGenerator:
-    datetime_service: FakeDatetimeService
-    coordination_tenure_generator: CoordinationTenureGenerator
+    cooperation_generator: CooperationGenerator
     company_generator: CompanyGenerator
     request_transfer_use_case: RequestCoordinationTransferUseCase
-    accept_transfer_use_case: AcceptCoordinationTransferUseCase
 
     def create_coordination_transfer_request(
         self,
-        requesting_coordination_tenure: Optional[UUID] = None,
+        requester: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
-        is_accepted: bool = False,
     ) -> UUID:
-        if requesting_coordination_tenure is None:
-            requesting_coordination_tenure = (
-                self.coordination_tenure_generator.create_coordination_tenure()
-            )
+        if requester is None:
+            requester = self.company_generator.create_company()
+        if cooperation is None:
+            cooperation = self.cooperation_generator.create_cooperation()
         if candidate is None:
             candidate = self.company_generator.create_company()
         request_response = self.request_transfer_use_case.request_transfer(
             RequestCoordinationTransferUseCase.Request(
-                requesting_coordination_tenure=requesting_coordination_tenure,
+                requester=requester,
+                cooperation=cooperation,
                 candidate=candidate,
             )
         )
-        assert not request_response.is_rejected
+        assert not request_response.is_rejected, request_response.rejection_reason
         assert request_response.transfer_request
         transfer_request = request_response.transfer_request
-        if is_accepted:
-            accept_response = (
-                self.accept_transfer_use_case.accept_coordination_transfer(
-                    AcceptCoordinationTransferUseCase.Request(
-                        transfer_request_id=transfer_request
-                    )
-                )
-            )
-            assert not accept_response.is_rejected
         return transfer_request
 
 

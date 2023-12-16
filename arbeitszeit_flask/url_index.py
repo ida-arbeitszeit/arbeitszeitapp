@@ -232,17 +232,14 @@ class GeneralUrlIndex:
     def get_start_page_url(self) -> str:
         return url_for(endpoint="auth.start")
 
-    def get_member_account_details_url(self) -> str:
-        return url_for("main_member.get_member_account_details")
-
-    def get_company_account_details_url(self) -> str:
-        return url_for("main_company.get_company_account_details")
-
-    def get_accountant_account_details_url(self) -> str:
-        return url_for("main_accountant.get_accountant_account_details")
+    def get_user_account_details_url(self) -> str:
+        return url_for("main_user.account_details")
 
     def get_renew_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.create_draft_from_plan", plan_id=plan_id)
 
     def get_hide_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_company.hide_plan", plan_id=plan_id)
+
+    def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
+        return url_for("main_company.request_coordination_transfer", coop_id=coop_id)
