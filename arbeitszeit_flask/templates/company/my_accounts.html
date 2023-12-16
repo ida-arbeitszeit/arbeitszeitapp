@@ -6,76 +6,77 @@
 
 {% block content %}
 
-<div class="section has-text-centered">
-    <h1 class="title">
-        {{ gettext("Accounts") }}
-    </h1>
-    <br>
-    <div class="box has-background-info-light has-text-info-dark">
-        <div class="icon"><i class="fas fa-info-circle"></i></div>
-        <p>{{ gettext("You have four different accounts.") }}</p>
+<section class="section has-text-centered columns">
+    <div class="column"></div>
+    <div class="column is-two-thirds">
+        <h1 class="title">
+            {{ gettext("Accounts") }}
+        </h1>
+        <div class="box has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>{{ gettext("Each company has four accounts.") }}</p>
+        </div>
+        <div class="table-container has-text-left">
+            <table class="table mx-auto">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="py-2"><a href="{{ url_for('main_company.account_p') }}">{{
+                                        gettext("Account p") }}</a>
+                        </td>
+                        <td><i class="fas fa-industry"></i></td>
+                        <td class="is-italic">{{ gettext("Account for fixed means of production") }}
+                        </td>
+                        <td
+                            class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_fixed }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="{{ url_for('main_company.account_r') }}">{{
+                                        gettext("Account r") }}</a>
+                        </td>
+                        <td><i class="fas fa-oil-can"></i></td>
+                        <td class="is-italic">{{ gettext("Account for liquid means of production")}}
+                        </td>
+                        <td
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_liquid }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="{{ url_for('main_company.account_a') }}">{{
+                                        gettext("Account a") }}</a>
+                        </td>
+                        <td><i class="fas fa-users"></i></td>
+                        <td class="is-italic">{{ gettext("Account for work certificates (wages)") }}
+                        </td>
+                        <td
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_work }}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2"><a href="{{ url_for('main_company.account_prd') }}">{{
+                                        gettext("Account prd") }}</a></td>
+                        <td><i class="fas fa-exchange-alt"></i></td>
+                        <td class="is-italic">{{ gettext("Account for product transfers (sales)") }}
+                        </td>
+                        <td
+                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">
+                            {{ view_model.balance_product }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p><a href="{{ url_for('main_company.list_all_transactions') }}">{{ gettext("List all transactions") }}</a>
+        </p>
     </div>
-    <br>
-    <div class="table-container">
-        <table class="table has-text-left mx-auto">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_p') }}">{{
-                                    gettext("Account p") }}</a>
-                    </td>
-                    <td><i class="fas fa-industry"></i></td>
-                    <td class="is-italic has-text-left">{{ gettext("Account for fixed means of production") }}
-                    </td>
-                    <td
-                        class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
-                        {{ view_model.balance_fixed }}</td>
-                </tr>
-                <tr>
-                    <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_r') }}">{{
-                                    gettext("Account r") }}</a>
-                    </td>
-                    <td><i class="fas fa-oil-can"></i></td>
-                    <td class="is-italic has-text-left">{{ gettext("Account for liquid means of production")}}
-                    </td>
-                    <td
-                        class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
-                        {{ view_model.balance_liquid }}</td>
-                </tr>
-                <tr>
-                    <td class="py-2  has-text-left"><a href="{{ url_for('main_company.account_a') }}">{{
-                                    gettext("Account a") }}</a>
-                    </td>
-                    <td><i class="fas fa-users"></i></td>
-                    <td class="is-italic has-text-left">{{ gettext("Account for work certificates (wages)") }}
-                    </td>
-                    <td
-                        class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
-                        {{ view_model.balance_work }}</td>
-                </tr>
-                <tr>
-                    <td class="py-2 has-text-left"><a href="{{ url_for('main_company.account_prd') }}">{{
-                                    gettext("Account prd") }}</a></td>
-                    <td><i class="fas fa-exchange-alt"></i></td>
-                    <td class="is-italic has-text-left">{{ gettext("Account for product transfers (sales)") }}
-                    </td>
-                    <td
-                        class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">
-                        {{ view_model.balance_product }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <p><a href="{{ url_for('main_company.list_all_transactions') }}">{{ gettext("List all transactions") }}</a>
-    </p>
-</div>
-</div>
+    <div class="column"></div>
+</section>
 
 {% endblock %}
