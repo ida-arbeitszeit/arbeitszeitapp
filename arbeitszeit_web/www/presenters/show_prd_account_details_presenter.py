@@ -69,7 +69,7 @@ class ShowPRDAccountDetailsPresenter:
             ),
             transaction_volume=str(round(transaction.transaction_volume, 2)),
             purpose=transaction.purpose,
-            buyer_name=transaction.buyer.buyer_name if transaction.buyer else "",
+            buyer_name=self._get_buyer_name(transaction.buyer),
             buyer_type_icon=self._get_buyer_type_icon(transaction.buyer),
         )
 
@@ -82,3 +82,13 @@ class ShowPRDAccountDetailsPresenter:
             return "fas fa-user"
         else:
             return "fas fa-industry"
+
+    def _get_buyer_name(
+        self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
+    ) -> str:
+        if not buyer:
+            return ""
+        elif buyer.buyer_is_member:
+            return self.translator.gettext("Anonymous worker")
+        else:
+            return buyer.buyer_name
