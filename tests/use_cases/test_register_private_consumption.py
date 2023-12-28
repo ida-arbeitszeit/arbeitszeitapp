@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
+from arbeitszeit.use_cases import query_private_consumptions
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
@@ -29,7 +29,9 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         )
         self.mock_database = self.injector.get(MockDatabase)
         self.consumer = self.member_generator.create_member()
-        self.query_private_consumptions = self.injector.get(QueryPrivateConsumptions)
+        self.query_private_consumptions = self.injector.get(
+            query_private_consumptions.QueryPrivateConsumptions
+        )
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
     def test_registration_fails_when_plan_does_not_exist(self) -> None:
@@ -103,8 +105,10 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, amount=3)
         )
-        consumptions = list(self.query_private_consumptions(self.consumer))
-        assert len(consumptions) == 0
+        response = self.query_private_consumptions.query_private_consumptions(
+            query_private_consumptions.Request(member=self.consumer)
+        )
+        assert len(response.consumptions) == 0
 
     def test_registration_is_successful_if_member_has_negative_certs_and_consumes_public_product(
         self,
@@ -214,9 +218,11 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, pieces)
         )
-        consumptions = list(self.query_private_consumptions(self.consumer))
-        assert len(consumptions) == 1
-        latest_consumption = consumptions[0]
+        response = self.query_private_consumptions.query_private_consumptions(
+            query_private_consumptions.Request(member=self.consumer)
+        )
+        assert len(response.consumptions) == 1
+        latest_consumption = response.consumptions[0]
         assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
             plan.id
         )
@@ -229,9 +235,11 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan.id, pieces)
         )
-        consumptions = list(self.query_private_consumptions(self.consumer))
-        assert len(consumptions) == 1
-        latest_consumption = consumptions[0]
+        response = self.query_private_consumptions.query_private_consumptions(
+            query_private_consumptions.Request(member=self.consumer)
+        )
+        assert len(response.consumptions) == 1
+        latest_consumption = response.consumptions[0]
         assert latest_consumption.price_per_unit == Decimal(0)
         assert latest_consumption.plan_id == plan.id
 

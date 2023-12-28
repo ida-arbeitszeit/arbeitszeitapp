@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraftRequest
+from arbeitszeit.use_cases.create_plan_draft import Request
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.session import Session
 
@@ -10,10 +10,10 @@ from arbeitszeit_web.session import Session
 class CreateDraftController:
     session: Session
 
-    def import_form_data(self, draft_form: DraftForm) -> CreatePlanDraftRequest:
+    def import_form_data(self, draft_form: DraftForm) -> Request:
         planner = self.session.get_current_user()
         assert planner
-        return CreatePlanDraftRequest(
+        return Request(
             costs=ProductionCosts(
                 labour_cost=draft_form.labour_cost_field().get_value(),
                 resource_cost=draft_form.resource_cost_field().get_value(),

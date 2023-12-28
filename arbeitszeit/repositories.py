@@ -179,6 +179,11 @@ class PlanDraftResult(QueryResult[records.PlanDraft], Protocol):
     def update(self) -> PlanDraftUpdate:
         ...
 
+    def joined_with_planner_and_email_address(
+        self,
+    ) -> QueryResult[tuple[records.PlanDraft, records.Company, records.EmailAddress]]:
+        ...
+
     def delete(self) -> int:
         ...
 

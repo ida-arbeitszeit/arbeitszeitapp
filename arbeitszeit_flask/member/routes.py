@@ -34,6 +34,9 @@ from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresente
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
+from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
+    QueryPrivateConsumptionsController,
+)
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
@@ -67,10 +70,14 @@ from .blueprint import MemberRoute
 
 @MemberRoute("/consumptions")
 def consumptions(
-    query_consumptions: QueryPrivateConsumptions,
+    controller: QueryPrivateConsumptionsController,
+    use_case: QueryPrivateConsumptions,
     presenter: PrivateConsumptionsPresenter,
 ) -> Response:
-    response = query_consumptions(UUID(current_user.id))
+    uc_request = controller.process_request()
+    if not uc_request:
+        return FlaskResponse(status=403)
+    response = use_case.query_private_consumptions(uc_request)
     view_model = presenter.present_private_consumptions(response)
     return FlaskResponse(
         render_template(

@@ -38,18 +38,17 @@ class UseCaseTester(BaseTestCase):
         assert response.company_id == company.id
 
     def test_that_no_info_is_generated_after_selling_of_consumer_product(self) -> None:
-        member = self.member_generator.create_member_record()
-        company = self.company_generator.create_company_record()
-
-        self.transaction_generator.create_transaction(
-            sending_account=member.account,
-            receiving_account=company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        member = self.member_generator.create_member()
+        company = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=company)
+        transactions_before_consumption = len(
+            self.show_p_account_details(company).transactions
         )
-
-        response = self.show_p_account_details(company.id)
-        assert len(response.transactions) == 0
+        self.consumption_generator.create_private_consumption(
+            consumer=member, plan=plan.id
+        )
+        response = self.show_p_account_details(company)
+        assert len(response.transactions) == transactions_before_consumption
 
     def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
         company1 = self.company_generator.create_company_record()
