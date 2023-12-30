@@ -1,14 +1,16 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template, url_for
+from flask import redirect, render_template, request, url_for
 
 from arbeitszeit.use_cases.create_cooperation import (
     CreateCooperation,
     CreateCooperationRequest,
 )
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import CreateCooperationForm
+from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )
@@ -20,10 +22,12 @@ class CreateCooperationView:
     presenter: CreateCooperationPresenter
     session: FlaskSession
 
-    def respond_to_get(self, form: CreateCooperationForm):
-        return FlaskResponse(self._render_template(form), status=200)
+    def GET(self) -> Response:
+        return FlaskResponse(self._render_template(CreateCooperationForm()), status=200)
 
-    def respond_to_post(self, form: CreateCooperationForm):
+    @commit_changes
+    def POST(self) -> Response:
+        form = CreateCooperationForm(request.form)
         name = form.get_name_string()
         definition = form.get_definition_string()
         user = self.session.get_current_user()

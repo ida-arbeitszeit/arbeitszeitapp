@@ -4,6 +4,7 @@ from flask import Response, redirect, render_template, request
 
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit_flask import types
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RegisterAccountantForm
 from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,
@@ -19,13 +20,18 @@ class SignupAccountantView:
     presenter: RegisterAccountantPresenter
     use_case: RegisterAccountantUseCase
 
-    def handle_request(self, token: str) -> types.Response:
-        if request.method == "POST":
-            return self.handle_post_request(token)
-        else:
-            return self.handle_get_request()
+    @commit_changes
+    def GET(self, token: str) -> types.Response:
+        return Response(
+            response=render_template(
+                "auth/signup_accountant.html",
+                form=RegisterAccountantForm(),
+            ),
+            status=200,
+        )
 
-    def handle_post_request(self, token: str) -> types.Response:
+    @commit_changes
+    def POST(self, token: str) -> types.Response:
         form = RegisterAccountantForm(request.form)
         if form.validate() and (
             use_case_request := self.controller.register_accountant(form, token)
@@ -40,13 +46,4 @@ class SignupAccountantView:
                 form=form,
             ),
             status=400,
-        )
-
-    def handle_get_request(self) -> types.Response:
-        return Response(
-            response=render_template(
-                "auth/signup_accountant.html",
-                form=RegisterAccountantForm(),
-            ),
-            status=200,
         )

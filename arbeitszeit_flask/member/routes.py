@@ -3,7 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import render_template, request
+from flask import render_template
 from flask_login import current_user
 
 from arbeitszeit import use_cases
@@ -12,11 +12,7 @@ from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase,
 )
-from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.forms import (
-    AnswerCompanyWorkInviteForm,
-    RegisterPrivateConsumptionForm,
-)
+from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -49,13 +45,9 @@ MemberRoute("/consumptions")(consumptions)
 
 
 @MemberRoute("/register_private_consumption", methods=["GET", "POST"])
-@commit_changes
-def register_private_consumption(view: RegisterPrivateConsumptionView) -> Response:
-    form = RegisterPrivateConsumptionForm(request.form)
-    if request.method == "POST":
-        return view.respond_to_post(form)
-    else:
-        return view.respond_to_get(form)
+@as_flask_view()
+class register_private_consumption(RegisterPrivateConsumptionView):
+    ...
 
 
 @MemberRoute("/dashboard")
@@ -155,9 +147,6 @@ def list_coordinators_of_cooperation(
 
 
 @MemberRoute("/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
-def show_company_work_invite(invite_id: UUID, view: CompanyWorkInviteView):
-    form = AnswerCompanyWorkInviteForm(request.form)
-    if request.method == "POST":
-        return view.respond_to_post(form, invite_id)
-    else:
-        return view.respond_to_get(invite_id)
+@as_flask_view()
+class show_company_work_invite(CompanyWorkInviteView):
+    ...
