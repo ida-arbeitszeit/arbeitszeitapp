@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
 from arbeitszeit.use_cases.start_page import StartPageUseCase
+from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -75,10 +76,9 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
 
 
 @auth.route("/signup-member", methods=["GET", "POST"])
-@with_injection()
-@commit_changes
-def signup_member(view: SignupMemberView):
-    return view.handle_request()
+@as_flask_view()
+class signup_member(SignupMemberView):
+    ...
 
 
 @auth.route("/confirm-member/<token>")
@@ -188,10 +188,9 @@ def login_company(
 
 
 @auth.route("/company/signup", methods=["GET", "POST"])
-@commit_changes
-@with_injection()
-def signup_company(view: SignupCompanyView):
-    return view.handle_request(request)
+@as_flask_view()
+class signup_company(SignupCompanyView):
+    ...
 
 
 @auth.route("/company/confirm/<token>")
@@ -229,10 +228,9 @@ def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
 
 
 @auth.route("/accountant/signup/<token>", methods=["GET", "POST"])
-@commit_changes
-@with_injection()
-def signup_accountant(token: str, view: SignupAccountantView):
-    return view.handle_request(token)
+@as_flask_view()
+class signup_accountant(SignupAccountantView):
+    ...
 
 
 @auth.route("/accountant/login", methods=["GET", "POST"])

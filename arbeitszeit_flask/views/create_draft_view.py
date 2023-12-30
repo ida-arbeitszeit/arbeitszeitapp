@@ -3,9 +3,10 @@ from typing import Union
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template
+from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex
@@ -27,8 +28,10 @@ class CreateDraftView:
     create_draft: CreatePlanDraft
     url_index: GeneralUrlIndex
 
-    def respond_to_post(self, form: CreateDraftForm) -> Response:
+    @commit_changes
+    def POST(self) -> Response:
         """either cancel plan creation, save draft or file draft."""
+        form = CreateDraftForm(request.form)
         user_action = self.request.get_form("action")
         if user_action == "save_draft":
             self._create_draft(form)
@@ -42,15 +45,7 @@ class CreateDraftView:
             )
             return redirect(self.url_index.get_my_plan_drafts_url())
 
-    def _create_draft(self, form: CreateDraftForm) -> Union[Response, UUID]:
-        use_case_request = self.prefilled_data_controller.import_form_data(form)
-        response = self.create_draft(use_case_request)
-        if response.is_rejected:
-            return http_404()
-        assert response.draft_id
-        return response.draft_id
-
-    def respond_to_get(self) -> Response:
+    def GET(self) -> Response:
         return FlaskResponse(
             render_template(
                 "company/create_draft.html",
@@ -62,3 +57,11 @@ class CreateDraftView:
                 ),
             )
         )
+
+    def _create_draft(self, form: CreateDraftForm) -> Union[Response, UUID]:
+        use_case_request = self.prefilled_data_controller.import_form_data(form)
+        response = self.create_draft(use_case_request)
+        if response.is_rejected:
+            return http_404()
+        assert response.draft_id
+        return response.draft_id

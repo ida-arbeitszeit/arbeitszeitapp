@@ -7,6 +7,7 @@ from flask import redirect, render_template, request, url_for
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
 )
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterPrivateConsumptionForm
 from arbeitszeit_flask.types import Response
@@ -25,7 +26,9 @@ class RegisterPrivateConsumptionView:
     controller: RegisterPrivateConsumptionController
     presenter: RegisterPrivateConsumptionPresenter
 
-    def respond_to_get(self, form: RegisterPrivateConsumptionForm) -> Response:
+    @commit_changes
+    def GET(self) -> Response:
+        form = RegisterPrivateConsumptionForm(request.form)
         amount: Optional[str] = request.args.get("amount")
         plan_id: Optional[str] = request.args.get("plan_id")
         if amount:
@@ -34,7 +37,9 @@ class RegisterPrivateConsumptionView:
             form.plan_id_field().set_value(plan_id)
         return FlaskResponse(self._render_template(form=form))
 
-    def respond_to_post(self, form: RegisterPrivateConsumptionForm) -> Response:
+    @commit_changes
+    def POST(self) -> Response:
+        form = RegisterPrivateConsumptionForm(request.form)
         if not form.validate():
             return self._handle_invalid_form(form)
         current_user = self.flask_session.get_current_user()

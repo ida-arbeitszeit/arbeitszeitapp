@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, render_template
+from flask import Response, render_template, request
 
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase,
 )
 from arbeitszeit_flask import types
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RequestCoordinationTransferForm
 from arbeitszeit_web.www.controllers.request_coordination_transfer_controller import (
     RequestCoordinationTransferController,
@@ -23,15 +24,16 @@ class RequestCoordinationTransferView:
     controller: RequestCoordinationTransferController
     use_case: RequestCoordinationTransferUseCase
 
-    def respond_to_get(
-        self, form: RequestCoordinationTransferForm, coop_id: UUID
-    ) -> types.Response:
+    @commit_changes
+    def GET(self, coop_id: UUID) -> types.Response:
+        form = RequestCoordinationTransferForm()
+        form.cooperation_field().set_value(str(coop_id))
         navbar_items = self.presenter.create_navbar_items(coop_id=coop_id)
         return self._create_response(navbar_items=navbar_items, form=form, status=200)
 
-    def respond_to_post(
-        self, form: RequestCoordinationTransferForm, coop_id: UUID
-    ) -> types.Response:
+    @commit_changes
+    def POST(self, coop_id: UUID) -> types.Response:
+        form = RequestCoordinationTransferForm(request.form)
         navbar_items = self.presenter.create_navbar_items(coop_id=coop_id)
         if not form.validate():
             return self._create_response(

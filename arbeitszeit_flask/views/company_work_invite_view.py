@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import cast
 from uuid import UUID
 
-from flask import Response, redirect, render_template
+from flask import Response, redirect, render_template, request
 
 from arbeitszeit.use_cases.answer_company_work_invite import (
     AnswerCompanyWorkInvite,
@@ -12,10 +12,10 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.forms import AnswerCompanyWorkInviteForm
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
-    AnswerCompanyWorkInviteForm,
 )
 from arbeitszeit_web.www.controllers.show_company_work_invite_details_controller import (
     ShowCompanyWorkInviteDetailsController,
@@ -27,6 +27,8 @@ from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter i
     ShowCompanyWorkInviteDetailsPresenter,
 )
 
+TEMPLATE = "member/show_company_work_invite_details.html"
+
 
 @dataclass
 class CompanyWorkInviteView:
@@ -37,7 +39,7 @@ class CompanyWorkInviteView:
     answer_presenter: AnswerCompanyWorkInvitePresenter
     answer_use_case: AnswerCompanyWorkInvite
 
-    def respond_to_get(self, invite_id: UUID) -> Response:
+    def GET(self, invite_id: UUID) -> Response:
         use_case_request = self.details_controller.create_use_case_request(invite_id)
         if use_case_request is None:
             return http_404()
@@ -47,16 +49,14 @@ class CompanyWorkInviteView:
         view_model = self.details_presenter.render_response(use_case_response)
         if view_model is None:
             return http_404()
-        template = "member/show_company_work_invite_details.html"
         return Response(
-            render_template(template, view_model=view_model),
+            render_template(TEMPLATE, view_model=view_model),
             status=200,
         )
 
     @commit_changes
-    def respond_to_post(
-        self, form: AnswerCompanyWorkInviteForm, invite_id: UUID
-    ) -> Response:
+    def POST(self, invite_id: UUID) -> Response:
+        form = AnswerCompanyWorkInviteForm(request.form)
         use_case_request = self.answer_controller.import_form_data(
             form=form, invite_id=invite_id
         )
