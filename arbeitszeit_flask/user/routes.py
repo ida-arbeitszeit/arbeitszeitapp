@@ -8,7 +8,7 @@ from arbeitszeit.use_cases.get_company_summary import (
 )
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit_flask.types import Response
-from arbeitszeit_flask.views.http_404_view import Http404View
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.user_account_details_controller import (
     UserAccountDetailsController,
 )
@@ -39,7 +39,6 @@ def company_summary(
     company_id: UUID,
     get_company_summary: GetCompanySummary,
     presenter: GetCompanySummarySuccessPresenter,
-    http_404_view: Http404View,
 ):
     use_case_response = get_company_summary(company_id)
     if isinstance(use_case_response, GetCompanySummarySuccess):
@@ -49,4 +48,4 @@ def company_summary(
             view_model=view_model.to_dict(),
         )
     else:
-        return http_404_view.get_response()
+        return http_404()

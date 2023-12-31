@@ -68,7 +68,6 @@ from arbeitszeit_flask.forms import (
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
-    Http404View,
     InviteWorkerToCompanyView,
     QueryCompaniesView,
     QueryPlansView,
@@ -77,6 +76,7 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
@@ -231,13 +231,12 @@ def delete_draft(
     controller: DeleteDraftController,
     use_case: DeleteDraftUseCase,
     presenter: DeleteDraftPresenter,
-    http_404_view: Http404View,
 ) -> Response:
     use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
     try:
         use_case_response = use_case.delete_draft(use_case_request)
     except use_case.Failure:
-        return http_404_view.get_response()
+        return http_404()
     view_model = presenter.present_draft_deletion(use_case_response)
     return redirect(view_model.redirect_target)
 
@@ -274,7 +273,6 @@ def create_draft(
 def file_plan(
     draft_id: str,
     session: FlaskSession,
-    not_found_view: Http404View,
     controller: FilePlanWithAccountingController,
     use_case: FilePlanWithAccounting,
     presenter: FilePlanWithAccountingPresenter,
@@ -284,7 +282,7 @@ def file_plan(
             draft_id=draft_id, session=session
         )
     except controller.InvalidRequest:
-        return not_found_view.get_response()
+        return http_404()
     response = use_case.file_plan_with_accounting(request)
     view_model = presenter.present_response(response)
     return redirect(view_model.redirect_url)
@@ -295,11 +293,10 @@ def get_draft_details(
     draft_id: str,
     use_case: GetDraftDetails,
     presenter: GetPrefilledDraftDataPresenter,
-    not_found_view: Http404View,
 ) -> Response:
     use_case_response = use_case(UUID(draft_id))
     if use_case_response is None:
-        return not_found_view.get_response()
+        return http_404()
     form = CreateDraftForm()
     view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
@@ -459,12 +456,11 @@ def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
     presenter: GetPlanDetailsCompanyPresenter,
-    http_404_view: Http404View,
 ):
     use_case_request = GetPlanDetailsUseCase.Request(plan_id)
     use_case_response = use_case.get_plan_details(use_case_request)
     if not use_case_response:
-        return http_404_view.get_response()
+        return http_404()
     view_model = presenter.present(use_case_response)
     return render_template("company/plan_details.html", view_model=view_model.to_dict())
 
@@ -474,7 +470,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -485,7 +480,7 @@ def coop_summary(
             "company/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @CompanyRoute(
@@ -558,7 +553,6 @@ def request_cooperation(
     request_cooperation: RequestCooperation,
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
-    http_404_view: Http404View,
 ):
     form = RequestCooperationForm(request.form)
     view = RequestCooperationView(
@@ -569,7 +563,6 @@ def request_cooperation(
         request_cooperation=request_cooperation,
         controller=controller,
         presenter=presenter,
-        not_found_view=http_404_view,
         template_name="company/request_cooperation.html",
     )
 

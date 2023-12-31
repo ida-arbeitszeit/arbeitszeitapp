@@ -24,11 +24,11 @@ from arbeitszeit_flask.forms import (
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
-    Http404View,
     QueryCompaniesView,
     QueryPlansView,
     RegisterPrivateConsumptionView,
 )
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
@@ -175,7 +175,6 @@ def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
     presenter: GetPlanDetailsMemberMemberPresenter,
-    http_404_view: Http404View,
 ) -> Response:
     use_case_request = GetPlanDetailsUseCase.Request(plan_id)
     use_case_response = use_case.get_plan_details(use_case_request)
@@ -188,7 +187,7 @@ def plan_details(
             )
         )
     else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @MemberRoute("/cooperation_summary/<uuid:coop_id>")
@@ -196,7 +195,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -207,7 +205,7 @@ def coop_summary(
             "member/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @MemberRoute("/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])

@@ -12,6 +12,7 @@ from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (
     AnswerCompanyWorkInviteController,
     AnswerCompanyWorkInviteForm,
@@ -26,8 +27,6 @@ from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter i
     ShowCompanyWorkInviteDetailsPresenter,
 )
 
-from .http_404_view import Http404View
-
 
 @dataclass
 class CompanyWorkInviteView:
@@ -37,18 +36,17 @@ class CompanyWorkInviteView:
     answer_controller: AnswerCompanyWorkInviteController
     answer_presenter: AnswerCompanyWorkInvitePresenter
     answer_use_case: AnswerCompanyWorkInvite
-    http_404_view: Http404View
 
     def respond_to_get(self, invite_id: UUID) -> Response:
         use_case_request = self.details_controller.create_use_case_request(invite_id)
         if use_case_request is None:
-            return self.http_404_view.get_response()
+            return http_404()
         use_case_response = self.details_use_case.show_company_work_invite_details(
             use_case_request
         )
         view_model = self.details_presenter.render_response(use_case_response)
         if view_model is None:
-            return self.http_404_view.get_response()
+            return http_404()
         template = "member/show_company_work_invite_details.html"
         return Response(
             render_template(template, view_model=view_model),
