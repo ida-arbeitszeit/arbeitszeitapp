@@ -23,7 +23,6 @@ from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperationResponse,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
@@ -120,9 +119,6 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
-    GetCompanySummarySuccessPresenter,
 )
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
@@ -471,26 +467,6 @@ def plan_details(
         return http_404_view.get_response()
     view_model = presenter.present(use_case_response)
     return render_template("company/plan_details.html", view_model=view_model.to_dict())
-
-
-@CompanyRoute("/company/company_summary/<uuid:company_id>")
-def company_summary(
-    company_id: UUID,
-    get_company_summary: GetCompanySummary,
-    presenter: GetCompanySummarySuccessPresenter,
-    http_404_view: Http404View,
-):
-    use_case_response = get_company_summary(company_id)
-    if isinstance(
-        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
-    ):
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/company_summary.html",
-            view_model=view_model.to_dict(),
-        )
-    else:
-        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")

@@ -52,7 +52,6 @@ class PlanDetailsFormatter:
                 self.translator.gettext("Planning company"),
                 str(plan_details.planner_id),
                 self.url_index.get_company_summary_url(
-                    user_role=user_role,
                     company_id=plan_details.planner_id,
                 ),
                 plan_details.planner_name,

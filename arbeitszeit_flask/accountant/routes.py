@@ -4,10 +4,8 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template
 from flask_login import current_user
 
-from arbeitszeit import use_cases
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
@@ -26,9 +24,6 @@ from arbeitszeit_web.www.controllers.approve_plan_controller import (
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
 from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
-    GetCompanySummarySuccessPresenter,
 )
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
@@ -105,26 +100,6 @@ def plan_details(
                 "accountant/plan_details.html",
                 view_model=view_model.to_dict(),
             )
-        )
-    else:
-        return http_404_view.get_response()
-
-
-@AccountantRoute("/accountant/company_summary/<uuid:company_id>")
-def company_summary(
-    company_id: UUID,
-    get_company_summary: GetCompanySummary,
-    presenter: GetCompanySummarySuccessPresenter,
-    http_404_view: Http404View,
-):
-    use_case_response = get_company_summary(company_id)
-    if isinstance(
-        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
-    ):
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "accountant/company_summary.html",
-            view_model=view_model.to_dict(),
         )
     else:
         return http_404_view.get_response()

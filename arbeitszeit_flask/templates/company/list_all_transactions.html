@@ -8,19 +8,18 @@
 {% block content %}
 {% from 'macros/transactions.html' import transaction_with_account %}
 
-<div class="section is-medium has-text-centered pb-0">
-    <h1 class="title">
-        {{ gettext("All transactions")
-        }}
-    </h1>
-    <div class="box has-background-info-light has-text-info-dark">
-        <div class="icon"><i class="fas fa-info-circle"></i></div>
-        <p>{{ gettext("Here are all transactions you have made or received so far.") }}</p>
-    </div>
-</div>
-<div class="section">
-    <div class="columns is-centered">
-        <div class="column is-two-thirds">
+<section class="section columns has-text-centered">
+    <div class="column"></div>
+    <div class="column is-two-thirds">
+        <h1 class="title">
+            {{ gettext("All transactions")
+            }}
+        </h1>
+        <div class="box has-background-info-light has-text-info-dark">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <p>{{ gettext("All transactions made or received so far.") }}</p>
+        </div>
+        <div class="section has-text-left">
             {% if all_transactions is defined and all_transactions|length %}
             {% for trans_info in all_transactions %}
             {{ transaction_with_account(trans_info.date, trans_info.transaction_type, trans_info.purpose, trans_info.transaction_volume, trans_info.account) }}
@@ -28,5 +27,6 @@
             {% endif %}
         </div>
     </div>
-</div>
+    <div class="column"></div>
+</section>
 {% endblock %}

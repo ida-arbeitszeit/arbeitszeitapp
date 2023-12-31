@@ -28,9 +28,7 @@ class UrlIndex(Protocol):
     def get_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
-    def get_company_summary_url(
-        self, user_role: Optional[UserRole], company_id: UUID
-    ) -> str:
+    def get_company_summary_url(self, company_id: UUID) -> str:
         ...
 
     def get_coop_summary_url(

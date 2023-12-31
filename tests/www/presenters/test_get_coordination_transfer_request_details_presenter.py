@@ -47,11 +47,9 @@ class GetDetailsPresenterTests(BaseTestCase):
     def test_that_correct_company_summary_url_of_candidate_is_displayed(
         self,
     ):
-        user_role = self.session.get_user_role()
-        assert user_role
         candidate_id = uuid4()
         expected_candidate_url = self.url_index.get_company_summary_url(
-            user_role=user_role, company_id=candidate_id
+            company_id=candidate_id
         )
         response = self.get_use_case_response(candidate_id=candidate_id)
         view_model = self.presenter.present(response)

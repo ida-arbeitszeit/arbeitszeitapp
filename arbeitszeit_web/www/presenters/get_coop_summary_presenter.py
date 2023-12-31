@@ -57,7 +57,6 @@ class GetCoopSummarySuccessPresenter:
             current_coordinator_id=str(response.current_coordinator),
             current_coordinator_name=response.current_coordinator_name,
             current_coordinator_url=self.url_index.get_company_summary_url(
-                user_role=user_role,
                 company_id=response.current_coordinator,
             ),
             list_of_coordinators_url=self.url_index.get_list_of_coordinators_url(
@@ -79,7 +78,7 @@ class GetCoopSummarySuccessPresenter:
                     ),
                     planner_name=plan.planner_name,
                     planner_url=self.url_index.get_company_summary_url(
-                        user_role=user_role, company_id=plan.planner_id
+                        company_id=plan.planner_id
                     ),
                     show_end_coop_button=response.requester_is_coordinator
                     or plan.requester_is_planner,
