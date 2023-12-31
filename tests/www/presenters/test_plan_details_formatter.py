@@ -49,9 +49,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
             (
                 self.translator.gettext("Planning company"),
                 str(PLANNER_ID),
-                self.url_index.get_company_summary_url(
-                    user_role=UserRole.company, company_id=PLANNER_ID
-                ),
+                self.url_index.get_company_summary_url(company_id=PLANNER_ID),
                 PLANNER_NAME,
             ),
         )

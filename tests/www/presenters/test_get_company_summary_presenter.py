@@ -235,9 +235,7 @@ class PlansOfCompanyTests(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.suppliers_ordered_by_volume[0].company_url,
-            self.url_index.get_company_summary_url(
-                user_role=UserRole.company, company_id=supplier_id
-            ),
+            self.url_index.get_company_summary_url(company_id=supplier_id),
         )
 
     def test_correct_supplier_name_is_shown(self):

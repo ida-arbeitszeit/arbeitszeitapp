@@ -72,17 +72,8 @@ class GeneralUrlIndex:
         else:
             raise ValueError(f"list of coordinators url not available for {user_role}")
 
-    def get_company_summary_url(
-        self, user_role: Optional[UserRole], company_id: UUID
-    ) -> str:
-        if user_role == UserRole.company:
-            return url_for("main_company.company_summary", company_id=company_id)
-        elif user_role == UserRole.member:
-            return url_for("main_member.company_summary", company_id=company_id)
-        elif user_role == UserRole.accountant:
-            return url_for("main_accountant.company_summary", company_id=company_id)
-        else:
-            raise ValueError(f"company summary not available for {user_role}")
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return url_for("main_user.company_summary", company_id=company_id)
 
     def get_answer_company_work_invite_url(self, *, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)

@@ -91,7 +91,6 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             view_model.current_coordinator_url,
             self.url_index.get_company_summary_url(
                 company_id=coop_summary.current_coordinator,
-                user_role=UserRole.company,
             ),
         )
 
@@ -170,7 +169,6 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
         self.assertEqual(
             view_model.plans[0].planner_url,
             self.url_index.get_company_summary_url(
-                user_role=UserRole.company,
                 company_id=coop_summary.plans[0].planner_id,
             ),
         )

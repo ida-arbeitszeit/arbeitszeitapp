@@ -39,7 +39,7 @@ class GetCoordinationTransferRequestDetailsPresenter:
             ),
             cooperation_name=response.cooperation_name,
             candidate_url=self.url_index.get_company_summary_url(
-                user_role=user_role, company_id=response.candidate_id
+                company_id=response.candidate_id
             ),
             candidate_name=response.candidate_name,
             current_user_is_candidate=current_user == response.candidate_id,
