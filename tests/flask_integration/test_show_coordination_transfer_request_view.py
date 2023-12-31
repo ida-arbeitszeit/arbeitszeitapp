@@ -21,33 +21,19 @@ class ShowTransferRequestBaseTest(ViewTestCase):
 
     def create_transfer_request(
         self,
-        requester_is_coordinator: bool = True,
-        candidate_is_current_user: bool = True,
+        *,
+        candidate: UUID,
+        requester: Optional[UUID] = None,
     ) -> UUID:
         coordinator = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=coordinator
         )
-        candidate = (
-            self.get_current_user()
-            if candidate_is_current_user
-            else self.company_generator.create_company()
-        )
-        requester = (
-            coordinator
-            if requester_is_coordinator
-            else self.company_generator.create_company()
-        )
+        requester = requester or coordinator
         transfer_request = self.coordination_transfer_request_generator.create_coordination_transfer_request(
             requester=requester, cooperation=cooperation, candidate=candidate
         )
         return transfer_request
-
-    def get_current_user(self) -> UUID:
-        with self.client.session_transaction() as session:
-            current_user: Optional[str] = session.get("_user_id")
-        assert current_user, "No logged in user"
-        return UUID(current_user)
 
     def accept_transfer_request(
         self, transfer_request: UUID, accepting_company: UUID
@@ -96,7 +82,7 @@ class CompanyGetRequestTests(ShowTransferRequestBaseTest):
         self.assertEqual(response.status_code, 404)
 
     def test_that_200_is_returned_if_transfer_request_does_exist(self) -> None:
-        transfer_request = self.create_transfer_request()
+        transfer_request = self.create_transfer_request(candidate=self.user.id)
         url = self.create_url(transfer_request=transfer_request)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -104,7 +90,9 @@ class CompanyGetRequestTests(ShowTransferRequestBaseTest):
     def test_that_post_form_does_not_show_on_page_if_current_user_is_not_candidate(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request(candidate_is_current_user=False)
+        transfer_request = self.create_transfer_request(
+            candidate=self.company_generator.create_company()
+        )
         url = self.create_url(transfer_request=transfer_request)
         response = self.client.get(url)
         self.assertNotIn('<form method="post">', response.text)
@@ -112,7 +100,7 @@ class CompanyGetRequestTests(ShowTransferRequestBaseTest):
     def test_that_post_form_does_not_show_on_page_if_transfer_has_already_been_accepted(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request()
+        transfer_request = self.create_transfer_request(candidate=self.user.id)
         self.accept_transfer_request(
             transfer_request=transfer_request, accepting_company=self.user.id
         )
@@ -123,7 +111,7 @@ class CompanyGetRequestTests(ShowTransferRequestBaseTest):
     def test_that_post_form_does_show_on_page_if_transfer_has_not_been_accepted_and_current_user_is_candidate(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request()
+        transfer_request = self.create_transfer_request(candidate=self.user.id)
         url = self.create_url(transfer_request=transfer_request)
         response = self.client.get(url)
         self.assertIn('<form method="post">', response.text)
@@ -142,7 +130,7 @@ class CompanyPostRequestTests(ShowTransferRequestBaseTest):
     def test_that_302_is_returned_if_transfer_request_exists_and_user_is_candidate(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request()
+        transfer_request = self.create_transfer_request(candidate=self.user.id)
         url = self.create_url(transfer_request=transfer_request)
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
@@ -150,7 +138,9 @@ class CompanyPostRequestTests(ShowTransferRequestBaseTest):
     def test_that_403_is_returned_if_transfer_request_exists_but_candidate_is_not_current_user(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request(candidate_is_current_user=False)
+        transfer_request = self.create_transfer_request(
+            candidate=self.company_generator.create_company()
+        )
         url = self.create_url(transfer_request=transfer_request)
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
@@ -158,7 +148,7 @@ class CompanyPostRequestTests(ShowTransferRequestBaseTest):
     def test_that_409_is_returned_if_transfer_request_exists_but_request_has_already_been_accepted(
         self,
     ) -> None:
-        transfer_request = self.create_transfer_request()
+        transfer_request = self.create_transfer_request(candidate=self.user.id)
         self.accept_transfer_request(
             transfer_request=transfer_request, accepting_company=self.user.id
         )
