@@ -14,6 +14,7 @@ from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
     CooperationGenerator,
+    CoordinationTransferRequestGenerator,
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
@@ -65,6 +66,9 @@ class ViewTestCase(FlaskTestCase):
         self.email_generator = self.injector.get(EmailGenerator)
         self.accountant_generator = self.injector.get(AccountantGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
+        self.coordination_transfer_request_generator = self.injector.get(
+            CoordinationTransferRequestGenerator
+        )
 
     def login_member(
         self,

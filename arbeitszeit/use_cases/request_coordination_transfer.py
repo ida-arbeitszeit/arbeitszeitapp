@@ -63,6 +63,7 @@ class RequestCoordinationTransferUseCase:
                 candidate_name=candidate.name,
                 candidate_email=candidate_email.address,
                 cooperation_name=cooperation.name,
+                transfer_request=transfer_request.id,
             )
         )
         return self.Response(

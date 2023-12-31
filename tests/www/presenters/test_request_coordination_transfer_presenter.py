@@ -150,7 +150,7 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
         self.assertEqual(
             self.notifier.warnings[0],
             self.translator.gettext(
-                "The requesting coordination tenure has a pending transfer request."
+                "Request has not been sent. You have a pending transfer request."
             ),
         )
 

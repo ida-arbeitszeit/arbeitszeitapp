@@ -84,6 +84,9 @@ from arbeitszeit_flask.views.register_productive_consumption import (
 from arbeitszeit_flask.views.request_coordination_transfer_view import (
     RequestCoordinationTransferView,
 )
+from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
+    ShowCoordinationTransferRequestView,
+)
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
@@ -502,6 +505,22 @@ def request_coordination_transfer(
     elif request.method == "POST":
         form = RequestCoordinationTransferForm(request.form)
         return view.respond_to_post(form=form, coop_id=coop_id)
+
+
+@CompanyRoute(
+    "/company/show_coordination_transfer_request/<uuid:transfer_request>",
+    methods=["GET", "POST"],
+)
+@commit_changes
+def show_coordination_transfer_request(
+    transfer_request: UUID,
+    view: ShowCoordinationTransferRequestView,
+):
+    if request.method == "GET":
+        return view.respond_to_get(transfer_request)
+
+    elif request.method == "POST":
+        return view.respond_to_post(transfer_request)
 
 
 @CompanyRoute(

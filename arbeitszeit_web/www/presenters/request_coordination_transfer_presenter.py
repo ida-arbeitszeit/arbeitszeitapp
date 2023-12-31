@@ -75,7 +75,7 @@ class RequestCoordinationTransferPresenter:
             ):
                 self.notifier.display_warning(
                     self.translator.gettext(
-                        "The requesting coordination tenure has a pending transfer request."
+                        "Request has not been sent. You have a pending transfer request."
                     )
                 )
                 return RequestCoordinationTransferViewModel(status_code=409)

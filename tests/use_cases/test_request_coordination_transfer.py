@@ -47,13 +47,10 @@ class RequestCoordinationTransferTests(BaseTestCase):
             RequestCoordinationTransferUseCase.Response.RejectionReason.candidate_is_not_a_company,
         )
 
-    def test_requesting_transfer_fails_if_requster_is_not_coordinator(
+    def test_requesting_transfer_fails_if_requester_is_not_coordinator(
         self,
     ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        response = self.use_case.request_transfer(
-            self.get_use_case_request(cooperation=cooperation)
-        )
+        response = self.use_case.request_transfer(self.get_use_case_request())
         self.assertTrue(response.is_rejected)
         self.assertEqual(
             response.rejection_reason,
@@ -63,15 +60,9 @@ class RequestCoordinationTransferTests(BaseTestCase):
     def test_requesting_transfer_fails_if_candidate_is_current_coordinator_of_cooperation(
         self,
     ) -> None:
-        candidate_and_coordinator = self.company_generator.create_company()
-        cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=candidate_and_coordinator
-        )
         response = self.use_case.request_transfer(
-            RequestCoordinationTransferUseCase.Request(
-                requester=candidate_and_coordinator,
-                candidate=candidate_and_coordinator,
-                cooperation=cooperation,
+            self.get_use_case_request(
+                requester_is_coordinator=True, candidate_is_coordinator=True
             )
         )
         self.assertTrue(response.is_rejected)
@@ -83,23 +74,15 @@ class RequestCoordinationTransferTests(BaseTestCase):
     def test_requesting_transfer_fails_if_current_coordinator_has_already_requested_a_transfer_that_is_still_pending(
         self,
     ) -> None:
-        coordinator = self.company_generator.create_company()
+        requester = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=coordinator
+            coordinator=requester
         )
         self.use_case.request_transfer(
-            RequestCoordinationTransferUseCase.Request(
-                requester=coordinator,
-                candidate=self.company_generator.create_company(),
-                cooperation=cooperation,
-            )
+            self.get_use_case_request(requester=requester, cooperation=cooperation)
         )
         response = self.use_case.request_transfer(
-            RequestCoordinationTransferUseCase.Request(
-                requester=coordinator,
-                candidate=self.company_generator.create_company(),
-                cooperation=cooperation,
-            )
+            self.get_use_case_request(requester=requester, cooperation=cooperation)
         )
         self.assertTrue(response.is_rejected)
         self.assertEqual(
@@ -149,18 +132,36 @@ class RequestCoordinationTransferTests(BaseTestCase):
         notification = self.get_latest_notification_delivered()
         self.assertEqual(notification.cooperation_name, expected_name)
 
+    def test_that_delivered_notification_contains_request_transfer_id(self) -> None:
+        expected_transfer_request = self.successfully_request_a_transfer()
+        notification = self.get_latest_notification_delivered()
+        self.assertEqual(notification.transfer_request, expected_transfer_request)
+
     def get_use_case_request(
         self,
         requester: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
+        requester_is_coordinator: bool = False,
+        candidate_is_coordinator: bool = False,
     ) -> RequestCoordinationTransferUseCase.Request:
         if requester is None:
             requester = self.company_generator.create_company()
         if cooperation is None:
-            cooperation = self.cooperation_generator.create_cooperation()
+            coordinator = (
+                requester
+                if requester_is_coordinator
+                else self.company_generator.create_company()
+            )
+            cooperation = self.cooperation_generator.create_cooperation(
+                coordinator=coordinator
+            )
         if candidate is None:
-            candidate = self.company_generator.create_company()
+            candidate = (
+                coordinator
+                if candidate_is_coordinator
+                else self.company_generator.create_company()
+            )
         return RequestCoordinationTransferUseCase.Request(
             requester=requester, cooperation=cooperation, candidate=candidate
         )
@@ -170,7 +171,7 @@ class RequestCoordinationTransferTests(BaseTestCase):
         current_user: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
         candidate: Optional[UUID] = None,
-    ) -> None:
+    ) -> UUID:
         if current_user is None:
             current_user = self.company_generator.create_company()
         if cooperation is None:
@@ -183,6 +184,8 @@ class RequestCoordinationTransferTests(BaseTestCase):
             )
         )
         self.assertFalse(response.is_rejected)
+        assert response.transfer_request
+        return response.transfer_request
 
     def get_latest_notification_delivered(
         self,

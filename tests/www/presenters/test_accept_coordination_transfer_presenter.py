@@ -4,7 +4,6 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.accept_coordination_transfer import (
     AcceptCoordinationTransferUseCase,
 )
-from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.accept_coordination_transfer_presenter import (
     AcceptCoordinationTransferPresenter,
 )
@@ -107,9 +106,9 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         response = self.presenter.present(self.uc_response(cooperation_id=uuid4()))
         self.assertIsNotNone(response.redirect_url)
 
-    def test_that_status_code_is_304_if_transfer_request_was_accepted(self) -> None:
+    def test_that_status_code_is_302_if_transfer_request_was_accepted(self) -> None:
         response = self.presenter.present(self.uc_response(cooperation_id=uuid4()))
-        self.assertEqual(304, response.status_code)
+        self.assertEqual(302, response.status_code)
 
     def test_that_correct_info_is_displayed_if_transfer_request_was_accepted(
         self,
@@ -123,12 +122,14 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
     def test_that_redirect_url_is_correct_if_transfer_request_was_accepted(
         self,
     ) -> None:
-        cooperation_id = uuid4()
+        transfer_request = uuid4()
         response = self.presenter.present(
-            self.uc_response(cooperation_id=cooperation_id)
+            self.uc_response(
+                cooperation_id=uuid4(), transfer_request_id=transfer_request
+            )
         )
-        expected_url = self.url_index.get_coop_summary_url(
-            coop_id=cooperation_id, user_role=UserRole.company
+        expected_url = self.url_index.get_show_coordination_transfer_request_url(
+            transfer_request=transfer_request
         )
         self.assertEqual(response.redirect_url, expected_url)
 
@@ -136,9 +137,10 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         self,
         rejection_reason: Optional[rejection_reason] = None,
         cooperation_id: Optional[UUID] = None,
+        transfer_request_id: UUID = uuid4(),
     ) -> AcceptCoordinationTransferUseCase.Response:
         return AcceptCoordinationTransferUseCase.Response(
             rejection_reason=rejection_reason,
             cooperation_id=cooperation_id,
-            transfer_request_id=uuid4(),
+            transfer_request_id=transfer_request_id,
         )

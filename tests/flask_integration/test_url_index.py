@@ -409,3 +409,34 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_request_coordination_transfer_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_request_to_show_coordination_transfer_request_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        current_user = self.login_company().id
+        coop_id = self.cooperation_generator.create_cooperation(
+            coordinator=current_user
+        )
+        transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
+            requester=current_user, cooperation=coop_id
+        )
+        url = self.url_index.get_show_coordination_transfer_request_url(
+            transfer_request_id
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_request_by_assignated_candidate_to_show_coordination_transfer_request_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        candidate = self.login_company().id
+        coordinator = self.company_generator.create_company()
+        coop_id = self.cooperation_generator.create_cooperation(coordinator=coordinator)
+        transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(
+            requester=coordinator, cooperation=coop_id, candidate=candidate
+        )
+        url = self.url_index.get_show_coordination_transfer_request_url(
+            transfer_request_id
+        )
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
