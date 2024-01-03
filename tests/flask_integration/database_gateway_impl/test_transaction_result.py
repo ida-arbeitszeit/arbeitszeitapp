@@ -7,7 +7,6 @@ from arbeitszeit.records import SocialAccounting, Transaction
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
-    AccountGenerator,
     CompanyGenerator,
     ConsumptionGenerator,
     MemberGenerator,
@@ -21,7 +20,6 @@ from ..flask import FlaskTestCase
 class TransactionRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.account_generator = self.injector.get(AccountGenerator)
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.plan_generator: PlanGenerator = self.injector.get(PlanGenerator)
         self.datetime_service: FakeDatetimeService = self.injector.get(
@@ -32,31 +30,31 @@ class TransactionRepositoryTests(FlaskTestCase):
     def test_created_transactions_show_up_in_all_transactions_received_by_account(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         transaction = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_receiver(
-                receiver_account.id
+                receiver_account
             )
         ) == [transaction]
 
     def test_created_transactions_shows_up_in_all_transactions(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         transaction = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -66,11 +64,11 @@ class TransactionRepositoryTests(FlaskTestCase):
     def test_transactions_from_social_accounting_can_be_filtered(
         self,
     ) -> None:
-        receiver_account = self.account_generator.create_account()
+        receiver_account = self.create_account()
         transaction = self.database_gateway.create_transaction(
             self.datetime_service.now(),
             sending_account=self.social_accounting.account,
-            receiving_account=receiver_account.id,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -82,12 +80,12 @@ class TransactionRepositoryTests(FlaskTestCase):
     def test_transactions_not_from_social_accounting_dont_show_up_when_filtering_for_transactions_from_social_accounting(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -99,20 +97,20 @@ class TransactionRepositoryTests(FlaskTestCase):
     def test_that_transactions_can_be_ordered_by_transaction_date(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         first_transaction = self.database_gateway.create_transaction(
             datetime(2000, 1, 1),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
         )
         second_transaction = self.database_gateway.create_transaction(
             datetime(2000, 1, 2),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
@@ -127,27 +125,29 @@ class TransactionRepositoryTests(FlaskTestCase):
         ) == [second_transaction, first_transaction]
 
     def test_created_transactions_show_up_in_all_sent_received_by_account(self) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         transaction = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=sender_account.id,
-            receiving_account=receiver_account.id,
+            sending_account=sender_account,
+            receiving_account=receiver_account,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
             purpose="test purpose",
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_sender(
-                sender_account.id
+                sender_account
             )
         ) == [transaction]
+
+    def create_account(self) -> UUID:
+        return self.database_gateway.create_account().id
 
 
 class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.account_generator = self.injector.get(AccountGenerator)
         self.database_gateway = self.injector.get(DatabaseGatewayImpl)
         self.datetime_service: FakeDatetimeService = self.injector.get(
             FakeDatetimeService
@@ -156,28 +156,28 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
     def test_transactions_are_presented_in_result_when_receiver_matches_account_id(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         transaction = self.create_transaction(
-            sender=sender_account.id, receiver=receiver_account.id
+            sender=sender_account, receiver=receiver_account
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_sender_or_receiver(
-                receiver_account.id
+                receiver_account
             )
         ) == [transaction]
 
     def test_transactions_are_presented_in_result_when_sender_matches_account_id(
         self,
     ) -> None:
-        sender_account = self.account_generator.create_account()
-        receiver_account = self.account_generator.create_account()
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
         transaction = self.create_transaction(
-            sender=sender_account.id, receiver=receiver_account.id
+            sender=sender_account, receiver=receiver_account
         )
         assert list(
             self.database_gateway.get_transactions().where_account_is_sender_or_receiver(
-                sender_account.id
+                sender_account
             )
         ) == [transaction]
 
@@ -190,6 +190,9 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
             amount_received=Decimal(1),
             purpose="test purpose",
         )
+
+    def create_account(self) -> UUID:
+        return self.database_gateway.create_account().id
 
 
 class ThatWereASaleForPlanResultTests(FlaskTestCase):
