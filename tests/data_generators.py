@@ -87,7 +87,6 @@ class MemberGenerator:
 
 @dataclass
 class CompanyGenerator:
-    account_generator: AccountGenerator
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
     company_manager: CompanyManager
@@ -143,14 +142,6 @@ class CompanyGenerator:
         )
         assert confirm_response.is_confirmed
         return company
-
-
-@dataclass
-class AccountGenerator:
-    database: DatabaseGateway
-
-    def create_account(self) -> records.Account:
-        return self.database.create_account()
 
 
 class EmailGenerator:
@@ -394,7 +385,6 @@ class ConsumptionGenerator:
 
 @dataclass
 class TransactionGenerator:
-    account_generator: AccountGenerator
     datetime_service: FakeDatetimeService
     database_gateway: DatabaseGateway
 
@@ -408,9 +398,9 @@ class TransactionGenerator:
         date=None,
     ) -> records.Transaction:
         if sending_account is None:
-            sending_account = self.account_generator.create_account().id
+            sending_account = self.database_gateway.create_account().id
         if receiving_account is None:
-            receiving_account = self.account_generator.create_account().id
+            receiving_account = self.database_gateway.create_account().id
         if amount_sent is None:
             amount_sent = Decimal(10)
         if amount_received is None:
