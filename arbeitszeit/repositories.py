@@ -464,6 +464,9 @@ class EmailAddressUpdate(DatabaseUpdate, Protocol):
 
 
 class AccountCredentialsResult(QueryResult[records.AccountCredentials], Protocol):
+    def for_user_account_with_id(self, user_id: UUID) -> Self:
+        ...
+
     def with_email_address(self, address: str) -> Self:
         ...
 

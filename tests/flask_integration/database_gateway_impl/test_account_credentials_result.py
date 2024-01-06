@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from parameterized import parameterized
 
 from arbeitszeit import records
@@ -305,4 +307,34 @@ class WithEmailAddressTests(AccountCredentialsResultTests):
         )
         assert not self.database_gateway.get_account_credentials().with_email_address(
             filter_text
+        )
+
+
+class ForUserAccountWithIdTests(AccountCredentialsResultTests):
+    def test_that_result_includes_credentials_for_matching_member(self) -> None:
+        member = self.member_generator.create_member()
+        assert self.database_gateway.get_account_credentials().for_user_account_with_id(
+            member
+        )
+
+    def test_that_result_includes_credentials_for_matching_accountant(self) -> None:
+        accountant = self.accountant_generator.create_accountant()
+        assert self.database_gateway.get_account_credentials().for_user_account_with_id(
+            accountant
+        )
+
+    def test_that_result_includes_credentials_for_matching_company(self) -> None:
+        company = self.company_generator.create_company()
+        assert self.database_gateway.get_account_credentials().for_user_account_with_id(
+            company
+        )
+
+    def test_that_when_filtering_for_random_user_id_no_results_are_returned(
+        self,
+    ) -> None:
+        self.member_generator.create_member()
+        self.company_generator.create_company()
+        self.accountant_generator.create_accountant()
+        assert not self.database_gateway.get_account_credentials().for_user_account_with_id(
+            uuid4()
         )
