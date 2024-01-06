@@ -898,6 +898,18 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
 
         return self.from_iterable(items=filtered_items)
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        def filtered_items() -> Iterator[records.PrivateConsumption]:
+            company_record = self.database.get_company_by_id(company)
+            if company_record is None:
+                return None
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
+                if transaction.receiving_account == company_record.product_account:
+                    yield consumption
+
+        return self.from_iterable(items=filtered_items)
+
     def joined_with_transactions_and_plan(
         self,
     ) -> QueryResultImpl[Tuple[records.PrivateConsumption, Transaction, Plan]]:
@@ -908,6 +920,40 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
                 transaction = self.database.transactions[consumption.transaction_id]
                 plan = self.database.plans[consumption.plan_id]
                 yield consumption, transaction, plan
+
+        return QueryResultImpl(
+            items=joined_items,
+            database=self.database,
+        )
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]
+    ]:
+        def joined_items() -> (
+            Iterator[
+                Tuple[
+                    records.PrivateConsumption,
+                    records.Transaction,
+                    records.Plan,
+                    records.Member,
+                ]
+            ]
+        ):
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
+                plan = self.database.plans[consumption.plan_id]
+                sending_account = transaction.sending_account
+                members = self.database.indices.member_by_account.get(sending_account)
+                (member_id,) = members
+                member = self.database.members[member_id]
+                yield consumption, transaction, plan, member
 
         return QueryResultImpl(
             items=joined_items,
@@ -940,6 +986,18 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
                     yield consumption
 
         return self.from_iterable(filtered_items)
+
+    def where_provider_is_company(self, company: UUID) -> Self:
+        def filtered_items() -> Iterator[records.ProductiveConsumption]:
+            company_record = self.database.get_company_by_id(company)
+            if company_record is None:
+                return None
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
+                if transaction.receiving_account == company_record.product_account:
+                    yield consumption
+
+        return self.from_iterable(items=filtered_items)
 
     def joined_with_transactions_and_plan(
         self,
@@ -983,6 +1041,42 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
                 plan = self.database.plans[consumption.plan_id]
                 provider = self.database.companies[plan.planner]
                 yield consumption, transaction, provider
+
+        return QueryResultImpl(
+            items=joined_items,
+            database=self.database,
+        )
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[
+            records.ProductiveConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]
+    ]:
+        def joined_items() -> (
+            Iterator[
+                Tuple[
+                    records.ProductiveConsumption,
+                    records.Transaction,
+                    records.Plan,
+                    records.Company,
+                ]
+            ]
+        ):
+            for consumption in self.items():
+                transaction = self.database.transactions[consumption.transaction_id]
+                plan = self.database.plans[consumption.plan_id]
+                sending_account = transaction.sending_account
+                companies = self.database.indices.company_by_account.get(
+                    sending_account
+                )
+                (company_id,) = companies
+                company = self.database.companies[company_id]
+                yield consumption, transaction, plan, company
 
         return QueryResultImpl(
             items=joined_items,
