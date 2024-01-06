@@ -1418,6 +1418,20 @@ class EmailAddressUpdate:
 
 
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
+    def for_user_account_with_id(self, user_id: UUID) -> Self:
+        id_ = str(user_id)
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        accountant = aliased(models.Accountant)
+        return self._with_modified_query(
+            lambda query: query.join(
+                member, member.user_id == models.User.id, isouter=True
+            )
+            .join(company, company.user_id == models.User.id, isouter=True)
+            .join(accountant, accountant.user_id == models.User.id, isouter=True)
+            .filter(or_(member.id == id_, company.id == id_, accountant.id == id_))
+        )
+
     def with_email_address(self, address: str) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(

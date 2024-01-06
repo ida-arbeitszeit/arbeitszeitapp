@@ -8,6 +8,7 @@ from itertools import islice
 from typing import (
     Callable,
     Dict,
+    Generator,
     Generic,
     Hashable,
     Iterable,
@@ -1157,6 +1158,24 @@ class EmailAddressUpdate:
 
 
 class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
+    def for_user_account_with_id(self, user_id: UUID) -> Self:
+        def items() -> Generator[records.AccountCredentials, None, None]:
+            valid_accountant = self.database.relationships.account_credentials_to_accountant.get_left_value(
+                user_id
+            )
+            valid_company = self.database.relationships.account_credentials_to_company.get_left_value(
+                user_id
+            )
+            valid_member = self.database.relationships.account_credentials_to_member.get_left_value(
+                user_id
+            )
+            valid_credentials = {valid_accountant, valid_company, valid_member}
+            for credentials in self.items():
+                if credentials.id in valid_credentials:
+                    yield credentials
+
+        return self.from_iterable(items=items)
+
     def with_email_address(self, address: str) -> Self:
         def items() -> Iterable[records.AccountCredentials]:
             for credentials in self.items():
