@@ -7,7 +7,7 @@ class StartViewTests(ViewTestCase):
     ) -> None:
         expected_email = "test@test.test"
         expected_password = "my password"
-        expected_target_url = "/member/query_plans"
+        expected_target_url = "/user/query_plans"
         self.member_generator.create_member(
             email=expected_email, password=expected_password, confirmed=True
         )

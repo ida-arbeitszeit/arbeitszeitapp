@@ -208,32 +208,21 @@ class QueryPlansPresenterTests(BaseTestCase):
             value=expected_value,
         )
 
-    def test_that_page_links_lead_to_member_query_plans_site_for_member(self) -> None:
+    def test_that_page_links_lead_to_query_plans_site_for_members(self) -> None:
         self.session.login_member(uuid4())
         response = self.queried_plan_generator.get_response(total_results=1)
         view_model = self.presenter.present(response, self.request)
         page_url = view_model.pagination.pages[0].href
-        self._assertSameUrlScheme(page_url, self.url_index.get_member_query_plans_url())
-        self._assertSameUrlDomain(page_url, self.url_index.get_member_query_plans_url())
+        self._assertSameUrlScheme(page_url, self.url_index.get_query_plans_url())
+        self._assertSameUrlDomain(page_url, self.url_index.get_query_plans_url())
 
-    def test_that_page_links_lead_to_company_query_plans_site_for_company(self) -> None:
+    def test_that_page_links_lead_to_query_plans_site_for_companies(self) -> None:
         self.session.login_company(uuid4())
         response = self.queried_plan_generator.get_response(total_results=1)
         view_model = self.presenter.present(response, self.request)
         page_url = view_model.pagination.pages[0].href
-        self._assertSameUrlScheme(
-            page_url, self.url_index.get_company_query_plans_url()
-        )
-        self._assertSameUrlDomain(
-            page_url, self.url_index.get_company_query_plans_url()
-        )
-
-    def test_that_page_links_lead_to_query_plans_site(self) -> None:
-        response = self.queried_plan_generator.get_response(total_results=1)
-        view_model = self.presenter.present(response, self.request)
-        page_url = view_model.pagination.pages[0].href
-        self._assertSameUrlScheme(page_url, self.url_index.get_member_query_plans_url())
-        self._assertSameUrlDomain(page_url, self.url_index.get_member_query_plans_url())
+        self._assertSameUrlScheme(page_url, self.url_index.get_query_plans_url())
+        self._assertSameUrlDomain(page_url, self.url_index.get_query_plans_url())
 
     def _assertQueryArg(self, url: str, *, name: str, value: str) -> None:
         query_args = parse_qs(urlparse(url).query)

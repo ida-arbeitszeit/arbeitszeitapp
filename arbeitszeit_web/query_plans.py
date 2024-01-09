@@ -13,7 +13,6 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-from .session import UserRole
 from .url_index import UrlIndex, UserUrlIndex
 
 
@@ -178,8 +177,4 @@ class QueryPlansPresenter:
         )
 
     def _get_pagination_base_url(self) -> str:
-        return (
-            self.url_index.get_member_query_plans_url()
-            if self.session.get_user_role() == UserRole.member
-            else self.url_index.get_company_query_plans_url()
-        )
+        return self.url_index.get_query_plans_url()

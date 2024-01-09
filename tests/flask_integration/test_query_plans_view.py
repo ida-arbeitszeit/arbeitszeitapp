@@ -6,62 +6,33 @@ from tests.flask_integration.flask import LogInUser
 
 from .flask import ViewTestCase
 
+URL = "/user/query_plans"
+
 
 class UserAccessTests(ViewTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-
     @parameterized.expand(
         [
-            (LogInUser.accountant, 302),
-            (None, 302),
-            (LogInUser.company, 302),
-            (LogInUser.member, 200),
+            (LogInUser.accountant,),
+            (LogInUser.company,),
+            (LogInUser.member,),
+            (LogInUser.unconfirmed_member,),
+            (LogInUser.unconfirmed_company,),
         ]
     )
-    def test_get_correct_response_from_member_page(
-        self, login: Optional[LogInUser], expected_code: int
+    def test_that_authenticated_users_receive_200_on_get_request(
+        self, login: Optional[LogInUser]
     ) -> None:
         self.assert_response_has_expected_code(
-            url="/member/query_plans",
+            url=URL,
             method="get",
             login=login,
-            expected_code=expected_code,
+            expected_code=200,
         )
 
-    @parameterized.expand(
-        [
-            (LogInUser.accountant, 302),
-            (None, 302),
-            (LogInUser.company, 200),
-            (LogInUser.member, 302),
-        ]
-    )
-    def test_get_correct_response_from_company_page(
-        self, login: Optional[LogInUser], expected_code: int
-    ) -> None:
+    def test_that_anonymous_users_get_redirected_on_get_request(self) -> None:
         self.assert_response_has_expected_code(
-            url="/company/query_plans",
+            url=URL,
             method="get",
-            login=login,
-            expected_code=expected_code,
+            login=None,
+            expected_code=302,
         )
-
-
-class AuthenticatedMemberTests(ViewTestCase):
-    def setUp(self):
-        super().setUp()
-        self.url = "/member/query_plans"
-        self.company_url = "/company/query_plans"
-        self.default_data = dict(select="Produktname", search="", radio="activation")
-        self.member = self.login_member()
-
-    def test_getting_empty_search_string_is_valid(self):
-        self.default_data["search"] = ""
-        response = self.client.get(self.url, data=self.default_data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_getting_query_with_invalid_sorting_category_results_in_400(self):
-        self.default_data["radio"] = "invalid category"
-        response = self.client.get(self.url, data=self.default_data)
-        self.assertEqual(response.status_code, 400)

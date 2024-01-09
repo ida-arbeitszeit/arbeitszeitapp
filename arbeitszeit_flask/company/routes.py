@@ -60,7 +60,6 @@ from arbeitszeit_flask.forms import (
     CreateCooperationForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
-    PlanSearchForm,
     RegisterProductiveConsumptionForm,
     RequestCooperationForm,
     RequestCoordinationTransferForm,
@@ -70,7 +69,6 @@ from arbeitszeit_flask.views import (
     EndCooperationView,
     InviteWorkerToCompanyView,
     QueryCompaniesView,
-    QueryPlansView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
@@ -88,7 +86,6 @@ from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
     CreateDraftFromPlanController,
 )
@@ -172,23 +169,6 @@ from .blueprint import CompanyRoute
 @CompanyRoute("/company/dashboard")
 def dashboard(view: CompanyDashboardView):
     return view.respond_to_get()
-
-
-@CompanyRoute("/company/query_plans", methods=["GET"])
-def query_plans(
-    query_plans: use_cases.query_plans.QueryPlans,
-    controller: QueryPlansController,
-    presenter: QueryPlansPresenter,
-):
-    template_name = "company/query_plans.html"
-    search_form = PlanSearchForm(request.args)
-    view = QueryPlansView(
-        query_plans,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @CompanyRoute("/company/query_companies", methods=["GET"])

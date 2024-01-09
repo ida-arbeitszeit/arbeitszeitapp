@@ -14,22 +14,18 @@ from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
 )
 from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
-    PlanSearchForm,
     RegisterPrivateConsumptionForm,
 )
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
     QueryCompaniesView,
-    QueryPlansView,
     RegisterPrivateConsumptionView,
 )
 from arbeitszeit_flask.views.http_error_view import http_404
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
@@ -81,23 +77,6 @@ def consumptions(
             view_model=view_model,
         )
     )
-
-
-@MemberRoute("/query_plans", methods=["GET"])
-def query_plans(
-    query_plans: use_cases.query_plans.QueryPlans,
-    controller: QueryPlansController,
-    presenter: QueryPlansPresenter,
-) -> Response:
-    template_name = "member/query_plans.html"
-    search_form = PlanSearchForm(request.form)
-    view = QueryPlansView(
-        query_plans,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @MemberRoute("/query_companies", methods=["GET", "POST"])
