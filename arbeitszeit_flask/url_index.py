@@ -202,11 +202,8 @@ class GeneralUrlIndex:
             endpoint="auth.confirm_email_company", token=token, _external=True
         )
 
-    def get_member_query_plans_url(self) -> str:
-        return url_for(endpoint="main_member.query_plans")
-
-    def get_company_query_plans_url(self) -> str:
-        return url_for(endpoint="main_company.query_plans")
+    def get_query_plans_url(self) -> str:
+        return url_for(endpoint="main_user.query_plans")
 
     def get_member_query_companies_url(self) -> str:
         return url_for(endpoint="main_member.query_companies")

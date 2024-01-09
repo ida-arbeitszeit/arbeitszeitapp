@@ -4,6 +4,7 @@ from typing import Callable, List, Optional, TypeVar
 from flask import Blueprint, redirect, request, url_for
 
 from arbeitszeit_flask.dependency_injection import create_dependency_injector
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.views.http_error_view import http_403
 from arbeitszeit_web.www.authentication import UserAuthenticator
 
@@ -25,6 +26,10 @@ class AuthenticatedUserRoute:
             authenticator = injector.get(UserAuthenticator)
             if not authenticator.is_user_authenticated():
                 if request.method == "GET":
+                    # Security: FlaskSession has a check implemented when we
+                    # set_next_url
+                    session = injector.get(FlaskSession)
+                    session.set_next_url(request.url)
                     return redirect(url_for("auth.start"))
                 else:
                     return http_403()

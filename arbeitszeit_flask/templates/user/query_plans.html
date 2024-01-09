@@ -1,6 +1,11 @@
 {% from 'macros/pagination.html' import render_pagination %}
+{% extends "base.html" %}
 
-{% macro query_plans(form, view_model) %}
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("All plans") }}</div>
+{% endblock %}
+
+{% block content %}
 <div class="section has-text-centered">
     <div class="columns is-centered">
         <div class="column is-one-third">
@@ -86,4 +91,4 @@
     </div>
 </div>
 {% endif %}
-{% endmacro %}
+{% endblock %}
