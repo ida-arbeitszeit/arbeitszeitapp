@@ -49,7 +49,6 @@ class ListCoordinationsOfCooperationPresenter:
                     coordinator_name=coordination.coordinator_name,
                     coordinator_url=self.url_index.get_company_summary_url(
                         company_id=coordination.coordinator_id,
-                        user_role=self.session.get_user_role(),
                     ),
                     start_time=self.datetime_service.format_datetime(
                         date=coordination.start_time,

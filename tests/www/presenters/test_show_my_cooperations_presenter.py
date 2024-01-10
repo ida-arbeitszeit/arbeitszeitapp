@@ -331,9 +331,7 @@ class InboundTest(BaseTestCase):
     def test_inbound_planner_url_is_presented_correctly(self):
         self.assertEqual(
             self.view_model.list_of_inbound_coop_requests.rows[0].planner_url,
-            self.url_index.get_company_summary_url(
-                user_role=UserRole.company, company_id=self.PLANNER_ID
-            ),
+            self.url_index.get_company_summary_url(company_id=self.PLANNER_ID),
         )
 
 

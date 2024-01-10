@@ -72,17 +72,8 @@ class GeneralUrlIndex:
         else:
             raise ValueError(f"list of coordinators url not available for {user_role}")
 
-    def get_company_summary_url(
-        self, user_role: Optional[UserRole], company_id: UUID
-    ) -> str:
-        if user_role == UserRole.company:
-            return url_for("main_company.company_summary", company_id=company_id)
-        elif user_role == UserRole.member:
-            return url_for("main_member.company_summary", company_id=company_id)
-        elif user_role == UserRole.accountant:
-            return url_for("main_accountant.company_summary", company_id=company_id)
-        else:
-            raise ValueError(f"company summary not available for {user_role}")
+    def get_company_summary_url(self, company_id: UUID) -> str:
+        return url_for("main_user.company_summary", company_id=company_id)
 
     def get_answer_company_work_invite_url(self, *, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
@@ -211,11 +202,8 @@ class GeneralUrlIndex:
             endpoint="auth.confirm_email_company", token=token, _external=True
         )
 
-    def get_member_query_plans_url(self) -> str:
-        return url_for(endpoint="main_member.query_plans")
-
-    def get_company_query_plans_url(self) -> str:
-        return url_for(endpoint="main_company.query_plans")
+    def get_query_plans_url(self) -> str:
+        return url_for(endpoint="main_user.query_plans")
 
     def get_member_query_companies_url(self) -> str:
         return url_for(endpoint="main_member.query_companies")
@@ -243,3 +231,13 @@ class GeneralUrlIndex:
 
     def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
         return url_for("main_company.request_coordination_transfer", coop_id=coop_id)
+
+    def get_show_coordination_transfer_request_url(self, transfer_request: UUID) -> str:
+        return url_for(
+            "main_company.show_coordination_transfer_request",
+            transfer_request=transfer_request,
+            _external=True,
+        )
+
+    def get_change_email_url(self, *, token: str) -> str:
+        return url_for("main_user.change_email_address", token=token, _external=True)

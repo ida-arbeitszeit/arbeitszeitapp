@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <div class="section has-text-centered">
-    HTTP 404 NOT FOUND
+    HTTP {{ view_model.code }} {{ view_model.reason }}
 </div>
-
 {% endblock %}

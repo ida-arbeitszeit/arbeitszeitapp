@@ -287,10 +287,25 @@ class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol
     def where_consumer_is_member(self, member: UUID) -> Self:
         ...
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        ...
+
     def joined_with_transactions_and_plan(
         self,
     ) -> QueryResult[
         Tuple[records.PrivateConsumption, records.Transaction, records.Plan]
+    ]:
+        ...
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> QueryResult[
+        Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]
     ]:
         ...
 
@@ -300,6 +315,9 @@ class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Pr
         ...
 
     def where_consumer_is_company(self, company: UUID) -> Self:
+        ...
+
+    def where_provider_is_company(self, company: UUID) -> Self:
         ...
 
     def joined_with_transactions_and_plan(
@@ -319,6 +337,18 @@ class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Pr
     def joined_with_transaction(
         self,
     ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]:
+        ...
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> QueryResult[
+        Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]
+    ]:
         ...
 
 
@@ -464,6 +494,9 @@ class EmailAddressUpdate(DatabaseUpdate, Protocol):
 
 
 class AccountCredentialsResult(QueryResult[records.AccountCredentials], Protocol):
+    def for_user_account_with_id(self, user_id: UUID) -> Self:
+        ...
+
     def with_email_address(self, address: str) -> Self:
         ...
 

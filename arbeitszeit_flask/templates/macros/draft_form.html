@@ -39,6 +39,26 @@ token field and buttons to submit. -->
 </div>
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
+  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_unit_amount">
+    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+  </div>
+  <div class="field">
+    <label class="label">{{ gettext("Smallest delivery unit")}}</label>
+    <div class="control">
+      {{ form.prd_unit(class_="input is-large") }}
+      <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
+    </div>
+  </div>
+  <div class="block"></div>
+  <div class="field">
+    <label class="label">{{ gettext("Amount")}}</label>
+    <div class="control">
+      {{ form.prd_amount(class_="input is-large") }}
+    </div>
+  </div>
+</div>
+<div class="block py-2"></div>
+<div class="box has-background-info-light">
   <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_costs">
     <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
   </div>
@@ -60,26 +80,6 @@ token field and buttons to submit. -->
     <label class="label">{{ gettext("Costs for labour")}}</label>
     <div class="control">
       {{ form.costs_a(class_="input is-large") }}
-    </div>
-  </div>
-</div>
-<div class="block py-2"></div>
-<div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_unit_amount">
-    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-  </div>
-  <div class="field">
-    <label class="label">{{ gettext("Smallest delivery unit")}}</label>
-    <div class="control">
-      {{ form.prd_unit(class_="input is-large") }}
-      <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
-    </div>
-  </div>
-  <div class="block"></div>
-  <div class="field">
-    <label class="label">{{ gettext("Amount")}}</label>
-    <div class="control">
-      {{ form.prd_amount(class_="input is-large") }}
     </div>
   </div>
 </div>

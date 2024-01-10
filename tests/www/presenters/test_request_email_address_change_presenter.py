@@ -2,6 +2,7 @@ from arbeitszeit.use_cases import request_email_address_change as use_case
 from arbeitszeit_web.www.presenters import (
     request_email_address_change_presenter as presenter,
 )
+from tests.forms import RequestEmailAddressChangeFormImpl
 
 from ..base_test_case import BaseTestCase
 
@@ -13,13 +14,13 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
 
     def test_on_success_redirect_to_non_empty_target(self) -> None:
         response = use_case.Response(is_rejected=False)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url
 
     def test_on_success_redirect_logged_in_member_to_account_details_page(self) -> None:
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=False)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_success_redirect_logged_in_company_to_account_details_page(
@@ -27,7 +28,7 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
     ) -> None:
         self.session.login_company(self.company_generator.create_company())
         response = use_case.Response(is_rejected=False)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_success_redirect_logged_in_accountant_to_account_details_page(
@@ -35,13 +36,13 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
     ) -> None:
         self.session.login_accountant(self.accountant_generator.create_accountant())
         response = use_case.Response(is_rejected=False)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url == self.url_index.get_user_account_details_url()
 
     def test_on_failure_dont_redirect_logged_in_member(self) -> None:
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=True)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url is None
 
     def test_on_failure_dont_redirect_logged_in_company(
@@ -49,7 +50,7 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
     ) -> None:
         self.session.login_company(self.company_generator.create_company())
         response = use_case.Response(is_rejected=True)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url is None
 
     def test_on_failure_dont_redirect_logged_in_accountant(
@@ -57,13 +58,13 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
     ) -> None:
         self.session.login_accountant(self.accountant_generator.create_accountant())
         response = use_case.Response(is_rejected=True)
-        view_model = self.presenter.render_response(response)
+        view_model = self.presenter.render_response(response, self._create_form())
         assert view_model.redirect_url is None
 
     def test_on_failure_show_a_warning_that_the_request_was_denied(self) -> None:
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=True)
-        self.presenter.render_response(response)
+        self.presenter.render_response(response, self._create_form())
         expected_message = self.translator.gettext(
             "Your request for an email address change was rejected."
         )
@@ -72,8 +73,32 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
     def test_on_success_dont_show_a_warning_that_the_request_was_denied(self) -> None:
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=False)
-        self.presenter.render_response(response)
+        self.presenter.render_response(response, self._create_form())
         expected_message = self.translator.gettext(
             "Your request for an email address change was rejected."
         )
         assert expected_message not in self.notifier.warnings
+
+    def test_that_error_message_is_added_to_new_email_field_on_rejection(self) -> None:
+        self.session.login_member(self.member_generator.create_member())
+        response = use_case.Response(is_rejected=True)
+        form = self._create_form()
+        self.presenter.render_response(response, form)
+        assert form.new_email_field.errors
+
+    def test_for_correct_error_message_on_new_email_field_when_request_was_rejected(
+        self,
+    ) -> None:
+        self.session.login_member(self.member_generator.create_member())
+        response = use_case.Response(is_rejected=True)
+        form = self._create_form()
+        self.presenter.render_response(response, form)
+        assert (
+            self.translator.gettext(
+                "The email address seems to be invalid or already taken."
+            )
+            in form.new_email_field.errors
+        )
+
+    def _create_form(self) -> RequestEmailAddressChangeFormImpl:
+        return RequestEmailAddressChangeFormImpl.from_values("test@test.test")

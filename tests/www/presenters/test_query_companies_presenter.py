@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
-from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
@@ -42,7 +41,7 @@ class QueryCompaniesPresenterTests(BaseTestCase):
     def test_correct_company_url_is_shown(self) -> None:
         expected_company = self.queried_company_generator.get_company()
         expected_url = self.url_index.get_company_summary_url(
-            user_role=UserRole.member, company_id=expected_company.company_id
+            company_id=expected_company.company_id
         )
         response = self.queried_company_generator.get_response([expected_company])
         view_model = self.presenter.present(response)

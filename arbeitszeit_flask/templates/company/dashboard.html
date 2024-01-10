@@ -60,7 +60,7 @@
             <h1 class="title is-3">{{ gettext("Company accounting") }}</h1>
         </div>
         <div class="tile is-ancestor">
-            <a class="tile is-parent" href="{{ url_for('main_company.company_summary', company_id=current_user.id) }}">
+            <a class="tile is-parent" href="{{ url_for('main_user.company_summary', company_id=current_user.id) }}">
                 <div class="tile is-child box has-background-primary-light">
                     <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
                         gettext("Company") }}
@@ -148,7 +148,7 @@
                     <div class="subtitle"></div>
                 </div>
             </a>
-            <a class="tile is-parent" href="{{ url_for('main_company.query_plans') }}">
+            <a class="tile is-parent" href="{{ url_for('main_user.query_plans') }}">
                 <div class="tile is-child box has-background-warning-light">
                     <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
                         {{ gettext("All plans") }}</h1>

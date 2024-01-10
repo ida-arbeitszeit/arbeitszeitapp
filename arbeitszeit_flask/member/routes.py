@@ -7,7 +7,6 @@ from flask import render_template, request
 from flask_login import current_user
 
 from arbeitszeit import use_cases
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
@@ -15,30 +14,23 @@ from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
 )
 from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
     CompanySearchForm,
-    PlanSearchForm,
     RegisterPrivateConsumptionForm,
 )
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
-    Http404View,
     QueryCompaniesView,
-    QueryPlansView,
     RegisterPrivateConsumptionView,
 )
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
 )
 from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
     QueryPrivateConsumptionsController,
-)
-from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
-    GetCompanySummarySuccessPresenter,
 )
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
@@ -85,23 +77,6 @@ def consumptions(
             view_model=view_model,
         )
     )
-
-
-@MemberRoute("/query_plans", methods=["GET"])
-def query_plans(
-    query_plans: use_cases.query_plans.QueryPlans,
-    controller: QueryPlansController,
-    presenter: QueryPlansPresenter,
-) -> Response:
-    template_name = "member/query_plans.html"
-    search_form = PlanSearchForm(request.form)
-    view = QueryPlansView(
-        query_plans,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get(search_form, FlaskRequest())
 
 
 @MemberRoute("/query_companies", methods=["GET", "POST"])
@@ -179,7 +154,6 @@ def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
     presenter: GetPlanDetailsMemberMemberPresenter,
-    http_404_view: Http404View,
 ) -> Response:
     use_case_request = GetPlanDetailsUseCase.Request(plan_id)
     use_case_response = use_case.get_plan_details(use_case_request)
@@ -192,27 +166,7 @@ def plan_details(
             )
         )
     else:
-        return http_404_view.get_response()
-
-
-@MemberRoute("/company_summary/<uuid:company_id>")
-def company_summary(
-    company_id: UUID,
-    get_company_summary: GetCompanySummary,
-    presenter: GetCompanySummarySuccessPresenter,
-    http_404_view: Http404View,
-):
-    use_case_response = get_company_summary(company_id)
-    if isinstance(
-        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
-    ):
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "member/company_summary.html",
-            view_model=view_model.to_dict(),
-        )
-    else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @MemberRoute("/cooperation_summary/<uuid:coop_id>")
@@ -220,7 +174,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -231,7 +184,7 @@ def coop_summary(
             "member/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @MemberRoute("/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])

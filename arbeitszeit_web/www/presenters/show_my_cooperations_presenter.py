@@ -191,7 +191,7 @@ class ShowMyCooperationsPresenter:
             ),
             planner_name=plan.planner_name,
             planner_url=self.url_index.get_company_summary_url(
-                user_role=UserRole.company, company_id=plan.planner_id
+                company_id=plan.planner_id
             ),
         )
 

@@ -30,3 +30,9 @@ class TextRendererImpl:
             "member/notification-about-work-invitation.html",
             invitation_url=invitation_url,
         )
+
+    def render_email_change_notification(self, *, change_email_url: str) -> str:
+        return render_template(
+            "user/request_email_change_notification.html",
+            change_email_url=change_email_url,
+        )

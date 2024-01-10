@@ -69,7 +69,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
     def test_presenter_shows_correct_coordinator_url(self) -> None:
         expected_coordinator = uuid4()
         expected_url = self.url_index.get_company_summary_url(
-            company_id=expected_coordinator, user_role=self.session.get_user_role()
+            company_id=expected_coordinator
         )
         response = self.get_use_case_response_with_one_coordination(
             coordinator_id=expected_coordinator

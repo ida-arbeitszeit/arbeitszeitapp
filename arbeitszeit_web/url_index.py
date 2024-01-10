@@ -28,9 +28,7 @@ class UrlIndex(Protocol):
     def get_work_invite_url(self, invite_id: UUID) -> str:
         ...
 
-    def get_company_summary_url(
-        self, user_role: Optional[UserRole], company_id: UUID
-    ) -> str:
+    def get_company_summary_url(self, company_id: UUID) -> str:
         ...
 
     def get_coop_summary_url(
@@ -134,10 +132,7 @@ class UrlIndex(Protocol):
     def get_company_confirmation_url(self, *, token: str) -> str:
         ...
 
-    def get_member_query_plans_url(self) -> str:
-        ...
-
-    def get_company_query_plans_url(self) -> str:
+    def get_query_plans_url(self) -> str:
         ...
 
     def get_member_query_companies_url(self) -> str:
@@ -174,6 +169,9 @@ class UrlIndex(Protocol):
         ...
 
     def get_request_coordination_transfer_url(self, coop_id: UUID) -> str:
+        ...
+
+    def get_show_coordination_transfer_request_url(self, transfer_request: UUID) -> str:
         ...
 
 

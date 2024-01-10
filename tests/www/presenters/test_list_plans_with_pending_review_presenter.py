@@ -74,7 +74,7 @@ class PresenterTests(BaseTestCase):
         assert view_model.plans[
             0
         ].company_summary_url == self.url_index.get_company_summary_url(
-            user_role=UserRole.accountant, company_id=planner_id
+            company_id=planner_id
         )
 
     def _get_empty_response(self) -> UseCase.Response:

@@ -57,7 +57,6 @@ class QueryCompaniesPresenter:
                         company_name=result.company_name,
                         company_email=result.company_email,
                         company_summary_url=self.url_index.get_company_summary_url(
-                            user_role=self.session.get_user_role(),
                             company_id=result.company_id,
                         ),
                     )

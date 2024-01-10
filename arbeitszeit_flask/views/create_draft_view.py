@@ -9,7 +9,7 @@ from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft
 from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex
-from arbeitszeit_flask.views.http_404_view import Http404View
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
@@ -25,7 +25,6 @@ class CreateDraftView:
     translator: Translator
     prefilled_data_controller: CreateDraftController
     create_draft: CreatePlanDraft
-    http_404_view: Http404View
     url_index: GeneralUrlIndex
 
     def respond_to_post(self, form: CreateDraftForm) -> Response:
@@ -47,7 +46,7 @@ class CreateDraftView:
         use_case_request = self.prefilled_data_controller.import_form_data(form)
         response = self.create_draft(use_case_request)
         if response.is_rejected:
-            return self.http_404_view.get_response()
+            return http_404()
         assert response.draft_id
         return response.draft_id
 

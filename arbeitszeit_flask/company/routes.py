@@ -23,7 +23,6 @@ from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperationResponse,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
@@ -61,7 +60,6 @@ from arbeitszeit_flask.forms import (
     CreateCooperationForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
-    PlanSearchForm,
     RegisterProductiveConsumptionForm,
     RequestCooperationForm,
     RequestCoordinationTransferForm,
@@ -69,15 +67,14 @@ from arbeitszeit_flask.forms import (
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
-    Http404View,
     InviteWorkerToCompanyView,
     QueryCompaniesView,
-    QueryPlansView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
@@ -85,8 +82,10 @@ from arbeitszeit_flask.views.register_productive_consumption import (
 from arbeitszeit_flask.views.request_coordination_transfer_view import (
     RequestCoordinationTransferView,
 )
+from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
+    ShowCoordinationTransferRequestView,
+)
 from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
     CreateDraftFromPlanController,
 )
@@ -117,9 +116,6 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
-    GetCompanySummarySuccessPresenter,
 )
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
@@ -175,23 +171,6 @@ def dashboard(view: CompanyDashboardView):
     return view.respond_to_get()
 
 
-@CompanyRoute("/company/query_plans", methods=["GET"])
-def query_plans(
-    query_plans: use_cases.query_plans.QueryPlans,
-    controller: QueryPlansController,
-    presenter: QueryPlansPresenter,
-):
-    template_name = "company/query_plans.html"
-    search_form = PlanSearchForm(request.args)
-    view = QueryPlansView(
-        query_plans,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get(search_form, FlaskRequest())
-
-
 @CompanyRoute("/company/query_companies", methods=["GET"])
 def query_companies(
     query_companies: use_cases.query_companies.QueryCompanies,
@@ -232,13 +211,12 @@ def delete_draft(
     controller: DeleteDraftController,
     use_case: DeleteDraftUseCase,
     presenter: DeleteDraftPresenter,
-    http_404_view: Http404View,
 ) -> Response:
     use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
     try:
         use_case_response = use_case.delete_draft(use_case_request)
     except use_case.Failure:
-        return http_404_view.get_response()
+        return http_404()
     view_model = presenter.present_draft_deletion(use_case_response)
     return redirect(view_model.redirect_target)
 
@@ -275,7 +253,6 @@ def create_draft(
 def file_plan(
     draft_id: str,
     session: FlaskSession,
-    not_found_view: Http404View,
     controller: FilePlanWithAccountingController,
     use_case: FilePlanWithAccounting,
     presenter: FilePlanWithAccountingPresenter,
@@ -285,7 +262,7 @@ def file_plan(
             draft_id=draft_id, session=session
         )
     except controller.InvalidRequest:
-        return not_found_view.get_response()
+        return http_404()
     response = use_case.file_plan_with_accounting(request)
     view_model = presenter.present_response(response)
     return redirect(view_model.redirect_url)
@@ -296,11 +273,10 @@ def get_draft_details(
     draft_id: str,
     use_case: GetDraftDetails,
     presenter: GetPrefilledDraftDataPresenter,
-    not_found_view: Http404View,
 ) -> Response:
     use_case_response = use_case(UUID(draft_id))
     if use_case_response is None:
-        return not_found_view.get_response()
+        return http_404()
     form = CreateDraftForm()
     view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
@@ -460,34 +436,13 @@ def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
     presenter: GetPlanDetailsCompanyPresenter,
-    http_404_view: Http404View,
 ):
     use_case_request = GetPlanDetailsUseCase.Request(plan_id)
     use_case_response = use_case.get_plan_details(use_case_request)
     if not use_case_response:
-        return http_404_view.get_response()
+        return http_404()
     view_model = presenter.present(use_case_response)
     return render_template("company/plan_details.html", view_model=view_model.to_dict())
-
-
-@CompanyRoute("/company/company_summary/<uuid:company_id>")
-def company_summary(
-    company_id: UUID,
-    get_company_summary: GetCompanySummary,
-    presenter: GetCompanySummarySuccessPresenter,
-    http_404_view: Http404View,
-):
-    use_case_response = get_company_summary(company_id)
-    if isinstance(
-        use_case_response, use_cases.get_company_summary.GetCompanySummarySuccess
-    ):
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/company_summary.html",
-            view_model=view_model.to_dict(),
-        )
-    else:
-        return http_404_view.get_response()
 
 
 @CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
@@ -495,7 +450,6 @@ def coop_summary(
     coop_id: UUID,
     get_coop_summary: GetCoopSummary,
     presenter: GetCoopSummarySuccessPresenter,
-    http_404_view: Http404View,
 ):
     use_case_response = get_coop_summary(
         GetCoopSummaryRequest(UUID(current_user.id), coop_id)
@@ -506,7 +460,7 @@ def coop_summary(
             "company/coop_summary.html", view_model=view_model.to_dict()
         )
     else:
-        return http_404_view.get_response()
+        return http_404()
 
 
 @CompanyRoute(
@@ -526,6 +480,22 @@ def request_coordination_transfer(
     elif request.method == "POST":
         form = RequestCoordinationTransferForm(request.form)
         return view.respond_to_post(form=form, coop_id=coop_id)
+
+
+@CompanyRoute(
+    "/company/show_coordination_transfer_request/<uuid:transfer_request>",
+    methods=["GET", "POST"],
+)
+@commit_changes
+def show_coordination_transfer_request(
+    transfer_request: UUID,
+    view: ShowCoordinationTransferRequestView,
+):
+    if request.method == "GET":
+        return view.respond_to_get(transfer_request)
+
+    elif request.method == "POST":
+        return view.respond_to_post(transfer_request)
 
 
 @CompanyRoute(
@@ -563,7 +533,6 @@ def request_cooperation(
     request_cooperation: RequestCooperation,
     controller: RequestCooperationController,
     presenter: RequestCooperationPresenter,
-    http_404_view: Http404View,
 ):
     form = RequestCooperationForm(request.form)
     view = RequestCooperationView(
@@ -574,7 +543,6 @@ def request_cooperation(
         request_cooperation=request_cooperation,
         controller=controller,
         presenter=presenter,
-        not_found_view=http_404_view,
         template_name="company/request_cooperation.html",
     )
 

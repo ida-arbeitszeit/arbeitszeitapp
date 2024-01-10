@@ -13,7 +13,6 @@ from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 
 from .notification import Notifier
-from .session import UserRole
 from .url_index import UrlIndex, UserUrlIndex
 
 
@@ -140,7 +139,6 @@ class QueryPlansPresenter:
                             result.plan_id
                         ),
                         company_summary_url=self.url_index.get_company_summary_url(
-                            user_role=self.session.get_user_role(),
                             company_id=result.company_id,
                         ),
                         company_name=result.company_name,
@@ -171,16 +169,12 @@ class QueryPlansPresenter:
         self, request: Request, total_results: int, current_offset: int
     ) -> Paginator:
         return Paginator(
-            base_url=self._get_pagination_base_url(request),
+            base_url=self._get_pagination_base_url(),
             query_arguments=dict(request.query_string().items()),
             page_size=_PAGE_SIZE,
             total_results=total_results,
             current_offset=current_offset,
         )
 
-    def _get_pagination_base_url(self, request: Request) -> str:
-        return (
-            self.url_index.get_member_query_plans_url()
-            if self.session.get_user_role() == UserRole.member
-            else self.url_index.get_company_query_plans_url()
-        )
+    def _get_pagination_base_url(self) -> str:
+        return self.url_index.get_query_plans_url()

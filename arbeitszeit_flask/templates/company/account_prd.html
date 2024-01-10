@@ -8,26 +8,27 @@
 {% block content %}
 {% from 'macros/transactions.html' import transaction_with_buyer %}
 
-<div class="section is-medium has-text-centered pb-0">
-    <h1 class="title">
-        {{ gettext("Account prd") }}
-    </h1>
-    <div class="box has-background-info-light has-text-info-dark">
-        <div class="icon"><i class="fas fa-info-circle"></i></div>
-        <p>{{ gettext("Your account for product transfers (sales).") }}</p>
-    </div>
-    <p>{{ gettext("Balance:") }}</p>
-    <p
-        class="py-2 has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
-        {{ view_model.account_balance }}</p>
-
-    <div>
-        <img src="{{ view_model.plot_url }}" alt="plot of prd account">
-    </div>
-</div>
-<div class="section">
-    <div class="columns is-centered">
-        <div class="column is-two-thirds">
+<section class="section columns has-text-centered">
+    <div class="column"></div>
+    <div class="column is-two-thirds">
+        <div class="pb-5">
+            <h1 class="title">
+                {{ gettext("Account prd") }}
+            </h1>
+            <div class="box has-background-info-light has-text-info-dark">
+                <div class="icon"><i class="fas fa-info-circle"></i></div>
+                <p>{{ gettext("The account for product transfers (sales).") }}</p>
+            </div>
+            <p>{{ gettext("Balance:") }}</p>
+            <p
+                class="has-text-weight-bold {{ 'has-text-primary' if view_model.account_balance|float >= 0 else 'has-text-danger' }}">
+                {{ view_model.account_balance }}</p>
+        
+            <div>
+                <img src="{{ view_model.plot_url }}" alt="plot of prd account">
+            </div>
+        </div>
+        <div class="section has-text-left">
             {% if view_model.show_transactions %}
             {% for trans_info in view_model.transactions %}
             {{ transaction_with_buyer(trans_info.date, trans_info.transaction_type, trans_info.purpose, trans_info.transaction_volume, trans_info.buyer_name, trans_info.buyer_type_icon) }}
@@ -35,5 +36,6 @@
             {% endif %}
         </div>
     </div>
-</div>
+    <div class="column"></div>
+</section>
 {% endblock %}
