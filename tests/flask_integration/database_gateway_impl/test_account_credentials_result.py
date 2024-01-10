@@ -338,3 +338,134 @@ class ForUserAccountWithIdTests(AccountCredentialsResultTests):
         assert not self.database_gateway.get_account_credentials().for_user_account_with_id(
             uuid4()
         )
+
+
+class UpdateTests(AccountCredentialsResultTests):
+    @parameterized.expand(
+        [
+            ("old@test.test", "new@test.test"),
+            ("old@test.test", "new2@test.test"),
+        ]
+    )
+    def test_can_query_for_new_mail_address_after_adress_update(
+        self, old_email_address: str, new_email_address: str
+    ) -> None:
+        self.member_generator.create_member(email=old_email_address)
+        assert not self.database_gateway.get_account_credentials().with_email_address(
+            new_email_address
+        )
+        self.database_gateway.create_email_address(
+            address=new_email_address, confirmed_on=None
+        )
+        self.database_gateway.get_account_credentials().update().change_email_address(
+            new_email_address
+        ).perform()
+        assert self.database_gateway.get_account_credentials().with_email_address(
+            new_email_address
+        )
+
+    def test_that_0_rows_are_affected_when_update_is_performed_on_empty_set(
+        self,
+    ) -> None:
+        self.database_gateway.create_email_address(
+            address="test@test.test", confirmed_on=None
+        )
+        rows_affected = (
+            self.database_gateway.get_account_credentials()
+            .update()
+            .change_email_address("test@test.test")
+            .perform()
+        )
+        assert not rows_affected
+
+    def test_that_1_row_is_affected_when_update_is_performed_on_query_matching_a_single_user(
+        self,
+    ) -> None:
+        self.member_generator.create_member()
+        self.database_gateway.create_email_address(
+            address="test@test.test", confirmed_on=None
+        )
+        rows_affected = (
+            self.database_gateway.get_account_credentials()
+            .update()
+            .change_email_address("test@test.test")
+            .perform()
+        )
+        assert rows_affected == 1
+
+    def test_that_0_rows_are_affected_when_updated_performed_is_empty(
+        self,
+    ) -> None:
+        self.member_generator.create_member()
+        self.database_gateway.create_email_address(
+            address="test@test.test", confirmed_on=None
+        )
+        rows_affected = (
+            self.database_gateway.get_account_credentials().update().perform()
+        )
+        assert rows_affected == 0
+
+    @parameterized.expand(
+        [
+            (0,),
+            (1,),
+            (2,),
+        ]
+    )
+    def test_that_changing_every_users_password_hash_affected_all_previously_created_users(
+        self, number_of_users_created: int
+    ) -> None:
+        self.create_members(n=number_of_users_created)
+        rows_affected = (
+            self.database_gateway.get_account_credentials()
+            .update()
+            .change_password_hash("new hash")
+            .perform()
+        )
+        assert rows_affected == number_of_users_created
+
+    @parameterized.expand(
+        [
+            ("new_hash",),
+            ("another example hash",),
+        ]
+    )
+    def test_that_password_hash_is_updated_after_password_hash_updated_was_performed(
+        self, new_hash: str
+    ) -> None:
+        member = self.member_generator.create_member()
+        (
+            self.database_gateway.get_account_credentials()
+            .for_user_account_with_id(member)
+            .update()
+            .change_password_hash(new_hash)
+            .perform()
+        )
+        updated_credentials = (
+            self.database_gateway.get_account_credentials()
+            .for_user_account_with_id(member)
+            .first()
+        )
+        assert updated_credentials
+        assert updated_credentials.password_hash == new_hash
+
+    def test_that_changing_one_users_password_hash_does_not_affect_another_users_credentials(
+        self,
+    ) -> None:
+        new_hash = "test hash 123"
+        member_to_change = self.member_generator.create_member()
+        control_member = self.member_generator.create_member()
+        (
+            self.database_gateway.get_account_credentials()
+            .for_user_account_with_id(member_to_change)
+            .update()
+            .change_password_hash(new_hash)
+            .perform()
+        )
+        control_credentials = (
+            self.database_gateway.get_account_credentials()
+            .for_user_account_with_id(control_member)
+            .first()
+        )
+        assert control_credentials
+        assert control_credentials.password_hash != new_hash
