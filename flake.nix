@@ -3,11 +3,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixos-23-05.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nixos-23-11.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
     flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils, flask-profiler, nixos-23-05 }:
+  outputs =
+    { self, nixpkgs, flake-utils, flask-profiler, nixos-23-05, nixos-23-11 }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
@@ -20,10 +22,15 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
+          pkgs-23-11 = import nixos-23-11 {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
         in {
           devShells = rec {
             default = nixos-unstable;
             nixos-23-05 = pkgs-23-05.callPackage nix/devShell.nix { };
+            nixos-23-11 = pkgs-23-11.callPackage nix/devShell.nix { };
             nixos-unstable = pkgs.callPackage nix/devShell.nix { };
             python310 =
               pkgs.callPackage nix/devShell.nix { python3 = pkgs.python310; };
