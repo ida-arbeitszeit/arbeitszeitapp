@@ -5,7 +5,7 @@ from arbeitszeit.use_cases.query_companies import CompanyQueryResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, Pagination, Paginator
 from arbeitszeit_web.request import Request
-from arbeitszeit_web.session import Session, UserRole
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -86,8 +86,4 @@ class QueryCompaniesPresenter:
         )
 
     def _get_pagination_base_url(self) -> str:
-        return (
-            self.url_index.get_member_query_companies_url()
-            if self.session.get_user_role() == UserRole.member
-            else self.url_index.get_company_query_companies_url()
-        )
+        return self.url_index.get_query_companies_url()

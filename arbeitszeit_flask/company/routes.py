@@ -56,7 +56,6 @@ from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import (
-    CompanySearchForm,
     CreateCooperationForm,
     CreateDraftForm,
     InviteWorkerToCompanyForm,
@@ -68,7 +67,6 @@ from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
     InviteWorkerToCompanyView,
-    QueryCompaniesView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
@@ -94,9 +92,6 @@ from arbeitszeit_web.www.controllers.delete_draft_controller import (
 )
 from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
-)
-from arbeitszeit_web.www.controllers.query_companies_controller import (
-    QueryCompaniesController,
 )
 from arbeitszeit_web.www.controllers.request_cooperation_controller import (
     RequestCooperationController,
@@ -137,9 +132,6 @@ from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter 
     ListCoordinationsOfCooperationPresenter,
 )
 from arbeitszeit_web.www.presenters.list_plans_presenter import ListPlansPresenter
-from arbeitszeit_web.www.presenters.query_companies_presenter import (
-    QueryCompaniesPresenter,
-)
 from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )
@@ -168,24 +160,6 @@ from .blueprint import CompanyRoute
 
 @CompanyRoute("/company/dashboard")
 def dashboard(view: CompanyDashboardView):
-    return view.respond_to_get()
-
-
-@CompanyRoute("/company/query_companies", methods=["GET"])
-def query_companies(
-    query_companies: use_cases.query_companies.QueryCompanies,
-    controller: QueryCompaniesController,
-    presenter: QueryCompaniesPresenter,
-):
-    template_name = "company/query_companies.html"
-    search_form = CompanySearchForm(request.args)
-    view = QueryCompaniesView(
-        search_form,
-        query_companies,
-        presenter,
-        controller,
-        template_name,
-    )
     return view.respond_to_get()
 
 

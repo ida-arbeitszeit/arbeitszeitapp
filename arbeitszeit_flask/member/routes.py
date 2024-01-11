@@ -16,19 +16,14 @@ from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsump
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import (
     AnswerCompanyWorkInviteForm,
-    CompanySearchForm,
     RegisterPrivateConsumptionForm,
 )
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
-    QueryCompaniesView,
     RegisterPrivateConsumptionView,
 )
 from arbeitszeit_flask.views.http_error_view import http_404
-from arbeitszeit_web.www.controllers.query_companies_controller import (
-    QueryCompaniesController,
-)
 from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
     QueryPrivateConsumptionsController,
 )
@@ -53,9 +48,6 @@ from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter 
 from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
     PrivateConsumptionsPresenter,
 )
-from arbeitszeit_web.www.presenters.query_companies_presenter import (
-    QueryCompaniesPresenter,
-)
 
 from .blueprint import MemberRoute
 
@@ -77,24 +69,6 @@ def consumptions(
             view_model=view_model,
         )
     )
-
-
-@MemberRoute("/query_companies", methods=["GET", "POST"])
-def query_companies(
-    query_companies: use_cases.query_companies.QueryCompanies,
-    controller: QueryCompaniesController,
-    presenter: QueryCompaniesPresenter,
-):
-    template_name = "member/query_companies.html"
-    search_form = CompanySearchForm(request.args)
-    view = QueryCompaniesView(
-        search_form,
-        query_companies,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get()
 
 
 @MemberRoute("/register_private_consumption", methods=["GET", "POST"])
