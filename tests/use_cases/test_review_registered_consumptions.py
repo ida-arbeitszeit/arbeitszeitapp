@@ -158,7 +158,9 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         )
         assert response.consumptions[0].plan_id == expected_plan_id
 
-    def test_volume_is_shown_that_equals_the_labour_costs_of_the_product(self) -> None:
+    def test_labour_hours_consumed_is_shown_that_equals_the_labour_costs_of_the_product(
+        self,
+    ) -> None:
         plan = self.plan_generator.create_plan(
             planner=self.providing_company,
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
@@ -168,9 +170,9 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert response.consumptions[0].volume == Decimal(6)
+        assert response.consumptions[0].labour_hours_consumed == Decimal(6)
 
-    def test_volume_is_shown_that_equals_the_labour_costs_of_the_product_times_the_amount_consumed(
+    def test_labour_hours_consumed_is_shown_that_equals_the_labour_costs_of_the_product_times_the_amount_consumed(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(
@@ -182,9 +184,9 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert response.consumptions[0].volume == Decimal(12)
+        assert response.consumptions[0].labour_hours_consumed == Decimal(12)
 
-    def test_volume_is_shown_that_equals_the_cooperation_price_of_the_product_when_plan_is_cooperating(
+    def test_labour_hours_consumed_is_shown_that_equals_the_cooperation_price_of_the_product_when_plan_is_cooperating(
         self,
     ) -> None:
         plan1 = self.plan_generator.create_plan(
@@ -203,7 +205,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert isclose(response.consumptions[0].volume, Decimal(9))
+        assert isclose(response.consumptions[0].labour_hours_consumed, Decimal(9))
 
 
 class ProductiveConsumptionDetailsTests(BaseTestCase):
@@ -286,7 +288,9 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         )
         assert response.consumptions[0].plan_id == expected_plan_id
 
-    def test_volume_is_shown_that_equals_the_labour_costs_of_the_product(self) -> None:
+    def test_labour_hours_consumed_is_shown_that_equals_the_labour_costs_of_the_product(
+        self,
+    ) -> None:
         plan = self.plan_generator.create_plan(
             planner=self.providing_company,
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
@@ -296,9 +300,9 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert response.consumptions[0].volume == Decimal(6)
+        assert response.consumptions[0].labour_hours_consumed == Decimal(6)
 
-    def test_volume_is_shown_that_equals_the_labour_costs_of_the_product_times_the_amount_consumed(
+    def test_labour_hours_consumed_is_shown_that_equals_the_labour_costs_of_the_product_times_the_amount_consumed(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(
@@ -312,9 +316,9 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert response.consumptions[0].volume == Decimal(12)
+        assert response.consumptions[0].labour_hours_consumed == Decimal(12)
 
-    def test_volume_is_shown_that_equals_the_cooperation_price_of_the_product_when_plan_is_cooperating(
+    def test_labour_hours_consumed_is_shown_that_equals_the_cooperation_price_of_the_product_when_plan_is_cooperating(
         self,
     ) -> None:
         plan1 = self.plan_generator.create_plan(
@@ -333,4 +337,4 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
-        assert isclose(response.consumptions[0].volume, Decimal(9))
+        assert isclose(response.consumptions[0].labour_hours_consumed, Decimal(9))

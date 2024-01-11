@@ -14,7 +14,7 @@ class RegisteredConsumption:
     consumer_id: UUID
     product_name: str
     plan_id: UUID
-    volume: Decimal
+    labour_hours_consumed: Decimal
 
 
 @dataclass
@@ -51,7 +51,7 @@ class RewiewRegisteredConsumptionsUseCase:
                 consumer_id=member.id,
                 product_name=plan.prd_name,
                 plan_id=plan.id,
-                volume=transaction.amount_sent,
+                labour_hours_consumed=transaction.amount_sent,
             )
             for _, transaction, plan, member in self.database.get_private_consumptions()
             .where_provider_is_company(request.providing_company)
@@ -76,7 +76,7 @@ class RewiewRegisteredConsumptionsUseCase:
                     consumer_id=company.id,
                     product_name=plan.prd_name,
                     plan_id=plan.id,
-                    volume=transaction.amount_sent,
+                    labour_hours_consumed=transaction.amount_sent,
                 )
             )
         return productive_consumptions
