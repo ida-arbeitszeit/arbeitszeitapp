@@ -205,11 +205,8 @@ class GeneralUrlIndex:
     def get_query_plans_url(self) -> str:
         return url_for(endpoint="main_user.query_plans")
 
-    def get_member_query_companies_url(self) -> str:
-        return url_for(endpoint="main_member.query_companies")
-
-    def get_company_query_companies_url(self) -> str:
-        return url_for(endpoint="main_company.query_companies")
+    def get_query_companies_url(self) -> str:
+        return url_for(endpoint="main_user.query_companies")
 
     def get_unconfirmed_member_url(self) -> str:
         return url_for(endpoint="auth.unconfirmed_member")

@@ -8,16 +8,24 @@ from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
 )
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
+from arbeitszeit.use_cases.query_companies import QueryCompanies
 from arbeitszeit.use_cases.query_plans import QueryPlans
 from arbeitszeit.use_cases.request_email_address_change import (
     RequestEmailAddressChangeUseCase,
 )
 from arbeitszeit_flask.flask_request import FlaskRequest
-from arbeitszeit_flask.forms import PlanSearchForm, RequestEmailAddressChangeForm
+from arbeitszeit_flask.forms import (
+    CompanySearchForm,
+    PlanSearchForm,
+    RequestEmailAddressChangeForm,
+)
 from arbeitszeit_flask.types import Response
-from arbeitszeit_flask.views import QueryPlansView
+from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
 from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
+from arbeitszeit_web.www.controllers.query_companies_controller import (
+    QueryCompaniesController,
+)
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
@@ -26,6 +34,9 @@ from arbeitszeit_web.www.controllers.user_account_details_controller import (
 )
 from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
+)
+from arbeitszeit_web.www.presenters.query_companies_presenter import (
+    QueryCompaniesPresenter,
 )
 from arbeitszeit_web.www.presenters.request_email_address_change_presenter import (
     RequestEmailAddressChangePresenter,
@@ -113,3 +124,21 @@ def query_plans(
         template_name,
     )
     return view.respond_to_get(search_form, FlaskRequest())
+
+
+@AuthenticatedUserRoute("/query_companies", methods=["GET"])
+def query_companies(
+    query_companies: QueryCompanies,
+    controller: QueryCompaniesController,
+    presenter: QueryCompaniesPresenter,
+):
+    template_name = "user/query_companies.html"
+    search_form = CompanySearchForm(request.args)
+    view = QueryCompaniesView(
+        search_form,
+        query_companies,
+        presenter,
+        controller,
+        template_name,
+    )
+    return view.respond_to_get()
