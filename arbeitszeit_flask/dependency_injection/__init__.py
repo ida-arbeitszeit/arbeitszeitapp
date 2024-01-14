@@ -32,7 +32,7 @@ from arbeitszeit_flask.mail_service import (
     get_mail_service,
 )
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
-from arbeitszeit_flask.password_hasher import PasswordHasherImpl
+from arbeitszeit_flask.password_hasher import provide_password_hasher
 from arbeitszeit_flask.text_renderer import TextRendererImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.translator import FlaskTranslator
@@ -95,7 +95,7 @@ class FlaskModule(Module):
         )
         binder.bind(
             PasswordHasher,
-            to=AliasProvider(PasswordHasherImpl),
+            to=CallableProvider(provide_password_hasher),
         )
         binder.bind(
             TokenService,
