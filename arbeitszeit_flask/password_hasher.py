@@ -1,4 +1,10 @@
+import importlib
+
+from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from arbeitszeit.injector import Injector
+from arbeitszeit.password_hasher import PasswordHasher
 
 
 class PasswordHasherImpl:
@@ -14,3 +20,11 @@ class PasswordHasherImpl:
         except ValueError:
             return True
         return method == "sha256"
+
+
+def provide_password_hasher(injector: Injector) -> PasswordHasher:
+    config = current_app.config["ARBEITSZEIT_PASSWORD_HASHER"]
+    module_name, klass_name = config.split(":", maxsplit=1)
+    module = importlib.import_module(module_name)
+    klass = getattr(module, klass_name)
+    return injector.get(klass)
