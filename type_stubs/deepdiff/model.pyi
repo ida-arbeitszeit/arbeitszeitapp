@@ -1,5 +1,6 @@
 from _typeshed import Incomplete
 from deepdiff.helper import RemapDict as RemapDict, dict_ as dict_, get_type as get_type, literal_eval_extended as literal_eval_extended, notpresent as notpresent, np as np, numpy_numbers as numpy_numbers, short_repr as short_repr, strings as strings
+from deepdiff.path import stringify_element as stringify_element
 from ordered_set import OrderedSet
 
 logger: Incomplete
@@ -29,7 +30,8 @@ class TextResult(ResultDict):
 class DeltaResult(TextResult):
     ADD_QUOTES_TO_STRINGS: bool
     ignore_order: Incomplete
-    def __init__(self, tree_results: Incomplete | None = ..., ignore_order: Incomplete | None = ...) -> None: ...
+    always_include_values: Incomplete
+    def __init__(self, tree_results: Incomplete | None = ..., ignore_order: Incomplete | None = ..., always_include_values: bool = ...) -> None: ...
 
 class DiffLevel:
     t1: Incomplete
