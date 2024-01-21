@@ -5,14 +5,19 @@ from arbeitszeit_web.session import Session, UserRole
 
 
 @dataclass
+class InvalidRequest:
+    status_code: int
+
+
+@dataclass
 class QueryPrivateConsumptionsController:
     session: Session
 
-    def process_request(self) -> use_case.Request | None:
+    def process_request(self) -> use_case.Request | InvalidRequest:
+        user_id = self.session.get_current_user()
+        if not user_id:
+            return InvalidRequest(status_code=401)
         match self.session.get_user_role():
             case UserRole.member:
-                user_id = self.session.get_current_user()
-                assert user_id
                 return use_case.Request(member=user_id)
-            case _:
-                return None
+        return InvalidRequest(status_code=403)
