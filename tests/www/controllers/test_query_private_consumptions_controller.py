@@ -1,6 +1,8 @@
 from uuid import uuid4
 
+from arbeitszeit.use_cases import query_private_consumptions as use_case
 from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
+    InvalidRequest,
     QueryPrivateConsumptionsController,
 )
 from tests.www.base_test_case import BaseTestCase
@@ -17,17 +19,27 @@ class QueryPrivateConsumptionsControllerTests(BaseTestCase):
         expected_member_id = uuid4()
         self.session.login_member(expected_member_id)
         request = self.controller.process_request()
-        assert request
+        assert isinstance(request, use_case.Request)
         assert request.member == expected_member_id
 
-    def test_that_no_request_is_returned_if_user_is_logged_in_as_company(self) -> None:
+    def test_that_companies_receive_403_forbidden(self) -> None:
         self.session.login_company(uuid4())
         request = self.controller.process_request()
-        assert request is None
+        assert isinstance(request, InvalidRequest)
+        assert request.status_code == 403
 
-    def test_that_no_request_is_returned_if_user_is_logged_in_as_accountant(
+    def test_that_accountants_receive_403_forbidden(
         self,
     ) -> None:
         self.session.login_accountant(uuid4())
         request = self.controller.process_request()
-        assert request is None
+        assert isinstance(request, InvalidRequest)
+        assert request.status_code == 403
+
+    def test_that_anonymous_user_receives_401_unauthorized(
+        self,
+    ) -> None:
+        self.session.logout()
+        request = self.controller.process_request()
+        assert isinstance(request, InvalidRequest)
+        assert request.status_code == 401
