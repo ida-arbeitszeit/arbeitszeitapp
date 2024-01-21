@@ -78,7 +78,7 @@ class MacAddress(Regexp):
 
 class URL(Regexp):
     validate_hostname: Incomplete
-    def __init__(self, require_tld: bool = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(self, require_tld: bool = ..., allow_ip: bool = ..., message: Incomplete | None = ...) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class UUID:
@@ -111,6 +111,16 @@ class HostnameValidation:
     allow_ip: Incomplete
     def __init__(self, require_tld: bool = ..., allow_ip: bool = ...) -> None: ...
     def __call__(self, hostname): ...
+
+class ReadOnly:
+    field_flags: Incomplete
+    def __init__(self) -> None: ...
+    def __call__(self, form, field) -> None: ...
+
+class Disabled:
+    field_flags: Incomplete
+    def __init__(self) -> None: ...
+    def __call__(self, form, field) -> None: ...
 email = Email
 equal_to = EqualTo
 ip_address = IPAddress
@@ -124,3 +134,5 @@ regexp = Regexp
 url = URL
 any_of = AnyOf
 none_of = NoneOf
+readonly = ReadOnly
+disabled = Disabled
