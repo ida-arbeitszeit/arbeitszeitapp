@@ -13,7 +13,11 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import confirm_member
+from arbeitszeit.use_cases import (
+    confirm_member,
+    get_coop_summary,
+    toggle_product_availablity,
+)
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -26,6 +30,7 @@ from arbeitszeit.use_cases.create_cooperation import (
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft, Request
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
+from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -158,6 +163,9 @@ class PlanGenerator:
     create_plan_draft_use_case: CreatePlanDraft
     file_plan_with_accounting: FilePlanWithAccounting
     approve_plan_use_case: ApprovePlanUseCase
+    toggle_product_availability: toggle_product_availablity.ToggleProductAvailability
+    hide_plan: HidePlan
+    get_coop_summary_use_case: get_coop_summary.GetCoopSummary
 
     def create_plan(
         self,
@@ -175,7 +183,7 @@ class PlanGenerator:
         cooperation: Optional[UUID] = None,
         is_available: bool = True,
         hidden_by_user: bool = False,
-    ) -> records.Plan:
+    ) -> UUID:
         if planner is None:
             planner = self.company_generator.create_company()
         draft = self.draft_plan(
@@ -196,62 +204,40 @@ class PlanGenerator:
         assert file_plan_response.plan_id
         assert file_plan_response.is_plan_successfully_filed
         if not approved:
-            plan = (
-                self.database_gateway.get_plans()
-                .with_id(file_plan_response.plan_id)
-                .first()
-            )
-            assert plan
-            return plan
+            return file_plan_response.plan_id
         response = self.approve_plan_use_case.approve_plan(
             ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
         )
         assert response.is_approved
-        plan = (
-            self.database_gateway.get_plans()
-            .with_id(file_plan_response.plan_id)
-            .first()
-        )
-        assert plan
-        assert plan.is_approved
         if requested_cooperation:
             request_cooperation_response = self.request_cooperation(
-                RequestCooperationRequest(plan.planner, plan.id, requested_cooperation)
+                RequestCooperationRequest(
+                    planner, file_plan_response.plan_id, requested_cooperation
+                )
             )
             assert (
                 not request_cooperation_response.is_rejected
             ), f"Cooperation request failed: {request_cooperation_response}"
         if cooperation:
-            coop_and_coordinator = (
-                self.database_gateway.get_cooperations()
-                .with_id(cooperation)
-                .joined_with_current_coordinator()
-                .first()
-            )
-            assert coop_and_coordinator
-            _, coordinator = coop_and_coordinator
+            coordinator = self._get_cooperation_coordinator(cooperation, planner)
             self.request_cooperation(
-                RequestCooperationRequest(plan.planner, plan.id, cooperation)
+                RequestCooperationRequest(
+                    planner, file_plan_response.plan_id, cooperation
+                )
             )
             self.accept_cooperation(
-                AcceptCooperationRequest(coordinator.id, plan.id, cooperation)
+                AcceptCooperationRequest(
+                    coordinator, file_plan_response.plan_id, cooperation
+                )
             )
-        selected_plan = self.database_gateway.get_plans().with_id(
-            file_plan_response.plan_id
-        )
-        update = selected_plan.update()
         if hidden_by_user:
-            update = update.hide()
+            self.hide_plan(plan_id=file_plan_response.plan_id)
         if not is_available:
-            update = update.toggle_product_availability()
-        update.perform()
-        plan = (
-            self.database_gateway.get_plans()
-            .with_id(file_plan_response.plan_id)
-            .first()
-        )
-        assert plan
-        return plan
+            toggle_response = self.toggle_product_availability(
+                current_user_id=planner, plan_id=file_plan_response.plan_id
+            )
+            assert toggle_response.is_success
+        return file_plan_response.plan_id
 
     def draft_plan(
         self,
@@ -295,6 +281,51 @@ class PlanGenerator:
         assert not response.is_rejected
         assert response.draft_id
         return response.draft_id
+
+    def create_plan_record(
+        self,
+        *,
+        amount: int = 100,
+        approved: bool = True,
+        costs: Optional[records.ProductionCosts] = None,
+        description="Beschreibung für Produkt A.",
+        is_public_service: bool = False,
+        planner: Optional[UUID] = None,
+        product_name: str = "Produkt A",
+        production_unit: str = "500 Gramm",
+        timeframe: Optional[int] = None,
+        requested_cooperation: Optional[UUID] = None,
+        cooperation: Optional[UUID] = None,
+        is_available: bool = True,
+        hidden_by_user: bool = False,
+    ) -> records.Plan:
+        # Don't use this method. It is only here for legacy reasons.
+        plan_id = self.create_plan(
+            amount=amount,
+            approved=approved,
+            costs=costs,
+            description=description,
+            is_public_service=is_public_service,
+            planner=planner,
+            product_name=product_name,
+            production_unit=production_unit,
+            timeframe=timeframe,
+            requested_cooperation=requested_cooperation,
+            cooperation=cooperation,
+            is_available=is_available,
+            hidden_by_user=hidden_by_user,
+        )
+        plan = self.database_gateway.get_plans().with_id(plan_id).first()
+        assert plan
+        return plan
+
+    def _get_cooperation_coordinator(self, cooperation: UUID, planner: UUID) -> UUID:
+        request = get_coop_summary.GetCoopSummaryRequest(
+            requester_id=planner, coop_id=cooperation
+        )
+        response = self.get_coop_summary_use_case(request)
+        assert response
+        return response.current_coordinator
 
 
 @dataclass
@@ -344,7 +375,7 @@ class ConsumptionGenerator:
         if consumer is None:
             consumer = self.company_generator.create_company()
         if plan is None:
-            plan = self.plan_generator.create_plan().id
+            plan = self.plan_generator.create_plan()
         request = RegisterProductiveConsumptionRequest(
             consumer=consumer,
             plan=plan,
@@ -366,7 +397,7 @@ class ConsumptionGenerator:
         if consumer is None:
             consumer = self.member_generator.create_member()
         if plan is None:
-            plan = self.plan_generator.create_plan().id
+            plan = self.plan_generator.create_plan()
         request = RegisterPrivateConsumptionRequest(
             amount=amount,
             plan=plan,
@@ -430,7 +461,7 @@ class CooperationGenerator:
         self,
         name: Optional[str] = None,
         coordinator: Optional[Union[records.Company, UUID]] = None,
-        plans: Optional[List[records.Plan]] = None,
+        plans: Optional[List[UUID]] = None,
     ) -> UUID:
         if name is None:
             name = f"name_{uuid4()}"
@@ -448,7 +479,7 @@ class CooperationGenerator:
         if plans is not None:
             assert (
                 self.database_gateway.get_plans()
-                .with_id(*[plan.id for plan in plans])
+                .with_id(*plans)
                 .update()
                 .set_cooperation(cooperation_id)
                 .perform()

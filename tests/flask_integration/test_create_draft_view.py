@@ -25,7 +25,7 @@ class AuthenticatedCompanyTestsForGet(ViewTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        url = f"/company/create_draft?expired_plan_id={str(plan.id)}"
+        url = f"/company/create_draft?expired_plan_id={str(plan)}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

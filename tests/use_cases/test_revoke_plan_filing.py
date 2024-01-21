@@ -39,7 +39,7 @@ class PlanGetsRevokedTests(BaseTestCase):
 
     def test_use_case_is_unsuccessful_if_plan_is_approved_and_not_expired(self) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=True, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=True, planner=planner)
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
         )
@@ -51,7 +51,7 @@ class PlanGetsRevokedTests(BaseTestCase):
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             approved=True, planner=planner, timeframe=1
-        ).id
+        )
         self.datetime_service.advance_time(dt=timedelta(days=2))
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
@@ -71,7 +71,7 @@ class PlanGetsRevokedTests(BaseTestCase):
         self,
     ) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=False, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=False, planner=planner)
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
         )
@@ -79,7 +79,7 @@ class PlanGetsRevokedTests(BaseTestCase):
 
     def test_draft_id_is_in_response_if_revoking_plan_succeeds(self) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=False, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=False, planner=planner)
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
         )
@@ -89,7 +89,7 @@ class PlanGetsRevokedTests(BaseTestCase):
         self,
     ) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=False, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=False, planner=planner)
         assert self.plan_is_a_plan_of_company(company=planner, plan=plan)
         self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
@@ -102,19 +102,21 @@ class PlanGetsRevokedTests(BaseTestCase):
         if requester is None:
             requester = self.company_generator.create_company()
         if plan is None:
-            plan = self.plan_generator.create_plan().id
+            plan = self.plan_generator.create_plan()
         return RevokePlanFilingUseCase.Request(requester=requester, plan=plan)
 
     def plan_is_a_plan_of_company(self, company: UUID, plan: UUID) -> bool:
         use_case_request = ShowMyPlansRequest(company_id=company)
         response = self.show_my_plans.show_company_plans(request=use_case_request)
-        company_plans = (
-            response.active_plans + response.expired_plans + response.non_active_plans
-        )
-        for p in company_plans:
-            if p.id == plan:
-                return True
-        return False
+        company_plans = [
+            p.id
+            for p in (
+                response.active_plans
+                + response.expired_plans
+                + response.non_active_plans
+            )
+        ]
+        return plan in company_plans
 
 
 class DraftGetsCreatedTests(BaseTestCase):
@@ -128,7 +130,7 @@ class DraftGetsCreatedTests(BaseTestCase):
         self,
     ) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=False, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=False, planner=planner)
         assert not self.drafts_of_company(company=planner)
         self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
@@ -139,7 +141,7 @@ class DraftGetsCreatedTests(BaseTestCase):
         self,
     ) -> None:
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(approved=False, planner=planner).id
+        plan = self.plan_generator.create_plan(approved=False, planner=planner)
         assert not self.drafts_of_company(company=planner)
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=planner)
@@ -155,7 +157,7 @@ class DraftGetsCreatedTests(BaseTestCase):
         self.plan_generator.draft_plan(planner=planner)
         plan_to_revoke = self.plan_generator.create_plan(
             approved=False, planner=planner
-        ).id
+        )
         self.use_case.revoke_plan_filing(
             self.create_request(plan=plan_to_revoke, requester=planner)
         )
@@ -182,7 +184,7 @@ class DraftGetsCreatedTests(BaseTestCase):
             amount=revoked_plan_amount,
             timeframe=revoked_plan_timeframe,
             is_public_service=revoked_plan_is_public,
-        ).id
+        )
         response = self.use_case.revoke_plan_filing(
             self.create_request(plan=plan, requester=revoked_plan_planner)
         )
@@ -207,7 +209,7 @@ class DraftGetsCreatedTests(BaseTestCase):
         if requester is None:
             requester = self.company_generator.create_company()
         if plan is None:
-            plan = self.plan_generator.create_plan().id
+            plan = self.plan_generator.create_plan()
         return RevokePlanFilingUseCase.Request(requester=requester, plan=plan)
 
     def drafts_of_company(self, company: UUID) -> list[UUID]:

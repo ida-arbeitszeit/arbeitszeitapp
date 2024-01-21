@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from arbeitszeit.records import Plan
 from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListOutboundCoopRequests,
     ListOutboundCoopRequestsRequest,
@@ -13,9 +12,9 @@ from tests.datetime_service import FakeDatetimeService
 from .dependency_injection import injection_test
 
 
-def plan_in_list(plan: Plan, response: ListOutboundCoopRequestsResponse) -> bool:
+def plan_in_list(plan: UUID, response: ListOutboundCoopRequestsResponse) -> bool:
     for listed_request in response.cooperation_requests:
-        if plan.id == listed_request.plan_id:
+        if plan == listed_request.plan_id:
             return True
     return False
 
