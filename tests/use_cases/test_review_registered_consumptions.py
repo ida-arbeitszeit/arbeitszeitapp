@@ -34,7 +34,7 @@ class ReviewRegisteredConsumptionsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -44,7 +44,7 @@ class ReviewRegisteredConsumptionsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -54,7 +54,7 @@ class ReviewRegisteredConsumptionsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_resource_consumption_by_company(plan=plan.id)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -64,8 +64,8 @@ class ReviewRegisteredConsumptionsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -75,9 +75,9 @@ class ReviewRegisteredConsumptionsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
-        self.consumption_generator.create_resource_consumption_by_company(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -100,7 +100,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         expected_date = datetime(2019, 5, 1)
         self.datetime_service.freeze_time(expected_date)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -108,7 +108,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
 
     def test_private_consumption_is_shown_as_private_consumption(self) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -119,7 +119,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         consumer = self.member_generator.create_member(name=expected_consumer_name)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_private_consumption(
-            plan=plan.id, consumer=consumer
+            plan=plan, consumer=consumer
         )
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -130,7 +130,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         expected_consumer_id = self.member_generator.create_member()
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_private_consumption(
-            plan=plan.id, consumer=expected_consumer_id
+            plan=plan, consumer=expected_consumer_id
         )
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -142,7 +142,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             planner=self.providing_company, product_name=expected_product_name
         )
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -151,7 +151,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
     def test_plan_id_is_shown(self) -> None:
         expected_plan_id = self.plan_generator.create_plan(
             planner=self.providing_company
-        ).id
+        )
         self.consumption_generator.create_private_consumption(plan=expected_plan_id)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -166,7 +166,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
             amount=1,
         )
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -180,7 +180,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
             amount=1,
         )
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=2)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=2)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -201,7 +201,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
         )
         self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
 
-        self.consumption_generator.create_private_consumption(plan=plan1.id)
+        self.consumption_generator.create_private_consumption(plan=plan1)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -220,7 +220,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         expected_date = datetime(2019, 5, 1)
         self.datetime_service.freeze_time(expected_date)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -230,7 +230,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -238,7 +238,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
 
     def test_consumption_of_resources_shows_not_as_private_consumption(self) -> None:
         plan = self.plan_generator.create_plan(planner=self.providing_company)
-        self.consumption_generator.create_resource_consumption_by_company(plan=plan.id)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -249,7 +249,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         consumer = self.company_generator.create_company(name=expected_consumer_name)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_fixed_means_consumption(
-            plan=plan.id, consumer=consumer
+            plan=plan, consumer=consumer
         )
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -260,7 +260,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         expected_consumer_id = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_fixed_means_consumption(
-            plan=plan.id, consumer=expected_consumer_id
+            plan=plan, consumer=expected_consumer_id
         )
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -272,7 +272,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         plan = self.plan_generator.create_plan(
             planner=self.providing_company, product_name=expected_product_name
         )
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -281,7 +281,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
     def test_plan_id_is_shown(self) -> None:
         expected_plan_id = self.plan_generator.create_plan(
             planner=self.providing_company
-        ).id
+        )
         self.consumption_generator.create_fixed_means_consumption(plan=expected_plan_id)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
@@ -296,7 +296,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
             amount=1,
         )
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -310,9 +310,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
             amount=1,
         )
-        self.consumption_generator.create_fixed_means_consumption(
-            plan=plan.id, amount=2
-        )
+        self.consumption_generator.create_fixed_means_consumption(plan=plan, amount=2)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )
@@ -333,7 +331,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
         )
         self.cooperation_generator.create_cooperation(plans=[plan1, plan2])
 
-        self.consumption_generator.create_fixed_means_consumption(plan=plan1.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan1)
         response = self.use_case.review_registered_consumptions(
             request=UseCase.Request(providing_company=self.providing_company)
         )

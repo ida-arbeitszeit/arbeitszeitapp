@@ -31,9 +31,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        url = (
-            f"/company/end_cooperation?plan_id={str(plan.id)}&cooperation_id={uuid4()}"
-        )
+        url = f"/company/end_cooperation?plan_id={str(plan)}&cooperation_id={uuid4()}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
@@ -42,7 +40,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan()
         cooperation = self.cooperation_generator.create_cooperation(plans=[plan])
-        url = f"/company/end_cooperation?plan_id={str(plan.id)}&cooperation_id={str(cooperation)}"
+        url = f"/company/end_cooperation?plan_id={str(plan)}&cooperation_id={str(cooperation)}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
@@ -51,7 +49,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(planner=self.company.id)
         cooperation = self.cooperation_generator.create_cooperation(plans=[plan])
-        url = f"/company/end_cooperation?plan_id={str(plan.id)}&cooperation_id={str(cooperation)}"
+        url = f"/company/end_cooperation?plan_id={str(plan)}&cooperation_id={str(cooperation)}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
@@ -62,6 +60,6 @@ class AuthenticatedCompanyTests(ViewTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             plans=[plan], coordinator=self.company
         )
-        url = f"/company/end_cooperation?plan_id={str(plan.id)}&cooperation_id={str(cooperation)}"
+        url = f"/company/end_cooperation?plan_id={str(plan)}&cooperation_id={str(cooperation)}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)

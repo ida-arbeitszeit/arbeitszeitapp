@@ -55,16 +55,19 @@ class UseCaseTest(BaseTestCase):
 
     def test_returned_plan_has_correct_attributes(self) -> None:
         expected_coop_name = "Test Cooperation"
+        expected_product_name = "test product name"
         coop = self.cooperation_generator.create_cooperation(name=expected_coop_name)
         company = self.company_generator.create_company()
         request = ListMyCooperatingPlansUseCase.Request(company=company)
-        plan = self.plan_generator.create_plan(planner=company, cooperation=coop)
+        plan = self.plan_generator.create_plan(
+            planner=company, cooperation=coop, product_name=expected_product_name
+        )
         result = self.use_case.list_cooperations(request=request)
         cooperating_plan = result.cooperating_plans[0]
         assert cooperating_plan.coop_id == coop
         assert cooperating_plan.coop_name == expected_coop_name
-        assert cooperating_plan.plan_id == plan.id
-        assert cooperating_plan.plan_name == plan.prd_name
+        assert cooperating_plan.plan_id == plan
+        assert cooperating_plan.plan_name == expected_product_name
 
     def test_two_plans_are_returned_if_requester_has_two_active_cooperating_plan(
         self,

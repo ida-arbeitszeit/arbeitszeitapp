@@ -33,10 +33,10 @@ class GetCompanySummaryBenchmark:
             plan = self.plan_generator.create_plan()
             for _ in range(5):
                 self.consumption_generator.create_resource_consumption_by_company(
-                    consumer=self.company, plan=plan.id
+                    consumer=self.company, plan=plan
                 )
                 self.consumption_generator.create_fixed_means_consumption(
-                    consumer=self.company, plan=plan.id
+                    consumer=self.company, plan=plan
                 )
         for _ in range(1000):
             self.plan_generator.create_plan(planner=self.company)

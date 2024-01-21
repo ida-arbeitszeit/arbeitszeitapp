@@ -39,11 +39,12 @@ class UseCaseTester(TestCase):
         self.assertEqual(response.latest_plans[0].activation_date, expected_date)
 
     def test_that_correct_plan_id_is_returned(self) -> None:
-        expected_plan_id = self.plan_generator.create_plan().id
+        expected_plan_id = self.plan_generator.create_plan()
         response = self.use_case.show_start_page()
         self.assertEqual(response.latest_plans[0].plan_id, expected_plan_id)
 
     def test_that_correct_product_name_of_plan_is_returned(self) -> None:
-        expected_product_name = self.plan_generator.create_plan().prd_name
+        expected_product_name = "test product name 123"
+        self.plan_generator.create_plan(product_name=expected_product_name)
         response = self.use_case.show_start_page()
         self.assertEqual(response.latest_plans[0].product_name, expected_product_name)

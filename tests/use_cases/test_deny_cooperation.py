@@ -39,7 +39,7 @@ class UseCaseTests(BaseTestCase):
         requester = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=uuid4()
+            requester_id=requester, plan_id=plan, cooperation_id=uuid4()
         )
         response = self.deny_cooperation(request)
         assert response.is_rejected
@@ -54,7 +54,7 @@ class UseCaseTests(BaseTestCase):
             coordinator=requester
         )
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         response = self.deny_cooperation(request)
         assert response.is_rejected
@@ -73,7 +73,7 @@ class UseCaseTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         response = self.deny_cooperation(request)
         assert response.is_rejected
@@ -89,7 +89,7 @@ class UseCaseTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         response = self.deny_cooperation(request)
         assert not response.is_rejected
@@ -103,11 +103,11 @@ class UseCaseTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         self.deny_cooperation(request)
         request_request = RequestCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         self.request_cooperation(request_request)
 
@@ -122,7 +122,7 @@ class UseCaseTests(BaseTestCase):
         )
         self.datetime_service.advance_time(timedelta(days=2))
         request = DenyCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         response = self.deny_cooperation(request)
         assert response.is_rejected

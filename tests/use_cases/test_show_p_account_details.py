@@ -45,7 +45,7 @@ class UseCaseTester(BaseTestCase):
             self.show_p_account_details(company).transactions
         )
         self.consumption_generator.create_private_consumption(
-            consumer=member, plan=plan.id
+            consumer=member, plan=plan
         )
         response = self.show_p_account_details(company)
         assert len(response.transactions) == transactions_before_consumption

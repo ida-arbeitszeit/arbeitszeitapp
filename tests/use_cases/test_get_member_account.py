@@ -70,7 +70,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
         amount=1,
     )
     consumption_generator.create_private_consumption(
-        consumer=member, amount=1, plan=plan.id
+        consumer=member, amount=1, plan=plan
     )
     response = use_case(member)
     assert len(response.transactions) == 1
@@ -101,7 +101,7 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
         amount=1,
     )
     consumption_generator.create_private_consumption(
-        consumer=member, amount=1, plan=plan.id
+        consumer=member, amount=1, plan=plan
     )
     response = use_case(member)
     assert response.transactions[0].transaction_volume == Decimal("0")
@@ -166,7 +166,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
     )
     consumption_generator.create_private_consumption(
         consumer=member,
-        plan=company1_plan.id,
+        plan=company1_plan,
         amount=1,
     )
     register_hours_worked(
