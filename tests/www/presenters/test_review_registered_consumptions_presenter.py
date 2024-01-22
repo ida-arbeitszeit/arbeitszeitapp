@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.review_registered_consumptions import RegisteredConsumption
 from arbeitszeit.use_cases.review_registered_consumptions import (
-    RewiewRegisteredConsumptionsUseCase as UseCase,
+    ReviewRegisteredConsumptionsUseCase as UseCase,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.review_registered_consumptions_presenter import (

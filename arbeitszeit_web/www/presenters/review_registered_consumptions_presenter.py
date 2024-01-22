@@ -4,7 +4,7 @@ from typing import Optional
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.review_registered_consumptions import RegisteredConsumption
 from arbeitszeit.use_cases.review_registered_consumptions import (
-    RewiewRegisteredConsumptionsUseCase as UseCase,
+    ReviewRegisteredConsumptionsUseCase as UseCase,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.url_index import UrlIndex
