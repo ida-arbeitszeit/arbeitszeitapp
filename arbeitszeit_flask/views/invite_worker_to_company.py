@@ -26,12 +26,12 @@ class InviteWorkerToCompanyView:
     post_request_handler: InviteWorkerPostRequestHandler
     get_request_handler: InviteWorkerGetRequestHandler
 
-    def GET(self, form: InviteWorkerToCompanyForm) -> Response:
+    def GET(self) -> Response:
         form = InviteWorkerToCompanyForm(request.form)
         return self.get_request_handler.respond_to_get(form)
 
     @commit_changes
-    def POST(self, form: InviteWorkerToCompanyForm) -> Response:
+    def POST(self) -> Response:
         form = InviteWorkerToCompanyForm(request.form)
         return self.post_request_handler.respond_to_post(form)
 
