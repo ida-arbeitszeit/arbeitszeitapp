@@ -1,3 +1,49 @@
-<div>
-    TODO
-</div>
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("My product transfers") }}</div>
+{% endblock %}
+
+{% block content %}
+
+<section class="section has-text-centered pb-0">
+    <h1 class="title">{{ gettext("My product transfers (sales)") }}</h1>
+</section>
+
+<section class="section columns has-text-centered">
+    <div class="column"></div>
+    <div class="column is-two-thirds">
+        <div class="section has-text-left">
+            {% for c in view_model.consumptions %}          
+            <article class="media">
+                <div class="media-left">
+                    <p class="pt-1">
+                        <small class="has-text-weight-semibold">{{ c.date }}</small><br>
+                    </p>
+                </div>
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <span class="icon"><i class='{{ c.consumer_type_icon }}'></i></span>
+                            {% if c.consumer_url is none %}
+                            <span>{{ c.consumer_name }}</span>
+                            {% else %}
+                            <span><a href="{{ c.consumer_url }}">{{ c.consumer_name }}</a></span>
+                            {% endif %}
+                            <br>
+                            <small><a href="{{ c.plan_url }}">{{ c.product_name }}</a></small>
+                        </p>
+                    </div>
+                </div>
+                <div class="media-right">
+                    <p class="is-size-5 pt-1 has-text-success">
+                        {{ c.labour_hours_consumed }}
+                    </p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column"></div>
+</section>
+{% endblock %}
