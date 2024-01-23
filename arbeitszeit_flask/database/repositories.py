@@ -1043,6 +1043,20 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             .filter(consuming_company.id == str(company))
         )
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        providing_company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.receiving_account == account.id)
+            .join(
+                providing_company,
+                account.id == providing_company.prd_account,
+            )
+            .filter(providing_company.id == str(company))
+        )
+
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
@@ -1135,6 +1149,55 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             .with_entities(models.ProductiveConsumption, transaction, provider),
         )
 
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.ProductiveConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[
+            records.ProductiveConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]:
+            consumption_orm, transaction_orm, plan_orm, company_orm = orm
+            return (
+                DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
+                DatabaseGatewayImpl.company_from_orm(company_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        plan = aliased(models.Plan)
+        company = aliased(models.Company)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction,
+                models.ProductiveConsumption.transaction_id == transaction.id,
+            )
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                company,
+                or_(
+                    company.p_account == account.id,
+                    company.r_account == account.id,
+                ),
+            )
+            .join(plan, models.ProductiveConsumption.plan_id == plan.id)
+            .with_entities(models.ProductiveConsumption, transaction, plan, company),
+        )
+
 
 class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
     def where_consumer_is_member(self, member: UUID) -> Self:
@@ -1162,6 +1225,20 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
             ).order_by(ordering)
         )
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        providing_company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.receiving_account == account.id)
+            .join(
+                providing_company,
+                account.id == providing_company.prd_account,
+            )
+            .filter(providing_company.id == str(company))
+        )
+
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
@@ -1187,6 +1264,51 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
             )
             .join(plan, models.PrivateConsumption.plan_id == plan.id)
             .with_entities(models.PrivateConsumption, transaction, plan),
+        )
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]:
+            consumption_orm, transaction_orm, plan_orm, member_orm = orm
+            return (
+                DatabaseGatewayImpl.private_consumption_from_orm(consumption_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        plan = aliased(models.Plan)
+        member = aliased(models.Member)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.PrivateConsumption.transaction_id == transaction.id
+            )
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                member,
+                account.id == member.account,
+            )
+            .join(plan, models.PrivateConsumption.plan_id == plan.id)
+            .with_entities(models.PrivateConsumption, transaction, plan, member),
         )
 
 
