@@ -4,7 +4,10 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
+from arbeitszeit.use_cases.show_prd_account_details import (
+    PeerTypes,
+    ShowPRDAccountDetailsUseCase,
+)
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -91,7 +94,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
 
-    def test_name_of_buyer_is_shown_if_transaction_is_of_type_sale_and_buyer_is_not_a_member(
+    def test_name_of_peer_is_shown_if_transaction_is_of_type_sale_and_peer_is_a_company(
         self,
     ):
         expected_user_name = "some user name"
@@ -99,18 +102,18 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    buyer=ShowPRDAccountDetailsUseCase.Buyer(
-                        buyer_is_member=False,
-                        buyer_id=uuid4(),
-                        buyer_name=expected_user_name,
+                    peer=ShowPRDAccountDetailsUseCase.Peer(
+                        type=PeerTypes.company,
+                        id=uuid4(),
+                        name=expected_user_name,
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_name, expected_user_name)
+        self.assertEqual(view_model.transactions[0].peer_name, expected_user_name)
 
-    def test_name_of_buyer_is_hidden_if_transaction_is_of_type_sale_and_buyer_is_a_member(
+    def test_name_of_peer_is_anonymized_if_transaction_is_of_type_sale_and_peer_is_a_member(
         self,
     ):
         expected_user_name = self.translator.gettext("Anonymous worker")
@@ -118,64 +121,74 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    buyer=ShowPRDAccountDetailsUseCase.Buyer(
-                        buyer_is_member=True,
-                        buyer_id=uuid4(),
-                        buyer_name="some worker name",
+                    peer=ShowPRDAccountDetailsUseCase.Peer(
+                        type=PeerTypes.member,
+                        id=uuid4(),
+                        name="some worker name",
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_name, expected_user_name)
+        self.assertEqual(view_model.transactions[0].peer_name, expected_user_name)
 
-    def test_correct_icon_for_type_of_buyer_is_shown_if_transaction_is_sale_of_consumer_product(
+    def test_correct_icon_for_type_of_peer_is_shown_if_transaction_is_sale_of_consumer_product(
         self,
     ):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    buyer=ShowPRDAccountDetailsUseCase.Buyer(
-                        buyer_is_member=True, buyer_id=uuid4(), buyer_name="member name"
+                    peer=ShowPRDAccountDetailsUseCase.Peer(
+                        type=PeerTypes.member, id=uuid4(), name="member name"
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_type_icon, "fas fa-user")
+        self.assertEqual(view_model.transactions[0].peer_type_icon, "fas fa-user")
 
-    def test_correct_icon_for_type_of_buyer_is_shown_if_transaction_is_sale_of_liquid_means(
+    def test_correct_icon_for_type_of_peer_is_shown_if_transaction_is_sale_of_liquid_means(
         self,
     ):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_liquid_means,
-                    buyer=ShowPRDAccountDetailsUseCase.Buyer(
-                        buyer_is_member=False,
-                        buyer_id=uuid4(),
-                        buyer_name="company name",
+                    peer=ShowPRDAccountDetailsUseCase.Peer(
+                        type=PeerTypes.company,
+                        id=uuid4(),
+                        name="company name",
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_type_icon, "fas fa-industry")
+        self.assertEqual(view_model.transactions[0].peer_type_icon, "fas fa-industry")
 
-    def test_type_of_buyer_is_none_if_transaction_is_of_type_expected_sales(
+    def test_peer_type_icon_is_none_if_transaction_is_of_type_expected_sales(
+        self,
+    ):
+        response = self._use_case_response(
+            transactions=[
+                self._get_transaction_info(
+                    peer=ShowPRDAccountDetailsUseCase.Peer(
+                        type=PeerTypes.social_accounting,
+                        id=uuid4(),
+                        name="some name",
+                    )
+                )
+            ]
+        )
+        view_model = self.presenter.present(response)
+        self.assertIsNone(view_model.transactions[0].peer_type_icon)
+
+    def test_name_of_peer_is_none_if_transaction_is_of_type_expected_sales(
         self,
     ):
         response = self._use_case_response(transactions=[self._get_transaction_info()])
         view_model = self.presenter.present(response)
-        self.assertIsNone(view_model.transactions[0].buyer_type_icon)
-
-    def test_name_of_buyer_is_empty_string_if_transaction_is_of_type_expected_sales(
-        self,
-    ):
-        response = self._use_case_response(transactions=[self._get_transaction_info()])
-        view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].buyer_name, "")
+        assert view_model.transactions[0].peer_name is None
 
     def _use_case_response(
         self,
@@ -193,14 +206,20 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def _get_transaction_info(
         self,
         transaction_type: Optional[TransactionTypes] = None,
-        buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer] = None,
+        peer: Optional[ShowPRDAccountDetailsUseCase.Peer] = None,
     ):
         if transaction_type is None:
             transaction_type = TransactionTypes.expected_sales
+        if peer is None:
+            peer = ShowPRDAccountDetailsUseCase.Peer(
+                type=PeerTypes.social_accounting,
+                id=uuid4(),
+                name="some accounting name",
+            )
         return ShowPRDAccountDetailsUseCase.TransactionInfo(
             transaction_type=transaction_type,
             date=datetime.now(),
             transaction_volume=Decimal(10.007),
             purpose="Test purpose",
-            buyer=buyer,
+            peer=peer,
         )

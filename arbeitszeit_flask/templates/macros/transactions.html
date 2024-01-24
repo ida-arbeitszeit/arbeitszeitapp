@@ -38,7 +38,7 @@
             <p>
                 <strong class="is-size-5">
                     {{ type }}
-                </strong><span class="icon"><i class='{{ buyer_type_icon }}'></i></span><span>{{ buyer_name }}</span>
+                </strong><span class="icon"><i class='{{ buyer_type_icon }}'></i></span><span>{{ buyer_name if buyer_name else "" }}</span>
                 <br>
                 <small>{{ purpose }}</small>
             </p>

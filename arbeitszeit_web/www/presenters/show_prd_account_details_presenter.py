@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
+from arbeitszeit.use_cases.show_prd_account_details import (
+    PeerTypes,
+    ShowPRDAccountDetailsUseCase,
+)
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -18,8 +21,8 @@ class ShowPRDAccountDetailsPresenter:
         date: str
         transaction_volume: str
         purpose: str
-        buyer_name: str
-        buyer_type_icon: Optional[str]
+        peer_name: str | None
+        peer_type_icon: str | None
 
     @dataclass
     class ViewModel:
@@ -69,26 +72,26 @@ class ShowPRDAccountDetailsPresenter:
             ),
             transaction_volume=str(round(transaction.transaction_volume, 2)),
             purpose=transaction.purpose,
-            buyer_name=self._get_buyer_name(transaction.buyer),
-            buyer_type_icon=self._get_buyer_type_icon(transaction.buyer),
+            peer_name=self._get_peer_name(transaction.peer),
+            peer_type_icon=self._get_peer_type_icon(transaction.peer),
         )
 
-    def _get_buyer_type_icon(
-        self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
-    ) -> Optional[str]:
-        if not buyer:
-            return None
-        elif buyer.buyer_is_member:
-            return "fas fa-user"
-        else:
-            return "fas fa-industry"
+    def _get_peer_type_icon(
+        self, peer: ShowPRDAccountDetailsUseCase.Peer
+    ) -> str | None:
+        match peer.type:
+            case PeerTypes.member:
+                return "fas fa-user"
+            case PeerTypes.company:
+                return "fas fa-industry"
+            case _:
+                return None
 
-    def _get_buyer_name(
-        self, buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
-    ) -> str:
-        if not buyer:
-            return ""
-        elif buyer.buyer_is_member:
-            return self.translator.gettext("Anonymous worker")
-        else:
-            return buyer.buyer_name
+    def _get_peer_name(self, peer: ShowPRDAccountDetailsUseCase.Peer) -> str | None:
+        match peer.type:
+            case PeerTypes.member:
+                return self.translator.gettext("Anonymous worker")
+            case PeerTypes.company:
+                return peer.name
+            case _:
+                return None

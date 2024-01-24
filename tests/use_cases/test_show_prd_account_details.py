@@ -3,7 +3,10 @@ from decimal import Decimal
 
 from arbeitszeit.records import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
+from arbeitszeit.use_cases.show_prd_account_details import (
+    PeerTypes,
+    ShowPRDAccountDetailsUseCase,
+)
 
 from .base_test_case import BaseTestCase
 
@@ -232,15 +235,23 @@ class UseCaseTester(BaseTestCase):
         assert response.plot.accumulated_volumes[1] == Decimal(0)
         assert response.plot.accumulated_volumes[3] == Decimal(5)
 
-    def test_that_no_consumer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
+    def test_that_peer_type_is_accounting_when_transaction_is_debit_for_expected_sales(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         response = self.show_prd_account_details(planner)
-        assert response.transactions[0].buyer is None
+        assert response.transactions[0].peer.type == PeerTypes.social_accounting
 
-    def test_that_correct_consumer_info_is_shown_when_company_sold_to_member(
+    def test_that_peer_name_is_accounting_when_transaction_is_debit_for_expected_sales(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(planner=planner)
+        response = self.show_prd_account_details(planner)
+        assert response.transactions[0].peer.name == "Social Accounting"
+
+    def test_that_peer_type_is_member_when_company_sold_to_member(
         self,
     ) -> None:
         expected_consumer_name = "test 123 name"
@@ -252,10 +263,22 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner)
         transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.buyer
-        assert transaction_of_sale.buyer.buyer_is_member == True
-        assert transaction_of_sale.buyer.buyer_id == consumer
-        assert transaction_of_sale.buyer.buyer_name == expected_consumer_name
+        assert transaction_of_sale.peer
+        assert transaction_of_sale.peer.type == PeerTypes.member
+
+    def test_that_member_id_and_name_are_none_when_company_sold_to_member(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        consumer = self.member_generator.create_member()
+        self.consumption_generator.create_private_consumption(
+            plan=plan.id, consumer=consumer
+        )
+        response = self.show_prd_account_details(planner)
+        transaction_of_sale = response.transactions[0]
+        assert transaction_of_sale.peer.id is None
+        assert transaction_of_sale.peer.name is None
 
     def test_that_correct_consumer_info_is_shown_when_company_sold_to_company(
         self,
@@ -268,7 +291,7 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.show_prd_account_details(planner.id)
         transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.buyer
-        assert transaction_of_sale.buyer.buyer_is_member == False
-        assert transaction_of_sale.buyer.buyer_id == consumer.id
-        assert transaction_of_sale.buyer.buyer_name == consumer.name
+        assert transaction_of_sale.peer
+        assert transaction_of_sale.peer.type == PeerTypes.company
+        assert transaction_of_sale.peer.id == consumer.id
+        assert transaction_of_sale.peer.name == consumer.name
