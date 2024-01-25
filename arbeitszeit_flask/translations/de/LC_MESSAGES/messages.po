@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
 "POT-Creation-Date: 2024-01-25 19:58+0100\n"
-"PO-Revision-Date: 2023-11-28 23:42+0100\n"
+"PO-Revision-Date: 2024-01-25 22:19+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
 "Language-Team: de <LL@li.org>\n"
@@ -176,7 +176,7 @@ msgstr "Art des Konsums"
 
 #: arbeitszeit_flask/forms.py:407
 msgid "Email address is required."
-msgstr ""
+msgstr "E-Mail-Adresse ist erforderlich."
 
 #: arbeitszeit_flask/plots/routes.py:29
 msgid "Work certificates"
@@ -432,7 +432,7 @@ msgstr "A-Konto"
 
 #: arbeitszeit_flask/templates/company/account_a.html:21
 msgid "The account for work certificates"
-msgstr ""
+msgstr "Das Konto für Arbeitszertifikate"
 
 #: arbeitszeit_flask/templates/company/account_a.html:23
 #: arbeitszeit_flask/templates/company/account_p.html:23
@@ -451,7 +451,7 @@ msgstr "P-Konto"
 
 #: arbeitszeit_flask/templates/company/account_p.html:21
 msgid "The account for fixed means of production."
-msgstr ""
+msgstr "Das Konto für feste Produktionsmittel."
 
 #: arbeitszeit_flask/templates/company/account_prd.html:5
 #: arbeitszeit_flask/templates/company/account_prd.html:16
@@ -463,7 +463,7 @@ msgstr "Prd-Konto"
 
 #: arbeitszeit_flask/templates/company/account_prd.html:20
 msgid "The account for product transfers (sales)."
-msgstr ""
+msgstr "Das Konto für Produktweitergaben (Verkäufe)."
 
 #: arbeitszeit_flask/templates/company/account_r.html:5
 #: arbeitszeit_flask/templates/company/account_r.html:16
@@ -475,7 +475,7 @@ msgstr "R-Konto"
 
 #: arbeitszeit_flask/templates/company/account_r.html:21
 msgid "The account for liquid means of production"
-msgstr ""
+msgstr "Das Konto für flüssige Produktionsmittel"
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:4
 #: arbeitszeit_flask/templates/company/my_cooperations.html:4
@@ -663,11 +663,11 @@ msgstr "Alle Transaktionen"
 
 #: arbeitszeit_flask/templates/company/list_all_transactions.html:20
 msgid "All transactions made or received so far."
-msgstr ""
+msgstr "Alle bisher getätigten oder erhaltenen Transaktionen."
 
 #: arbeitszeit_flask/templates/company/my_accounts.html:17
 msgid "Each company has four accounts."
-msgstr ""
+msgstr "Jeder Betrieb hat vier Konten."
 
 #: arbeitszeit_flask/templates/company/my_accounts.html:35
 msgid "Account for fixed means of production"
@@ -974,23 +974,23 @@ msgstr "Noch keine Pläne."
 
 #: arbeitszeit_flask/templates/company/request_coordination_transfer.html:14
 msgid "Request coordination transfer"
-msgstr ""
+msgstr "Koordinationsübergabe anfragen"
 
 #: arbeitszeit_flask/templates/company/request_coordination_transfer.html:32
 msgid "Candidate ID"
-msgstr ""
+msgstr "Kandidaten-ID"
 
 #: arbeitszeit_flask/templates/company/request_coordination_transfer.html:39
 msgid "Request transfer"
-msgstr ""
+msgstr "Übergabe anfragen"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:5
 msgid "Coordination Transfer Request"
-msgstr ""
+msgstr "Anfrage Koordinationsübergabe"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:11
 msgid "Request date"
-msgstr ""
+msgstr "Anfragedatum"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:15
 #: arbeitszeit_flask/templates/macros/company_summary.html:116
@@ -1000,15 +1000,15 @@ msgstr "Status"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:25
 msgid "Candidate"
-msgstr ""
+msgstr "Kandidat"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:36
 msgid "You are the candidate. Do you accept?"
-msgstr ""
+msgstr "Du bist der Kandidat. Nimmst du an?"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:37
 msgid "Accept coordination transfer"
-msgstr ""
+msgstr "Koordinationsübergabe annehmen"
 
 #: arbeitszeit_flask/templates/macros/accountant_navigation.html:27
 #: arbeitszeit_flask/templates/macros/company_navigation.html:27
@@ -1090,7 +1090,7 @@ msgstr "Aktuelle*r Koordinator*in"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:35
 msgid "Transfer coordination"
-msgstr ""
+msgstr "Koordination übergeben"
 
 #: arbeitszeit_flask/templates/macros/coop_summary.html:42
 #: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:5
@@ -1425,11 +1425,11 @@ msgstr "Nach Plan-ID oder Produktname suchen"
 
 #: arbeitszeit_flask/templates/user/request_email_address_change.html:5
 msgid "Change email address"
-msgstr ""
+msgstr "E-Mail-Adresse ändern"
 
 #: arbeitszeit_flask/templates/user/request_email_address_change.html:19
 msgid "Submit"
-msgstr ""
+msgstr "Senden"
 
 #: arbeitszeit_flask/templates/user/request_email_change_notification.html:1
 msgid ""
@@ -1438,6 +1438,9 @@ msgid ""
 "someone tried to change the email address for your user account. If this "
 "was you please visit the following link to confirm this change."
 msgstr ""
+"Liebe*r Nutzer*in der Arbeitszeitapp,\n"
+"\n"
+"jemand hat versucht, die E-Mail-Adresse für dein Nutzerkonto zu ändern. Falls das du warst, besuche bitte den folgenden Link, um diese Änderung zu bestätigen."
 
 #: arbeitszeit_flask/views/create_draft_view.py:39
 msgid "Draft successfully saved."
@@ -1470,7 +1473,7 @@ msgstr ""
 
 #: arbeitszeit_web/email/email_change_confirmation_presenter.py:24
 msgid "Email address change requested"
-msgstr ""
+msgstr "Änderung der E-Mail-Adresse angefordert"
 
 #: arbeitszeit_web/email/invite_worker_presenter.py:23
 msgid "Invitation from a company on Arbeitszeitapp"
@@ -1486,7 +1489,7 @@ msgstr "Bestätigung des Kontos"
 
 #: arbeitszeit_web/email/request_coordination_transfer_presenter.py:19
 msgid "You are asked to be the coordinator of a cooperation"
-msgstr ""
+msgstr "Du wirst angefragt, Koordinator*in einer Kooperation zu sein"
 
 #: arbeitszeit_web/email/request_coordination_transfer_presenter.py:23
 #, python-format
@@ -1494,7 +1497,7 @@ msgid ""
 "Hello %(candidate)s,<br>Your are asked to be the coordinator of the "
 "cooperation '%(cooperation)s'. Please follow this link to check the request"
 " in the Arbeitszeitapp: <a href='%(url)s'>LINK</a>."
-msgstr ""
+msgstr "Hallo %(candidate)s,<br>Du wirst angefragt, Koordinator*in der Kooperation '%(cooperation)s' zu sein. Bitte folge diesem Link, um die Anfrage in der Arbeitszeitapp zu prüfen: <a href='%(url)s'>LINK</a>."
 
 #: arbeitszeit_web/formatters/plan_details_formatter.py:49
 #: arbeitszeit_web/www/presenters/get_company_summary_presenter.py:114
@@ -1550,7 +1553,7 @@ msgstr "Du bist nicht mit dem korrekten Konto angemeldet."
 
 #: arbeitszeit_web/www/formfield_parsers.py:19
 msgid "Invalid UUID."
-msgstr ""
+msgstr "Ungültige UUID."
 
 #: arbeitszeit_web/www/formfield_parsers.py:44
 msgid "This is not an integer."
@@ -1576,19 +1579,19 @@ msgstr "Ungültige Kooperations-ID."
 msgid ""
 "Successfully accepted the request. You are now coordinator of the "
 "cooperation."
-msgstr ""
+msgstr "Anfrage erfolgreich angenommen. Du bist jetzt Koordinator*in der Kooperation."
 
 #: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:61
 msgid "Transfer request not found."
-msgstr ""
+msgstr "Übergabeanfrage nicht gefunden."
 
 #: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:68
 msgid "This request is not valid anymore."
-msgstr ""
+msgstr "Diese Anfrage ist nicht mehr gültig."
 
 #: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:75
 msgid "You are not the candidate of this request."
-msgstr ""
+msgstr "Du bist nicht der*die Kandidat*in dieser Anfrage."
 
 #: arbeitszeit_web/www/presenters/answer_company_work_invite_presenter.py:25
 #, python-format
@@ -1626,7 +1629,7 @@ msgstr "Interner Fehler: Koordinator nicht gefunden."
 
 #: arbeitszeit_web/www/presenters/create_draft_from_plan_presenter.py:24
 msgid "A new draft was created from an expired plan."
-msgstr ""
+msgstr "Ein neuer Entwurf wurde von einem abgelaufenen Plan erstellt."
 
 #: arbeitszeit_web/www/presenters/create_draft_presenter.py:61
 msgid "Plan draft successfully created"
@@ -1700,11 +1703,11 @@ msgstr "Verkauf flüssige Produktionsmittel"
 
 #: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:47
 msgid "Pending"
-msgstr ""
+msgstr "Ausstehend"
 
 #: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:49
 msgid "Closed"
-msgstr ""
+msgstr "Abgeschlossen"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:40
 #: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:51
@@ -1754,7 +1757,7 @@ msgstr "Arbeiter*in konnte nicht eingeladen werden."
 
 #: arbeitszeit_web/www/presenters/list_coordinations_of_cooperation_presenter.py:77
 msgid "Coordinators"
-msgstr ""
+msgstr "Koordinator*innen"
 
 #: arbeitszeit_web/www/presenters/log_in_accountant_presenter.py:27
 #: arbeitszeit_web/www/presenters/log_in_member_presenter.py:46
@@ -1909,39 +1912,39 @@ msgstr "Nur der Planersteller kann eine Kooperation anfragen."
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:38
 msgid "Request Coordination Transfer"
-msgstr ""
+msgstr "Koordinationsübergabe anfragen"
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:53
 msgid "The candidate is not a company."
-msgstr ""
+msgstr "Der*die Kandidat*in ist kein Betrieb."
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:61
 msgid "You are not the coordinator."
-msgstr ""
+msgstr "Du bist nicht der Koordinator."
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:69
 msgid "The candidate is already the coordinator."
-msgstr ""
+msgstr "Der Kandidat ist bereits der Koordinator."
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:77
 msgid "Request has not been sent. You have a pending transfer request."
-msgstr ""
+msgstr "Anfrage wurde nicht gesendet. Du hast eine ausstehende Übergabeanfrage."
 
 #: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:30
 msgid "The email address seems to be invalid or already taken."
-msgstr ""
+msgstr "Die E-Mail-Adresse scheint ungültig oder bereits vergeben zu sein."
 
 #: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:36
 msgid "Your request for an email address change was rejected."
-msgstr ""
+msgstr "Deine Anfrage, die E-Mail-Adresse zu ändern wurde abgelehnt."
 
 #: arbeitszeit_web/www/presenters/revoke_plan_filing_presenter.py:17
 msgid "Unexpected error: Not possible to revoke plan filing."
-msgstr ""
+msgstr "Unerwarteter Fehler: Nicht möglich, die Planeinreichung zu wiederrufen."
 
 #: arbeitszeit_web/www/presenters/revoke_plan_filing_presenter.py:23
 msgid "Filing of plan has been successfully revoked."
-msgstr ""
+msgstr "Planeinreichung wurde erfolgreich widerrufen."
 
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:51
 msgid "Payment"
