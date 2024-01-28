@@ -12,13 +12,13 @@ class AuthenticatedMemberTests(ViewTestCase):
         self.member = self.login_member()
 
     def test_get_404_when_coop_does_not_exist(self) -> None:
-        url = f"/member/cooperation_summary/{uuid4()}"
+        url = f"/user/cooperation_summary/{uuid4()}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
     def test_get_200_when_coop_exists(self) -> None:
         coop = self.coop_generator.create_cooperation()
-        url = f"/member/cooperation_summary/{coop}"
+        url = f"/user/cooperation_summary/{coop}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -30,13 +30,13 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self.company = self.login_company()
 
     def test_get_404_when_coop_does_not_exist(self) -> None:
-        url = f"/company/cooperation_summary/{uuid4()}"
+        url = f"/user/cooperation_summary/{uuid4()}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
     def test_get_200_when_coop_exists(self) -> None:
         coop = self.coop_generator.create_cooperation()
-        url = f"/company/cooperation_summary/{coop}"
+        url = f"/user/cooperation_summary/{coop}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -48,12 +48,12 @@ class AuthenticatedAccountantTests(ViewTestCase):
         self.accountant = self.login_accountant()
 
     def test_get_404_when_coop_does_not_exist(self) -> None:
-        url = f"/accountant/cooperation_summary/{uuid4()}"
+        url = f"/user/cooperation_summary/{uuid4()}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
     def test_get_200_when_coop_exists(self) -> None:
         coop = self.coop_generator.create_cooperation()
-        url = f"/accountant/cooperation_summary/{coop}"
+        url = f"/user/cooperation_summary/{coop}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

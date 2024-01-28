@@ -35,7 +35,7 @@ class GetCoordinationTransferRequestDetailsPresenter:
         return self.ViewModel(
             request_date=self.datetime_service.format_datetime(response.request_date),
             cooperation_url=self.url_index.get_coop_summary_url(
-                user_role=user_role, coop_id=response.cooperation_id
+                coop_id=response.cooperation_id
             ),
             cooperation_name=response.cooperation_name,
             candidate_url=self.url_index.get_company_summary_url(

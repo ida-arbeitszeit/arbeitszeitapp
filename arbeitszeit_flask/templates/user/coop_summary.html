@@ -1,4 +1,10 @@
-{% macro coop_summary(view_model) %}
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Cooperation") }}</div>
+{% endblock %}
+
+{% block content %}
 
 <div class="section has-text-centered">
     <h1 class="title">
@@ -96,4 +102,4 @@
     </div>
 </div>
 
-{% endmacro %}
+{% endblock %}
