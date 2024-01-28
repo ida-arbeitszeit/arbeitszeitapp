@@ -3,7 +3,6 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
-from arbeitszeit_web.session import Session
 
 from ...url_index import UrlIndex, UserUrlIndex
 
@@ -41,10 +40,8 @@ class GetCoopSummaryViewModel:
 class GetCoopSummarySuccessPresenter:
     user_url_index: UserUrlIndex
     url_index: UrlIndex
-    session: Session
 
     def present(self, response: GetCoopSummaryResponse) -> GetCoopSummaryViewModel:
-        user_role = self.session.get_user_role()
         return GetCoopSummaryViewModel(
             coop_id=str(response.coop_id),
             coop_name=response.coop_name,
@@ -60,7 +57,6 @@ class GetCoopSummarySuccessPresenter:
                 company_id=response.current_coordinator,
             ),
             list_of_coordinators_url=self.url_index.get_list_of_coordinators_url(
-                user_role=user_role,
                 cooperation_id=response.coop_id,
             ),
             coop_price="-"

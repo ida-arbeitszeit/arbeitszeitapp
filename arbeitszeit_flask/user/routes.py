@@ -18,6 +18,9 @@ from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
 from arbeitszeit_flask.views.coop_summary_view import CoopSummaryView
 from arbeitszeit_flask.views.get_statistics_view import GetStatisticsView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
+from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
+    ListCoordinationsOfCooperationView,
+)
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
@@ -119,4 +122,12 @@ class statistics(GetStatisticsView):
 @AuthenticatedUserRoute("/cooperation_summary/<uuid:coop_id>")
 @as_flask_view()
 class coop_summary(CoopSummaryView):
+    ...
+
+
+@AuthenticatedUserRoute(
+    "/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
+)
+@as_flask_view()
+class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView):
     ...

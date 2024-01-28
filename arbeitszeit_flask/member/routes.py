@@ -7,9 +7,6 @@ from flask_login import current_user
 
 from arbeitszeit import use_cases
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
-    ListCoordinationsOfCooperationUseCase,
-)
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
@@ -28,9 +25,6 @@ from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
 )
 from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
     GetPlanDetailsMemberMemberPresenter,
-)
-from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
-    ListCoordinationsOfCooperationPresenter,
 )
 
 from .blueprint import MemberRoute
@@ -104,24 +98,6 @@ class plan_details:
             )
         else:
             return http_404()
-
-
-@MemberRoute("/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"])
-@as_flask_view()
-@dataclass
-class list_coordinators_of_cooperation:
-    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase
-    presenter: ListCoordinationsOfCooperationPresenter
-
-    def GET(self, coop_id: UUID) -> Response:
-        use_case_response = self.list_coordinations_of_cooperation.list_coordinations(
-            ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
-        )
-        view_model = self.presenter.list_coordinations_of_cooperation(use_case_response)
-        return render_template(
-            "member/list_coordinators_of_cooperation.html",
-            view_model=view_model,
-        )
 
 
 @MemberRoute("/invite_details/<uuid:invite_id>", methods=["GET", "POST"])

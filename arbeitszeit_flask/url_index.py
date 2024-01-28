@@ -46,24 +46,10 @@ class GeneralUrlIndex:
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_user.coop_summary", coop_id=coop_id)
 
-    def get_list_of_coordinators_url(
-        self, user_role: Optional[UserRole], cooperation_id: UUID
-    ) -> str:
-        if user_role == UserRole.member:
-            return url_for(
-                "main_member.list_coordinators_of_cooperation", coop_id=cooperation_id
-            )
-        elif user_role == UserRole.company:
-            return url_for(
-                "main_company.list_coordinators_of_cooperation", coop_id=cooperation_id
-            )
-        elif user_role == UserRole.accountant:
-            return url_for(
-                "main_accountant.list_coordinators_of_cooperation",
-                coop_id=cooperation_id,
-            )
-        else:
-            raise ValueError(f"list of coordinators url not available for {user_role}")
+    def get_list_of_coordinators_url(self, cooperation_id: UUID) -> str:
+        return url_for(
+            "main_user.list_coordinators_of_cooperation", coop_id=cooperation_id
+        )
 
     def get_company_summary_url(self, company_id: UUID) -> str:
         return url_for("main_user.company_summary", company_id=company_id)

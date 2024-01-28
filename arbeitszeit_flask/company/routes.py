@@ -31,9 +31,6 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
 )
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
-    ListCoordinationsOfCooperationUseCase,
-)
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
     ListInboundCoopRequestsRequest,
@@ -109,9 +106,6 @@ from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
     ListAllCooperationsPresenter,
-)
-from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
-    ListCoordinationsOfCooperationPresenter,
 )
 from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
     RevokePlanFilingPresenter,
@@ -390,23 +384,6 @@ class request_coordination_transfer(RequestCoordinationTransferView):
 @as_flask_view()
 class show_coordination_transfer_request(ShowCoordinationTransferRequestView):
     ...
-
-
-@CompanyRoute(
-    "/company/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
-)
-def list_coordinators_of_cooperation(
-    coop_id: UUID,
-    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
-    presenter: ListCoordinationsOfCooperationPresenter,
-):
-    use_case_response = list_coordinations_of_cooperation.list_coordinations(
-        ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
-    )
-    view_model = presenter.list_coordinations_of_cooperation(use_case_response)
-    return render_template(
-        "company/list_coordinators_of_cooperation.html", view_model=view_model
-    )
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])

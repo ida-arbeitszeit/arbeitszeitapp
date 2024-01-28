@@ -174,7 +174,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.company, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -183,7 +183,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.member, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -192,7 +192,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_accountant()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.accountant, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
