@@ -33,9 +33,6 @@ from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
 from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
     GetPlanDetailsMemberMemberPresenter,
 )
-from arbeitszeit_web.www.presenters.get_statistics_presenter import (
-    GetStatisticsPresenter,
-)
 from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
     ListCoordinationsOfCooperationPresenter,
 )
@@ -88,21 +85,6 @@ class my_account:
                 "member/my_account.html",
                 view_model=view_model,
             )
-        )
-
-
-@MemberRoute("/statistics")
-@as_flask_view()
-@dataclass
-class statistics:
-    get_statistics: use_cases.get_statistics.GetStatistics
-    presenter: GetStatisticsPresenter
-
-    def GET(self) -> Response:
-        use_case_response = self.get_statistics()
-        view_model = self.presenter.present(use_case_response)
-        return FlaskResponse(
-            render_template("member/statistics.html", view_model=view_model)
         )
 
 

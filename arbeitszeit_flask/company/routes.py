@@ -110,9 +110,6 @@ from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
-from arbeitszeit_web.www.presenters.get_statistics_presenter import (
-    GetStatisticsPresenter,
-)
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
     ListAllCooperationsPresenter,
@@ -365,16 +362,6 @@ class register_hours_worked(RegisterHoursWorkedView):
 @as_flask_view()
 class register_productive_consumption(RegisterProductiveConsumptionView):
     ...
-
-
-@CompanyRoute("/company/statistics")
-def statistics(
-    get_statistics: use_cases.get_statistics.GetStatistics,
-    presenter: GetStatisticsPresenter,
-):
-    use_case_response = get_statistics()
-    view_model = presenter.present(use_case_response)
-    return render_template("company/statistics.html", view_model=view_model)
 
 
 @CompanyRoute("/company/plan_details/<uuid:plan_id>")
