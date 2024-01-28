@@ -26,7 +26,6 @@ from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounti
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
-from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
@@ -104,9 +103,6 @@ from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
-from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
-    ListAllCooperationsPresenter,
-)
 from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
     RevokePlanFilingPresenter,
 )
@@ -458,17 +454,6 @@ def my_cooperations(
         list_my_coop_plans_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
-
-
-@CompanyRoute("/company/list_all_cooperations")
-@commit_changes
-def list_all_cooperations(
-    use_case: ListAllCooperations,
-    presenter: ListAllCooperationsPresenter,
-):
-    response = use_case()
-    view_model = presenter.present(response)
-    return render_template("company/list_all_cooperations.html", view_model=view_model)
 
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])

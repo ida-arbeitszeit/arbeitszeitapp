@@ -18,6 +18,7 @@ from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
 from arbeitszeit_flask.views.coop_summary_view import CoopSummaryView
 from arbeitszeit_flask.views.get_statistics_view import GetStatisticsView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
+from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperationsView
 from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
     ListCoordinationsOfCooperationView,
 )
@@ -130,4 +131,10 @@ class coop_summary(CoopSummaryView):
 )
 @as_flask_view()
 class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView):
+    ...
+
+
+@AuthenticatedUserRoute("/list_all_cooperations")
+@as_flask_view()
+class list_all_cooperations(ListAllCooperationsView):
     ...
