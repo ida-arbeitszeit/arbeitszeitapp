@@ -4,6 +4,7 @@ from typing import Any, Optional
 from flask import Flask, session
 from flask_migrate import upgrade
 from flask_talisman import Talisman
+from jinja2 import StrictUndefined
 
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
@@ -50,6 +51,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     app = Flask(
         __name__, instance_relative_config=False, template_folder=template_folder
     )
+    app.jinja_env.undefined = StrictUndefined
 
     load_configuration(app=app, configuration=config)
 

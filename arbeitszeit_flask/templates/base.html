@@ -22,13 +22,13 @@
 </head>
 
 <body>
-  {% if session['user_type'] == 'company' %}
+  {% if session['user_type'] is defined and (session['user_type'] == 'company') %}
   {% set user_navigation = company_navigation %}
 
-  {% elif session['user_type'] == 'member' %}
+  {% elif session['user_type'] is defined and (session['user_type'] == 'member') %}
   {% set user_navigation = member_navigation %}
 
-  {% elif session['user_type'] == 'accountant' %}
+  {% elif session['user_type'] is defined and (session['user_type'] == 'accountant') %}
   {% set user_navigation = accountant_navigation %}
 
   {% else %}

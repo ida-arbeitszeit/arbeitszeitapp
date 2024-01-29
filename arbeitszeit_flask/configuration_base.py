@@ -24,3 +24,10 @@ FLASK_PROFILER = {
 
 RESTX_MASK_SWAGGER = False
 ARBEITSZEIT_PASSWORD_HASHER = "arbeitszeit_flask.password_hasher:PasswordHasherImpl"
+
+# swagger placeholders are necessary until fix of bug in flask-restx:
+# https://github.com/python-restx/flask-restx/issues/565
+SWAGGER_UI_OAUTH_CLIENT_ID = "placeholder"
+SWAGGER_VALIDATOR_URL = "placeholder"
+SWAGGER_UI_OAUTH_REALM = "placeholder"
+SWAGGER_UI_OAUTH_APP_NAME = "placeholder"

@@ -13,6 +13,7 @@ from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
+    ConsumptionGenerator,
     CooperationGenerator,
     CoordinationTransferRequestGenerator,
     EmailGenerator,
@@ -69,6 +70,7 @@ class ViewTestCase(FlaskTestCase):
         self.coordination_transfer_request_generator = self.injector.get(
             CoordinationTransferRequestGenerator
         )
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
 
     def login_member(
         self,
