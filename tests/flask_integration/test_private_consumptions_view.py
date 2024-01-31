@@ -1,7 +1,5 @@
 from typing import Optional
 
-import jinja2
-import pytest
 from parameterized import parameterized
 
 from tests.flask_integration.flask import LogInUser, ViewTestCase
@@ -30,11 +28,6 @@ class UserAccessTests(ViewTestCase):
             expected_code=expected_code,
         )
 
-    @pytest.mark.xfail(
-        raises=jinja2.exceptions.UndefinedError,
-        reason="expected to fail until resolution of issue #921",
-        strict=True,
-    )
     def test_logged_in_member_gets_200_after_consuming_something(self) -> None:
         member = self.login_member()
         self.consumption_generator.create_private_consumption(consumer=member)
