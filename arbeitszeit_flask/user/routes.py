@@ -8,16 +8,14 @@ from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
 )
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
-from arbeitszeit.use_cases.query_plans import QueryPlans
 from arbeitszeit.use_cases.request_email_address_change import (
     RequestEmailAddressChangeUseCase,
 )
-from arbeitszeit_flask.flask_request import FlaskRequest
-from arbeitszeit_flask.forms import PlanSearchForm, RequestEmailAddressChangeForm
+from arbeitszeit_flask.class_based_view import as_flask_view
+from arbeitszeit_flask.forms import RequestEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
-from arbeitszeit_flask.views import QueryPlansView
+from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
-from arbeitszeit_web.query_plans import QueryPlansController, QueryPlansPresenter
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
@@ -99,17 +97,12 @@ def change_email_address(token: str) -> Response:
 
 
 @AuthenticatedUserRoute("/query_plans", methods=["GET"])
-def query_plans(
-    query_plans: QueryPlans,
-    controller: QueryPlansController,
-    presenter: QueryPlansPresenter,
-) -> Response:
-    template_name = "user/query_plans.html"
-    search_form = PlanSearchForm(request.form)
-    view = QueryPlansView(
-        query_plans,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get(search_form, FlaskRequest())
+@as_flask_view()
+class query_plans(QueryPlansView):
+    ...
+
+
+@AuthenticatedUserRoute("/query_companies", methods=["GET"])
+@as_flask_view()
+class query_companies(QueryCompaniesView):
+    ...

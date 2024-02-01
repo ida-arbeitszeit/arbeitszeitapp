@@ -35,6 +35,7 @@ class FlaskConfiguration(dict):
                 "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
                 "MAIL_BACKEND": "flask_mail",
                 "LANGUAGES": {"en": "English", "de": "Deutsch"},
+                "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",
             }
         )
 
@@ -82,6 +83,10 @@ class SqliteModule(Module):
 def get_dependency_injector(
     additional_modules: Optional[List[Module]] = None,
 ) -> Injector:
+    # Please be aware that the get_dependency_injector function is only called
+    # from the testing side. The app itself is used with its default dependency
+    # injector. Influencing the dependency injector used by the app is
+    # currently only possible via configuration options.
     modules: List[Module] = [
         FlaskModule(),
         TestingModule(),

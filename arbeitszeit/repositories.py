@@ -556,6 +556,9 @@ class AccountCredentialsUpdate(DatabaseUpdate, Protocol):
     def change_email_address(self, new_email_address: str) -> Self:
         ...
 
+    def change_password_hash(self, new_password_hash: str) -> Self:
+        ...
+
 
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:

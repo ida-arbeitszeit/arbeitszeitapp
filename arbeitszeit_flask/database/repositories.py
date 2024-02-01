@@ -1603,6 +1603,47 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
             mapper=mapper,
         )
 
+    def update(self) -> AccountCredentialsUpdate:
+        return AccountCredentialsUpdate(db=self.db, query=self.query)
+
+
+@dataclass
+class AccountCredentialsUpdate:
+    db: SQLAlchemy
+    query: Any
+    new_address: Optional[str] = None
+    password_hash: Optional[str] = None
+
+    def change_email_address(self, new_email_address: str) -> Self:
+        return replace(
+            self,
+            new_address=new_email_address,
+        )
+
+    def change_password_hash(self, new_password_hash: str) -> Self:
+        return replace(
+            self,
+            password_hash=new_password_hash,
+        )
+
+    def perform(self) -> int:
+        new_values = dict()
+        if self.new_address is not None:
+            new_values["email_address"] = self.new_address
+        if self.password_hash:
+            new_values["password"] = self.password_hash
+        if not new_values:
+            return 0
+        sql_statement = (
+            update(models.User)
+            .where(
+                models.User.id.in_(self.query.with_entities(models.User.id).subquery())
+            )
+            .values(**new_values)
+            .execution_options(synchronize_session="fetch")
+        )
+        return self.db.session.execute(sql_statement).rowcount
+
 
 @dataclass
 class AccountingRepository:

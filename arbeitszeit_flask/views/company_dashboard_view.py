@@ -18,7 +18,7 @@ class CompanyDashboardView:
     get_company_dashboard_presenter: GetCompanyDashboardPresenter
     flask_session: FlaskSession
 
-    def respond_to_get(self) -> Response:
+    def GET(self) -> Response:
         current_user = self.flask_session.get_current_user()
         assert current_user
         try:

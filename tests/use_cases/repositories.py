@@ -1481,6 +1481,12 @@ class AccountCredentialsUpdate:
 
         return replace(self, actions=self.actions + [_change_action])
 
+    def change_password_hash(self, new_password_hash: str) -> Self:
+        def _change_action(db: MockDatabase, item: records.AccountCredentials) -> None:
+            item.password_hash = new_password_hash
+
+        return replace(self, actions=self.actions + [_change_action])
+
 
 @singleton
 class FakeLanguageRepository:

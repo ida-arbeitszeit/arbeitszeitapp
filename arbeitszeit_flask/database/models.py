@@ -16,7 +16,7 @@ def generate_uuid() -> str:
 
 class User(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(300), nullable=False)
     email_address = db.Column(
         db.ForeignKey("email.address"), nullable=False, unique=True
     )

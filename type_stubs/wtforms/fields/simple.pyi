@@ -45,3 +45,6 @@ class URLField(StringField):
 
 class EmailField(StringField):
     widget: Incomplete
+
+class ColorField(StringField):
+    widget: Incomplete

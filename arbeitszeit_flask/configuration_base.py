@@ -23,3 +23,4 @@ FLASK_PROFILER = {
 }
 
 RESTX_MASK_SWAGGER = False
+ARBEITSZEIT_PASSWORD_HASHER = "arbeitszeit_flask.password_hasher:PasswordHasherImpl"

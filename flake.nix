@@ -11,7 +11,7 @@
   outputs =
     { self, nixpkgs, flake-utils, flask-profiler, nixos-23-05, nixos-23-11 }:
     let
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
         let
           pkgs = import nixpkgs {

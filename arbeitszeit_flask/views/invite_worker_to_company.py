@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from flask import Response, flash, render_template
+from flask import Response, flash, render_template, request
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
@@ -26,10 +26,13 @@ class InviteWorkerToCompanyView:
     post_request_handler: InviteWorkerPostRequestHandler
     get_request_handler: InviteWorkerGetRequestHandler
 
-    def respond_to_get(self, form: InviteWorkerToCompanyForm) -> Response:
+    def GET(self) -> Response:
+        form = InviteWorkerToCompanyForm(request.form)
         return self.get_request_handler.respond_to_get(form)
 
-    def respond_to_post(self, form: InviteWorkerToCompanyForm) -> Response:
+    @commit_changes
+    def POST(self) -> Response:
+        form = InviteWorkerToCompanyForm(request.form)
         return self.post_request_handler.respond_to_post(form)
 
 
@@ -59,7 +62,6 @@ class InviteWorkerPostRequestHandler:
     presenter: InviteWorkerToCompanyPresenter
     controller: InviteWorkerToCompanyController
 
-    @commit_changes
     def respond_to_post(self, form: InviteWorkerToCompanyForm) -> Response:
         template_name = "company/invite_worker_to_company.html"
         if not form.validate():
