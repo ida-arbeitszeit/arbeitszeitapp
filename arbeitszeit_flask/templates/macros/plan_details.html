@@ -148,6 +148,19 @@
                             {% endif %}
                         </p>
                     </div>
+                    {% if view_model.details.type_of_plan[1] == 'Public' %} <span>
+                        <div class="tile is-child notification has-background-warning-light">
+                            <p class="title is-4">{{ view_model.details.labor_per_unit[0] }}</p>
+                            <p class="subtitle">{{ view_model.details.labor_per_unit[1] }}
+                                {% if view_model.details.labor_per_unit[2] %} <span>
+                                    <a href="{{ view_model.details.labor_per_unit[3] }}">
+                                        <i class="fas fa-hands-helping"></i></a>
+                                </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </span>
+                    {% endif %}
                 </div>
                 <div class="tile is-parent">
                     <article class="tile is-child notification">
