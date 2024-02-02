@@ -369,6 +369,79 @@ we override. This includes specifically ``setUp`` and
 Note how the order of the super() call in ``setUp`` and ``tearDown``
 is flipped.
 
+HTTP Routing
+------------
+
+The ``arbeitszeitapp`` webserver processes incoming requests using
+specific functions designed for different types of requests. For
+example, there's a special handler for authentication requests when a
+member logs in, and another for viewing a company's accounts. Each of
+these request handlers corresponds to a specific use case in a
+one-to-one relationship. While there may be exceptions in our
+codebase, we consider them as legacy code that should be updated to
+align with a one-to-one relationship between use cases and request
+handlers.
+
+We group these individual request handlers based on their
+authorization requirements. For instance, request handlers that only
+allow companies to access are grouped together, while those requiring
+the user to be authenticated as an accountant are placed in a
+different group. To organize this, we use `Flask blueprints`_, which
+are structured in direct subdirectories of the ``arbeitszeit_flask``
+directory in our codebase.
+
+Request handling
+----------------
+
+A request handler manages incoming HTTP requests and generates HTTP
+responses for users. Request handlers deal with all requests directed
+to a specific URI path. This means that a request handler handles
+different types of requests, like ``GET`` or ``POST``.
+
+In the ``arbeitszeitapp``, request handlers fall into two categories
+based on their structure: function-based and class-based. Consider
+function-based handlers as outdated, and avoid using them for new
+implementations. This document focuses on explaining class-based
+handlers.
+
+For a class-based request handler, you need one method for each HTTP
+method to be handled. Here's an example for a handler managing
+``GET``, ``POST``, and ``DELETE`` requests::
+
+    from arbeitszeit_flask.types import Response
+
+    class MyRequestHandler:
+        def GET(self) -> Response:
+            return "Hi from GET method"
+
+        def POST(self) -> Response:
+            return "Hi from POST method"
+
+        def DELETE(self) -> Response:
+            return "Hi from DELETE method"
+
+Ensure that the return type of each method is a valid response. Check
+the type definition of ``Response`` for details on valid response types.
+
+Having methods like ``GET`` and ``POST`` in a class describes the
+abilities of a request handler. Whether specific methods are allowed
+for a given path depends on the routing logic. Depending on the HTTP
+routing, a handler might need to accept extra arguments. For example,
+consider the `URI path pattern`_ ``/member/<uuid:member_id>``. A
+handler for this path must accept a ``member_id`` argument of type
+``UUID`` for any of the allowed methods::
+
+    from arbeitszeit_flask.types import Response
+
+    class MyRequestHandler:
+        def GET(self, member_id: UUID) -> Response:
+            return f"Returning member info for member {member_id}"
+
+        def POST(self, member_id: UUID) -> Response:
+            return f"Updating member info for member {member_id}"
+
+        def DELETE(self, member_id: UUID) -> Response:
+            return f"Deleting member account for member {member_id}"
 
 Configuration of the web server
 --------------------------------
@@ -474,3 +547,5 @@ configuration options are available
 
 
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
+.. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/
+.. _URI path pattern: https://flask.palletsprojects.com/en/latest/api/#url-route-registrations
