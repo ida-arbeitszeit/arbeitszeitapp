@@ -39,6 +39,8 @@ class PriceCalculator:
 
 
 def calculate_individual_price(plan: records.Plan) -> Decimal:
+    if plan.is_public_service:
+        return Decimal(0)
     return plan.production_costs.total_cost() / plan.prd_amount
 
 
