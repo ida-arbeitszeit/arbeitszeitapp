@@ -30,8 +30,6 @@ class GetCoordinationTransferRequestDetailsPresenter:
     def present(self, response: UseCase.Response) -> ViewModel:
         current_user = self.session.get_current_user()
         assert current_user
-        user_role = self.session.get_user_role()
-        assert user_role
         return self.ViewModel(
             request_date=self.datetime_service.format_datetime(response.request_date),
             cooperation_url=self.url_index.get_coop_summary_url(
