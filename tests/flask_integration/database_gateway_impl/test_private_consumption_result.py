@@ -121,14 +121,24 @@ class PrivateConsumptionTests(FlaskTestCase):
             .joined_with_transactions_and_plan()
         )
 
-    def test_can_filter_consumptions_by_providing_company(self) -> None:
+    def test_exclude_consumptions_of_products_from_other_providers_when_filtering_by_providing_company(
+        self,
+    ) -> None:
         provider = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=provider)
         self.consumption_generator.create_private_consumption(plan=plan.id)
         consumptions = self.database_gateway.get_private_consumptions()
-        assert consumptions.where_provider_is_company(provider)
         assert not consumptions.where_provider_is_company(other_company)
+
+    def test_that_consumptions_of_products_from_provider_are_included_when_filtering_by_providing_company(
+        self,
+    ) -> None:
+        provider = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=provider)
+        self.consumption_generator.create_private_consumption(plan=plan.id)
+        consumptions = self.database_gateway.get_private_consumptions()
+        assert consumptions.where_provider_is_company(provider)
 
     def test_can_retrieve_plan_and_transaction_and_consumer_with_consumption(
         self,
