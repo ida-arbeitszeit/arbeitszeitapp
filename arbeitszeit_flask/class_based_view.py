@@ -19,10 +19,6 @@ class as_flask_view:
             injector = create_dependency_injector()
             view = injector.get(view_class)
             dispatched_method = getattr(view, request.method, _not_implemented_view)
-            return injector.call_with_injection(
-                dispatched_method,
-                args=args,
-                kwargs=kwargs,
-            )
+            return dispatched_method(*args, **kwargs)
 
         return wrapper

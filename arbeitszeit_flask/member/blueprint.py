@@ -26,11 +26,7 @@ class MemberRoute:
             redirect_url = authenticator.redirect_user_to_member_login()
             if redirect_url:
                 return redirect(redirect_url)
-            return injector.call_with_injection(
-                view_function,
-                args=args,
-                kwargs=kwargs,
-            )
+            return view_function(*args, **kwargs)
 
         main_member.route(self.route_string, methods=self.methods)(_wrapper)
         # We return the original view_function to mimic the behavior
