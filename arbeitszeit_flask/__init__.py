@@ -51,7 +51,6 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     app = Flask(
         __name__, instance_relative_config=False, template_folder=template_folder
     )
-    app.jinja_env.undefined = StrictUndefined
 
     load_configuration(app=app, configuration=config)
 
@@ -62,8 +61,10 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     # view without being logged in.
     login_manager.login_view = "auth.start"
 
-    # Init Flask-Talisman
-    if not app.config["DEBUG"]:
+    if app.config["DEBUG"]:
+        app.jinja_env.undefined = StrictUndefined
+    else:
+        # Init Flask-Talisman
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(
             app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
