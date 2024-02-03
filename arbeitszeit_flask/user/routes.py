@@ -15,7 +15,13 @@ from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.forms import RequestEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
+from arbeitszeit_flask.views.coop_summary_view import CoopSummaryView
+from arbeitszeit_flask.views.get_statistics_view import GetStatisticsView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
+from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperationsView
+from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
+    ListCoordinationsOfCooperationView,
+)
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
@@ -105,4 +111,30 @@ class query_plans(QueryPlansView):
 @AuthenticatedUserRoute("/query_companies", methods=["GET"])
 @as_flask_view()
 class query_companies(QueryCompaniesView):
+    ...
+
+
+@AuthenticatedUserRoute("/statistics")
+@as_flask_view()
+class statistics(GetStatisticsView):
+    ...
+
+
+@AuthenticatedUserRoute("/cooperation_summary/<uuid:coop_id>")
+@as_flask_view()
+class coop_summary(CoopSummaryView):
+    ...
+
+
+@AuthenticatedUserRoute(
+    "/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
+)
+@as_flask_view()
+class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView):
+    ...
+
+
+@AuthenticatedUserRoute("/list_all_cooperations")
+@as_flask_view()
+class list_all_cooperations(ListAllCooperationsView):
     ...

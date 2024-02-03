@@ -194,9 +194,7 @@ class NavbarItemsTests(BaseTestCase):
         navbar_items = self.presenter.create_navbar_items(cooperation_id)
         self.assertEqual(
             navbar_items[0].url,
-            self.url_index.get_coop_summary_url(
-                coop_id=cooperation_id, user_role=self.session.get_user_role()
-            ),
+            self.url_index.get_coop_summary_url(coop_id=cooperation_id),
         )
 
     def test_second_navbar_item_has_correct_text(self) -> None:

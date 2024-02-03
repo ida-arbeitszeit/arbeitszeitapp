@@ -6,7 +6,6 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase as UseCase,
 )
-from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -31,7 +30,6 @@ class ListCoordinationsOfCooperationPresenter:
 
     url_index: UrlIndex
     datetime_service: DatetimeService
-    session: Session
     translator: Translator
 
     def list_coordinations_of_cooperation(
@@ -40,7 +38,6 @@ class ListCoordinationsOfCooperationPresenter:
         return self.ViewModel(
             cooperation_url=self.url_index.get_coop_summary_url(
                 coop_id=response.cooperation_id,
-                user_role=self.session.get_user_role(),
             ),
             cooperation_name=response.cooperation_name,
             has_coordinations=len(response.coordinations) > 0,
@@ -70,7 +67,6 @@ class ListCoordinationsOfCooperationPresenter:
                     text=self.translator.gettext("Cooperation"),
                     url=self.url_index.get_coop_summary_url(
                         coop_id=response.cooperation_id,
-                        user_role=self.session.get_user_role(),
                     ),
                 ),
                 NavbarItem(

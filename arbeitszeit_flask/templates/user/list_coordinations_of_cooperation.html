@@ -1,4 +1,11 @@
-{% macro list_coordinations_of_cooperation(view_model) %}
+{% extends "base.html" %}
+
+{% block navbar_start %}
+{% from 'macros/navbar.html' import navbar %}
+{{ navbar(view_model.navbar_items) }}
+{% endblock %}
+
+{% block content %}
 
 <div class="section has-text-centered">
     <div class="content">
@@ -42,4 +49,4 @@
     {% endif %}
 </div>
 
-{% endmacro %}
+{% endblock %}

@@ -31,14 +31,10 @@ class UrlIndex(Protocol):
     def get_company_summary_url(self, company_id: UUID) -> str:
         ...
 
-    def get_coop_summary_url(
-        self, *, user_role: Optional[UserRole], coop_id: UUID
-    ) -> str:
+    def get_coop_summary_url(self, *, coop_id: UUID) -> str:
         ...
 
-    def get_list_of_coordinators_url(
-        self, *, user_role: Optional[UserRole], cooperation_id: UUID
-    ) -> str:
+    def get_list_of_coordinators_url(self, *, cooperation_id: UUID) -> str:
         ...
 
     def get_company_dashboard_url(self) -> str:

@@ -31,7 +31,7 @@ class GetDetailsPresenterTests(BaseTestCase):
         cooperation_id = uuid4()
         response = self.get_use_case_response(cooperation_id=cooperation_id)
         expected_cooperation_url = self.url_index.get_coop_summary_url(
-            user_role=user_role, coop_id=cooperation_id
+            coop_id=cooperation_id
         )
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.cooperation_url, expected_cooperation_url)

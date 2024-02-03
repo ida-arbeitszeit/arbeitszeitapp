@@ -188,6 +188,68 @@ class ProductiveConsumptionResultTests(FlaskTestCase):
             for _, _, provider in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_provider()
         ] == [provider]
 
+    def test_that_consumptions_joined_with_transaction_and_plan_and_consumer_yields_at_least_one_result_if_there_exists_one_resource_consumption(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        assert (
+            self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
+        )
+
+    def test_joining_with_transaction_and_plan_and_consumer_yields_same_transaction_as_when_just_joining_with_transaction(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        assert [
+            transaction
+            for _, transaction, _, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
+        ] == [
+            transaction
+            for _, transaction in self.database_gateway.get_productive_consumptions().joined_with_transaction()
+        ]
+
+    def test_joining_with_transaction_and_plan_and_consumer_yields_same_consumption_as_when_not_joining(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        assert [
+            consumption
+            for consumption, _, _, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
+        ] == list(self.database_gateway.get_productive_consumptions())
+
+    def test_joining_with_transaction_and_plan_and_consumer_yields_same_plan_as_when_just_joining_with_transaction_and_plan(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        assert [
+            plan
+            for _, _, plan, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
+        ] == [
+            plan
+            for _, _, plan in self.database_gateway.get_productive_consumptions().joined_with_transactions_and_plan()
+        ]
+
+    def test_joining_with_transaction_and_plan_and_consumer_yields_original_consumer(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=consumer
+        )
+        assert [
+            consumer.id
+            for _, _, _, consumer in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
+        ] == [consumer]
+
+
+class FilterWhereProviderIsCompanyTests(FlaskTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
+        self.consumption_generator = self.injector.get(ConsumptionGenerator)
+        self.plan_generator = self.injector.get(PlanGenerator)
+        self.company_generator = self.injector.get(CompanyGenerator)
+
     def test_no_consumption_is_returned_when_queried_providing_company_does_not_exist(
         self,
     ) -> None:
@@ -240,56 +302,3 @@ class ProductiveConsumptionResultTests(FlaskTestCase):
             provider
         )
         assert len(result) == 1
-
-    def test_that_consumptions_can_be_joined_with_transaction_and_plan_and_consumer(
-        self,
-    ) -> None:
-        self.consumption_generator.create_resource_consumption_by_company()
-        assert (
-            self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
-        )
-
-    def test_joining_with_transaction_and_plan_and_consumer_yields_same_transaction_as_when_just_joining_with_transaction(
-        self,
-    ) -> None:
-        self.consumption_generator.create_resource_consumption_by_company()
-        assert [
-            transaction
-            for _, transaction, _, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
-        ] == [
-            transaction
-            for _, transaction in self.database_gateway.get_productive_consumptions().joined_with_transaction()
-        ]
-
-    def test_joining_with_transaction_and_plan_and_consumer_yields_same_consumption_as_when_not_joining(
-        self,
-    ) -> None:
-        self.consumption_generator.create_resource_consumption_by_company()
-        assert [
-            consumption
-            for consumption, _, _, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
-        ] == list(self.database_gateway.get_productive_consumptions())
-
-    def test_joining_with_transaction_and_plan_and_consumer_yields_same_plan_as_when_just_joining_with_transaction_and_plan(
-        self,
-    ) -> None:
-        self.consumption_generator.create_resource_consumption_by_company()
-        assert [
-            plan
-            for _, _, plan, _ in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
-        ] == [
-            plan
-            for _, _, plan in self.database_gateway.get_productive_consumptions().joined_with_transactions_and_plan()
-        ]
-
-    def test_joining_with_transaction_and_plan_and_consumer_yields_original_consumer(
-        self,
-    ) -> None:
-        consumer = self.company_generator.create_company()
-        self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer
-        )
-        assert [
-            consumer.id
-            for _, _, _, consumer in self.database_gateway.get_productive_consumptions().joined_with_transaction_and_plan_and_consumer()
-        ] == [consumer]

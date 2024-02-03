@@ -26,9 +26,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
 
     def test_presenter_shows_correct_cooperation_url(self) -> None:
         expected_cooperation = uuid4()
-        expected_url = self.url_index.get_coop_summary_url(
-            coop_id=expected_cooperation, user_role=self.session.get_user_role()
-        )
+        expected_url = self.url_index.get_coop_summary_url(coop_id=expected_cooperation)
         response = self.get_use_case_response_with_one_coordination(
             cooperation_id=expected_cooperation
         )
@@ -135,7 +133,6 @@ class ListCoordinationsPresenterTests(BaseTestCase):
             view_model.navbar_items[0].url,
             self.url_index.get_coop_summary_url(
                 coop_id=response.cooperation_id,
-                user_role=self.session.get_user_role(),
             ),
         )
         self.assertEqual(
