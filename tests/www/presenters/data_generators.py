@@ -131,6 +131,7 @@ class PlanDetailsGenerator:
         resources_cost: Optional[Decimal] = None,
         labour_cost: Optional[Decimal] = None,
         is_public_service: Optional[bool] = None,
+        labour_cost_per_unit: Optional[Decimal] = None,
         price_per_unit: Optional[Decimal] = None,
         is_available: Optional[bool] = None,
         is_cooperating: Optional[bool] = None,
@@ -167,6 +168,8 @@ class PlanDetailsGenerator:
             labour_cost = Decimal(3)
         if is_public_service is None:
             is_public_service = False
+        if labour_cost_per_unit is None:
+            labour_cost_per_unit = Decimal("0.875")
         if price_per_unit is None:
             price_per_unit = Decimal("0.061")
         if is_available is None:
@@ -192,6 +195,7 @@ class PlanDetailsGenerator:
             labour_cost=labour_cost,
             is_public_service=is_public_service,
             price_per_unit=price_per_unit,
+            labour_cost_per_unit=labour_cost_per_unit,
             is_available=is_available,
             is_cooperating=is_cooperating,
             cooperation=cooperation,
