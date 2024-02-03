@@ -11,5 +11,4 @@ class RegisterMemberController:
             email=form.email_field.get_value(),
             name=form.name_field.get_value(),
             password=form.password_field.get_value(),
-            repeat_password=form.repeat_password_field.get_value(),
         )
