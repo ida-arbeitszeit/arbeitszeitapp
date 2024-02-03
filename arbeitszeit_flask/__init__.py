@@ -4,6 +4,7 @@ from typing import Any, Optional
 from flask import Flask, session
 from flask_migrate import upgrade
 from flask_talisman import Talisman
+from jinja2 import StrictUndefined
 
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
@@ -60,8 +61,10 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     # view without being logged in.
     login_manager.login_view = "auth.start"
 
-    # Init Flask-Talisman
-    if not app.config["DEBUG"]:
+    if app.config["DEBUG"]:
+        app.jinja_env.undefined = StrictUndefined
+    else:
+        # Init Flask-Talisman
         csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
         Talisman(
             app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
