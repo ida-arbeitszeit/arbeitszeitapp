@@ -107,7 +107,7 @@ class PlanDetailsFormatter:
                 self.translator.gettext("Labour (per unit)"),
                 self._format_price(plan_details.labour_cost_per_unit)
                 if plan_details.is_public_service
-                else None
+                else None,
             ),
             availability_string=(
                 self.translator.gettext("Product currently available"),
