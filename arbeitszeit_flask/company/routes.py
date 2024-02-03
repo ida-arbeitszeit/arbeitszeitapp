@@ -67,6 +67,9 @@ from arbeitszeit_flask.views.register_productive_consumption import (
 from arbeitszeit_flask.views.request_coordination_transfer_view import (
     RequestCoordinationTransferView,
 )
+from arbeitszeit_flask.views.review_registered_consumptions_view import (
+    ReviewRegisteredConsumptionsView,
+)
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
@@ -465,4 +468,10 @@ class invite_worker_to_company(InviteWorkerToCompanyView):
 @CompanyRoute("/company/end_cooperation")
 @as_flask_view()
 class end_cooperation(EndCooperationView):
+    ...
+
+
+@CompanyRoute("/company/review_registered_consumptions")
+@as_flask_view()
+class review_registered_consumptions(ReviewRegisteredConsumptionsView):
     ...

@@ -4,7 +4,7 @@ from math import isclose
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.review_registered_consumptions import (
-    RewiewRegisteredConsumptionsUseCase as UseCase,
+    ReviewRegisteredConsumptionsUseCase as UseCase,
 )
 from tests.use_cases.base_test_case import BaseTestCase
 
