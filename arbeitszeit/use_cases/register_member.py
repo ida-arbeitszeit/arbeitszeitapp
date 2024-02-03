@@ -38,6 +38,7 @@ class RegisterMemberUseCase:
         email: str
         name: str
         password: str
+        repeat_password: str
 
     def register_member(self, request: Request) -> Response:
         try:

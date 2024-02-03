@@ -120,9 +120,11 @@ class RegisterForm(Form):
                 message=trans.lazy_gettext(
                     "The password must be at least 8 characters in length"
                 ),
-            )
+            ),
+            validators.EqualTo("repeat_password", message="Passwords must match"),
         ],
     )
+    repeat_password = PasswordField("Repeat Password")
 
     @property
     def email_field(self) -> WtFormField[str]:
@@ -131,6 +133,10 @@ class RegisterForm(Form):
     @property
     def password_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="password")
+
+    @property
+    def repeat_password_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="repeat_password")
 
     @property
     def name_field(self) -> WtFormField[str]:
