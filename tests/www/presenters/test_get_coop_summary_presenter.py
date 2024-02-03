@@ -9,7 +9,6 @@ from arbeitszeit.use_cases.get_coop_summary import (
     AssociatedPlan,
     GetCoopSummaryResponse,
 )
-from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
     GetCoopSummarySuccessPresenter,
 )
@@ -101,7 +100,6 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
             view_model.list_of_coordinators_url,
             self.url_index.get_list_of_coordinators_url(
                 cooperation_id=coop_summary.coop_id,
-                user_role=UserRole.company,
             ),
         )
 

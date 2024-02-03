@@ -105,7 +105,7 @@ class ExpectationsTestCase(BaseTestCase):
         assert response_before_sale
         self.consumption_generator.create_fixed_means_consumption(
             consumer=consumer,
-            plan=plan.id,
+            plan=plan,
             amount=1,
         )
         response_after_sale = self.get_company_summary(planner)

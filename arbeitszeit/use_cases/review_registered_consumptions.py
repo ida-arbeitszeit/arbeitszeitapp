@@ -18,7 +18,7 @@ class RegisteredConsumption:
 
 
 @dataclass
-class RewiewRegisteredConsumptionsUseCase:
+class ReviewRegisteredConsumptionsUseCase:
     @dataclass
     class Request:
         providing_company: UUID

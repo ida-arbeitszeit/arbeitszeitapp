@@ -28,6 +28,12 @@ class UserAccessTests(ViewTestCase):
             expected_code=expected_code,
         )
 
+    def test_logged_in_member_gets_200_after_consuming_something(self) -> None:
+        member = self.login_member()
+        self.consumption_generator.create_private_consumption(consumer=member)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
 
 class AnonymousUserTest(ViewTestCase):
     def setUp(self) -> None:

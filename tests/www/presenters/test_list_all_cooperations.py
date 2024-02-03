@@ -5,7 +5,6 @@ from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperationsResponse,
     ListedCooperation,
 )
-from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
     ListAllCooperationsPresenter,
 )
@@ -47,9 +46,7 @@ class ListMessagesPresenterTests(BaseTestCase):
 
     def test_correct_coop_summary_url_is_displayed_in_view_model(self) -> None:
         coop_id = uuid4()
-        expected_url = self.url_index.get_coop_summary_url(
-            coop_id=coop_id, user_role=UserRole.company
-        )
+        expected_url = self.url_index.get_coop_summary_url(coop_id=coop_id)
         view_model = self.presenter.present(
             self._create_response_with_one_cooperation(coop_id=coop_id)
         )

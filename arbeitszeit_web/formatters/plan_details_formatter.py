@@ -4,7 +4,6 @@ from typing import List, Optional, Tuple
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_details import PlanDetails
-from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -37,10 +36,8 @@ class PlanDetailsFormatter:
     url_index: UrlIndex
     translator: Translator
     datetime_service: DatetimeService
-    session: Session
 
     def format_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
-        user_role = self.session.get_user_role()
         return PlanDetailsWeb(
             plan_id=(self.translator.gettext("Plan ID"), str(plan_details.plan_id)),
             activity_string=(
@@ -97,9 +94,7 @@ class PlanDetailsFormatter:
                 self.translator.gettext("Price (per unit)"),
                 self._format_price(plan_details.price_per_unit),
                 plan_details.is_cooperating,
-                self.url_index.get_coop_summary_url(
-                    user_role=user_role, coop_id=plan_details.cooperation
-                )
+                self.url_index.get_coop_summary_url(coop_id=plan_details.cooperation)
                 if plan_details.cooperation
                 else None,
             ),

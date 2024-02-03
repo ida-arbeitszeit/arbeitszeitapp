@@ -32,7 +32,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     def test_that_creating_draft_from_existing_plan_for_existing_company_is_not_rejected(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(approved=True).id
+        plan = self.plan_generator.create_plan(approved=True)
         company = self.company_generator.create_company()
         response = self.use_case.create_draft_from_plan(
             request=use_case.Request(
@@ -45,7 +45,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     def test_creating_draft_from_existing_plan_for_non_existing_company_produces_rejection_response(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(approved=True).id
+        plan = self.plan_generator.create_plan(approved=True)
         response = self.use_case.create_draft_from_plan(
             request=use_case.Request(
                 plan=plan,
@@ -57,7 +57,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     def test_that_company_has_an_additional_draft_after_succesful_request(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(approved=True).id
+        plan = self.plan_generator.create_plan(approved=True)
         company = self.company_generator.create_company()
         drafts_before_request = self.count_drafts_for_company(company)
         self.use_case.create_draft_from_plan(
@@ -89,7 +89,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(
             approved=True, product_name=expected_name
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.product_name == expected_name
 
@@ -99,7 +99,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(
             approved=True, description=expected_description
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.description == expected_description
 
@@ -114,7 +114,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
                 labour_cost=Decimal(0),
                 resource_cost=Decimal(0),
             ),
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.means_cost == expected_cost
 
@@ -129,7 +129,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
                 means_cost=Decimal(0),
                 resource_cost=Decimal(0),
             ),
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.labour_cost == expected_cost
 
@@ -144,7 +144,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
                 means_cost=Decimal(0),
                 labour_cost=Decimal(0),
             ),
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.resources_cost == expected_cost
 
@@ -154,7 +154,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(
             approved=True, production_unit=expected_unit
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.production_unit == expected_unit
 
@@ -162,7 +162,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     def test_that_newly_created_draft_has_same_amount_as_pre_existing_plan(
         self, expected_amount: int
     ) -> None:
-        plan = self.plan_generator.create_plan(approved=True, amount=expected_amount).id
+        plan = self.plan_generator.create_plan(approved=True, amount=expected_amount)
         summary = self.create_draft_and_get_details(plan)
         assert summary.amount == expected_amount
 
@@ -172,7 +172,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(
             approved=True, timeframe=expected_timeframe
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.timeframe == expected_timeframe
 
@@ -182,7 +182,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
     ) -> None:
         plan = self.plan_generator.create_plan(
             approved=True, is_public_service=expected_is_public
-        ).id
+        )
         summary = self.create_draft_and_get_details(plan)
         assert summary.is_public_service == expected_is_public
 
@@ -191,7 +191,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
         self, expected_timestamp: datetime
     ) -> None:
         self.datetime_service.freeze_time(expected_timestamp - timedelta(days=1))
-        plan = self.plan_generator.create_plan(approved=True).id
+        plan = self.plan_generator.create_plan(approved=True)
         self.datetime_service.freeze_time(expected_timestamp)
         company = self.company_generator.create_company()
         response = self.use_case.create_draft_from_plan(

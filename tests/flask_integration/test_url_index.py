@@ -114,7 +114,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_details_url(UserRole.company, plan.id)
+        url = self.url_index.get_plan_details_url(UserRole.company, plan)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -123,7 +123,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_plan_details_url(UserRole.member, plan.id)
+        url = self.url_index.get_plan_details_url(UserRole.member, plan)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -147,7 +147,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.company, coop)
+        url = self.url_index.get_coop_summary_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -156,7 +156,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.member, coop)
+        url = self.url_index.get_coop_summary_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -165,7 +165,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_accountant()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_coop_summary_url(UserRole.accountant, coop)
+        url = self.url_index.get_coop_summary_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -174,7 +174,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.company, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -183,7 +183,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_member()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.member, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -192,7 +192,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_accountant()
         coop = self.cooperation_generator.create_cooperation()
-        url = self.url_index.get_list_of_coordinators_url(UserRole.accountant, coop)
+        url = self.url_index.get_list_of_coordinators_url(coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -297,7 +297,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_toggle_availability_url(plan.id)
+        url = self.url_index.get_toggle_availability_url(plan)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
@@ -317,7 +317,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         coop = self.cooperation_generator.create_cooperation(
             coordinator=company, plans=[plan]
         )
-        url = self.url_index.get_end_coop_url(plan.id, coop)
+        url = self.url_index.get_end_coop_url(plan, coop)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
@@ -380,7 +380,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_renew_plan_url(plan.id)
+        url = self.url_index.get_renew_plan_url(plan)
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
 
@@ -389,7 +389,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     ) -> None:
         self.login_company()
         plan = self.plan_generator.create_plan()
-        url = self.url_index.get_hide_plan_url(plan.id)
+        url = self.url_index.get_hide_plan_url(plan)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 

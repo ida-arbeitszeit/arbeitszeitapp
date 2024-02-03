@@ -28,15 +28,13 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
 
     def test_reject_registration_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        sender = self.company_generator.create_company_record()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.freeze_time(datetime(2001, 1, 1))
         consumption_type = ConsumptionType.means_of_prod
         pieces = 5
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, pieces, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.plan_is_not_active
@@ -48,9 +46,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         plan = self.plan_generator.create_plan()
         consumption_type = ConsumptionType.consumption
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, 5, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender.id, plan, 5, consumption_type)
         )
         assert response.is_rejected
         assert (
@@ -63,9 +59,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         plan = self.plan_generator.create_plan(is_public_service=True)
         consumption_type = ConsumptionType.means_of_prod
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, 5, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender.id, plan, 5, consumption_type)
         )
         assert response.is_rejected
         assert (
@@ -78,7 +72,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=sender)
         consumption_type = ConsumptionType.means_of_prod
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(sender, plan.id, 5, consumption_type)
+            RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.consumer_is_planner
@@ -90,12 +84,10 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         pieces = 5
 
         self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender, plan.id, pieces, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
-        price_total = pieces * self.price_checker.get_unit_price(plan.id)
+        price_total = pieces * self.price_checker.get_unit_price(plan)
         assert (
             self.balance_checker.get_company_account_balances(sender).p_account
             == -price_total
@@ -108,12 +100,10 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         pieces = 5
 
         self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender, plan.id, pieces, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
-        price_total = pieces * self.price_checker.get_unit_price(plan.id)
+        price_total = pieces * self.price_checker.get_unit_price(plan)
         assert (
             self.balance_checker.get_company_account_balances(sender).r_account
             == -price_total
@@ -121,6 +111,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
 
     def test_balance_of_seller_increased(self) -> None:
         sender = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
@@ -128,19 +119,18 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
                 resource_cost=Decimal(1),
             ),
             amount=5,
+            planner=planner,
         )
         consumption_type = ConsumptionType.raw_materials
         pieces = 5
         assert self.balance_checker.get_company_account_balances(
-            plan.planner
+            planner
         ).prd_account == Decimal("-3")
         self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender, plan.id, pieces, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert self.balance_checker.get_company_account_balances(
-            plan.planner
+            planner
         ).prd_account == Decimal("0")
 
     def test_balance_of_seller_increased_correctly_when_plan_is_in_cooperation(
@@ -148,22 +138,22 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
     ) -> None:
         coop = self.cooperation_generator.create_cooperation()
         sender = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(amount=50, cooperation=coop)
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            amount=50, cooperation=coop, planner=planner
+        )
         self.plan_generator.create_plan(amount=200, cooperation=coop)
         consumption_type = ConsumptionType.raw_materials
         pieces = 5
         balance_before_transaction = self.balance_checker.get_company_account_balances(
-            plan.planner
+            planner
         ).prd_account
         self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender, plan.id, pieces, consumption_type
-            )
+            RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert (
-            self.balance_checker.get_company_account_balances(plan.planner).prd_account
-            == balance_before_transaction
-            + self.price_checker.get_unit_cost(plan.id) * 5
+            self.balance_checker.get_company_account_balances(planner).prd_account
+            == balance_before_transaction + self.price_checker.get_unit_cost(plan) * 5
         )
 
     def test_that_unit_cost_for_cooperating_plans_only_considers_non_expired_plans(
@@ -194,7 +184,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             sender
         ).r_account
         self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(sender, plan.id, 1, consumption_type)
+            RegisterProductiveConsumptionRequest(sender, plan, 1, consumption_type)
         )
         assert self.balance_checker.get_company_account_balances(
             sender
@@ -204,16 +194,17 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         self,
     ) -> None:
         sender = self.company_generator.create_company_record()
-        plan = self.plan_generator.create_plan()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
         consumption_type = ConsumptionType.means_of_prod
         pieces = 5
         transactions_before_payment = len(self.mock_database.get_transactions())
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, pieces, consumption_type
+                sender.id, plan, pieces, consumption_type
             )
         )
-        price_total = pieces * self.price_checker.get_unit_price(plan.id)
+        price_total = pieces * self.price_checker.get_unit_price(plan)
         assert (
             len(self.mock_database.get_transactions())
             == transactions_before_payment + 1
@@ -225,24 +216,23 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         )
         assert latest_transaction
         assert latest_transaction.sending_account == sender.means_account
-        assert latest_transaction.receiving_account == self.get_product_account(
-            plan.planner
-        )
+        assert latest_transaction.receiving_account == self.get_product_account(planner)
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
 
     def test_correct_transaction_added_if_raw_materials_were_consumed(self) -> None:
         sender = self.company_generator.create_company_record()
-        plan = self.plan_generator.create_plan()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
         consumption_type = ConsumptionType.raw_materials
         pieces = 5
         transactions_before_payment = len(self.mock_database.get_transactions())
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, pieces, consumption_type
+                sender.id, plan, pieces, consumption_type
             )
         )
-        price_total = pieces * self.price_checker.get_unit_price(plan.id)
+        price_total = pieces * self.price_checker.get_unit_price(plan)
         assert (
             len(self.mock_database.get_transactions())
             == transactions_before_payment + 1
@@ -254,9 +244,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         )
         assert latest_transaction
         assert latest_transaction.sending_account == sender.raw_material_account
-        assert latest_transaction.receiving_account == self.get_product_account(
-            plan.planner
-        )
+        assert latest_transaction.receiving_account == self.get_product_account(planner)
         assert latest_transaction.amount_sent == price_total
         assert latest_transaction.amount_received == price_total
 
@@ -269,15 +257,15 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         pieces = 5
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, pieces, consumption_type
+                sender.id, plan, pieces, consumption_type
             )
         )
         consumptions = list(self.query_company_consumptions(sender.id))
         assert len(consumptions) == 1
         latest_consumption = consumptions[0]
-        assert latest_consumption.plan_id == plan.id
+        assert latest_consumption.plan_id == plan
         assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
-            plan.id
+            plan
         )
         assert latest_consumption.amount == pieces
         assert latest_consumption.consumption_type == ConsumptionType.means_of_prod
@@ -289,15 +277,15 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         pieces = 5
         self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
-                sender.id, plan.id, pieces, consumption_type
+                sender.id, plan, pieces, consumption_type
             )
         )
         consumptions = list(self.query_company_consumptions(sender.id))
         assert len(consumptions) == 1
         latest_consumption = consumptions[0]
-        assert latest_consumption.plan_id == plan.id
+        assert latest_consumption.plan_id == plan
         assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
-            plan.id
+            plan
         )
         assert latest_consumption.amount == pieces
         assert latest_consumption.consumption_type == ConsumptionType.raw_materials
@@ -321,7 +309,7 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         response = self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
                 consumer=consumer.id,
-                plan=plan.id,
+                plan=plan,
                 amount=1,
                 consumption_type=ConsumptionType.means_of_prod,
             )
@@ -353,7 +341,7 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         self.response = self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
                 consumer=self.consumer.id,
-                plan=self.plan.id,
+                plan=self.plan,
                 amount=1,
                 consumption_type=ConsumptionType.means_of_prod,
             )

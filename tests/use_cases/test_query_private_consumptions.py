@@ -21,7 +21,7 @@ class TestQueryPrivateConsumptions(BaseTestCase):
         assert not response.consumptions
 
     def test_that_correct_consumptions_are_returned(self) -> None:
-        expected_plan = self.plan_generator.create_plan().id
+        expected_plan = self.plan_generator.create_plan()
         member = self.member_generator.create_member()
         self.consumption_generator.create_private_consumption(
             consumer=member, plan=expected_plan
@@ -34,8 +34,8 @@ class TestQueryPrivateConsumptions(BaseTestCase):
 
     def test_that_consumptions_are_returned_in_correct_order(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        first_plan = self.plan_generator.create_plan().id
-        second_plan = self.plan_generator.create_plan().id
+        first_plan = self.plan_generator.create_plan()
+        second_plan = self.plan_generator.create_plan()
         member = self.member_generator.create_member()
         self.consumption_generator.create_private_consumption(
             consumer=member, plan=first_plan

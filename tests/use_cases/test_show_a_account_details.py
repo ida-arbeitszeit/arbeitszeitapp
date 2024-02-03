@@ -42,7 +42,7 @@ class UseCaseTester(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=company)
         response = self.show_a_account_details(company)
         transactions_before_consumption = len(response.transactions)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.show_a_account_details(company)
         assert len(response.transactions) == transactions_before_consumption
 
@@ -51,7 +51,7 @@ class UseCaseTester(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=company)
         response = self.show_a_account_details(company)
         transactions_before_consumption = len(response.transactions)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.show_a_account_details(company)
         assert len(response.transactions) == transactions_before_consumption
 

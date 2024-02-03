@@ -1,6 +1,6 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from arbeitszeit.records import Company, Plan
+from arbeitszeit.records import Company
 from arbeitszeit.use_cases.list_active_plans_of_company import (
     ListActivePlansOfCompany,
     ListPlansResponse,
@@ -10,13 +10,8 @@ from tests.data_generators import CompanyGenerator, PlanGenerator
 from .dependency_injection import injection_test
 
 
-def plan_in_results(plan: Plan, response: ListPlansResponse) -> bool:
-    return any(
-        (
-            plan.id == result.id and plan.prd_name == result.prd_name
-            for result in response.plans
-        )
-    )
+def plan_in_results(plan: UUID, response: ListPlansResponse) -> bool:
+    return any((plan == result.id for result in response.plans))
 
 
 @injection_test
@@ -44,7 +39,7 @@ def test_list_plans_response_includes_single_plan(
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan: Plan = plan_generator.create_plan(planner=company)
+    plan = plan_generator.create_plan(planner=company)
     response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan, response)
 
@@ -56,7 +51,7 @@ def test_list_plans_response_includes_multiple_plans(
     plan_generator: PlanGenerator,
 ):
     company = company_generator.create_company()
-    plan1: Plan = plan_generator.create_plan(planner=company)
-    plan2: Plan = plan_generator.create_plan(planner=company)
+    plan1 = plan_generator.create_plan(planner=company)
+    plan2 = plan_generator.create_plan(planner=company)
     response: ListPlansResponse = list_plans(company_id=company)
     assert plan_in_results(plan1, response) and plan_in_results(plan2, response)

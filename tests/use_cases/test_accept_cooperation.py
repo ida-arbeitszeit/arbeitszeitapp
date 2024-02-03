@@ -34,7 +34,7 @@ class AcceptCooperationTests(BaseTestCase):
         requester = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan()
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=uuid4()
+            requester_id=requester.id, plan_id=plan, cooperation_id=uuid4()
         )
         response = self.accept_cooperation(request)
         assert response.is_rejected
@@ -50,7 +50,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(cooperation=cooperation1)
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation2
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation2
         )
         response = self.accept_cooperation(request)
         assert response.is_rejected
@@ -65,7 +65,7 @@ class AcceptCooperationTests(BaseTestCase):
             coordinator=requester
         )
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
         response = self.accept_cooperation(request)
         assert response.is_rejected
@@ -80,7 +80,7 @@ class AcceptCooperationTests(BaseTestCase):
             coordinator=requester
         )
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
         response = self.accept_cooperation(request)
         assert response.is_rejected
@@ -99,7 +99,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
         response = self.accept_cooperation(request)
         assert response.is_rejected
@@ -115,7 +115,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
         response = self.accept_cooperation(request)
         assert not response.is_rejected
@@ -127,11 +127,11 @@ class AcceptCooperationTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
         response = self.accept_cooperation(request)
         assert not response.is_rejected
-        self.assert_plan_in_cooperation(plan.id, cooperation)
+        self.assert_plan_in_cooperation(plan, cooperation)
 
     def test_two_cooperating_plans_have_same_prices(self) -> None:
         requester = self.company_generator.create_company_record()
@@ -147,16 +147,16 @@ class AcceptCooperationTests(BaseTestCase):
             requested_cooperation=cooperation,
         )
         request1 = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan1.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan1, cooperation_id=cooperation
         )
         request2 = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan2.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan2, cooperation_id=cooperation
         )
         self.accept_cooperation(request1)
         self.accept_cooperation(request2)
         assert self.price_checker.get_unit_price(
-            plan1.id
-        ) == self.price_checker.get_unit_price(plan2.id)
+            plan1
+        ) == self.price_checker.get_unit_price(plan2)
 
     def test_price_of_cooperating_plans_is_correctly_calculated(self) -> None:
         requester = self.company_generator.create_company_record()
@@ -174,17 +174,17 @@ class AcceptCooperationTests(BaseTestCase):
             requested_cooperation=cooperation,
         )
         request1 = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan1.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan1, cooperation_id=cooperation
         )
         request2 = AcceptCooperationRequest(
-            requester_id=requester.id, plan_id=plan2.id, cooperation_id=cooperation
+            requester_id=requester.id, plan_id=plan2, cooperation_id=cooperation
         )
         self.accept_cooperation(request1)
         self.accept_cooperation(request2)
         # In total costs of 30h and 20 units -> price should be 1.5h per unit
         assert (
-            self.price_checker.get_unit_price(plan1.id)
-            == self.price_checker.get_unit_price(plan2.id)
+            self.price_checker.get_unit_price(plan1)
+            == self.price_checker.get_unit_price(plan2)
             == Decimal("1.5")
         )
 
@@ -195,7 +195,7 @@ class AcceptCooperationTests(BaseTestCase):
         )
         plan = self.plan_generator.create_plan(requested_cooperation=cooperation)
         request = AcceptCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         self.accept_cooperation(request)
         response = self.accept_cooperation(request)
@@ -211,7 +211,7 @@ class AcceptCooperationTests(BaseTestCase):
             requested_cooperation=cooperation, timeframe=1
         )
         request = AcceptCooperationRequest(
-            requester_id=requester, plan_id=plan.id, cooperation_id=cooperation
+            requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         self.datetime_service.advance_time(timedelta(days=2))
         response = self.accept_cooperation(request)

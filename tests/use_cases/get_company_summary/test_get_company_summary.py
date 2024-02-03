@@ -104,9 +104,9 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 2))
         response = self.get_company_summary(company)
         assert response
-        assert response.plan_details[0].id == third.id
-        assert response.plan_details[1].id == second.id
-        assert response.plan_details[2].id == first.id
+        assert response.plan_details[0].id == third
+        assert response.plan_details[1].id == second
+        assert response.plan_details[2].id == first
 
     def test_returns_correct_sales_volume_of_zero_if_plan_is_public(self) -> None:
         company = self.company_generator.create_company()
@@ -156,10 +156,10 @@ class UseCaseTests(BaseTestCase):
         plan1 = self.plan_generator.create_plan(planner=seller.id)
         plan2 = self.plan_generator.create_plan(planner=seller.id)
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=plan1.id
+            consumer=consumer.id, plan=plan1
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=plan2.id
+            consumer=consumer.id, plan=plan2
         )
         response = self.get_company_summary(consumer.id)
         assert response
@@ -183,7 +183,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_correct_supplier_id_is_shown(self) -> None:
         consumer = self.company_generator.create_company_record()
         supplier = self.company_generator.create_company_record()
-        offered_plan = self.plan_generator.create_plan(planner=supplier.id).id
+        offered_plan = self.plan_generator.create_plan(planner=supplier.id)
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=offered_plan
         )
@@ -197,7 +197,7 @@ class UseCaseTests(BaseTestCase):
         supplier = self.company_generator.create_company_record(name=supplier_name)
         offered_plan = self.plan_generator.create_plan(planner=supplier.id)
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=offered_plan.id
+            consumer=consumer.id, plan=offered_plan
         )
         response = self.get_company_summary(consumer.id)
         assert response
@@ -216,7 +216,7 @@ class UseCaseTests(BaseTestCase):
         )
         company = self.company_generator.create_company_record()
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=company.id, plan=plan.id, amount=1
+            consumer=company.id, plan=plan, amount=1
         )
         response = self.get_company_summary(company.id)
         assert response
@@ -238,10 +238,10 @@ class UseCaseTests(BaseTestCase):
             amount=1,
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=plan1.id, amount=1
+            consumer=consumer.id, plan=plan1, amount=1
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=plan2.id, amount=1
+            consumer=consumer.id, plan=plan2, amount=1
         )
         response = self.get_company_summary(consumer.id)
         assert response
@@ -251,32 +251,26 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         consumer = self.company_generator.create_company_record()
-        top_supplier_plan = self.plan_generator.create_plan()
-        medium_supplier_plan = self.plan_generator.create_plan()
-        low_supplier_plan = self.plan_generator.create_plan()
+        top_supplier = self.company_generator.create_company()
+        top_supplier_plan = self.plan_generator.create_plan(planner=top_supplier)
+        medium_supplier = self.company_generator.create_company()
+        medium_supplier_plan = self.plan_generator.create_plan(planner=medium_supplier)
+        low_supplier = self.company_generator.create_company()
+        low_supplier_plan = self.plan_generator.create_plan(planner=low_supplier)
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, amount=1, plan=low_supplier_plan.id
+            consumer=consumer.id, amount=1, plan=low_supplier_plan
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, amount=20, plan=top_supplier_plan.id
+            consumer=consumer.id, amount=20, plan=top_supplier_plan
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, amount=10, plan=medium_supplier_plan.id
+            consumer=consumer.id, amount=10, plan=medium_supplier_plan
         )
         response = self.get_company_summary(consumer.id)
         assert response
-        assert (
-            response.suppliers_ordered_by_volume[0].company_id
-            == top_supplier_plan.planner
-        )
-        assert (
-            response.suppliers_ordered_by_volume[1].company_id
-            == medium_supplier_plan.planner
-        )
-        assert (
-            response.suppliers_ordered_by_volume[2].company_id
-            == low_supplier_plan.planner
-        )
+        assert response.suppliers_ordered_by_volume[0].company_id == top_supplier
+        assert response.suppliers_ordered_by_volume[1].company_id == medium_supplier
+        assert response.suppliers_ordered_by_volume[2].company_id == low_supplier
 
     def test_that_correct_volumes_of_sale_of_suppliers_are_calculated_after_two_consumptions_from_different_suppliers(
         self,
@@ -291,11 +285,11 @@ class UseCaseTests(BaseTestCase):
             amount=1,
         )
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=consumer.id, plan=plan1.id, amount=1
+            consumer=consumer.id, plan=plan1, amount=1
         )
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id,
-            plan=plan2.id,
+            plan=plan2,
             amount=1,
         )
         response = self.get_company_summary(consumer.id)
