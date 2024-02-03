@@ -137,9 +137,6 @@ class GeneralUrlIndex:
             type_of_consumption=type_string,
         )
 
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.toggle_availability", plan_id=plan_id)
-
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return url_for(
             "main_company.end_cooperation",

@@ -37,24 +37,6 @@ class PlanResultTests(FlaskTestCase):
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
 
-    def test_that_availability_is_toggled_to_false(self) -> None:
-        plan = self.plan_generator.create_plan(is_available=True)
-        self.database_gateway.get_plans().with_id(
-            plan
-        ).update().toggle_product_availability().perform()
-        plan_from_repo = self.database_gateway.get_plans().with_id(plan).first()
-        assert plan_from_repo
-        assert plan_from_repo.is_available == False
-
-    def test_that_availability_is_toggled_to_true(self) -> None:
-        plan = self.plan_generator.create_plan(is_available=False)
-        self.database_gateway.get_plans().with_id(
-            plan
-        ).update().toggle_product_availability().perform()
-        plan_from_repo = self.database_gateway.get_plans().with_id(plan).first()
-        assert plan_from_repo
-        assert plan_from_repo.is_available == True
-
     def test_create_plan_propagates_specified_arguments_to_created_plan(self) -> None:
         expected_planner = self.company_generator.create_company()
         plan = self.database_gateway.create_plan(

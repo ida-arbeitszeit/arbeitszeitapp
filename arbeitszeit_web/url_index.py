@@ -89,9 +89,6 @@ class UrlIndex(Protocol):
     ) -> str:
         ...
 
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        ...
-
     def get_end_coop_url(self, *, plan_id: UUID, cooperation_id: UUID) -> str:
         ...
 

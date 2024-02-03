@@ -292,15 +292,6 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_toggle_availability_url_for_existing_plan_leads_to_functional_url(
-        self,
-    ) -> None:
-        self.login_company()
-        plan = self.plan_generator.create_plan()
-        url = self.url_index.get_toggle_availability_url(plan)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-
     def test_request_coop_url_leads_to_functional_url(
         self,
     ) -> None:

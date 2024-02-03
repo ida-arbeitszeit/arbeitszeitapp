@@ -18,7 +18,6 @@ class ActivePlansRow:
     activation_date: str
     expiration_date: str
     expiration_relative: str
-    is_available: bool
     is_cooperating: bool
     is_public_service: bool
 
@@ -126,7 +125,6 @@ class ShowMyPlansPresenter:
                     expiration_relative=self._format_days_until_expiration(
                         plan.expiration_date
                     ),
-                    is_available=plan.is_available,
                     is_cooperating=plan.is_cooperating,
                     is_public_service=plan.is_public_service,
                 )

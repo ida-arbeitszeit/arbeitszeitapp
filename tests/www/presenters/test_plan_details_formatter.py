@@ -202,19 +202,6 @@ class PlanDetailsFormatterTests(BaseTestCase):
             ),
         )
 
-    def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_details = self.plan_details_generator.create_plan_details(
-            is_available=True
-        )
-        web_details = self.formatter.format_plan_details(plan_details)
-        self.assertTupleEqual(
-            web_details.availability_string,
-            (
-                self.translator.gettext("Product currently available"),
-                self.translator.gettext("Yes"),
-            ),
-        )
-
     def test_active_days_is_displayed_correctly_as_string(self):
         web_details = self.formatter.format_plan_details(self.plan_details)
         self.assertEqual(
