@@ -23,17 +23,12 @@ from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperationResponse,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
-from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
-)
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
-    ListCoordinationsOfCooperationUseCase,
 )
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
@@ -104,22 +99,10 @@ from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
-from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
-    GetCoopSummarySuccessPresenter,
-)
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
-from arbeitszeit_web.www.presenters.get_statistics_presenter import (
-    GetStatisticsPresenter,
-)
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
-from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
-    ListAllCooperationsPresenter,
-)
-from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
-    ListCoordinationsOfCooperationPresenter,
-)
 from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
     RevokePlanFilingPresenter,
 )
@@ -367,16 +350,6 @@ class register_productive_consumption(RegisterProductiveConsumptionView):
     ...
 
 
-@CompanyRoute("/company/statistics")
-def statistics(
-    get_statistics: use_cases.get_statistics.GetStatistics,
-    presenter: GetStatisticsPresenter,
-):
-    use_case_response = get_statistics()
-    view_model = presenter.present(use_case_response)
-    return render_template("company/statistics.html", view_model=view_model)
-
-
 @CompanyRoute("/company/plan_details/<uuid:plan_id>")
 def plan_details(
     plan_id: UUID,
@@ -389,24 +362,6 @@ def plan_details(
         return http_404()
     view_model = presenter.present(use_case_response)
     return render_template("company/plan_details.html", view_model=view_model.to_dict())
-
-
-@CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
-def coop_summary(
-    coop_id: UUID,
-    get_coop_summary: GetCoopSummary,
-    presenter: GetCoopSummarySuccessPresenter,
-):
-    use_case_response = get_coop_summary(
-        GetCoopSummaryRequest(UUID(current_user.id), coop_id)
-    )
-    if use_case_response:
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/coop_summary.html", view_model=view_model.to_dict()
-        )
-    else:
-        return http_404()
 
 
 @CompanyRoute(
@@ -425,23 +380,6 @@ class request_coordination_transfer(RequestCoordinationTransferView):
 @as_flask_view()
 class show_coordination_transfer_request(ShowCoordinationTransferRequestView):
     ...
-
-
-@CompanyRoute(
-    "/company/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
-)
-def list_coordinators_of_cooperation(
-    coop_id: UUID,
-    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
-    presenter: ListCoordinationsOfCooperationPresenter,
-):
-    use_case_response = list_coordinations_of_cooperation.list_coordinations(
-        ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
-    )
-    view_model = presenter.list_coordinations_of_cooperation(use_case_response)
-    return render_template(
-        "company/list_coordinators_of_cooperation.html", view_model=view_model
-    )
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
@@ -516,17 +454,6 @@ def my_cooperations(
         list_my_coop_plans_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
-
-
-@CompanyRoute("/company/list_all_cooperations")
-@commit_changes
-def list_all_cooperations(
-    use_case: ListAllCooperations,
-    presenter: ListAllCooperationsPresenter,
-):
-    response = use_case()
-    view_model = presenter.present(response)
-    return render_template("company/list_all_cooperations.html", view_model=view_model)
 
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])

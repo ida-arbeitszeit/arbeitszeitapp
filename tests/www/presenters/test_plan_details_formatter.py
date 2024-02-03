@@ -2,7 +2,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit_web.formatters.plan_details_formatter import PlanDetailsFormatter
-from arbeitszeit_web.session import UserRole
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
@@ -199,9 +198,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
                 self.translator.gettext("Price (per unit)"),
                 "0.06",
                 True,
-                self.url_index.get_coop_summary_url(
-                    user_role=UserRole.company, coop_id=COOP_ID
-                ),
+                self.url_index.get_coop_summary_url(coop_id=COOP_ID),
             ),
         )
 

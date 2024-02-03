@@ -1,4 +1,10 @@
-{% macro statistics(view_model) %}
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Global statistics") }}</div>
+{% endblock %}
+
+{% block content %}
 
 <div class="section">
     <div class="has-text-centered">
@@ -87,4 +93,4 @@
     </div>
 </div>
 
-{% endmacro %}
+{% endblock %}

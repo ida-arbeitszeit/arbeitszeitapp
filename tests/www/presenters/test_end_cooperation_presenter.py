@@ -68,9 +68,7 @@ class PresenterTests(BaseTestCase):
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
-            self.url_index.get_coop_summary_url(
-                coop_id=coop_id, user_role=UserRole.company
-            ),
+            self.url_index.get_coop_summary_url(coop_id=coop_id),
         )
 
     def test_plan_details_url_gets_returned_when_plan_details_url_was_referer(

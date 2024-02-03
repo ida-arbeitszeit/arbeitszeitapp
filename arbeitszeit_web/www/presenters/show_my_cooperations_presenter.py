@@ -173,9 +173,7 @@ class ShowMyCooperationsPresenter:
             coop_name=coop.name,
             coop_definition=coop.definition.splitlines(),
             count_plans_in_coop=str(coop.count_plans_in_coop),
-            coop_summary_url=self.url_index.get_coop_summary_url(
-                user_role=UserRole.company, coop_id=coop.id
-            ),
+            coop_summary_url=self.url_index.get_coop_summary_url(coop_id=coop.id),
         )
 
     def _display_inbound_coop_requests(
@@ -217,9 +215,7 @@ class ShowMyCooperationsPresenter:
                 user_role=UserRole.company, plan_id=plan.plan_id
             ),
             coop_name=plan.coop_name,
-            coop_url=self.url_index.get_coop_summary_url(
-                user_role=UserRole.company, coop_id=plan.coop_id
-            ),
+            coop_url=self.url_index.get_coop_summary_url(coop_id=plan.coop_id),
         )
 
     def _accept_message_info(
