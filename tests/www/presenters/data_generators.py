@@ -28,6 +28,7 @@ class QueriedPlanGenerator:
         description: Optional[str] = None,
         activation_date: Optional[datetime] = None,
         price_per_unit: Optional[Decimal] = None,
+        labour_cost_per_unit: Optional[Decimal] = None,
     ) -> QueriedPlan:
         if plan_id is None:
             plan_id = uuid4()
@@ -41,6 +42,8 @@ class QueriedPlanGenerator:
             activation_date = datetime.now()
         if price_per_unit is None:
             price_per_unit = Decimal(5)
+        if labour_cost_per_unit is None:
+            labour_cost_per_unit = Decimal(1)
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",
@@ -48,6 +51,7 @@ class QueriedPlanGenerator:
             product_name="Bread",
             description=description,
             price_per_unit=price_per_unit,
+            labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=False,
             is_available=True,
             is_cooperating=is_cooperating,
