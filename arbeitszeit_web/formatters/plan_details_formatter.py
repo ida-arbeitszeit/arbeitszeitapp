@@ -25,6 +25,7 @@ class PlanDetailsWeb:
     labour_cost: Tuple[str, str]
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str, bool, Optional[str]]
+    labour_cost_per_unit: Optional[Tuple[str, str]]
     availability_string: Tuple[str, str]
     creation_date: str
     approval_date: str
@@ -101,6 +102,12 @@ class PlanDetailsFormatter:
                 )
                 if plan_details.cooperation
                 else None,
+            ),
+            labour_cost_per_unit=(
+                self.translator.gettext("Labour (per unit)"),
+                self._format_price(plan_details.labour_cost_per_unit)
+                if plan_details.is_public_service
+                else None
             ),
             availability_string=(
                 self.translator.gettext("Product currently available"),
