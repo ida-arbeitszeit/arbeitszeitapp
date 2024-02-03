@@ -165,9 +165,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
     def hide(self) -> Self:
         ...
 
-    def toggle_product_availability(self) -> Self:
-        ...
-
 
 class PlanDraftResult(QueryResult[records.PlanDraft], Protocol):
     def with_id(self, id_: UUID) -> Self:

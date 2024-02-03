@@ -433,15 +433,6 @@ class PlanUpdate:
             ),
         )
 
-    def toggle_product_availability(self) -> Self:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                is_available=func.not_(models.Plan.is_available),
-            ),
-        )
-
     def hide(self) -> Self:
         return replace(
             self,
@@ -1931,7 +1922,6 @@ class DatabaseGatewayImpl:
             if plan.requested_cooperation
             else None,
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
-            is_available=plan.is_available,
             hidden_by_user=plan.hidden_by_user,
         )
 

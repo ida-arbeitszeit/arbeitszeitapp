@@ -363,12 +363,6 @@ class PlanUpdate:
 
         return self._add_update(update)
 
-    def toggle_product_availability(self) -> Self:
-        def update(plan: records.Plan) -> None:
-            plan.is_available = not plan.is_available
-
-        return self._add_update(update)
-
     def perform(self) -> int:
         items_affected = 0
         for item in self.items():
@@ -1620,7 +1614,6 @@ class MockDatabase:
             approval_date=None,
             requested_cooperation=None,
             cooperation=None,
-            is_available=True,
             hidden_by_user=False,
         )
         self.plans[plan.id] = plan

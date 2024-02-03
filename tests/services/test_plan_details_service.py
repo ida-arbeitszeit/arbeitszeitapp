@@ -140,12 +140,6 @@ class PlanDetailsServiceTests(TestCase):
         assert details
         self.assertTrue(details.is_public_service)
 
-    def test_that_correct_availability_is_shown(self) -> None:
-        plan = self.plan_generator.create_plan(is_available=True)
-        details = self.service.get_details_from_plan(plan)
-        assert details
-        self.assertTrue(details.is_available)
-
     def test_that_no_cooperation_is_shown_when_plan_is_not_cooperating(self) -> None:
         plan = self.plan_generator.create_plan(cooperation=None)
         details = self.service.get_details_from_plan(plan)

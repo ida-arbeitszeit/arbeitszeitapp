@@ -57,9 +57,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertFalse(presentation.show_non_active_plans)
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self) -> None:
-        plan = self.plan_generator.create_plan_record(
-            cooperation=None, is_available=True
-        )
+        plan = self.plan_generator.create_plan_record(cooperation=None)
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
@@ -77,10 +75,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             presentation.active_plans.rows[0].is_public_service, plan.is_public_service
         )
         self.assertEqual(
-            presentation.active_plans.rows[0].is_available,
-            True,
-        )
-        self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
             False,
         )
@@ -90,9 +84,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan_record(
-            cooperation=coop, is_available=True
-        )
+        plan = self.plan_generator.create_plan_record(cooperation=coop)
         RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
         self.assertEqual(
@@ -234,7 +226,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             plan_creation_date=plan.plan_creation_date,
             activation_date=plan.activation_date,
             expiration_date=plan.expiration_date,
-            is_available=plan.is_available,
             is_cooperating=bool(plan.cooperation),
             cooperation=plan.cooperation,
         )
@@ -248,7 +239,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             plan_creation_date=plan.creation_date,
             activation_date=None,
             expiration_date=None,
-            is_available=False,
             is_cooperating=False,
             cooperation=None,
         )
