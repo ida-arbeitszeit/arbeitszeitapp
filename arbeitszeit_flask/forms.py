@@ -124,7 +124,7 @@ class RegisterForm(Form):
             validators.EqualTo("repeat_password", message="Passwords must match"),
         ],
     )
-    repeat_password = PasswordField("Repeat Password")
+    repeat_password = PasswordField(trans.lazy_gettext("Repeat Password"))
 
     @property
     def email_field(self) -> WtFormField[str]:
