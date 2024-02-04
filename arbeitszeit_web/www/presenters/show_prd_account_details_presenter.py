@@ -6,8 +6,7 @@ from typing import List
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import (
-    PeerTypes,
-    ShowPRDAccountDetailsUseCase,
+    ShowPRDAccountDetailsUseCase as UseCase,
 )
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -21,8 +20,8 @@ class ShowPRDAccountDetailsPresenter:
         date: str
         transaction_volume: str
         purpose: str
-        peer_name: str | None
-        peer_type_icon: str | None
+        peer_name: str
+        peer_type_icon: str
 
     @dataclass
     class ViewModel:
@@ -35,9 +34,7 @@ class ShowPRDAccountDetailsPresenter:
     url_index: UrlIndex
     datetime_service: DatetimeService
 
-    def present(
-        self, use_case_response: ShowPRDAccountDetailsUseCase.Response
-    ) -> ViewModel:
+    def present(self, use_case_response: UseCase.Response) -> ViewModel:
         transactions = [
             self._create_info(transaction)
             for transaction in use_case_response.transactions
@@ -51,9 +48,7 @@ class ShowPRDAccountDetailsPresenter:
             ),
         )
 
-    def _create_info(
-        self, transaction: ShowPRDAccountDetailsUseCase.TransactionInfo
-    ) -> TransactionInfo:
+    def _create_info(self, transaction: UseCase.TransactionInfo) -> TransactionInfo:
         assert transaction.transaction_type in [
             TransactionTypes.sale_of_consumer_product,
             TransactionTypes.sale_of_fixed_means,
@@ -77,21 +72,23 @@ class ShowPRDAccountDetailsPresenter:
         )
 
     def _get_peer_type_icon(
-        self, peer: ShowPRDAccountDetailsUseCase.Peer
-    ) -> str | None:
-        match peer.type:
-            case PeerTypes.member:
-                return "fas fa-user"
-            case PeerTypes.company:
-                return "fas fa-industry"
-            case _:
-                return None
+        self,
+        peer: UseCase.MemberPeer | UseCase.CompanyPeer | UseCase.SocialAccountingPeer,
+    ) -> str:
+        if isinstance(peer, UseCase.MemberPeer):
+            return "fas fa-user"
+        elif isinstance(peer, UseCase.CompanyPeer):
+            return "fas fa-industry"
+        else:
+            return ""
 
-    def _get_peer_name(self, peer: ShowPRDAccountDetailsUseCase.Peer) -> str | None:
-        match peer.type:
-            case PeerTypes.member:
-                return self.translator.gettext("Anonymous worker")
-            case PeerTypes.company:
-                return peer.name
-            case _:
-                return None
+    def _get_peer_name(
+        self,
+        peer: UseCase.MemberPeer | UseCase.CompanyPeer | UseCase.SocialAccountingPeer,
+    ) -> str:
+        if isinstance(peer, UseCase.MemberPeer):
+            return self.translator.gettext("Anonymous worker")
+        elif isinstance(peer, UseCase.CompanyPeer):
+            return peer.name
+        else:
+            return ""

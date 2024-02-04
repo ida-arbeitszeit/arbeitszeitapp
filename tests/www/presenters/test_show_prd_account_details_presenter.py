@@ -1,12 +1,11 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import List
 from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_prd_account_details import (
-    PeerTypes,
-    ShowPRDAccountDetailsUseCase,
+    ShowPRDAccountDetailsUseCase as UseCase,
 )
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
@@ -102,16 +101,12 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=ShowPRDAccountDetailsUseCase.Peer(
-                        type=PeerTypes.company,
-                        id=uuid4(),
-                        name=expected_user_name,
-                    ),
+                    peer=UseCase.CompanyPeer(id=uuid4(), name=expected_user_name),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].peer_name, expected_user_name)
+        assert view_model.transactions[0].peer_name == expected_user_name
 
     def test_name_of_peer_is_anonymized_if_transaction_is_of_type_sale_and_peer_is_a_member(
         self,
@@ -121,102 +116,87 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=ShowPRDAccountDetailsUseCase.Peer(
-                        type=PeerTypes.member,
-                        id=uuid4(),
-                        name="some worker name",
-                    ),
+                    peer=UseCase.MemberPeer(),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].peer_name, expected_user_name)
+        assert view_model.transactions[0].peer_name == expected_user_name
 
-    def test_correct_icon_for_type_of_peer_is_shown_if_transaction_is_sale_of_consumer_product(
+    def test_member_peer_icon_is_shown_if_transaction_was_with_member(
         self,
     ):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=ShowPRDAccountDetailsUseCase.Peer(
-                        type=PeerTypes.member, id=uuid4(), name="member name"
-                    ),
+                    peer=UseCase.MemberPeer(),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].peer_type_icon, "fas fa-user")
+        assert view_model.transactions[0].peer_type_icon == "fas fa-user"
 
-    def test_correct_icon_for_type_of_peer_is_shown_if_transaction_is_sale_of_liquid_means(
+    def test_company_peer_icon_is_shown_if_transaction_was_with_company(
         self,
     ):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_liquid_means,
-                    peer=ShowPRDAccountDetailsUseCase.Peer(
-                        type=PeerTypes.company,
-                        id=uuid4(),
-                        name="company name",
-                    ),
+                    peer=UseCase.CompanyPeer(id=uuid4(), name="company name"),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions[0].peer_type_icon, "fas fa-industry")
+        assert view_model.transactions[0].peer_type_icon == "fas fa-industry"
 
-    def test_peer_type_icon_is_none_if_transaction_is_of_type_expected_sales(
+    def test_peer_type_icon_is_empty_string_if_transaction_is_of_type_expected_sales(
         self,
     ):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
-                    peer=ShowPRDAccountDetailsUseCase.Peer(
-                        type=PeerTypes.social_accounting,
-                        id=uuid4(),
-                        name="some name",
-                    )
+                    peer=UseCase.SocialAccountingPeer(id=uuid4())
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        self.assertIsNone(view_model.transactions[0].peer_type_icon)
+        assert view_model.transactions[0].peer_type_icon == ""
 
-    def test_name_of_peer_is_none_if_transaction_is_of_type_expected_sales(
+    def test_name_of_peer_is_empty_if_transaction_is_of_type_expected_sales(
         self,
     ):
         response = self._use_case_response(transactions=[self._get_transaction_info()])
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name is None
+        assert view_model.transactions[0].peer_name == ""
 
     def _use_case_response(
         self,
         company_id: UUID = uuid4(),
-        transactions: List[ShowPRDAccountDetailsUseCase.TransactionInfo] = [],
+        transactions: List[UseCase.TransactionInfo] = [],
         account_balance: Decimal = Decimal(0),
-        plot: ShowPRDAccountDetailsUseCase.PlotDetails = ShowPRDAccountDetailsUseCase.PlotDetails(
-            [], []
-        ),
+        plot: UseCase.PlotDetails = UseCase.PlotDetails([], []),
     ):
-        return ShowPRDAccountDetailsUseCase.Response(
-            company_id, transactions, account_balance, plot
-        )
+        return UseCase.Response(company_id, transactions, account_balance, plot)
 
     def _get_transaction_info(
         self,
-        transaction_type: Optional[TransactionTypes] = None,
-        peer: Optional[ShowPRDAccountDetailsUseCase.Peer] = None,
+        transaction_type: TransactionTypes | None = None,
+        peer: (
+            UseCase.MemberPeer
+            | UseCase.CompanyPeer
+            | UseCase.SocialAccountingPeer
+            | None
+        ) = None,
     ):
         if transaction_type is None:
             transaction_type = TransactionTypes.expected_sales
         if peer is None:
-            peer = ShowPRDAccountDetailsUseCase.Peer(
-                type=PeerTypes.social_accounting,
+            peer = UseCase.SocialAccountingPeer(
                 id=uuid4(),
-                name="some accounting name",
             )
-        return ShowPRDAccountDetailsUseCase.TransactionInfo(
+        return UseCase.TransactionInfo(
             transaction_type=transaction_type,
             date=datetime.now(),
             transaction_volume=Decimal(10.007),

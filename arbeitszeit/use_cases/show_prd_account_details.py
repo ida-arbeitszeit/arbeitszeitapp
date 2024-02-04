@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
 from itertools import accumulate
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from arbeitszeit.records import AccountOwner, Company, Member
@@ -13,19 +12,19 @@ from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
-class PeerTypes(Enum):
-    member = "member"
-    company = "company"
-    social_accounting = "social_accounting"
-
-
 @dataclass
 class ShowPRDAccountDetailsUseCase:
+    class MemberPeer:
+        ...
+
     @dataclass
-    class Peer:
-        type: PeerTypes
-        id: Optional[UUID]
-        name: Optional[str]
+    class CompanyPeer:
+        name: str
+        id: UUID
+
+    @dataclass
+    class SocialAccountingPeer:
+        id: UUID
 
     @dataclass
     class TransactionInfo:
@@ -33,7 +32,11 @@ class ShowPRDAccountDetailsUseCase:
         date: datetime
         transaction_volume: Decimal
         purpose: str
-        peer: ShowPRDAccountDetailsUseCase.Peer
+        peer: (
+            ShowPRDAccountDetailsUseCase.MemberPeer
+            | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
+            | ShowPRDAccountDetailsUseCase.CompanyPeer
+        )
 
     @dataclass
     class PlotDetails:
@@ -96,17 +99,17 @@ class ShowPRDAccountDetailsUseCase:
 
     def _create_peer_info(
         self, peer: AccountOwner
-    ) -> ShowPRDAccountDetailsUseCase.Peer:
-        return self.Peer(
-            type=self._get_peer_type(peer),
-            id=None if peer.is_member() else peer.id,
-            name=None if peer.is_member() else peer.get_name(),
-        )
-
-    def _get_peer_type(self, peer: AccountOwner) -> PeerTypes:
+    ) -> (
+        ShowPRDAccountDetailsUseCase.MemberPeer
+        | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
+        | ShowPRDAccountDetailsUseCase.CompanyPeer
+    ):
         if isinstance(peer, Member):
-            return PeerTypes.member
+            return self.MemberPeer()
         elif isinstance(peer, Company):
-            return PeerTypes.company
+            return self.CompanyPeer(
+                id=peer.id,
+                name=peer.get_name(),
+            )
         else:
-            return PeerTypes.social_accounting
+            return self.SocialAccountingPeer(id=peer.id)
