@@ -1,4 +1,4 @@
-{ mkShell, python3, nixfmt, sqlite }:
+{ mkShell, python3, nixfmt, sqlite, glibcLocales }:
 mkShell {
   packages = (with python3.pkgs; [
     black
@@ -16,4 +16,5 @@ mkShell {
   ]) ++ [ nixfmt sqlite ]
     ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
   inputsFrom = [ python3.pkgs.arbeitszeitapp ];
+  LOCALE_ARCHIVE = "${glibcLocales}/lib/locale/locale-archive";
 }
