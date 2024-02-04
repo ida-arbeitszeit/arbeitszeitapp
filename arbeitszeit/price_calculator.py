@@ -33,8 +33,8 @@ class PriceCalculator:
     def calculate_individual_price(self, plan: records.Plan) -> Decimal:
         return calculate_individual_price(plan)
 
-    def calculate_individual_labour(self, plan: records.Plan) -> Decimal:
-        return calculate_individual_labour(plan)
+    def individual_labour_cost(self, plan: records.Plan) -> Decimal:
+        return individual_labour_cost(plan)
 
     def _calculate_coop_price(self, plans: List[records.Plan]) -> Decimal:
         assert not any(plan.is_public_service for plan in plans)
@@ -44,12 +44,10 @@ class PriceCalculator:
 def calculate_individual_price(plan: records.Plan) -> Decimal:
     if plan.is_public_service:
         return Decimal(0)
-    return plan.production_costs.total_cost() / plan.prd_amount
+    return individual_labour_cost(plan)
 
 
-def calculate_individual_labour(plan: records.Plan) -> Decimal:
-    if not plan.is_public_service:
-        return Decimal(0)
+def individual_labour_cost(plan: records.Plan) -> Decimal:
     return plan.production_costs.total_cost() / plan.prd_amount
 
 

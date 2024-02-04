@@ -46,14 +46,11 @@ class PlanDetailsService:
         plan = self.database_gateway.get_plans().with_id(plan_id).first()
         if plan is None:
             return None
+        labour_cost_per_unit = self.price_calculator.individual_labour_cost(plan)
         if plan.is_active_as_of(now):
-            labour_cost_per_unit = Decimal(0)
             price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         else:
             price_per_unit = self.price_calculator.calculate_individual_price(plan)
-            labour_cost_per_unit = self.price_calculator.calculate_individual_labour(
-                plan
-            )
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         return PlanDetails(
