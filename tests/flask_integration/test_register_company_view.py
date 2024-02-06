@@ -35,7 +35,12 @@ class UnauthenticatedAndUnconfirmedCompanyTests(ViewTestCase):
     def test_correct_posting_is_possible_and_redirects_company(self):
         response = self.client.post(
             self.url,
-            data=dict(email="test@cp.org", name="test name", password="test_password"),
+            data=dict(
+                email="test@cp.org",
+                name="test name",
+                password="test_password",
+                repeat_password="test_password",
+            ),
         )
         self.assertEqual(response.status_code, 302)
 
@@ -45,7 +50,10 @@ class UnauthenticatedAndUnconfirmedCompanyTests(ViewTestCase):
             response = self.client.post(
                 self.url,
                 data=dict(
-                    email=company_email, name="test name", password="test_password"
+                    email=company_email,
+                    name="test name",
+                    password="test_password",
+                    repeat_password="test_password",
                 ),
             )
             self.assertEqual(response.status_code, 302)
