@@ -6,15 +6,6 @@ from arbeitszeit_web.api.controllers.expected_input import InputLocation
 from arbeitszeit_web.api.controllers.query_plans_api_controller import ExpectedInput
 
 
-def _generate_location(location: InputLocation) -> str:
-    if location == InputLocation.query:
-        return "query"
-    elif location == InputLocation.form:
-        return "form"
-    else:
-        return "path"
-
-
 def generate_input_documentation(
     expected_inputs: List[ExpectedInput],
 ) -> RequestParser:
@@ -29,3 +20,15 @@ def generate_input_documentation(
             required=input.required,
         )
     return parser
+
+
+def _generate_location(location: InputLocation) -> str:
+    match location:
+        case InputLocation.query:
+            return "query"
+        case InputLocation.form:
+            return "form"
+        case InputLocation.path:
+            return "path"
+        case _:
+            raise ValueError(f"Unknown location: {location}")
