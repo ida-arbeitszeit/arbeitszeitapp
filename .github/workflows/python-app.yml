@@ -1,6 +1,10 @@
 name: Arbeitszeitapp CI Tests
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   static-code-analysis:
