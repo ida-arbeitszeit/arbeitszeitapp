@@ -24,7 +24,7 @@ class PlanDetailsWeb:
     labour_cost: Tuple[str, str]
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str, bool, Optional[str]]
-    labour_cost_per_unit: Optional[Tuple[str, str]]
+    labour_cost_per_unit: Tuple[str, str]
     creation_date: str
     approval_date: str
     expiration_date: str
