@@ -118,7 +118,7 @@ class ExpectedInputsTests(BaseTestCase):
     def test_input_offset_has_correct_parameters(self) -> None:
         input = self.inputs[0]
         self.assertEqual(input.name, "offset")
-        self.assertEqual(input.type, str)
+        self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query offset.")
         self.assertEqual(input.default, 0)
         self.assertEqual(input.location, InputLocation.query)
@@ -131,7 +131,7 @@ class ExpectedInputsTests(BaseTestCase):
     def test_input_limit_has_correct_parameters(self) -> None:
         input = self.inputs[1]
         self.assertEqual(input.name, "limit")
-        self.assertEqual(input.type, str)
+        self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query limit.")
         self.assertEqual(input.default, 30)
         self.assertEqual(input.location, InputLocation.query)
