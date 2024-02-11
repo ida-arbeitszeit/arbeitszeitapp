@@ -100,9 +100,7 @@ class PlanDetailsFormatter:
             labour_cost_per_unit=(
                 self.translator.gettext("Labour (per unit)"),
                 self._format_price(plan_details.labour_cost_per_unit),
-            )
-            if plan_details.is_public_service
-            else None,
+            ),
             creation_date=self.datetime_service.format_datetime(
                 date=plan_details.creation_date,
                 zone="Europe/Berlin",
