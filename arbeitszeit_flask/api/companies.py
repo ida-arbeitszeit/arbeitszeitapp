@@ -14,7 +14,7 @@ from arbeitszeit_web.api.controllers.query_companies_api_controller import (
 from arbeitszeit_web.api.presenters.query_companies_api_presenter import (
     QueryCompaniesApiPresenter,
 )
-from arbeitszeit_web.api.response_errors import BadRequest
+from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 
 namespace = Namespace("companies", "Companies related endpoints.")
 
@@ -31,7 +31,9 @@ model = SchemaConverter(namespace).json_schema_to_flaskx(
 class QueryCompanies(Resource):
     @namespace.expect(input_documentation)
     @namespace.marshal_with(model, skip_none=True)
-    @error_response_handling(error_responses=[BadRequest], namespace=namespace)
+    @error_response_handling(
+        error_responses=[BadRequest, Unauthorized], namespace=namespace
+    )
     @authentication_check
     @with_injection()
     def get(

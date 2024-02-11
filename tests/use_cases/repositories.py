@@ -16,13 +16,12 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Self,
     Set,
     Tuple,
     TypeVar,
 )
 from uuid import UUID, uuid4
-
-from typing_extensions import Self
 
 from arbeitszeit import records
 from arbeitszeit.decimal import decimal_sum
@@ -360,12 +359,6 @@ class PlanUpdate:
     def hide(self) -> Self:
         def update(plan: records.Plan) -> None:
             plan.hidden_by_user = True
-
-        return self._add_update(update)
-
-    def toggle_product_availability(self) -> Self:
-        def update(plan: records.Plan) -> None:
-            plan.is_available = not plan.is_available
 
         return self._add_update(update)
 
@@ -1620,7 +1613,6 @@ class MockDatabase:
             approval_date=None,
             requested_cooperation=None,
             cooperation=None,
-            is_available=True,
             hidden_by_user=False,
         )
         self.plans[plan.id] = plan

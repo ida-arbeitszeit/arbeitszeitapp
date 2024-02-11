@@ -42,19 +42,6 @@ class TestPresenterForPlanner(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
-    def test_url_for_changing_availability_is_displayed_correctly(self):
-        expected_plan_id = uuid4()
-        response = UseCaseResponse(
-            plan_details=self.plan_details_generator.create_plan_details(
-                plan_id=expected_plan_id, planner_id=self.expected_planner
-            ),
-        )
-        view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.own_plan_action.toggle_availability_url,
-            self.url_index.get_toggle_availability_url(expected_plan_id),
-        )
-
     def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_cooperating(
         self,
     ):
@@ -139,15 +126,6 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
-
-    def test_view_model_shows_availability_when_plan_is_available(self):
-        response = UseCaseResponse(
-            plan_details=self.plan_details_generator.create_plan_details(
-                is_available=True
-            ),
-        )
-        view_model = self.presenter.present(response)
-        self.assertTrue(view_model.own_plan_action.is_available_bool)
 
     def test_view_model_shows_plan_as_cooperating_when_plan_is_cooperating(
         self,

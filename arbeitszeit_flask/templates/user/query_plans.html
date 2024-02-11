@@ -68,9 +68,6 @@
                         </p>
                     </div>
                     <div>
-                        {% if not column.is_available %}
-                        <span class="tag is-danger">{{ gettext("Product not available") }}</span>
-                        {% endif %}
                         {% if column.is_cooperating %}
                         <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
                         {% endif %}

@@ -13,11 +13,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import (
-    confirm_member,
-    get_coop_summary,
-    toggle_product_availablity,
-)
+from arbeitszeit.use_cases import confirm_member, get_coop_summary
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -163,7 +159,6 @@ class PlanGenerator:
     create_plan_draft_use_case: CreatePlanDraft
     file_plan_with_accounting: FilePlanWithAccounting
     approve_plan_use_case: ApprovePlanUseCase
-    toggle_product_availability: toggle_product_availablity.ToggleProductAvailability
     hide_plan: HidePlan
     get_coop_summary_use_case: get_coop_summary.GetCoopSummary
 
@@ -181,7 +176,6 @@ class PlanGenerator:
         timeframe: Optional[int] = None,
         requested_cooperation: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
-        is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> UUID:
         if planner is None:
@@ -232,11 +226,6 @@ class PlanGenerator:
             )
         if hidden_by_user:
             self.hide_plan(plan_id=file_plan_response.plan_id)
-        if not is_available:
-            toggle_response = self.toggle_product_availability(
-                current_user_id=planner, plan_id=file_plan_response.plan_id
-            )
-            assert toggle_response.is_success
         return file_plan_response.plan_id
 
     def draft_plan(
@@ -296,7 +285,6 @@ class PlanGenerator:
         timeframe: Optional[int] = None,
         requested_cooperation: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
-        is_available: bool = True,
         hidden_by_user: bool = False,
     ) -> records.Plan:
         # Don't use this method. It is only here for legacy reasons.
@@ -312,7 +300,6 @@ class PlanGenerator:
             timeframe=timeframe,
             requested_cooperation=requested_cooperation,
             cooperation=cooperation,
-            is_available=is_available,
             hidden_by_user=hidden_by_user,
         )
         plan = self.database_gateway.get_plans().with_id(plan_id).first()

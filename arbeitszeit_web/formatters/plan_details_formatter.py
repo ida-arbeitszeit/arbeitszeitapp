@@ -25,7 +25,6 @@ class PlanDetailsWeb:
     type_of_plan: Tuple[str, str]
     price_per_unit: Tuple[str, str, bool, Optional[str]]
     labour_cost_per_unit: Optional[Tuple[str, str]]
-    availability_string: Tuple[str, str]
     creation_date: str
     approval_date: str
     expiration_date: str
@@ -104,12 +103,6 @@ class PlanDetailsFormatter:
             )
             if plan_details.is_public_service
             else None,
-            availability_string=(
-                self.translator.gettext("Product currently available"),
-                self.translator.gettext("Yes")
-                if plan_details.is_available
-                else self.translator.gettext("No"),
-            ),
             creation_date=self.datetime_service.format_datetime(
                 date=plan_details.creation_date,
                 zone="Europe/Berlin",

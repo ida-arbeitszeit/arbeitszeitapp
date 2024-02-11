@@ -53,7 +53,6 @@ class QueriedPlanGenerator:
             price_per_unit=price_per_unit,
             labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=False,
-            is_available=True,
             is_cooperating=is_cooperating,
             activation_date=activation_date,
         )
@@ -137,7 +136,6 @@ class PlanDetailsGenerator:
         is_public_service: Optional[bool] = None,
         labour_cost_per_unit: Optional[Decimal] = None,
         price_per_unit: Optional[Decimal] = None,
-        is_available: Optional[bool] = None,
         is_cooperating: Optional[bool] = None,
         cooperation: Optional[UUID] = None,
         creation_date: Optional[datetime] = None,
@@ -176,8 +174,6 @@ class PlanDetailsGenerator:
             labour_cost_per_unit = Decimal("0.875")
         if price_per_unit is None:
             price_per_unit = Decimal("0.061")
-        if is_available is None:
-            is_available = True
         if is_cooperating is None:
             is_cooperating = False
         if creation_date is None:
@@ -200,7 +196,6 @@ class PlanDetailsGenerator:
             is_public_service=is_public_service,
             price_per_unit=price_per_unit,
             labour_cost_per_unit=labour_cost_per_unit,
-            is_available=is_available,
             is_cooperating=is_cooperating,
             cooperation=cooperation,
             creation_date=creation_date,

@@ -44,7 +44,6 @@ class QueriedPlan:
     price_per_unit: Decimal
     labour_cost_per_unit: Decimal
     is_public_service: bool
-    is_available: bool
     is_cooperating: bool
     activation_date: datetime
 
@@ -126,7 +125,6 @@ class QueryPlans:
             price_per_unit=price_per_unit,
             labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=plan.is_public_service,
-            is_available=plan.is_available,
             is_cooperating=bool(plan.cooperation),
             activation_date=plan.activation_date,
         )

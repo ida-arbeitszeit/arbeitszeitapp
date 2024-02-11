@@ -1,14 +1,19 @@
 from tests.api.integration.base_test_case import ApiTestCase
 
 
-class UnauthenticatedUsersTests(ApiTestCase):
+class AnonymousUsersTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = self.url_prefix + "/companies"
 
-    def test_unauthenticated_user_gets_401(self):
+    def test_anonymous_user_gets_status_code_401_on_get_request(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
+
+    def test_anonymous_user_gets_corrrect_error_message_on_get_request(self):
+        expected_message = "You have to authenticate before using this service."
+        response = self.client.get(self.url)
+        self.assertEqual(response.json["message"], expected_message)
 
 
 class AuthenticatedCompanyTests(ApiTestCase):

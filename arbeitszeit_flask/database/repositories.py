@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Self,
     Tuple,
     TypeVar,
 )
@@ -21,7 +22,6 @@ from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import and_, case, func, or_, update
 from sqlalchemy.sql.functions import concat
-from typing_extensions import Self
 
 from arbeitszeit import records
 from arbeitszeit_flask.database import models
@@ -430,15 +430,6 @@ class PlanUpdate:
             plan_update_values=dict(
                 self.plan_update_values,
                 activation_date=activation_timestamp,
-            ),
-        )
-
-    def toggle_product_availability(self) -> Self:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                is_available=func.not_(models.Plan.is_available),
             ),
         )
 
@@ -1931,7 +1922,6 @@ class DatabaseGatewayImpl:
             if plan.requested_cooperation
             else None,
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
-            is_available=plan.is_available,
             hidden_by_user=plan.hidden_by_user,
         )
 
