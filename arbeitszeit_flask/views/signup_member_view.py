@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Tuple
 
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user
@@ -34,7 +35,7 @@ class SignupMemberView:
         return render_template("auth/signup_member.html", form=register_form)
 
     @commit_changes
-    def POST(self) -> Response:
+    def POST(self) -> Response | Tuple[Response, int]:
         register_form = RegisterForm(request.form)
         if register_form.validate():
             return self._handle_valid_post_request(register_form=register_form)
