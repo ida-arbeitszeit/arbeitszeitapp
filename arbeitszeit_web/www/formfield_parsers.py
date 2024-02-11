@@ -1,7 +1,6 @@
 from copy import copy
+from typing import Self
 from uuid import UUID
-
-from typing_extensions import Self
 
 from arbeitszeit_web.fields import ParsingFailure, ParsingSuccess
 from arbeitszeit_web.translator import Translator

@@ -16,13 +16,12 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Self,
     Set,
     Tuple,
     TypeVar,
 )
 from uuid import UUID, uuid4
-
-from typing_extensions import Self
 
 from arbeitszeit import records
 from arbeitszeit.decimal import decimal_sum

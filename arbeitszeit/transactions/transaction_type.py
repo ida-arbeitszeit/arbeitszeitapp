@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import Iterable, Optional, Tuple
-
-from typing_extensions import TypeAlias
+from typing import Iterable, Optional, Tuple, TypeAlias
 
 from arbeitszeit.records import AccountTypes
 

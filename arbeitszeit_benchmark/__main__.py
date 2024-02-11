@@ -3,9 +3,7 @@ from __future__ import annotations
 import argparse
 import timeit
 from dataclasses import dataclass
-from typing import Dict, Optional
-
-from typing_extensions import Self
+from typing import Dict, Optional, Self
 
 from .get_company_summary_benchmark import GetCompanySummaryBenchmark
 from .get_company_transactions import GetCompanyTransactionsBenchmark
