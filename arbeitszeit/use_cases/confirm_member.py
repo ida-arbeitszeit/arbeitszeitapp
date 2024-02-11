@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -18,6 +18,7 @@ class ConfirmMemberUseCase:
         member: Optional[UUID] = None
 
     database: DatabaseGateway
+    datetime_service: DatetimeService
 
     def confirm_member(self, request: Request) -> Response:
         record = (
@@ -34,5 +35,5 @@ class ConfirmMemberUseCase:
         else:
             self.database.get_email_addresses().with_address(
                 request.email_address
-            ).update().set_confirmation_timestamp(datetime.min).perform()
+            ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
             return self.Response(is_confirmed=True, member=member.id)

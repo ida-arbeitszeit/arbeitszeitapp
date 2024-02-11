@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, Tuple, Union
 from uuid import UUID
 
@@ -31,10 +32,18 @@ class GetUserAccountDetailsUseCase:
             return self._create_failure_model()
         else:
             user, mail = record
-            return self._create_success_model(user.id, mail.address)
+            return self._create_success_model(user.id, mail)
 
-    def _create_success_model(self, user_id: UUID, email_address: str) -> Response:
-        return Response(user_info=UserInfo(id=user_id, email_address=email_address))
+    def _create_success_model(
+        self, user_id: UUID, email_address: records.EmailAddress
+    ) -> Response:
+        return Response(
+            user_info=UserInfo(
+                id=user_id,
+                email_address=email_address.address,
+                email_address_confirmation_timestamp=email_address.confirmed_on,
+            )
+        )
 
     def _create_failure_model(self) -> Response:
         return Response(user_info=None)
@@ -54,3 +63,4 @@ class Response:
 class UserInfo:
     id: UUID
     email_address: str
+    email_address_confirmation_timestamp: Optional[datetime] = None
