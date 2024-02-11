@@ -1,36 +1,32 @@
 from dataclasses import dataclass
-from typing import List
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
 from arbeitszeit_web.api.controllers import query_parser
-from arbeitszeit_web.api.controllers.expected_input import ExpectedInput, InputLocation
+from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.request import Request
 
 DEFAULT_OFFSET: int = 0
 DEFAULT_LIMIT: int = 30
 
 
+active_plans_expected_inputs = [
+    QueryParameter(
+        name="offset",
+        type=int,
+        description="The query offset.",
+        default=DEFAULT_OFFSET,
+    ),
+    QueryParameter(
+        name="limit",
+        type=int,
+        description="The query limit.",
+        default=DEFAULT_LIMIT,
+    ),
+]
+
+
 @dataclass
 class QueryPlansApiController:
-    @classmethod
-    def create_expected_inputs(cls) -> List[ExpectedInput]:
-        return [
-            ExpectedInput(
-                name="offset",
-                type=int,
-                description="The query offset.",
-                default=DEFAULT_OFFSET,
-                location=InputLocation.query,
-            ),
-            ExpectedInput(
-                name="limit",
-                type=int,
-                description="The query limit.",
-                default=DEFAULT_LIMIT,
-                location=InputLocation.query,
-            ),
-        ]
-
     request: Request
 
     def create_request(self) -> QueryPlansRequest:
