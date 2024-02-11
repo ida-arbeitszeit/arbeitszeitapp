@@ -110,7 +110,9 @@ class RegisterForm(Form):
     )
     name = StringField(
         trans.lazy_gettext("Name"),
-        validators=[validators.InputRequired(message=trans.lazy_gettext("Name is required"))],
+        validators=[
+            validators.InputRequired(message=trans.lazy_gettext("Name is required"))
+        ],
     )
     password = PasswordField(
         trans.lazy_gettext("Password"),
@@ -121,7 +123,9 @@ class RegisterForm(Form):
                     "The password must be at least 8 characters in length"
                 ),
             ),
-            validators.EqualTo("repeat_password", message=trans.lazy_gettext("Passwords must match")),
+            validators.EqualTo(
+                "repeat_password", message=trans.lazy_gettext("Passwords must match")
+            ),
         ],
     )
     repeat_password = PasswordField(trans.lazy_gettext("Repeat Password"))

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from parameterized import parameterized
+from parameterized import param, parameterized
 
 from arbeitszeit_flask.extensions import mail
 
@@ -100,3 +100,61 @@ class UnauthenticatedAndUnconfirmedMemberTests(ViewTestCase):
             assert len(outbox) == 1
             assert outbox[0].sender == "test_sender@cp.org"
             assert outbox[0].recipients[0] == member_email
+
+    @parameterized.expand(
+        [
+            param(
+                dict(
+                    email="test@cp.org",
+                    name="test name",
+                    password="test_password",
+                    repeat_password="not_same_password",
+                )
+            ),
+            param(
+                dict(
+                    email="test@cp.org",
+                    name="test name",
+                    password="short",
+                    repeat_password="short",
+                )
+            ),
+            param(
+                dict(
+                    email="test@cp.org",
+                    name="",
+                    password="test_password",
+                    repeat_password="test_password",
+                )
+            ),
+            param(
+                dict(
+                    email="invalid_email",
+                    name="test name",
+                    password="test_password",
+                    repeat_password="test_password",
+                )
+            ),
+            param(
+                dict(
+                    email="invalid_email@",
+                    name="test name",
+                    password="test_password",
+                    repeat_password="test_password",
+                )
+            ),
+            param(
+                dict(
+                    email="invalid_email@cp",
+                    name="test name",
+                    password="test_password",
+                    repeat_password="test_password",
+                )
+            ),
+        ]
+    )
+    def test_invalid_form_posting_with_incorrect_form_does_not_redirect_user(
+        self, invalid_form_data: dict
+    ):
+        response = self.client.post(self.url, data=invalid_form_data)
+        self.assertEqual(response.status_code, 400)

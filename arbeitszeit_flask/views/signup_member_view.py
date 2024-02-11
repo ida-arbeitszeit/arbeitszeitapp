@@ -43,7 +43,7 @@ class SignupMemberView:
                 return redirect(url_for("main_member.dashboard"))
             else:
                 self.flask_session.logout()
-        return render_template("auth/signup_member.html", form=register_form)
+        return render_template("auth/signup_member.html", form=register_form), 400
 
     def _handle_valid_post_request(self, register_form: RegisterForm):
         use_case_request = self.controller.create_request(register_form)
