@@ -109,12 +109,11 @@ class QueryPlans:
         planner: records.Company,
         cooperating_plans: List[records.PlanSummary],
     ) -> QueriedPlan:
-        labour_cost_per_unit = Decimal(0)
+        labour_cost_per_unit = individual_labour_cost(plan)
         if cooperating_plans:
             price_per_unit = calculate_average_costs(cooperating_plans)
         else:
             price_per_unit = calculate_individual_price(plan)
-            labour_cost_per_unit = individual_labour_cost(plan)
         assert plan.activation_date
         return QueriedPlan(
             plan_id=plan.id,
