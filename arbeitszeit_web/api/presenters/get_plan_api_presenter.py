@@ -34,7 +34,6 @@ class GetPlanApiPresenter:
                 labour_cost=JsonDecimal(),
                 is_public_service=JsonBoolean(),
                 price_per_unit=JsonDecimal(),
-                is_available=JsonBoolean(),
                 is_cooperating=JsonBoolean(),
                 cooperation=JsonString(required=False),
                 creation_date=JsonDatetime(),

@@ -445,12 +445,6 @@ including auto-generated API docs.  Open the documentation in your
 browser at ``build/html/index.html``. The HTML code is generated from
 the top-level file ``README.rst``, which serves as the source of truth.
 
-Regenerate the API docs via:
-
-    .. code-block:: bash
-
-     ./regenerate-api-docs
-
 Benchmarking
 ------------
 

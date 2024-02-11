@@ -76,7 +76,6 @@ class UrlIndexTestImpl:
     get_request_coordination_transfer_url = UrlIndexMethod()
     get_revoke_plan_filing_url = UrlIndexMethod()
     get_show_coordination_transfer_request_url = UrlIndexMethod()
-    get_toggle_availability_url = UrlIndexMethod()
     get_unconfirmed_member_url = UrlIndexMethod()
     get_unreviewed_plans_list_view_url = UrlIndexMethod()
     get_user_account_details_url = UrlIndexMethod()

@@ -35,10 +35,10 @@ class PrivateConsumptionTests(FlaskTestCase):
 
     def test_that_retrieved_consumption_contains_specified_plan_id(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         consumption = self.database_gateway.get_private_consumptions().first()
         assert consumption
-        assert consumption.plan_id == plan.id
+        assert consumption.plan_id == plan
 
     def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
         self.consumption_generator.create_private_consumption()
@@ -78,24 +78,24 @@ class PrivateConsumptionTests(FlaskTestCase):
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
-        self.consumption_generator.create_private_consumption(plan=plan_1.id)
+        self.consumption_generator.create_private_consumption(plan=plan_1)
         self.datetime_service.advance_time(timedelta(days=1))
         plan_2 = self.plan_generator.create_plan()
-        self.consumption_generator.create_private_consumption(plan=plan_2.id)
+        self.consumption_generator.create_private_consumption(plan=plan_2)
         consumption_1, consumption_2 = list(
             self.database_gateway.get_private_consumptions().ordered_by_creation_date(
                 ascending=True
             )
         )
-        assert consumption_1.plan_id == plan_1.id
-        assert consumption_2.plan_id == plan_2.id
+        assert consumption_1.plan_id == plan_1
+        assert consumption_2.plan_id == plan_2
         consumption_2, consumption_1 = list(
             self.database_gateway.get_private_consumptions().ordered_by_creation_date(
                 ascending=False
             )
         )
-        assert consumption_1.plan_id == plan_1.id
-        assert consumption_2.plan_id == plan_2.id
+        assert consumption_1.plan_id == plan_1
+        assert consumption_2.plan_id == plan_2
 
     def test_can_retrieve_plan_and_transaction_with_consumption(self) -> None:
         self.consumption_generator.create_private_consumption()
@@ -127,7 +127,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         provider = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=provider)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         consumptions = self.database_gateway.get_private_consumptions()
         assert not consumptions.where_provider_is_company(other_company)
 
@@ -136,7 +136,7 @@ class PrivateConsumptionTests(FlaskTestCase):
     ) -> None:
         provider = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=provider)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         consumptions = self.database_gateway.get_private_consumptions()
         assert consumptions.where_provider_is_company(provider)
 

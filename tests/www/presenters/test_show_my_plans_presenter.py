@@ -42,14 +42,14 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         )
 
     def test_do_not_show_notification_when_user_has_one_plan(self) -> None:
-        plan = self.plan_generator.create_plan()
+        plan = self.plan_generator.create_plan_record()
         RESPONSE_WITH_ONE_PLAN = self.response_with_one_plan(plan)
         self.presenter.present(RESPONSE_WITH_ONE_PLAN)
         self.assertFalse(self.notifier.infos)
         self.assertFalse(self.notifier.warnings)
 
     def test_do_only_show_active_plans_when_user_has_one_active_plan(self) -> None:
-        plan = self.plan_generator.create_plan()
+        plan = self.plan_generator.create_plan_record()
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertTrue(presentation.show_active_plans)
@@ -57,7 +57,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertFalse(presentation.show_non_active_plans)
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self) -> None:
-        plan = self.plan_generator.create_plan(cooperation=None, is_available=True)
+        plan = self.plan_generator.create_plan_record(cooperation=None)
         RESPONSE_WITH_ONE_ACTIVE_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_ACTIVE_PLAN)
         self.assertEqual(
@@ -75,10 +75,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             presentation.active_plans.rows[0].is_public_service, plan.is_public_service
         )
         self.assertEqual(
-            presentation.active_plans.rows[0].is_available,
-            True,
-        )
-        self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
             False,
         )
@@ -88,7 +84,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
-        plan = self.plan_generator.create_plan(cooperation=coop, is_available=True)
+        plan = self.plan_generator.create_plan_record(cooperation=coop)
         RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
         self.assertEqual(
@@ -122,7 +118,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         )
 
     def test_presenter_shows_correct_info_of_one_single_non_active_plan(self) -> None:
-        plan = self.plan_generator.create_plan(approved=False)
+        plan = self.plan_generator.create_plan_record(approved=False)
         RESPONSE_WITH_ONE_NON_ACTIVE_PLAN = self.response_with_one_non_active_plan(plan)
         presentation = self.presenter.present(RESPONSE_WITH_ONE_NON_ACTIVE_PLAN)
         row1 = presentation.non_active_plans.rows[0]
@@ -144,7 +140,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertEqual(row1.type_of_plan, self.translator.gettext("Productive"))
 
     def test_non_active_plan_has_correct_revocation_url(self) -> None:
-        plan = self.plan_generator.create_plan(approved=False)
+        plan = self.plan_generator.create_plan_record(approved=False)
         use_case_response = self.response_with_one_non_active_plan(plan)
         view_model = self.presenter.present(use_case_response)
         row = view_model.non_active_plans.rows[0]
@@ -230,7 +226,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             plan_creation_date=plan.plan_creation_date,
             activation_date=plan.activation_date,
             expiration_date=plan.expiration_date,
-            is_available=plan.is_available,
             is_cooperating=bool(plan.cooperation),
             cooperation=plan.cooperation,
         )
@@ -244,7 +239,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             plan_creation_date=plan.creation_date,
             activation_date=None,
             expiration_date=None,
-            is_available=False,
             is_cooperating=False,
             cooperation=None,
         )
@@ -292,7 +286,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
 
     def response_with_one_expired_plan(self) -> ShowMyPlansResponse:
         planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(planner=planner, timeframe=1)
+        self.plan_generator.create_plan_record(planner=planner, timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
         return self.show_my_plans.show_company_plans(
             request=ShowMyPlansRequest(company_id=planner)
@@ -309,7 +303,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         )
 
     def _create_active_plan(self, timeframe: int = 1) -> Plan:
-        plan = self.plan_generator.create_plan(
+        plan = self.plan_generator.create_plan_record(
             timeframe=timeframe,
         )
         return plan

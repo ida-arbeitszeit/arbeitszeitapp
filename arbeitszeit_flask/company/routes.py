@@ -44,7 +44,6 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -253,13 +252,6 @@ def revoke_plan_filing(
     response = use_case.revoke_plan_filing(request=request)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
-
-
-@CompanyRoute("/company/toggle_availability/<uuid:plan_id>", methods=["GET"])
-@commit_changes
-def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
-    toggle_availability(UUID(current_user.id), plan_id)
-    return redirect(url_for("main_company.plan_details", plan_id=plan_id))
 
 
 @CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])

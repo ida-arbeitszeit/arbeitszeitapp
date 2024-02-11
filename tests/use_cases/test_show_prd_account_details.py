@@ -3,7 +3,9 @@ from decimal import Decimal
 
 from arbeitszeit.records import ProductionCosts, SocialAccounting
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
+from arbeitszeit.use_cases.show_prd_account_details import (
+    ShowPRDAccountDetailsUseCase as UseCase,
+)
 
 from .base_test_case import BaseTestCase
 
@@ -11,7 +13,7 @@ from .base_test_case import BaseTestCase
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.show_prd_account_details = self.injector.get(ShowPRDAccountDetailsUseCase)
+        self.show_prd_account_details = self.injector.get(UseCase)
         self.social_accounting = self.injector.get(SocialAccounting)
         self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
@@ -62,14 +64,14 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
 
     def test_that_transactions_are_shown_in_correct_descending_order(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.show_prd_account_details(planner)
         transactions = response.transactions
         assert (
@@ -95,7 +97,7 @@ class UseCaseTester(BaseTestCase):
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
         self.consumption_generator.create_private_consumption(
-            plan=plan.id,
+            plan=plan,
             consumer=consumer,
             amount=1,
         )
@@ -126,7 +128,7 @@ class UseCaseTester(BaseTestCase):
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
         self.consumption_generator.create_fixed_means_consumption(
-            plan=plan.id, consumer=consumer
+            plan=plan, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
@@ -152,7 +154,7 @@ class UseCaseTester(BaseTestCase):
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 1
         self.consumption_generator.create_resource_consumption_by_company(
-            plan=plan.id, consumer=consumer
+            plan=plan, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
         assert len(response.transactions) == 2
@@ -177,7 +179,7 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
@@ -195,9 +197,9 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=1)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=1)
         transaction_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=2)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=2)
         response = self.show_prd_account_details(planner)
         assert len(response.plot.timestamps) == 3
         assert len(response.plot.accumulated_volumes) == 3
@@ -219,11 +221,11 @@ class UseCaseTester(BaseTestCase):
             amount=1,
         )
         transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=1)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=1)
         self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=2)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=2)
         transaction_3_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan.id, amount=3)
+        self.consumption_generator.create_private_consumption(plan=plan, amount=3)
         response = self.show_prd_account_details(planner)
         assert response.plot.timestamps[1] == transaction_1_timestamp
         assert response.plot.timestamps[3] == transaction_3_timestamp
@@ -232,15 +234,24 @@ class UseCaseTester(BaseTestCase):
         assert response.plot.accumulated_volumes[1] == Decimal(0)
         assert response.plot.accumulated_volumes[3] == Decimal(5)
 
-    def test_that_no_consumer_is_shown_in_transaction_detail_when_transaction_is_debit_for_expected_sales(
+    def test_that_peer_type_is_accounting_when_transaction_is_debit_for_expected_sales(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         response = self.show_prd_account_details(planner)
-        assert response.transactions[0].buyer is None
+        assert isinstance(response.transactions[0].peer, UseCase.SocialAccountingPeer)
 
-    def test_that_correct_consumer_info_is_shown_when_company_sold_to_member(
+    def test_that_correct_accounting_id_is_shown_when_transaction_is_debit_for_expected_sales(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        self.plan_generator.create_plan(planner=planner)
+        response = self.show_prd_account_details(planner)
+        assert isinstance(response.transactions[0].peer, UseCase.SocialAccountingPeer)
+        assert response.transactions[0].peer.id == self.social_accounting.id
+
+    def test_that_peer_type_is_member_when_company_sold_to_member(
         self,
     ) -> None:
         expected_consumer_name = "test 123 name"
@@ -248,27 +259,36 @@ class UseCaseTester(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=planner)
         consumer = self.member_generator.create_member(name=expected_consumer_name)
         self.consumption_generator.create_private_consumption(
-            plan=plan.id, consumer=consumer
+            plan=plan, consumer=consumer
         )
         response = self.show_prd_account_details(planner)
         transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.buyer
-        assert transaction_of_sale.buyer.buyer_is_member == True
-        assert transaction_of_sale.buyer.buyer_id == consumer
-        assert transaction_of_sale.buyer.buyer_name == expected_consumer_name
+        assert isinstance(transaction_of_sale.peer, UseCase.MemberPeer)
 
-    def test_that_correct_consumer_info_is_shown_when_company_sold_to_company(
+    def test_that_correct_consumer_id_is_shown_when_company_sold_to_company(
         self,
     ) -> None:
         consumer = self.company_generator.create_company_record()
         planner = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(planner=planner.id)
         self.consumption_generator.create_fixed_means_consumption(
-            consumer=consumer.id, plan=plan.id
+            consumer=consumer.id, plan=plan
         )
         response = self.show_prd_account_details(planner.id)
         transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.buyer
-        assert transaction_of_sale.buyer.buyer_is_member == False
-        assert transaction_of_sale.buyer.buyer_id == consumer.id
-        assert transaction_of_sale.buyer.buyer_name == consumer.name
+        assert isinstance(transaction_of_sale.peer, UseCase.CompanyPeer)
+        assert transaction_of_sale.peer.id == consumer.id
+
+    def test_that_correct_consumer_name_is_shown_when_company_sold_to_company(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company_record()
+        planner = self.company_generator.create_company_record()
+        plan = self.plan_generator.create_plan(planner=planner.id)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer.id, plan=plan
+        )
+        response = self.show_prd_account_details(planner.id)
+        transaction_of_sale = response.transactions[0]
+        assert isinstance(transaction_of_sale.peer, UseCase.CompanyPeer)
+        assert transaction_of_sale.peer.name == consumer.name

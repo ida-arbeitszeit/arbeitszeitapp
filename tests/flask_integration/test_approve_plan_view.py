@@ -11,7 +11,7 @@ class AccountantTests(ViewTestCase):
     def test_that_logged_in_accountant_gets_redirected(self) -> None:
         plan = self.plan_generator.create_plan()
         self.assert_response_has_expected_code(
-            url=f"/accountant/plans/{plan.id}/approve",
+            url=f"/accountant/plans/{plan}/approve",
             method="post",
             login=LogInUser.accountant,
             expected_code=302,
@@ -20,7 +20,7 @@ class AccountantTests(ViewTestCase):
     def test_that_unauthenticated_user_gets_redirected(self) -> None:
         plan = self.plan_generator.create_plan()
         self.assert_response_has_expected_code(
-            url=f"/accountant/plans/{plan.id}/approve",
+            url=f"/accountant/plans/{plan}/approve",
             method="post",
             login=None,
             expected_code=302,

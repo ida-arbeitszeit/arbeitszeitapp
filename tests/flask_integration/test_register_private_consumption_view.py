@@ -44,7 +44,7 @@ class AuthenticatedMemberTests(ViewTestCase):
         response = self.client.post(
             self.url,
             data=dict(
-                plan_id=plan.id,
+                plan_id=plan,
                 amount=2,
             ),
         )

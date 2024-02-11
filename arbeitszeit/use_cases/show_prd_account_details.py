@@ -4,21 +4,27 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
-from arbeitszeit.records import AccountOwner, SocialAccounting
+from arbeitszeit.records import AccountOwner, Company, Member
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
 @dataclass
 class ShowPRDAccountDetailsUseCase:
+    class MemberPeer:
+        ...
+
     @dataclass
-    class Buyer:
-        buyer_is_member: bool
-        buyer_id: UUID
-        buyer_name: str
+    class CompanyPeer:
+        name: str
+        id: UUID
+
+    @dataclass
+    class SocialAccountingPeer:
+        id: UUID
 
     @dataclass
     class TransactionInfo:
@@ -26,7 +32,11 @@ class ShowPRDAccountDetailsUseCase:
         date: datetime
         transaction_volume: Decimal
         purpose: str
-        buyer: Optional[ShowPRDAccountDetailsUseCase.Buyer]
+        peer: (
+            ShowPRDAccountDetailsUseCase.MemberPeer
+            | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
+            | ShowPRDAccountDetailsUseCase.CompanyPeer
+        )
 
     @dataclass
     class PlotDetails:
@@ -52,7 +62,7 @@ class ShowPRDAccountDetailsUseCase:
                 date=row.transaction.date,
                 transaction_volume=row.volume,
                 purpose=row.transaction.purpose,
-                buyer=self._create_buyer_info(row.peer),
+                peer=self._create_peer_info(row.peer),
             )
             for row in self.accounting_service.get_statement_of_account(
                 company, [company.product_account]
@@ -87,13 +97,19 @@ class ShowPRDAccountDetailsUseCase:
         volumes_cumsum = list(accumulate(t.transaction_volume for t in transactions))
         return volumes_cumsum
 
-    def _create_buyer_info(
-        self, buyer: AccountOwner
-    ) -> Optional[ShowPRDAccountDetailsUseCase.Buyer]:
-        if isinstance(buyer, SocialAccounting):
-            return None
-        return self.Buyer(
-            buyer_is_member=buyer.is_member(),
-            buyer_id=buyer.id,
-            buyer_name=buyer.get_name(),
-        )
+    def _create_peer_info(
+        self, peer: AccountOwner
+    ) -> (
+        ShowPRDAccountDetailsUseCase.MemberPeer
+        | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
+        | ShowPRDAccountDetailsUseCase.CompanyPeer
+    ):
+        if isinstance(peer, Member):
+            return self.MemberPeer()
+        elif isinstance(peer, Company):
+            return self.CompanyPeer(
+                id=peer.id,
+                name=peer.get_name(),
+            )
+        else:
+            return self.SocialAccountingPeer(id=peer.id)

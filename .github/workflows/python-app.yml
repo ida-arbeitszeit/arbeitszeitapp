@@ -1,6 +1,10 @@
 name: Arbeitszeitapp CI Tests
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   static-code-analysis:
@@ -61,10 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4.5.0
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         cache: 'pip'
     - name: Install dependencies
       run: |
@@ -101,7 +105,7 @@ jobs:
   unittests-nixpkgs:
     strategy:
       matrix:
-        devShell: [nixos-unstable, nixos-23-05, nixos-23-11]
+        devShell: [nixos-unstable, nixos-23-11]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -112,7 +116,7 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     # One might be tempted to run all the tests from `./run-checks`
     # but this could be a bad idea.  The python packages used with
-    # nixos-23-05 are older then nixos-unstable.  This means that
+    # nixos-23-11 are older then nixos-unstable.  This means that
     # there might be incompatibilities between different versions of
     # the tools used, e.g. mypy, flake8, black and so on. To avoid
     # running into these incompatibilities we simply don't run

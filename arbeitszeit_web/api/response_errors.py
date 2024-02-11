@@ -1,3 +1,7 @@
+"""
+The exceptions in this module are ordered by their HTTP status code.
+"""
+
 from typing import Protocol
 
 from arbeitszeit_web.api.presenters.interfaces import JsonObject, JsonString, JsonValue
@@ -30,6 +34,18 @@ error_response_schema = JsonObject(
 )
 
 
+class BadRequest(Exception):
+    code = 400
+    description = "Bad Request"
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    @classmethod
+    def get_schema(cls) -> JsonValue:
+        return error_response_schema
+
+
 class Unauthorized(Exception):
     code = 401
     description = "Unauthorized"
@@ -42,9 +58,9 @@ class Unauthorized(Exception):
         return error_response_schema
 
 
-class BadRequest(Exception):
-    code = 400
-    description = "Bad Request"
+class Forbidden(Exception):
+    code = 403
+    description = "Forbidden"
 
     def __init__(self, message: str) -> None:
         self.message = message

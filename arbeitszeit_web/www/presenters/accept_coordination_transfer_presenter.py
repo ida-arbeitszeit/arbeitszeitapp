@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
-
-from typing_extensions import assert_never
+from typing import Optional, assert_never
 
 from arbeitszeit.use_cases.accept_coordination_transfer import (
     AcceptCoordinationTransferUseCase,

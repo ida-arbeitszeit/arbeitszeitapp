@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
 from arbeitszeit_web.api.controllers.expected_input import InputLocation
 from arbeitszeit_web.api.controllers.query_plans_api_controller import (
@@ -40,42 +42,73 @@ class ControllerTests(BaseTestCase):
         use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, 30)
 
-    def test_correct_offset_gets_returned_if_it_was_set_in_query_string(self):
-        expected_offset = 8
+    @parameterized.expand(
+        [
+            (0,),
+            (110,),
+        ]
+    )
+    def test_offset_gets_returned_if_it_is_positive_integer_and_set_in_query_string(
+        self,
+        expected_offset: int,
+    ):
         self.request.set_arg(arg="offset", value=str(expected_offset))
         use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.offset, expected_offset)
 
-    def test_correct_limit_gets_returned_if_it_was_set_in_query_string(self):
-        expected_limit = 7
+    @parameterized.expand(
+        [
+            (0,),
+            (110,),
+        ]
+    )
+    def test_correct_limit_gets_returned_if_it_is_positive_integer_and_set_in_query_string(
+        self,
+        expected_limit: int,
+    ):
         self.request.set_arg(arg="limit", value=expected_limit)
         use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, expected_limit)
 
+    @parameterized.expand(
+        [
+            (0, 110),
+            (110, 0),
+        ]
+    )
     def test_both_correct_limit_and_offset_get_returned_if_specified_in_query_string(
         self,
+        expected_limit: int,
+        expected_offset: int,
     ):
-        expected_limit = 7
         self.request.set_arg(arg="limit", value=expected_limit)
-        expected_offset = 8
-        self.request.set_arg(arg="offset", value=str(expected_offset))
+        self.request.set_arg(arg="offset", value=expected_offset)
         use_case_request = self.controller.create_request()
         self.assertEqual(use_case_request.limit, expected_limit)
         self.assertEqual(use_case_request.offset, expected_offset)
 
-    def test_controller_raises_bad_request_if_offset_query_string_has_letters(self):
-        input = "123abc"
-        self.request.set_arg(arg="offset", value=input)
+    @parameterized.expand(
+        [
+            ("abc",),
+            ("123abc",),
+            ("abc123",),
+        ]
+    )
+    def test_controller_raises_bad_request_if_offset_query_string_has_letters(
+        self,
+        offset: str,
+    ):
+        self.request.set_arg(arg="offset", value=offset)
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(
-            err.exception.message, f"Input must be an integer, not {input}."
+            err.exception.message, f"Input must be an integer, not {offset}."
         )
 
     def test_controller_raises_bad_request_if_offset_query_string_is_negative_number(
         self,
     ):
-        input = "-123"
+        input = -123
         self.request.set_arg(arg="offset", value=input)
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
@@ -95,7 +128,7 @@ class ControllerTests(BaseTestCase):
     def test_controller_raises_bad_request_if_limit_query_string_is_negative_number(
         self,
     ):
-        input = "-123"
+        input = -123
         self.request.set_arg(arg="limit", value=input)
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
@@ -120,7 +153,7 @@ class ExpectedInputsTests(BaseTestCase):
     def test_input_offset_has_correct_parameters(self):
         input = self.inputs[0]
         self.assertEqual(input.name, "offset")
-        self.assertEqual(input.type, str)
+        self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query offset.")
         self.assertEqual(input.default, 0)
         self.assertEqual(input.location, InputLocation.query)
@@ -133,7 +166,7 @@ class ExpectedInputsTests(BaseTestCase):
     def test_input_limit_has_correct_parameters(self):
         input = self.inputs[1]
         self.assertEqual(input.name, "limit")
-        self.assertEqual(input.type, str)
+        self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query limit.")
         self.assertEqual(input.default, 30)
         self.assertEqual(input.location, InputLocation.query)

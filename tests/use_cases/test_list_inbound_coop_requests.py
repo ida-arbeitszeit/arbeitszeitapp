@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from arbeitszeit.records import Plan
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
     ListInboundCoopRequestsRequest,
@@ -15,13 +14,13 @@ class UseCaseTest(BaseTestCase):
         super().setUp()
         self.use_case = self.injector.get(ListInboundCoopRequests)
 
-    def test_emtpy_list_is_returned_when_cooperation_is_not_found(self):
+    def test_emtpy_list_is_returned_when_cooperation_is_not_found(self) -> None:
         response = self.use_case(ListInboundCoopRequestsRequest(uuid4()))
         assert len(response.cooperation_requests) == 0
 
     def test_empty_list_is_returned_when_there_are_no_requests_for_coordinator(
         self,
-    ):
+    ) -> None:
         coordinator = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(requested_cooperation=coop)
@@ -30,7 +29,7 @@ class UseCaseTest(BaseTestCase):
 
     def test_correct_plans_are_returned_when_plans_request_cooperation(
         self,
-    ):
+    ) -> None:
         coordinator = self.company_generator.create_company()
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         requesting_plan1 = self.plan_generator.create_plan(requested_cooperation=coop)
@@ -42,7 +41,7 @@ class UseCaseTest(BaseTestCase):
 
     def test_that_requests_for_expired_plans_are_not_shown(
         self,
-    ):
+    ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coordinator = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
@@ -53,9 +52,9 @@ class UseCaseTest(BaseTestCase):
         assert len(response.cooperation_requests) == 1
 
     def plan_in_list(
-        self, plan: Plan, response: ListInboundCoopRequestsResponse
+        self, plan: UUID, response: ListInboundCoopRequestsResponse
     ) -> bool:
         for listed_request in response.cooperation_requests:
-            if plan.id == listed_request.plan_id:
+            if plan == listed_request.plan_id:
                 return True
         return False

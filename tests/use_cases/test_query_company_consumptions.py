@@ -22,19 +22,19 @@ class UseCaseTests(BaseTestCase):
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
         self.consumption_generator.create_resource_consumption_by_company(
-            consumer=company, plan=plan.id
+            consumer=company, plan=plan
         )
         results = list(self.query_consumptions(company))
         assert len(results) == 1
         latest_consumption = results[0]
-        assert latest_consumption.plan_id == plan.id
+        assert latest_consumption.plan_id == plan
 
     def test_latter_of_two_consumptions_is_returned_first_other_one_is_returned_second(
         self,
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        first_plan = self.plan_generator.create_plan().id
-        second_plan = self.plan_generator.create_plan().id
+        first_plan = self.plan_generator.create_plan()
+        second_plan = self.plan_generator.create_plan()
         company = self.company_generator.create_company()
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=first_plan

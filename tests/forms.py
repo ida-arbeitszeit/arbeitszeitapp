@@ -2,10 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, List, Optional, Self, TypeVar
 from uuid import uuid4
-
-from typing_extensions import Self
 
 T = TypeVar("T")
 

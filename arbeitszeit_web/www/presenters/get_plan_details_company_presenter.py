@@ -14,8 +14,6 @@ from ...url_index import UrlIndex
 
 @dataclass
 class OwnPlanAction:
-    is_available_bool: bool
-    toggle_availability_url: str
     is_cooperating: bool
     end_coop_url: Optional[str]
     request_coop_url: Optional[str]
@@ -64,10 +62,6 @@ class GetPlanDetailsCompanyPresenter:
 
     def _create_own_plan_action_section(self, plan: PlanDetails) -> OwnPlanAction:
         section = OwnPlanAction(
-            is_available_bool=plan.is_available,
-            toggle_availability_url=self.url_index.get_toggle_availability_url(
-                plan.plan_id
-            ),
             is_cooperating=plan.is_cooperating,
             end_coop_url=self.url_index.get_end_coop_url(
                 plan_id=plan.plan_id, cooperation_id=plan.cooperation

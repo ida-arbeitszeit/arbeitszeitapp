@@ -38,14 +38,11 @@ class ApiTestCase(FlaskTestCase):
         self.company_generator.create_company(
             password=password, email=email, confirmed=True
         )
-        # login via webapp, not api
-        # because api endpoint has not been implemented yet
         response = self.client.post(
-            "/company/login",
+            self.url_prefix + "/auth/login_company",
             data=dict(
                 email=email,
                 password=password,
             ),
-            follow_redirects=True,
         )
         assert response.status_code < 400

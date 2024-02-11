@@ -5,6 +5,7 @@ from arbeitszeit_flask.extensions import csrf_protect
 
 from .auth import namespace as auth_ns
 from .companies import namespace as companies_ns
+from .consumptions import namespace as consumptions_ns
 from .plans import namespace as plans_ns
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -28,6 +29,8 @@ api_extension = Api(
     decorators=[csrf_protect.exempt],
 )
 
-api_extension.add_namespace(plans_ns)
-api_extension.add_namespace(companies_ns)
+# the ordering of these calls determines the order of the endpoints in the swagger UI
 api_extension.add_namespace(auth_ns)
+api_extension.add_namespace(companies_ns)
+api_extension.add_namespace(plans_ns)
+api_extension.add_namespace(consumptions_ns)

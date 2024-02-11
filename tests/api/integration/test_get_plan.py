@@ -5,8 +5,8 @@ class UnauthenticatedUsersTests(ApiTestCase):
     def setUp(self) -> None:
         super().setUp()
 
-    def test_unauthenticated_user_gets_401_with_valid_path_params(self):
-        valid_plan_id = str(self.plan_generator.create_plan().id)
+    def test_unauthenticated_user_gets_401_with_valid_path_params(self) -> None:
+        valid_plan_id = str(self.plan_generator.create_plan())
         valid_url = self.create_url(valid_plan_id)
         response = self.client.get(valid_url)
         self.assertEqual(response.status_code, 401)
@@ -22,7 +22,7 @@ class AuthenticatedCompanyTests(ApiTestCase):
         self.login_company()
 
     def test_get_returns_200_with_valid_path_parameter(self) -> None:
-        valid_plan_id = str(self.plan_generator.create_plan().id)
+        valid_plan_id = str(self.plan_generator.create_plan())
         valid_url = self.create_url(path_param=valid_plan_id)
         response = self.client.get(valid_url)
         self.assertEqual(response.status_code, 200)
@@ -38,7 +38,7 @@ class AuthenticatedMemberTests(ApiTestCase):
         self.login_member()
 
     def test_get_returns_200_with_valid_path_parameter(self) -> None:
-        valid_plan_id = str(self.plan_generator.create_plan().id)
+        valid_plan_id = str(self.plan_generator.create_plan())
         valid_url = self.create_url(path_param=valid_plan_id)
         response = self.client.get(valid_url)
         self.assertEqual(response.status_code, 200)

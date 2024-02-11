@@ -38,11 +38,14 @@ class LoggedInCompanyTests(ViewTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_request_shows_truncated_plan_name_and_id_of_company_plan(self) -> None:
-        plan = self.plan_generator.create_plan(planner=self.company.id)
+        product_name = "product test name"
+        plan = self.plan_generator.create_plan(
+            planner=self.company.id, product_name=product_name
+        )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(plan.prd_name[:10], response.get_data(as_text=True))
-        self.assertIn(str(plan.id)[:6], response.get_data(as_text=True))
+        self.assertIn(product_name[:10], response.get_data(as_text=True))
+        self.assertIn(str(plan)[:6], response.get_data(as_text=True))
 
     def test_get_request_shows_message_if_company_has_no_plans(self) -> None:
         response = self.client.get(self.url)
