@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("All companies") }}</div>
+{% endblock %}
+
+{% block content %}
+{% from 'macros/pagination.html' import render_pagination %}
+<div class="section has-text-centered">
+    <h1 class="title">
+        {{ gettext("Search companies") }}
+    </h1>
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            <form method="get">
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-large is-fullwidth">
+                            {{ form.select }}
+                        </div>
+                    </div>
+                    <p class="help">{{ gettext("Search by name or email")}}</p>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        {{ form.search(class_="input is-large") }}
+                    </div>
+                </div>
+                <button class="button is-block is-primary is-large is-fullwidth">
+                    {{ gettext("Search") }}
+                </button>
+            </form>
+        </div>
+    </div>
+    <h1 class="title">
+        {{ gettext("Results") }}
+    </h1>
+</div>
+
+{% if view_model.show_results %}
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            {{ render_pagination(view_model.pagination) }}
+            {% for column in view_model.results.rows %}
+            <article class="media">
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                <a href="{{ column.company_summary_url }}">{{ column.company_name }}</a>
+                            </strong>
+                            <br>
+                            <small>{{ column.company_email }}</small>
+                        </p>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+            {{ render_pagination(view_model.pagination) }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

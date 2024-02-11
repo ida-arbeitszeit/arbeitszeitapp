@@ -34,7 +34,6 @@ class QueryPlansApiPresenter:
                         description=JsonString(),
                         price_per_unit=JsonDecimal(),
                         is_public_service=JsonBoolean(),
-                        is_available=JsonBoolean(),
                         is_cooperating=JsonBoolean(),
                         activation_date=JsonDatetime(),
                     ),

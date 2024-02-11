@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Global statistics") }}</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="section">
+    <div class="has-text-centered">
+        <h1 class="title">{{ gettext("Global statistics") }}</h1>
+    </div>
+    <div class="block py-2"></div>
+    <div class="tile is-ancestor has-text-centered">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.registered_companies_count }}</h1>
+                <div class="subtitle">{{ gettext("Companies") }}</div>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.registered_members_count }}</h1>
+                <div class="subtitle">{{ gettext("Workers") }}</div>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.active_plans_count }}</h1>
+                <div class="subtitle">{{ gettext("Plans") }}</div>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.cooperations_count }}</h1>
+                <div class="subtitle">{{ gettext("Cooperations") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent has-text-centered">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.payout_factor }}</h1>
+                <div class="subtitle">{{ gettext("FIC (Payout factor)") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Plans") }}</h1>
+                <div>
+                    <img src="{{ view_model.barplot_plans_url }}" alt="bar plot of public and productive plans">
+                </div>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Planned ressources") }}</h1>
+                <div>
+                    <img src="{{ view_model.barplot_means_of_production_url }}" alt="bar plot of means of production">
+                </div>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title is-4 has-text-centered">{{ gettext("Certificates and products") }}</h1>
+                <div>
+                    <img src="{{ view_model.barplot_for_certificates_url }}" alt="bar plot of certificates vs product">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <b>{{ gettext("Active plans") }}:</b> {{ view_model.active_plans_count }} &#8212;
+                <b>{{ gettext("Public active plans") }}:</b> {{ view_model.active_plans_public_count }} &#8212;
+                <b>{{ gettext("Average plan duration") }}:</b> {{ view_model.average_timeframe_days }} &#8212;
+                <b>{{ gettext("Currently planned fixed means") }}:</b> {{ view_model.planned_means_hours }} &#8212;
+                <b>{{ gettext("Currently planned liquid means") }}:</b> {{ view_model.planned_resources_hours }} &#8212;
+                <b>{{ gettext("Currently planned work") }}:</b> {{ view_model.planned_work_hours }} &#8212;
+                <b>{{ gettext("Available work certificates") }}:</b> {{ view_model.certificates_count }} &#8212;
+                <b>{{ gettext("Available product (no public products)") }}:</b> {{ view_model.available_product }}
+            </div>
+        </div>
+        <div class="tile is-parent is-4 has-text-centered">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.average_timeframe_days }}</h1>
+                <div class="subtitle">{{ gettext("Average plan duration") }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

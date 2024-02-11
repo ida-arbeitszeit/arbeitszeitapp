@@ -34,7 +34,6 @@ class GetCoopSummaryResponse:
     current_coordinator: UUID
     current_coordinator_name: str
     coop_price: Optional[Decimal]
-
     plans: List[AssociatedPlan]
 
 

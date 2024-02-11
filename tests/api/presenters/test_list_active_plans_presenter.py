@@ -136,7 +136,6 @@ class TestSchema(BaseTestCase):
             ("product_name", JsonString),
             ("description", JsonString),
             ("is_public_service", JsonBoolean),
-            ("is_available", JsonBoolean),
             ("is_cooperating", JsonBoolean),
             ("price_per_unit", JsonDecimal),
             ("activation_date", JsonDatetime),

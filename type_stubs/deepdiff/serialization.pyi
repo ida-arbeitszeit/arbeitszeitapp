@@ -1,7 +1,7 @@
 import json
 import pickle
 from _typeshed import Incomplete
-from deepdiff.helper import TEXT_VIEW as TEXT_VIEW, get_type as get_type, strings as strings
+from deepdiff.helper import TEXT_VIEW as TEXT_VIEW, get_type as get_type, np_float32 as np_float32, np_float64 as np_float64, np_int32 as np_int32, np_int64 as np_int64, strings as strings
 from deepdiff.model import DeltaResult as DeltaResult
 
 csv: Incomplete

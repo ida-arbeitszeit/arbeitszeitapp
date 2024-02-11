@@ -1,51 +1,63 @@
 from datetime import datetime
-from unittest import TestCase
+from uuid import UUID
 
-from arbeitszeit.records import Plan
 from arbeitszeit.use_cases.hide_plan import HidePlan
-from tests.data_generators import PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 
-from .dependency_injection import get_dependency_injector
+from .base_test_case import BaseTestCase
 
 
-class UseCaseTests(TestCase):
+class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
-        self.injector = get_dependency_injector()
-        self.plan_generator = self.injector.get(PlanGenerator)
+        super().setUp()
         self.hide_plan = self.injector.get(HidePlan)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
+        self.show_my_plans_use_case = self.injector.get(ShowMyPlansUseCase)
         self.now = datetime(2000, 1, 1)
         self.datetime_service.freeze_time(self.now)
 
-    def test_that_correct_plan_gets_hidden_attribute_set_to_true(self):
-        plan1 = self.create_expired_plan()
-        plan2 = self.create_expired_plan()
-        plan3 = self.create_expired_plan()
-        self.hide_plan(plan2.id)
-        self.assertFalse(plan1.hidden_by_user)
-        self.assertTrue(plan2.hidden_by_user)
-        self.assertFalse(plan3.hidden_by_user)
+    def test_that_correct_plan_gets_hidden_attribute_set_to_true(self) -> None:
+        planner = self.company_generator.create_company()
+        plan1 = self.create_expired_plan(planner)
+        plan2 = self.create_expired_plan(planner)
+        plan3 = self.create_expired_plan(planner)
+        self.hide_plan(plan2)
+        assert not self.is_plan_hidden(plan=plan1, planner=planner)
+        assert self.is_plan_hidden(plan=plan2, planner=planner)
+        assert not self.is_plan_hidden(plan=plan3, planner=planner)
 
-    def test_that_correct_response_gets_returned(self):
+    def test_that_correct_response_gets_returned(self) -> None:
         plan = self.create_expired_plan()
-        response = self.hide_plan(plan.id)
-        self.assertEqual(response.plan_id, plan.id)
+        response = self.hide_plan(plan)
+        self.assertEqual(response.plan_id, plan)
         self.assertEqual(response.is_success, True)
 
     def test_that_active_plans_do_not_get_hidden_and_correct_response_gets_returned(
         self,
-    ):
+    ) -> None:
         plan = self.create_active_plan()
-        response = self.hide_plan(plan.id)
-        assert response.plan_id == plan.id
+        response = self.hide_plan(plan)
+        assert response.plan_id == plan
         assert response.is_success == False
 
-    def create_expired_plan(self) -> Plan:
+    def create_expired_plan(self, planner: UUID | None = None) -> UUID:
+        if not planner:
+            planner = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        plan = self.plan_generator.create_plan(timeframe=1)
+        plan = self.plan_generator.create_plan(planner=planner, timeframe=1)
         self.datetime_service.unfreeze_time()
         return plan
 
-    def create_active_plan(self) -> Plan:
+    def create_active_plan(self) -> UUID:
         return self.plan_generator.create_plan()
+
+    def is_plan_hidden(self, *, plan: UUID, planner: UUID) -> bool:
+        request = ShowMyPlansRequest(planner)
+        response = self.show_my_plans_use_case.show_company_plans(request)
+        return plan not in (
+            plan_info.id
+            for plan_info in (
+                response.non_active_plans
+                + response.active_plans
+                + response.expired_plans
+            )
+        )

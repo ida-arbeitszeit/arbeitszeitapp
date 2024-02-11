@@ -2,7 +2,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit_web.formatters.plan_details_formatter import PlanDetailsFormatter
-from arbeitszeit_web.session import UserRole
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
@@ -199,22 +198,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
                 self.translator.gettext("Price (per unit)"),
                 "0.06",
                 True,
-                self.url_index.get_coop_summary_url(
-                    user_role=UserRole.company, coop_id=COOP_ID
-                ),
-            ),
-        )
-
-    def test_availability_is_displayed_correctly_as_tuple_of_strings(self):
-        plan_details = self.plan_details_generator.create_plan_details(
-            is_available=True
-        )
-        web_details = self.formatter.format_plan_details(plan_details)
-        self.assertTupleEqual(
-            web_details.availability_string,
-            (
-                self.translator.gettext("Product currently available"),
-                self.translator.gettext("Yes"),
+                self.url_index.get_coop_summary_url(coop_id=COOP_ID),
             ),
         )
 

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+{% from 'macros/navbar.html' import navbar %}
+{{ navbar(view_model.navbar_items) }}
+{% endblock %}
+
+{% block content %}
+
+<div class="section has-text-centered">
+    <div class="content">
+        <h1>{{ gettext("History of coordinators") }}</h1>
+    </div>
+    <br>
+    <div class="table-container">
+        <table class="table has-text-left mx-auto">
+            <tbody>
+                <tr>
+                    <td class="has-text-left has-text-weight-semibold">{{ gettext("Cooperation") }}:</td>
+                    <td class="has-text-left"><a href="{{ view_model.cooperation_url }}">{{ view_model.cooperation_name }}</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% if view_model.has_coordinations %}
+        <div class="columns is-centered has-text-left">
+            <div class="column is-one-third">
+                {% for coordination in view_model.coordinations %}
+                <article class="media">
+                    <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                <a href="{{ coordination.coordinator_url }}">{{ coordination.coordinator_name }}</a>
+                            </strong>
+                            <br>
+                            <small>{{ gettext("Start of coordination") }}:&emsp;{{ coordination.start_time }}</small>
+                            <br>
+                            <small>{{ gettext("End of coordination") }}:&emsp;{{ coordination.end_time }}</small>
+                        </p>
+                    </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <p class="has-text-centered">{{ gettext("No coordinators found.")}}</p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -17,14 +17,14 @@ class QueryPlansApiController:
         return [
             ExpectedInput(
                 name="offset",
-                type=str,
+                type=int,
                 description="The query offset.",
                 default=DEFAULT_OFFSET,
                 location=InputLocation.query,
             ),
             ExpectedInput(
                 name="limit",
-                type=str,
+                type=int,
                 description="The query limit.",
                 default=DEFAULT_LIMIT,
                 location=InputLocation.query,

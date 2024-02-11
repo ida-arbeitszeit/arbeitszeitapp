@@ -48,7 +48,7 @@ class RegisterProductiveConsumption:
             plan, consumer, purpose = self._validate_request(request)
         except RegisterProductiveConsumptionResponse.RejectionReason as reason:
             return RegisterProductiveConsumptionResponse(rejection_reason=reason)
-        self.create_transaction(
+        self._create_transaction(
             consumer=consumer,
             plan=plan,
             amount=request.amount,
@@ -98,7 +98,7 @@ class RegisterProductiveConsumption:
             raise RegisterProductiveConsumptionResponse.RejectionReason.invalid_consumption_type
         return request.consumption_type
 
-    def create_transaction(
+    def _create_transaction(
         self,
         amount: int,
         consumption_type: ConsumptionType,

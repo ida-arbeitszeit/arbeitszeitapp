@@ -7,3 +7,6 @@ class PasswordHasher(Protocol):
 
     def is_password_matching_hash(self, password: str, password_hash: str) -> bool:
         ...
+
+    def is_regeneration_needed(self, password_hash: str) -> bool:
+        ...

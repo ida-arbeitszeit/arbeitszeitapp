@@ -17,7 +17,7 @@ class ShowMyAccountsView:
     use_case: ShowMyAccounts
     presenter: ShowMyAccountsPresenter
 
-    def respond_to_get(self) -> Response:
+    def GET(self) -> Response:
         use_case_request = self.controller.create_request()
         response = self.use_case(use_case_request)
         view_model = self.presenter.present(response)

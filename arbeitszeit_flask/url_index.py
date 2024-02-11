@@ -43,34 +43,13 @@ class GeneralUrlIndex:
     def get_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
-    def get_coop_summary_url(self, user_role: Optional[UserRole], coop_id: UUID) -> str:
-        if user_role == UserRole.member:
-            return url_for("main_member.coop_summary", coop_id=coop_id)
-        elif user_role == UserRole.company:
-            return url_for("main_company.coop_summary", coop_id=coop_id)
-        elif user_role == UserRole.accountant:
-            return url_for("main_accountant.coop_summary", coop_id=coop_id)
-        else:
-            raise ValueError(f"coop summary url not available for {user_role}")
+    def get_coop_summary_url(self, coop_id: UUID) -> str:
+        return url_for("main_user.coop_summary", coop_id=coop_id)
 
-    def get_list_of_coordinators_url(
-        self, user_role: Optional[UserRole], cooperation_id: UUID
-    ) -> str:
-        if user_role == UserRole.member:
-            return url_for(
-                "main_member.list_coordinators_of_cooperation", coop_id=cooperation_id
-            )
-        elif user_role == UserRole.company:
-            return url_for(
-                "main_company.list_coordinators_of_cooperation", coop_id=cooperation_id
-            )
-        elif user_role == UserRole.accountant:
-            return url_for(
-                "main_accountant.list_coordinators_of_cooperation",
-                coop_id=cooperation_id,
-            )
-        else:
-            raise ValueError(f"list of coordinators url not available for {user_role}")
+    def get_list_of_coordinators_url(self, cooperation_id: UUID) -> str:
+        return url_for(
+            "main_user.list_coordinators_of_cooperation", coop_id=cooperation_id
+        )
 
     def get_company_summary_url(self, company_id: UUID) -> str:
         return url_for("main_user.company_summary", company_id=company_id)
@@ -158,9 +137,6 @@ class GeneralUrlIndex:
             type_of_consumption=type_string,
         )
 
-    def get_toggle_availability_url(self, plan_id: UUID) -> str:
-        return url_for("main_company.toggle_availability", plan_id=plan_id)
-
     def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
         return url_for(
             "main_company.end_cooperation",
@@ -205,11 +181,8 @@ class GeneralUrlIndex:
     def get_query_plans_url(self) -> str:
         return url_for(endpoint="main_user.query_plans")
 
-    def get_member_query_companies_url(self) -> str:
-        return url_for(endpoint="main_member.query_companies")
-
-    def get_company_query_companies_url(self) -> str:
-        return url_for(endpoint="main_company.query_companies")
+    def get_query_companies_url(self) -> str:
+        return url_for(endpoint="main_user.query_companies")
 
     def get_unconfirmed_member_url(self) -> str:
         return url_for(endpoint="auth.unconfirmed_member")

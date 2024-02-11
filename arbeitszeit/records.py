@@ -209,7 +209,6 @@ class Plan:
     activation_date: Optional[datetime]
     requested_cooperation: Optional[UUID]
     cooperation: Optional[UUID]
-    is_available: bool
     hidden_by_user: bool
 
     @property

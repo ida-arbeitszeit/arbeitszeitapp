@@ -48,9 +48,7 @@ class EndCooperationPresenter:
                     user_role=self.session.get_user_role(), plan_id=UUID(plan_id)
                 )
                 return url
-        url = self.url_index.get_coop_summary_url(
-            user_role=self.session.get_user_role(), coop_id=UUID(cooperation_id)
-        )
+        url = self.url_index.get_coop_summary_url(coop_id=UUID(cooperation_id))
         return url
 
     def _refers_from_plan_details(self, referer: str) -> bool:

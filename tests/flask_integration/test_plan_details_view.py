@@ -11,7 +11,7 @@ class MemberViewTests(ViewTestCase):
     def test_get_200_when_accessing_view(self) -> None:
         plan_generator = self.injector.get(PlanGenerator)
         plan = plan_generator.create_plan()
-        response = self.client.get(f"/member/plan_details/{plan.id}")
+        response = self.client.get(f"/member/plan_details/{plan}")
         self.assertEqual(response.status_code, 200)
 
 
@@ -20,5 +20,5 @@ class CompanyViewTests(ViewTestCase):
         self.company = self.login_company()
         plan_generator = self.injector.get(PlanGenerator)
         plan = plan_generator.create_plan()
-        response = self.client.get(f"/company/plan_details/{plan.id}")
+        response = self.client.get(f"/company/plan_details/{plan}")
         self.assertEqual(response.status_code, 200)

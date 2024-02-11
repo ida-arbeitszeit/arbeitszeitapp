@@ -35,12 +35,10 @@ class LogInMemberUseCase:
     def log_in_member(self, request: Request) -> Response:
         credentials: records.AccountCredentials
         member: Optional[records.Member]
-        record = (
-            self.database.get_account_credentials()
-            .with_email_address(request.email.strip())
-            .joined_with_member()
-            .first()
+        credentials_query = self.database.get_account_credentials().with_email_address(
+            request.email.strip()
         )
+        record = credentials_query.joined_with_member().first()
         if not record or not record[1]:
             return self.Response(
                 is_logged_in=False,
@@ -59,6 +57,12 @@ class LogInMemberUseCase:
                 email=request.email,
                 user_id=None,
             )
+        if self.password_hasher.is_regeneration_needed(credentials.password_hash):
+            credentials_query.update().change_password_hash(
+                new_password_hash=self.password_hasher.calculate_password_hash(
+                    request.password
+                )
+            ).perform()
         return self.Response(
             is_logged_in=True,
             rejection_reason=None,

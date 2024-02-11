@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.get_coordination_transfer_request_details import (
     GetCoordinationTransferRequestDetailsUseCase,
 )
 from arbeitszeit_flask import types
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.views.http_error_view import http_403, http_404, http_409
 from arbeitszeit_web.www.controllers.accept_coordination_transfer_controller import (
     AcceptCoordinationTransferController,
@@ -30,7 +31,8 @@ class ShowCoordinationTransferRequestView:
     accept_use_case: AcceptCoordinationTransferUseCase
     accept_presenter: AcceptCoordinationTransferPresenter
 
-    def respond_to_get(self, transfer_request: UUID) -> types.Response:
+    @commit_changes
+    def GET(self, transfer_request: UUID) -> types.Response:
         details_uc_response = self.details_use_case.get_details(
             request=GetCoordinationTransferRequestDetailsUseCase.Request(
                 transfer_request
@@ -44,7 +46,8 @@ class ShowCoordinationTransferRequestView:
             request_details=transfer_request_details,
         )
 
-    def respond_to_post(self, transfer_request: UUID) -> types.Response:
+    @commit_changes
+    def POST(self, transfer_request: UUID) -> types.Response:
         uc_request = self.accept_controller.create_use_case_request(
             transfer_request=transfer_request
         )

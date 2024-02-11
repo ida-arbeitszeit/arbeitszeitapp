@@ -2,10 +2,18 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar
+from typing import (
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Self,
+    Tuple,
+    TypeVar,
+)
 from uuid import UUID
-
-from typing_extensions import Self
 
 from arbeitszeit import records
 
@@ -163,9 +171,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         """
 
     def hide(self) -> Self:
-        ...
-
-    def toggle_product_availability(self) -> Self:
         ...
 
 
@@ -554,6 +559,9 @@ class AccountCredentialsResult(QueryResult[records.AccountCredentials], Protocol
 
 class AccountCredentialsUpdate(DatabaseUpdate, Protocol):
     def change_email_address(self, new_email_address: str) -> Self:
+        ...
+
+    def change_password_hash(self, new_password_hash: str) -> Self:
         ...
 
 

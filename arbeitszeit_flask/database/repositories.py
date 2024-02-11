@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Self,
     Tuple,
     TypeVar,
 )
@@ -21,7 +22,6 @@ from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import and_, case, func, or_, update
 from sqlalchemy.sql.functions import concat
-from typing_extensions import Self
 
 from arbeitszeit import records
 from arbeitszeit_flask.database import models
@@ -430,15 +430,6 @@ class PlanUpdate:
             plan_update_values=dict(
                 self.plan_update_values,
                 activation_date=activation_timestamp,
-            ),
-        )
-
-    def toggle_product_availability(self) -> Self:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                is_available=func.not_(models.Plan.is_available),
             ),
         )
 
@@ -1043,6 +1034,20 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             .filter(consuming_company.id == str(company))
         )
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        providing_company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.receiving_account == account.id)
+            .join(
+                providing_company,
+                account.id == providing_company.prd_account,
+            )
+            .filter(providing_company.id == str(company))
+        )
+
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         transaction = aliased(models.Transaction)
         ordering = transaction.date
@@ -1135,6 +1140,55 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             .with_entities(models.ProductiveConsumption, transaction, provider),
         )
 
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.ProductiveConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[
+            records.ProductiveConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Company,
+        ]:
+            consumption_orm, transaction_orm, plan_orm, company_orm = orm
+            return (
+                DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
+                DatabaseGatewayImpl.company_from_orm(company_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        plan = aliased(models.Plan)
+        company = aliased(models.Company)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction,
+                models.ProductiveConsumption.transaction_id == transaction.id,
+            )
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                company,
+                or_(
+                    company.p_account == account.id,
+                    company.r_account == account.id,
+                ),
+            )
+            .join(plan, models.ProductiveConsumption.plan_id == plan.id)
+            .with_entities(models.ProductiveConsumption, transaction, plan, company),
+        )
+
 
 class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
     def where_consumer_is_member(self, member: UUID) -> Self:
@@ -1162,6 +1216,20 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
             ).order_by(ordering)
         )
 
+    def where_provider_is_company(self, company: UUID) -> Self:
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        providing_company = aliased(models.Company)
+        return self._with_modified_query(
+            lambda query: query.join(transaction)
+            .join(account, transaction.receiving_account == account.id)
+            .join(
+                providing_company,
+                account.id == providing_company.prd_account,
+            )
+            .filter(providing_company.id == str(company))
+        )
+
     def joined_with_transactions_and_plan(
         self,
     ) -> FlaskQueryResult[
@@ -1187,6 +1255,51 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
             )
             .join(plan, models.PrivateConsumption.plan_id == plan.id)
             .with_entities(models.PrivateConsumption, transaction, plan),
+        )
+
+    def joined_with_transaction_and_plan_and_consumer(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[
+            records.PrivateConsumption,
+            records.Transaction,
+            records.Plan,
+            records.Member,
+        ]:
+            consumption_orm, transaction_orm, plan_orm, member_orm = orm
+            return (
+                DatabaseGatewayImpl.private_consumption_from_orm(consumption_orm),
+                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.plan_from_orm(plan_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+            )
+
+        transaction = aliased(models.Transaction)
+        account = aliased(models.Account)
+        plan = aliased(models.Plan)
+        member = aliased(models.Member)
+        return FlaskQueryResult(
+            db=self.db,
+            mapper=mapper,
+            query=self.query.join(
+                transaction, models.PrivateConsumption.transaction_id == transaction.id
+            )
+            .join(account, transaction.sending_account == account.id)
+            .join(
+                member,
+                account.id == member.account,
+            )
+            .join(plan, models.PrivateConsumption.plan_id == plan.id)
+            .with_entities(models.PrivateConsumption, transaction, plan, member),
         )
 
 
@@ -1603,6 +1716,47 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
             mapper=mapper,
         )
 
+    def update(self) -> AccountCredentialsUpdate:
+        return AccountCredentialsUpdate(db=self.db, query=self.query)
+
+
+@dataclass
+class AccountCredentialsUpdate:
+    db: SQLAlchemy
+    query: Any
+    new_address: Optional[str] = None
+    password_hash: Optional[str] = None
+
+    def change_email_address(self, new_email_address: str) -> Self:
+        return replace(
+            self,
+            new_address=new_email_address,
+        )
+
+    def change_password_hash(self, new_password_hash: str) -> Self:
+        return replace(
+            self,
+            password_hash=new_password_hash,
+        )
+
+    def perform(self) -> int:
+        new_values = dict()
+        if self.new_address is not None:
+            new_values["email_address"] = self.new_address
+        if self.password_hash:
+            new_values["password"] = self.password_hash
+        if not new_values:
+            return 0
+        sql_statement = (
+            update(models.User)
+            .where(
+                models.User.id.in_(self.query.with_entities(models.User.id).subquery())
+            )
+            .values(**new_values)
+            .execution_options(synchronize_session="fetch")
+        )
+        return self.db.session.execute(sql_statement).rowcount
+
 
 @dataclass
 class AccountingRepository:
@@ -1768,7 +1922,6 @@ class DatabaseGatewayImpl:
             if plan.requested_cooperation
             else None,
             cooperation=UUID(plan.cooperation) if plan.cooperation else None,
-            is_available=plan.is_available,
             hidden_by_user=plan.hidden_by_user,
         )
 

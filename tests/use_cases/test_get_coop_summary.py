@@ -156,7 +156,7 @@ class AssociatedPlansTests(BaseTestCase):
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(GetCoopSummaryRequest(uuid4(), coop))
         assert response
-        assert response.plans[0].plan_id == plan.id
+        assert response.plans[0].plan_id == plan
 
     def test_that_associated_plan_in_a_summary_has_correct_plan_name(self) -> None:
         expected_prd_name = "A product name"
@@ -220,7 +220,7 @@ class AssociatedPlansTests(BaseTestCase):
         plan = self.plan_generator.create_plan(planner=expected_planner)
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         response = self.get_coop_summary(
-            GetCoopSummaryRequest(requester_id=plan.planner, coop_id=coop)
+            GetCoopSummaryRequest(requester_id=expected_planner, coop_id=coop)
         )
         assert response
         assert response.plans[0].requester_is_planner == True

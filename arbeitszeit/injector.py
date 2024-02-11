@@ -23,7 +23,15 @@ TypeT = TypeVar("TypeT", bound=Type)
 
 class Injector:
     def __init__(self, modules: List[Module]) -> None:
+        class _RecursionModule(Module):
+            def configure(module_self, binder: Binder) -> None:
+                super().configure(binder)
+                binder[Injector] = InstanceProvider(self)
+
+        recursion_module = _RecursionModule()
+
         self.binder: Binder = Binder(Injector.default_provider)
+        recursion_module.configure(self.binder)
         for module in modules:
             module.configure(self.binder)
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
@@ -32,30 +32,10 @@ class PlanResultTests(FlaskTestCase):
 
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.database_gateway.get_plans().with_id(plan.id).update().hide().perform()
-        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
+        self.database_gateway.get_plans().with_id(plan).update().hide().perform()
+        plan_from_repo = self.database_gateway.get_plans().with_id(plan).first()
         assert plan_from_repo
         assert plan_from_repo.hidden_by_user
-
-    def test_that_availability_is_toggled_to_false(self) -> None:
-        plan = self.plan_generator.create_plan()
-        assert plan.is_available == True
-        self.database_gateway.get_plans().with_id(
-            plan.id
-        ).update().toggle_product_availability().perform()
-        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
-        assert plan_from_repo
-        assert plan_from_repo.is_available == False
-
-    def test_that_availability_is_toggled_to_true(self) -> None:
-        plan = self.plan_generator.create_plan(is_available=False)
-        assert plan.is_available == False
-        self.database_gateway.get_plans().with_id(
-            plan.id
-        ).update().toggle_product_availability().perform()
-        plan_from_repo = self.database_gateway.get_plans().with_id(plan.id).first()
-        assert plan_from_repo
-        assert plan_from_repo.is_available == True
 
     def test_create_plan_propagates_specified_arguments_to_created_plan(self) -> None:
         expected_planner = self.company_generator.create_company()
@@ -88,7 +68,8 @@ class PlanResultTests(FlaskTestCase):
         self.database_gateway.get_plans().with_id(plan.id).update().set_approval_date(
             expected_approval_date
         ).perform()
-        changed_plan: Plan = self.database_gateway.get_plans().with_id(plan.id).first()  # type: ignore
+        changed_plan = self.database_gateway.get_plans().with_id(plan.id).first()
+        assert changed_plan
         assert changed_plan.approval_date == expected_approval_date
 
     def test_that_plan_gets_deleted(self) -> None:
@@ -135,7 +116,7 @@ class GetActivePlansTests(FlaskTestCase):
             self.datetime_service.now_minus_25_hours(),
             self.datetime_service.now_minus_one_day(),
         ]
-        plans: List[Plan] = list()
+        plans: List[UUID] = list()
         for timestamp in creation_dates:
             self.datetime_service.freeze_time(timestamp)
             plans.append(self.plan_generator.create_plan())
@@ -146,9 +127,9 @@ class GetActivePlansTests(FlaskTestCase):
             .limit(3)
         )
         assert len(retrieved_plans) == 3
-        assert retrieved_plans[0] == plans[1]
-        assert retrieved_plans[1] == plans[2]
-        assert retrieved_plans[2] == plans[4]
+        assert retrieved_plans[0].id == plans[1]
+        assert retrieved_plans[1].id == plans[2]
+        assert retrieved_plans[2].id == plans[4]
 
     def test_plans_can_be_ordered_by_activation_date_in_descending_order(
         self,
@@ -160,7 +141,7 @@ class GetActivePlansTests(FlaskTestCase):
             self.datetime_service.now_minus_25_hours(),
             self.datetime_service.now_minus_one_day(),
         ]
-        plans: List[Plan] = list()
+        plans: List[UUID] = list()
         for timestamp in activation_dates:
             self.datetime_service.freeze_time(timestamp)
             plans.append(self.plan_generator.create_plan())
@@ -171,9 +152,9 @@ class GetActivePlansTests(FlaskTestCase):
             .limit(3)
         )
         assert len(retrieved_plans) == 3
-        assert retrieved_plans[0] == plans[1]
-        assert retrieved_plans[1] == plans[2]
-        assert retrieved_plans[2] == plans[4]
+        assert retrieved_plans[0].id == plans[1]
+        assert retrieved_plans[1].id == plans[2]
+        assert retrieved_plans[2].id == plans[4]
 
     def test_plans_can_be_ordered_by_planner_name(
         self,
@@ -183,16 +164,16 @@ class GetActivePlansTests(FlaskTestCase):
             self.company_generator.create_company_record(name=name)
             for name in planner_names
         ]
-        plans: List[Plan] = list()
+        plans: List[UUID] = list()
         for company in planners:
             plans.append(self.plan_generator.create_plan(planner=company.id))
         retrieved_plans = list(
             self.database_gateway.get_plans().ordered_by_planner_name().limit(3)
         )
         assert len(retrieved_plans) == 3
-        assert retrieved_plans[0] == plans[0]
-        assert retrieved_plans[1] == plans[1]
-        assert retrieved_plans[2] == plans[3]
+        assert retrieved_plans[0].id == plans[0]
+        assert retrieved_plans[1].id == plans[1]
+        assert retrieved_plans[2].id == plans[3]
 
     def test_that_plans_can_be_filtered_by_product_name(self) -> None:
         expected_plan = self.plan_generator.create_plan(
@@ -204,7 +185,7 @@ class GetActivePlansTests(FlaskTestCase):
             )
         )
         assert returned_plan
-        assert returned_plan[0] == expected_plan
+        assert returned_plan[0].id == expected_plan
 
     def test_that_plans_can_be_filtered_by_substrings_of_product_name(
         self,
@@ -216,17 +197,16 @@ class GetActivePlansTests(FlaskTestCase):
             self.database_gateway.get_plans().with_product_name_containing("very of go")
         )
         assert returned_plan
-        assert returned_plan[0] == expected_plan
+        assert returned_plan[0].id == expected_plan
 
     def test_that_query_plans_by_substring_of_plan_id_returns_plan(self) -> None:
         expected_plan = self.plan_generator.create_plan()
-        expected_plan_id = expected_plan.id
-        query = str(expected_plan_id)[3:8]
+        query = str(expected_plan)[3:8]
         returned_plan = list(
             self.database_gateway.get_plans().with_id_containing(query)
         )
         assert returned_plan
-        assert returned_plan[0] == expected_plan
+        assert returned_plan[0].id == expected_plan
 
     def test_that_plans_that_ordering_by_creation_date_works_even_when_plan_activation_was_in_reverse_order(
         self,
@@ -238,18 +218,18 @@ class GetActivePlansTests(FlaskTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 3))
         self.approve_plan_use_case.approve_plan(
             request=ApprovePlanUseCase.Request(
-                plan=second_plan.id,
+                plan=second_plan,
             )
         )
         self.datetime_service.freeze_time(datetime(2000, 1, 4))
         self.approve_plan_use_case.approve_plan(
             request=ApprovePlanUseCase.Request(
-                plan=first_plan.id,
+                plan=first_plan,
             )
         )
         plans = list(self.database_gateway.get_plans().ordered_by_creation_date())
-        assert plans[0].id == first_plan.id
-        assert plans[1].id == second_plan.id
+        assert plans[0].id == first_plan
+        assert plans[1].id == second_plan
 
 
 class GetAllPlans(FlaskTestCase):
@@ -314,20 +294,23 @@ class GetAllPlans(FlaskTestCase):
 
     def test_can_get_plan_by_its_id(self) -> None:
         expected_plan = self.plan_generator.create_plan()
-        assert expected_plan in self.database_gateway.get_plans().with_id(
-            expected_plan.id
-        )
+        assert expected_plan in [
+            p.id for p in self.database_gateway.get_plans().with_id(expected_plan)
+        ]
 
     def test_can_filter_plans_by_multiple_ids(self) -> None:
         expected_plan_1 = self.plan_generator.create_plan()
         expected_plan_2 = self.plan_generator.create_plan()
         other_plan = self.plan_generator.create_plan()
-        query = self.database_gateway.get_plans().with_id(
-            expected_plan_1.id, expected_plan_2.id
-        )
-        assert expected_plan_1 in query
-        assert expected_plan_2 in query
-        assert other_plan not in query
+        results = [
+            p.id
+            for p in self.database_gateway.get_plans().with_id(
+                expected_plan_1, expected_plan_2
+            )
+        ]
+        assert expected_plan_1 in results
+        assert expected_plan_2 in results
+        assert other_plan not in results
 
     def test_nothing_is_returned_if_plan_with_specified_uuid_is_not_present(
         self,
@@ -350,8 +333,8 @@ class GetAllPlans(FlaskTestCase):
         requesting_plan = self.plan_generator.create_plan(requested_cooperation=coop)
         non_requesting_plan = self.plan_generator.create_plan()
         results = self.database_gateway.get_plans().with_open_cooperation_request()
-        assert requesting_plan.id in [plan.id for plan in results]
-        assert non_requesting_plan.id not in [plan.id for plan in results]
+        assert requesting_plan in [plan.id for plan in results]
+        assert non_requesting_plan not in [plan.id for plan in results]
 
     def test_that_plans_with_open_cooperation_request_at_specific_coop_can_be_filtered(
         self,
@@ -367,26 +350,26 @@ class GetAllPlans(FlaskTestCase):
         results = self.database_gateway.get_plans().with_open_cooperation_request(
             cooperation=coop
         )
-        assert plan_requesting_at_coop.id in [plan.id for plan in results]
-        assert plan_requesting_at_other_coop.id not in [plan.id for plan in results]
+        assert plan_requesting_at_coop in [plan.id for plan in results]
+        assert plan_requesting_at_other_coop not in [plan.id for plan in results]
 
     def test_can_filter_for_cooperating_plans(self):
         coop = self.cooperation_generator.create_cooperation()
         cooperating_plan = self.plan_generator.create_plan(cooperation=coop)
         non_cooperating_plan = self.plan_generator.create_plan(cooperation=None)
         results = self.database_gateway.get_plans().that_are_cooperating()
-        assert cooperating_plan.id in [plan.id for plan in results]
-        assert non_cooperating_plan.id not in [plan.id for plan in results]
+        assert cooperating_plan in [plan.id for plan in results]
+        assert non_cooperating_plan not in [plan.id for plan in results]
 
     def test_plan_without_cooperation_is_considered_to_be_only_plan_in_its_own_cooperation(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(cooperation=None)
         cooperating_plans = (
-            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan.id)
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan)
         )
         assert len(cooperating_plans) == 1
-        assert plan in cooperating_plans
+        assert plan in [p.id for p in cooperating_plans]
 
     def test_that_plans_outside_of_cooperation_are_excluded_when_filtering_for_cooperating_plans(
         self,
@@ -396,11 +379,11 @@ class GetAllPlans(FlaskTestCase):
         plan2 = self.plan_generator.create_plan(cooperation=coop)
         self.plan_generator.create_plan(requested_cooperation=None)
         cooperating_plans = (
-            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1.id)
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1)
         )
         assert len(cooperating_plans) == 2
-        assert plan1.id in [p.id for p in cooperating_plans]
-        assert plan2.id in [p.id for p in cooperating_plans]
+        assert plan1 in [p.id for p in cooperating_plans]
+        assert plan2 in [p.id for p in cooperating_plans]
 
     def test_can_filter_plans_that_are_part_of_any_cooperation(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
@@ -425,9 +408,9 @@ class GetAllPlans(FlaskTestCase):
         plan3 = self.plan_generator.create_plan(requested_cooperation=None)
         plans = self.database_gateway.get_plans().that_are_part_of_cooperation(coop)
         assert len(plans) == 2
-        assert plans.with_id(plan1.id)
-        assert plans.with_id(plan2.id)
-        assert not plans.with_id(plan3.id)
+        assert plans.with_id(plan1)
+        assert plans.with_id(plan2)
+        assert not plans.with_id(plan3)
 
     def test_nothing_returned_when_no_plans_in_cooperation(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
@@ -439,23 +422,23 @@ class GetAllPlans(FlaskTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
 
-        self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
+        self.database_gateway.get_plans().with_id(plan).update().set_cooperation(
             cooperation
         ).perform()
-        plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
+        plan_from_orm = self.database_gateway.get_plans().with_id(plan).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation == cooperation
 
-        self.database_gateway.get_plans().with_id(plan.id).update().set_cooperation(
+        self.database_gateway.get_plans().with_id(plan).update().set_cooperation(
             None
         ).perform()
-        plan_from_orm = self.database_gateway.get_plans().with_id(plan.id).first()
+        plan_from_orm = self.database_gateway.get_plans().with_id(plan).first()
         assert plan_from_orm
         assert plan_from_orm.cooperation is None
 
     def test_can_set_approval_date(self) -> None:
         plan = self.plan_generator.create_plan()
-        plans = self.database_gateway.get_plans().with_id(plan.id)
+        plans = self.database_gateway.get_plans().with_id(plan)
         expected_approval_date = datetime(2000, 3, 2)
         assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
@@ -789,11 +772,11 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         plan = self.plan_generator.create_plan()
         for amount in productive_consumptions:
             self.consumption_generator.create_fixed_means_consumption(
-                plan=plan.id, amount=amount
+                plan=plan, amount=amount
             )
         for amount in private_consumptions:
             self.consumption_generator.create_private_consumption(
-                plan=plan.id, amount=amount
+                plan=plan, amount=amount
             )
         result = (
             self.database_gateway.get_plans()
@@ -821,15 +804,15 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         self.consumption_generator.create_private_consumption()
         for amount in productive_consumptions:
             self.consumption_generator.create_fixed_means_consumption(
-                plan=plan.id, amount=amount
+                plan=plan, amount=amount
             )
         for amount in private_consumptions:
             self.consumption_generator.create_private_consumption(
-                plan=plan.id, amount=amount
+                plan=plan, amount=amount
             )
         result = (
             self.database_gateway.get_plans()
-            .with_id(plan.id)
+            .with_id(plan)
             .joined_with_provided_product_amount()
             .first()
         )
@@ -850,7 +833,7 @@ class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
     def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()
-        plan_result = self.database_gateway.get_plans().with_id(plan.id)
+        plan_result = self.database_gateway.get_plans().with_id(plan)
         plan_result.update().set_requested_cooperation(cooperation).perform()
         assert plan_result.that_request_cooperation_with_coordinator()
         plan_result.update().set_requested_cooperation(None).perform()
@@ -869,8 +852,8 @@ class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
             )
         )
         assert len(inbound_requests) == 2
-        assert requesting_plan1.id in map(lambda p: p.id, inbound_requests)
-        assert requesting_plan2.id in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan1 in map(lambda p: p.id, inbound_requests)
+        assert requesting_plan2 in map(lambda p: p.id, inbound_requests)
 
     def test_that_plans_where_coordination_was_passed_on_are_ignored(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))

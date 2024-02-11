@@ -49,8 +49,8 @@ class AuthTests(ViewTestCase):
 
     def _make_sale_to_member(self, provider: UUID) -> None:
         plan = self.plan_generator.create_plan(planner=provider)
-        self.consumption_generator.create_private_consumption(plan=plan.id)
+        self.consumption_generator.create_private_consumption(plan=plan)
 
     def _make_sale_to_company(self, provider: UUID) -> None:
         plan = self.plan_generator.create_plan(planner=provider)
-        self.consumption_generator.create_fixed_means_consumption(plan=plan.id)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)

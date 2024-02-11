@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template
+from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
 )
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
@@ -22,10 +23,14 @@ class RegisterProductiveConsumptionView:
     register_productive_consumption: RegisterProductiveConsumption
     presenter: RegisterProductiveConsumptionPresenter
 
-    def respond_to_get(self, form: RegisterProductiveConsumptionForm) -> Response:
+    @commit_changes
+    def GET(self) -> Response:
+        form = RegisterProductiveConsumptionForm(request.form)
         return FlaskResponse(self._render_template(form), status=200)
 
-    def respond_to_post(self, form: RegisterProductiveConsumptionForm) -> Response:
+    @commit_changes
+    def POST(self) -> Response:
+        form = RegisterProductiveConsumptionForm(request.form)
         if not form.validate():
             return self._handle_invalid_form(form)
         try:

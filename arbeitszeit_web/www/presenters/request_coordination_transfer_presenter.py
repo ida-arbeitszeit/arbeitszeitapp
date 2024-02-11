@@ -1,13 +1,11 @@
 from dataclasses import dataclass
+from typing import assert_never
 from uuid import UUID
-
-from typing_extensions import assert_never
 
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase as UseCase,
 )
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -23,7 +21,6 @@ class RequestCoordinationTransferPresenter:
     translator: Translator
     notifier: Notifier
     url_index: UrlIndex
-    session: Session
 
     def create_navbar_items(self, coop_id: UUID) -> list[NavbarItem]:
         return [
@@ -31,7 +28,6 @@ class RequestCoordinationTransferPresenter:
                 text=self.translator.gettext("Cooperation"),
                 url=self.url_index.get_coop_summary_url(
                     coop_id=coop_id,
-                    user_role=self.session.get_user_role(),
                 ),
             ),
             NavbarItem(

@@ -124,9 +124,7 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
         coop_id = LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].id
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_summary_url,
-            self.url_index.get_coop_summary_url(
-                coop_id=coop_id, user_role=UserRole.company
-            ),
+            self.url_index.get_coop_summary_url(coop_id=coop_id),
         )
         self.assertEqual(
             presentation.list_of_coordinations.rows[0].coop_creation_date,
@@ -419,8 +417,6 @@ class CooperatingPlansTest(BaseTestCase):
 
     def test_coop_url_is_shown_correctly(self):
         self.assertEqual(
-            self.url_index.get_coop_summary_url(
-                user_role=UserRole.company, coop_id=self.COOP_ID
-            ),
+            self.url_index.get_coop_summary_url(coop_id=self.COOP_ID),
             self.view_model.list_of_my_cooperating_plans.rows[0].coop_url,
         )

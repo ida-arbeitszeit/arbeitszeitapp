@@ -18,7 +18,7 @@ class AuthenticatedMemberTests(ViewTestCase):
 
     def test_get_200_when_plan_exists(self) -> None:
         plan = self.plan_generator.create_plan()
-        url = f"/member/plan_details/{plan.id}"
+        url = f"/member/plan_details/{plan}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -36,7 +36,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
 
     def test_get_200_when_plan_exists(self) -> None:
         plan = self.plan_generator.create_plan()
-        url = f"/company/plan_details/{plan.id}"
+        url = f"/company/plan_details/{plan}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -54,6 +54,6 @@ class AuthenticatedAccountantTests(ViewTestCase):
 
     def test_get_200_when_plan_exists(self) -> None:
         plan = self.plan_generator.create_plan()
-        url = f"/accountant/plan_details/{plan.id}"
+        url = f"/accountant/plan_details/{plan}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

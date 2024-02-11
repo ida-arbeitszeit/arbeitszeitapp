@@ -3,10 +3,8 @@ the arbeitszeitapp can issue and the interface by which the use cases
 request those notifications to be sent.
 """
 from dataclasses import dataclass
-from typing import Protocol, Type, Union, get_args
+from typing import Protocol, Type, TypeAlias, Union, get_args
 from uuid import UUID
-
-from typing_extensions import TypeAlias
 
 
 @dataclass

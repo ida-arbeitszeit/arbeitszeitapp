@@ -9,7 +9,7 @@ class CompanyViewTests(ViewTestCase):
 
     def test_that_requesting_view_results_in_200_status_code(self) -> None:
         response = self.client.get(
-            f"/company/cooperation_summary/{self.cooperation}/coordinators"
+            f"/user/cooperation_summary/{self.cooperation}/coordinators"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -22,7 +22,7 @@ class MemberViewTests(ViewTestCase):
 
     def test_that_requesting_view_results_in_200_status_code(self) -> None:
         response = self.client.get(
-            f"/member/cooperation_summary/{self.cooperation}/coordinators"
+            f"/user/cooperation_summary/{self.cooperation}/coordinators"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -35,6 +35,6 @@ class AccountantViewTests(ViewTestCase):
 
     def test_that_requesting_view_results_in_200_status_code(self) -> None:
         response = self.client.get(
-            f"/accountant/cooperation_summary/{self.cooperation}/coordinators"
+            f"/user/cooperation_summary/{self.cooperation}/coordinators"
         )
         self.assertEqual(response.status_code, 200)

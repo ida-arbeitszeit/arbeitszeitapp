@@ -23,18 +23,12 @@ from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperationResponse,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
 from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
-from arbeitszeit.use_cases.list_active_plans_of_company import ListActivePlansOfCompany
-from arbeitszeit.use_cases.list_all_cooperations import ListAllCooperations
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
-)
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
-    ListCoordinationsOfCooperationUseCase,
 )
 from arbeitszeit.use_cases.list_inbound_coop_requests import (
     ListInboundCoopRequests,
@@ -48,27 +42,17 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListOutboundCoopRequestsRequest,
 )
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
-from arbeitszeit.use_cases.request_cooperation import RequestCooperation
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from arbeitszeit.use_cases.toggle_product_availablity import ToggleProductAvailability
+from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.forms import (
-    CompanySearchForm,
-    CreateCooperationForm,
-    CreateDraftForm,
-    InviteWorkerToCompanyForm,
-    RegisterProductiveConsumptionForm,
-    RequestCooperationForm,
-    RequestCoordinationTransferForm,
-)
+from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
     InviteWorkerToCompanyView,
-    QueryCompaniesView,
     RequestCooperationView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
@@ -82,6 +66,9 @@ from arbeitszeit_flask.views.register_productive_consumption import (
 from arbeitszeit_flask.views.request_coordination_transfer_view import (
     RequestCoordinationTransferView,
 )
+from arbeitszeit_flask.views.review_registered_consumptions_view import (
+    ReviewRegisteredConsumptionsView,
+)
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
@@ -94,12 +81,6 @@ from arbeitszeit_web.www.controllers.delete_draft_controller import (
 )
 from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import (
     FilePlanWithAccountingController,
-)
-from arbeitszeit_web.www.controllers.query_companies_controller import (
-    QueryCompaniesController,
-)
-from arbeitszeit_web.www.controllers.request_cooperation_controller import (
-    RequestCooperationController,
 )
 from arbeitszeit_web.www.controllers.revoke_plan_filing_controller import (
     RevokePlanFilingController,
@@ -120,29 +101,10 @@ from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
-from arbeitszeit_web.www.presenters.get_coop_summary_presenter import (
-    GetCoopSummarySuccessPresenter,
-)
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
-from arbeitszeit_web.www.presenters.get_statistics_presenter import (
-    GetStatisticsPresenter,
-)
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
-from arbeitszeit_web.www.presenters.list_all_cooperations_presenter import (
-    ListAllCooperationsPresenter,
-)
-from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
-    ListCoordinationsOfCooperationPresenter,
-)
-from arbeitszeit_web.www.presenters.list_plans_presenter import ListPlansPresenter
-from arbeitszeit_web.www.presenters.query_companies_presenter import (
-    QueryCompaniesPresenter,
-)
-from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
-    RequestCooperationPresenter,
-)
 from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
     RevokePlanFilingPresenter,
 )
@@ -167,26 +129,9 @@ from .blueprint import CompanyRoute
 
 
 @CompanyRoute("/company/dashboard")
-def dashboard(view: CompanyDashboardView):
-    return view.respond_to_get()
-
-
-@CompanyRoute("/company/query_companies", methods=["GET"])
-def query_companies(
-    query_companies: use_cases.query_companies.QueryCompanies,
-    controller: QueryCompaniesController,
-    presenter: QueryCompaniesPresenter,
-):
-    template_name = "company/query_companies.html"
-    search_form = CompanySearchForm(request.args)
-    view = QueryCompaniesView(
-        search_form,
-        query_companies,
-        presenter,
-        controller,
-        template_name,
-    )
-    return view.respond_to_get()
+@as_flask_view()
+class dashboard(CompanyDashboardView):
+    ...
 
 
 @CompanyRoute("/company/consumptions")
@@ -236,16 +181,9 @@ def create_draft_from_plan(
 
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
-@commit_changes
-def create_draft(
-    view: CreateDraftView,
-):
-    form = CreateDraftForm(request.form)
-    if request.method == "POST":
-        return view.respond_to_post(form)
-
-    elif request.method == "GET":
-        return view.respond_to_get()
+@as_flask_view()
+class create_draft(CreateDraftView):
+    ...
 
 
 @CompanyRoute("/company/file_plan/<draft_id>", methods=["POST"])
@@ -316,13 +254,6 @@ def revoke_plan_filing(
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/toggle_availability/<uuid:plan_id>", methods=["GET"])
-@commit_changes
-def toggle_availability(plan_id: UUID, toggle_availability: ToggleProductAvailability):
-    toggle_availability(UUID(current_user.id), plan_id)
-    return redirect(url_for("main_company.plan_details", plan_id=plan_id))
-
-
 @CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
 def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
@@ -332,8 +263,9 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 
 
 @CompanyRoute("/company/my_accounts")
-def my_accounts(view: ShowMyAccountsView):
-    return view.respond_to_get()
+@as_flask_view()
+class my_accounts(ShowMyAccountsView):
+    ...
 
 
 @CompanyRoute("/company/my_accounts/all_transactions")
@@ -402,33 +334,15 @@ def account_prd(
 
 
 @CompanyRoute("/company/register_hours_worked", methods=["GET", "POST"])
-@commit_changes
-def register_hours_worked(view: RegisterHoursWorkedView):
-    if request.method == "GET":
-        return view.respond_to_get()
-    elif request.method == "POST":
-        return view.respond_to_post()
+@as_flask_view()
+class register_hours_worked(RegisterHoursWorkedView):
+    ...
 
 
 @CompanyRoute("/company/register_productive_consumption", methods=["GET", "POST"])
-@commit_changes
-def register_productive_consumption(view: RegisterProductiveConsumptionView):
-    if request.method == "GET":
-        form = RegisterProductiveConsumptionForm(request.args)
-        return view.respond_to_get(form)
-    elif request.method == "POST":
-        form = RegisterProductiveConsumptionForm(request.form)
-        return view.respond_to_post(form)
-
-
-@CompanyRoute("/company/statistics")
-def statistics(
-    get_statistics: use_cases.get_statistics.GetStatistics,
-    presenter: GetStatisticsPresenter,
-):
-    use_case_response = get_statistics()
-    view_model = presenter.present(use_case_response)
-    return render_template("company/statistics.html", view_model=view_model)
+@as_flask_view()
+class register_productive_consumption(RegisterProductiveConsumptionView):
+    ...
 
 
 @CompanyRoute("/company/plan_details/<uuid:plan_id>")
@@ -445,112 +359,34 @@ def plan_details(
     return render_template("company/plan_details.html", view_model=view_model.to_dict())
 
 
-@CompanyRoute("/company/cooperation_summary/<uuid:coop_id>")
-def coop_summary(
-    coop_id: UUID,
-    get_coop_summary: GetCoopSummary,
-    presenter: GetCoopSummarySuccessPresenter,
-):
-    use_case_response = get_coop_summary(
-        GetCoopSummaryRequest(UUID(current_user.id), coop_id)
-    )
-    if use_case_response:
-        view_model = presenter.present(use_case_response)
-        return render_template(
-            "company/coop_summary.html", view_model=view_model.to_dict()
-        )
-    else:
-        return http_404()
-
-
 @CompanyRoute(
     "/company/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
     methods=["GET", "POST"],
 )
-@commit_changes
-def request_coordination_transfer(
-    coop_id: UUID,
-    view: RequestCoordinationTransferView,
-):
-    if request.method == "GET":
-        form = RequestCoordinationTransferForm()
-        form.cooperation_field().set_value(str(coop_id))
-        return view.respond_to_get(form=form, coop_id=coop_id)
-
-    elif request.method == "POST":
-        form = RequestCoordinationTransferForm(request.form)
-        return view.respond_to_post(form=form, coop_id=coop_id)
+@as_flask_view()
+class request_coordination_transfer(RequestCoordinationTransferView):
+    ...
 
 
 @CompanyRoute(
     "/company/show_coordination_transfer_request/<uuid:transfer_request>",
     methods=["GET", "POST"],
 )
-@commit_changes
-def show_coordination_transfer_request(
-    transfer_request: UUID,
-    view: ShowCoordinationTransferRequestView,
-):
-    if request.method == "GET":
-        return view.respond_to_get(transfer_request)
-
-    elif request.method == "POST":
-        return view.respond_to_post(transfer_request)
-
-
-@CompanyRoute(
-    "/company/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
-)
-def list_coordinators_of_cooperation(
-    coop_id: UUID,
-    list_coordinations_of_cooperation: ListCoordinationsOfCooperationUseCase,
-    presenter: ListCoordinationsOfCooperationPresenter,
-):
-    use_case_response = list_coordinations_of_cooperation.list_coordinations(
-        ListCoordinationsOfCooperationUseCase.Request(cooperation=coop_id)
-    )
-    view_model = presenter.list_coordinations_of_cooperation(use_case_response)
-    return render_template(
-        "company/list_coordinators_of_cooperation.html", view_model=view_model
-    )
+@as_flask_view()
+class show_coordination_transfer_request(ShowCoordinationTransferRequestView):
+    ...
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
-@commit_changes
-def create_cooperation(view: CreateCooperationView):
-    form = CreateCooperationForm(request.form)
-    if request.method == "POST":
-        return view.respond_to_post(form)
-    elif request.method == "GET":
-        return view.respond_to_get(form)
+@as_flask_view()
+class create_cooperation(CreateCooperationView):
+    ...
 
 
 @CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
-@commit_changes
-def request_cooperation(
-    list_plans: ListActivePlansOfCompany,
-    list_plans_presenter: ListPlansPresenter,
-    request_cooperation: RequestCooperation,
-    controller: RequestCooperationController,
-    presenter: RequestCooperationPresenter,
-):
-    form = RequestCooperationForm(request.form)
-    view = RequestCooperationView(
-        current_user_id=UUID(current_user.id),
-        form=form,
-        list_plans=list_plans,
-        list_plans_presenter=list_plans_presenter,
-        request_cooperation=request_cooperation,
-        controller=controller,
-        presenter=presenter,
-        template_name="company/request_cooperation.html",
-    )
-
-    if request.method == "POST":
-        return view.respond_to_post()
-
-    elif request.method == "GET":
-        return view.respond_to_get()
+@as_flask_view()
+class request_cooperation(RequestCooperationView):
+    ...
 
 
 @CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
@@ -615,31 +451,19 @@ def my_cooperations(
     return render_template("company/my_cooperations.html", **view_model.to_dict())
 
 
-@CompanyRoute("/company/list_all_cooperations")
-@commit_changes
-def list_all_cooperations(
-    use_case: ListAllCooperations,
-    presenter: ListAllCooperationsPresenter,
-):
-    response = use_case()
-    view_model = presenter.present(response)
-    return render_template("company/list_all_cooperations.html", view_model=view_model)
-
-
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
-def invite_worker_to_company(
-    view: InviteWorkerToCompanyView,
-) -> Response:
-    form = InviteWorkerToCompanyForm(request.form)
-    if request.method == "POST":
-        return view.respond_to_post(form)
-    else:
-        return view.respond_to_get(form)
+@as_flask_view()
+class invite_worker_to_company(InviteWorkerToCompanyView):
+    ...
 
 
 @CompanyRoute("/company/end_cooperation")
-@commit_changes
-def end_cooperation(
-    view: EndCooperationView,
-) -> Response:
-    return view.respond_to_get()
+@as_flask_view()
+class end_cooperation(EndCooperationView):
+    ...
+
+
+@CompanyRoute("/company/review_registered_consumptions")
+@as_flask_view()
+class review_registered_consumptions(ReviewRegisteredConsumptionsView):
+    ...

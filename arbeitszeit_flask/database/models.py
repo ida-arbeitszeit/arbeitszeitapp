@@ -16,7 +16,7 @@ def generate_uuid() -> str:
 
 class User(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(300), nullable=False)
     email_address = db.Column(
         db.ForeignKey("email.address"), nullable=False, unique=True
     )
@@ -107,7 +107,6 @@ class Plan(db.Model):
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
-    is_available = db.Column(db.Boolean, nullable=False, default=True)
     requested_cooperation = db.Column(
         db.String, db.ForeignKey("cooperation.id"), nullable=True
     )

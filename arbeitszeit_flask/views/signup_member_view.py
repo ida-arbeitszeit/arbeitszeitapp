@@ -4,8 +4,10 @@ from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm
+from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_member_controller import (
     RegisterMemberController,
 )
@@ -21,16 +23,26 @@ class SignupMemberView:
     register_member_presenter: RegisterMemberPresenter
     flask_session: FlaskSession
 
-    def handle_request(self):
-        register_form = RegisterForm(request.form)
-        if request.method == "POST" and register_form.validate():
-            return self._handle_valid_post_request(register_form=register_form)
+    @commit_changes
+    def GET(self):
         if current_user.is_authenticated:
             if self.flask_session.is_logged_in_as_member():
                 return redirect(url_for("main_member.dashboard"))
             else:
                 self.flask_session.logout()
+        register_form = RegisterForm(request.form)
+        return render_template("auth/signup_member.html", form=register_form)
 
+    @commit_changes
+    def POST(self) -> Response:
+        register_form = RegisterForm(request.form)
+        if register_form.validate():
+            return self._handle_valid_post_request(register_form=register_form)
+        elif current_user.is_authenticated:
+            if self.flask_session.is_logged_in_as_member():
+                return redirect(url_for("main_member.dashboard"))
+            else:
+                self.flask_session.logout()
         return render_template("auth/signup_member.html", form=register_form)
 
     def _handle_valid_post_request(self, register_form: RegisterForm):
