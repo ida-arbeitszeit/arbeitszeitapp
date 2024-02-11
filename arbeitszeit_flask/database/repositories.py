@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Self,
     Tuple,
     TypeVar,
 )
@@ -21,7 +22,6 @@ from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import and_, case, func, or_, update
 from sqlalchemy.sql.functions import concat
-from typing_extensions import Self
 
 from arbeitszeit import records
 from arbeitszeit_flask.database import models

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
+from typing import assert_never
 from uuid import UUID
-
-from typing_extensions import assert_never
 
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase as UseCase,

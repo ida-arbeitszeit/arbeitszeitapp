@@ -2,10 +2,18 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar
+from typing import (
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Self,
+    Tuple,
+    TypeVar,
+)
 from uuid import UUID
-
-from typing_extensions import Self
 
 from arbeitszeit import records
 
