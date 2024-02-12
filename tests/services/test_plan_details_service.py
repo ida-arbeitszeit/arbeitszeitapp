@@ -90,6 +90,31 @@ class PlanDetailsServiceTests(TestCase):
 
     @parameterized.expand(
         [
+            (True, False),
+            (False, True),
+            (True, True),
+            (False, False),
+        ]
+    )
+    def test_that_correct_labour_per_unit_is_shown(
+        self, is_public_service: bool, approved: bool
+    ) -> None:
+        plan = self.plan_generator.create_plan(
+            is_public_service=is_public_service,
+            amount=2,
+            approved=approved,
+            costs=ProductionCosts(
+                means_cost=Decimal(1),
+                labour_cost=Decimal(2),
+                resource_cost=Decimal(3),
+            ),
+        )
+        details = self.service.get_details_from_plan(plan)
+        assert details
+        self.assertEqual(details.labour_cost_per_unit, Decimal(3))
+
+    @parameterized.expand(
+        [
             ("test product name",),
             ("another product name",),
         ]
