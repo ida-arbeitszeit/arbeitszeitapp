@@ -1795,6 +1795,15 @@ class AccountingRepository:
         return self.social_accounting_from_orm(accounting_orm)
 
 
+class PasswordResetRequestResult(FlaskQueryResult[records.PasswordResetRequest]):
+    def with_email_address(self, email_address) -> Self:
+        raise NotImplementedError("NOT YET IMPLEMENTED")
+
+    def count(self) -> int:
+        raise NotImplementedError("NOT YET IMPLEMENTED")
+
+
+
 @dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
@@ -2317,3 +2326,9 @@ class DatabaseGatewayImpl:
             email_address=orm.email_address,
             password_hash=orm.password,
         )
+
+    def get_password_reset_requests(self, email_address: str) -> PasswordResetRequestResult:
+        raise NotImplementedError("NOT YET IMPLEMENTED")
+
+    def create_password_reset_request(self, email_address: str, reset_token: str, created_at: datetime):
+        raise NotImplementedError("NOT YET IMPLEMENTED")
