@@ -105,6 +105,23 @@ environment within a directory subtree, as a more powerful alternative
 to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
 A Nix flake is located in this repository.
 
+    **A note for Mac users:**
+    The Nix installation, by default, places inserts commands to set the 
+    path and environment variables into scripts in the global /etc directory. 
+    Whenever the Mac OS gets updated, it overwrites these scripts, so that
+    the system can no longer find Nix. To fix this, you can put this command
+    in your ~/.zshrc file:
+
+        .. code-block:: bash
+
+         # Nix
+         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+           source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+         fi
+         # End Nix
+
+    see https://github.com/NixOs/nix/issues/3616 for more details.
+
 
 Development Philosophy
 -----------------------
@@ -294,11 +311,11 @@ submit changes in a pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
 You can generate a code coverage report at ``htmlcov/index.html`` via
-the command::
+the command:
 
 .. code-block:: bash
 
-    coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web -m pytest && coverage html
+  coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web -m pytest && coverage html
 
 It is possible to disable tests that require a PostgreSQL database to
 run via an environment variable:
