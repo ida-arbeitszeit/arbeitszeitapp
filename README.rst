@@ -106,11 +106,10 @@ to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
 A Nix flake is located in this repository.
 
     **A note for Mac users:**
-    The Nix installation, by default, places inserts commands to set the 
-    path and environment variables into scripts in the global /etc directory. 
-    Whenever the Mac OS gets updated, it overwrites these scripts, so that
-    the system can no longer find Nix. To fix this, you can put this command
-    in your ~/.zshrc file:
+    By default, during Nix installation, commands are added to configure path and environment
+    variables within scripts located in the global /etc directory. However, macOS updates can
+    overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
+    adding the following command to your ~/.zshrc file:
 
         .. code-block:: bash
 
