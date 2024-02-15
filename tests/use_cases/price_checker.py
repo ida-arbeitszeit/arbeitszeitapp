@@ -15,6 +15,12 @@ class PriceChecker:
         assert response
         return response.plan_details.price_per_unit
 
+    def get_labour_per_unit(self, plan: UUID) -> Decimal:
+        request = GetPlanDetailsUseCase.Request(plan)
+        response = self.get_plan_details.get_plan_details(request)
+        assert response
+        return response.plan_details.labour_cost_per_unit
+
     def get_unit_cost(self, plan: UUID) -> Decimal:
         request = GetPlanDetailsUseCase.Request(plan)
         response = self.get_plan_details.get_plan_details(request)

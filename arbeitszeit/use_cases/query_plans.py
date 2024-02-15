@@ -12,6 +12,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import (
     calculate_average_costs,
     calculate_individual_price,
+    individual_labour_cost,
 )
 from arbeitszeit.repositories import DatabaseGateway, PlanResult
 
@@ -41,6 +42,7 @@ class QueriedPlan:
     product_name: str
     description: str
     price_per_unit: Decimal
+    labour_cost_per_unit: Decimal
     is_public_service: bool
     is_cooperating: bool
     activation_date: datetime
@@ -107,6 +109,7 @@ class QueryPlans:
         planner: records.Company,
         cooperating_plans: List[records.PlanSummary],
     ) -> QueriedPlan:
+        labour_cost_per_unit = individual_labour_cost(plan)
         if cooperating_plans:
             price_per_unit = calculate_average_costs(cooperating_plans)
         else:
@@ -119,6 +122,7 @@ class QueryPlans:
             product_name=plan.prd_name,
             description=plan.description,
             price_per_unit=price_per_unit,
+            labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=plan.is_public_service,
             is_cooperating=bool(plan.cooperation),
             activation_date=plan.activation_date,
