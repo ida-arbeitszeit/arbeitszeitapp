@@ -440,13 +440,13 @@ def my_cooperations(
     )
 
     view_model = presenter.present(
-        list_coord_response,
-        list_inbound_coop_requests_response,
-        accept_cooperation_response,
-        deny_cooperation_response,
-        list_outbound_coop_requests_response,
-        cancel_cooperation_solicitation_response,
-        list_my_coop_plans_response,
+        list_coord_response=list_coord_response,
+        list_inbound_coop_requests_response=list_inbound_coop_requests_response,
+        list_outbound_coop_requests_response=list_outbound_coop_requests_response,
+        list_my_cooperating_plans_response=list_my_coop_plans_response,
+        accept_cooperation_response=accept_cooperation_response,
+        deny_cooperation_response=deny_cooperation_response,
+        cancel_cooperation_solicitation_response=cancel_cooperation_solicitation_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
 
