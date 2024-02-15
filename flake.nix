@@ -12,6 +12,7 @@
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
       systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
         let
+          isMacOs = !builtins.isNull (builtins.match ".*-darwin" system);
           pkgs = import nixpkgs {
             inherit system;
             overlays = [ self.overlays.default ];
@@ -23,10 +24,16 @@
         in {
           devShells = rec {
             default = nixos-unstable;
-            nixos-23-11 = pkgs-23-11.callPackage nix/devShell.nix { };
-            nixos-unstable = pkgs.callPackage nix/devShell.nix { };
-            python311 =
-              pkgs.callPackage nix/devShell.nix { python3 = pkgs.python311; };
+            nixos-23-11 = pkgs-23-11.callPackage nix/devShell.nix {
+              includeGlibcLocales = !isMacOs;
+            };
+            nixos-unstable = pkgs.callPackage nix/devShell.nix {
+              includeGlibcLocales = !isMacOs;
+            };
+            python311 = pkgs.callPackage nix/devShell.nix {
+              python3 = pkgs.python311;
+              includeGlibcLocales = !isMacOs;
+            };
           };
           packages = {
             default = pkgs.python3.pkgs.arbeitszeitapp;
