@@ -5,35 +5,31 @@ from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest as UseCaseRequest,
 )
-from arbeitszeit_web.api.controllers.expected_input import ExpectedInput, InputLocation
+from arbeitszeit_web.api.controllers.parameters import FormParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session, UserRole
 
+liquid_means_expected_inputs = [
+    FormParameter(
+        name="plan_id",
+        type=str,
+        description="The plan to consume.",
+        default=None,
+        required=True,
+    ),
+    FormParameter(
+        name="amount",
+        type=int,
+        description="The amount of product to consume.",
+        default=None,
+        required=True,
+    ),
+]
+
 
 @dataclass
 class LiquidMeansConsumptionController:
-    @classmethod
-    def create_expected_inputs(cls) -> list[ExpectedInput]:
-        return [
-            ExpectedInput(
-                name="plan_id",
-                type=str,
-                description="The plan to consume.",
-                default=None,
-                location=InputLocation.form,
-                required=True,
-            ),
-            ExpectedInput(
-                name="amount",
-                type=int,
-                description="The amount of product to consume.",
-                default=None,
-                location=InputLocation.form,
-                required=True,
-            ),
-        ]
-
     request: Request
     session: Session
 

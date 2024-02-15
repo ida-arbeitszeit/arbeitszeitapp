@@ -1,34 +1,54 @@
-from typing import List
+from typing import Callable, Sequence
 
+from flask_restx import Namespace
 from flask_restx.reqparse import RequestParser
 
-from arbeitszeit_web.api.controllers.expected_input import InputLocation
-from arbeitszeit_web.api.controllers.query_plans_api_controller import ExpectedInput
+from arbeitszeit_web.api.controllers.parameters import (
+    FormParameter,
+    PathParameter,
+    QueryParameter,
+)
 
 
-def generate_input_documentation(
-    expected_inputs: List[ExpectedInput],
-) -> RequestParser:
-    parser = RequestParser()
-    for input in expected_inputs:
-        parser.add_argument(
+class with_input_documentation:
+    def __init__(
+        self,
+        expected_inputs: Sequence[QueryParameter | FormParameter | PathParameter],
+        namespace: Namespace,
+    ) -> None:
+        self._expected_inputs = expected_inputs
+        self._namespace = namespace
+
+    def __call__(self, func: Callable) -> Callable:
+        parser = RequestParser()
+        for expected_input in self._expected_inputs:
+            if isinstance(expected_input, PathParameter):
+                # RequestParser does not handle path parameters
+                # https://github.com/noirbizarre/flask-restplus/issues/146
+                self._add_documentation_for_path_variable(func, expected_input)
+            else:
+                parser = self._add_argument_to_parser(parser, expected_input)
+        decorator = self._namespace.doc(expect=[parser])
+        decorator(func)
+        return func
+
+    def _add_documentation_for_path_variable(
+        self, func: Callable, expected_input: PathParameter
+    ) -> None:
+        decorator = self._namespace.doc(
+            params={expected_input.name: expected_input.description}
+        )
+        decorator(func)
+
+    def _add_argument_to_parser(
+        self, parser: RequestParser, input: FormParameter | QueryParameter
+    ) -> RequestParser:
+        location = "query" if isinstance(input, QueryParameter) else "form"
+        return parser.add_argument(
             name=input.name,
             type=input.type,
             help=input.description,
             default=input.default,
-            location=_generate_location(input.location),
+            location=location,
             required=input.required,
         )
-    return parser
-
-
-def _generate_location(location: InputLocation) -> str:
-    match location:
-        case InputLocation.query:
-            return "query"
-        case InputLocation.form:
-            return "form"
-        case InputLocation.path:
-            return "path"
-        case _:
-            raise ValueError(f"Unknown location: {location}")

@@ -2,7 +2,15 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit_web.api.controllers.parameters import PathParameter
 from arbeitszeit_web.api.response_errors import BadRequest
+
+plan_detail_expected_input = [
+    PathParameter(
+        name="plan_id",
+        description="The plan id.",
+    )
+]
 
 
 @dataclass
