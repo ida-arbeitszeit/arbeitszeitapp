@@ -2334,12 +2334,30 @@ class DatabaseGatewayImpl:
             password_hash=orm.password,
         )
 
-    def get_password_reset_requests(
-        self, email_address: str
-    ) -> PasswordResetRequestResult:
-        raise NotImplementedError("NOT YET IMPLEMENTED")
+    @classmethod
+    def password_reset_request_from_orm(
+        cls, password_reset_request_orm: models.PasswordResetRequest
+    ) -> records.PasswordResetRequest:
+        return records.PasswordResetRequest(
+            id=password_reset_request_orm.id,
+            email_address=password_reset_request_orm.email_address,
+            reset_token=password_reset_request_orm.reset_token,
+            created_at=password_reset_request_orm.created_at,
+        )
+
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
+        return PasswordResetRequestResult(
+            query=models.PasswordResetRequest.query,
+            mapper=self.password_reset_request_from_orm,
+            db=self.db,
+        )
 
     def create_password_reset_request(
         self, email_address: str, reset_token: str, created_at: datetime
     ) -> records.PasswordResetRequest:
-        raise NotImplementedError("NOT YET IMPLEMENTED")
+        new_entry = models.PasswordResetRequest(
+            email_address=email_address, reset_token=reset_token, created_at=created_at
+        )
+        self.db.session.add(new_entry)
+        self.db.session.flush()
+        return self.password_reset_request_from_orm(new_entry)

@@ -739,9 +739,7 @@ class DatabaseGateway(Protocol):
     def get_account_credentials(self) -> AccountCredentialsResult:
         ...
 
-    def get_password_reset_requests(
-        self, email_address: str
-    ) -> PasswordResetRequestResult:
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
         ...
 
     def create_password_reset_request(
