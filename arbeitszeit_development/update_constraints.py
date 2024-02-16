@@ -123,14 +123,26 @@ class VersionStringCleaner:
 
 
 class PackageFilter:
+    # Since we use a custom flask-profiler package we need to exclude it from
+    # constraints.txt.  Unfortunately jsonschema packages with nixpkgs is not
+    # officially supported by flask-restx. That's why we exclude it
+    # here. docutils as distributed by nixpkgs is not officially supported by
+    # the current sphinx version.
+    PACKAGE_BLACKLIST = {
+        "flask_profiler",
+        "jsonschema",
+        "docutils",
+        "arbeitszeitapp",
+    }
+
     def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:
-        # Since we use a custom flask-profiler package we need to
-        # exclude it from constraints.txt.  Unfortunately jsonschema
-        # packages with nixpkgs is not officially supported by
-        # flask-restx. That's why we exclude it here. docutils as
-        # distributed by nixpkgs is not officially supported by the
-        # current sphinx version.
-        return package_name not in ["flask-profiler", "jsonschema", "docutils"]
+        if package_name in self.PACKAGE_BLACKLIST:
+            return False
+        # We exclude python packages that only provide types. Having packages
+        # and their respecive "types-" packages not being in sync due to nix'
+        # packaging machinery would cause unnecessary friction with no real
+        # benefit.
+        return not package_name.startswith("types-")
 
 
 def parse_arguments():
