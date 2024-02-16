@@ -1,3 +1,4 @@
+{% from 'macros/dropdowns.html' import hover_info_dropdown %}
 {% macro plan_details(view_model) %}
 <div class="section has-text-centered">
     <div class="section">
@@ -10,6 +11,9 @@
                     <div class="tile">
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification">
+                                <div class="has-text-right has-text-info-dark">
+                                    {{ hover_info_dropdown(id="id_plan_id", text=gettext("This UUID identifies your plan. It is used by workers/companies to debit/credit labour time spent on the plan")) }}
+                                </div>
                                 <p class="title is-4">{{ view_model.details.plan_id[0] }}</p>
                                 <p class="subtitle">
                                     {{ view_model.details.plan_id[1] }}&nbsp;

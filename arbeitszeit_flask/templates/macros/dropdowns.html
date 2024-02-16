@@ -1,0 +1,23 @@
+{% macro hover_info_dropdown(id, text) %}
+<div class="dropdown is-hoverable">
+    <div class="dropdown-trigger">
+        <span class="icon" aria-haspopup="true" aria-controls="{{ id }}">
+            <i class="fa-solid fa-info-circle">
+                <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
+            </i>
+        </span>
+    </div>
+    <div class="dropdown-menu" id="{{ id }}" role="menu">
+        <div class="dropdown-content">
+            <div class="dropdown-item has-text-left">
+                <p>
+                    {{ text }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>    
+
+{% endmacro %}
