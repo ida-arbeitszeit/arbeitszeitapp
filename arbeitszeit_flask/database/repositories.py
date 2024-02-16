@@ -1796,12 +1796,19 @@ class AccountingRepository:
 
 
 class PasswordResetRequestResult(FlaskQueryResult[records.PasswordResetRequest]):
-    def with_email_address(self, email_address) -> Self:
-        raise NotImplementedError("NOT YET IMPLEMENTED")
+    def with_email_address(self, email_address: str) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PasswordResetRequest.email_address == func.lower(email_address)
+            )
+        )
 
-    def count(self) -> int:
-        raise NotImplementedError("NOT YET IMPLEMENTED")
-
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PasswordResetRequest.created_at > creation_threshold
+            )
+        )
 
 
 @dataclass
@@ -2327,8 +2334,12 @@ class DatabaseGatewayImpl:
             password_hash=orm.password,
         )
 
-    def get_password_reset_requests(self, email_address: str) -> PasswordResetRequestResult:
+    def get_password_reset_requests(
+        self, email_address: str
+    ) -> PasswordResetRequestResult:
         raise NotImplementedError("NOT YET IMPLEMENTED")
 
-    def create_password_reset_request(self, email_address: str, reset_token: str, created_at: datetime):
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
         raise NotImplementedError("NOT YET IMPLEMENTED")

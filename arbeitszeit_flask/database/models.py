@@ -230,6 +230,8 @@ class CoordinationTransferRequest(db.Model):
 
 class PasswordResetRequest(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email_address = db.Column(db.String, nullable=False, unique=False)
+    email_address = db.Column(
+        db.String, db.ForeignKey("email.address"), nullable=False, unique=False
+    )
     reset_token = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)

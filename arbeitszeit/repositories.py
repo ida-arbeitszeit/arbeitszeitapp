@@ -569,7 +569,7 @@ class PasswordResetRequestResult(QueryResult[records.PasswordResetRequest], Prot
     def with_email_address(self, email_address) -> Self:
         ...
 
-    def count(self) -> int:
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
         ...
 
 
@@ -739,8 +739,12 @@ class DatabaseGateway(Protocol):
     def get_account_credentials(self) -> AccountCredentialsResult:
         ...
 
-    def get_password_reset_requests(self, email_address: str) -> PasswordResetRequestResult:
+    def get_password_reset_requests(
+        self, email_address: str
+    ) -> PasswordResetRequestResult:
         ...
 
-    def create_password_reset_request(self, email_address: str, reset_token: str, created_at: datetime) -> records.PasswordResetRequest:
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
         ...
