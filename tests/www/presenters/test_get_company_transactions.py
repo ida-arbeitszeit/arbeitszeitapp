@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
+from uuid import UUID
 
 from dateutil import tz
 
@@ -22,7 +23,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self.presenter = self.injector.get(GetCompanyTransactionsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self) -> None:
-        response = GetCompanyTransactionsResponse(transactions=[])
+        response = self.create_use_case_response()
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions, [])
 
@@ -30,7 +31,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         expected_transaction = self._get_single_transaction_info()
-        response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
+        response = self.create_use_case_response(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
 
@@ -52,7 +53,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                 expected_transaction = self._get_single_transaction_info(
                     transaction_type=transaction_type
                 )
-                response = GetCompanyTransactionsResponse(
+                response = self.create_use_case_response(
                     transactions=[expected_transaction]
                 )
                 view_model = self.presenter.present(response)
@@ -64,7 +65,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
 
     def test_that_transaction_date_is_formatted_as_string(self) -> None:
         expected_transaction = self._get_single_transaction_info()
-        response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
+        response = self.create_use_case_response(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
         self.assertIsInstance(presented_transaction.date, str)
@@ -72,7 +73,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def test_that_transaction_date_is_formatted_correctly(self) -> None:
         expected_time = datetime(1998, 12, 1, 22, 5, tzinfo=tz.gettz("Europe/Berlin"))
         expected_transaction = self._get_single_transaction_info(date=expected_time)
-        response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
+        response = self.create_use_case_response(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
         self.assertEqual(presented_transaction.date, "01.12.1998 22:05")
@@ -82,7 +83,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         expected_transaction = self._get_single_transaction_info(
             transaction_volume=expected_transaction_volume
         )
-        response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
+        response = self.create_use_case_response(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
         self.assertIsInstance(presented_transaction.transaction_volume, Decimal)
@@ -103,7 +104,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                 expected_transaction = self._get_single_transaction_info(
                     account_type=account_type
                 )
-                response = GetCompanyTransactionsResponse(
+                response = self.create_use_case_response(
                     transactions=[expected_transaction]
                 )
                 view_model = self.presenter.present(response)
@@ -118,14 +119,14 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         expected_transaction = self._get_single_transaction_info(
             purpose=expected_purpose
         )
-        response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
+        response = self.create_use_case_response(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
         self.assertIsInstance(presented_transaction.purpose, str)
         self.assertEqual(presented_transaction.purpose, expected_purpose)
 
     def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
-        response = GetCompanyTransactionsResponse(
+        response = self.create_use_case_response(
             transactions=[
                 self._get_single_transaction_info(),
                 self._get_single_transaction_info(),
@@ -135,23 +136,41 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transactions), 2)
 
     def test_view_model_contains_two_navbar_items(self) -> None:
-        response = GetCompanyTransactionsResponse(transactions=[])
+        response = self.create_use_case_response(transactions=[])
         view_model = self.presenter.present(response)
         assert len(view_model.navbar_items) == 2
 
-    def test_first_navbar_item_has_text_accounts_and_url_to_my_accounts(self) -> None:
-        response = GetCompanyTransactionsResponse(transactions=[])
+    def test_first_navbar_item_has_text_accounts_and_url_to_company_accounts(
+        self,
+    ) -> None:
+        response = self.create_use_case_response()
         view_model = self.presenter.present(response)
         first_navbar_item = view_model.navbar_items[0]
         assert first_navbar_item.text == self.translator.gettext("Accounts")
-        assert first_navbar_item.url == self.url_index.get_my_accounts_url()
+        assert first_navbar_item.url == self.url_index.get_company_accounts_url(
+            company_id=response.company_id
+        )
 
     def test_second_navbar_item_has_text_all_transactions_and_url_not_set(self) -> None:
-        response = GetCompanyTransactionsResponse(transactions=[])
+        response = self.create_use_case_response()
         view_model = self.presenter.present(response)
         second_navbar_item = view_model.navbar_items[1]
         assert second_navbar_item.text == self.translator.gettext("All transactions")
         assert second_navbar_item.url is None
+
+    def create_use_case_response(
+        self,
+        transactions: Optional[list[TransactionInfo]] = None,
+        company_id: Optional[UUID] = None,
+    ) -> GetCompanyTransactionsResponse:
+        if transactions is None:
+            transactions = []
+        if company_id is None:
+            company_id = self.company_generator.create_company()
+        return GetCompanyTransactionsResponse(
+            transactions=transactions,
+            company_id=company_id,
+        )
 
     def _get_single_transaction_info(
         self,

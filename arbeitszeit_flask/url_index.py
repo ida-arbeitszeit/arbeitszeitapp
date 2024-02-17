@@ -215,5 +215,5 @@ class GeneralUrlIndex:
     def get_change_email_url(self, *, token: str) -> str:
         return url_for("main_user.change_email_address", token=token, _external=True)
 
-    def get_my_accounts_url(self) -> str:
-        return url_for("main_company.my_accounts")
+    def get_company_accounts_url(self, company_id: UUID) -> str:
+        return url_for("main_user.company_accounts", company_id=company_id)

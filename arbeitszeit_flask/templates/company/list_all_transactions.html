@@ -20,8 +20,8 @@
             <p>{{ gettext("All transactions made or received so far.") }}</p>
         </div>
         <div class="section has-text-left">
-            {% if view_model.all_transactions is defined and view_model.all_transactions|length %}
-            {% for transaction in view_model.all_transactions %}
+            {% if view_model.transactions is defined and view_model.transactions|length %}
+            {% for transaction in view_model.transactions %}
             {{ transaction_with_account(transaction.date, transaction.transaction_type, transaction.purpose, transaction.transaction_volume, transaction.account) }}
             {% endfor %}
             {% endif %}

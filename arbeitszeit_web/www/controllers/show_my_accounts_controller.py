@@ -1,14 +1,10 @@
 from dataclasses import dataclass
+from uuid import UUID
 
-from arbeitszeit.use_cases.show_my_accounts import ShowMyAccountsRequest
-from arbeitszeit_web.session import Session
+from arbeitszeit.use_cases.show_company_accounts import ShowCompanyAccountsRequest
 
 
 @dataclass
-class ShowMyAccountsController:
-    session: Session
-
-    def create_request(self) -> ShowMyAccountsRequest:
-        current_user = self.session.get_current_user()
-        assert current_user
-        return ShowMyAccountsRequest(current_user=current_user)
+class ShowCompanyAccountsController:
+    def create_request(self, company_id: UUID) -> ShowCompanyAccountsRequest:
+        return ShowCompanyAccountsRequest(company=company_id)

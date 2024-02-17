@@ -1,16 +1,16 @@
 from decimal import Decimal
 
-from arbeitszeit.use_cases.show_my_accounts import ShowMyAccountsResponse
+from arbeitszeit.use_cases.show_company_accounts import ShowMyAccountsResponse
 from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
-    ShowMyAccountsPresenter,
+    ShowCompanyAccountsPresenter,
 )
 from tests.www.base_test_case import BaseTestCase
 
 
-class ShowMyAccountsPresenterTests(BaseTestCase):
+class ShowCompanyAccountsPresenterTests(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.presenter = self.injector.get(ShowMyAccountsPresenter)
+        self.presenter = self.injector.get(ShowCompanyAccountsPresenter)
 
     def test_show_correct_balance_string_for_balances(self):
         presentation = self.presenter.present(

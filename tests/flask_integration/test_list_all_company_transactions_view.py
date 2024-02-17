@@ -10,15 +10,21 @@ class AuthTests(ViewTestCase):
         super().setUp()
         self.url = "/company/my_accounts/all_transactions"
 
+    def test_anonymous_user_gets_status_code_302_on_get_request(self) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=None,
+            expected_code=302,
+        )
+
     @parameterized.expand(
         [
-            (None, 302),
             (LogInUser.accountant, 302),
-            (LogInUser.company, 200),
             (LogInUser.member, 302),
         ]
     )
-    def test_different_users_get_expected_status_codes_on_get_requests(
+    def test_non_company_users_get_status_code_302_on_get_requests(
         self, login: Optional[LogInUser], expected_code: int
     ) -> None:
         self.assert_response_has_expected_code(
@@ -26,4 +32,12 @@ class AuthTests(ViewTestCase):
             method="get",
             login=login,
             expected_code=expected_code,
+        )
+
+    def test_that_any_company_gets_200_status_code_on_get_request(self) -> None:
+        self.assert_response_has_expected_code(
+            url=self.url,
+            method="get",
+            login=LogInUser.company,
+            expected_code=200,
         )

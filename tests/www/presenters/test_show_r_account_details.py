@@ -82,7 +82,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         response = self._use_case_response()
         view_model = self.presenter.present(response)
         assert view_model.navbar_items[0].text == self.translator.gettext("Accounts")
-        assert view_model.navbar_items[0].url == self.url_index.get_my_accounts_url()
+        assert view_model.navbar_items[
+            0
+        ].url == self.url_index.get_company_accounts_url(company_id=response.company_id)
 
     def test_second_navbar_item_has_text_account_r_and_no_url(self) -> None:
         response = self._use_case_response()
@@ -93,8 +95,12 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def _use_case_response(
         self,
         company_id: UUID = uuid4(),
-        transactions: List[UseCase.TransactionInfo] = [],
+        transactions: List[UseCase.TransactionInfo] | None = None,
         account_balance: Decimal = Decimal(0),
-        plot: UseCase.PlotDetails = UseCase.PlotDetails([], []),
+        plot: UseCase.PlotDetails | None = None,
     ) -> UseCase.Response:
+        if transactions is None:
+            transactions = []
+        if plot is None:
+            plot = UseCase.PlotDetails([], [])
         return UseCase.Response(company_id, transactions, account_balance, plot)

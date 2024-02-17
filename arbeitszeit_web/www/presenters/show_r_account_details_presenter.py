@@ -47,7 +47,9 @@ class ShowRAccountDetailsPresenter:
             navbar_items=[
                 NavbarItem(
                     text=self.translator.gettext("Accounts"),
-                    url=self.url_index.get_my_accounts_url(),
+                    url=self.url_index.get_company_accounts_url(
+                        company_id=use_case_response.company_id
+                    ),
                 ),
                 NavbarItem(text=self.translator.gettext("Account r"), url=None),
             ],

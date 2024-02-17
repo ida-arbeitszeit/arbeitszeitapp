@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import List
+from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import AccountTypes
@@ -44,7 +45,9 @@ class GetCompanyTransactionsPresenter:
         ]
         return GetCompanyTransactionsViewModel(
             transactions=transactions,
-            navbar_items=self._create_navbar_items(),
+            navbar_items=self._create_navbar_items(
+                company_id=use_case_response.company_id
+            ),
         )
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
@@ -99,11 +102,11 @@ class GetCompanyTransactionsPresenter:
         )
         return transaction_dict[transaction_type.name]
 
-    def _create_navbar_items(self) -> list[NavbarItem]:
+    def _create_navbar_items(self, company_id: UUID) -> list[NavbarItem]:
         return [
             NavbarItem(
                 text=self.translator.gettext("Accounts"),
-                url=self.url_index.get_my_accounts_url(),
+                url=self.url_index.get_company_accounts_url(company_id=company_id),
             ),
             NavbarItem(
                 text=self.translator.gettext("All transactions"),
