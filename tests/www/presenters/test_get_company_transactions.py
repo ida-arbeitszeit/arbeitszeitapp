@@ -21,18 +21,20 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         super().setUp()
         self.presenter = self.injector.get(GetCompanyTransactionsPresenter)
 
-    def test_return_empty_list_when_no_transactions_took_place(self):
+    def test_return_empty_list_when_no_transactions_took_place(self) -> None:
         response = GetCompanyTransactionsResponse(transactions=[])
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions, [])
 
-    def test_show_details_of_one_transaction_when_one_transaction_took_place(self):
+    def test_show_details_of_one_transaction_when_one_transaction_took_place(
+        self,
+    ) -> None:
         expected_transaction = self._get_single_transaction_info()
         response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
 
-    def test_that_correct_string_is_shown_for_each_transaction_type(self):
+    def test_that_correct_string_is_shown_for_each_transaction_type(self) -> None:
         transaction_types = [
             TransactionTypes.credit_for_fixed_means,
             TransactionTypes.credit_for_liquid_means,
@@ -60,14 +62,14 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                     self._get_transaction_name(transaction_type),
                 )
 
-    def test_that_transaction_date_is_formatted_as_string(self):
+    def test_that_transaction_date_is_formatted_as_string(self) -> None:
         expected_transaction = self._get_single_transaction_info()
         response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
         view_model = self.presenter.present(response)
         presented_transaction = view_model.transactions[0]
         self.assertIsInstance(presented_transaction.date, str)
 
-    def test_that_transaction_date_is_formatted_correctly(self):
+    def test_that_transaction_date_is_formatted_correctly(self) -> None:
         expected_time = datetime(1998, 12, 1, 22, 5, tzinfo=tz.gettz("Europe/Berlin"))
         expected_transaction = self._get_single_transaction_info(date=expected_time)
         response = GetCompanyTransactionsResponse(transactions=[expected_transaction])
@@ -75,7 +77,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         presented_transaction = view_model.transactions[0]
         self.assertEqual(presented_transaction.date, "01.12.1998 22:05")
 
-    def test_that_transaction_volume_is_shown_as_correct_decimal(self):
+    def test_that_transaction_volume_is_shown_as_correct_decimal(self) -> None:
         expected_transaction_volume = Decimal(10)
         expected_transaction = self._get_single_transaction_info(
             transaction_volume=expected_transaction_volume
@@ -89,7 +91,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             expected_transaction_volume,
         )
 
-    def test_that_correct_string_is_shown_for_each_account_type(self):
+    def test_that_correct_string_is_shown_for_each_account_type(self) -> None:
         account_types = [
             AccountTypes.p,
             AccountTypes.r,
@@ -111,7 +113,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                     self._get_account_name(account_type),
                 )
 
-    def test_that_transaction_purpose_is_shown_as_correct_string(self):
+    def test_that_transaction_purpose_is_shown_as_correct_string(self) -> None:
         expected_purpose = "purpose test"
         expected_transaction = self._get_single_transaction_info(
             purpose=expected_purpose
@@ -122,7 +124,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self.assertIsInstance(presented_transaction.purpose, str)
         self.assertEqual(presented_transaction.purpose, expected_purpose)
 
-    def test_return_two_transactions_when_two_transactions_took_place(self):
+    def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
         response = GetCompanyTransactionsResponse(
             transactions=[
                 self._get_single_transaction_info(),
@@ -131,6 +133,25 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 2)
+
+    def test_view_model_contains_two_navbar_items(self) -> None:
+        response = GetCompanyTransactionsResponse(transactions=[])
+        view_model = self.presenter.present(response)
+        assert len(view_model.navbar_items) == 2
+
+    def test_first_navbar_item_has_text_accounts_and_url_to_my_accounts(self) -> None:
+        response = GetCompanyTransactionsResponse(transactions=[])
+        view_model = self.presenter.present(response)
+        first_navbar_item = view_model.navbar_items[0]
+        assert first_navbar_item.text == self.translator.gettext("Accounts")
+        assert first_navbar_item.url == self.url_index.get_my_accounts_url()
+
+    def test_second_navbar_item_has_text_all_transactions_and_url_not_set(self) -> None:
+        response = GetCompanyTransactionsResponse(transactions=[])
+        view_model = self.presenter.present(response)
+        second_navbar_item = view_model.navbar_items[1]
+        assert second_navbar_item.text == self.translator.gettext("All transactions")
+        assert second_navbar_item.url is None
 
     def _get_single_transaction_info(
         self,

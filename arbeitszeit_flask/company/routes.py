@@ -277,7 +277,7 @@ def list_all_transactions(
     view_model = presenter.present(response)
     return render_template(
         "company/list_all_transactions.html",
-        all_transactions=view_model.transactions,
+        view_model=view_model,
     )
 
 

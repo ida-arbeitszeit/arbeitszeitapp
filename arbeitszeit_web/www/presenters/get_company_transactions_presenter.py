@@ -10,6 +10,8 @@ from arbeitszeit.use_cases.get_company_transactions import (
     TransactionInfo,
 )
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.navbar import NavbarItem
 
 
 @dataclass
@@ -24,12 +26,14 @@ class ViewModelTransactionInfo:
 @dataclass
 class GetCompanyTransactionsViewModel:
     transactions: List[ViewModelTransactionInfo]
+    navbar_items: list[NavbarItem]
 
 
 @dataclass
 class GetCompanyTransactionsPresenter:
     translator: Translator
     datetime_service: DatetimeService
+    url_index: UrlIndex
 
     def present(
         self, use_case_response: GetCompanyTransactionsResponse
@@ -38,8 +42,10 @@ class GetCompanyTransactionsPresenter:
             self._create_info(transaction)
             for transaction in use_case_response.transactions
         ]
-
-        return GetCompanyTransactionsViewModel(transactions=transactions)
+        return GetCompanyTransactionsViewModel(
+            transactions=transactions,
+            navbar_items=self._create_navbar_items(),
+        )
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         account = self._get_account(transaction.account_type)
@@ -92,3 +98,15 @@ class GetCompanyTransactionsPresenter:
             ),
         )
         return transaction_dict[transaction_type.name]
+
+    def _create_navbar_items(self) -> list[NavbarItem]:
+        return [
+            NavbarItem(
+                text=self.translator.gettext("Accounts"),
+                url=self.url_index.get_my_accounts_url(),
+            ),
+            NavbarItem(
+                text=self.translator.gettext("All transactions"),
+                url=None,
+            ),
+        ]
