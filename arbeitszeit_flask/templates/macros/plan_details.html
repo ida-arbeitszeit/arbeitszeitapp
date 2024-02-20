@@ -63,7 +63,6 @@
                     <div class="tile is-parent">
                         <article class="tile is-child notification has-background-warning-light">
                             <div class="has-text-right has-text-info-dark">
-                                <!-- TODO: clarify can plan be approved but be Inactive and not expired because current date is BEFORE start of planning timeframe? -->
                                 {{ info_tooltip(id="id_plan_status", text=gettext("Status can be \"Active\", i.e. plan was approved and current date is within planning timeframe, or \"Inactive\", i.e. plan is not yet approved or it is expired.")) }}
                             </div>
                             <p class="title is-4">{{ view_model.details.activity_string[0] }}</p>
