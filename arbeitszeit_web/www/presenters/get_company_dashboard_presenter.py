@@ -6,11 +6,19 @@ from typing import List
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
 class GetCompanyDashboardPresenter:
+    @dataclass
+    class Tile:
+        title: str
+        subtitle: str
+        icon: str
+        url: str
+
     @dataclass
     class PlanDetailsWeb:
         prd_name: str
@@ -25,9 +33,11 @@ class GetCompanyDashboardPresenter:
         company_email: str
         has_latest_plans: bool
         latest_plans: List[GetCompanyDashboardPresenter.PlanDetailsWeb]
+        accounts_tile: GetCompanyDashboardPresenter.Tile
 
     url_index: UrlIndex
     datetime_service: DatetimeService
+    translator: Translator
 
     def present(
         self, use_case_response: GetCompanyDashboardUseCase.Response
@@ -43,6 +53,7 @@ class GetCompanyDashboardPresenter:
             company_email=use_case_response.company_info.email,
             has_latest_plans=bool(use_case_response.three_latest_plans),
             latest_plans=latest_plans,
+            accounts_tile=self._create_accounts_tile(use_case_response),
         )
 
     def _get_plan_details_web(
@@ -55,5 +66,17 @@ class GetCompanyDashboardPresenter:
             ),
             plan_details_url=self.url_index.get_plan_details_url(
                 plan_id=plan.plan_id, user_role=UserRole.company
+            ),
+        )
+
+    def _create_accounts_tile(
+        self, use_case_response: GetCompanyDashboardUseCase.Response
+    ) -> Tile:
+        return self.Tile(
+            title=self.translator.gettext("Accounts"),
+            subtitle=self.translator.gettext("You have four accounts"),
+            icon="fas fa-chart-line",
+            url=self.url_index.get_company_accounts_url(
+                company_id=use_case_response.company_info.id
             ),
         )

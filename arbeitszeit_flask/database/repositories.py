@@ -1749,9 +1749,7 @@ class AccountCredentialsUpdate:
             return 0
         sql_statement = (
             update(models.User)
-            .where(
-                models.User.id.in_(self.query.with_entities(models.User.id).subquery())
-            )
+            .where(models.User.id.in_(self.query.with_entities(models.User.id)))
             .values(**new_values)
             .execution_options(synchronize_session="fetch")
         )

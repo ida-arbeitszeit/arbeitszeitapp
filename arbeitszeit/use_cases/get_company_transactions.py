@@ -21,6 +21,7 @@ class TransactionInfo:
 @dataclass
 class GetCompanyTransactionsResponse:
     transactions: List[TransactionInfo]
+    company_id: UUID
 
 
 @dataclass
@@ -43,4 +44,7 @@ class GetCompanyTransactions:
                 company, company.accounts()
             )
         ]
-        return GetCompanyTransactionsResponse(transactions=transactions)
+        return GetCompanyTransactionsResponse(
+            transactions=transactions,
+            company_id=company_id,
+        )

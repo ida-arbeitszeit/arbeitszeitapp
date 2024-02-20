@@ -22,6 +22,7 @@ from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperatio
 from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
     ListCoordinationsOfCooperationView,
 )
+from arbeitszeit_flask.views.show_company_accounts_view import CompanyAccountsView
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
@@ -137,4 +138,10 @@ class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView):
 @AuthenticatedUserRoute("/list_all_cooperations")
 @as_flask_view()
 class list_all_cooperations(ListAllCooperationsView):
+    ...
+
+
+@AuthenticatedUserRoute("/company/<uuid:company_id>/accounts")
+@as_flask_view()
+class company_accounts(CompanyAccountsView):
     ...

@@ -18,6 +18,11 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         info = self.get_company_transactions(company)
         assert not info.transactions
 
+    def test_that_response_contains_the_company_id_from_the_request(self) -> None:
+        company = self.company_generator.create_company()
+        response = self.get_company_transactions(company)
+        assert response.company_id == company
+
     def test_that_correct_info_is_generated_after_member_consumes_product(
         self,
     ) -> None:

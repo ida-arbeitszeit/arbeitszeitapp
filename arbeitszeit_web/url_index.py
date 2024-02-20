@@ -164,6 +164,9 @@ class UrlIndex(Protocol):
     def get_show_coordination_transfer_request_url(self, transfer_request: UUID) -> str:
         ...
 
+    def get_company_accounts_url(self, company_id: UUID) -> str:
+        ...
+
 
 @dataclass
 class UserUrlIndex:

@@ -7,8 +7,8 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class ShowMyAccountsRequest:
-    current_user: UUID
+class ShowCompanyAccountsRequest:
+    company: UUID
 
 
 @dataclass
@@ -17,17 +17,17 @@ class ShowMyAccountsResponse:
 
 
 @dataclass
-class ShowMyAccounts:
+class ShowCompanyAccounts:
     database: DatabaseGateway
 
-    def __call__(self, request: ShowMyAccountsRequest) -> ShowMyAccountsResponse:
+    def __call__(self, request: ShowCompanyAccountsRequest) -> ShowMyAccountsResponse:
         accounts = dict(
             (account.id, balance)
             for account, balance in self.database.get_accounts()
-            .owned_by_company(request.current_user)
+            .owned_by_company(request.company)
             .joined_with_balance()
         )
-        company = self.database.get_companies().with_id(request.current_user).first()
+        company = self.database.get_companies().with_id(request.company).first()
         assert company
         balances = [
             accounts[company.means_account],
