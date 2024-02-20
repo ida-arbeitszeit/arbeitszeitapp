@@ -76,11 +76,13 @@
                     <div class="subtitle is-6">{{ gettext("Your plans") }}</div>
                 </div>
             </a>
-            <a class="tile is-parent" href="{{ url_for('main_user.company_accounts', company_id=view_model.company_id) }}">
+            <a class="tile is-parent" href="{{ view_model.accounts_tile.url }}">
                 <div class="tile is-child box has-background-primary-light">
-                    <h1 class="title is-5"><span class="icon"><i class="fas fa-chart-line"></i></span> {{
-                        gettext("Accounts") }}</h1>
-                    <div class="subtitle is-6">{{ gettext("You have four accounts") }}</div>
+                    <h1 class="title is-5">
+                        <span class="icon"><i class="{{ view_model.accounts_tile.icon }}"></i></span>
+                        {{ view_model.accounts_tile.title }}
+                    </h1>
+                    <div class="subtitle is-6">{{ view_model.accounts_tile.subtitle }}</div>
                 </div>
             </a>
         </div>
