@@ -12,7 +12,7 @@ class ShowCompanyAccountsRequest:
 
 
 @dataclass
-class ShowMyAccountsResponse:
+class ShowCompanyAccountsResponse:
     balances: List[Decimal]
 
 
@@ -20,7 +20,9 @@ class ShowMyAccountsResponse:
 class ShowCompanyAccounts:
     database: DatabaseGateway
 
-    def __call__(self, request: ShowCompanyAccountsRequest) -> ShowMyAccountsResponse:
+    def __call__(
+        self, request: ShowCompanyAccountsRequest
+    ) -> ShowCompanyAccountsResponse:
         accounts = dict(
             (account.id, balance)
             for account, balance in self.database.get_accounts()
@@ -35,4 +37,4 @@ class ShowCompanyAccounts:
             accounts[company.work_account],
             accounts[company.product_account],
         ]
-        return ShowMyAccountsResponse(balances=balances)
+        return ShowCompanyAccountsResponse(balances=balances)

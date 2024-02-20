@@ -4,10 +4,10 @@ from uuid import UUID
 from flask import Response, render_template
 
 from arbeitszeit.use_cases.show_company_accounts import ShowCompanyAccounts
-from arbeitszeit_web.www.controllers.show_my_accounts_controller import (
+from arbeitszeit_web.www.controllers.show_company_accounts_controller import (
     ShowCompanyAccountsController,
 )
-from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
+from arbeitszeit_web.www.presenters.show_company_accounts_presenter import (
     ShowCompanyAccountsPresenter,
 )
 
@@ -24,7 +24,7 @@ class CompanyAccountsView:
         view_model = self.presenter.present(response)
         return Response(
             render_template(
-                "company/accounts.html",
+                "user/company_accounts.html",
                 view_model=view_model,
             )
         )

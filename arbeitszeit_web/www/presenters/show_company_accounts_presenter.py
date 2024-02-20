@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.show_company_accounts import ShowMyAccountsResponse
+from arbeitszeit.use_cases.show_company_accounts import ShowCompanyAccountsResponse
 
 
 @dataclass
@@ -16,7 +16,7 @@ class ViewModel:
 
 
 class ShowCompanyAccountsPresenter:
-    def present(self, use_case_response: ShowMyAccountsResponse) -> ViewModel:
+    def present(self, use_case_response: ShowCompanyAccountsResponse) -> ViewModel:
         balances = [str(round(balance, 2)) for balance in use_case_response.balances]
         signs = [balance >= 0 for balance in use_case_response.balances]
 

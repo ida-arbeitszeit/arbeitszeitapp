@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit_web.www.controllers.show_my_accounts_controller import (
+from arbeitszeit_web.www.controllers.show_company_accounts_controller import (
     ShowCompanyAccountsController,
 )
 from tests.www.base_test_case import BaseTestCase

@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from arbeitszeit.use_cases.show_company_accounts import ShowMyAccountsResponse
-from arbeitszeit_web.www.presenters.show_my_accounts_presenter import (
+from arbeitszeit.use_cases.show_company_accounts import ShowCompanyAccountsResponse
+from arbeitszeit_web.www.presenters.show_company_accounts_presenter import (
     ShowCompanyAccountsPresenter,
 )
 from tests.www.base_test_case import BaseTestCase
@@ -14,7 +14,7 @@ class ShowCompanyAccountsPresenterTests(BaseTestCase):
 
     def test_show_correct_balance_string_for_balances(self):
         presentation = self.presenter.present(
-            ShowMyAccountsResponse(
+            ShowCompanyAccountsResponse(
                 balances=[Decimal(0), Decimal(-1), Decimal(2.0051), Decimal(2.5)]
             )
         )
@@ -25,7 +25,7 @@ class ShowCompanyAccountsPresenterTests(BaseTestCase):
 
     def test_show_correct_signs_for_balances(self):
         presentation = self.presenter.present(
-            ShowMyAccountsResponse(
+            ShowCompanyAccountsResponse(
                 balances=[Decimal(0), Decimal(-1), Decimal(2.0051), Decimal(2.5)]
             )
         )
