@@ -423,3 +423,12 @@ class GeneralUrlIndexTests(ViewTestCase):
         )
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_get_request_to_company_accounts_url_leads_to_functional_url_if_company_exists(
+        self,
+    ) -> None:
+        self.login_company()
+        company = self.company_generator.create_company()
+        url = self.url_index.get_company_accounts_url(company_id=company)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

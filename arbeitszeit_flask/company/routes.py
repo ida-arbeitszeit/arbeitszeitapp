@@ -72,7 +72,6 @@ from arbeitszeit_flask.views.review_registered_consumptions_view import (
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
-from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
     CreateDraftFromPlanController,
 )
@@ -262,12 +261,6 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/my_accounts")
-@as_flask_view()
-class my_accounts(ShowMyAccountsView):
-    ...
-
-
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
     get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
@@ -277,7 +270,7 @@ def list_all_transactions(
     view_model = presenter.present(response)
     return render_template(
         "company/list_all_transactions.html",
-        all_transactions=view_model.transactions,
+        view_model=view_model,
     )
 
 

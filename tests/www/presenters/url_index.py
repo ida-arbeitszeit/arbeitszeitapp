@@ -40,6 +40,7 @@ class UrlIndexTestImpl:
     get_answer_company_work_invite_url = UrlIndexMethod()
     get_approve_plan_url = UrlIndexMethod()
     get_change_email_url = UrlIndexMethod()
+    get_company_accounts_url = UrlIndexMethod()
     get_company_confirmation_url = UrlIndexMethod()
     get_company_dashboard_url = UrlIndexMethod()
     get_company_dashboard_url = UrlIndexMethod()

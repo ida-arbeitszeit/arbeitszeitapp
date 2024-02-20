@@ -8,6 +8,7 @@ from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.navbar import NavbarItem
 
 
 @dataclass
@@ -24,8 +25,9 @@ class ShowPAccountDetailsPresenter:
         transactions: List[ShowPAccountDetailsPresenter.TransactionInfo]
         account_balance: str
         plot_url: str
+        navbar_items: list[NavbarItem]
 
-    trans: Translator
+    translator: Translator
     url_index: UrlIndex
     datetime_service: DatetimeService
 
@@ -42,16 +44,25 @@ class ShowPAccountDetailsPresenter:
             plot_url=self.url_index.get_line_plot_of_company_p_account(
                 use_case_response.company_id
             ),
+            navbar_items=[
+                NavbarItem(
+                    text=self.translator.gettext("Accounts"),
+                    url=self.url_index.get_company_accounts_url(
+                        company_id=use_case_response.company_id
+                    ),
+                ),
+                NavbarItem(text=self.translator.gettext("Account p"), url=None),
+            ],
         )
 
     def _create_info(
         self, transaction: ShowPAccountDetailsUseCase.TransactionInfo
     ) -> TransactionInfo:
         transaction_type = (
-            self.trans.gettext("Consumption")
+            self.translator.gettext("Consumption")
             if transaction.transaction_type
             == TransactionTypes.consumption_of_fixed_means
-            else self.trans.gettext("Credit")
+            else self.translator.gettext("Credit")
         )
         return self.TransactionInfo(
             transaction_type,
