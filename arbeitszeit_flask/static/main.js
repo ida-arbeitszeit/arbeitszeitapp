@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
     (document.querySelectorAll('.dropdown') || []).forEach(($dropdown) => {
       $dropdown.addEventListener('click', function(event) {
         event.stopPropagation();
-        $dropdown.classList.toggle('is-active');
+        $isOpen = $dropdown.classList.contains('is-active')
+        closeAllElementsByClassName('.dropdown')
+        if (!$isOpen) {
+          openElement($dropdown);
+        }
       });
     });
 
