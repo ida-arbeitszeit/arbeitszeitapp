@@ -129,8 +129,10 @@ def line_plot_of_company_p_account(
     plotter: Plotter,
     use_case: ShowPAccountDetailsUseCase,
 ):
-    company_id = UUID(request.args["company_id"])
-    use_case_response = use_case(company_id)
+    use_case_request = ShowPAccountDetailsUseCase.Request(
+        company=UUID(request.args["company_id"])
+    )
+    use_case_response = use_case.show_details(request=use_case_request)
     png = plotter.create_line_plot(
         x=use_case_response.plot.timestamps,
         y=use_case_response.plot.accumulated_volumes,

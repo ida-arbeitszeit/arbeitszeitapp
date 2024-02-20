@@ -432,3 +432,44 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_company_accounts_url(company_id=company)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_company_account_p_leads_to_functional_url_if_company_exists(
+        self,
+    ) -> None:
+        self.login_company()
+        company = self.company_generator.create_company()
+        url = self.url_index.get_company_account_p_url(company_id=company)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_account_r_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_account_r_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_account_a_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_account_a_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_account_prd_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_account_prd_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_company_transactions_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_company()
+        url = self.url_index.get_company_transactions_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

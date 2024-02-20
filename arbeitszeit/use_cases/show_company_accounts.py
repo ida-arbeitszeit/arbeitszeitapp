@@ -14,6 +14,7 @@ class ShowCompanyAccountsRequest:
 @dataclass
 class ShowCompanyAccountsResponse:
     balances: List[Decimal]
+    company: UUID
 
 
 @dataclass
@@ -37,4 +38,4 @@ class ShowCompanyAccounts:
             accounts[company.work_account],
             accounts[company.product_account],
         ]
-        return ShowCompanyAccountsResponse(balances=balances)
+        return ShowCompanyAccountsResponse(balances=balances, company=request.company)
