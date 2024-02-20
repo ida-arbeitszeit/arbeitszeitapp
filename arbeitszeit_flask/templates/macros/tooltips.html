@@ -1,5 +1,5 @@
-{% macro hover_info_tooltip(id, text) %}
-<div class="dropdown is-right is-hoverable">
+{% macro info_tooltip(id, text) %}
+<div class="dropdown is-right">
     <div class="dropdown-trigger">
         <span class="icon" aria-haspopup="true" aria-controls="{{ id }}">
             <i class="fa-solid fa-info-circle">
@@ -18,6 +18,6 @@
             </div>
         </div>
     </div>
-</div>    
+</div>
 
 {% endmacro %}

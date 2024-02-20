@@ -1,4 +1,4 @@
-{% from 'macros/tooltips.html' import hover_info_tooltip %}
+{% from 'macros/tooltips.html' import info_tooltip %}
 {% macro plan_details(view_model) %}
 <div class="section has-text-centered">
     <div class="section">
@@ -12,7 +12,7 @@
                         <div class="tile is-parent is-vertical">
                             <article class="tile is-child notification">
                                 <div class="has-text-right has-text-info-dark">
-                                    {{ hover_info_tooltip(id="id_plan_id", text=gettext("This plan ID identifies your plan. It is used to account for labour time by workers and companies that work on, or respectively consume, the planned product or service.")) }}
+                                    {{ info_tooltip(id="id_plan_id", text=gettext("This plan ID identifies your plan. It is used to account for labour time by workers and companies that work on, or respectively consume, the planned product or service.")) }}
                                 </div>
                                 <p class="title is-4">{{ view_model.details.plan_id[0] }}</p>
                                 <p class="subtitle">
