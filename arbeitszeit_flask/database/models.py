@@ -233,5 +233,5 @@ class PasswordResetRequest(db.Model):
     email_address = db.Column(
         db.String, db.ForeignKey("email.address"), nullable=False, unique=False
     )
-    reset_token = db.Column(db.String, nullable=False)
+    reset_token = db.Column(db.String(300), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
