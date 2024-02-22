@@ -47,7 +47,12 @@ class EndCooperation:
         return EndCooperationResponse(rejection_reason=None)
 
     def _validate_request(self, request: EndCooperationRequest) -> None:
-        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
+        plan_and_cooperation = (
+            self.database_gateway.get_plans()
+            .with_id(request.plan_id)
+            .joined_with_cooperation()
+            .first()
+        )
         cooperation_and_coordinator = (
             self.database_gateway.get_cooperations()
             .with_id(request.cooperation_id)
@@ -56,9 +61,10 @@ class EndCooperation:
         )
         if not cooperation_and_coordinator:
             raise EndCooperationResponse.RejectionReason.cooperation_not_found
-        if plan is None:
+        if plan_and_cooperation is None:
             raise EndCooperationResponse.RejectionReason.plan_not_found
-        if plan.cooperation is None:
+        plan, current_cooperation = plan_and_cooperation
+        if not current_cooperation:
             raise EndCooperationResponse.RejectionReason.plan_has_no_cooperation
         coordinator = cooperation_and_coordinator[1]
         if (request.requester_id != coordinator.id) and (

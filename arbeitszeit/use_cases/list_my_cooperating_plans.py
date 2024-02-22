@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import List
 from uuid import UUID
 
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.records import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -44,18 +44,19 @@ class ListMyCooperatingPlansUseCase:
             .that_are_cooperating()
         )
         return self.Response(
-            cooperating_plans=[self._create_plan_object(plan) for plan in plans]
+            cooperating_plans=[
+                self._create_plan_object(plan, cooperation)
+                for plan, cooperation in plans.joined_with_cooperation()
+                if cooperation
+            ]
         )
 
-    def _create_plan_object(self, plan: Plan) -> CooperatingPlan:
-        assert plan.cooperation
-        cooperation = (
-            self.database_gateway.get_cooperations().with_id(plan.cooperation).first()
-        )
-        assert cooperation
+    def _create_plan_object(
+        self, plan: records.Plan, cooperation: records.Cooperation
+    ) -> CooperatingPlan:
         return self.CooperatingPlan(
             plan_id=plan.id,
             plan_name=plan.prd_name,
-            coop_id=plan.cooperation,
+            coop_id=cooperation.id,
             coop_name=cooperation.name,
         )

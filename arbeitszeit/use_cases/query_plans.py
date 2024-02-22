@@ -72,14 +72,16 @@ class QueryPlans:
         total_results = len(plans)
         plans = self._apply_filter(plans, request.query_string, request.filter_category)
         plans = self._apply_sorting(plans, request.sorting_category)
-        planning_info = plans.joined_with_planner_and_cooperating_plans(now)
+        planning_info = plans.joined_with_planner_and_cooperation_and_cooperating_plans(
+            now
+        )
         if request.offset is not None:
             planning_info = planning_info.offset(n=request.offset)
         if request.limit is not None:
             planning_info = planning_info.limit(n=request.limit)
         results = [
-            self._plan_to_response_model(plan, planner, cooperating_plans)
-            for plan, planner, cooperating_plans in planning_info
+            self._plan_to_response_model(plan, planner, cooperation, cooperating_plans)
+            for plan, planner, cooperation, cooperating_plans in planning_info
         ]
         return PlanQueryResponse(
             results=results, total_results=total_results, request=request
@@ -107,6 +109,7 @@ class QueryPlans:
         self,
         plan: records.Plan,
         planner: records.Company,
+        cooperation: Optional[records.Cooperation],
         cooperating_plans: List[records.PlanSummary],
     ) -> QueriedPlan:
         labour_cost_per_unit = individual_labour_cost(plan)
@@ -124,6 +127,6 @@ class QueryPlans:
             price_per_unit=price_per_unit,
             labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=plan.is_public_service,
-            is_cooperating=bool(plan.cooperation),
+            is_cooperating=bool(cooperation),
             activation_date=plan.activation_date,
         )

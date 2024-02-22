@@ -18,9 +18,9 @@ from typing import (
 from uuid import UUID, uuid4
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.dialects.postgresql import INTERVAL, insert
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import and_, case, func, or_, update
+from sqlalchemy.sql.expression import and_, case, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
@@ -139,8 +139,11 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def that_are_cooperating(self) -> Self:
+        plan_cooperation = aliased(models.PlanCooperation)
         return self._with_modified_query(
-            lambda query: query.filter(models.Plan.cooperation != None)
+            lambda query: query.join(
+                plan_cooperation, plan_cooperation.plan == models.Plan.id
+            )
         )
 
     def planned_by(self, *company: UUID) -> Self:
@@ -174,31 +177,42 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
+        plan_cooperation = aliased(models.PlanCooperation)
+        other_plan_cooperation = aliased(models.PlanCooperation)
         return self._with_modified_query(
-            lambda query: query.filter(
+            lambda query: query.join(
+                plan_cooperation,
+                plan_cooperation.plan == models.Plan.id,
+                isouter=True,
+            )
+            .join(
+                other_plan_cooperation,
+                other_plan_cooperation.cooperation == plan_cooperation.cooperation,
+                isouter=True,
+            )
+            .filter(
                 or_(
+                    other_plan_cooperation.plan == str(plan),
                     models.Plan.id == str(plan),
-                    and_(
-                        models.Plan.cooperation != None,
-                        models.Plan.cooperation.in_(
-                            models.Plan.query.filter(
-                                models.Plan.id == str(plan)
-                            ).with_entities(models.Plan.cooperation)
-                        ),
-                    ),
                 )
             )
+            .distinct()
         )
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
         cooperations = list(map(str, cooperation))
+        plan_cooperation = aliased(models.PlanCooperation)
         if not cooperation:
             return self._with_modified_query(
-                lambda query: query.filter(models.Plan.cooperation != None)
+                lambda query: query.join(
+                    plan_cooperation, plan_cooperation.plan == models.Plan.id
+                )
             )
         else:
             return self._with_modified_query(
-                lambda query: query.filter(models.Plan.cooperation.in_(cooperations))
+                lambda query: query.join(
+                    plan_cooperation, plan_cooperation.plan == models.Plan.id
+                ).filter(plan_cooperation.cooperation.in_(cooperations))
             )
 
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> Self:
@@ -247,12 +261,20 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             lambda query: query.filter(models.Plan.hidden_by_user == False)
         )
 
-    def joined_with_planner_and_cooperating_plans(
+    def joined_with_planner_and_cooperation_and_cooperating_plans(
         self, timestamp: datetime
     ) -> FlaskQueryResult[
-        Tuple[records.Plan, records.Company, List[records.PlanSummary]]
+        Tuple[
+            records.Plan,
+            records.Company,
+            Optional[records.Cooperation],
+            List[records.PlanSummary],
+        ]
     ]:
         planner = aliased(models.Company)
+        cooperation = aliased(models.Cooperation)
+        plan_cooperation = aliased(models.PlanCooperation)
+        other_plan_cooperation = aliased(models.PlanCooperation)
         cooperating_plan = aliased(models.Plan)
         expiration_date = (
             func.cast(concat(cooperating_plan.timeframe, "days"), INTERVAL)
@@ -261,8 +283,26 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         query = (
             self.query.join(planner, planner.id == models.Plan.planner)
             .join(
+                plan_cooperation,
+                plan_cooperation.plan == models.Plan.id,
+                isouter=True,
+            )
+            .join(
+                cooperation,
+                cooperation.id == plan_cooperation.cooperation,
+                isouter=True,
+            )
+            .join(
+                other_plan_cooperation,
+                plan_cooperation.cooperation == other_plan_cooperation.cooperation,
+                isouter=True,
+            )
+            .join(
                 cooperating_plan,
-                cooperating_plan.cooperation == models.Plan.cooperation,
+                or_(
+                    cooperating_plan.id == other_plan_cooperation.plan,
+                    cooperating_plan.id == models.Plan.id,
+                ),
                 isouter=True,
             )
             .filter(
@@ -274,10 +314,11 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
                     ),
                 )
             )
-            .group_by(models.Plan, planner)
+            .group_by(models.Plan, planner, cooperation)
             .with_entities(
                 models.Plan,
                 planner,
+                cooperation,
                 func.array_agg(cooperating_plan.timeframe),
                 func.array_agg(
                     cooperating_plan.costs_p
@@ -289,8 +330,37 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
         return FlaskQueryResult(
             db=self.db,
-            mapper=self._map_result_with_plan_and_company_and_cooperating_plans,
+            mapper=self._map_result_with_plan_and_company_and_cooperation_and_cooperating_plans,
             query=query,
+        )
+
+    def joined_with_cooperation(
+        self,
+    ) -> FlaskQueryResult[tuple[records.Plan, Optional[records.Cooperation]]]:
+        def mapper(orm: Any) -> tuple[records.Plan, Optional[records.Cooperation]]:
+            return (
+                DatabaseGatewayImpl.plan_from_orm(orm[0]),
+                DatabaseGatewayImpl.cooperation_from_orm(orm[1]) if orm[1] else None,
+            )
+
+        plan_cooperation = aliased(models.PlanCooperation)
+        cooperation = aliased(models.Cooperation)
+        query = (
+            self.query.join(
+                plan_cooperation, plan_cooperation.plan == models.Plan.id, isouter=True
+            )
+            .join(
+                cooperation,
+                cooperation.id == plan_cooperation.cooperation,
+                isouter=True,
+            )
+            .with_entities(models.Plan, cooperation)
+        )
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
         )
 
     def joined_with_provided_product_amount(
@@ -334,10 +404,15 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     @classmethod
-    def _map_result_with_plan_and_company_and_cooperating_plans(
+    def _map_result_with_plan_and_company_and_cooperation_and_cooperating_plans(
         self, orm: Any
-    ) -> Tuple[records.Plan, records.Company, List[records.PlanSummary]]:
-        if any(orm[2]):
+    ) -> Tuple[
+        records.Plan,
+        records.Company,
+        Optional[records.Cooperation],
+        List[records.PlanSummary],
+    ]:
+        if orm[3]:
             cooperating_plans = list(
                 records.PlanSummary(
                     production_costs=cost,
@@ -345,9 +420,9 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
                     amount=amount,
                 )
                 for duration, cost, amount in zip(
-                    orm[2],
                     orm[3],
                     orm[4],
+                    orm[5],
                 )
             )
         else:
@@ -355,6 +430,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         return (
             DatabaseGatewayImpl.plan_from_orm(orm[0]),
             DatabaseGatewayImpl.company_from_orm(orm[1]),
+            DatabaseGatewayImpl.cooperation_from_orm(orm[2]) if orm[2] else None,
             cooperating_plans,
         )
 
@@ -365,8 +441,14 @@ class PlanUpdate:
     db: SQLAlchemy
     plan_update_values: Dict[str, Any] = field(default_factory=dict)
     review_update_values: Dict[str, Any] = field(default_factory=dict)
+    cooperation_update: SetCooperation | None = None
+
+    @dataclass
+    class SetCooperation:
+        cooperation: Optional[UUID]
 
     def perform(self) -> int:
+        sql_statement: Any
         row_count = 0
         if self.plan_update_values:
             sql_statement = (
@@ -394,15 +476,35 @@ class PlanUpdate:
             )
             result = self.db.session.execute(sql_statement)
             row_count = max(row_count, result.rowcount)  # type: ignore
+        if self.cooperation_update:
+            match self.cooperation_update:
+                case self.SetCooperation(cooperation=None):
+                    sql_statement = delete(models.PlanCooperation).where(
+                        models.PlanCooperation.plan.in_(
+                            self.query.with_entities(models.Plan.id).scalar_subquery()
+                        )
+                    )
+                case self.SetCooperation(cooperation=coop_id):
+                    values = [
+                        dict(plan=plan.id, cooperation=str(coop_id))
+                        for plan in self.query
+                    ]
+                    sql_statement = (
+                        insert(models.PlanCooperation)
+                        .values(values)
+                        .on_conflict_do_update(
+                            constraint="plan_cooperation_pkey",
+                            set_=dict(cooperation=str(coop_id)),
+                        )
+                    )
+            result = self.db.session.execute(sql_statement)
+            row_count = max(row_count, result.rowcount)  # type: ignore
         return row_count
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
         return replace(
             self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                cooperation=str(cooperation) if cooperation else None,
-            ),
+            cooperation_update=self.SetCooperation(cooperation),
         )
 
     def set_requested_cooperation(self, cooperation: Optional[UUID]) -> Self:
@@ -1919,7 +2021,6 @@ class DatabaseGatewayImpl:
             requested_cooperation=UUID(plan.requested_cooperation)
             if plan.requested_cooperation
             else None,
-            cooperation=UUID(plan.cooperation) if plan.cooperation else None,
             hidden_by_user=plan.hidden_by_user,
         )
 
