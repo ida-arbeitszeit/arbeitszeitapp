@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from arbeitszeit.records import Plan, PlanDraft
 from arbeitszeit.use_cases.show_my_plans import (
@@ -85,7 +85,9 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan_record(cooperation=coop)
-        RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(plan)
+        RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(
+            plan, cooperation=coop
+        )
         presentation = self.presenter.present(RESPONSE_WITH_COOPERATING_PLAN)
         self.assertEqual(
             presentation.active_plans.rows[0].is_cooperating,
@@ -217,7 +219,9 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             self.url_index.get_draft_details_url(draft_id),
         )
 
-    def _convert_into_plan_info(self, plan: Plan) -> PlanInfo:
+    def _convert_into_plan_info(
+        self, plan: Plan, cooperation: UUID | None = None
+    ) -> PlanInfo:
         return PlanInfo(
             id=plan.id,
             prd_name=plan.prd_name,
@@ -226,8 +230,8 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             plan_creation_date=plan.plan_creation_date,
             activation_date=plan.activation_date,
             expiration_date=plan.expiration_date,
-            is_cooperating=bool(plan.cooperation),
-            cooperation=plan.cooperation,
+            is_cooperating=bool(cooperation),
+            cooperation=cooperation,
         )
 
     def _convert_draft_into_plan_info(self, plan: PlanDraft) -> PlanInfo:
@@ -274,8 +278,10 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             drafts=[],
         )
 
-    def response_with_one_active_plan(self, plan: Plan) -> ShowMyPlansResponse:
-        plan_info = self._convert_into_plan_info(plan)
+    def response_with_one_active_plan(
+        self, plan: Plan, cooperation: UUID | None = None
+    ) -> ShowMyPlansResponse:
+        plan_info = self._convert_into_plan_info(plan, cooperation)
         return ShowMyPlansResponse(
             count_all_plans=1,
             non_active_plans=[],

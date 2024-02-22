@@ -123,9 +123,21 @@ class PlanResult(QueryResult[records.Plan], Protocol):
         only contain plans that are not hidden.
         """
 
-    def joined_with_planner_and_cooperating_plans(
+    def joined_with_planner_and_cooperation_and_cooperating_plans(
         self, timestamp: datetime
-    ) -> QueryResult[Tuple[records.Plan, records.Company, List[records.PlanSummary]]]:
+    ) -> QueryResult[
+        Tuple[
+            records.Plan,
+            records.Company,
+            Optional[records.Cooperation],
+            List[records.PlanSummary],
+        ]
+    ]:
+        ...
+
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResult[Tuple[records.Plan, Optional[records.Cooperation]]]:
         ...
 
     def joined_with_provided_product_amount(

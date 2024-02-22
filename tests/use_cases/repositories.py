@@ -168,7 +168,10 @@ class PlanResult(QueryResultImpl[Plan]):
         return self._filter_elements(lambda plan: plan.is_public_service)
 
     def that_are_cooperating(self) -> Self:
-        return self._filter_elements(lambda plan: plan.cooperation is not None)
+        def cooperation_of(plan: records.Plan) -> Optional[UUID]:
+            return self.database.relationships.cooperation_to_plan.get_one(plan.id)
+
+        return self._filter_elements(lambda plan: cooperation_of(plan) is not None)
 
     def planned_by(self, *company: UUID) -> Self:
         return self._filter_elements(lambda plan: plan.planner in company)
@@ -190,27 +193,36 @@ class PlanResult(QueryResultImpl[Plan]):
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         def items_generator() -> Iterator[records.Plan]:
+            cooperation_id = self.database.relationships.cooperation_to_plan.get_one(
+                plan
+            )
             plan_record = self.database.plans.get(plan)
             if not plan_record:
                 return
-            if plan_record.cooperation is None:
+            if cooperation_id is None:
                 yield from (
                     other_plan for other_plan in self.items() if other_plan.id == plan
                 )
             else:
-                yield from (
-                    plan
-                    for plan in self.items()
-                    if plan.cooperation == plan_record.cooperation
-                )
+                for candidate in self.items():
+                    candidate_cooperation = (
+                        self.database.relationships.cooperation_to_plan.get_one(
+                            candidate.id
+                        )
+                    )
+                    if candidate_cooperation == cooperation_id:
+                        yield candidate
 
         return self.from_iterable(items_generator)
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
+        def cooperation_of(plan: records.Plan) -> Optional[UUID]:
+            return self.database.relationships.cooperation_to_plan.get_one(plan.id)
+
         return self._filter_elements(
-            (lambda plan: plan.cooperation in cooperation)
+            (lambda plan: cooperation_of(plan) in cooperation)
             if cooperation
-            else (lambda plan: plan.cooperation is not None)
+            else (lambda plan: cooperation_of(plan) is not None)
         )
 
     def that_request_cooperation_with_coordinator(self, *company: UUID) -> Self:
@@ -250,30 +262,72 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_are_not_hidden(self) -> Self:
         return self._filter_elements(lambda plan: not plan.hidden_by_user)
 
-    def joined_with_planner_and_cooperating_plans(
+    def joined_with_planner_and_cooperation_and_cooperating_plans(
         self, timestamp: datetime
     ) -> QueryResultImpl[
-        Tuple[records.Plan, records.Company, List[records.PlanSummary]]
+        Tuple[
+            records.Plan,
+            records.Company,
+            Optional[records.Cooperation],
+            List[records.PlanSummary],
+        ]
     ]:
         def items() -> (
-            Iterable[Tuple[records.Plan, records.Company, List[records.PlanSummary]]]
+            Iterable[
+                Tuple[
+                    records.Plan,
+                    records.Company,
+                    Optional[Cooperation],
+                    List[records.PlanSummary],
+                ]
+            ]
         ):
             for plan in self.items():
-                if plan.cooperation:
+                cooperation_id = (
+                    self.database.relationships.cooperation_to_plan.get_one(plan.id)
+                )
+                if cooperation_id:
                     cooperating_plans = [
                         self.database.plans[p].to_summary()
-                        for p in self.database.indices.plan_by_cooperation.get(
-                            plan.cooperation
+                        for p in self.database.relationships.cooperation_to_plan.get_many(
+                            cooperation_id
                         )
                         if self.database.plans[p].is_active_as_of(timestamp)
                     ]
                 else:
                     cooperating_plans = []
-                yield plan, self.database.companies[plan.planner], cooperating_plans
+                cooperation = (
+                    self.database.cooperations[cooperation_id]
+                    if cooperation_id
+                    else None
+                )
+                yield plan, self.database.companies[
+                    plan.planner
+                ], cooperation, cooperating_plans
 
         return QueryResultImpl(
             database=self.database,
             items=items,
+        )
+
+    def joined_with_cooperation(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Plan, Optional[records.Cooperation]]]:
+        def items() -> (
+            Generator[tuple[records.Plan, Optional[records.Cooperation]], None, None]
+        ):
+            for p in self.items():
+                cooperation_id = (
+                    self.database.relationships.cooperation_to_plan.get_one(p.id)
+                )
+                if cooperation_id:
+                    yield p, self.database.cooperations[cooperation_id]
+                else:
+                    yield p, None
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
         )
 
     def joined_with_provided_product_amount(
@@ -326,13 +380,23 @@ class PlanUpdate:
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
         def update(plan: Plan) -> None:
-            if plan.cooperation:
-                self.records.indices.plan_by_cooperation.remove(
-                    plan.cooperation, plan.id
-                )
             if cooperation:
-                self.records.indices.plan_by_cooperation.add(cooperation, plan.id)
-            plan.cooperation = cooperation
+                assert cooperation in self.records.cooperations
+                cooperation_plans = (
+                    self.records.relationships.cooperation_to_plan.get_many(cooperation)
+                )
+                if plan.id not in cooperation_plans:
+                    self.records.relationships.cooperation_to_plan.relate(
+                        cooperation, plan.id
+                    )
+            else:
+                current_coop = self.records.relationships.cooperation_to_plan.get_one(
+                    plan.id
+                )
+                if current_coop:
+                    self.records.relationships.cooperation_to_plan.dissociate(
+                        current_coop, plan.id
+                    )
 
         return self._add_update(update)
 
@@ -1612,7 +1676,6 @@ class MockDatabase:
             activation_date=None,
             approval_date=None,
             requested_cooperation=None,
-            cooperation=None,
             hidden_by_user=False,
         )
         self.plans[plan.id] = plan
@@ -1936,7 +1999,6 @@ class OneToMany(Generic[One, Many]):
         self._backwards: Dict[Many, Optional[One]] = defaultdict(lambda: None)
 
     def relate(self, one: One, many: Many) -> None:
-        assert not self._backwards[many]
         self._forwards[one].add(many)
         self._backwards[many] = one
 
@@ -1984,11 +2046,11 @@ class Relationships:
     account_credentials_to_accountant: OneToOne[UUID, UUID] = field(
         default_factory=OneToOne
     )
+    cooperation_to_plan: OneToMany[UUID, UUID] = field(default_factory=OneToMany)
 
 
 @dataclass
 class Indices:
-    plan_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
     member_by_account: Index[UUID, UUID] = field(default_factory=Index)
     company_by_account: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_transaction: Index[UUID, UUID] = field(default_factory=Index)

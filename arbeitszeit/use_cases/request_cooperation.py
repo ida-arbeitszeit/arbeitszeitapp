@@ -70,7 +70,12 @@ class RequestCooperation:
         self, request: RequestCooperationRequest
     ) -> Tuple[Company, EmailAddress]:
         now = self.datetime_service.now()
-        plan = self.database_gateway.get_plans().with_id(request.plan_id).first()
+        plan_and_current_cooperation = (
+            self.database_gateway.get_plans()
+            .with_id(request.plan_id)
+            .joined_with_cooperation()
+            .first()
+        )
         cooperation_and_coordinator = (
             self.database_gateway.get_companies()
             .that_is_coordinating_cooperation(request.cooperation_id)
@@ -79,11 +84,12 @@ class RequestCooperation:
         )
         if cooperation_and_coordinator is None:
             raise RequestCooperationResponse.RejectionReason.cooperation_not_found
-        if plan is None:
+        if plan_and_current_cooperation is None:
             raise RequestCooperationResponse.RejectionReason.plan_not_found
+        plan, current_cooperation = plan_and_current_cooperation
         if not plan.is_active_as_of(now):
             raise RequestCooperationResponse.RejectionReason.plan_inactive
-        if plan.cooperation:
+        if current_cooperation:
             raise RequestCooperationResponse.RejectionReason.plan_has_cooperation
         if plan.requested_cooperation:
             raise RequestCooperationResponse.RejectionReason.plan_is_already_requesting_cooperation
