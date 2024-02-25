@@ -4,47 +4,118 @@ Development guide
 Implementing Business Logic
 ----------------------------
 
-The code implementing the business logic is organized by use cases.  A
-use case is basically an action that a user wants to perform via the
-software.  Usually a use case is something that would make sense even
-if this specific application would not exist. An example for that
-would be the filing of plans by companies. If the arbeitszeit economy
-would be conducted without this application companies would still need
-to file plans with public accounting.  Every use case should "live" in
-its own class inside a file under the ``arbeitszeit/use_cases/``
-directory. The use case should expose a single "public" method that
-describes the use case adequately in its name. In our example this
-would probably be the method ``file_plan``.  This method takes exactly
-one argument, apart from the implicit ``self`` argument, namely a
-``request`` argument. We shall call this argument the *use case
-request*. The return value of this method is called the *use case
-response*. The type (class) of both values is specific to the use case
-and declared as an interior class of the use case.
+The code implementing the business logic is organized by use cases. We
+define a use case as an action that a user wants to perform via our
+app. Typically, a use case would still make sense even if our specific
+application didn't exist. For example, companies filing plans is a use
+case that would be necessary regardless of whether our application
+existed.
 
-See this example for reference::
+To keep our code organized, we place each use case in its own class
+within a file under the ``arbeitszeit/use_cases/`` directory. Each use
+case class should expose a single "public" method that adequately
+describes the use case in its name. For instance, in our example, we
+might name this method ``file_plan``. This method should take exactly
+one argument, in addition to the implicit ``self`` argument, which we
+call the *use case request*. The return value of this method is called
+the *use case response*. Both the type (class) of the request and
+response are specific to the use case and should be declared in the
+same module as the use case.
 
-  # We need to import the "new" annotations module so that
-  # interior classes can be handled by mypy without much hassle.
-  from __future__ import annotations
+Here's an example for reference::
 
   from dataclasses import dataclass
   from decimal import Decimal
   from uuid import UUID
 
+  @dataclass
+  class Request:
+      company_id: UUID
+      planned_hours: Decimal
+      plan_duration_in_days: int
+
+  @dataclass
+  class Response:
+      is_granted: bool
+
   class FilePlanUseCase:
-      @dataclass
-      class Request:
-          company_id: UUID
-          planned_hours: Decimal
-          plan_duration_in_days: int
-
-      @dataclass
-      class Response:
-          is_granted: bool
-
       def file_plan(self, request: Request) -> Response:
-          response = business_logic(request)
+          # Here, we'd implement our business logic
+          # For now, let's just return a response
+          response = Response(is_granted=True)
           return response
+
+In this example, we define two data classes, ``Request`` and
+``Response``, to hold the input and output data for our use
+case. Then, we create a class called ``FilePlanUseCase``, which
+contains a method called ``file_plan`` to handle the "file plan" use
+case. Inside this method, we'd implement the specific business logic
+needed for filing plans. For now, we're just returning a simple
+response to demonstrate the structure.
+
+Testing the Business Logic
+--------------------------
+
+When we modify or add to the business logic of our application, it's
+crucial to create tests. These tests serve two main purposes: Firstly,
+they ensure the reliability of any changes made through thorough
+testing. Having tests in place safeguards us against unintentionally
+introducing bugs. Secondly, the tests act as a specification that
+other programmers can refer to in order to understand what a
+particular use case is expected to accomplish.
+
+To streamline the testing process, we've established a basic framework
+and provided some utility classes for setting up the application
+state. The following example illustrates the components that our
+testing setup offers::
+
+  from decimal import Decimal
+  from parameterized import parameterized
+  from arbeitszeit.use_cases import file_plan
+  from tests.use_cases.base_test_case import BaseTestCase
+
+  class FilePlanTests(BaseTestCase):
+      def setUp(self) -> None:
+          # The BaseTestCase parent class handles setting up the
+          # dependency injection logic.
+          super().setUp()
+          # Here, we create an instance of the use case object that we want to test.
+          self.use_case = self.injector.get(file_plan.FilePlanUseCase)
+
+      # The next test case demonstrates a basic scenario where we use
+      # a generator object to prepare the test's preconditions.
+      def test_that_existing_company_can_file_a_plan(self) -> None:
+          # The BaseTestCase class provides "generator" objects that
+          # aid in setting up the application state before running the test.
+          company = self.company_generator.create_company()
+          request = file_plan.Request(
+              company_id=company,
+              planned_hours=Decimal(20),
+              plan_duration_in_days=5,
+          )
+          response = self.use_case.file_plan(request)
+          # Finally, we verify that the plan was successfully filed
+          # by examining the response.
+          assert response.is_granted
+
+      # This example illustrates show you can create parameterized tests.
+      @parameterized.expand([0, -1, -999])
+      def test_that_plans_with_non_positive_durations_are_rejected(
+          self, duration: int
+      ) -> None:
+          company = self.company_generator.create_company()
+          request = file_plan.Request(
+              company_id=company,
+              planned_hours=Decimal(20),
+              plan_duration_in_days=duration,
+          )
+          response = self.use_case.file_plan(request)
+          assert not response.is_granted
+
+In this example, we define the ``FilePlanTests`` class, which inherits
+from ``BaseTestCase`` to leverage its setup functionality. Within this
+class, we have methods to test different scenarios, ensuring that our
+business logic behaves as expected under various conditions.
 
 Implementing calls to relational database servers
 -------------------------------------------------
