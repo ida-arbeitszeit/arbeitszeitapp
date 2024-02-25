@@ -214,3 +214,21 @@ class GeneralUrlIndex:
 
     def get_change_email_url(self, *, token: str) -> str:
         return url_for("main_user.change_email_address", token=token, _external=True)
+
+    def get_company_accounts_url(self, *, company_id: UUID) -> str:
+        return url_for("main_user.company_accounts", company_id=company_id)
+
+    def get_company_account_p_url(self, *, company_id: UUID) -> str:
+        return url_for("main_user.company_account_p", company_id=company_id)
+
+    def get_company_account_r_url(self) -> str:
+        return url_for("main_company.account_r")
+
+    def get_company_account_a_url(self) -> str:
+        return url_for("main_company.account_a")
+
+    def get_company_account_prd_url(self) -> str:
+        return url_for("main_company.account_prd")
+
+    def get_company_transactions_url(self) -> str:
+        return url_for("main_company.list_all_transactions")

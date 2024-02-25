@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.show_prd_account_details import (
 )
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.navbar import NavbarItem
 
 
 @dataclass
@@ -29,6 +30,7 @@ class ShowPRDAccountDetailsPresenter:
         show_transactions: bool
         account_balance: str
         plot_url: str
+        navbar_items: list[NavbarItem]
 
     translator: Translator
     url_index: UrlIndex
@@ -46,6 +48,18 @@ class ShowPRDAccountDetailsPresenter:
             plot_url=self.url_index.get_line_plot_of_company_prd_account(
                 use_case_response.company_id
             ),
+            navbar_items=[
+                NavbarItem(
+                    text=self.translator.gettext("Accounts"),
+                    url=self.url_index.get_company_accounts_url(
+                        company_id=use_case_response.company_id
+                    ),
+                ),
+                NavbarItem(
+                    text=self.translator.gettext("Account prd"),
+                    url=None,
+                ),
+            ],
         )
 
     def _create_info(self, transaction: UseCase.TransactionInfo) -> TransactionInfo:

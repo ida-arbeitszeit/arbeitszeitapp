@@ -4,9 +4,9 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
+from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.records import Plan, PlanDraft
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -50,6 +50,7 @@ class ShowMyPlansUseCase:
             .planned_by(request.company_id)
             .ordered_by_creation_date(ascending=False)
             .that_are_not_hidden()
+            .joined_with_cooperation()
         )
         drafts = list(
             map(
@@ -60,8 +61,8 @@ class ShowMyPlansUseCase:
         drafts.sort(key=lambda x: x.plan_creation_date, reverse=True)
         count_all_plans = len(all_plans_of_company) + len(drafts)
         non_active_plans = [
-            self._create_plan_info_from_plan(plan)
-            for plan in all_plans_of_company
+            self._create_plan_info_from_plan(plan, cooperation)
+            for plan, cooperation in all_plans_of_company
             if (
                 not plan.is_approved
                 and not plan.is_active_as_of(now)
@@ -69,8 +70,8 @@ class ShowMyPlansUseCase:
             )
         ]
         active_plans = [
-            self._create_plan_info_from_plan(plan)
-            for plan in all_plans_of_company
+            self._create_plan_info_from_plan(plan, cooperation)
+            for plan, cooperation in all_plans_of_company
             if (
                 plan.is_approved
                 and plan.is_active_as_of(now)
@@ -78,8 +79,8 @@ class ShowMyPlansUseCase:
             )
         ]
         expired_plans = [
-            self._create_plan_info_from_plan(plan)
-            for plan in all_plans_of_company
+            self._create_plan_info_from_plan(plan, cooperation)
+            for plan, cooperation in all_plans_of_company
             if plan.is_expired_as_of(now)
         ]
         return ShowMyPlansResponse(
@@ -90,7 +91,9 @@ class ShowMyPlansUseCase:
             drafts=drafts,
         )
 
-    def _create_plan_info_from_plan(self, plan: Plan) -> PlanInfo:
+    def _create_plan_info_from_plan(
+        self, plan: records.Plan, cooperation: Optional[records.Cooperation]
+    ) -> PlanInfo:
         return PlanInfo(
             id=plan.id,
             prd_name=plan.prd_name,
@@ -99,11 +102,11 @@ class ShowMyPlansUseCase:
             plan_creation_date=plan.plan_creation_date,
             activation_date=plan.activation_date,
             expiration_date=plan.expiration_date,
-            is_cooperating=bool(plan.cooperation),
-            cooperation=plan.cooperation,
+            is_cooperating=bool(cooperation),
+            cooperation=cooperation.id if cooperation else None,
         )
 
-    def _create_plan_info_from_draft(self, draft: PlanDraft) -> PlanInfo:
+    def _create_plan_info_from_draft(self, draft: records.PlanDraft) -> PlanInfo:
         return PlanInfo(
             id=draft.id,
             prd_name=draft.product_name,

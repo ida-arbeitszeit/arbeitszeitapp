@@ -28,22 +28,6 @@
     <h1 class="title is-4">
         {{ gettext("Cooperations that I coordinate") }}
     </h1>
-    {% if accept_message or deny_message or cancel_message %}
-    <div class="block"></div>
-    {% for message in accept_message %}
-    <div class='{{ "notification is-success" if accept_message_success else "notification is-danger"}}'>
-        {{ message }}
-    </div>
-    {% endfor %}
-    {% for message in deny_message %}
-    <div class='{{ "notification is-success" if deny_message_success else "notification is-danger"}}'>{{ message }}
-    </div>
-    {% endfor %}
-    {% for message in cancel_message %}
-    <div class='{{ "notification is-success" if cancel_message_success else "notification is-danger"}}'>{{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
 
     <div class="column is-offset-4 is-4 has-text-left">
     {% if list_of_coordinations.rows %}

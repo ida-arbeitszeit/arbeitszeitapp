@@ -72,7 +72,6 @@ from arbeitszeit_flask.views.review_registered_consumptions_view import (
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
-from arbeitszeit_flask.views.show_my_accounts_view import ShowMyAccountsView
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
     CreateDraftFromPlanController,
 )
@@ -115,9 +114,6 @@ from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
-from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
-    ShowPAccountDetailsPresenter,
-)
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -262,12 +258,6 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/my_accounts")
-@as_flask_view()
-class my_accounts(ShowMyAccountsView):
-    ...
-
-
 @CompanyRoute("/company/my_accounts/all_transactions")
 def list_all_transactions(
     get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
@@ -277,19 +267,6 @@ def list_all_transactions(
     view_model = presenter.present(response)
     return render_template(
         "company/list_all_transactions.html",
-        all_transactions=view_model.transactions,
-    )
-
-
-@CompanyRoute("/company/my_accounts/account_p")
-def account_p(
-    show_p_account_details: use_cases.show_p_account_details.ShowPAccountDetailsUseCase,
-    presenter: ShowPAccountDetailsPresenter,
-):
-    response = show_p_account_details(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/account_p.html",
         view_model=view_model,
     )
 
@@ -440,13 +417,13 @@ def my_cooperations(
     )
 
     view_model = presenter.present(
-        list_coord_response,
-        list_inbound_coop_requests_response,
-        accept_cooperation_response,
-        deny_cooperation_response,
-        list_outbound_coop_requests_response,
-        cancel_cooperation_solicitation_response,
-        list_my_coop_plans_response,
+        list_coord_response=list_coord_response,
+        list_inbound_coop_requests_response=list_inbound_coop_requests_response,
+        list_outbound_coop_requests_response=list_outbound_coop_requests_response,
+        list_my_cooperating_plans_response=list_my_coop_plans_response,
+        accept_cooperation_response=accept_cooperation_response,
+        deny_cooperation_response=deny_cooperation_response,
+        cancel_cooperation_solicitation_response=cancel_cooperation_solicitation_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
 

@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
@@ -121,6 +123,23 @@ class UseCaseTests(BaseTestCase):
         self.plan_generator.create_plan(is_public_service=True)
         response = self.query_plans(self.make_request())
         assert response.results[0].price_per_unit == 0
+
+    def test_that_labour_per_unit_is_correctly_displayed(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(200),
+                resource_cost=Decimal(100),
+                means_cost=Decimal(50),
+            )
+        )
+        response = self.query_plans(self.make_request())
+        queried_plan = response.results[0]
+        assert (
+            queried_plan.labour_cost_per_unit
+            == self.price_checker.get_labour_per_unit(plan)
+        )
 
     def test_that_price_of_cooperating_plans_is_correctly_displayed(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()

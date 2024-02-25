@@ -110,10 +110,16 @@ class Plan(db.Model):
     requested_cooperation = db.Column(
         db.String, db.ForeignKey("cooperation.id"), nullable=True
     )
-    cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=True)
     hidden_by_user = db.Column(db.Boolean, nullable=False, default=False)
 
     review = db.relationship("PlanReview", uselist=False, back_populates="plan")
+
+
+class PlanCooperation(db.Model):
+    plan = db.Column(
+        db.String, db.ForeignKey("plan.id"), nullable=False, primary_key=True
+    )
+    cooperation = db.Column(db.String, db.ForeignKey("cooperation.id"), nullable=False)
 
 
 class PlanReview(db.Model):

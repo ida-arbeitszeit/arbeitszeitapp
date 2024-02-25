@@ -1,9 +1,10 @@
 from parameterized import parameterized
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
-from arbeitszeit_web.api.controllers.expected_input import InputLocation
+from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.api.controllers.query_plans_api_controller import (
     QueryPlansApiController,
+    active_plans_expected_inputs,
 )
 from arbeitszeit_web.api.response_errors import BadRequest
 from tests.request import FakeRequest
@@ -141,7 +142,7 @@ class ExpectedInputsTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(QueryPlansApiController)
-        self.inputs = self.controller.create_expected_inputs()
+        self.inputs = active_plans_expected_inputs
 
     def test_controller_has_two_expected_inputs(self):
         self.assertEqual(len(self.inputs), 2)
@@ -150,18 +151,25 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[0]
         self.assertEqual(input.name, "offset")
 
+    def test_input_offset_is_query_param(self):
+        input = self.inputs[0]
+        self.assertIsInstance(input, QueryParameter)
+
     def test_input_offset_has_correct_parameters(self):
         input = self.inputs[0]
         self.assertEqual(input.name, "offset")
         self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query offset.")
         self.assertEqual(input.default, 0)
-        self.assertEqual(input.location, InputLocation.query)
         self.assertEqual(input.required, False)
 
     def test_second_expected_input_is_limit(self):
         input = self.inputs[1]
         self.assertEqual(input.name, "limit")
+
+    def test_input_limit_is_query_param(self):
+        input = self.inputs[1]
+        self.assertIsInstance(input, QueryParameter)
 
     def test_input_limit_has_correct_parameters(self):
         input = self.inputs[1]
@@ -169,5 +177,4 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The query limit.")
         self.assertEqual(input.default, 30)
-        self.assertEqual(input.location, InputLocation.query)
         self.assertEqual(input.required, False)

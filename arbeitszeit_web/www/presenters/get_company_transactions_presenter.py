@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import List
+from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import AccountTypes
@@ -10,6 +11,8 @@ from arbeitszeit.use_cases.get_company_transactions import (
     TransactionInfo,
 )
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.navbar import NavbarItem
 
 
 @dataclass
@@ -24,12 +27,14 @@ class ViewModelTransactionInfo:
 @dataclass
 class GetCompanyTransactionsViewModel:
     transactions: List[ViewModelTransactionInfo]
+    navbar_items: list[NavbarItem]
 
 
 @dataclass
 class GetCompanyTransactionsPresenter:
     translator: Translator
     datetime_service: DatetimeService
+    url_index: UrlIndex
 
     def present(
         self, use_case_response: GetCompanyTransactionsResponse
@@ -38,8 +43,12 @@ class GetCompanyTransactionsPresenter:
             self._create_info(transaction)
             for transaction in use_case_response.transactions
         ]
-
-        return GetCompanyTransactionsViewModel(transactions=transactions)
+        return GetCompanyTransactionsViewModel(
+            transactions=transactions,
+            navbar_items=self._create_navbar_items(
+                company_id=use_case_response.company_id
+            ),
+        )
 
     def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
         account = self._get_account(transaction.account_type)
@@ -92,3 +101,15 @@ class GetCompanyTransactionsPresenter:
             ),
         )
         return transaction_dict[transaction_type.name]
+
+    def _create_navbar_items(self, company_id: UUID) -> list[NavbarItem]:
+        return [
+            NavbarItem(
+                text=self.translator.gettext("Accounts"),
+                url=self.url_index.get_company_accounts_url(company_id=company_id),
+            ),
+            NavbarItem(
+                text=self.translator.gettext("All transactions"),
+                url=None,
+            ),
+        ]

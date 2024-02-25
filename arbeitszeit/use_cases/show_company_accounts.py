@@ -7,27 +7,30 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class ShowMyAccountsRequest:
-    current_user: UUID
+class ShowCompanyAccountsRequest:
+    company: UUID
 
 
 @dataclass
-class ShowMyAccountsResponse:
+class ShowCompanyAccountsResponse:
     balances: List[Decimal]
+    company: UUID
 
 
 @dataclass
-class ShowMyAccounts:
+class ShowCompanyAccounts:
     database: DatabaseGateway
 
-    def __call__(self, request: ShowMyAccountsRequest) -> ShowMyAccountsResponse:
+    def __call__(
+        self, request: ShowCompanyAccountsRequest
+    ) -> ShowCompanyAccountsResponse:
         accounts = dict(
             (account.id, balance)
             for account, balance in self.database.get_accounts()
-            .owned_by_company(request.current_user)
+            .owned_by_company(request.company)
             .joined_with_balance()
         )
-        company = self.database.get_companies().with_id(request.current_user).first()
+        company = self.database.get_companies().with_id(request.company).first()
         assert company
         balances = [
             accounts[company.means_account],
@@ -35,4 +38,4 @@ class ShowMyAccounts:
             accounts[company.work_account],
             accounts[company.product_account],
         ]
-        return ShowMyAccountsResponse(balances=balances)
+        return ShowCompanyAccountsResponse(balances=balances, company=request.company)

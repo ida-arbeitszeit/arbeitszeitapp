@@ -1,6 +1,10 @@
 from uuid import uuid4
 
-from arbeitszeit_web.api.controllers.get_plan_api_controller import GetPlanApiController
+from arbeitszeit_web.api.controllers.get_plan_api_controller import (
+    GetPlanApiController,
+    plan_detail_expected_input,
+)
+from arbeitszeit_web.api.controllers.parameters import PathParameter
 from arbeitszeit_web.api.response_errors import BadRequest
 from tests.www.base_test_case import BaseTestCase
 
@@ -40,3 +44,21 @@ class ControllerTests(BaseTestCase):
         self.assertEqual(
             err.exception.message, f"Plan id must be in UUID format, got {plan_id}."
         )
+
+
+class ExpectedInputsTests(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.expected_inputs = plan_detail_expected_input
+
+    def test_expected_inputs_has_correct_length(self) -> None:
+        assert len(self.expected_inputs) == 1
+
+    def test_expected_input_is_of_type_path_param(self) -> None:
+        assert isinstance(self.expected_inputs[0], PathParameter)
+
+    def test_expected_input_has_correct_name(self) -> None:
+        assert self.expected_inputs[0].name == "plan_id"
+
+    def test_expected_input_has_correct_description(self) -> None:
+        assert self.expected_inputs[0].description == "The plan id."

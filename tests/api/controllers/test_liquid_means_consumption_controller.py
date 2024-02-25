@@ -3,10 +3,11 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit.records import ConsumptionType
-from arbeitszeit_web.api.controllers.expected_input import InputLocation
 from arbeitszeit_web.api.controllers.liquid_means_consumption_controller import (
     LiquidMeansConsumptionController,
+    liquid_means_expected_inputs,
 )
+from arbeitszeit_web.api.controllers.parameters import FormParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
@@ -153,7 +154,7 @@ class ExpectedInputsTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(LiquidMeansConsumptionController)
-        self.inputs = self.controller.create_expected_inputs()
+        self.inputs = liquid_means_expected_inputs
 
     def test_controller_has_two_expected_inputs(self):
         self.assertEqual(len(self.inputs), 2)
@@ -162,18 +163,25 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[0]
         self.assertEqual(input.name, "plan_id")
 
+    def test_input_plan_id_is_of_type_form_param(self):
+        input = self.inputs[0]
+        assert isinstance(input, FormParameter)
+
     def test_input_plan_id_has_correct_parameters(self):
         input = self.inputs[0]
         self.assertEqual(input.name, "plan_id")
         self.assertEqual(input.type, str)
         self.assertEqual(input.description, "The plan to consume.")
         self.assertEqual(input.default, None)
-        self.assertEqual(input.location, InputLocation.form)
         self.assertEqual(input.required, True)
 
     def test_second_expected_input_is_amount(self):
         input = self.inputs[1]
         self.assertEqual(input.name, "amount")
+
+    def test_input_amount_is_of_type_form_param(self):
+        input = self.inputs[1]
+        assert isinstance(input, FormParameter)
 
     def test_input_amount_has_correct_parameters(self):
         input = self.inputs[1]
@@ -181,5 +189,4 @@ class ExpectedInputsTests(BaseTestCase):
         self.assertEqual(input.type, int)
         self.assertEqual(input.description, "The amount of product to consume.")
         self.assertEqual(input.default, None)
-        self.assertEqual(input.location, InputLocation.form)
         self.assertEqual(input.required, True)
