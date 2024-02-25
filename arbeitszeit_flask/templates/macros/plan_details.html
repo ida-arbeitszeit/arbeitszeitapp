@@ -130,7 +130,7 @@
                             </article>
                             <article class="tile is-child notification has-background-danger-light">
                                 <div class="has-text-right has-text-info-dark">
-                                    {{ info_tooltip(id="id_liquid_means", text=gettext("Here, recurring costs that can vary from plan to plan are summarized, e.g. electricity, rent for production halls, maintenance of machines etc.")) }}
+                                    {{ info_tooltip(id="id_liquid_means", text=gettext("Here, recurring costs from raw materials and consumables are summarized, e.g. electricity, rent for production halls, maintenance of machines etc.")) }}
                                 </div>
                                 <p class="title is-4">{{ view_model.details.resources_cost[0] }}</p>
                                 <p class="subtitle">{{ view_model.details.resources_cost[1] }}</p>
@@ -153,7 +153,7 @@
                 <div class="tile is-parent">
                     <article class="tile is-child notification">
                         <div class="has-text-right has-text-info-dark">
-                            {{ info_tooltip(id="id_type", text=gettext("\"Type\" can be either \"Productive\" or \"Public\". Products from the latter can be consumed for free, and are funded via the Factor of Individual Consumption (FIC)-level.")) }}
+                            {{ info_tooltip(id="id_type", text=gettext("\"Type\" can be either \"Productive\" or \"Public\". Products from the latter can be consumed for free, and are funded via the Factor of Individual Consumption (FIC).")) }}
                         </div>
                         <p class="title is-4">{{ view_model.details.type_of_plan[0] }}</p>
                         <p class="subtitle">{{ view_model.details.type_of_plan[1] }}</p>
@@ -162,7 +162,7 @@
                 <div class="tile is-parent">
                     <div class="tile is-child notification has-background-warning-light">
                         <div class="has-text-right has-text-info-dark">
-                            {{ info_tooltip(id="id_price_per_unit", text=gettext("Calculated by dividing total costs through amount, and it is also the price that is debited when the product is consumed. 0 for public plans.")) }}
+                            {{ info_tooltip(id="id_price_per_unit", text=gettext("This is the amount of time that is debited when the product is consumed. 0 for public plans.")) }}
                         </div>
                         <p class="title is-4">{{ view_model.details.price_per_unit[0] }}</p>
                         <p class="subtitle">{{ view_model.details.price_per_unit[1] }}
@@ -177,7 +177,7 @@
                 <div class="tile is-parent">
                     <div class="tile is-child notification has-background-warning-light">
                         <div class="has-text-right has-text-info-dark">
-                            {{ info_tooltip(id="id_labour_per_unit", text=gettext("This is to account for real working hours per unit, independent from consumption price which could be reduced, e.g. for public plans.")) }}
+                            {{ info_tooltip(id="id_labour_per_unit", text=gettext("This field shows working hours spent per produced unit.")) }}
                         </div>
                         <p class="title is-4">{{ view_model.details.labour_cost_per_unit[0] }}</p>
                         <p class="subtitle">{{ view_model.details.labour_cost_per_unit[1] }}</p>
