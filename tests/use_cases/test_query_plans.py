@@ -135,9 +135,11 @@ class UseCaseTests(BaseTestCase):
             )
         )
         response = self.query_plans(self.make_request())
-        assert response.results[
-            0
-        ].labour_cost_per_unit == self.price_checker.get_labour_per_unit(plan)
+        queried_plan = response.results[0]
+        assert (
+            queried_plan.labour_cost_per_unit
+            == self.price_checker.get_labour_per_unit(plan)
+        )
 
     def test_that_price_of_cooperating_plans_is_correctly_displayed(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
