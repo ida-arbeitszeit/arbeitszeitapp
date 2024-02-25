@@ -14,6 +14,10 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 @dataclass
 class ShowPAccountDetailsUseCase:
     @dataclass
+    class Request:
+        company: UUID
+
+    @dataclass
     class TransactionInfo:
         transaction_type: TransactionTypes
         date: datetime
@@ -35,8 +39,8 @@ class ShowPAccountDetailsUseCase:
     accounting_service: UserAccountingService
     database: DatabaseGateway
 
-    def __call__(self, company_id: UUID) -> Response:
-        company = self.database.get_companies().with_id(company_id).first()
+    def show_details(self, request: Request) -> Response:
+        company = self.database.get_companies().with_id(request.company).first()
         assert company
         transactions = [
             self.TransactionInfo(
@@ -55,7 +59,7 @@ class ShowPAccountDetailsUseCase:
             accumulated_volumes=self._get_plot_volumes(transactions),
         )
         return self.Response(
-            company_id=company_id,
+            company_id=request.company,
             transactions=transactions,
             account_balance=account_balance,
             plot=plot,

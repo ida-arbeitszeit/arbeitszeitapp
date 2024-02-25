@@ -10,6 +10,16 @@ from .dependency_injection import injection_test
 
 
 @injection_test
+def test_that_response_returns_the_company_id_that_was_requested(
+    use_case: ShowCompanyAccounts,
+    company_generator: CompanyGenerator,
+):
+    company = company_generator.create_company()
+    response = use_case(request=ShowCompanyAccountsRequest(company=company))
+    assert response.company == company
+
+
+@injection_test
 def test_that_list_of_balances_has_four_entries_when_no_transactions_took_place(
     use_case: ShowCompanyAccounts,
     company_generator: CompanyGenerator,
