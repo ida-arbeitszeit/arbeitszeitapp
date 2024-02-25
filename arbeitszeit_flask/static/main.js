@@ -17,18 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // modals: see https://bulma.io/documentation/components/modal
 document.addEventListener('DOMContentLoaded', () => {
-    // Functions to open and close a modal
-    function openModal($el) {
+    // Functions to open and close an element
+    function openElement($el) {
       $el.classList.add('is-active');
     }
   
-    function closeModal($el) {
+    function closeElement($el) {
       $el.classList.remove('is-active');
     }
   
-    function closeAllModals() {
-      (document.querySelectorAll('.modal') || []).forEach(($modal) => {
-        closeModal($modal);
+    function closeAllElementsByClassName($className) {
+      (document.querySelectorAll($className) || []).forEach(($elem) => {
+        closeElement($elem);
       });
     }
   
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const $target = document.getElementById(modal);
   
       $trigger.addEventListener('click', () => {
-        openModal($target);
+        openElement($target);
       });
     });
   
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const $target = $close.closest('.modal');
   
       $close.addEventListener('click', () => {
-        closeModal($target);
+        closeElement($target);
       });
     });
   
@@ -56,9 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const e = event || window.event;
   
       if (e.keyCode === 27) { // Escape key
-        closeAllModals();
+        closeAllElementsByClassName('.modal');
       }
     });
+
+    document.addEventListener('click', function() {
+      closeAllElementsByClassName('.dropdown');
+    });
+
+    (document.querySelectorAll('.dropdown') || []).forEach(($dropdown) => {
+      $dropdown.addEventListener('click', function(event) {
+        event.stopPropagation();
+        $isOpen = $dropdown.classList.contains('is-active')
+        closeAllElementsByClassName('.dropdown')
+        if (!$isOpen) {
+          openElement($dropdown);
+        }
+      });
+    });
+
   });
 
   function copyTextToClipboard(text) {
