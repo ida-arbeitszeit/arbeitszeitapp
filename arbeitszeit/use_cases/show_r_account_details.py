@@ -12,34 +12,42 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
 @dataclass
+class Request:
+    company: UUID
+
+
+@dataclass
+class TransactionInfo:
+    transaction_type: TransactionTypes
+    date: datetime
+    transaction_volume: Decimal
+    purpose: str
+
+
+@dataclass
+class PlotDetails:
+    timestamps: List[datetime]
+    accumulated_volumes: List[Decimal]
+
+
+@dataclass
+class Response:
+    company_id: UUID
+    transactions: List[TransactionInfo]
+    account_balance: Decimal
+    plot: PlotDetails
+
+
+@dataclass
 class ShowRAccountDetailsUseCase:
-    @dataclass
-    class TransactionInfo:
-        transaction_type: TransactionTypes
-        date: datetime
-        transaction_volume: Decimal
-        purpose: str
-
-    @dataclass
-    class PlotDetails:
-        timestamps: List[datetime]
-        accumulated_volumes: List[Decimal]
-
-    @dataclass
-    class Response:
-        company_id: UUID
-        transactions: List[ShowRAccountDetailsUseCase.TransactionInfo]
-        account_balance: Decimal
-        plot: ShowRAccountDetailsUseCase.PlotDetails
-
     accounting_service: UserAccountingService
     database: DatabaseGateway
 
-    def __call__(self, company_id: UUID) -> Response:
-        company = self.database.get_companies().with_id(company_id).first()
+    def show_details(self, request: Request) -> Response:
+        company = self.database.get_companies().with_id(request.company).first()
         assert company
         transactions = [
-            self.TransactionInfo(
+            TransactionInfo(
                 transaction_type=row.transaction_type,
                 date=row.transaction.date,
                 transaction_volume=row.volume,
@@ -50,12 +58,12 @@ class ShowRAccountDetailsUseCase:
             )
         ]
         account_balance = self._get_account_balance(company.raw_material_account)
-        plot = self.PlotDetails(
+        plot = PlotDetails(
             timestamps=self._get_plot_dates(transactions),
             accumulated_volumes=self._get_plot_volumes(transactions),
         )
-        return self.Response(
-            company_id=company_id,
+        return Response(
+            company_id=request.company,
             transactions=transactions,
             account_balance=account_balance,
             plot=plot,

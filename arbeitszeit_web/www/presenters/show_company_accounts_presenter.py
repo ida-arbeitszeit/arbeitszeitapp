@@ -41,7 +41,9 @@ class ShowCompanyAccountsPresenter:
             url_to_account_p=self.url_index.get_company_account_p_url(
                 company_id=use_case_response.company
             ),
-            url_to_account_r=self.url_index.get_company_account_r_url(),
+            url_to_account_r=self.url_index.get_company_account_r_url(
+                company_id=use_case_response.company
+            ),
             url_to_account_a=self.url_index.get_company_account_a_url(),
             url_to_account_prd=self.url_index.get_company_account_prd_url(),
             url_to_all_transactions=self.url_index.get_company_transactions_url(),

@@ -170,7 +170,7 @@ class UrlIndex(Protocol):
     def get_company_account_p_url(self, *, company_id: UUID) -> str:
         ...
 
-    def get_company_account_r_url(self) -> str:
+    def get_company_account_r_url(self, *, company_id: UUID) -> str:
         ...
 
     def get_company_account_a_url(self) -> str:

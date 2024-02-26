@@ -5,7 +5,7 @@ from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_r_account_details import ShowRAccountDetailsUseCase
+from arbeitszeit.use_cases import show_r_account_details
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -31,9 +31,7 @@ class ShowRAccountDetailsPresenter:
     url_index: UrlIndex
     datetime_service: DatetimeService
 
-    def present(
-        self, use_case_response: ShowRAccountDetailsUseCase.Response
-    ) -> ViewModel:
+    def present(self, use_case_response: show_r_account_details.Response) -> ViewModel:
         transactions = [
             self._create_info(transaction)
             for transaction in use_case_response.transactions
@@ -56,7 +54,7 @@ class ShowRAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transaction: ShowRAccountDetailsUseCase.TransactionInfo
+        self, transaction: show_r_account_details.TransactionInfo
     ) -> TransactionInfo:
         transaction_type = (
             self.translator.gettext("Consumption")
