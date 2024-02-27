@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Callable
 from uuid import uuid4
 
 from arbeitszeit import records
@@ -33,21 +32,14 @@ class PasswordResetRequestResultTests(FlaskTestCase):
         )
         return email_address
 
-    def _check_for_expected_email_address(
-        self, expected_email_address: str
-    ) -> Callable[[records.PasswordResetRequest], bool]:
-        return lambda record: record.email_address == expected_email_address
-
     def _check_all_results_for_same_email(
         self,
         result_records: list[records.PasswordResetRequest],
         expected_email_address: str,
     ) -> bool:
         return all(
-            map(
-                self._check_for_expected_email_address(expected_email_address),
-                result_records,
-            )
+            result_record.email_address == expected_email_address
+            for result_record in result_records
         )
 
     def test_querying_password_reset_request_by_email(self) -> None:
