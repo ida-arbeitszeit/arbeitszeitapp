@@ -117,9 +117,6 @@ from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPr
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
-from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
-    ShowRAccountDetailsPresenter,
-)
 
 from .blueprint import CompanyRoute
 
@@ -267,19 +264,6 @@ def list_all_transactions(
     view_model = presenter.present(response)
     return render_template(
         "company/list_all_transactions.html",
-        view_model=view_model,
-    )
-
-
-@CompanyRoute("/company/my_accounts/account_r")
-def account_r(
-    show_r_account_details: use_cases.show_r_account_details.ShowRAccountDetailsUseCase,
-    presenter: ShowRAccountDetailsPresenter,
-):
-    response = show_r_account_details(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/account_r.html",
         view_model=view_model,
     )
 

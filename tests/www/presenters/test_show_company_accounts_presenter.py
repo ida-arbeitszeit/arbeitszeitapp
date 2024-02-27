@@ -39,10 +39,16 @@ class ShowCompanyAccountsPresenterTests(BaseTestCase):
             self.url_index.get_company_account_p_url(company_id=company),
         )
 
-    def test_view_model_contains_url_to_account_r(self) -> None:
-        presentation = self.presenter.present(self.create_use_case_response())
+    def test_view_model_contains_url_to_account_r_of_the_requested_company(
+        self,
+    ) -> None:
+        company = uuid4()
+        presentation = self.presenter.present(
+            self.create_use_case_response(company=company)
+        )
         self.assertEqual(
-            presentation.url_to_account_r, self.url_index.get_company_account_r_url()
+            presentation.url_to_account_r,
+            self.url_index.get_company_account_r_url(company_id=company),
         )
 
     def test_view_model_contains_url_to_account_a(self) -> None:
