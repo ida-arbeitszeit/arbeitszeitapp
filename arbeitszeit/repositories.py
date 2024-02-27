@@ -577,6 +577,14 @@ class AccountCredentialsUpdate(DatabaseUpdate, Protocol):
         ...
 
 
+class PasswordResetRequestResult(QueryResult[records.PasswordResetRequest], Protocol):
+    def with_email_address(self, email_address) -> Self:
+        ...
+
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
+        ...
+
+
 class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]:
         ...
@@ -741,4 +749,12 @@ class DatabaseGateway(Protocol):
         ...
 
     def get_account_credentials(self) -> AccountCredentialsResult:
+        ...
+
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
+        ...
+
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
         ...

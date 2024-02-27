@@ -339,3 +339,11 @@ class PlanSummary:
     production_costs: Decimal
     duration_in_days: int
     amount: int
+
+
+@dataclass
+class PasswordResetRequest:
+    id: UUID
+    email_address: str
+    reset_token: str
+    created_at: datetime

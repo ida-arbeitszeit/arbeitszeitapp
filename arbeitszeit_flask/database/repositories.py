@@ -1895,6 +1895,22 @@ class AccountingRepository:
         return self.social_accounting_from_orm(accounting_orm)
 
 
+class PasswordResetRequestResult(FlaskQueryResult[records.PasswordResetRequest]):
+    def with_email_address(self, email_address: str) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PasswordResetRequest.email_address == func.lower(email_address)
+            )
+        )
+
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.PasswordResetRequest.created_at > creation_threshold
+            )
+        )
+
+
 @dataclass
 class DatabaseGatewayImpl:
     db: SQLAlchemy
@@ -2416,3 +2432,31 @@ class DatabaseGatewayImpl:
             email_address=orm.email_address,
             password_hash=orm.password,
         )
+
+    @classmethod
+    def password_reset_request_from_orm(
+        cls, password_reset_request_orm: models.PasswordResetRequest
+    ) -> records.PasswordResetRequest:
+        return records.PasswordResetRequest(
+            id=password_reset_request_orm.id,
+            email_address=password_reset_request_orm.email_address,
+            reset_token=password_reset_request_orm.reset_token,
+            created_at=password_reset_request_orm.created_at,
+        )
+
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
+        return PasswordResetRequestResult(
+            query=models.PasswordResetRequest.query,
+            mapper=self.password_reset_request_from_orm,
+            db=self.db,
+        )
+
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
+        new_entry = models.PasswordResetRequest(
+            email_address=email_address, reset_token=reset_token, created_at=created_at
+        )
+        self.db.session.add(new_entry)
+        self.db.session.flush()
+        return self.password_reset_request_from_orm(new_entry)
