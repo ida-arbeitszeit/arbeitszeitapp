@@ -107,9 +107,6 @@ from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 from arbeitszeit_web.www.presenters.revoke_plan_filing_presenter import (
     RevokePlanFilingPresenter,
 )
-from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
-    ShowAAccountDetailsPresenter,
-)
 from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
@@ -264,19 +261,6 @@ def list_all_transactions(
     view_model = presenter.present(response)
     return render_template(
         "company/list_all_transactions.html",
-        view_model=view_model,
-    )
-
-
-@CompanyRoute("/company/my_accounts/account_a")
-def account_a(
-    show_a_account_details: use_cases.show_a_account_details.ShowAAccountDetailsUseCase,
-    presenter: ShowAAccountDetailsPresenter,
-):
-    response = show_a_account_details(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/account_a.html",
         view_model=view_model,
     )
 

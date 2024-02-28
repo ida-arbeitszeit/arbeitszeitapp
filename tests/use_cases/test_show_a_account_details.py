@@ -2,63 +2,66 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
 )
-from arbeitszeit.use_cases.show_a_account_details import ShowAAccountDetailsUseCase
 from tests.use_cases.base_test_case import BaseTestCase
 
 
 class UseCaseTester(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.show_a_account_details = self.injector.get(ShowAAccountDetailsUseCase)
+        self.use_case = self.injector.get(
+            show_a_account_details.ShowAAccountDetailsUseCase
+        )
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
     def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert not response.transactions
 
     def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.account_balance == 0
 
     def test_company_id_is_returned(self):
         self.member_generator.create_member()
-        company = self.company_generator.create_company_record()
-        response = self.show_a_account_details(company.id)
-        assert response.company_id == company.id
+        company = self.company_generator.create_company()
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.company_id == company
 
     def test_that_no_info_is_generated_after_selling_of_consumer_product(self) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         transactions_before_consumption = len(response.transactions)
         self.consumption_generator.create_private_consumption(plan=plan)
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert len(response.transactions) == transactions_before_consumption
 
     def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         transactions_before_consumption = len(response.transactions)
         self.consumption_generator.create_fixed_means_consumption(plan=plan)
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert len(response.transactions) == transactions_before_consumption
 
     def test_after_approving_a_plan_one_transaction_is_recorded(self) -> None:
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert len(response.transactions) == 1
 
     def test_after_approving_a_plan_and_registering_work_two_transactions_are_recorded(
@@ -74,7 +77,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal(2),
             )
         )
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert len(response.transactions) == 2
 
     def test_two_transactions_are_recorded_in_descending_order(self) -> None:
@@ -88,7 +91,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal(2),
             )
         )
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert (
             response.transactions[0].transaction_type
             == TransactionTypes.payment_of_wages
@@ -110,7 +113,7 @@ class UseCaseTester(BaseTestCase):
                 resource_cost=Decimal(0),
             ),
         )
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert len(response.transactions) == 1
         assert response.transactions[0].transaction_volume == Decimal(8.5)
         assert response.transactions[0].purpose is not None
@@ -134,7 +137,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=hours_worked,
             )
         )
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
         transaction = response.transactions[0]
         assert transaction.transaction_type == TransactionTypes.payment_of_wages
         assert transaction.transaction_volume == -hours_worked
@@ -142,8 +145,8 @@ class UseCaseTester(BaseTestCase):
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
         self.member_generator.create_member()
-        company = self.company_generator.create_company_record()
-        response = self.show_a_account_details(company.id)
+        company = self.company_generator.create_company()
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
 
@@ -160,7 +163,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=hours_worked,
             )
         )
-        response = self.show_a_account_details(own_company)
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
@@ -189,7 +192,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        response = self.show_a_account_details(own_company)
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
         assert len(response.plot.timestamps) == 2
         assert len(response.plot.accumulated_volumes) == 2
 
@@ -205,7 +208,7 @@ class UseCaseTester(BaseTestCase):
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
         worker3 = self.member_generator.create_member()
-        own_company = self.company_generator.create_company_record(
+        own_company = self.company_generator.create_company(
             workers=[worker1, worker2, worker3]
         )
 
@@ -213,7 +216,7 @@ class UseCaseTester(BaseTestCase):
         self.datetime_service.freeze_time(first_transaction_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
-                company_id=own_company.id,
+                company_id=own_company,
                 worker_id=worker1,
                 hours_worked=Decimal("10"),
             )
@@ -222,7 +225,7 @@ class UseCaseTester(BaseTestCase):
         self.datetime_service.freeze_time(seconds_transaction_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
-                company_id=own_company.id,
+                company_id=own_company,
                 worker_id=worker2,
                 hours_worked=Decimal("10"),
             )
@@ -231,13 +234,13 @@ class UseCaseTester(BaseTestCase):
         self.datetime_service.freeze_time(third_transaction_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
-                company_id=own_company.id,
+                company_id=own_company,
                 worker_id=worker3,
                 hours_worked=Decimal("10"),
             )
         )
 
-        response = self.show_a_account_details(own_company.id)
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
         assert response.plot.timestamps[0] == first_transaction_timestamp
         assert response.plot.timestamps[2] == third_transaction_timestamp
 
@@ -259,7 +262,7 @@ class UseCaseTester(BaseTestCase):
                 resource_cost=Decimal(0),
             ),
         )
-        response = self.show_a_account_details(company)
+        response = self.use_case.show_details(self.create_use_case_request(company))
 
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
@@ -269,3 +272,8 @@ class UseCaseTester(BaseTestCase):
 
         assert transaction_timestamp in response.plot.timestamps
         assert expected_labour_time in response.plot.accumulated_volumes
+
+    def create_use_case_request(
+        self, company_id: UUID
+    ) -> show_a_account_details.Request:
+        return show_a_account_details.Request(company=company_id)

@@ -4,22 +4,20 @@ from typing import List
 from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_a_account_details import (
-    ShowAAccountDetailsUseCase as UseCase,
-)
+from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
 )
 from tests.www.base_test_case import BaseTestCase
 
-DEFAULT_INFO1 = UseCase.TransactionInfo(
+DEFAULT_INFO1 = show_a_account_details.TransactionInfo(
     transaction_type=TransactionTypes.credit_for_wages,
     date=datetime.now(),
     transaction_volume=Decimal(10.007),
     purpose="Test purpose",
 )
 
-DEFAULT_INFO2 = UseCase.TransactionInfo(
+DEFAULT_INFO2 = show_a_account_details.TransactionInfo(
     transaction_type=TransactionTypes.payment_of_wages,
     date=datetime.now(),
     transaction_volume=Decimal(20),
@@ -97,12 +95,14 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def _use_case_response(
         self,
         company_id: UUID = uuid4(),
-        transactions: List[UseCase.TransactionInfo] | None = None,
+        transactions: List[show_a_account_details.TransactionInfo] | None = None,
         account_balance: Decimal = Decimal(0),
-        plot: UseCase.PlotDetails | None = None,
-    ) -> UseCase.Response:
+        plot: show_a_account_details.PlotDetails | None = None,
+    ) -> show_a_account_details.Response:
         if transactions is None:
             transactions = []
         if plot is None:
-            plot = UseCase.PlotDetails([], [])
-        return UseCase.Response(company_id, transactions, account_balance, plot)
+            plot = show_a_account_details.PlotDetails([], [])
+        return show_a_account_details.Response(
+            company_id, transactions, account_balance, plot
+        )
