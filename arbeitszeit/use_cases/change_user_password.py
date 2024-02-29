@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.email_notifications import EmailSender, ResetPasswordConfirmation
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
