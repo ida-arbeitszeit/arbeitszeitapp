@@ -31,8 +31,8 @@ class RequestUserPasswordResetTest(BaseTestCase):
             )
         )
 
-        self.assertTrue(
-            len(self._delivered_reset_password_request_message(sent_to_email)) == 1
+        self.assertEqual(
+            len(self._delivered_reset_password_request_message(sent_to_email)), 1
         )
 
     def test_reset_password_request_messages_are_sent_up_to_threshold_in_a_short_time_span(
@@ -48,9 +48,9 @@ class RequestUserPasswordResetTest(BaseTestCase):
             )
             self.datetime_service.advance_time(timedelta(seconds=10))
 
-        self.assertTrue(
-            len(self._delivered_reset_password_request_message(sent_to_email))
-            == request_user_password_reset.Config.max_reset_requests
+        self.assertEqual(
+            len(self._delivered_reset_password_request_message(sent_to_email)),
+            request_user_password_reset.Config.max_reset_requests,
         )
 
     def test_many_reset_password_request_messages_sent_over_a_long_time_period_are_sent(
@@ -71,9 +71,9 @@ class RequestUserPasswordResetTest(BaseTestCase):
                 timedelta(minutes=request_user_password_reset.Config.time_threshold_min)
             )
 
-        self.assertTrue(
-            len(self._delivered_reset_password_request_message(sent_to_email))
-            == total_number_sent_over_threshold
+        self.assertEqual(
+            len(self._delivered_reset_password_request_message(sent_to_email)),
+            total_number_sent_over_threshold,
         )
 
     def test_reset_password_request_messages_for_different_emails_are_sent(self):
@@ -94,11 +94,11 @@ class RequestUserPasswordResetTest(BaseTestCase):
             )
             self.datetime_service.advance_time(timedelta(seconds=10))
 
-        self.assertTrue(
-            len(self._delivered_reset_password_request_message(sent_to_email1))
-            == number_of_requests
+        self.assertEqual(
+            len(self._delivered_reset_password_request_message(sent_to_email1)),
+            number_of_requests,
         )
-        self.assertTrue(
-            len(self._delivered_reset_password_request_message(sent_to_email2))
-            == number_of_requests
+        self.assertEqual(
+            len(self._delivered_reset_password_request_message(sent_to_email2)),
+            number_of_requests,
         )

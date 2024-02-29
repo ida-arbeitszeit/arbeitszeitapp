@@ -3,7 +3,6 @@ from datetime import timedelta
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.email_notifications import EmailSender, ResetPasswordRequest
-from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
 
 

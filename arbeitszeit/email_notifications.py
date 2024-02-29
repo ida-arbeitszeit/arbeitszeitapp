@@ -62,6 +62,11 @@ class ResetPasswordRequest:
     reset_token: str
 
 
+@dataclass
+class ResetPasswordConfirmation:
+    email_address: str
+
+
 # This type definition can be used by implementations of the
 # EmailSender protocol for static type checking purposes. Keep this
 # list alphabetically sorted.
@@ -73,6 +78,7 @@ Message: TypeAlias = Union[
     CoordinationTransferRequest,
     EmailChangeConfirmation,
     MemberRegistration,
+    ResetPasswordConfirmation,
     ResetPasswordRequest,
     WorkerInvitation,
 ]
