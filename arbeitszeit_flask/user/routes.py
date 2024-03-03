@@ -22,6 +22,7 @@ from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperatio
 from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
     ListCoordinationsOfCooperationView,
 )
+from arbeitszeit_flask.views.show_a_account_details_view import ShowAAccountDetailsView
 from arbeitszeit_flask.views.show_company_accounts_view import CompanyAccountsView
 from arbeitszeit_flask.views.show_p_account_details_view import ShowPAccountDetailsView
 from arbeitszeit_flask.views.show_r_account_details_view import ShowRAccountDetailsView
@@ -158,4 +159,10 @@ class company_account_p(ShowPAccountDetailsView):
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_r")
 @as_flask_view()
 class company_account_r(ShowRAccountDetailsView):
+    ...
+
+
+@AuthenticatedUserRoute("/company/<uuid:company_id>/account_a")
+@as_flask_view()
+class company_account_a(ShowAAccountDetailsView):
     ...

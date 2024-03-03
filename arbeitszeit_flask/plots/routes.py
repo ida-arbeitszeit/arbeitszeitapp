@@ -4,14 +4,16 @@ from uuid import UUID
 from flask import Blueprint, Response, request
 from flask_login import login_required
 
-from arbeitszeit.use_cases import show_r_account_details
-from arbeitszeit.use_cases.show_a_account_details import ShowAAccountDetailsUseCase
+from arbeitszeit.use_cases import show_a_account_details, show_r_account_details
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.www.controllers.show_a_account_details_controller import (
+    ShowAAccountDetailsController,
+)
 
 plots = Blueprint("plots", __name__)
 
@@ -147,10 +149,12 @@ def line_plot_of_company_p_account(
 @login_required
 def line_plot_of_company_a_account(
     plotter: Plotter,
-    use_case: ShowAAccountDetailsUseCase,
+    controller: ShowAAccountDetailsController,
+    use_case: show_a_account_details.ShowAAccountDetailsUseCase,
 ):
     company_id = UUID(request.args["company_id"])
-    use_case_response = use_case(company_id)
+    use_case_request = controller.create_request(company_id)
+    use_case_response = use_case.show_details(request=use_case_request)
     png = plotter.create_line_plot(
         x=use_case_response.plot.timestamps,
         y=use_case_response.plot.accumulated_volumes,
