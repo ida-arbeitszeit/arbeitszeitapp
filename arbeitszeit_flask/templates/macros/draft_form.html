@@ -1,15 +1,12 @@
 <!-- This macro draws all the relevant fields for a draft edit/create
 form.  When you use this in templates, remember to include the csrf
 token field and buttons to submit. -->
-
-{% from 'macros/modals.html' import info_modal %}
+{% from 'macros/tooltips.html' import info_tooltip %}
 
 {% macro draft_form(form) %}
 <div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_name_desc">
-    <span class="icon">
-      <i class="fa-solid fa-circle-question"></i>
-    </span>
+  <div class="has-text-right has-text-info-dark">
+    {{ info_tooltip(id="id_product_name_description", text=gettext("Specify product name and description."))}}
   </div>
   <div class="field">
     <label class="label">{{ gettext("Product name")}}</label>
@@ -27,8 +24,8 @@ token field and buttons to submit. -->
 </div>
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_timeframe">
-    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+  <div class="has-text-right has-text-info-dark">
+    {{ info_tooltip(id="id_timeframe", text=gettext("Choose a planning timeframe in which you are planning to produce and deliver your product."))}}
   </div>
   <div class="field">
     <label class="label">{{ gettext("Planning timeframe")}}</label>
@@ -39,18 +36,21 @@ token field and buttons to submit. -->
 </div>
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_unit_amount">
-    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-  </div>
   <div class="field">
+    <div class="has-text-right has-text-info-dark">
+      {{ info_tooltip(id="id_unit", text=gettext("This value is used for calculation purposes only, i.e. you do not have to adhere to any rules here. For example, if you plan to produce beverages, you are free to choose if your smallest delivery unit is one can or one six-pack of cans."))}}
+    </div>
     <label class="label">{{ gettext("Smallest delivery unit")}}</label>
     <div class="control">
       {{ form.prd_unit(class_="input is-large") }}
-      <p class="help">{{ gettext("E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, etc.")}}</p>
+      <p class="help">{{ gettext("E.g. 1 package, 1 kilogram, 20 bottles, 1 language lesson, etc.")}}</p>
     </div>
   </div>
   <div class="block"></div>
   <div class="field">
+    <div class="has-text-right has-text-info-dark">
+      {{ info_tooltip(id="id_amount", text=gettext("This value is assumed to be in the same unit as Smallest delivery unit. Together with planning timeframe, the three values are used to calculate how much labour time is required to produce one piece of your product."))}}
+    </div>
     <label class="label">{{ gettext("Amount")}}</label>
     <div class="control">
       {{ form.prd_amount(class_="input is-large") }}
@@ -59,10 +59,10 @@ token field and buttons to submit. -->
 </div>
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_costs">
-    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
-  </div>
   <div class="field">
+    <div class="has-text-right has-text-info-dark">
+      {{ info_tooltip(id="id_fixed_means", text=gettext("This is sometimes also called depreciation, e.g. if you plan to use a machine that cost 10000 hours to produce, for 10 years, and you have ten one-year-plans, then for this fixed mean of production, the value would be 1000."))}}
+    </div>
     <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
     <div class="control">
       {{ form.costs_p(class_="input is-large") }}
@@ -70,6 +70,9 @@ token field and buttons to submit. -->
   </div>
   <div class="block"></div>
   <div class="field">
+    <div class="has-text-right has-text-info-dark">
+      {{ info_tooltip(id="id_liquid_means", text=gettext("Here, recurring costs from raw materials and consumables are summarized, e.g. electricity, rent for production halls, maintenance of machines etc."))}}
+    </div>
     <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
     <div class="control">
       {{ form.costs_r(class_="input is-large") }}
@@ -77,6 +80,9 @@ token field and buttons to submit. -->
   </div>
   <div class="block"></div>
   <div class="field">
+    <div class="has-text-right has-text-info-dark">
+      {{ info_tooltip(id="id_labour", text=gettext("Planned hours of human work."))}}
+    </div>
     <label class="label">{{ gettext("Costs for labour")}}</label>
     <div class="control">
       {{ form.costs_a(class_="input is-large") }}
@@ -85,20 +91,12 @@ token field and buttons to submit. -->
 </div>
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
-  <div class="has-text-right has-text-info-dark js-modal-trigger" data-target="id_type">
-    <span class="icon">
-      <i class="fa-solid fa-circle-question"></i>
-    </span>
+  <div class="has-text-right has-text-info-dark">
+    {{ info_tooltip(id="id_type", text=gettext("Products and services within a supply chain should not be marked public. Only if your product should be consumed for free by all members of society - funded via the Factor of Individual Consumption (FIC) - then please checkmark this box."))}}
   </div>
   <div class="field">
     {{ form.productive_or_public }} {{ form.productive_or_public.label }}
   </div>
 </div>
-
-{{ info_modal(id="id_name_desc", text=gettext("Specify product name and description.")) }}
-{{ info_modal(id="id_timeframe", text=gettext("Choose a planning timeframe in which you are planning to produce and deliver your product.")) }}
-{{ info_modal(id="id_costs", text=gettext("Estimate what costs you will have in the given timeframe.")) }}
-{{ info_modal(id="id_unit_amount", text=gettext("Describe the smallest delivery unit and what amount of these units you will produce.")) }}
-{{ info_modal(id="id_type", text=gettext("The type of plan. Productive plans are the norm.")) }}
 
 {% endmacro %}
