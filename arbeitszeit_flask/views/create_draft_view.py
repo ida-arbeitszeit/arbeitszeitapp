@@ -30,7 +30,6 @@ class CreateDraftView:
 
     @commit_changes
     def POST(self) -> Response:
-        """either cancel plan creation, save draft or file draft."""
         form = CreateDraftForm(request.form)
         user_action = self.request.get_form("action")
         if user_action == "save_draft":

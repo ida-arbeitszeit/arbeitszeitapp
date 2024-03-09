@@ -262,20 +262,24 @@ class CreateDraftForm(Form):
     )
     description = TextAreaField(validators=[validators.InputRequired()])
     timeframe = IntegerField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=1, max=365)]
+        validators=[validators.InputRequired(), validators.NumberRange(min=1, max=365)],
+        render_kw={"placeholder": trans.lazy_gettext("Days")},
     )
     prd_unit = StringField(validators=[validators.InputRequired()])
     prd_amount = IntegerField(
         validators=[validators.InputRequired(), validators.NumberRange(min=1)]
     )
     costs_p = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        render_kw={"placeholder": trans.lazy_gettext("Hours")},
     )
     costs_r = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        render_kw={"placeholder": trans.lazy_gettext("Hours")},
     )
     costs_a = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)]
+        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        render_kw={"placeholder": trans.lazy_gettext("Hours")},
     )
     productive_or_public = BooleanField(
         trans.lazy_gettext("This plan is a public service")
