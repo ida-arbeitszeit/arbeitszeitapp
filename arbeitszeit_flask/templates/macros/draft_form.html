@@ -38,7 +38,7 @@ token field and buttons to submit. -->
 <div class="box has-background-info-light">
   <div class="field">
     <div class="has-text-right has-text-info-dark">
-      {{ info_tooltip(id="id_unit", text=gettext("This value is used for calculation purposes only, i.e. you do not have to adhere to any rules here. For example, if you plan to produce beverages, you are free to choose if your smallest delivery unit is one can or one six-pack of cans."))}}
+      {{ info_tooltip(id="id_unit", text=gettext("This value is used for informational purposes only, i.e. you do not have to adhere to any rules here. For example, if you plan to produce beverages, you are free to choose if your smallest delivery unit is one can or one six-pack of cans."))}}
     </div>
     <label class="label">{{ gettext("Smallest delivery unit")}}</label>
     <div class="control">
@@ -49,7 +49,7 @@ token field and buttons to submit. -->
   <div class="block"></div>
   <div class="field">
     <div class="has-text-right has-text-info-dark">
-      {{ info_tooltip(id="id_amount", text=gettext("This value is assumed to be in the same unit as Smallest delivery unit. By dividing the sum of your production costs through this amount, the app calculates how much labour time is required to produce one piece of your product."))}}
+      {{ info_tooltip(id="id_amount", text=gettext("How many of your \"smallest delivery unit\" will you produce in total? By dividing the sum of your production costs by this amount, the app calculates how much labour time is required to produce one piece of your product."))}}
     </div>
     <label class="label">{{ gettext("Amount")}}</label>
     <div class="control">
