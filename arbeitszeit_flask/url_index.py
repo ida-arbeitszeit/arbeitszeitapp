@@ -231,4 +231,4 @@ class GeneralUrlIndex:
         return url_for("main_company.account_prd")
 
     def get_company_transactions_url(self) -> str:
-        return url_for("main_company.list_all_transactions")
+        return url_for("main_company.get_company_transactions")

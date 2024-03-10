@@ -58,6 +58,9 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.get_company_transactions_view import (
+    GetCompanyTransactionsView,
+)
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
@@ -96,9 +99,6 @@ from arbeitszeit_web.www.presenters.create_draft_presenter import (
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
-    GetCompanyTransactionsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
@@ -253,16 +253,9 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 
 
 @CompanyRoute("/company/my_accounts/all_transactions")
-def list_all_transactions(
-    get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
-    presenter: GetCompanyTransactionsPresenter,
-):
-    response = get_company_transactions(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/list_all_transactions.html",
-        view_model=view_model,
-    )
+@as_flask_view()
+class get_company_transactions(GetCompanyTransactionsView):
+    ...
 
 
 @CompanyRoute("/company/my_accounts/account_prd")
