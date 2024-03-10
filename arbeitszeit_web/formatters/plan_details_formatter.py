@@ -90,7 +90,7 @@ class PlanDetailsFormatter:
                 else self.translator.gettext("Productive"),
             ),
             price_per_unit=(
-                self.translator.gettext("Price (per unit)"),
+                self.translator.gettext("Price (hours/unit)"),
                 self._format_price(plan_details.price_per_unit),
                 plan_details.is_cooperating,
                 self.url_index.get_coop_summary_url(coop_id=plan_details.cooperation)
@@ -98,7 +98,7 @@ class PlanDetailsFormatter:
                 else None,
             ),
             labour_cost_per_unit=(
-                self.translator.gettext("Labour (per unit)"),
+                self.translator.gettext("Labour time (hours/unit)"),
                 self._format_price(plan_details.labour_cost_per_unit),
             ),
             creation_date=self.datetime_service.format_datetime(
