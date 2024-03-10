@@ -16,6 +16,9 @@ from arbeitszeit_flask.forms import RequestEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import QueryCompaniesView, QueryPlansView
 from arbeitszeit_flask.views.coop_summary_view import CoopSummaryView
+from arbeitszeit_flask.views.get_company_transactions_view import (
+    GetCompanyTransactionsView,
+)
 from arbeitszeit_flask.views.get_statistics_view import GetStatisticsView
 from arbeitszeit_flask.views.http_error_view import http_404, http_501
 from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperationsView
@@ -165,4 +168,10 @@ class company_account_r(ShowRAccountDetailsView):
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_a")
 @as_flask_view()
 class company_account_a(ShowAAccountDetailsView):
+    ...
+
+
+@AuthenticatedUserRoute("/company/<uuid:company_id>/transactions")
+@as_flask_view()
+class get_company_transactions(GetCompanyTransactionsView):
     ...

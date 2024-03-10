@@ -230,5 +230,5 @@ class GeneralUrlIndex:
     def get_company_account_prd_url(self) -> str:
         return url_for("main_company.account_prd")
 
-    def get_company_transactions_url(self) -> str:
-        return url_for("main_company.get_company_transactions")
+    def get_company_transactions_url(self, *, company_id: UUID) -> str:
+        return url_for("main_user.get_company_transactions", company_id=company_id)

@@ -58,9 +58,6 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
-from arbeitszeit_flask.views.get_company_transactions_view import (
-    GetCompanyTransactionsView,
-)
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
@@ -250,12 +247,6 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     response = hide_plan(plan_id)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
-
-
-@CompanyRoute("/company/my_accounts/all_transactions")
-@as_flask_view()
-class get_company_transactions(GetCompanyTransactionsView):
-    ...
 
 
 @CompanyRoute("/company/my_accounts/account_prd")
