@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-10 19:56+0100\n"
+"POT-Creation-Date: 2024-03-10 22:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1218,7 +1218,7 @@ msgid "Plan expiration"
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:109
-msgid "This is the amount you promise to deliver."
+msgid "This is the amount you plan to deliver."
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:156
@@ -1576,11 +1576,11 @@ msgid "Productive"
 msgstr ""
 
 #: arbeitszeit_web/formatters/plan_details_formatter.py:93
-msgid "Price (per unit)"
+msgid "Price (hours/unit)"
 msgstr ""
 
 #: arbeitszeit_web/formatters/plan_details_formatter.py:101
-msgid "Labour (per unit)"
+msgid "Labour time (hours/unit)"
 msgstr ""
 
 #: arbeitszeit_web/www/authentication.py:37
