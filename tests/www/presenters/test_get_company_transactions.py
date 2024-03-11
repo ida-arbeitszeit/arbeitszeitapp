@@ -7,10 +7,7 @@ from dateutil import tz
 
 from arbeitszeit.records import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.get_company_transactions import (
-    GetCompanyTransactionsResponse,
-    TransactionInfo,
-)
+from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
     GetCompanyTransactionsPresenter,
 )
@@ -160,14 +157,14 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
 
     def create_use_case_response(
         self,
-        transactions: Optional[list[TransactionInfo]] = None,
+        transactions: Optional[list[get_company_transactions.TransactionInfo]] = None,
         company_id: Optional[UUID] = None,
-    ) -> GetCompanyTransactionsResponse:
+    ) -> get_company_transactions.Response:
         if transactions is None:
             transactions = []
         if company_id is None:
             company_id = self.company_generator.create_company()
-        return GetCompanyTransactionsResponse(
+        return get_company_transactions.Response(
             transactions=transactions,
             company_id=company_id,
         )
@@ -179,7 +176,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         transaction_volume: Optional[Decimal] = None,
         account_type: Optional[AccountTypes] = None,
         purpose: Optional[str] = None,
-    ) -> TransactionInfo:
+    ) -> get_company_transactions.TransactionInfo:
         if transaction_type is None:
             transaction_type = TransactionTypes.credit_for_fixed_means
         if date is None:
@@ -190,7 +187,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             account_type = AccountTypes.p
         if purpose is None:
             purpose = "Test purpose"
-        return TransactionInfo(
+        return get_company_transactions.TransactionInfo(
             transaction_type=transaction_type,
             date=date,
             transaction_volume=transaction_volume,

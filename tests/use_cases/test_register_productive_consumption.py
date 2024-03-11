@@ -2,15 +2,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.records import Company, ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
+from arbeitszeit.records import ConsumptionType, ProductionCosts
+from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
-)
-from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
-    GetCompanyTransactionsResponse,
 )
 
 from .base_test_case import BaseTestCase
@@ -328,19 +325,23 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         super().setUp()
         self.transaction_time = datetime(2020, 10, 1, 22, 30)
         self.datetime_service.freeze_time(self.transaction_time)
-        self.consumer = self.company_generator.create_company_record()
+        self.consumer = self.company_generator.create_company()
         self.planner = self.company_generator.create_company()
         self.plan = self.plan_generator.create_plan(planner=self.planner, timeframe=2)
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
         )
-        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
+        self.get_company_transactions = self.injector.get(
+            get_company_transactions.GetCompanyTransactionsUseCase
+        )
         self.planner_transactions_before_payment = len(
-            self.get_company_transactions(self.planner).transactions
+            self.get_company_transactions.get_transactions(
+                get_company_transactions.Request(company=self.planner)
+            ).transactions
         )
         self.response = self.register_productive_consumption(
             RegisterProductiveConsumptionRequest(
-                consumer=self.consumer.id,
+                consumer=self.consumer,
                 plan=self.plan,
                 amount=1,
                 consumption_type=ConsumptionType.means_of_prod,
@@ -349,26 +350,28 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
 
     def test_transaction_shows_up_in_transaction_listing_for_consumer(self) -> None:
-        transaction_info = self.get_consumer_transaction_infos(self.consumer)
-        self.assertEqual(len(transaction_info.transactions), 1)
+        transactions = self.get_transactions_of_company(self.consumer)
+        self.assertEqual(len(transactions), 1)
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner)
+        transactions = self.get_transactions_of_company(self.planner)
         self.assertEqual(
-            len(transaction_info.transactions),
+            len(transactions),
             self.planner_transactions_before_payment + 1,
         )
 
     def test_transaction_info_of_consumer_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_company_transactions(self.consumer.id)
+        transactions = self.get_transactions_of_company(self.consumer)
         assert not self.response.is_rejected
-        self.assertEqual(transaction_info.transactions[0].date, self.transaction_time)
+        self.assertEqual(transactions[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transaction_info = self.get_company_transactions(self.planner)
-        self.assertEqual(transaction_info.transactions[-1].date, self.transaction_time)
+        transactions = self.get_transactions_of_company(self.planner)
+        self.assertEqual(transactions[-1].date, self.transaction_time)
 
-    def get_consumer_transaction_infos(
-        self, user: Company
-    ) -> GetCompanyTransactionsResponse:
-        return self.get_company_transactions(user.id)
+    def get_transactions_of_company(
+        self, company: UUID
+    ) -> list[get_company_transactions.TransactionInfo]:
+        return self.get_company_transactions.get_transactions(
+            get_company_transactions.Request(company=company)
+        ).transactions

@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
+from arbeitszeit.use_cases import get_company_transactions
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
@@ -25,7 +25,9 @@ class GetCompanyTransactionsBenchmark:
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
+        self.get_company_transactions = self.injector.get(
+            get_company_transactions.GetCompanyTransactionsUseCase
+        )
         self.buyer = self.company_generator.create_company()
         for _ in range(100):
             plan = self.plan_generator.create_plan()
@@ -40,4 +42,5 @@ class GetCompanyTransactionsBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        self.get_company_transactions(self.buyer)
+        use_case_request = get_company_transactions.Request(company=self.buyer)
+        self.get_company_transactions.get_transactions(request=use_case_request)

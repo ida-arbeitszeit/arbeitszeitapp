@@ -4,12 +4,9 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
+from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
-from arbeitszeit.use_cases.get_company_transactions import (
-    GetCompanyTransactions,
-    TransactionInfo,
-)
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanSorting,
@@ -35,7 +32,7 @@ class UseCaseTests(BaseTestCase):
             RegisterProductiveConsumption
         )
         self.get_company_transactions_use_case = self.injector.get(
-            GetCompanyTransactions
+            get_company_transactions.GetCompanyTransactionsUseCase
         )
 
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
@@ -181,8 +178,13 @@ class UseCaseTests(BaseTestCase):
             Decimal("-6"),
         )
 
-    def get_company_transactions(self, company: UUID) -> List[TransactionInfo]:
-        response = self.get_company_transactions_use_case(company)
+    def get_company_transactions(
+        self, company: UUID
+    ) -> List[get_company_transactions.TransactionInfo]:
+        use_case_request = get_company_transactions.Request(company=company)
+        response = self.get_company_transactions_use_case.get_transactions(
+            request=use_case_request
+        )
         return response.transactions
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:

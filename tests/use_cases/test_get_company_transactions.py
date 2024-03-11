@@ -1,26 +1,29 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
+from uuid import UUID
 
 from arbeitszeit.records import AccountTypes, ProductionCosts
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.get_company_transactions import GetCompanyTransactions
+from arbeitszeit.use_cases import get_company_transactions
 
 from .base_test_case import BaseTestCase
 
 
-class GetCompanyTransactionsUseCase(BaseTestCase):
+class GetCompanyTransactionsUseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.get_company_transactions = self.injector.get(GetCompanyTransactions)
+        self.use_case = self.injector.get(
+            get_company_transactions.GetCompanyTransactionsUseCase
+        )
 
     def test_that_no_info_is_generated_when_no_transaction_took_place(self) -> None:
         company = self.company_generator.create_company()
-        info = self.get_company_transactions(company)
+        info = self.use_case.get_transactions(self.create_request(company=company))
         assert not info.transactions
 
     def test_that_response_contains_the_company_id_from_the_request(self) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_transactions(company)
+        response = self.use_case.get_transactions(self.create_request(company=company))
         assert response.company_id == company
 
     def test_that_correct_info_is_generated_after_member_consumes_product(
@@ -37,10 +40,14 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             ),
             amount=1,
         )
-        info_company = self.get_company_transactions(company)
+        info_company = self.use_case.get_transactions(
+            self.create_request(company=company)
+        )
         transactions_before = len(info_company.transactions)
         self.consumption_generator.create_private_consumption(plan=plan, amount=1)
-        info_company = self.get_company_transactions(company)
+        info_company = self.use_case.get_transactions(
+            self.create_request(company=company)
+        )
         assert len(info_company.transactions) == transactions_before + 1
         transaction = info_company.transactions[0]
         assert transaction.transaction_type == TransactionTypes.sale_of_consumer_product
@@ -62,7 +69,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         self.consumption_generator.create_fixed_means_consumption(
             consumer=company1, plan=plan
         )
-        info_sender = self.get_company_transactions(company1)
+        info_sender = self.use_case.get_transactions(
+            self.create_request(company=company1)
+        )
         transaction = info_sender.transactions[0]
         assert (
             transaction.transaction_type == TransactionTypes.consumption_of_fixed_means
@@ -84,7 +93,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             amount=1,
         )
         self.consumption_generator.create_fixed_means_consumption(plan=plan)
-        info_receiver = self.get_company_transactions(company1)
+        info_receiver = self.use_case.get_transactions(
+            self.create_request(company=company1)
+        )
         transaction = info_receiver.transactions[0]
         assert transaction.transaction_type == TransactionTypes.sale_of_fixed_means
         assert transaction.transaction_volume == Decimal("12.5")
@@ -105,7 +116,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
                 labour_cost=Decimal(4),
             ),
         )
-        info_receiver = self.get_company_transactions(company)
+        info_receiver = self.use_case.get_transactions(
+            self.create_request(company=company)
+        )
         assert len(info_receiver.transactions) == 4
         transaction_volumes = [t.transaction_volume for t in info_receiver.transactions]
         assert expected_p_amount in transaction_volumes
@@ -131,7 +144,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             timeframe=1,
         )
         self.datetime_service.advance_time(timedelta(days=1))
-        info_receiver = self.get_company_transactions(company)
+        info_receiver = self.use_case.get_transactions(
+            self.create_request(company=company)
+        )
         assert info_receiver.transactions[3].transaction_volume == Decimal(10)
         assert (
             info_receiver.transactions[3].transaction_type
@@ -157,7 +172,9 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
             consumer=company1,
         )
         self.datetime_service.advance_time(timedelta(hours=1))
-        info_company1 = self.get_company_transactions(company1)
+        info_company1 = self.use_case.get_transactions(
+            self.create_request(company=company1)
+        )
         trans1 = info_company1.transactions[2]
         assert trans1.transaction_type == TransactionTypes.consumption_of_fixed_means
         trans2 = info_company1.transactions[1]
@@ -183,7 +200,7 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         self.datetime_service.advance_time(timedelta(hours=1))
         self.consumption_generator.create_private_consumption(plan=plan)
         self.datetime_service.advance_time(timedelta(hours=1))
-        info = self.get_company_transactions(company1)
+        info = self.use_case.get_transactions(self.create_request(company=company1))
         # trans1
         trans1 = info.transactions[3]
         assert trans1.transaction_type == TransactionTypes.consumption_of_fixed_means
@@ -196,3 +213,6 @@ class GetCompanyTransactionsUseCase(BaseTestCase):
         # trans4
         trans4 = info.transactions[0]
         assert trans4.transaction_type == TransactionTypes.sale_of_consumer_product
+
+    def create_request(self, company: UUID) -> get_company_transactions.Request:
+        return get_company_transactions.Request(company=company)

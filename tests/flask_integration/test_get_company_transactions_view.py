@@ -1,5 +1,3 @@
-from typing import Optional
-
 from parameterized import parameterized
 
 from tests.flask_integration.flask import LogInUser, ViewTestCase
@@ -8,7 +6,8 @@ from tests.flask_integration.flask import LogInUser, ViewTestCase
 class AuthTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/my_accounts/all_transactions"
+        self.company = self.company_generator.create_company()
+        self.url = f"user/company/{self.company}/transactions"
 
     def test_anonymous_user_gets_status_code_302_on_get_request(self) -> None:
         self.assert_response_has_expected_code(
@@ -20,24 +19,17 @@ class AuthTests(ViewTestCase):
 
     @parameterized.expand(
         [
-            (LogInUser.accountant, 302),
-            (LogInUser.member, 302),
+            (LogInUser.accountant, 200),
+            (LogInUser.company, 200),
+            (LogInUser.member, 200),
         ]
     )
-    def test_non_company_users_get_status_code_302_on_get_requests(
-        self, login: Optional[LogInUser], expected_code: int
+    def test_authenticated_users_get_status_code_200_on_get_requests(
+        self, login: LogInUser, expected_code: int
     ) -> None:
         self.assert_response_has_expected_code(
             url=self.url,
             method="get",
             login=login,
             expected_code=expected_code,
-        )
-
-    def test_that_any_company_gets_200_status_code_on_get_request(self) -> None:
-        self.assert_response_has_expected_code(
-            url=self.url,
-            method="get",
-            login=LogInUser.company,
-            expected_code=200,
         )

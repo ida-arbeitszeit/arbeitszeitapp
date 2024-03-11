@@ -6,10 +6,7 @@ from uuid import UUID
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.get_company_transactions import (
-    GetCompanyTransactionsResponse,
-    TransactionInfo,
-)
+from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -37,7 +34,7 @@ class GetCompanyTransactionsPresenter:
     url_index: UrlIndex
 
     def present(
-        self, use_case_response: GetCompanyTransactionsResponse
+        self, use_case_response: get_company_transactions.Response
     ) -> GetCompanyTransactionsViewModel:
         transactions = [
             self._create_info(transaction)
@@ -50,7 +47,9 @@ class GetCompanyTransactionsPresenter:
             ),
         )
 
-    def _create_info(self, transaction: TransactionInfo) -> ViewModelTransactionInfo:
+    def _create_info(
+        self, transaction: get_company_transactions.TransactionInfo
+    ) -> ViewModelTransactionInfo:
         account = self._get_account(transaction.account_type)
         return ViewModelTransactionInfo(
             transaction_type=self._get_transaction_name(transaction.transaction_type),
