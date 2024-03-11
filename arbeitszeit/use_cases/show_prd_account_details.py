@@ -13,51 +13,58 @@ from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
 
 @dataclass
+class Request:
+    company_id: UUID
+
+
+class MemberPeer:
+    ...
+
+
+@dataclass
+class CompanyPeer:
+    name: str
+    id: UUID
+
+
+@dataclass
+class SocialAccountingPeer:
+    id: UUID
+
+
+@dataclass
+class TransactionInfo:
+    transaction_type: TransactionTypes
+    date: datetime
+    transaction_volume: Decimal
+    purpose: str
+    peer: (MemberPeer | SocialAccountingPeer | CompanyPeer)
+
+
+@dataclass
+class PlotDetails:
+    timestamps: List[datetime]
+    accumulated_volumes: List[Decimal]
+
+
+@dataclass
+class Response:
+    company_id: UUID
+    transactions: List[TransactionInfo]
+    account_balance: Decimal
+    plot: PlotDetails
+
+
+@dataclass
 class ShowPRDAccountDetailsUseCase:
-    class MemberPeer:
-        ...
-
-    @dataclass
-    class CompanyPeer:
-        name: str
-        id: UUID
-
-    @dataclass
-    class SocialAccountingPeer:
-        id: UUID
-
-    @dataclass
-    class TransactionInfo:
-        transaction_type: TransactionTypes
-        date: datetime
-        transaction_volume: Decimal
-        purpose: str
-        peer: (
-            ShowPRDAccountDetailsUseCase.MemberPeer
-            | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
-            | ShowPRDAccountDetailsUseCase.CompanyPeer
-        )
-
-    @dataclass
-    class PlotDetails:
-        timestamps: List[datetime]
-        accumulated_volumes: List[Decimal]
-
-    @dataclass
-    class Response:
-        company_id: UUID
-        transactions: List[ShowPRDAccountDetailsUseCase.TransactionInfo]
-        account_balance: Decimal
-        plot: ShowPRDAccountDetailsUseCase.PlotDetails
-
     accounting_service: UserAccountingService
     database: DatabaseGateway
 
-    def __call__(self, company_id: UUID) -> Response:
-        company = self.database.get_companies().with_id(company_id).first()
+    def show_details(self, request: Request) -> Response:
+        company = self.database.get_companies().with_id(request.company_id).first()
         assert company
         transactions = [
-            self.TransactionInfo(
+            TransactionInfo(
                 transaction_type=row.transaction_type,
                 date=row.transaction.date,
                 transaction_volume=row.volume,
@@ -71,12 +78,12 @@ class ShowPRDAccountDetailsUseCase:
         transactions_ascending = transactions.copy()
         transactions_ascending.reverse()
         account_balance = self._get_account_balance(company.product_account)
-        plot = self.PlotDetails(
+        plot = PlotDetails(
             timestamps=self._get_plot_dates(transactions_ascending),
             accumulated_volumes=self._get_plot_volumes(transactions_ascending),
         )
-        return self.Response(
-            company_id=company_id,
+        return Response(
+            company_id=request.company_id,
             transactions=transactions,
             account_balance=account_balance,
             plot=plot,
@@ -99,17 +106,13 @@ class ShowPRDAccountDetailsUseCase:
 
     def _create_peer_info(
         self, peer: AccountOwner
-    ) -> (
-        ShowPRDAccountDetailsUseCase.MemberPeer
-        | ShowPRDAccountDetailsUseCase.SocialAccountingPeer
-        | ShowPRDAccountDetailsUseCase.CompanyPeer
-    ):
+    ) -> MemberPeer | SocialAccountingPeer | CompanyPeer:
         if isinstance(peer, Member):
-            return self.MemberPeer()
+            return MemberPeer()
         elif isinstance(peer, Company):
-            return self.CompanyPeer(
+            return CompanyPeer(
                 id=peer.id,
                 name=peer.get_name(),
             )
         else:
-            return self.SocialAccountingPeer(id=peer.id)
+            return SocialAccountingPeer(id=peer.id)

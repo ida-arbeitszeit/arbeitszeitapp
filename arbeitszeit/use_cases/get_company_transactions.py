@@ -19,18 +19,23 @@ class TransactionInfo:
 
 
 @dataclass
-class GetCompanyTransactionsResponse:
+class Response:
     transactions: List[TransactionInfo]
     company_id: UUID
 
 
 @dataclass
-class GetCompanyTransactions:
+class Request:
+    company: UUID
+
+
+@dataclass
+class GetCompanyTransactionsUseCase:
     accounting_service: UserAccountingService
     database_gateway: DatabaseGateway
 
-    def __call__(self, company_id: UUID) -> GetCompanyTransactionsResponse:
-        company = self.database_gateway.get_companies().with_id(company_id).first()
+    def get_transactions(self, request: Request) -> Response:
+        company = self.database_gateway.get_companies().with_id(request.company).first()
         assert company
         transactions = [
             TransactionInfo(
@@ -44,7 +49,7 @@ class GetCompanyTransactions:
                 company, company.accounts()
             )
         ]
-        return GetCompanyTransactionsResponse(
+        return Response(
             transactions=transactions,
-            company_id=company_id,
+            company_id=request.company,
         )

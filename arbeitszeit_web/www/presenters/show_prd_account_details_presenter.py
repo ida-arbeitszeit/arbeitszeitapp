@@ -5,9 +5,7 @@ from typing import List
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import (
-    ShowPRDAccountDetailsUseCase as UseCase,
-)
+from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -36,7 +34,9 @@ class ShowPRDAccountDetailsPresenter:
     url_index: UrlIndex
     datetime_service: DatetimeService
 
-    def present(self, use_case_response: UseCase.Response) -> ViewModel:
+    def present(
+        self, use_case_response: show_prd_account_details.Response
+    ) -> ViewModel:
         transactions = [
             self._create_info(transaction)
             for transaction in use_case_response.transactions
@@ -62,7 +62,9 @@ class ShowPRDAccountDetailsPresenter:
             ],
         )
 
-    def _create_info(self, transaction: UseCase.TransactionInfo) -> TransactionInfo:
+    def _create_info(
+        self, transaction: show_prd_account_details.TransactionInfo
+    ) -> TransactionInfo:
         assert transaction.transaction_type in [
             TransactionTypes.sale_of_consumer_product,
             TransactionTypes.sale_of_fixed_means,
@@ -87,22 +89,30 @@ class ShowPRDAccountDetailsPresenter:
 
     def _get_peer_type_icon(
         self,
-        peer: UseCase.MemberPeer | UseCase.CompanyPeer | UseCase.SocialAccountingPeer,
+        peer: (
+            show_prd_account_details.MemberPeer
+            | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.SocialAccountingPeer
+        ),
     ) -> str:
-        if isinstance(peer, UseCase.MemberPeer):
+        if isinstance(peer, show_prd_account_details.MemberPeer):
             return "fas fa-user"
-        elif isinstance(peer, UseCase.CompanyPeer):
+        elif isinstance(peer, show_prd_account_details.CompanyPeer):
             return "fas fa-industry"
         else:
             return ""
 
     def _get_peer_name(
         self,
-        peer: UseCase.MemberPeer | UseCase.CompanyPeer | UseCase.SocialAccountingPeer,
+        peer: (
+            show_prd_account_details.MemberPeer
+            | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.SocialAccountingPeer
+        ),
     ) -> str:
-        if isinstance(peer, UseCase.MemberPeer):
+        if isinstance(peer, show_prd_account_details.MemberPeer):
             return self.translator.gettext("Anonymous worker")
-        elif isinstance(peer, UseCase.CompanyPeer):
+        elif isinstance(peer, show_prd_account_details.CompanyPeer):
             return peer.name
         else:
             return ""

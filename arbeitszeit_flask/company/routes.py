@@ -5,7 +5,6 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
-from arbeitszeit import use_cases
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -97,9 +96,6 @@ from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPre
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
 )
-from arbeitszeit_web.www.presenters.get_company_transactions_presenter import (
-    GetCompanyTransactionsPresenter,
-)
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
 )
@@ -111,9 +107,6 @@ from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
-from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
-    ShowPRDAccountDetailsPresenter,
-)
 
 from .blueprint import CompanyRoute
 
@@ -250,32 +243,6 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     response = hide_plan(plan_id)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
-
-
-@CompanyRoute("/company/my_accounts/all_transactions")
-def list_all_transactions(
-    get_company_transactions: use_cases.get_company_transactions.GetCompanyTransactions,
-    presenter: GetCompanyTransactionsPresenter,
-):
-    response = get_company_transactions(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/list_all_transactions.html",
-        view_model=view_model,
-    )
-
-
-@CompanyRoute("/company/my_accounts/account_prd")
-def account_prd(
-    show_prd_account_details: use_cases.show_prd_account_details.ShowPRDAccountDetailsUseCase,
-    presenter: ShowPRDAccountDetailsPresenter,
-):
-    response = show_prd_account_details(UUID(current_user.id))
-    view_model = presenter.present(response)
-    return render_template(
-        "company/account_prd.html",
-        view_model=view_model,
-    )
 
 
 @CompanyRoute("/company/register_hours_worked", methods=["GET", "POST"])
