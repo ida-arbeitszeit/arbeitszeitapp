@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-11 21:41+0100\n"
+"POT-Creation-Date: 2024-03-11 22:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1077,10 +1077,10 @@ msgstr ""
 #: arbeitszeit_flask/templates/macros/draft_form.html:64
 #: arbeitszeit_flask/templates/macros/plan_details.html:126
 msgid ""
-"This is sometimes also called depreciation, e.g. if you plan to use a "
-"machine that cost 10000 hours to produce, for 10 years, and you have ten "
-"one-year-plans, then for this fixed mean of production, the value would "
-"be 1000."
+"This field is mainly to account for depreciation of machines, e.g. if you"
+" plan to use a machine that cost 10000 hours to produce, for 10 years, "
+"and you have ten one-year-plans, then for this fixed mean of production, "
+"the value would be 1000."
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/draft_form.html:66
@@ -1112,9 +1112,8 @@ msgstr ""
 #: arbeitszeit_flask/templates/macros/draft_form.html:95
 msgid ""
 "Products and services within a supply chain should not be marked public. "
-"Only if your product should be consumed for free by all members of "
-"society - funded via the Factor of Individual Consumption (FIC) - then "
-"please checkmark this box."
+"Only checkmark this box if your product will be generally and freely "
+"available."
 msgstr ""
 
 #: arbeitszeit_flask/templates/macros/help.html:189
