@@ -14,6 +14,9 @@ from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.www.controllers.show_a_account_details_controller import (
     ShowAAccountDetailsController,
 )
+from arbeitszeit_web.www.controllers.show_prd_account_details_controller import (
+    ShowPRDAccountDetailsController,
+)
 
 plots = Blueprint("plots", __name__)
 
@@ -96,11 +99,13 @@ def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: C
 @with_injection()
 @login_required
 def line_plot_of_company_prd_account(
+    controller: ShowPRDAccountDetailsController,
     plotter: Plotter,
     use_case: ShowPRDAccountDetailsUseCase,
 ):
     company_id = UUID(request.args["company_id"])
-    use_case_response = use_case(company_id)
+    use_case_request = controller.create_request(company_id)
+    use_case_response = use_case.show_details(use_case_request)
     png = plotter.create_line_plot(
         x=use_case_response.plot.timestamps,
         y=use_case_response.plot.accumulated_volumes,

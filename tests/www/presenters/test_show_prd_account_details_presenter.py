@@ -4,9 +4,7 @@ from typing import List
 from uuid import UUID, uuid4
 
 from arbeitszeit.transactions import TransactionTypes
-from arbeitszeit.use_cases.show_prd_account_details import (
-    ShowPRDAccountDetailsUseCase as UseCase,
-)
+from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -101,7 +99,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=UseCase.CompanyPeer(id=uuid4(), name=expected_user_name),
+                    peer=show_prd_account_details.CompanyPeer(
+                        id=uuid4(), name=expected_user_name
+                    ),
                 )
             ]
         )
@@ -116,7 +116,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=UseCase.MemberPeer(),
+                    peer=show_prd_account_details.MemberPeer(),
                 )
             ]
         )
@@ -130,7 +130,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_consumer_product,
-                    peer=UseCase.MemberPeer(),
+                    peer=show_prd_account_details.MemberPeer(),
                 )
             ]
         )
@@ -144,7 +144,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions=[
                 self._get_transaction_info(
                     transaction_type=TransactionTypes.sale_of_liquid_means,
-                    peer=UseCase.CompanyPeer(id=uuid4(), name="company name"),
+                    peer=show_prd_account_details.CompanyPeer(
+                        id=uuid4(), name="company name"
+                    ),
                 )
             ]
         )
@@ -157,7 +159,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         response = self._use_case_response(
             transactions=[
                 self._get_transaction_info(
-                    peer=UseCase.SocialAccountingPeer(id=uuid4())
+                    peer=show_prd_account_details.SocialAccountingPeer(id=uuid4())
                 )
             ]
         )
@@ -195,33 +197,35 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
     def _use_case_response(
         self,
         company_id: UUID = uuid4(),
-        transactions: List[UseCase.TransactionInfo] | None = None,
+        transactions: List[show_prd_account_details.TransactionInfo] | None = None,
         account_balance: Decimal = Decimal(0),
-        plot: UseCase.PlotDetails | None = None,
-    ) -> UseCase.Response:
+        plot: show_prd_account_details.PlotDetails | None = None,
+    ) -> show_prd_account_details.Response:
         if transactions is None:
             transactions = []
         if plot is None:
-            plot = UseCase.PlotDetails([], [])
-        return UseCase.Response(company_id, transactions, account_balance, plot)
+            plot = show_prd_account_details.PlotDetails([], [])
+        return show_prd_account_details.Response(
+            company_id, transactions, account_balance, plot
+        )
 
     def _get_transaction_info(
         self,
         transaction_type: TransactionTypes | None = None,
         peer: (
-            UseCase.MemberPeer
-            | UseCase.CompanyPeer
-            | UseCase.SocialAccountingPeer
+            show_prd_account_details.MemberPeer
+            | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.SocialAccountingPeer
             | None
         ) = None,
-    ) -> UseCase.TransactionInfo:
+    ) -> show_prd_account_details.TransactionInfo:
         if transaction_type is None:
             transaction_type = TransactionTypes.expected_sales
         if peer is None:
-            peer = UseCase.SocialAccountingPeer(
+            peer = show_prd_account_details.SocialAccountingPeer(
                 id=uuid4(),
             )
-        return UseCase.TransactionInfo(
+        return show_prd_account_details.TransactionInfo(
             transaction_type=transaction_type,
             date=datetime.now(),
             transaction_volume=Decimal(10.007),

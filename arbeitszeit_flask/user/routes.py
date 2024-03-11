@@ -28,6 +28,9 @@ from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
 from arbeitszeit_flask.views.show_a_account_details_view import ShowAAccountDetailsView
 from arbeitszeit_flask.views.show_company_accounts_view import CompanyAccountsView
 from arbeitszeit_flask.views.show_p_account_details_view import ShowPAccountDetailsView
+from arbeitszeit_flask.views.show_prd_account_details_view import (
+    ShowPRDAccountDetailsView,
+)
 from arbeitszeit_flask.views.show_r_account_details_view import ShowRAccountDetailsView
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
@@ -168,6 +171,12 @@ class company_account_r(ShowRAccountDetailsView):
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_a")
 @as_flask_view()
 class company_account_a(ShowAAccountDetailsView):
+    ...
+
+
+@AuthenticatedUserRoute("/company/<uuid:company_id>/account_prd")
+@as_flask_view()
+class company_account_prd(ShowPRDAccountDetailsView):
     ...
 
 
