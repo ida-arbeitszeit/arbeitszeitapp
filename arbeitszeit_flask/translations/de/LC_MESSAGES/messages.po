@@ -1089,6 +1089,10 @@ msgid ""
 "you have ten one-year-plans, then for this fixed mean of production, the "
 "value would be 1000."
 msgstr ""
+"Dieses Feld wird hauptsächlich dafür genutzt, der Abnutzung von Maschinen "
+"Rechnung zu tragen. Z.B. würdest du bei zehn Ein-Jahres-Plänen für eine "
+"Maschine, die die ganzen 10 Jahre im Einsatz sein soll und 10000 Stunden "
+"gekostet hat, für dieses feste Produktionsmittel den Wert 1000 eintragen."
 
 #: arbeitszeit_flask/templates/macros/draft_form.html:66
 #: arbeitszeit_web/formatters/plan_details_formatter.py:75
