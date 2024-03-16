@@ -20,6 +20,7 @@ MAIL_PORT = environ.get("MAIL_PORT")
 MAIL_USERNAME = environ.get("MAIL_USERNAME")
 MAIL_PASSWORD = environ.get("MAIL_PASSWORD")
 MAIL_DEFAULT_SENDER = environ.get("MAIL_DEFAULT_SENDER")
+MAIL_ADMIN = environ.get("MAIL_ADMIN")
 MAIL_USE_TLS = False
 MAIL_USE_SSL = True
 

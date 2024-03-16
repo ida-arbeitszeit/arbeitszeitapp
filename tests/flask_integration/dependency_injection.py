@@ -33,6 +33,7 @@ class FlaskConfiguration(dict):
                 "SECURITY_PASSWORD_SALT": "dev password salt",
                 "TESTING": True,
                 "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
+                "MAIL_ADMIN": "test_admin@cp.org",
                 "MAIL_BACKEND": "flask_mail",
                 "LANGUAGES": {"en": "English", "de": "Deutsch"},
                 "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",

@@ -37,3 +37,6 @@ class FakeEmailService:
 class FakeEmailConfiguration:
     def get_sender_address(self) -> str:
         return "test@test.test"
+
+    def get_admin_email_address(self) -> str:
+        return "admin@test.test"

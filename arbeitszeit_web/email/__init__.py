@@ -5,6 +5,9 @@ class EmailConfiguration(Protocol):
     def get_sender_address(self) -> str:
         ...
 
+    def get_admin_email_address(self) -> str:
+        ...
+
 
 class MailService(Protocol):
     def send_message(

@@ -11,6 +11,9 @@ class FlaskEmailConfiguration:
     def get_sender_address(self) -> str:
         return current_app.config["MAIL_DEFAULT_SENDER"]
 
+    def get_admin_email_address(self) -> str:
+        return current_app.config["MAIL_ADMIN"]
+
 
 def get_mail_service() -> MailService:
     if current_app.config.get("MAIL_BACKEND") == "flask_mail":

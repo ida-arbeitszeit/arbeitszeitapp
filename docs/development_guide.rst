@@ -570,6 +570,10 @@ configuration options are available
    
    The sender address used when sending out mail.
 
+.. py:data:: MAIL_ADMIN
+
+   The email address of the app administrator. Users may use this email address to contact the administrator.
+
 .. py:data:: SECRET_KEY
    
    A password used for protecting agains Cross-site request forgery

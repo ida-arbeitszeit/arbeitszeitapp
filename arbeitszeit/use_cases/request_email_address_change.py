@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from arbeitszeit.email import is_possibly_an_email_address
-from arbeitszeit.email_notifications import EmailChangeConfirmation, EmailSender
+from arbeitszeit.email_notifications import (
+    EmailChangeConfirmation,
+    EmailChangeWarning,
+    EmailSender,
+)
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -14,6 +18,9 @@ class RequestEmailAddressChangeUseCase:
 
     def request_email_address_change(self, request: Request) -> Response:
         if self._is_valid_request(request):
+            self.email_sender.send_email(
+                EmailChangeWarning(old_email_address=request.current_email_address)
+            )
             self.email_sender.send_email(
                 EmailChangeConfirmation(
                     old_email_address=request.current_email_address,
