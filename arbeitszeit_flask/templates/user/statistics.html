@@ -37,13 +37,19 @@
             </div>
         </div>
     </div>
-    <div class="tile is-ancestor">
-        <div class="tile is-parent has-text-centered">
+    <div class="tile is-ancestor has-text-centered">
+        <div class="tile is-parent">
             <div class="tile is-child box">
                 <h1 class="title">{{ view_model.payout_factor }}</h1>
                 <div class="subtitle">{{ gettext("FIC (Payout factor)") }}</div>
             </div>
         </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <h1 class="title">{{ view_model.fpc_balance }}</h1>
+                <div class="subtitle">{{ gettext("Balance for Fund of Public Companies (FPC)") }}</div>
+            </div>
+        </div>        
     </div>
     <div class="tile is-ancestor">
         <div class="tile is-parent">
