@@ -17,7 +17,6 @@ class Response:
     email_address: str
 
 
-@dataclass
 class Config:
     time_threshold_min: int = 30
     max_reset_requests: int = 5

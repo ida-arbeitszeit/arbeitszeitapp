@@ -53,9 +53,7 @@ class RequestUserPasswordResetTest(BaseTestCase):
             request_user_password_reset.Config.max_reset_requests,
         )
 
-    def test_many_reset_password_request_messages_sent_over_a_long_time_period_are_sent(
-        self,
-    ):
+    def test_all_reset_password_request_messages_are_sent_over_a_long_time_period(self):
         sent_to_email = "test@email.com"
         self.datetime_service.freeze_time(datetime(2024, 2, 21, hour=10))
         total_number_sent_over_threshold = (
