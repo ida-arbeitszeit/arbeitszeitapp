@@ -17,57 +17,83 @@ class ShowPAccountDetailsTests(BaseTestCase):
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
 
-    def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
+    def test_no_transactions_returned_when_company_has_neither_consumed_nor_planned_p(
+        self,
+    ) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
 
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert not response.transactions
 
-    def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
-        self.member_generator.create_member()
+    def test_balance_is_zero_when_company_has_neither_consumed_nor_planned_p(
+        self,
+    ) -> None:
         company = self.company_generator.create_company()
-
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.account_balance == 0
 
-    def test_company_id_is_returned(self) -> None:
-        self.member_generator.create_member()
+    def test_balance_is_zero_when_company_has_consumed_the_same_amount_of_p_as_it_has_planned(
+        self,
+    ) -> None:
         company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company, costs=ProductionCosts(Decimal(0), Decimal(0), Decimal(3))
+        )
+        plan_to_be_consumed = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)), amount=1
+        )
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=company, amount=1, plan=plan_to_be_consumed
+        )
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.account_balance == 0
 
+    def test_sum_of_planned_p_is_zero_when_when_company_has_not_planned_p(self) -> None:
+        company = self.company_generator.create_company()
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.sum_of_planned_p == 0
+
+    def test_sum_of_consumed_p_is_zero_when_company_has_not_consumed_p(self) -> None:
+        company = self.company_generator.create_company()
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.sum_of_consumed_p == 0
+
+    def test_id_of_the_company_that_owns_the_account_is_returned(self) -> None:
+        company = self.company_generator.create_company()
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.company_id == company
 
-    def test_that_no_info_is_generated_after_selling_of_consumer_product(self) -> None:
-        member = self.member_generator.create_member()
-        company = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(planner=company)
+    def test_that_no_transactions_are_generated_after_company_passed_on_a_consumer_product(
+        self,
+    ) -> None:
+        producer = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=producer)
         transactions_before_consumption = len(
             self.use_case.show_details(
-                self.create_use_case_request(company)
+                self.create_use_case_request(producer)
             ).transactions
         )
-        self.consumption_generator.create_private_consumption(
-            consumer=member, plan=plan
-        )
-        response = self.use_case.show_details(self.create_use_case_request(company))
+        self.consumption_generator.create_private_consumption(plan=plan)
+        response = self.use_case.show_details(self.create_use_case_request(producer))
         assert len(response.transactions) == transactions_before_consumption
 
-    def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
-        company1 = self.company_generator.create_company_record()
-        company2 = self.company_generator.create_company_record()
-
-        self.transaction_generator.create_transaction(
-            sending_account=company1.means_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+    def test_that_no_transactions_are_generated_after_company_passed_on_a_means_of_production(
+        self,
+    ) -> None:
+        producer = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=producer)
+        transactions_before_consumption = len(
+            self.use_case.show_details(
+                self.create_use_case_request(producer)
+            ).transactions
         )
 
-        response = self.use_case.show_details(self.create_use_case_request(company2.id))
-        assert not response.transactions
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
+        response = self.use_case.show_details(self.create_use_case_request(producer))
+        assert len(response.transactions) == transactions_before_consumption
 
-    def test_that_no_info_is_generated_when_credit_for_r_is_granted(self) -> None:
+    def test_that_transactions_are_generated_when_credit_for_r_is_granted(self) -> None:
         company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
@@ -140,24 +166,97 @@ class ShowPAccountDetailsTests(BaseTestCase):
         )
         assert response.account_balance == Decimal(8.5)
 
-    def test_that_correct_info_for_is_generated_after_company_consuming_p(self) -> None:
-        company1 = self.company_generator.create_company_record()
-        company2 = self.company_generator.create_company_record()
+    def test_that_after_consumption_of_means_of_production_a_transaction_of_that_type_is_shown(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        self.consumption_generator.create_fixed_means_consumption(consumer=consumer)
 
-        trans = self.transaction_generator.create_transaction(
-            sending_account=company1.means_account,
-            receiving_account=company2.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-
-        response = self.use_case.show_details(self.create_use_case_request(company1.id))
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
         transaction = response.transactions[0]
         assert (
             transaction.transaction_type == TransactionTypes.consumption_of_fixed_means
         )
-        assert transaction.transaction_volume == -trans.amount_sent
-        assert response.account_balance == -trans.amount_sent
+
+    def test_that_after_consumption_of_fixed_means_a_transaction_with_volume_of_negated_costs_is_shown(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        costs = ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        expected_volume = -costs.total_cost()
+        plan = self.plan_generator.create_plan(costs=costs, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan, amount=1
+        )
+
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
+        transaction = response.transactions[0]
+        assert transaction.transaction_volume == expected_volume
+
+    def test_that_after_consumption_of_fixed_means_the_balance_equals_the_negated_costs(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        costs = ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        expected_balance = -costs.total_cost()
+        plan = self.plan_generator.create_plan(costs=costs, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan, amount=1
+        )
+
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
+        assert response.account_balance == expected_balance
+
+    def test_that_after_consumption_of_two_fixed_means_the_p_balance_equals_negated_sum_of_costs(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        costs1 = ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        costs2 = ProductionCosts(Decimal(4), Decimal(5), Decimal(6))
+        expected_balance = -(costs1.total_cost() + costs2.total_cost())
+        plan1 = self.plan_generator.create_plan(costs=costs1, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan1, amount=1
+        )
+        plan2 = self.plan_generator.create_plan(costs=costs2, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan2, amount=1
+        )
+
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
+        assert response.account_balance == expected_balance
+
+    def test_that_after_filing_two_plans_the_sum_of_planned_p_is_equal_to_the_sum_of_the_costs_for_p(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        costs1 = ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        costs2 = ProductionCosts(Decimal(4), Decimal(5), Decimal(6))
+        expected_sum = costs1.means_cost + costs2.means_cost
+        self.plan_generator.create_plan(costs=costs1, amount=1, planner=planner)
+        self.plan_generator.create_plan(costs=costs2, amount=1, planner=planner)
+
+        response = self.use_case.show_details(self.create_use_case_request(planner))
+        assert response.sum_of_planned_p == expected_sum
+
+    def test_that_after_consuming_two_means_of_productions_the_sum_of_consumed_p_is_equal_to_the_sum_of_the_costs(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        costs1 = ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
+        costs2 = ProductionCosts(Decimal(4), Decimal(5), Decimal(6))
+        expected_sum = costs1.total_cost() + costs2.total_cost()
+        plan1 = self.plan_generator.create_plan(costs=costs1, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan1, amount=1
+        )
+        plan2 = self.plan_generator.create_plan(costs=costs2, amount=1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer, plan=plan2, amount=1
+        )
+
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
+        assert response.sum_of_consumed_p == expected_sum
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
         self.member_generator.create_member()
