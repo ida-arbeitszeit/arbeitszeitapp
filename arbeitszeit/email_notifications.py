@@ -56,6 +56,17 @@ class CoordinationTransferRequest:
     transfer_request: UUID
 
 
+@dataclass
+class ResetPasswordRequest:
+    email_address: str
+    reset_token: str
+
+
+@dataclass
+class ResetPasswordConfirmation:
+    email_address: str
+
+
 # This type definition can be used by implementations of the
 # EmailSender protocol for static type checking purposes. Keep this
 # list alphabetically sorted.
@@ -67,6 +78,8 @@ Message: TypeAlias = Union[
     CoordinationTransferRequest,
     EmailChangeConfirmation,
     MemberRegistration,
+    ResetPasswordConfirmation,
+    ResetPasswordRequest,
     WorkerInvitation,
 ]
 # Implementations can rely on this set to contain all possible message

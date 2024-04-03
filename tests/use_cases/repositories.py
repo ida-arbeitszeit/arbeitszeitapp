@@ -1244,6 +1244,18 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
         ]
 
 
+class PasswordResetRequestResult(QueryResultImpl[records.PasswordResetRequest]):
+    def with_email_address(self, email_address: str) -> Self:
+        return self._filter_elements(
+            lambda record: record.email_address == email_address
+        )
+
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
+        return self._filter_elements(
+            lambda record: record.created_at > creation_threshold
+        )
+
+
 class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
         return self._filter_elements(lambda a: a.address in addresses)
@@ -1586,6 +1598,7 @@ class MockDatabase:
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, records.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
+        self.reset_password_requests: List[records.PasswordResetRequest] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -1953,6 +1966,24 @@ class MockDatabase:
             database=self,
             items=self.account_credentials.values,
         )
+
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
+        return PasswordResetRequestResult(
+            items=lambda: self.reset_password_requests,
+            database=self,
+        )
+
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
+        record = records.PasswordResetRequest(
+            id=uuid4(),
+            email_address=email_address,
+            reset_token=reset_token,
+            created_at=created_at,
+        )
+        self.reset_password_requests.append(record)
+        return record
 
 
 class Index(Generic[Key, Value]):

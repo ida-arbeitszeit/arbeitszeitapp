@@ -61,7 +61,7 @@ token field and buttons to submit. -->
 <div class="box has-background-info-light">
   <div class="field">
     <div class="has-text-right has-text-info-dark">
-      {{ info_tooltip(id="id_fixed_means", text=gettext("This is sometimes also called depreciation, e.g. if you plan to use a machine that cost 10000 hours to produce, for 10 years, and you have ten one-year-plans, then for this fixed mean of production, the value would be 1000."))}}
+      {{ info_tooltip(id="id_fixed_means", text=gettext("This field is mainly to account for wear and tear of machines. E.g. if you plan to use a machine that cost 10000 hours to produce, for 10 years, and you have ten one-year-plans, then for this fixed mean of production, the value would be 1000."))}}
     </div>
     <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
     <div class="control">
@@ -92,7 +92,7 @@ token field and buttons to submit. -->
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
   <div class="has-text-right has-text-info-dark">
-    {{ info_tooltip(id="id_type", text=gettext("Products and services within a supply chain should not be marked public. Only if your product should be consumed for free by all members of society - funded via the Factor of Individual Consumption (FIC) - then please checkmark this box."))}}
+    {{ info_tooltip(id="id_type", text=gettext("Products and services within a supply chain should not be marked public. Only checkmark this box if your product will be generally and freely available."))}}
   </div>
   <div class="field">
     {{ form.productive_or_public }} {{ form.productive_or_public.label }}

@@ -17,7 +17,7 @@ class InviteWorkerPresenterImpl:
 
     def show_invite_worker_message(self, worker_email: str, invite: UUID) -> None:
         invitation_url = self.url_index.get_answer_company_work_invite_url(
-            invite_id=invite
+            invite_id=invite, is_absolute=True
         )
         self.email_service.send_message(
             subject=self.translator.gettext(

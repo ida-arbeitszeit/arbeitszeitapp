@@ -54,8 +54,14 @@ class GeneralUrlIndex:
     def get_company_summary_url(self, company_id: UUID) -> str:
         return url_for("main_user.company_summary", company_id=company_id)
 
-    def get_answer_company_work_invite_url(self, *, invite_id: UUID) -> str:
-        return url_for("main_member.show_company_work_invite", invite_id=invite_id)
+    def get_answer_company_work_invite_url(
+        self, *, invite_id: UUID, is_absolute: bool
+    ) -> str:
+        return url_for(
+            "main_member.show_company_work_invite",
+            invite_id=invite_id,
+            _external=is_absolute,
+        )
 
     def get_register_private_consumption_url(
         self, amount: Optional[int] = None, plan_id: Optional[UUID] = None
