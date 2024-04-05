@@ -1,4 +1,5 @@
 from typing import Any, Dict
+from uuid import uuid4
 
 from parameterized import parameterized
 
@@ -68,3 +69,17 @@ class QueryCompanyViewTests(ViewTestCase):
             expected_code=400,
             data=data,
         )
+
+    def test_that_one_company_name_appears_in_html_when_there_are_two_companies_but_only_one_is_searched_for(
+        self,
+    ) -> None:
+        self.login_member()
+        EXPECTED_COMPANY_NAME = f"One-{uuid4()}"
+        UNEXPECTED_COMPANY_NAME = f"Two-{uuid4()}"
+        self.company_generator.create_company(name=EXPECTED_COMPANY_NAME)
+        self.company_generator.create_company(name=UNEXPECTED_COMPANY_NAME)
+        response = self.client.get(
+            URL, query_string={"select": "Name", "search": EXPECTED_COMPANY_NAME}
+        )
+        assert EXPECTED_COMPANY_NAME in response.text
+        assert UNEXPECTED_COMPANY_NAME not in response.text
