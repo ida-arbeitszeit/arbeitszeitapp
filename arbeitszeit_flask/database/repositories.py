@@ -299,10 +299,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             )
             .join(
                 cooperating_plan,
-                or_(
-                    cooperating_plan.id == other_plan_cooperation.plan,
-                    cooperating_plan.id == models.Plan.id,
-                ),
+                cooperating_plan.id == other_plan_cooperation.plan,
                 isouter=True,
             )
             .filter(
@@ -412,7 +409,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         Optional[records.Cooperation],
         List[records.PlanSummary],
     ]:
-        if orm[3]:
+        if any(orm[3]):
             cooperating_plans = list(
                 records.PlanSummary(
                     production_costs=cost,
