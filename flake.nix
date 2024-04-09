@@ -7,10 +7,22 @@
     flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
 
-  outputs = { self, nixpkgs, flake-utils, flask-profiler, nixos-23-11 }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      flask-profiler,
+      nixos-23-11,
+    }:
     let
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      systemDependent = flake-utils.lib.eachSystem supportedSystems (system:
+      supportedSystems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      systemDependent = flake-utils.lib.eachSystem supportedSystems (
+        system:
         let
           isMacOs = !builtins.isNull (builtins.match ".*-darwin" system);
           pkgs = import nixpkgs {
@@ -21,14 +33,14 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-        in {
+        in
+        {
           devShells = rec {
             default = nixos-unstable;
-            nixos-23-11 = pkgs-23-11.callPackage nix/devShell.nix {
-              includeGlibcLocales = !isMacOs;
-            };
+            nixos-23-11 = pkgs-23-11.callPackage nix/devShell.nix { includeGlibcLocales = !isMacOs; };
             nixos-unstable = pkgs.callPackage nix/devShell.nix {
               includeGlibcLocales = !isMacOs;
+              nixfmt = pkgs.nixfmt-rfc-style;
             };
             python311 = pkgs.callPackage nix/devShell.nix {
               python3 = pkgs.python311;
@@ -48,19 +60,21 @@
             arbeitszeit-python3 = pkgs.python3.pkgs.arbeitszeitapp;
             arbeitszeit-python311 = pkgs.python311.pkgs.arbeitszeitapp;
           };
-        });
+        }
+      );
       systemIndependent = {
         overlays = {
           # The default overlay provides the arbeitszeitapp to
           # nixpkgs.
-          default = let
-            ourOverlay = final: prev: {
-              pythonPackagesExtensions = prev.pythonPackagesExtensions
-                ++ [ (import nix/pythonPackages.nix) ];
-            };
-          in nixpkgs.lib.composeExtensions ourOverlay
-          flask-profiler.overlays.default;
+          default =
+            let
+              ourOverlay = final: prev: {
+                pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [ (import nix/pythonPackages.nix) ];
+              };
+            in
+            nixpkgs.lib.composeExtensions ourOverlay flask-profiler.overlays.default;
         };
       };
-    in systemDependent // systemIndependent;
+    in
+    systemDependent // systemIndependent;
 }
