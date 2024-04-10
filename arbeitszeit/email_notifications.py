@@ -2,6 +2,7 @@
 the arbeitszeitapp can issue and the interface by which the use cases
 request those notifications to be sent.
 """
+
 from dataclasses import dataclass
 from typing import Protocol, Type, TypeAlias, Union, get_args
 from uuid import UUID
@@ -88,5 +89,4 @@ all_message_types: set[Type] = set(get_args(Message))
 
 
 class EmailSender(Protocol):
-    def send_email(self, message: Message) -> None:
-        ...
+    def send_email(self, message: Message) -> None: ...

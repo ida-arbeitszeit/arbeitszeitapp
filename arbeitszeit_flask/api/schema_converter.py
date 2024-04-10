@@ -81,9 +81,7 @@ class SchemaConverter:
                 dict_model.update({key: self.json_schema_to_flaskx(schema=json_value)})
         return dict_model
 
-    def json_schema_to_flaskx(
-        self, schema: JsonValue
-    ) -> Union[
+    def json_schema_to_flaskx(self, schema: JsonValue) -> Union[
         Model,
         fields.String,
         fields.Arbitrary,

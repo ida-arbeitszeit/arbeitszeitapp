@@ -41,9 +41,11 @@ class PlanDetailsFormatter:
             plan_id=(self.translator.gettext("Plan ID"), str(plan_details.plan_id)),
             activity_string=(
                 self.translator.gettext("Status"),
-                self.translator.gettext("Active")
-                if plan_details.is_active
-                else self.translator.gettext("Inactive"),
+                (
+                    self.translator.gettext("Active")
+                    if plan_details.is_active
+                    else self.translator.gettext("Inactive")
+                ),
             ),
             planner=(
                 self.translator.gettext("Planning company"),
@@ -85,17 +87,23 @@ class PlanDetailsFormatter:
             ),
             type_of_plan=(
                 self.translator.gettext("Type"),
-                self.translator.gettext("Public")
-                if plan_details.is_public_service
-                else self.translator.gettext("Productive"),
+                (
+                    self.translator.gettext("Public")
+                    if plan_details.is_public_service
+                    else self.translator.gettext("Productive")
+                ),
             ),
             price_per_unit=(
                 self.translator.gettext("Price (hours/unit)"),
                 self._format_price(plan_details.price_per_unit),
                 plan_details.is_cooperating,
-                self.url_index.get_coop_summary_url(coop_id=plan_details.cooperation)
-                if plan_details.cooperation
-                else None,
+                (
+                    self.url_index.get_coop_summary_url(
+                        coop_id=plan_details.cooperation
+                    )
+                    if plan_details.cooperation
+                    else None
+                ),
             ),
             labour_cost_per_unit=(
                 self.translator.gettext("Labour time (hours/unit)"),
@@ -106,20 +114,24 @@ class PlanDetailsFormatter:
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
-            approval_date=self.datetime_service.format_datetime(
-                date=plan_details.approval_date,
-                zone="Europe/Berlin",
-                fmt="%d.%m.%Y %H:%M",
-            )
-            if plan_details.approval_date
-            else "-",
-            expiration_date=self.datetime_service.format_datetime(
-                date=plan_details.expiration_date,
-                zone="Europe/Berlin",
-                fmt="%d.%m.%Y %H:%M",
-            )
-            if plan_details.expiration_date
-            else "-",
+            approval_date=(
+                self.datetime_service.format_datetime(
+                    date=plan_details.approval_date,
+                    zone="Europe/Berlin",
+                    fmt="%d.%m.%Y %H:%M",
+                )
+                if plan_details.approval_date
+                else "-"
+            ),
+            expiration_date=(
+                self.datetime_service.format_datetime(
+                    date=plan_details.expiration_date,
+                    zone="Europe/Berlin",
+                    fmt="%d.%m.%Y %H:%M",
+                )
+                if plan_details.expiration_date
+                else "-"
+            ),
         )
 
     def _format_price(self, price_per_unit: Decimal) -> str:

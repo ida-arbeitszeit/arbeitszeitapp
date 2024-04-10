@@ -2,8 +2,7 @@ from typing import List, Protocol
 
 
 class EmailConfiguration(Protocol):
-    def get_sender_address(self) -> str:
-        ...
+    def get_sender_address(self) -> str: ...
 
 
 class MailService(Protocol):
@@ -13,5 +12,4 @@ class MailService(Protocol):
         recipients: List[str],
         html: str,
         sender: str,
-    ) -> None:
-        ...
+    ) -> None: ...
