@@ -42,7 +42,9 @@ class GetCoordinationTransferRequestDetailsPresenter:
             candidate_name=response.candidate_name,
             current_user_is_candidate=current_user == response.candidate_id,
             request_is_pending=response.request_is_pending,
-            request_status=self.translator.gettext("Pending")
-            if response.request_is_pending
-            else self.translator.gettext("Closed"),
+            request_status=(
+                self.translator.gettext("Pending")
+                if response.request_is_pending
+                else self.translator.gettext("Closed")
+            ),
         )

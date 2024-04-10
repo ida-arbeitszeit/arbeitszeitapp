@@ -77,8 +77,7 @@ def unconfirmed_member(authenticator: MemberAuthenticator):
 
 @auth.route("/signup-member", methods=["GET", "POST"])
 @as_flask_view()
-class signup_member(SignupMemberView):
-    ...
+class signup_member(SignupMemberView): ...
 
 
 @auth.route("/confirm-member/<token>")
@@ -189,8 +188,7 @@ def login_company(
 
 @auth.route("/company/signup", methods=["GET", "POST"])
 @as_flask_view()
-class signup_company(SignupCompanyView):
-    ...
+class signup_company(SignupCompanyView): ...
 
 
 @auth.route("/company/confirm/<token>")
@@ -229,8 +227,7 @@ def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
 
 @auth.route("/accountant/signup/<token>", methods=["GET", "POST"])
 @as_flask_view()
-class signup_accountant(SignupAccountantView):
-    ...
+class signup_accountant(SignupAccountantView): ...
 
 
 @auth.route("/accountant/login", methods=["GET", "POST"])

@@ -37,9 +37,11 @@ class GetMemberAccountPresenter:
                 date=self.datetime_service.format_datetime(
                     t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
                 ),
-                type=self.translator.gettext("Consumption")
-                if (t.type == TransactionTypes.private_consumption)
-                else self.translator.gettext("Wages"),
+                type=(
+                    self.translator.gettext("Consumption")
+                    if (t.type == TransactionTypes.private_consumption)
+                    else self.translator.gettext("Wages")
+                ),
                 user_name=t.peer_name,
                 volume=f"{round(t.transaction_volume, 2)}",
                 is_volume_positive=t.transaction_volume >= 0,

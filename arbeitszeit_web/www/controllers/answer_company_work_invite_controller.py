@@ -10,8 +10,7 @@ from arbeitszeit_web.session import Session
 
 
 class AnswerCompanyWorkInviteForm(Protocol):
-    def get_is_accepted_field(self) -> bool:
-        ...
+    def get_is_accepted_field(self) -> bool: ...
 
 
 @dataclass(frozen=True)

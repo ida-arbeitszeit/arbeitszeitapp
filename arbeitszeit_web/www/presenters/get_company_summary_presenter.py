@@ -109,9 +109,11 @@ class GetCompanySummarySuccessPresenter:
             url=self.user_url_index.get_plan_details_url(
                 plan_details.id,
             ),
-            status=self.translator.gettext("Active")
-            if plan_details.is_active
-            else self.translator.gettext("Inactive"),
+            status=(
+                self.translator.gettext("Active")
+                if plan_details.is_active
+                else self.translator.gettext("Inactive")
+            ),
             sales_volume=f"{round(plan_details.sales_volume, 2)}",
             sales_balance=f"{round(plan_details.sales_balance, 2)}",
             deviation_relative=Deviation(

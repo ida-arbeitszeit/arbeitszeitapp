@@ -7,12 +7,10 @@ Number = Union[int, float, Decimal]
 
 class Translator(ABC):
     @abstractmethod
-    def gettext(self, text: str) -> str:
-        ...
+    def gettext(self, text: str) -> str: ...
 
     @abstractmethod
-    def pgettext(self, context: str, text: str) -> str:
-        ...
+    def pgettext(self, context: str, text: str) -> str: ...
 
     @abstractmethod
     def ngettext(self, singular: str, plural: str, n: Number) -> str:

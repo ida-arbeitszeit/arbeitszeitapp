@@ -52,12 +52,14 @@ class ListCoordinationsOfCooperationPresenter:
                         zone="Europe/Berlin",
                         fmt="%d.%m.%Y %H:%M",
                     ),
-                    end_time="-"
-                    if coordination.end_time is None
-                    else self.datetime_service.format_datetime(
-                        date=coordination.end_time,
-                        zone="Europe/Berlin",
-                        fmt="%d.%m.%Y %H:%M",
+                    end_time=(
+                        "-"
+                        if coordination.end_time is None
+                        else self.datetime_service.format_datetime(
+                            date=coordination.end_time,
+                            zone="Europe/Berlin",
+                            fmt="%d.%m.%Y %H:%M",
+                        )
                     ),
                 )
                 for coordination in response.coordinations

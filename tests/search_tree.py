@@ -4,8 +4,7 @@ from typing import Generic, Optional, Protocol, TypeVar
 
 
 class SelfComparable(Protocol):
-    def __lt__(self: T, other: T) -> bool:
-        ...
+    def __lt__(self: T, other: T) -> bool: ...
 
 
 T = TypeVar("T", bound=SelfComparable)
