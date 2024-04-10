@@ -6,11 +6,11 @@
             {{ gettext("Plan information") }}
         </h1>
         <div class="box">
-            <div class="tile is-ancestor">
+            <div class="grid">
                 <div class="tile is-vertical is-8">
                     <div class="tile">
-                        <div class="tile is-parent is-vertical">
-                            <article class="tile is-child notification">
+                        <div class="cell is-vertical">
+                            <article class="box notification">
                                 <div class="has-text-right has-text-info-dark">
                                     {{ info_tooltip(id="id_plan_id", text=gettext("This plan ID identifies your plan. It is used to account for labour time by workers and companies that work on, or respectively consume, the planned product or service.")) }}
                                 </div>
@@ -26,14 +26,14 @@
                                 </p>
                             </article>
                             <div class="tile">
-                                <div class="tile is-parent">
-                                    <article class="tile is-child notification">
+                                <div class="cell">
+                                    <article class="box notification">
                                         <p class="title is-4">{{ view_model.details.product_name[0] }}</p>
                                         <p class="subtitle">{{ view_model.details.product_name[1] }}</p>
                                     </article>
                                 </div>
-                                <div class="tile is-parent">
-                                    <article class="tile is-child notification">
+                                <div class="cell">
+                                    <article class="box notification">
                                         <p class="title is-4">{{ view_model.details.planner[0] }}</p>
                                         <p class="subtitle"><a href="{{ view_model.details.planner[2] }}">{{
                                         view_model.details.planner[3] }}</a></p>
@@ -43,8 +43,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="tile is-parent">
-                    <article class="tile is-child notification has-background-primary-light">
+                <div class="cell">
+                    <article class="box notification has-background-primary-light">
                         <div class="content">
                             <p class="title is-4">{{ view_model.details.description[0] }}</p>
                             <div class="content">
@@ -58,10 +58,10 @@
         </div>
 
         <div class="box">
-            <div class="tile is-ancestor">
+            <div class="grid">
                 <div class="tile is-4">
-                    <div class="tile is-parent">
-                        <article class="tile is-child notification has-background-warning-light">
+                    <div class="cell">
+                        <article class="box notification has-background-warning-light">
                             <div class="has-text-right has-text-info-dark">
                                 {{ info_tooltip(id="id_plan_status", text=gettext("Status can be \"Active\", i.e. plan was approved and current date is within planning timeframe, or \"Inactive\", i.e. plan is not yet approved or it is expired.")) }}
                             </div>
@@ -70,8 +70,8 @@
                         </article>
                     </div>
                 </div>
-                <div class="tile is-parent">
-                    <div class="tile is-child notification">
+                <div class="cell">
+                    <div class="box notification">
                         <p class="title is-4">{{ view_model.details.timeframe[0] }}</p>
                         <p class="subtitle">({{ view_model.details.active_days}} / {{ view_model.details.timeframe[1]
                             }})</p>
@@ -80,9 +80,9 @@
                     </div>
                 </div>
             </div>
-            <div class="tile is-ancestor">
-                <div class="tile is-parent">
-                    <article class="tile is-child notification">
+            <div class="grid">
+                <div class="cell">
+                    <article class="box notification">
                         <div class="columns subtitle is-italic">
                             <div class="column"><span
                                     class="has-text-weight-semibold">{{  gettext("Plan creation") }}</span>
@@ -100,18 +100,18 @@
         </div>
 
         <div class="box">
-            <div class="tile is-ancestor">
+            <div class="grid">
                 <div class="tile is-vertical">
                     <div class="tile">
-                        <div class="tile is-parent is-vertical">
-                            <article class="tile is-child notification">
+                        <div class="cell is-vertical">
+                            <article class="box notification">
                                 <div class="has-text-right has-text-info-dark">
                                     {{ info_tooltip(id="id_amount", text=gettext("This is the amount you plan to deliver.")) }}
                                 </div>
                                 <p class="title is-4">{{ view_model.details.amount[0] }}</p>
                                 <p class="subtitle">{{ view_model.details.amount[1] }}</p>
                             </article>
-                            <article class="tile is-child notification">
+                            <article class="box notification">
                                 <p class="title is-4">{{ view_model.details.production_unit[0] }}</p>
                                 <p class="subtitle">{{ view_model.details.production_unit[1] }}</p>
                             </article>
@@ -120,22 +120,22 @@
                 </div>
                 <div class="tile is-vertical is-8">
                     <div class="tile">
-                        <div class="tile is-parent is-vertical">
-                            <article class="tile is-child notification has-background-danger-light">
+                        <div class="cell is-vertical">
+                            <article class="box notification has-background-danger-light">
                                 <div class="has-text-right has-text-info-dark">
                                     {{ info_tooltip(id="id_fixed_means", text=gettext("This field is mainly to account for wear and tear of machines. E.g. if you plan to use a machine that cost 10000 hours to produce, for 10 years, and you have ten one-year-plans, then for this fixed mean of production, the value would be 1000.")) }}
                                 </div>
                                 <p class="title is-4">{{ view_model.details.means_cost[0] }}</p>
                                 <p class="subtitle">{{ view_model.details.means_cost[1] }}</p>
                             </article>
-                            <article class="tile is-child notification has-background-danger-light">
+                            <article class="box notification has-background-danger-light">
                                 <div class="has-text-right has-text-info-dark">
                                     {{ info_tooltip(id="id_liquid_means", text=gettext("Here, recurring costs from raw materials and consumables are summarized, e.g. electricity, rent for production halls, maintenance of machines etc.")) }}
                                 </div>
                                 <p class="title is-4">{{ view_model.details.resources_cost[0] }}</p>
                                 <p class="subtitle">{{ view_model.details.resources_cost[1] }}</p>
                             </article>
-                            <article class="tile is-child notification has-background-danger-light">
+                            <article class="box notification has-background-danger-light">
                                 <div class="has-text-right has-text-info-dark">
                                     {{ info_tooltip(id="id_labour", text=gettext("Planned hours of human work.")) }}
                                 </div>
@@ -149,9 +149,9 @@
         </div>
 
         <div class="box">
-            <div class="tile is-ancestor">
-                <div class="tile is-parent">
-                    <article class="tile is-child notification">
+            <div class="grid">
+                <div class="cell">
+                    <article class="box notification">
                         <div class="has-text-right has-text-info-dark">
                             {{ info_tooltip(id="id_type", text=gettext("\"Type\" can be either \"Productive\" or \"Public\". Products from the latter can be consumed for free, and are funded via the Factor of Individual Consumption (FIC).")) }}
                         </div>
@@ -159,8 +159,8 @@
                         <p class="subtitle">{{ view_model.details.type_of_plan[1] }}</p>
                     </article>
                 </div>
-                <div class="tile is-parent">
-                    <div class="tile is-child notification has-background-warning-light">
+                <div class="cell">
+                    <div class="box notification has-background-warning-light">
                         <div class="has-text-right has-text-info-dark">
                             {{ info_tooltip(id="id_price_per_unit", text=gettext("This is the amount of time that is debited when the product is consumed. 0 for public plans.")) }}
                         </div>
@@ -174,8 +174,8 @@
                         </p>
                     </div>
                 </div>
-                <div class="tile is-parent">
-                    <div class="tile is-child notification has-background-warning-light">
+                <div class="cell">
+                    <div class="box notification has-background-warning-light">
                         <div class="has-text-right has-text-info-dark">
                             {{ info_tooltip(id="id_labour_per_unit", text=gettext("This field shows working hours spent per produced unit.")) }}
                         </div>
