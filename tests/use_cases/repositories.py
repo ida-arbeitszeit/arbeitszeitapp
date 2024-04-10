@@ -53,8 +53,7 @@ Value = TypeVar("Value", bound=Hashable)
 
 
 class Sortable(Protocol):
-    def __lt__(self, other: Self) -> bool:
-        ...
+    def __lt__(self, other: Self) -> bool: ...
 
 
 @dataclass
@@ -114,9 +113,9 @@ class PlanResult(QueryResultImpl[Plan]):
 
     def ordered_by_activation_date(self, ascending: bool = True) -> Self:
         return self.sorted_by(
-            key=lambda plan: plan.activation_date
-            if plan.activation_date
-            else datetime.min,
+            key=lambda plan: (
+                plan.activation_date if plan.activation_date else datetime.min
+            ),
             reverse=not ascending,
         )
 
@@ -186,9 +185,11 @@ class PlanResult(QueryResultImpl[Plan]):
         self, *, cooperation: Optional[UUID] = None
     ) -> Self:
         return self._filter_elements(
-            lambda plan: plan.requested_cooperation == cooperation
-            if cooperation
-            else plan.requested_cooperation is not None
+            lambda plan: (
+                plan.requested_cooperation == cooperation
+                if cooperation
+                else plan.requested_cooperation is not None
+            )
         )
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
@@ -233,9 +234,11 @@ class PlanResult(QueryResultImpl[Plan]):
                 if coordinator.id in company
             }
             return filter(
-                lambda plan: plan.requested_cooperation in cooperations
-                if company
-                else plan.requested_cooperation is not None,
+                lambda plan: (
+                    plan.requested_cooperation in cooperations
+                    if company
+                    else plan.requested_cooperation is not None
+                ),
                 self.items(),
             )
 
@@ -253,9 +256,11 @@ class PlanResult(QueryResultImpl[Plan]):
             production_costs += plan.production_costs
             duration_sum += plan.timeframe
         return records.PlanningStatistics(
-            average_plan_duration_in_days=(Decimal(duration_sum) / Decimal(plan_count))
-            if plan_count > 0
-            else Decimal(0),
+            average_plan_duration_in_days=(
+                (Decimal(duration_sum) / Decimal(plan_count))
+                if plan_count > 0
+                else Decimal(0)
+            ),
             total_planned_costs=production_costs,
         )
 
@@ -272,16 +277,14 @@ class PlanResult(QueryResultImpl[Plan]):
             List[records.PlanSummary],
         ]
     ]:
-        def items() -> (
-            Iterable[
-                Tuple[
-                    records.Plan,
-                    records.Company,
-                    Optional[Cooperation],
-                    List[records.PlanSummary],
-                ]
+        def items() -> Iterable[
+            Tuple[
+                records.Plan,
+                records.Company,
+                Optional[Cooperation],
+                List[records.PlanSummary],
             ]
-        ):
+        ]:
             for plan in self.items():
                 cooperation_id = (
                     self.database.relationships.cooperation_to_plan.get_one(plan.id)
@@ -994,16 +997,14 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
             records.Member,
         ]
     ]:
-        def joined_items() -> (
-            Iterator[
-                Tuple[
-                    records.PrivateConsumption,
-                    records.Transaction,
-                    records.Plan,
-                    records.Member,
-                ]
+        def joined_items() -> Iterator[
+            Tuple[
+                records.PrivateConsumption,
+                records.Transaction,
+                records.Plan,
+                records.Member,
             ]
-        ):
+        ]:
             for consumption in self.items():
                 transaction = self.database.transactions[consumption.transaction_id]
                 plan = self.database.plans[consumption.plan_id]
@@ -1115,16 +1116,14 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
             records.Company,
         ]
     ]:
-        def joined_items() -> (
-            Iterator[
-                Tuple[
-                    records.ProductiveConsumption,
-                    records.Transaction,
-                    records.Plan,
-                    records.Company,
-                ]
+        def joined_items() -> Iterator[
+            Tuple[
+                records.ProductiveConsumption,
+                records.Transaction,
+                records.Plan,
+                records.Company,
             ]
-        ):
+        ]:
             for consumption in self.items():
                 transaction = self.database.transactions[consumption.transaction_id]
                 plan = self.database.plans[consumption.plan_id]
@@ -1244,6 +1243,18 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
         ]
 
 
+class PasswordResetRequestResult(QueryResultImpl[records.PasswordResetRequest]):
+    def with_email_address(self, email_address: str) -> Self:
+        return self._filter_elements(
+            lambda record: record.email_address == email_address
+        )
+
+    def with_creation_date_after(self, creation_threshold: datetime) -> Self:
+        return self._filter_elements(
+            lambda record: record.created_at > creation_threshold
+        )
+
+
 class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
         return self._filter_elements(lambda a: a.address in addresses)
@@ -1251,10 +1262,10 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def that_belong_to_member(self, member: UUID) -> Self:
         def items() -> Iterable[records.EmailAddress]:
             for address in self.items():
-                (
-                    credentials_id,
-                ) = self.database.indices.account_credentials_by_email_address_lowercased.get(
-                    address.address.lower()
+                (credentials_id,) = (
+                    self.database.indices.account_credentials_by_email_address_lowercased.get(
+                        address.address.lower()
+                    )
                 )
                 member_id = self.database.relationships.account_credentials_to_member.get_right_value(
                     credentials_id
@@ -1267,10 +1278,10 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
     def that_belong_to_company(self, company: UUID) -> Self:
         def items() -> Iterable[records.EmailAddress]:
             for address in self.items():
-                (
-                    credentials_id,
-                ) = self.database.indices.account_credentials_by_email_address_lowercased.get(
-                    address.address.lower()
+                (credentials_id,) = (
+                    self.database.indices.account_credentials_by_email_address_lowercased.get(
+                        address.address.lower()
+                    )
                 )
                 company_id = self.database.relationships.account_credentials_to_company.get_right_value(
                     credentials_id
@@ -1367,15 +1378,13 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
             Optional[records.Accountant],
         ]
     ]:
-        def items() -> (
-            Iterable[
-                Tuple[
-                    records.AccountCredentials,
-                    records.EmailAddress,
-                    Optional[records.Accountant],
-                ]
+        def items() -> Iterable[
+            Tuple[
+                records.AccountCredentials,
+                records.EmailAddress,
+                Optional[records.Accountant],
             ]
-        ):
+        ]:
             for credentials in self.items():
                 email_address = self.database.email_addresses[credentials.email_address]
                 accountant_id = self.database.relationships.account_credentials_to_accountant.get_right_value(
@@ -1419,15 +1428,13 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
             Optional[records.Member],
         ]
     ]:
-        def items() -> (
-            Iterable[
-                Tuple[
-                    records.AccountCredentials,
-                    records.EmailAddress,
-                    Optional[records.Member],
-                ]
+        def items() -> Iterable[
+            Tuple[
+                records.AccountCredentials,
+                records.EmailAddress,
+                Optional[records.Member],
             ]
-        ):
+        ]:
             for credentials in self.items():
                 member_id = self.database.relationships.account_credentials_to_member.get_right_value(
                     credentials.id
@@ -1471,15 +1478,13 @@ class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
             Optional[records.Company],
         ]
     ]:
-        def items() -> (
-            Iterable[
-                Tuple[
-                    records.AccountCredentials,
-                    records.EmailAddress,
-                    Optional[records.Company],
-                ]
+        def items() -> Iterable[
+            Tuple[
+                records.AccountCredentials,
+                records.EmailAddress,
+                Optional[records.Company],
             ]
-        ):
+        ]:
             for credentials in self.items():
                 email = self.database.email_addresses[credentials.email_address]
                 company_id = self.database.relationships.account_credentials_to_company.get_right_value(
@@ -1586,6 +1591,7 @@ class MockDatabase:
         self.company_work_invites: List[CompanyWorkInvite] = list()
         self.email_addresses: Dict[str, records.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
+        self.reset_password_requests: List[records.PasswordResetRequest] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -1953,6 +1959,24 @@ class MockDatabase:
             database=self,
             items=self.account_credentials.values,
         )
+
+    def get_password_reset_requests(self) -> PasswordResetRequestResult:
+        return PasswordResetRequestResult(
+            items=lambda: self.reset_password_requests,
+            database=self,
+        )
+
+    def create_password_reset_request(
+        self, email_address: str, reset_token: str, created_at: datetime
+    ) -> records.PasswordResetRequest:
+        record = records.PasswordResetRequest(
+            id=uuid4(),
+            email_address=email_address,
+            reset_token=reset_token,
+            created_at=created_at,
+        )
+        self.reset_password_requests.append(record)
+        return record
 
 
 class Index(Generic[Key, Value]):

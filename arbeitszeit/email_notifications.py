@@ -2,6 +2,7 @@
 the arbeitszeitapp can issue and the interface by which the use cases
 request those notifications to be sent.
 """
+
 from dataclasses import dataclass
 from typing import Protocol, Type, TypeAlias, Union, get_args
 from uuid import UUID
@@ -56,6 +57,17 @@ class CoordinationTransferRequest:
     transfer_request: UUID
 
 
+@dataclass
+class ResetPasswordRequest:
+    email_address: str
+    reset_token: str
+
+
+@dataclass
+class ResetPasswordConfirmation:
+    email_address: str
+
+
 # This type definition can be used by implementations of the
 # EmailSender protocol for static type checking purposes. Keep this
 # list alphabetically sorted.
@@ -67,6 +79,8 @@ Message: TypeAlias = Union[
     CoordinationTransferRequest,
     EmailChangeConfirmation,
     MemberRegistration,
+    ResetPasswordConfirmation,
+    ResetPasswordRequest,
     WorkerInvitation,
 ]
 # Implementations can rely on this set to contain all possible message
@@ -75,5 +89,4 @@ all_message_types: set[Type] = set(get_args(Message))
 
 
 class EmailSender(Protocol):
-    def send_email(self, message: Message) -> None:
-        ...
+    def send_email(self, message: Message) -> None: ...

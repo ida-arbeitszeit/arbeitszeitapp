@@ -35,7 +35,7 @@
                         <td class="is-italic">{{ gettext("Account for fixed means of production") }}
                         </td>
                         <td
-                            class="py-2  has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_fixed_positive else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold">
                             {{ view_model.balance_fixed }}</td>
                     </tr>
                     <tr>
@@ -46,7 +46,7 @@
                         <td class="is-italic">{{ gettext("Account for liquid means of production")}}
                         </td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_liquid_positive else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold">
                             {{ view_model.balance_liquid }}</td>
                     </tr>
                     <tr>
@@ -57,7 +57,7 @@
                         <td class="is-italic">{{ gettext("Account for work certificates (wages)") }}
                         </td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_work_positive else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold">
                             {{ view_model.balance_work }}</td>
                     </tr>
                     <tr>
@@ -67,7 +67,7 @@
                         <td class="is-italic">{{ gettext("Account for product transfers (sales)") }}
                         </td>
                         <td
-                            class="py-2 has-text-right has-text-weight-bold {{ 'has-text-primary' if view_model.is_product_positive else 'has-text-danger' }}">
+                            class="py-2 has-text-right has-text-weight-bold">
                             {{ view_model.balance_product }}</td>
                     </tr>
                 </tbody>

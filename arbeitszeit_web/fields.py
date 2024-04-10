@@ -5,14 +5,11 @@ T = TypeVar("T")
 
 
 class FormField(Protocol[T]):
-    def get_value(self) -> T:
-        ...
+    def get_value(self) -> T: ...
 
-    def attach_error(self, message: str) -> None:
-        ...
+    def attach_error(self, message: str) -> None: ...
 
-    def set_value(self, value: T) -> None:
-        ...
+    def set_value(self, value: T) -> None: ...
 
 
 @dataclass
@@ -26,8 +23,7 @@ class ParsingFailure:
 
 
 class FieldParser(Protocol[T]):
-    def __call__(self, value: str, /) -> ParsingSuccess[T] | ParsingFailure:
-        ...
+    def __call__(self, value: str, /) -> ParsingSuccess[T] | ParsingFailure: ...
 
 
 def parse_formfield(

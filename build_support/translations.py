@@ -92,8 +92,7 @@ def initialize_catalog(arguments: InitializeArguments) -> None:
 
 class InitializeArguments(Protocol):
     @property
-    def locale(self) -> str:
-        ...
+    def locale(self) -> str: ...
 
 
 if __name__ == "__main__":
