@@ -93,7 +93,9 @@ class ShowPAccountDetailsTests(BaseTestCase):
         response = self.use_case.show_details(self.create_use_case_request(producer))
         assert len(response.transactions) == transactions_before_consumption
 
-    def test_that_transactions_are_generated_when_credit_for_r_is_granted(self) -> None:
+    def test_that_no_transactions_are_generated_when_credit_for_r_is_granted(
+        self,
+    ) -> None:
         company = self.company_generator.create_company_record()
 
         self.transaction_generator.create_transaction(
