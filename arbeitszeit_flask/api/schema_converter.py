@@ -1,6 +1,5 @@
 from typing import Any, Dict, Union
 
-from deepdiff import DeepDiff
 from flask_restx import Model, fields
 
 from arbeitszeit_web.api.presenters.interfaces import (
@@ -28,10 +27,11 @@ class SchemaConverter:
 
     def _prevent_overriding(self, model: Model) -> None:
         """
-        Ensure that a model previously registered on namespace does not get overridden by a different one that has the same name.
+        Ensure that a model previously registered on namespace does not
+        get overridden by a different one that has the same name.
         """
         if model.name in self.namespace.models:
-            if not DeepDiff(self.namespace.models[model.name], model):
+            if self.namespace.models[model.name] is not model:
                 pass
             else:
                 raise DifferentModelWithSameNameExists(

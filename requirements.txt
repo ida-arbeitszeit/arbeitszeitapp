@@ -1,4 +1,3 @@
-deepdiff
 email_validator
 Flask
 Flask-Babel
