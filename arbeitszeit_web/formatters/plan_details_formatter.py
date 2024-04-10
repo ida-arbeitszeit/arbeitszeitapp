@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+
+from .datetime_formatter import DatetimeFormatter
 
 
 @dataclass
@@ -34,7 +35,7 @@ class PlanDetailsWeb:
 class PlanDetailsFormatter:
     url_index: UrlIndex
     translator: Translator
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def format_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
         return PlanDetailsWeb(
@@ -109,13 +110,13 @@ class PlanDetailsFormatter:
                 self.translator.gettext("Labour time (hours/unit)"),
                 self._format_price(plan_details.labour_cost_per_unit),
             ),
-            creation_date=self.datetime_service.format_datetime(
+            creation_date=self.datetime_formatter.format_datetime(
                 date=plan_details.creation_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             approval_date=(
-                self.datetime_service.format_datetime(
+                self.datetime_formatter.format_datetime(
                     date=plan_details.approval_date,
                     zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
@@ -124,7 +125,7 @@ class PlanDetailsFormatter:
                 else "-"
             ),
             expiration_date=(
-                self.datetime_service.format_datetime(
+                self.datetime_formatter.format_datetime(
                     date=plan_details.expiration_date,
                     zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",

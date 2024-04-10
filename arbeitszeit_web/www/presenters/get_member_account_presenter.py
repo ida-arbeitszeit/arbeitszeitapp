@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases.get_member_account import GetMemberAccountResponse
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 
 
@@ -26,7 +26,7 @@ class GetMemberAccountPresenter:
         is_balance_positive: bool
         transactions: List[GetMemberAccountPresenter.Transaction]
 
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
     translator: Translator
 
     def present_member_account(
@@ -34,7 +34,7 @@ class GetMemberAccountPresenter:
     ) -> ViewModel:
         transactions = [
             self.Transaction(
-                date=self.datetime_service.format_datetime(
+                date=self.datetime_formatter.format_datetime(
                     t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
                 ),
                 type=(
