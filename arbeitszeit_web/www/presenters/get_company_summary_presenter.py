@@ -2,12 +2,12 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
 from arbeitszeit.control_thresholds import ControlThresholds
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
     Supplier,
 )
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
@@ -59,7 +59,7 @@ class GetCompanySummarySuccessPresenter:
     translator: Translator
     url_index: UrlIndex
     control_thresholds: ControlThresholds
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
@@ -71,7 +71,7 @@ class GetCompanySummarySuccessPresenter:
             id=str(use_case_response.id),
             name=use_case_response.name,
             email=use_case_response.email,
-            registered_on=self.datetime_service.format_datetime(
+            registered_on=self.datetime_formatter.format_datetime(
                 use_case_response.registered_on, zone="Europe/Berlin", fmt="%d.%m.%Y"
             ),
             expectations=[
