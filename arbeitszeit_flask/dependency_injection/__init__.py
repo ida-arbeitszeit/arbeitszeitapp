@@ -46,6 +46,7 @@ from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
 from arbeitszeit_web.email.email_sender import EmailSender as EmailSenderImpl
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.plotter import Plotter
@@ -89,6 +90,7 @@ class FlaskModule(Module):
         binder[Plotter] = AliasProvider(FlaskPlotter)
         binder[Colors] = AliasProvider(FlaskColors)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
+        binder[DatetimeFormatter] = AliasProvider(RealtimeDatetimeService)
         binder.bind(
             AccountantInvitationEmailView,
             to=AliasProvider(AccountantInvitationEmailViewImpl),

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.query_private_consumptions import Response
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 
 @dataclass
@@ -21,14 +21,14 @@ class PrivateConsumptionsPresenter:
         is_consumptions_visible: bool
         consumptions: List[Consumption]
 
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def present_private_consumptions(self, response: Response) -> ViewModel:
         return self.ViewModel(
             is_consumptions_visible=bool(response.consumptions),
             consumptions=[
                 self.ViewModel.Consumption(
-                    consumption_date=self.datetime_service.format_datetime(
+                    consumption_date=self.datetime_formatter.format_datetime(
                         date=consumption.consumption_date,
                         fmt="%d.%m.%Y",
                     ),

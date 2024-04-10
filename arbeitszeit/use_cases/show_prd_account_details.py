@@ -17,8 +17,7 @@ class Request:
     company_id: UUID
 
 
-class MemberPeer:
-    ...
+class MemberPeer: ...
 
 
 @dataclass
@@ -38,7 +37,7 @@ class TransactionInfo:
     date: datetime
     transaction_volume: Decimal
     purpose: str
-    peer: (MemberPeer | SocialAccountingPeer | CompanyPeer)
+    peer: MemberPeer | SocialAccountingPeer | CompanyPeer
 
 
 @dataclass

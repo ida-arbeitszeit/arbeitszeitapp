@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -36,7 +36,7 @@ class GetCompanyDashboardPresenter:
         accounts_tile: GetCompanyDashboardPresenter.Tile
 
     url_index: UrlIndex
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
     translator: Translator
 
     def present(
@@ -61,7 +61,7 @@ class GetCompanyDashboardPresenter:
     ) -> PlanDetailsWeb:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
-            activation_date=self.datetime_service.format_datetime(
+            activation_date=self.datetime_formatter.format_datetime(
                 plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
             ),
             plan_details_url=self.url_index.get_plan_details_url(

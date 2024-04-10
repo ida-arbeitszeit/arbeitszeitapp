@@ -113,8 +113,7 @@ from .blueprint import CompanyRoute
 
 @CompanyRoute("/company/dashboard")
 @as_flask_view()
-class dashboard(CompanyDashboardView):
-    ...
+class dashboard(CompanyDashboardView): ...
 
 
 @CompanyRoute("/company/consumptions")
@@ -165,8 +164,7 @@ def create_draft_from_plan(
 
 @CompanyRoute("/company/create_draft", methods=["GET", "POST"])
 @as_flask_view()
-class create_draft(CreateDraftView):
-    ...
+class create_draft(CreateDraftView): ...
 
 
 @CompanyRoute("/company/file_plan/<draft_id>", methods=["POST"])
@@ -247,14 +245,12 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 
 @CompanyRoute("/company/register_hours_worked", methods=["GET", "POST"])
 @as_flask_view()
-class register_hours_worked(RegisterHoursWorkedView):
-    ...
+class register_hours_worked(RegisterHoursWorkedView): ...
 
 
 @CompanyRoute("/company/register_productive_consumption", methods=["GET", "POST"])
 @as_flask_view()
-class register_productive_consumption(RegisterProductiveConsumptionView):
-    ...
+class register_productive_consumption(RegisterProductiveConsumptionView): ...
 
 
 @CompanyRoute("/company/plan_details/<uuid:plan_id>")
@@ -276,8 +272,7 @@ def plan_details(
     methods=["GET", "POST"],
 )
 @as_flask_view()
-class request_coordination_transfer(RequestCoordinationTransferView):
-    ...
+class request_coordination_transfer(RequestCoordinationTransferView): ...
 
 
 @CompanyRoute(
@@ -285,20 +280,17 @@ class request_coordination_transfer(RequestCoordinationTransferView):
     methods=["GET", "POST"],
 )
 @as_flask_view()
-class show_coordination_transfer_request(ShowCoordinationTransferRequestView):
-    ...
+class show_coordination_transfer_request(ShowCoordinationTransferRequestView): ...
 
 
 @CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
 @as_flask_view()
-class create_cooperation(CreateCooperationView):
-    ...
+class create_cooperation(CreateCooperationView): ...
 
 
 @CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
 @as_flask_view()
-class request_cooperation(RequestCooperationView):
-    ...
+class request_cooperation(RequestCooperationView): ...
 
 
 @CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
@@ -365,17 +357,14 @@ def my_cooperations(
 
 @CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
 @as_flask_view()
-class invite_worker_to_company(InviteWorkerToCompanyView):
-    ...
+class invite_worker_to_company(InviteWorkerToCompanyView): ...
 
 
 @CompanyRoute("/company/end_cooperation")
 @as_flask_view()
-class end_cooperation(EndCooperationView):
-    ...
+class end_cooperation(EndCooperationView): ...
 
 
 @CompanyRoute("/company/review_registered_consumptions")
 @as_flask_view()
-class review_registered_consumptions(ReviewRegisteredConsumptionsView):
-    ...
+class review_registered_consumptions(ReviewRegisteredConsumptionsView): ...

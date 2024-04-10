@@ -7,11 +7,9 @@ from arbeitszeit_web.request import Request
 
 
 class QueryCompaniesFormData(Protocol):
-    def get_query_string(self) -> str:
-        ...
+    def get_query_string(self) -> str: ...
 
-    def get_category_string(self) -> str:
-        ...
+    def get_category_string(self) -> str: ...
 
 
 _page_size = DEFAULT_PAGE_SIZE
