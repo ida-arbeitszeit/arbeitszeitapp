@@ -4,6 +4,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
+from arbeitszeit.transactions.transaction_type import TransactionTypes
 from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
@@ -176,6 +177,44 @@ class UseCaseTests(BaseTestCase):
         self.assertEqual(
             self.get_company_account_balances(planner).product,
             Decimal("-6"),
+        )
+
+    def test_that_no_transaction_for_fixed_means_is_created_when_no_fixed_means_were_planned(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                resource_cost=Decimal(2),
+                means_cost=Decimal(0),
+            ),
+        )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        assert not any(
+            transaction.transaction_type == TransactionTypes.credit_for_fixed_means
+            for transaction in self.get_company_transactions(planner)
+        )
+
+    def test_that_no_transaction_for_liquid_means_is_created_when_no_liquid_means_were_planned(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                resource_cost=Decimal(0),
+                means_cost=Decimal(2),
+            ),
+        )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        assert not any(
+            transaction.transaction_type == TransactionTypes.credit_for_liquid_means
+            for transaction in self.get_company_transactions(planner)
         )
 
     def get_company_transactions(
