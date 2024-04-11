@@ -20,10 +20,18 @@
                 <div class="icon"><i class="fas fa-info-circle"></i></div>
                 <p>{{ gettext("The account for fixed means of production.") }}</p>
             </div>
-            <p>{{ gettext("Balance:") }}</p>
-            <p
-                class="has-text-weight-bold">
-                {{ view_model.account_balance }}
+            <p>
+                {{ gettext("Sum of planned fixed means of production:") }}
+                <span class="has-text-weight-bold">{{ view_model.sum_of_planned_p }}</span>
+            </p>
+            <p>{{ gettext("Sum of consumed fixed means of production:") }}
+                <span  class="has-text-weight-bold">{{ view_model.sum_of_consumed_p }}</span>
+            </p>
+            <p>{{ gettext("Balance:") }}
+                <span
+                    class="has-text-weight-bold">
+                    {{ view_model.account_balance }}
+                </span>
             </p>
         <div>
             <img src="{{ view_model.plot_url }}" alt="plot of p account">
