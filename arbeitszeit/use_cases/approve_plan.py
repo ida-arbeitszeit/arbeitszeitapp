@@ -35,12 +35,14 @@ class ApprovePlanUseCase:
         matching_plans.update().set_approval_date(now).set_activation_timestamp(
             now
         ).perform()
-        self._create_transaction_from_social_accounting(
-            plan, planner.means_account, plan.production_costs.means_cost
-        )
-        self._create_transaction_from_social_accounting(
-            plan, planner.raw_material_account, plan.production_costs.resource_cost
-        )
+        if plan.production_costs.means_cost:
+            self._create_transaction_from_social_accounting(
+                plan, planner.means_account, plan.production_costs.means_cost
+            )
+        if plan.production_costs.resource_cost:
+            self._create_transaction_from_social_accounting(
+                plan, planner.raw_material_account, plan.production_costs.resource_cost
+            )
         self._create_transaction_from_social_accounting(
             plan, planner.product_account, -plan.expected_sales_value
         )

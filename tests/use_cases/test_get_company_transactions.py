@@ -129,10 +129,9 @@ class GetCompanyTransactionsUseCaseTests(BaseTestCase):
         assert TransactionTypes.credit_for_liquid_means in transaction_purposes
         assert TransactionTypes.expected_sales in transaction_purposes
 
-    def test_that_correct_info_for_company_is_generated_after_transaction_where_credit_for_a_is_granted(
+    def test_that_company_transactions_include_credit_for_wages_after_plan_is_approved(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(
             planner=company,
@@ -141,17 +140,33 @@ class GetCompanyTransactionsUseCaseTests(BaseTestCase):
                 means_cost=Decimal(0),
                 resource_cost=Decimal(0),
             ),
-            timeframe=1,
         )
-        self.datetime_service.advance_time(timedelta(days=1))
-        info_receiver = self.use_case.get_transactions(
-            self.create_request(company=company)
+        response = self.use_case.get_transactions(self.create_request(company=company))
+        assert any(
+            transaction.transaction_type == TransactionTypes.credit_for_wages
+            for transaction in response.transactions
         )
-        assert info_receiver.transactions[3].transaction_volume == Decimal(10)
-        assert (
-            info_receiver.transactions[3].transaction_type
-            == TransactionTypes.credit_for_wages
+
+    def test_that_first_credit_for_wages_transaction_after_plan_approval_has_has_volume_of_planned_labour(
+        self,
+    ) -> None:
+        planned_labour = Decimal(8)
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                labour_cost=planned_labour,
+                means_cost=Decimal(0),
+                resource_cost=Decimal(0),
+            ),
         )
+        response = self.use_case.get_transactions(self.create_request(company=company))
+        transaction = next(
+            transaction
+            for transaction in response.transactions
+            if transaction.transaction_type == TransactionTypes.credit_for_wages
+        )
+        assert transaction.transaction_volume == planned_labour
 
     def test_correct_info_is_generated_after_several_transactions_where_companies_consume_each_others_product(
         self,
