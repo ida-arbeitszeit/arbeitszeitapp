@@ -1,6 +1,5 @@
 from typing import TypeAlias, Union
 
-from deepdiff import DeepDiff
 from flask_restx import Model, fields
 
 from arbeitszeit_web.api.presenters.interfaces import (
@@ -35,40 +34,46 @@ class DifferentModelWithSameNameExists(Exception):
 class SchemaConverter:
     def __init__(self, namespace: Namespace) -> None:
         self.namespace = namespace
-
-    def _prevent_overriding(self, model: Model) -> None:
-        """
-        Ensure that a model previously registered on namespace does not get overridden by a different one that has the same name.
-        """
-        if model.name in self.namespace.models:
-            if not DeepDiff(self.namespace.models[model.name], model):
-                pass
-            else:
-                raise DifferentModelWithSameNameExists(
-                    f"Different model with name {model.name} exists already."
-                )
+        self._registered_schemas = RegisteredSchemas(namespace)
 
     def json_schema_to_flaskx(self, schema: JsonValue) -> Union[Model, RestxField]:
         if isinstance(schema, JsonObject):
-            model = Model(schema.name, self.field_from_schema(schema))
-            self._prevent_overriding(model)
+            self._prevent_overriding(schema)
+            self._registered_schemas[schema.name] = schema
+            model = Model(schema.name, self._field_from_schema(schema))
             self.namespace.model(name=model.name, model=model)
             return model
         else:
-            return self.field_from_schema(schema)
+            return self._field_from_schema(schema)
 
-    def field_from_schema(self, schema: JsonValue) -> RestxField:
+    def _prevent_overriding(self, schema: JsonObject) -> None:
+        """
+        Ensure that a model previously registered on namespace does not
+        get overridden by a different one that has the same name.
+        """
+        try:
+            registered_schema = self._registered_schemas[schema.name]
+        except KeyError:
+            return
+        if registered_schema is not schema:
+            raise DifferentModelWithSameNameExists(
+                f"Different model with name '{schema.name}' exists already."
+            )
+
+    def _field_from_schema(self, schema: JsonValue) -> RestxField:
         match schema:
             case JsonObject(members=members):
                 return {
-                    key: self.field_from_schema(value) for key, value in members.items()
+                    key: self._field_from_schema(value)
+                    for key, value in members.items()
                 }
             case JsonList(elements=JsonObject() as elements, required=required):
                 object_model = Model(
                     elements.name,
-                    self.field_from_schema(elements),
+                    self._field_from_schema(elements),
                 )
-                self._prevent_overriding(object_model)
+                self._prevent_overriding(elements)
+                self._registered_schemas[elements.name] = elements
                 self.namespace.model(name=elements.name, model=object_model)
                 return fields.List(
                     fields.Nested(object_model, skip_none=True), required=required
@@ -85,3 +90,17 @@ class SchemaConverter:
                 return fields.DateTime(required=required)
             case other:
                 raise NotImplementedError(other)
+
+
+class RegisteredSchemas:
+    def __init__(self, namespace: Namespace) -> None:
+        self._namespace = namespace
+        # We need to store the data about already registered models with the
+        # namespace since this is our source of truth.
+        self._namespace.schemas = dict()  # type: ignore
+
+    def __setitem__(self, name: str, value: JsonValue) -> None:
+        self._namespace.schemas[name] = value  # type: ignore
+
+    def __getitem__(self, name: str) -> JsonValue:
+        return self._namespace.schemas[name]  # type: ignore

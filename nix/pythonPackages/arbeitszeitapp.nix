@@ -3,7 +3,6 @@
   pytestCheckHook,
 
   # python packages
-  deepdiff,
   email_validator,
   flask,
   flask-babel,
@@ -39,7 +38,6 @@ buildPythonPackage {
     setuptools
   ];
   propagatedBuildInputs = [
-    deepdiff
     email_validator
     flask
     flask-babel
