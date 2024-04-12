@@ -1,13 +1,19 @@
+from _typeshed import Incomplete
+
 from . import apidoc as apidoc
 from ._http import HTTPStatus as HTTPStatus
-from .mask import MaskError as MaskError, ParseError as ParseError
+from .mask import MaskError as MaskError
+from .mask import ParseError as ParseError
 from .namespace import Namespace as Namespace
 from .postman import PostmanCollectionV1 as PostmanCollectionV1
 from .representations import output_json as output_json
 from .resource import Resource as Resource
 from .swagger import Swagger as Swagger
-from .utils import BaseResponse as BaseResponse, camel_to_dash as camel_to_dash, default_id as default_id, import_check_view_func as import_check_view_func, unpack as unpack
-from _typeshed import Incomplete
+from .utils import BaseResponse as BaseResponse
+from .utils import camel_to_dash as camel_to_dash
+from .utils import default_id as default_id
+from .utils import import_check_view_func as import_check_view_func
+from .utils import unpack as unpack
 
 endpoint_from_view_func: Incomplete
 RE_RULES: Incomplete
@@ -50,7 +56,37 @@ class Api:
     blueprint: Incomplete
     default_namespace: Incomplete
     url_scheme: Incomplete
-    def __init__(self, app: Incomplete | None = ..., version: str = ..., title: Incomplete | None = ..., description: Incomplete | None = ..., terms_url: Incomplete | None = ..., license: Incomplete | None = ..., license_url: Incomplete | None = ..., contact: Incomplete | None = ..., contact_url: Incomplete | None = ..., contact_email: Incomplete | None = ..., authorizations: Incomplete | None = ..., security: Incomplete | None = ..., doc: str = ..., default_id=..., default: str = ..., default_label: str = ..., validate: Incomplete | None = ..., tags: Incomplete | None = ..., prefix: str = ..., ordered: bool = ..., default_mediatype: str = ..., decorators: Incomplete | None = ..., catch_all_404s: bool = ..., serve_challenge_on_401: bool = ..., format_checker: Incomplete | None = ..., url_scheme: Incomplete | None = ..., default_swagger_filename: str = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        app: Incomplete | None = None,
+        version: str = "1.0",
+        title: Incomplete | None = None,
+        description: Incomplete | None = None,
+        terms_url: Incomplete | None = None,
+        license: Incomplete | None = None,
+        license_url: Incomplete | None = None,
+        contact: Incomplete | None = None,
+        contact_url: Incomplete | None = None,
+        contact_email: Incomplete | None = None,
+        authorizations: Incomplete | None = None,
+        security: Incomplete | None = None,
+        doc: str = "/",
+        default_id=...,
+        default: str = "default",
+        default_label: str = "Default namespace",
+        validate: Incomplete | None = None,
+        tags: Incomplete | None = None,
+        prefix: str = "",
+        ordered: bool = False,
+        default_mediatype: str = "application/json",
+        decorators: Incomplete | None = None,
+        catch_all_404s: bool = False,
+        serve_challenge_on_401: bool = False,
+        format_checker: Incomplete | None = None,
+        url_scheme: Incomplete | None = None,
+        default_swagger_filename: str = "swagger.json",
+        **kwargs,
+    ) -> None: ...
     def init_app(self, app, **kwargs) -> None: ...
     def __getattr__(self, name): ...
     def register_resource(self, namespace, resource, *urls, **kwargs): ...
@@ -62,7 +98,7 @@ class Api:
     def default_endpoint(self, resource, namespace): ...
     def get_ns_path(self, ns): ...
     def ns_urls(self, ns, urls): ...
-    def add_namespace(self, ns, path: Incomplete | None = ...) -> None: ...
+    def add_namespace(self, ns, path: Incomplete | None = None) -> None: ...
     def namespace(self, *args, **kwargs): ...
     def endpoint(self, name): ...
     @property
@@ -76,7 +112,7 @@ class Api:
     def owns_endpoint(self, endpoint): ...
     def error_router(self, original_handler, e): ...
     def handle_error(self, e): ...
-    def as_postman(self, urlvars: bool = ..., swagger: bool = ...): ...
+    def as_postman(self, urlvars: bool = False, swagger: bool = False): ...
     @property
     def payload(self): ...
     @property

@@ -22,7 +22,23 @@ class QuiverKey(martist.Artist):
     kw: Incomplete
     text: Incomplete
     zorder: Incomplete
-    def __init__(self, Q, X, Y, U, label, *, angle: int = ..., coordinates: str = ..., color: Incomplete | None = ..., labelsep: float = ..., labelpos: str = ..., labelcolor: Incomplete | None = ..., fontproperties: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        Q,
+        X,
+        Y,
+        U,
+        label,
+        *,
+        angle: int = 0,
+        coordinates: str = "axes",
+        color: Incomplete | None = None,
+        labelsep: float = 0.1,
+        labelpos: str = "N",
+        labelcolor: Incomplete | None = None,
+        fontproperties: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     @property
     def labelsep(self): ...
     stale: bool
@@ -48,14 +64,31 @@ class Quiver(mcollections.PolyCollection):
     pivot: Incomplete
     transform: Incomplete
     polykw: Incomplete
-    def __init__(self, ax, *args, scale: Incomplete | None = ..., headwidth: int = ..., headlength: int = ..., headaxislength: float = ..., minshaft: int = ..., minlength: int = ..., units: str = ..., scale_units: Incomplete | None = ..., angles: str = ..., width: Incomplete | None = ..., color: str = ..., pivot: str = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        ax,
+        *args,
+        scale: Incomplete | None = None,
+        headwidth: int = 3,
+        headlength: int = 5,
+        headaxislength: float = 4.5,
+        minshaft: int = 1,
+        minlength: int = 1,
+        units: str = "width",
+        scale_units: Incomplete | None = None,
+        angles: str = "uv",
+        width: Incomplete | None = None,
+        color: str = "k",
+        pivot: str = "tail",
+        **kwargs,
+    ) -> None: ...
     def get_datalim(self, transData): ...
     stale: bool
     def draw(self, renderer) -> None: ...
     U: Incomplete
     V: Incomplete
     Umask: Incomplete
-    def set_UVC(self, U, V, C: Incomplete | None = ...) -> None: ...
+    def set_UVC(self, U, V, C: Incomplete | None = None) -> None: ...
     quiver_doc: Incomplete
 
 class Barbs(mcollections.PolyCollection):
@@ -66,10 +99,24 @@ class Barbs(mcollections.PolyCollection):
     flip: Incomplete
     x: Incomplete
     y: Incomplete
-    def __init__(self, ax, *args, pivot: str = ..., length: int = ..., barbcolor: Incomplete | None = ..., flagcolor: Incomplete | None = ..., sizes: Incomplete | None = ..., fill_empty: bool = ..., barb_increments: Incomplete | None = ..., rounding: bool = ..., flip_barb: bool = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        ax,
+        *args,
+        pivot: str = "tip",
+        length: int = 7,
+        barbcolor: Incomplete | None = None,
+        flagcolor: Incomplete | None = None,
+        sizes: Incomplete | None = None,
+        fill_empty: bool = False,
+        barb_increments: Incomplete | None = None,
+        rounding: bool = True,
+        flip_barb: bool = False,
+        **kwargs,
+    ) -> None: ...
     u: Incomplete
     v: Incomplete
     stale: bool
-    def set_UVC(self, U, V, C: Incomplete | None = ...) -> None: ...
+    def set_UVC(self, U, V, C: Incomplete | None = None) -> None: ...
     def set_offsets(self, xy) -> None: ...
     barbs_doc: Incomplete

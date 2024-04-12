@@ -1,5 +1,8 @@
-from .core import CSRF
 from _typeshed import Incomplete
+
+from .core import CSRF
+
+__all__ = ["SessionCSRF"]
 
 class SessionCSRF(CSRF):
     TIME_FORMAT: str

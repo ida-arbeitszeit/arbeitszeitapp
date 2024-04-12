@@ -10,7 +10,15 @@ class AxisInfo:
     minfmt: Incomplete
     label: Incomplete
     default_limits: Incomplete
-    def __init__(self, majloc: Incomplete | None = ..., minloc: Incomplete | None = ..., majfmt: Incomplete | None = ..., minfmt: Incomplete | None = ..., label: Incomplete | None = ..., default_limits: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        majloc: Incomplete | None = None,
+        minloc: Incomplete | None = None,
+        majfmt: Incomplete | None = None,
+        minfmt: Incomplete | None = None,
+        label: Incomplete | None = None,
+        default_limits: Incomplete | None = None,
+    ) -> None: ...
 
 class ConversionInterface:
     @staticmethod

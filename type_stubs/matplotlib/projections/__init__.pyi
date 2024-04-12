@@ -1,6 +1,10 @@
-from .geo import AitoffAxes as AitoffAxes, HammerAxes as HammerAxes, LambertAxes as LambertAxes, MollweideAxes as MollweideAxes
-from .polar import PolarAxes as PolarAxes
 from _typeshed import Incomplete
+
+from .geo import AitoffAxes as AitoffAxes
+from .geo import HammerAxes as HammerAxes
+from .geo import LambertAxes as LambertAxes
+from .geo import MollweideAxes as MollweideAxes
+from .polar import PolarAxes as PolarAxes
 
 class ProjectionRegistry:
     def __init__(self) -> None: ...
@@ -11,6 +15,6 @@ class ProjectionRegistry:
 projection_registry: Incomplete
 
 def register_projection(cls) -> None: ...
-def get_projection_class(projection: Incomplete | None = ...): ...
+def get_projection_class(projection: Incomplete | None = None): ...
 
 get_projection_names: Incomplete

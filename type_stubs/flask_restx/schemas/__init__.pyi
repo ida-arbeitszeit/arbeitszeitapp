@@ -1,10 +1,11 @@
-from _typeshed import Incomplete
 from collections.abc import Mapping
+
+from _typeshed import Incomplete
 from flask_restx import errors as errors
 
 class SchemaValidationError(errors.ValidationError):
     errors: Incomplete
-    def __init__(self, msg, errors: Incomplete | None = ...) -> None: ...
+    def __init__(self, msg, errors: Incomplete | None = None) -> None: ...
     __unicode__: Incomplete
 
 class LazySchema(Mapping):

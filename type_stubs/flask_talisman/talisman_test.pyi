@@ -1,6 +1,10 @@
 import unittest
+
 from _typeshed import Incomplete
-from flask_talisman import ALLOW_FROM as ALLOW_FROM, DENY as DENY, NONCE_LENGTH as NONCE_LENGTH, Talisman as Talisman
+from flask_talisman import ALLOW_FROM as ALLOW_FROM
+from flask_talisman import DENY as DENY
+from flask_talisman import NONCE_LENGTH as NONCE_LENGTH
+from flask_talisman import Talisman as Talisman
 
 HTTPS_ENVIRON: Incomplete
 

@@ -1,6 +1,8 @@
+import typing as t
+
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-import typing as t
+
 from .extension import SQLAlchemy as SQLAlchemy
 from .query import Query as Query
 
@@ -15,7 +17,9 @@ class Model:
 class BindMetaMixin(type):
     __fsa__: SQLAlchemy
     metadata: sa.MetaData
-    def __init__(cls, name: str, bases: tuple[type, ...], d: dict[str, t.Any], **kwargs: t.Any) -> None: ...
+    def __init__(
+        cls, name: str, bases: tuple[type, ...], d: dict[str, t.Any], **kwargs: t.Any
+    ) -> None: ...
 
 class BindMixin:
     __fsa__: SQLAlchemy
@@ -27,7 +31,9 @@ class NameMetaMixin(type):
     metadata: sa.MetaData
     __tablename__: str
     __table__: sa.Table
-    def __init__(cls, name: str, bases: tuple[type, ...], d: dict[str, t.Any], **kwargs: t.Any) -> None: ...
+    def __init__(
+        cls, name: str, bases: tuple[type, ...], d: dict[str, t.Any], **kwargs: t.Any
+    ) -> None: ...
     def __table_cls__(cls, *args: t.Any, **kwargs: t.Any) -> sa.Table | None: ...
 
 class NameMixin:

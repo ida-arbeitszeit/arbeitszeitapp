@@ -1,6 +1,17 @@
 from _typeshed import Incomplete
-from matplotlib.ticker import AsinhLocator as AsinhLocator, AutoLocator as AutoLocator, AutoMinorLocator as AutoMinorLocator, LogFormatterSciNotation as LogFormatterSciNotation, LogLocator as LogLocator, LogitFormatter as LogitFormatter, LogitLocator as LogitLocator, NullFormatter as NullFormatter, NullLocator as NullLocator, ScalarFormatter as ScalarFormatter, SymmetricalLogLocator as SymmetricalLogLocator
-from matplotlib.transforms import IdentityTransform as IdentityTransform, Transform as Transform
+from matplotlib.ticker import AsinhLocator as AsinhLocator
+from matplotlib.ticker import AutoLocator as AutoLocator
+from matplotlib.ticker import AutoMinorLocator as AutoMinorLocator
+from matplotlib.ticker import LogFormatterSciNotation as LogFormatterSciNotation
+from matplotlib.ticker import LogitFormatter as LogitFormatter
+from matplotlib.ticker import LogitLocator as LogitLocator
+from matplotlib.ticker import LogLocator as LogLocator
+from matplotlib.ticker import NullFormatter as NullFormatter
+from matplotlib.ticker import NullLocator as NullLocator
+from matplotlib.ticker import ScalarFormatter as ScalarFormatter
+from matplotlib.ticker import SymmetricalLogLocator as SymmetricalLogLocator
+from matplotlib.transforms import IdentityTransform as IdentityTransform
+from matplotlib.transforms import Transform as Transform
 
 class ScaleBase:
     def __init__(self, axis) -> None: ...
@@ -31,7 +42,7 @@ class LogTransform(Transform):
     input_dims: int
     output_dims: int
     base: Incomplete
-    def __init__(self, base, nonpositive: str = ...) -> None: ...
+    def __init__(self, base, nonpositive: str = "clip") -> None: ...
     def transform_non_affine(self, values): ...
     def inverted(self): ...
 
@@ -46,7 +57,14 @@ class InvertedLogTransform(Transform):
 class LogScale(ScaleBase):
     name: str
     subs: Incomplete
-    def __init__(self, axis, *, base: int = ..., subs: Incomplete | None = ..., nonpositive: str = ...) -> None: ...
+    def __init__(
+        self,
+        axis,
+        *,
+        base: int = 10,
+        subs: Incomplete | None = None,
+        nonpositive: str = "clip",
+    ) -> None: ...
     base: Incomplete
     def set_default_locators_and_formatters(self, axis) -> None: ...
     def get_transform(self): ...
@@ -55,7 +73,7 @@ class LogScale(ScaleBase):
 class FuncScaleLog(LogScale):
     name: str
     subs: Incomplete
-    def __init__(self, axis, functions, base: int = ...) -> None: ...
+    def __init__(self, axis, functions, base: int = 10) -> None: ...
     @property
     def base(self): ...
     def get_transform(self): ...
@@ -84,7 +102,15 @@ class InvertedSymmetricalLogTransform(Transform):
 class SymmetricalLogScale(ScaleBase):
     name: str
     subs: Incomplete
-    def __init__(self, axis, *, base: int = ..., linthresh: int = ..., subs: Incomplete | None = ..., linscale: int = ...) -> None: ...
+    def __init__(
+        self,
+        axis,
+        *,
+        base: int = 10,
+        linthresh: int = 2,
+        subs: Incomplete | None = None,
+        linscale: int = 1,
+    ) -> None: ...
     base: Incomplete
     linthresh: Incomplete
     linscale: Incomplete
@@ -110,7 +136,15 @@ class InvertedAsinhTransform(Transform):
 class AsinhScale(ScaleBase):
     name: str
     auto_tick_multipliers: Incomplete
-    def __init__(self, axis, *, linear_width: float = ..., base: int = ..., subs: str = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        axis,
+        *,
+        linear_width: float = 1.0,
+        base: int = 10,
+        subs: str = "auto",
+        **kwargs,
+    ) -> None: ...
     linear_width: Incomplete
     def get_transform(self): ...
     def set_default_locators_and_formatters(self, axis) -> None: ...
@@ -118,20 +152,27 @@ class AsinhScale(ScaleBase):
 class LogitTransform(Transform):
     input_dims: int
     output_dims: int
-    def __init__(self, nonpositive: str = ...) -> None: ...
+    def __init__(self, nonpositive: str = "mask") -> None: ...
     def transform_non_affine(self, values): ...
     def inverted(self): ...
 
 class LogisticTransform(Transform):
     input_dims: int
     output_dims: int
-    def __init__(self, nonpositive: str = ...) -> None: ...
+    def __init__(self, nonpositive: str = "mask") -> None: ...
     def transform_non_affine(self, values): ...
     def inverted(self): ...
 
 class LogitScale(ScaleBase):
     name: str
-    def __init__(self, axis, nonpositive: str = ..., *, one_half: str = ..., use_overline: bool = ...) -> None: ...
+    def __init__(
+        self,
+        axis,
+        nonpositive: str = "mask",
+        *,
+        one_half: str = "\\frac{1}{2}",
+        use_overline: bool = False,
+    ) -> None: ...
     def get_transform(self): ...
     def set_default_locators_and_formatters(self, axis) -> None: ...
     def limit_range_for_scale(self, vmin, vmax, minpos): ...

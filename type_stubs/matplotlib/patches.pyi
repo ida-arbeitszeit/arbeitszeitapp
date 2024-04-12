@@ -1,17 +1,45 @@
-from . import artist as artist, cbook as cbook, colors as colors, transforms as transforms
-from ._enums import CapStyle as CapStyle, JoinStyle as JoinStyle
-from .bezier import NonIntersectingPathException as NonIntersectingPathException, get_cos_sin as get_cos_sin, get_intersection as get_intersection, get_parallels as get_parallels, inside_circle as inside_circle, make_wedged_bezier2 as make_wedged_bezier2, split_bezier_intersecting_with_closedpath as split_bezier_intersecting_with_closedpath, split_path_inout as split_path_inout
-from .path import Path as Path
 from _typeshed import Incomplete
 from matplotlib.transforms import Affine2D as Affine2D
 
+from . import artist as artist
+from . import cbook as cbook
+from . import colors as colors
+from . import transforms as transforms
+from ._enums import CapStyle as CapStyle
+from ._enums import JoinStyle as JoinStyle
+from .bezier import NonIntersectingPathException as NonIntersectingPathException
+from .bezier import get_cos_sin as get_cos_sin
+from .bezier import get_intersection as get_intersection
+from .bezier import get_parallels as get_parallels
+from .bezier import inside_circle as inside_circle
+from .bezier import make_wedged_bezier2 as make_wedged_bezier2
+from .bezier import (
+    split_bezier_intersecting_with_closedpath as split_bezier_intersecting_with_closedpath,
+)
+from .bezier import split_path_inout as split_path_inout
+from .path import Path as Path
+
 class Patch(artist.Artist):
     zorder: int
-    def __init__(self, *, edgecolor: Incomplete | None = ..., facecolor: Incomplete | None = ..., color: Incomplete | None = ..., linewidth: Incomplete | None = ..., linestyle: Incomplete | None = ..., antialiased: Incomplete | None = ..., hatch: Incomplete | None = ..., fill: bool = ..., capstyle: Incomplete | None = ..., joinstyle: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        *,
+        edgecolor: Incomplete | None = None,
+        facecolor: Incomplete | None = None,
+        color: Incomplete | None = None,
+        linewidth: Incomplete | None = None,
+        linestyle: Incomplete | None = None,
+        antialiased: Incomplete | None = None,
+        hatch: Incomplete | None = None,
+        fill: bool = True,
+        capstyle: Incomplete | None = None,
+        joinstyle: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def get_verts(self): ...
-    def contains(self, mouseevent, radius: Incomplete | None = ...): ...
-    def contains_point(self, point, radius: Incomplete | None = ...): ...
-    def contains_points(self, points, radius: Incomplete | None = ...): ...
+    def contains(self, mouseevent, radius: Incomplete | None = None): ...
+    def contains_point(self, point, radius: Incomplete | None = None): ...
+    def contains_points(self, points, radius: Incomplete | None = None): ...
     def update_from(self, other) -> None: ...
     def get_extents(self): ...
     def get_transform(self): ...
@@ -41,22 +69,33 @@ class Patch(artist.Artist):
     def get_hatch(self): ...
     def draw(self, renderer) -> None: ...
     def get_path(self) -> None: ...
-    def get_window_extent(self, renderer: Incomplete | None = ...): ...
+    def get_window_extent(self, renderer: Incomplete | None = None): ...
 
 class Shadow(Patch):
     patch: Incomplete
-    def __init__(self, patch, ox, oy, *, shade: float = ..., **kwargs) -> None: ...
+    def __init__(self, patch, ox, oy, *, shade: float = 0.7, **kwargs) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
     def draw(self, renderer) -> None: ...
 
 class Rectangle(Patch):
     angle: Incomplete
-    def __init__(self, xy, width, height, *, angle: float = ..., rotation_point: str = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        xy,
+        width,
+        height,
+        *,
+        angle: float = 0.0,
+        rotation_point: str = "xy",
+        **kwargs,
+    ) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
     @property
     def rotation_point(self): ...
+    @rotation_point.setter
+    def rotation_point(self, value) -> None: ...
     def get_x(self): ...
     def get_y(self): ...
     def get_xy(self): ...
@@ -81,7 +120,9 @@ class RegularPolygon(Patch):
     numvertices: Incomplete
     orientation: Incomplete
     radius: Incomplete
-    def __init__(self, xy, numVertices, *, radius: int = ..., orientation: int = ..., **kwargs) -> None: ...
+    def __init__(
+        self, xy, numVertices, *, radius: int = 5, orientation: int = 0, **kwargs
+    ) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
 
@@ -92,13 +133,26 @@ class PathPatch(Patch):
 
 class StepPatch(PathPatch):
     orientation: Incomplete
-    def __init__(self, values, edges, *, orientation: str = ..., baseline: int = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        values,
+        edges,
+        *,
+        orientation: str = "vertical",
+        baseline: int = 0,
+        **kwargs,
+    ) -> None: ...
     def get_data(self): ...
     stale: bool
-    def set_data(self, values: Incomplete | None = ..., edges: Incomplete | None = ..., baseline: Incomplete | None = ...) -> None: ...
+    def set_data(
+        self,
+        values: Incomplete | None = None,
+        edges: Incomplete | None = None,
+        baseline: Incomplete | None = None,
+    ) -> None: ...
 
 class Polygon(Patch):
-    def __init__(self, xy, *, closed: bool = ..., **kwargs) -> None: ...
+    def __init__(self, xy, *, closed: bool = True, **kwargs) -> None: ...
     def get_path(self): ...
     def get_closed(self): ...
     stale: bool
@@ -109,7 +163,9 @@ class Polygon(Patch):
 
 class Wedge(Patch):
     center: Incomplete
-    def __init__(self, center, r, theta1, theta2, *, width: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self, center, r, theta1, theta2, *, width: Incomplete | None = None, **kwargs
+    ) -> None: ...
     stale: bool
     def set_center(self, center) -> None: ...
     r: Incomplete
@@ -123,19 +179,46 @@ class Wedge(Patch):
     def get_path(self): ...
 
 class Arrow(Patch):
-    def __init__(self, x, y, dx, dy, *, width: float = ..., **kwargs) -> None: ...
+    def __init__(self, x, y, dx, dy, *, width: float = 1.0, **kwargs) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
 
 class FancyArrow(Polygon):
-    def __init__(self, x, y, dx, dy, *, width: float = ..., length_includes_head: bool = ..., head_width: Incomplete | None = ..., head_length: Incomplete | None = ..., shape: str = ..., overhang: int = ..., head_starts_at_zero: bool = ..., **kwargs) -> None: ...
-    def set_data(self, *, x: Incomplete | None = ..., y: Incomplete | None = ..., dx: Incomplete | None = ..., dy: Incomplete | None = ..., width: Incomplete | None = ..., head_width: Incomplete | None = ..., head_length: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        x,
+        y,
+        dx,
+        dy,
+        *,
+        width: float = 0.001,
+        length_includes_head: bool = False,
+        head_width: Incomplete | None = None,
+        head_length: Incomplete | None = None,
+        shape: str = "full",
+        overhang: int = 0,
+        head_starts_at_zero: bool = False,
+        **kwargs,
+    ) -> None: ...
+    def set_data(
+        self,
+        *,
+        x: Incomplete | None = None,
+        y: Incomplete | None = None,
+        dx: Incomplete | None = None,
+        dy: Incomplete | None = None,
+        width: Incomplete | None = None,
+        head_width: Incomplete | None = None,
+        head_length: Incomplete | None = None,
+    ) -> None: ...
 
 class CirclePolygon(RegularPolygon):
-    def __init__(self, xy, radius: int = ..., *, resolution: int = ..., **kwargs) -> None: ...
+    def __init__(
+        self, xy, radius: int = 5, *, resolution: int = 20, **kwargs
+    ) -> None: ...
 
 class Ellipse(Patch):
-    def __init__(self, xy, width, height, *, angle: int = ..., **kwargs) -> None: ...
+    def __init__(self, xy, width, height, *, angle: int = 0, **kwargs) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
     stale: bool
@@ -159,7 +242,7 @@ class Annulus(Patch):
     center: Incomplete
     width: Incomplete
     angle: Incomplete
-    def __init__(self, xy, r, width, angle: float = ..., **kwargs) -> None: ...
+    def __init__(self, xy, r, width, angle: float = 0.0, **kwargs) -> None: ...
     stale: bool
     def set_center(self, xy) -> None: ...
     def get_center(self): ...
@@ -178,7 +261,7 @@ class Annulus(Patch):
 
 class Circle(Ellipse):
     radius: Incomplete
-    def __init__(self, xy, radius: int = ..., **kwargs) -> None: ...
+    def __init__(self, xy, radius: int = 5, **kwargs) -> None: ...
     width: Incomplete
     stale: bool
     def set_radius(self, radius) -> None: ...
@@ -187,11 +270,25 @@ class Circle(Ellipse):
 class Arc(Ellipse):
     theta1: Incomplete
     theta2: Incomplete
-    def __init__(self, xy, width, height, *, angle: float = ..., theta1: float = ..., theta2: float = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        xy,
+        width,
+        height,
+        *,
+        angle: float = 0.0,
+        theta1: float = 0.0,
+        theta2: float = 360.0,
+        **kwargs,
+    ) -> None: ...
     def draw(self, renderer): ...
 
-def bbox_artist(artist, renderer, props: Incomplete | None = ..., fill: bool = ...) -> None: ...
-def draw_bbox(bbox, renderer, color: str = ..., trans: Incomplete | None = ...) -> None: ...
+def bbox_artist(
+    artist, renderer, props: Incomplete | None = None, fill: bool = True
+) -> None: ...
+def draw_bbox(
+    bbox, renderer, color: str = "k", trans: Incomplete | None = None
+) -> None: ...
 
 class _Style:
     def __init_subclass__(cls) -> None: ...
@@ -206,41 +303,56 @@ class _Style:
 class BoxStyle(_Style):
     class Square:
         pad: Incomplete
-        def __init__(self, pad: float = ...) -> None: ...
+        def __init__(self, pad: float = 0.3) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Circle:
         pad: Incomplete
-        def __init__(self, pad: float = ...) -> None: ...
+        def __init__(self, pad: float = 0.3) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Ellipse:
         pad: Incomplete
-        def __init__(self, pad: float = ...) -> None: ...
+        def __init__(self, pad: float = 0.3) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class LArrow:
         pad: Incomplete
-        def __init__(self, pad: float = ...) -> None: ...
+        def __init__(self, pad: float = 0.3) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class RArrow(LArrow):
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class DArrow:
         pad: Incomplete
-        def __init__(self, pad: float = ...) -> None: ...
+        def __init__(self, pad: float = 0.3) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Round:
         pad: Incomplete
         rounding_size: Incomplete
-        def __init__(self, pad: float = ..., rounding_size: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self, pad: float = 0.3, rounding_size: Incomplete | None = None
+        ) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Round4:
         pad: Incomplete
         rounding_size: Incomplete
-        def __init__(self, pad: float = ..., rounding_size: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self, pad: float = 0.3, rounding_size: Incomplete | None = None
+        ) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Sawtooth:
         pad: Incomplete
         tooth_size: Incomplete
-        def __init__(self, pad: float = ..., tooth_size: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self, pad: float = 0.3, tooth_size: Incomplete | None = None
+        ) -> None: ...
         def __call__(self, x0, y0, width, height, mutation_size): ...
+
     class Roundtooth(Sawtooth):
         def __call__(self, x0, y0, width, height, mutation_size): ...
 
@@ -248,36 +360,65 @@ class ConnectionStyle(_Style):
     class _Base:
         class SimpleEvent:
             def __init__(self, xy) -> None: ...
-        def __call__(self, posA, posB, shrinkA: float = ..., shrinkB: float = ..., patchA: Incomplete | None = ..., patchB: Incomplete | None = ...): ...
+
+        def __call__(
+            self,
+            posA,
+            posB,
+            shrinkA: float = 2.0,
+            shrinkB: float = 2.0,
+            patchA: Incomplete | None = None,
+            patchB: Incomplete | None = None,
+        ): ...
+
     class Arc3(_Base):
         rad: Incomplete
-        def __init__(self, rad: float = ...) -> None: ...
+        def __init__(self, rad: float = 0.0) -> None: ...
         def connect(self, posA, posB): ...
+
     class Angle3(_Base):
         angleA: Incomplete
         angleB: Incomplete
-        def __init__(self, angleA: int = ..., angleB: int = ...) -> None: ...
+        def __init__(self, angleA: int = 90, angleB: int = 0) -> None: ...
         def connect(self, posA, posB): ...
+
     class Angle(_Base):
         angleA: Incomplete
         angleB: Incomplete
         rad: Incomplete
-        def __init__(self, angleA: int = ..., angleB: int = ..., rad: float = ...) -> None: ...
+        def __init__(
+            self, angleA: int = 90, angleB: int = 0, rad: float = 0.0
+        ) -> None: ...
         def connect(self, posA, posB): ...
+
     class Arc(_Base):
         angleA: Incomplete
         angleB: Incomplete
         armA: Incomplete
         armB: Incomplete
         rad: Incomplete
-        def __init__(self, angleA: int = ..., angleB: int = ..., armA: Incomplete | None = ..., armB: Incomplete | None = ..., rad: float = ...) -> None: ...
+        def __init__(
+            self,
+            angleA: int = 0,
+            angleB: int = 0,
+            armA: Incomplete | None = None,
+            armB: Incomplete | None = None,
+            rad: float = 0.0,
+        ) -> None: ...
         def connect(self, posA, posB): ...
+
     class Bar(_Base):
         armA: Incomplete
         armB: Incomplete
         fraction: Incomplete
         angle: Incomplete
-        def __init__(self, armA: float = ..., armB: float = ..., fraction: float = ..., angle: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self,
+            armA: float = 0.0,
+            armB: float = 0.0,
+            fraction: float = 0.3,
+            angle: Incomplete | None = None,
+        ) -> None: ...
         def connect(self, posA, posB): ...
 
 class ArrowStyle(_Style):
@@ -285,61 +426,142 @@ class ArrowStyle(_Style):
         @staticmethod
         def ensure_quadratic_bezier(path): ...
         def transmute(self, path, mutation_size, linewidth) -> None: ...
-        def __call__(self, path, mutation_size, linewidth, aspect_ratio: float = ...): ...
+        def __call__(
+            self, path, mutation_size, linewidth, aspect_ratio: float = 1.0
+        ): ...
+
     class _Curve(_Base):
         arrow: str
         fillbegin: bool
         fillend: bool
-        def __init__(self, head_length: float = ..., head_width: float = ..., widthA: float = ..., widthB: float = ..., lengthA: float = ..., lengthB: float = ..., angleA: int = ..., angleB: int = ..., scaleA: Incomplete | None = ..., scaleB: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self,
+            head_length: float = 0.4,
+            head_width: float = 0.2,
+            widthA: float = 1.0,
+            widthB: float = 1.0,
+            lengthA: float = 0.2,
+            lengthB: float = 0.2,
+            angleA: int = 0,
+            angleB: int = 0,
+            scaleA: Incomplete | None = None,
+            scaleB: Incomplete | None = None,
+        ) -> None: ...
         def transmute(self, path, mutation_size, linewidth): ...
+
     class Curve(_Curve):
         def __init__(self) -> None: ...
+
     class CurveA(_Curve):
         arrow: str
+
     class CurveB(_Curve):
         arrow: str
+
     class CurveAB(_Curve):
         arrow: str
+
     class CurveFilledA(_Curve):
         arrow: str
+
     class CurveFilledB(_Curve):
         arrow: str
+
     class CurveFilledAB(_Curve):
         arrow: str
+
     class BracketA(_Curve):
         arrow: str
-        def __init__(self, widthA: float = ..., lengthA: float = ..., angleA: int = ...) -> None: ...
+        def __init__(
+            self, widthA: float = 1.0, lengthA: float = 0.2, angleA: int = 0
+        ) -> None: ...
+
     class BracketB(_Curve):
         arrow: str
-        def __init__(self, widthB: float = ..., lengthB: float = ..., angleB: int = ...) -> None: ...
+        def __init__(
+            self, widthB: float = 1.0, lengthB: float = 0.2, angleB: int = 0
+        ) -> None: ...
+
     class BracketAB(_Curve):
         arrow: str
-        def __init__(self, widthA: float = ..., lengthA: float = ..., angleA: int = ..., widthB: float = ..., lengthB: float = ..., angleB: int = ...) -> None: ...
+        def __init__(
+            self,
+            widthA: float = 1.0,
+            lengthA: float = 0.2,
+            angleA: int = 0,
+            widthB: float = 1.0,
+            lengthB: float = 0.2,
+            angleB: int = 0,
+        ) -> None: ...
+
     class BarAB(_Curve):
         arrow: str
-        def __init__(self, widthA: float = ..., angleA: int = ..., widthB: float = ..., angleB: int = ...) -> None: ...
+        def __init__(
+            self,
+            widthA: float = 1.0,
+            angleA: int = 0,
+            widthB: float = 1.0,
+            angleB: int = 0,
+        ) -> None: ...
+
     class BracketCurve(_Curve):
         arrow: str
-        def __init__(self, widthA: float = ..., lengthA: float = ..., angleA: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self,
+            widthA: float = 1.0,
+            lengthA: float = 0.2,
+            angleA: Incomplete | None = None,
+        ) -> None: ...
+
     class CurveBracket(_Curve):
         arrow: str
-        def __init__(self, widthB: float = ..., lengthB: float = ..., angleB: Incomplete | None = ...) -> None: ...
+        def __init__(
+            self,
+            widthB: float = 1.0,
+            lengthB: float = 0.2,
+            angleB: Incomplete | None = None,
+        ) -> None: ...
+
     class Simple(_Base):
-        def __init__(self, head_length: float = ..., head_width: float = ..., tail_width: float = ...) -> None: ...
+        def __init__(
+            self,
+            head_length: float = 0.5,
+            head_width: float = 0.5,
+            tail_width: float = 0.2,
+        ) -> None: ...
         def transmute(self, path, mutation_size, linewidth): ...
+
     class Fancy(_Base):
-        def __init__(self, head_length: float = ..., head_width: float = ..., tail_width: float = ...) -> None: ...
+        def __init__(
+            self,
+            head_length: float = 0.4,
+            head_width: float = 0.4,
+            tail_width: float = 0.4,
+        ) -> None: ...
         def transmute(self, path, mutation_size, linewidth): ...
+
     class Wedge(_Base):
         tail_width: Incomplete
         shrink_factor: Incomplete
-        def __init__(self, tail_width: float = ..., shrink_factor: float = ...) -> None: ...
+        def __init__(
+            self, tail_width: float = 0.3, shrink_factor: float = 0.5
+        ) -> None: ...
         def transmute(self, path, mutation_size, linewidth): ...
 
 class FancyBboxPatch(Patch):
     stale: bool
-    def __init__(self, xy, width, height, boxstyle: str = ..., *, mutation_scale: int = ..., mutation_aspect: int = ..., **kwargs) -> None: ...
-    def set_boxstyle(self, boxstyle: Incomplete | None = ..., **kwargs): ...
+    def __init__(
+        self,
+        xy,
+        width,
+        height,
+        boxstyle: str = "round",
+        *,
+        mutation_scale: int = 1,
+        mutation_aspect: int = 1,
+        **kwargs,
+    ) -> None: ...
+    def set_boxstyle(self, boxstyle: Incomplete | None = None, **kwargs): ...
     def get_boxstyle(self): ...
     def set_mutation_scale(self, scale) -> None: ...
     def get_mutation_scale(self): ...
@@ -362,14 +584,31 @@ class FancyArrowPatch(Patch):
     patchB: Incomplete
     shrinkA: Incomplete
     shrinkB: Incomplete
-    def __init__(self, posA: Incomplete | None = ..., posB: Incomplete | None = ..., *, path: Incomplete | None = ..., arrowstyle: str = ..., connectionstyle: str = ..., patchA: Incomplete | None = ..., patchB: Incomplete | None = ..., shrinkA: int = ..., shrinkB: int = ..., mutation_scale: int = ..., mutation_aspect: int = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        posA: Incomplete | None = None,
+        posB: Incomplete | None = None,
+        *,
+        path: Incomplete | None = None,
+        arrowstyle: str = "simple",
+        connectionstyle: str = "arc3",
+        patchA: Incomplete | None = None,
+        patchB: Incomplete | None = None,
+        shrinkA: int = 2,
+        shrinkB: int = 2,
+        mutation_scale: int = 1,
+        mutation_aspect: int = 1,
+        **kwargs,
+    ) -> None: ...
     stale: bool
     def set_positions(self, posA, posB) -> None: ...
     def set_patchA(self, patchA) -> None: ...
     def set_patchB(self, patchB) -> None: ...
-    def set_connectionstyle(self, connectionstyle: Incomplete | None = ..., **kwargs): ...
+    def set_connectionstyle(
+        self, connectionstyle: Incomplete | None = None, **kwargs
+    ): ...
     def get_connectionstyle(self): ...
-    def set_arrowstyle(self, arrowstyle: Incomplete | None = ..., **kwargs): ...
+    def set_arrowstyle(self, arrowstyle: Incomplete | None = None, **kwargs): ...
     def get_arrowstyle(self): ...
     def set_mutation_scale(self, scale) -> None: ...
     def get_mutation_scale(self): ...
@@ -385,7 +624,26 @@ class ConnectionPatch(FancyArrowPatch):
     coords2: Incomplete
     axesA: Incomplete
     axesB: Incomplete
-    def __init__(self, xyA, xyB, coordsA, coordsB: Incomplete | None = ..., *, axesA: Incomplete | None = ..., axesB: Incomplete | None = ..., arrowstyle: str = ..., connectionstyle: str = ..., patchA: Incomplete | None = ..., patchB: Incomplete | None = ..., shrinkA: float = ..., shrinkB: float = ..., mutation_scale: float = ..., mutation_aspect: Incomplete | None = ..., clip_on: bool = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        xyA,
+        xyB,
+        coordsA,
+        coordsB: Incomplete | None = None,
+        *,
+        axesA: Incomplete | None = None,
+        axesB: Incomplete | None = None,
+        arrowstyle: str = "-",
+        connectionstyle: str = "arc3",
+        patchA: Incomplete | None = None,
+        patchB: Incomplete | None = None,
+        shrinkA: float = 0.0,
+        shrinkB: float = 0.0,
+        mutation_scale: float = 10.0,
+        mutation_aspect: Incomplete | None = None,
+        clip_on: bool = False,
+        **kwargs,
+    ) -> None: ...
     stale: bool
     def set_annotation_clip(self, b) -> None: ...
     def get_annotation_clip(self): ...
