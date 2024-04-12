@@ -9,6 +9,7 @@ from arbeitszeit_web.api.presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonInteger,
+    JsonList,
     JsonObject,
     JsonString,
 )
@@ -98,94 +99,26 @@ class SchemaConversionTests(ApiTestCase):
         registered_model = self.namespace.models["SchemaName"]
         self.assertIsInstance(registered_model["item_name"], fields.String)
 
-    def test_convert_object_members_to_list(
-        self,
-    ) -> None:
-        obj = JsonObject(
-            members={"item_name": JsonString(as_list=True)}, name="SchemaName"
-        )
-        self.converter.json_schema_to_flaskx(obj)
-        registered_model = self.namespace.models["SchemaName"]
-        self.assertIsInstance(registered_model["item_name"], fields.List)
-        self.assertIsInstance(registered_model["item_name"].container, fields.String)
-
     def test_converted_list_is_always_required(self) -> None:
-        obj = JsonObject(
-            members={"item_name": JsonString(as_list=True)}, name="SchemaName"
-        )
+        obj = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
         self.converter.json_schema_to_flaskx(obj)
         registered_model = self.namespace.models["SchemaName"]
         self.assertTrue(registered_model["item_name"].required)
-
-    def test_convert_nested_objects_to_list_of_nested_objects(
-        self,
-    ) -> None:
-        model = JsonObject(
-            members={
-                "item_name": JsonObject(
-                    name="some_name",
-                    members={"some_string": JsonString()},
-                    as_list=True,
-                )
-            },
-            name="SchemaName",
-        )
-        self.converter.json_schema_to_flaskx(model)
-        registered_model = self.namespace.models["SchemaName"]
-        assert isinstance(registered_model["item_name"], fields.List)
-        assert isinstance(registered_model["item_name"].container, fields.Nested)
-        self.assertIsInstance(
-            registered_model["item_name"].container.model["some_string"], fields.String
-        )
-
-    def test_converted_list_of_nested_objects_is_required_per_default(
-        self,
-    ) -> None:
-        model = JsonObject(
-            members={
-                "item_name": JsonObject(
-                    name="some_name",
-                    members={"some_string": JsonString()},
-                    as_list=True,
-                )
-            },
-            name="SchemaName",
-        )
-        self.converter.json_schema_to_flaskx(model)
-        registered_model = self.namespace.models["SchemaName"]
-        self.assertTrue(registered_model["item_name"].required)
-
-    def test_nested_field_has_skip_none_switch_set_per_default(
-        self,
-    ) -> None:
-        model = JsonObject(
-            members={
-                "item_name": JsonObject(
-                    name="some_name",
-                    members={"some_string": JsonString()},
-                    as_list=True,
-                )
-            },
-            name="SchemaName",
-        )
-        self.converter.json_schema_to_flaskx(model)
-        registered_model = self.namespace.models["SchemaName"]
-        self.assertTrue(registered_model["item_name"].container.skip_none)
 
     def test_two_members_of_objects_are_registered_when_one_is_as_list(
         self,
     ) -> None:
         obj = JsonObject(
             members={
-                "has_list_elements": JsonObject(
-                    name="InnerModel",
-                    as_list=True,
-                    members=dict(one=JsonString(), two=JsonBoolean()),
+                "has_list_elements": JsonList(
+                    JsonObject(
+                        name="InnerModel",
+                        members=dict(one=JsonString(), two=JsonBoolean()),
+                    )
                 ),
                 "has_no_list_elements": JsonDecimal(),
             },
             name="SchemaName",
-            as_list=False,
         )
         self.converter.json_schema_to_flaskx(obj)
         registered_model = self.namespace.models["SchemaName"]
