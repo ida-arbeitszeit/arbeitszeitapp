@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Dict, Protocol, Union
 
@@ -8,6 +10,7 @@ JsonValue = Union[
     "JsonBoolean",
     "JsonDatetime",
     "JsonInteger",
+    "JsonList",
 ]
 
 
@@ -15,14 +18,12 @@ JsonValue = Union[
 class JsonObject:
     members: Dict[str, JsonValue]
     name: str
-    as_list: bool = False
     required: bool = True
 
 
 @dataclass
 class JsonString:
     required: bool = True
-    as_list: bool = False
 
 
 @dataclass
@@ -30,25 +31,27 @@ class JsonDecimal:
     """A floating point number with an arbitrary precision."""
 
     required: bool = True
-    as_list: bool = False
 
 
 @dataclass
 class JsonBoolean:
     required: bool = True
-    as_list: bool = False
 
 
 @dataclass
 class JsonInteger:
     required: bool = True
-    as_list: bool = False
 
 
 @dataclass
 class JsonDatetime:
     required: bool = True
-    as_list: bool = False
+
+
+@dataclass
+class JsonList:
+    elements: JsonValue
+    required: bool = True
 
 
 class Namespace(Protocol):
