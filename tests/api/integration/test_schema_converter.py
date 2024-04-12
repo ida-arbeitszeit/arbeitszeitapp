@@ -149,10 +149,9 @@ class SchemaConversionTests(ApiTestCase):
         with self.assertRaises(DifferentModelWithSameNameExists):
             self.converter.json_schema_to_flaskx(model2)
 
-    def test_no_error_is_raised_when_two_identical_models_with_same_name_are_registered_on_same_namespace(
+    def test_that_no_error_is_raised_when_the_exact_same_model_is_registered_twice(
         self,
     ) -> None:
-        model1 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
-        model2 = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
-        self.converter.json_schema_to_flaskx(model1)
-        self.converter.json_schema_to_flaskx(model2)
+        model = JsonObject(members={"item_name": JsonString()}, name="SchemaName")
+        self.converter.json_schema_to_flaskx(model)
+        self.converter.json_schema_to_flaskx(model)
