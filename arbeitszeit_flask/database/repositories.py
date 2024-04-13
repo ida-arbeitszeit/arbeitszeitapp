@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Iterable,
     Iterator,
     List,
     Optional,
@@ -842,6 +843,14 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             lambda query: self.query.join(
                 models.SocialAccounting,
                 models.SocialAccounting.account == models.Transaction.sending_account,
+            )
+        )
+
+    def where_sender_is_labour_account(self, labour_accounts: Iterable[Account]) -> Self:
+        labour_account_ids = list(map(lambda labour_account: str(labour_account.id), labour_accounts))
+        return self._with_modified_query(
+            lambda query: self.query.filter(
+                models.Transaction.sending_account.in_(labour_account_ids)
             )
         )
 
