@@ -23,7 +23,9 @@ class EmailSender:
     invite_worker_presenter: InviteWorkerPresenterImpl
     request_cooperation_presenter: CooperationRequestEmailPresenter
     email_change_confirmation_presenter: EmailChangeConfirmationPresenter
-    request_coordination_transfer_email_presenter: RequestCoordinationTransferEmailPresenter
+    request_coordination_transfer_email_presenter: (
+        RequestCoordinationTransferEmailPresenter
+    )
 
     def send_email(self, message: interface.Message) -> None:
         if isinstance(message, interface.MemberRegistration):

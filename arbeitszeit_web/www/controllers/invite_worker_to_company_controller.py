@@ -7,8 +7,7 @@ from arbeitszeit_web.session import Session
 
 
 class InviteWorkerToCompanyForm(Protocol):
-    def get_worker_id(self) -> str:
-        ...
+    def get_worker_id(self) -> str: ...
 
 
 @dataclass

@@ -45,7 +45,7 @@ class SendMailTests(BaseTestCase):
     def test_mail_has_correct_html(self) -> None:
         invite = uuid4()
         invitation_url = self.url_index.get_answer_company_work_invite_url(
-            invite_id=invite
+            invite_id=invite, is_absolute=True
         )
         expected_html = (
             self.text_renderer.render_member_notfication_about_work_invitation(

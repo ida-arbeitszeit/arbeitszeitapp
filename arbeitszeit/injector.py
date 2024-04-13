@@ -96,8 +96,7 @@ class Binder:
 
 
 class Provider(Protocol, Generic[T_cov]):
-    def provide(self, binder: Binder) -> T_cov:
-        ...
+    def provide(self, binder: Binder) -> T_cov: ...
 
 
 class AliasProvider(Generic[T]):

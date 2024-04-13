@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Iterator, List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.query_company_consumptions import ConsumptionQueryResponse
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 
 
@@ -25,7 +25,7 @@ class ViewModel:
 
 @dataclass
 class CompanyConsumptionsPresenter:
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
     translator: Translator
 
     def present(
@@ -41,7 +41,7 @@ class CompanyConsumptionsPresenter:
         self, consumption: ConsumptionQueryResponse
     ) -> ViewModel.Consumption:
         return ViewModel.Consumption(
-            consumption_date=self.datetime_service.format_datetime(
+            consumption_date=self.datetime_formatter.format_datetime(
                 date=consumption.consumption_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",

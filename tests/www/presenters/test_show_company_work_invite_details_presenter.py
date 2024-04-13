@@ -28,7 +28,7 @@ class PresenterTests(BaseTestCase):
     def test_successful_response_renders_accept_url_to_view_model(self) -> None:
         invite_id = uuid4()
         expected_url = self.url_index.get_answer_company_work_invite_url(
-            invite_id=invite_id
+            invite_id=invite_id, is_absolute=False
         )
         view_model = self.presenter.render_response(
             self.make_response(invite_id=invite_id)

@@ -10,8 +10,7 @@ logger = getLogger(__name__)
 
 
 class SubprocessRunner(Protocol):
-    def run_command(self, command: Subprocess) -> CompletedProcess:
-        ...
+    def run_command(self, command: Subprocess) -> CompletedProcess: ...
 
 
 @dataclass

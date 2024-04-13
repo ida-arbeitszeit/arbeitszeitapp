@@ -99,9 +99,6 @@ class TestSchema(BaseTestCase):
     def test_schema_is_of_type_object(self) -> None:
         assert isinstance(self.schema, JsonObject)
 
-    def test_schema_is_not_shown_as_list(self) -> None:
-        assert not self.schema.as_list
-
     def test_schema_is_required(self) -> None:
         assert self.schema.required
 
@@ -124,7 +121,3 @@ class TestSchema(BaseTestCase):
     def test_member_success_is_required(self) -> None:
         assert isinstance(self.schema, JsonObject)
         assert self.schema.members["success"].required
-
-    def test_member_success_is_not_shown_as_list(self) -> None:
-        assert isinstance(self.schema, JsonObject)
-        assert not self.schema.members["success"].as_list

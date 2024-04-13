@@ -1,22 +1,8 @@
-from abc import ABC, abstractmethod
 from datetime import date, datetime
-from typing import Optional
+from typing import Protocol
 
 
-class DatetimeService(ABC):
-    @abstractmethod
-    def today(self) -> date:
-        pass
+class DatetimeService(Protocol):
+    def today(self) -> date: ...
 
-    @abstractmethod
-    def now(self) -> datetime:
-        pass
-
-    @abstractmethod
-    def format_datetime(
-        self,
-        date: datetime,
-        zone: Optional[str] = ...,
-        fmt: Optional[str] = ...,
-    ) -> str:
-        pass
+    def now(self) -> datetime: ...

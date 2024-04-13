@@ -8,8 +8,7 @@ from arbeitszeit_web.api.presenters.interfaces import JsonObject, JsonString, Js
 
 
 class ApiResponseError(Protocol):
-    def __init__(self, message: str) -> None:
-        ...
+    def __init__(self, message: str) -> None: ...
 
     @property
     def code(self) -> int:  # must be class var
@@ -20,12 +19,10 @@ class ApiResponseError(Protocol):
         ...
 
     @classmethod
-    def get_schema(cls) -> JsonValue:
-        ...
+    def get_schema(cls) -> JsonValue: ...
 
     @property
-    def message(self) -> str:
-        ...
+    def message(self) -> str: ...
 
 
 error_response_schema = JsonObject(

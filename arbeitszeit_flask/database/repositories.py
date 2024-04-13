@@ -2043,9 +2043,9 @@ class DatabaseGatewayImpl:
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date,
             activation_date=plan.activation_date,
-            requested_cooperation=UUID(plan.requested_cooperation)
-            if plan.requested_cooperation
-            else None,
+            requested_cooperation=(
+                UUID(plan.requested_cooperation) if plan.requested_cooperation else None
+            ),
             hidden_by_user=plan.hidden_by_user,
         )
 

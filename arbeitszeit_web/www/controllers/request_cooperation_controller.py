@@ -9,11 +9,9 @@ from arbeitszeit_web.translator import Translator
 
 
 class RequestCooperationForm(Protocol):
-    def get_plan_id_string(self) -> str:
-        ...
+    def get_plan_id_string(self) -> str: ...
 
-    def get_cooperation_id_string(self) -> str:
-        ...
+    def get_cooperation_id_string(self) -> str: ...
 
 
 @dataclass

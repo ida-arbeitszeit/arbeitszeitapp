@@ -4,6 +4,7 @@ from typing import List, Optional
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
 from arbeitszeit_web.api.presenters.interfaces import (
     JsonInteger,
+    JsonList,
     JsonObject,
     JsonString,
     JsonValue,
@@ -22,14 +23,15 @@ class QueryCompaniesApiPresenter:
     def get_schema(cls) -> JsonValue:
         return JsonObject(
             members=dict(
-                results=JsonObject(
-                    members=dict(
-                        company_id=JsonString(),
-                        company_email=JsonString(),
-                        company_name=JsonString(),
-                    ),
-                    name="Company",
-                    as_list=True,
+                results=JsonList(
+                    elements=JsonObject(
+                        members=dict(
+                            company_id=JsonString(),
+                            company_email=JsonString(),
+                            company_name=JsonString(),
+                        ),
+                        name="Company",
+                    )
                 ),
                 total_results=JsonInteger(),
                 offset=JsonInteger(),
