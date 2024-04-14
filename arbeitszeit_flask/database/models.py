@@ -142,7 +142,6 @@ class AccountTypes(Enum):
     prd = "prd"
     member = "member"
     accounting = "accounting"
-    fpc = "fund of public companies"
 
 
 class Account(db.Model):
