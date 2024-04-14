@@ -118,15 +118,6 @@ class TransactionRepositoryTests(FlaskTestCase):
         )
 
         all_accounts = self.database_gateway.get_accounts()
-        # created_test_accounts = list(
-        #     set(all_accounts).intersection(
-        #         [
-        #             labour_sending_account_from_company_one,
-        #             labour_sending_account_from_company_two,
-        #             labour_sending_account_from_company_three,
-        #         ]
-        #     )
-        # )
         assert list(
             self.database_gateway.get_transactions().where_sender_is_labour_account(
                 all_accounts
