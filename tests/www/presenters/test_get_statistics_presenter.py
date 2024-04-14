@@ -20,6 +20,7 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     planned_resources=Decimal("400.1"),
     planned_means=Decimal("215.23"),
     payout_factor=Decimal("0.74516"),
+    fpc_balance=Decimal("8.76"),
 )
 
 

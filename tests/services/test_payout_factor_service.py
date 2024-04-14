@@ -6,7 +6,7 @@ from arbeitszeit.records import ProductionCosts
 from tests.use_cases.base_test_case import BaseTestCase
 
 
-class CalculationTests(BaseTestCase):
+class PayoutFactorServiceCalculationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.injector.get(PayoutFactorService)

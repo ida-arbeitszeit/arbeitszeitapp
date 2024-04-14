@@ -77,6 +77,62 @@ class TransactionRepositoryTests(FlaskTestCase):
             self.database_gateway.get_transactions().where_sender_is_social_accounting()
         ) == [transaction]
 
+    def test_transactions_from_labour_accounts_can_be_filtered(
+        self,
+    ) -> None:
+        labour_sending_account_from_company_one = self.database_gateway.create_account()
+        labour_sending_account_from_company_two = self.database_gateway.create_account()
+        labour_sending_account_from_company_three = (
+            self.database_gateway.create_account()
+        )
+
+        worker_receiver_account_one = self.create_account()
+        worker_receiver_account_two = self.create_account()
+        worker_receiver_account_three = self.create_account()
+
+        transaction_one = self.database_gateway.create_transaction(
+            self.datetime_service.now(),
+            sending_account=labour_sending_account_from_company_one.id,
+            receiving_account=worker_receiver_account_one,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose 1",
+        )
+
+        transaction_two = self.database_gateway.create_transaction(
+            self.datetime_service.now(),
+            sending_account=labour_sending_account_from_company_two.id,
+            receiving_account=worker_receiver_account_two,
+            amount_sent=Decimal(2),
+            amount_received=Decimal(2),
+            purpose="test purpose 2",
+        )
+
+        transaction_three = self.database_gateway.create_transaction(
+            self.datetime_service.now(),
+            sending_account=labour_sending_account_from_company_three.id,
+            receiving_account=worker_receiver_account_three,
+            amount_sent=Decimal(3),
+            amount_received=Decimal(3),
+            purpose="test purpose 3",
+        )
+
+        all_accounts = self.database_gateway.get_accounts()
+        # created_test_accounts = list(
+        #     set(all_accounts).intersection(
+        #         [
+        #             labour_sending_account_from_company_one,
+        #             labour_sending_account_from_company_two,
+        #             labour_sending_account_from_company_three,
+        #         ]
+        #     )
+        # )
+        assert list(
+            self.database_gateway.get_transactions().where_sender_is_labour_account(
+                all_accounts
+            )
+        ) == [transaction_one, transaction_two, transaction_three]
+
     def test_transactions_not_from_social_accounting_dont_show_up_when_filtering_for_transactions_from_social_accounting(
         self,
     ) -> None:

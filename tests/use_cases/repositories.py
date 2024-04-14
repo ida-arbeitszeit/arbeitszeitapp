@@ -884,6 +884,14 @@ class TransactionResult(QueryResultImpl[Transaction]):
             == self.database.social_accounting.account
         )
 
+    def where_sender_is_labour_account(self, labour_accounts: AccountResult) -> Self:
+        labour_account_ids = list(
+            map(lambda labour_account: labour_account.id, labour_accounts)
+        )
+        return self._filter_elements(
+            lambda transaction: transaction.sending_account in labour_account_ids
+        )
+
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
         plans = set(plan)
 

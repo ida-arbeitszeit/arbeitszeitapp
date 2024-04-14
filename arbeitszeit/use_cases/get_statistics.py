@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.fpc_balance import PublicFundService
+from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import AccountResult, DatabaseGateway
 
 

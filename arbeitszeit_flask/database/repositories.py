@@ -8,7 +8,6 @@ from typing import (
     Callable,
     Dict,
     Generic,
-    Iterable,
     Iterator,
     List,
     Optional,
@@ -25,6 +24,7 @@ from sqlalchemy.sql.expression import and_, case, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
+from arbeitszeit.repositories import AccountResult
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.models import (
     Account,
@@ -846,10 +846,12 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             )
         )
 
-    def where_sender_is_labour_account(self, labour_accounts: Iterable[Account]) -> Self:
-        labour_account_ids = list(map(lambda labour_account: str(labour_account.id), labour_accounts))
+    def where_sender_is_labour_account(self, labour_accounts: AccountResult) -> Self:
+        labour_account_ids = list(
+            map(lambda labour_account: str(labour_account.id), labour_accounts)
+        )
         return self._with_modified_query(
-            lambda query: self.query.filter(
+            lambda query: query.filter(
                 models.Transaction.sending_account.in_(labour_account_ids)
             )
         )
