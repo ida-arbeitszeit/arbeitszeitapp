@@ -7,7 +7,6 @@ Flask-Migrate
 flask-restx
 Flask-Talisman
 Flask-WTF
-injector
 is_safe_url
 matplotlib
 
