@@ -1,6 +1,28 @@
 from _typeshed import Incomplete
 
-def streamplot(axes, x, y, u, v, density: int = ..., linewidth: Incomplete | None = ..., color: Incomplete | None = ..., cmap: Incomplete | None = ..., norm: Incomplete | None = ..., arrowsize: int = ..., arrowstyle: str = ..., minlength: float = ..., transform: Incomplete | None = ..., zorder: Incomplete | None = ..., start_points: Incomplete | None = ..., maxlength: float = ..., integration_direction: str = ..., broken_streamlines: bool = ...): ...
+__all__ = ["streamplot"]
+
+def streamplot(
+    axes,
+    x,
+    y,
+    u,
+    v,
+    density: int = 1,
+    linewidth: Incomplete | None = None,
+    color: Incomplete | None = None,
+    cmap: Incomplete | None = None,
+    norm: Incomplete | None = None,
+    arrowsize: int = 1,
+    arrowstyle: str = "-|>",
+    minlength: float = 0.1,
+    transform: Incomplete | None = None,
+    zorder: Incomplete | None = None,
+    start_points: Incomplete | None = None,
+    maxlength: float = 4.0,
+    integration_direction: str = "both",
+    broken_streamlines: bool = True,
+): ...
 
 class StreamplotSet:
     lines: Incomplete
@@ -21,9 +43,9 @@ class DomainMap:
     def mask2grid(self, xm, ym): ...
     def data2grid(self, xd, yd): ...
     def grid2data(self, xg, yg): ...
-    def start_trajectory(self, xg, yg, broken_streamlines: bool = ...) -> None: ...
+    def start_trajectory(self, xg, yg, broken_streamlines: bool = True) -> None: ...
     def reset_start_point(self, xg, yg) -> None: ...
-    def update_trajectory(self, xg, yg, broken_streamlines: bool = ...) -> None: ...
+    def update_trajectory(self, xg, yg, broken_streamlines: bool = True) -> None: ...
     def undo_trajectory(self) -> None: ...
 
 class Grid:

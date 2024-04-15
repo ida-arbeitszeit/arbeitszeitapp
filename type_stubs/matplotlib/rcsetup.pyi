@@ -1,10 +1,15 @@
 import ast
+
 from _typeshed import Incomplete
 from matplotlib import cbook as cbook
-from matplotlib._enums import CapStyle as CapStyle, JoinStyle as JoinStyle
-from matplotlib._fontconfig_pattern import parse_fontconfig_pattern as parse_fontconfig_pattern
+from matplotlib._enums import CapStyle as CapStyle
+from matplotlib._enums import JoinStyle as JoinStyle
+from matplotlib._fontconfig_pattern import (
+    parse_fontconfig_pattern as parse_fontconfig_pattern,
+)
 from matplotlib.cbook import ls_mapper as ls_mapper
-from matplotlib.colors import Colormap as Colormap, is_color_like as is_color_like
+from matplotlib.colors import Colormap as Colormap
+from matplotlib.colors import is_color_like as is_color_like
 
 interactive_bk: Incomplete
 non_interactive_bk: Incomplete
@@ -14,7 +19,14 @@ class ValidateInStrings:
     key: Incomplete
     ignorecase: Incomplete
     valid: Incomplete
-    def __init__(self, key, valid, ignorecase: bool = ..., *, _deprecated_since: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        key,
+        valid,
+        ignorecase: bool = False,
+        *,
+        _deprecated_since: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, s): ...
 
 def validate_any(s): ...

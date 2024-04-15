@@ -1,24 +1,46 @@
-from matplotlib._image import *
 import matplotlib.artist as martist
 from _typeshed import Incomplete
-from matplotlib import cbook as cbook, cm as cm
+from matplotlib import cbook as cbook
+from matplotlib import cm as cm
+from matplotlib._image import *
 from matplotlib.backend_bases import FigureCanvasBase as FigureCanvasBase
-from matplotlib.transforms import Affine2D as Affine2D, Bbox as Bbox, BboxBase as BboxBase, BboxTransform as BboxTransform, BboxTransformTo as BboxTransformTo, IdentityTransform as IdentityTransform, TransformedBbox as TransformedBbox
+from matplotlib.transforms import Affine2D as Affine2D
+from matplotlib.transforms import Bbox as Bbox
+from matplotlib.transforms import BboxBase as BboxBase
+from matplotlib.transforms import BboxTransform as BboxTransform
+from matplotlib.transforms import BboxTransformTo as BboxTransformTo
+from matplotlib.transforms import IdentityTransform as IdentityTransform
+from matplotlib.transforms import TransformedBbox as TransformedBbox
 
 interpolations_names: Incomplete
 
-def composite_images(images, renderer, magnification: float = ...): ...
+def composite_images(images, renderer, magnification: float = 1.0): ...
 
 class _ImageBase(martist.Artist, cm.ScalarMappable):
     zorder: int
     origin: Incomplete
     axes: Incomplete
-    def __init__(self, ax, cmap: Incomplete | None = ..., norm: Incomplete | None = ..., interpolation: Incomplete | None = ..., origin: Incomplete | None = ..., filternorm: bool = ..., filterrad: float = ..., resample: bool = ..., *, interpolation_stage: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        ax,
+        cmap: Incomplete | None = None,
+        norm: Incomplete | None = None,
+        interpolation: Incomplete | None = None,
+        origin: Incomplete | None = None,
+        filternorm: bool = True,
+        filterrad: float = 4.0,
+        resample: bool = False,
+        *,
+        interpolation_stage: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def get_size(self): ...
     def get_shape(self): ...
     def set_alpha(self, alpha) -> None: ...
     def changed(self) -> None: ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...) -> None: ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ) -> None: ...
     stale: bool
     def draw(self, renderer, *args, **kwargs) -> None: ...
     def contains(self, mouseevent): ...
@@ -37,9 +59,25 @@ class _ImageBase(martist.Artist, cm.ScalarMappable):
     def get_filterrad(self): ...
 
 class AxesImage(_ImageBase):
-    def __init__(self, ax, *, cmap: Incomplete | None = ..., norm: Incomplete | None = ..., interpolation: Incomplete | None = ..., origin: Incomplete | None = ..., extent: Incomplete | None = ..., filternorm: bool = ..., filterrad: float = ..., resample: bool = ..., interpolation_stage: Incomplete | None = ..., **kwargs) -> None: ...
-    def get_window_extent(self, renderer: Incomplete | None = ...): ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...): ...
+    def __init__(
+        self,
+        ax,
+        *,
+        cmap: Incomplete | None = None,
+        norm: Incomplete | None = None,
+        interpolation: Incomplete | None = None,
+        origin: Incomplete | None = None,
+        extent: Incomplete | None = None,
+        filternorm: bool = True,
+        filterrad: float = 4.0,
+        resample: bool = False,
+        interpolation_stage: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
+    def get_window_extent(self, renderer: Incomplete | None = None): ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ): ...
     stale: bool
     def set_extent(self, extent, **kwargs) -> None: ...
     def get_extent(self): ...
@@ -47,8 +85,10 @@ class AxesImage(_ImageBase):
 
 class NonUniformImage(AxesImage):
     mouseover: bool
-    def __init__(self, ax, *, interpolation: str = ..., **kwargs) -> None: ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...): ...
+    def __init__(self, ax, *, interpolation: str = "nearest", **kwargs) -> None: ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ): ...
     stale: bool
     def set_data(self, x, y, A) -> None: ...
     def set_array(self, *args) -> None: ...
@@ -60,8 +100,20 @@ class NonUniformImage(AxesImage):
     def set_cmap(self, cmap) -> None: ...
 
 class PcolorImage(AxesImage):
-    def __init__(self, ax, x: Incomplete | None = ..., y: Incomplete | None = ..., A: Incomplete | None = ..., *, cmap: Incomplete | None = ..., norm: Incomplete | None = ..., **kwargs) -> None: ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...): ...
+    def __init__(
+        self,
+        ax,
+        x: Incomplete | None = None,
+        y: Incomplete | None = None,
+        A: Incomplete | None = None,
+        *,
+        cmap: Incomplete | None = None,
+        norm: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ): ...
     stale: bool
     def set_data(self, x, y, A) -> None: ...
     def set_array(self, *args) -> None: ...
@@ -73,20 +125,64 @@ class FigureImage(_ImageBase):
     ox: Incomplete
     oy: Incomplete
     magnification: float
-    def __init__(self, fig, *, cmap: Incomplete | None = ..., norm: Incomplete | None = ..., offsetx: int = ..., offsety: int = ..., origin: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        fig,
+        *,
+        cmap: Incomplete | None = None,
+        norm: Incomplete | None = None,
+        offsetx: int = 0,
+        offsety: int = 0,
+        origin: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def get_extent(self): ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...): ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ): ...
     stale: bool
     def set_data(self, A) -> None: ...
 
 class BboxImage(_ImageBase):
     bbox: Incomplete
-    def __init__(self, bbox, *, cmap: Incomplete | None = ..., norm: Incomplete | None = ..., interpolation: Incomplete | None = ..., origin: Incomplete | None = ..., filternorm: bool = ..., filterrad: float = ..., resample: bool = ..., **kwargs) -> None: ...
-    def get_window_extent(self, renderer: Incomplete | None = ...): ...
+    def __init__(
+        self,
+        bbox,
+        *,
+        cmap: Incomplete | None = None,
+        norm: Incomplete | None = None,
+        interpolation: Incomplete | None = None,
+        origin: Incomplete | None = None,
+        filternorm: bool = True,
+        filterrad: float = 4.0,
+        resample: bool = False,
+        **kwargs,
+    ) -> None: ...
+    def get_window_extent(self, renderer: Incomplete | None = None): ...
     def contains(self, mouseevent): ...
-    def make_image(self, renderer, magnification: float = ..., unsampled: bool = ...): ...
+    def make_image(
+        self, renderer, magnification: float = 1.0, unsampled: bool = False
+    ): ...
 
-def imread(fname, format: Incomplete | None = ...): ...
-def imsave(fname, arr, vmin: Incomplete | None = ..., vmax: Incomplete | None = ..., cmap: Incomplete | None = ..., format: Incomplete | None = ..., origin: Incomplete | None = ..., dpi: int = ..., *, metadata: Incomplete | None = ..., pil_kwargs: Incomplete | None = ...) -> None: ...
+def imread(fname, format: Incomplete | None = None): ...
+def imsave(
+    fname,
+    arr,
+    vmin: Incomplete | None = None,
+    vmax: Incomplete | None = None,
+    cmap: Incomplete | None = None,
+    format: Incomplete | None = None,
+    origin: Incomplete | None = None,
+    dpi: int = 100,
+    *,
+    metadata: Incomplete | None = None,
+    pil_kwargs: Incomplete | None = None,
+) -> None: ...
 def pil_to_array(pilImage): ...
-def thumbnail(infile, thumbfile, scale: float = ..., interpolation: str = ..., preview: bool = ...): ...
+def thumbnail(
+    infile,
+    thumbfile,
+    scale: float = 0.1,
+    interpolation: str = "bilinear",
+    preview: bool = False,
+): ...

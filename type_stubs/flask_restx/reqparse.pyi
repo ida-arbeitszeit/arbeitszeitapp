@@ -1,8 +1,10 @@
+from _typeshed import Incomplete
+
 from ._http import HTTPStatus as HTTPStatus
-from .errors import SpecsError as SpecsError, abort as abort
+from .errors import SpecsError as SpecsError
+from .errors import abort as abort
 from .marshalling import marshal as marshal
 from .model import Model as Model
-from _typeshed import Incomplete
 
 class ParseResult(dict):
     def __getattr__(self, name): ...
@@ -28,11 +30,28 @@ class Argument:
     store_missing: Incomplete
     trim: Incomplete
     nullable: Incomplete
-    def __init__(self, name, default: Incomplete | None = ..., dest: Incomplete | None = ..., required: bool = ..., ignore: bool = ..., type=..., location=..., choices=..., action: str = ..., help: Incomplete | None = ..., operators=..., case_sensitive: bool = ..., store_missing: bool = ..., trim: bool = ..., nullable: bool = ...) -> None: ...
+    def __init__(
+        self,
+        name,
+        default: Incomplete | None = None,
+        dest: Incomplete | None = None,
+        required: bool = False,
+        ignore: bool = False,
+        type=...,
+        location=("json", "values"),
+        choices=(),
+        action: str = "store",
+        help: Incomplete | None = None,
+        operators=("=",),
+        case_sensitive: bool = True,
+        store_missing: bool = True,
+        trim: bool = False,
+        nullable: bool = True,
+    ) -> None: ...
     def source(self, request): ...
     def convert(self, value, op): ...
     def handle_validation_error(self, error, bundle_errors): ...
-    def parse(self, request, bundle_errors: bool = ...): ...
+    def parse(self, request, bundle_errors: bool = False): ...
     @property
     def __schema__(self): ...
 
@@ -42,9 +61,15 @@ class RequestParser:
     result_class: Incomplete
     trim: Incomplete
     bundle_errors: Incomplete
-    def __init__(self, argument_class=..., result_class=..., trim: bool = ..., bundle_errors: bool = ...) -> None: ...
+    def __init__(
+        self,
+        argument_class=...,
+        result_class=...,
+        trim: bool = False,
+        bundle_errors: bool = False,
+    ) -> None: ...
     def add_argument(self, *args, **kwargs): ...
-    def parse_args(self, req: Incomplete | None = ..., strict: bool = ...): ...
+    def parse_args(self, req: Incomplete | None = None, strict: bool = False): ...
     def copy(self): ...
     def replace_argument(self, name, *args, **kwargs): ...
     def remove_argument(self, name): ...

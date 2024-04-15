@@ -1,21 +1,49 @@
 from _typeshed import Incomplete
 
+__all__ = [
+    "CheckboxInput",
+    "ColorInput",
+    "DateInput",
+    "DateTimeInput",
+    "DateTimeLocalInput",
+    "EmailInput",
+    "FileInput",
+    "HiddenInput",
+    "ListWidget",
+    "MonthInput",
+    "NumberInput",
+    "Option",
+    "PasswordInput",
+    "RadioInput",
+    "RangeInput",
+    "SearchInput",
+    "Select",
+    "SubmitInput",
+    "TableWidget",
+    "TextArea",
+    "TextInput",
+    "TelInput",
+    "TimeInput",
+    "URLInput",
+    "WeekInput",
+]
+
 class ListWidget:
     html_tag: Incomplete
     prefix_label: Incomplete
-    def __init__(self, html_tag: str = ..., prefix_label: bool = ...) -> None: ...
+    def __init__(self, html_tag: str = "ul", prefix_label: bool = True) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class TableWidget:
     with_table_tag: Incomplete
-    def __init__(self, with_table_tag: bool = ...) -> None: ...
+    def __init__(self, with_table_tag: bool = True) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class Input:
     html_params: Incomplete
     validation_attrs: Incomplete
     input_type: Incomplete
-    def __init__(self, input_type: Incomplete | None = ...) -> None: ...
+    def __init__(self, input_type: Incomplete | None = None) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class TextInput(Input):
@@ -26,7 +54,7 @@ class PasswordInput(Input):
     input_type: str
     validation_attrs: Incomplete
     hide_value: Incomplete
-    def __init__(self, hide_value: bool = ...) -> None: ...
+    def __init__(self, hide_value: bool = True) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class HiddenInput(Input):
@@ -46,7 +74,7 @@ class FileInput(Input):
     input_type: str
     validation_attrs: Incomplete
     multiple: Incomplete
-    def __init__(self, multiple: bool = ...) -> None: ...
+    def __init__(self, multiple: bool = False) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class SubmitInput(Input):
@@ -60,7 +88,7 @@ class TextArea:
 class Select:
     validation_attrs: Incomplete
     multiple: Incomplete
-    def __init__(self, multiple: bool = ...) -> None: ...
+    def __init__(self, multiple: bool = False) -> None: ...
     def __call__(self, field, **kwargs): ...
     @classmethod
     def render_option(cls, value, label, selected, **kwargs): ...
@@ -114,14 +142,19 @@ class NumberInput(Input):
     step: Incomplete
     min: Incomplete
     max: Incomplete
-    def __init__(self, step: Incomplete | None = ..., min: Incomplete | None = ..., max: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        step: Incomplete | None = None,
+        min: Incomplete | None = None,
+        max: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class RangeInput(Input):
     input_type: str
     validation_attrs: Incomplete
     step: Incomplete
-    def __init__(self, step: Incomplete | None = ...) -> None: ...
+    def __init__(self, step: Incomplete | None = None) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class ColorInput(Input):

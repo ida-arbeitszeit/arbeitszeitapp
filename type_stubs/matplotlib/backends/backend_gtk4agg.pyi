@@ -1,6 +1,8 @@
-from . import backend_agg as backend_agg, backend_gtk4 as backend_gtk4
 from .. import cbook as cbook
-from .backend_gtk4 import Gtk as Gtk, _BackendGTK4
+from . import backend_agg as backend_agg
+from . import backend_gtk4 as backend_gtk4
+from .backend_gtk4 import Gtk as Gtk
+from .backend_gtk4 import _BackendGTK4
 
 class FigureCanvasGTK4Agg(backend_agg.FigureCanvasAgg, backend_gtk4.FigureCanvasGTK4):
     def on_draw_event(self, widget, ctx): ...

@@ -1,5 +1,6 @@
 from _typeshed import Incomplete
-from wtforms import FileField as _FileField, MultipleFileField as _MultipleFileField
+from wtforms import FileField as _FileField
+from wtforms import MultipleFileField as _MultipleFileField
 from wtforms.validators import DataRequired
 
 class FileField(_FileField):
@@ -14,19 +15,24 @@ class MultipleFileField(_MultipleFileField):
 
 class FileRequired(DataRequired):
     def __call__(self, form, field) -> None: ...
+
 file_required = FileRequired
 
 class FileAllowed:
     upload_set: Incomplete
     message: Incomplete
-    def __init__(self, upload_set, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, upload_set, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
+
 file_allowed = FileAllowed
 
 class FileSize:
     min_size: Incomplete
     max_size: Incomplete
     message: Incomplete
-    def __init__(self, max_size, min_size: int = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self, max_size, min_size: int = 0, message: Incomplete | None = None
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
+
 file_size = FileSize

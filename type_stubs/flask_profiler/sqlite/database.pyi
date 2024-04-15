@@ -1,8 +1,10 @@
 import sqlite3
-from .migrations import Migrations as Migrations
-from .select_query import RecordResult as RecordResult
+
 from _typeshed import Incomplete
 from flask_profiler.entities import measurement_archive as interface
+
+from .migrations import Migrations as Migrations
+from .select_query import RecordResult as RecordResult
 
 LOGGER: Incomplete
 

@@ -1,6 +1,7 @@
-from _typeshed import Incomplete
 from sqlite3 import Connection, Cursor
 from typing import Iterator
+
+from _typeshed import Incomplete
 
 LOGGER: Incomplete
 

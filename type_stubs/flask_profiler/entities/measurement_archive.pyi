@@ -1,14 +1,17 @@
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Generic, Iterator, List, Optional, Protocol, TypeVar
+from typing import Generic, Iterator, List, Protocol, TypeVar
+
 from typing_extensions import Self
 
-FiledDataT = TypeVar('FiledDataT', bound='FiledData')
-T = TypeVar('T', covariant=True)
+FiledDataT = TypeVar("FiledDataT", bound="FiledData")
+T = TypeVar("T", covariant=True)
 
 class MeasurementArchivist(Protocol):
     def record_measurement(self, measurement: Measurement) -> int: ...
     def get_records(self) -> RecordedMeasurements: ...
 
+@dataclass
 class Measurement:
     route_name: str
     start_timestamp: datetime
@@ -20,9 +23,10 @@ class FiledData(Protocol, Generic[T]):
     def __iter__(self) -> Iterator[T]: ...
     def limit(self, n: int) -> FiledDataT: ...
     def offset(self, n: int) -> FiledDataT: ...
-    def first(self) -> Optional[T]: ...
+    def first(self) -> T | None: ...
     def __len__(self) -> int: ...
 
+@dataclass
 class Record:
     id: int
     name: str
@@ -35,7 +39,9 @@ class Record:
 
 class RecordedMeasurements(FiledData[Record], Protocol):
     def summarize(self) -> SummarizedMeasurements: ...
-    def summarize_by_interval(self, timestamps: List[datetime]) -> SummarizedMeasurements: ...
+    def summarize_by_interval(
+        self, timestamps: List[datetime]
+    ) -> SummarizedMeasurements: ...
     def with_method(self, method: str) -> RecordedMeasurements: ...
     def with_name(self, name: str) -> RecordedMeasurements: ...
     def with_name_containing(self, substring: str) -> RecordedMeasurements: ...
@@ -44,6 +50,7 @@ class RecordedMeasurements(FiledData[Record], Protocol):
     def with_id(self, id_: int) -> RecordedMeasurements: ...
     def ordered_by_start_time(self, ascending: bool = ...) -> RecordedMeasurements: ...
 
+@dataclass
 class Summary:
     method: str
     name: str
@@ -53,7 +60,17 @@ class Summary:
     avg_elapsed: float
     first_measurement: datetime
     last_measurement: datetime
-    def __init__(self, method, name, count, min_elapsed, max_elapsed, avg_elapsed, first_measurement, last_measurement) -> None: ...
+    def __init__(
+        self,
+        method,
+        name,
+        count,
+        min_elapsed,
+        max_elapsed,
+        avg_elapsed,
+        first_measurement,
+        last_measurement,
+    ) -> None: ...
 
 class SummarizedMeasurements(FiledData[Summary], Protocol):
     def sorted_by_avg_elapsed(self, ascending: bool = ...) -> Self: ...

@@ -1,7 +1,12 @@
 from _typeshed import Incomplete
-from matplotlib import backend_tools as backend_tools, cbook as cbook
+from matplotlib import backend_tools as backend_tools
+from matplotlib import cbook as cbook
 from matplotlib._pylab_helpers import Gcf as Gcf
-from matplotlib.backend_bases import FigureCanvasBase as FigureCanvasBase, FigureManagerBase as FigureManagerBase, NavigationToolbar2 as NavigationToolbar2, TimerBase as TimerBase, _Backend
+from matplotlib.backend_bases import FigureCanvasBase as FigureCanvasBase
+from matplotlib.backend_bases import FigureManagerBase as FigureManagerBase
+from matplotlib.backend_bases import NavigationToolbar2 as NavigationToolbar2
+from matplotlib.backend_bases import TimerBase as TimerBase
+from matplotlib.backend_bases import _Backend
 from matplotlib.backend_tools import Cursors as Cursors
 
 def mpl_to_gtk_cursor_name(mpl_cursor): ...

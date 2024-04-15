@@ -1,6 +1,7 @@
+from typing import NamedTuple
+
 from _typeshed import Incomplete
 from matplotlib import cbook as cbook
-from typing import NamedTuple
 
 class Page(NamedTuple):
     text: Incomplete
@@ -15,7 +16,18 @@ class Box(NamedTuple):
     height: Incomplete
     width: Incomplete
 
-class Text(NamedTuple('Text', [('x', Incomplete), ('y', Incomplete), ('font', Incomplete), ('glyph', Incomplete), ('width', Incomplete)])):
+class Text(
+    NamedTuple(
+        "Text",
+        [
+            ("x", Incomplete),
+            ("y", Incomplete),
+            ("font", Incomplete),
+            ("glyph", Incomplete),
+            ("width", Incomplete),
+        ],
+    )
+):
     @property
     def font_path(self): ...
     @property
@@ -32,7 +44,12 @@ class Dvi:
     state: Incomplete
     def __init__(self, filename, dpi) -> None: ...
     def __enter__(self): ...
-    def __exit__(self, etype, evalue, etrace) -> None: ...
+    def __exit__(
+        self,
+        etype: type[BaseException] | None,
+        evalue: BaseException | None,
+        etrace: types.TracebackType | None,
+    ) -> None: ...
     def __iter__(self): ...
     def close(self) -> None: ...
 

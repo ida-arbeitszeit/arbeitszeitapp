@@ -4,6 +4,7 @@ from matplotlib.path import Path as Path
 from matplotlib.transforms import Affine2D as Affine2D
 
 __credits__: Incomplete
+__version__: str
 RIGHT: int
 UP: int
 DOWN: int
@@ -22,6 +23,32 @@ class Sankey:
     pitch: Incomplete
     tolerance: Incomplete
     extent: Incomplete
-    def __init__(self, ax: Incomplete | None = ..., scale: float = ..., unit: str = ..., format: str = ..., gap: float = ..., radius: float = ..., shoulder: float = ..., offset: float = ..., head_angle: int = ..., margin: float = ..., tolerance: float = ..., **kwargs) -> None: ...
-    def add(self, patchlabel: str = ..., flows: Incomplete | None = ..., orientations: Incomplete | None = ..., labels: str = ..., trunklength: float = ..., pathlengths: float = ..., prior: Incomplete | None = ..., connect=..., rotation: int = ..., **kwargs): ...
+    def __init__(
+        self,
+        ax: Incomplete | None = None,
+        scale: float = 1.0,
+        unit: str = "",
+        format: str = "%G",
+        gap: float = 0.25,
+        radius: float = 0.1,
+        shoulder: float = 0.03,
+        offset: float = 0.15,
+        head_angle: int = 100,
+        margin: float = 0.4,
+        tolerance: float = 1e-06,
+        **kwargs,
+    ) -> None: ...
+    def add(
+        self,
+        patchlabel: str = "",
+        flows: Incomplete | None = None,
+        orientations: Incomplete | None = None,
+        labels: str = "",
+        trunklength: float = 1.0,
+        pathlengths: float = 0.25,
+        prior: Incomplete | None = None,
+        connect=(0, 0),
+        rotation: int = 0,
+        **kwargs,
+    ): ...
     def finish(self): ...
