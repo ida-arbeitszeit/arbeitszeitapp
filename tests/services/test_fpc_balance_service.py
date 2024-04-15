@@ -3,6 +3,7 @@ from decimal import Decimal
 from parameterized import parameterized
 
 from arbeitszeit.fpc_balance import PublicFundService
+from arbeitszeit.records import ProductionCosts
 from tests.data_generators import TransactionGenerator
 from tests.use_cases.base_test_case import BaseTestCase
 
@@ -46,3 +47,29 @@ class PublicFundServiceCalculationTests(BaseTestCase):
         ]
         fpc_balance = self.service.calculate_fpc_balance()
         assert fpc_balance == expected_fpc_balance
+
+    def test_fpc_balance_if_no_transactions(self) -> None:
+
+        public_plan_one = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(0), Decimal(10), Decimal(10)),
+            is_public_service=True,
+        )
+        public_plan_two = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(0), Decimal(20), Decimal(20)),
+            is_public_service=True,
+        )
+        public_plan_three = self.plan_generator.create_plan(
+            costs=ProductionCosts(Decimal(0), Decimal(30), Decimal(30)),
+            is_public_service=True,
+        )
+
+        test_plans = (
+            self.service.database_gateway.get_plans()
+            .that_are_public()
+            .that_are_approved()
+        )
+        test_plan_ids = [plan.id for plan in test_plans]
+        assert test_plan_ids == [public_plan_one, public_plan_two, public_plan_three]
+
+        fpc_balance = self.service.calculate_fpc_balance()
+        assert fpc_balance == Decimal(-120)
