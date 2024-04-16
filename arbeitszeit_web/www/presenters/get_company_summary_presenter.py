@@ -48,6 +48,10 @@ class GetCompanySummaryViewModel:
     plan_details: List[PlanDetailsWeb]
     suppliers_ordered_by_volume: List[SuppliersWeb]
     show_suppliers: bool
+    p_account_overview_url: str
+    r_account_overview_url: str
+    a_account_overview_url: str
+    prd_account_overview_url: str
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -100,6 +104,18 @@ class GetCompanySummarySuccessPresenter:
             ],
             suppliers_ordered_by_volume=suppliers_ordered_by_volume,
             show_suppliers=bool(suppliers_ordered_by_volume),
+            p_account_overview_url=self.url_index.get_company_account_p_url(
+                company_id=use_case_response.id
+            ),
+            r_account_overview_url=self.url_index.get_company_account_r_url(
+                company_id=use_case_response.id
+            ),
+            a_account_overview_url=self.url_index.get_company_account_a_url(
+                company_id=use_case_response.id
+            ),
+            prd_account_overview_url=self.url_index.get_company_account_prd_url(
+                company_id=use_case_response.id
+            ),
         )
 
     def _get_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
