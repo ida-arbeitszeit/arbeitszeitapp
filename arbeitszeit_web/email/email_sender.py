@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 
 from arbeitszeit import email_notifications as interface
-from arbeitszeit_web.email.email_change_warning_presenter import (
-    EmailChangeWarningPresenter,
-)
+from arbeitszeit_web.email.email_change_warning_view import EmailChangeWarningView
 from arbeitszeit_web.email.request_coordination_transfer_presenter import (
     RequestCoordinationTransferEmailPresenter,
 )
@@ -26,7 +24,7 @@ class EmailSender:
     invite_worker_presenter: InviteWorkerPresenterImpl
     request_cooperation_presenter: CooperationRequestEmailPresenter
     email_change_confirmation_presenter: EmailChangeConfirmationPresenter
-    email_change_warning_presenter: EmailChangeWarningPresenter
+    email_change_warning_view: EmailChangeWarningView
     request_coordination_transfer_email_presenter: RequestCoordinationTransferEmailPresenter
 
     def send_email(self, message: interface.Message) -> None:
@@ -54,7 +52,7 @@ class EmailSender:
         elif isinstance(message, interface.CooperationRequestEmail):
             self.request_cooperation_presenter.present(message)
         elif isinstance(message, interface.EmailChangeWarning):
-            self.email_change_warning_presenter.present_email_change_warning(message)
+            self.email_change_warning_view.render_email_change_warning(message)
         elif isinstance(message, interface.EmailChangeConfirmation):
             self.email_change_confirmation_presenter.present_email_change_confirmation(
                 message

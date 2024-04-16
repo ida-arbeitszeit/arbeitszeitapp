@@ -7,13 +7,13 @@ from arbeitszeit_web.translator import Translator
 
 
 @dataclass
-class EmailChangeWarningPresenter:
+class EmailChangeWarningView:
     email_service: MailService
     text_renderer: TextRenderer
     translator: Translator
     email_configuration: EmailConfiguration
 
-    def present_email_change_warning(
+    def render_email_change_warning(
         self, email_change_warning: email_notifications.EmailChangeWarning
     ) -> None:
         self.email_service.send_message(
