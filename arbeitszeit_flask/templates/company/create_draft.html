@@ -20,22 +20,15 @@
         <div class="field is-grouped is-grouped-centered">
           <div class="control">
             <button class="button is-primary is-light"
-                    name="action"
-                    value="save_draft"
-                    type="submit"
-                    formaction="{{ view_model.save_draft_url }}">
+                    type="submit">
               {{ gettext("Save as draft")}}
             </button>
           </div>
           <div class="control">
-            <button class="button is-light"
-                    name="action"
-                    value="cancel"
-                    type="submit"
-                    formaction="{{ view_model.cancel_url }}"
-                    formnovalidate>
+            <a class="button is-light"
+               href="{{ cancel_url }}">
               {{ gettext("Cancel")}}
-            </button>
+            </a>
           </div>
         </div>
       </form>
