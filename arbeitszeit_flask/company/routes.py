@@ -200,7 +200,7 @@ def get_draft_details(
     view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
         render_template(
-            "company/create_draft.html",
+            "company/draft_details.html",
             view_model=view_model,
             form=form,
         )
