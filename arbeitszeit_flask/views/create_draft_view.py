@@ -50,7 +50,6 @@ class CreateDraftView:
                 "company/create_draft.html",
                 form=CreateDraftForm(),
                 view_model=dict(
-                    load_draft_url=GeneralUrlIndex().get_my_plan_drafts_url(),
                     save_draft_url="",
                     cancel_url="",
                 ),
