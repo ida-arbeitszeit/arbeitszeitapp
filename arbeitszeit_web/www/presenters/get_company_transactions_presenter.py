@@ -3,10 +3,10 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import AccountTypes
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import get_company_transactions
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -30,7 +30,7 @@ class GetCompanyTransactionsViewModel:
 @dataclass
 class GetCompanyTransactionsPresenter:
     translator: Translator
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
     url_index: UrlIndex
 
     def present(
@@ -53,7 +53,7 @@ class GetCompanyTransactionsPresenter:
         account = self._get_account(transaction.account_type)
         return ViewModelTransactionInfo(
             transaction_type=self._get_transaction_name(transaction.transaction_type),
-            date=self.datetime_service.format_datetime(
+            date=self.datetime_formatter.format_datetime(
                 transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
             transaction_volume=round(transaction.transaction_volume, 2),

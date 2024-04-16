@@ -16,8 +16,7 @@ class ViewModel:
 
 
 class AccountantInvitationEmailView(Protocol):
-    def render_accountant_invitation_email(self, view_model: ViewModel) -> None:
-        ...
+    def render_accountant_invitation_email(self, view_model: ViewModel) -> None: ...
 
 
 @dataclass

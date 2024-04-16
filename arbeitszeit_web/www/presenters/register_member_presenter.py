@@ -44,7 +44,9 @@ class RegisterMemberPresenter:
             assert response.user_id
             self.session.login_member(response.user_id)
             return RegisterMemberViewModel(
-                redirect_to=self.url_index.get_unconfirmed_member_url()
-                if response.is_confirmation_required
-                else self.url_index.get_member_dashboard_url(),
+                redirect_to=(
+                    self.url_index.get_unconfirmed_member_url()
+                    if response.is_confirmation_required
+                    else self.url_index.get_member_dashboard_url()
+                ),
             )

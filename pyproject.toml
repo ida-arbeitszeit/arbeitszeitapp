@@ -65,7 +65,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "deepdiff.*",
     "flask_babel",
     "flask_login",
     "flask_restx.*",

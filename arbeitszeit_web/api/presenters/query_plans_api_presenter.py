@@ -7,6 +7,7 @@ from arbeitszeit_web.api.presenters.interfaces import (
     JsonDatetime,
     JsonDecimal,
     JsonInteger,
+    JsonList,
     JsonObject,
     JsonString,
     JsonValue,
@@ -25,20 +26,21 @@ class QueryPlansApiPresenter:
     def get_schema(cls) -> JsonValue:
         return JsonObject(
             members=dict(
-                results=JsonObject(
-                    members=dict(
-                        plan_id=JsonString(),
-                        company_name=JsonString(),
-                        company_id=JsonString(),
-                        product_name=JsonString(),
-                        description=JsonString(),
-                        price_per_unit=JsonDecimal(),
-                        is_public_service=JsonBoolean(),
-                        is_cooperating=JsonBoolean(),
-                        activation_date=JsonDatetime(),
-                    ),
-                    name="Plan",
-                    as_list=True,
+                results=JsonList(
+                    elements=JsonObject(
+                        members=dict(
+                            plan_id=JsonString(),
+                            company_name=JsonString(),
+                            company_id=JsonString(),
+                            product_name=JsonString(),
+                            description=JsonString(),
+                            price_per_unit=JsonDecimal(),
+                            is_public_service=JsonBoolean(),
+                            is_cooperating=JsonBoolean(),
+                            activation_date=JsonDatetime(),
+                        ),
+                        name="Plan",
+                    )
                 ),
                 total_results=JsonInteger(),
                 offset=JsonInteger(),

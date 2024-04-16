@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase as UseCase,
 )
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -29,7 +29,7 @@ class ListCoordinationsOfCooperationPresenter:
         navbar_items: list[NavbarItem]
 
     url_index: UrlIndex
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
     translator: Translator
 
     def list_coordinations_of_cooperation(
@@ -47,17 +47,19 @@ class ListCoordinationsOfCooperationPresenter:
                     coordinator_url=self.url_index.get_company_summary_url(
                         company_id=coordination.coordinator_id,
                     ),
-                    start_time=self.datetime_service.format_datetime(
+                    start_time=self.datetime_formatter.format_datetime(
                         date=coordination.start_time,
                         zone="Europe/Berlin",
                         fmt="%d.%m.%Y %H:%M",
                     ),
-                    end_time="-"
-                    if coordination.end_time is None
-                    else self.datetime_service.format_datetime(
-                        date=coordination.end_time,
-                        zone="Europe/Berlin",
-                        fmt="%d.%m.%Y %H:%M",
+                    end_time=(
+                        "-"
+                        if coordination.end_time is None
+                        else self.datetime_formatter.format_datetime(
+                            date=coordination.end_time,
+                            zone="Europe/Berlin",
+                            fmt="%d.%m.%Y %H:%M",
+                        )
                     ),
                 )
                 for coordination in response.coordinations

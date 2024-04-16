@@ -22,7 +22,7 @@ class QueryPlansView:
     request: FlaskRequest
 
     def GET(self) -> Response:
-        form = PlanSearchForm(request.form)
+        form = PlanSearchForm(request.args)
         if not form.validate():
             return self._get_invalid_form_response(form=form)
         use_case_request = self.controller.import_form_data(form, self.request)

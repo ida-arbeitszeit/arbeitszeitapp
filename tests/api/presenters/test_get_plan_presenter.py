@@ -43,7 +43,6 @@ class TestSchema(BaseTestCase):
 
     def test_schema_top_level(self) -> None:
         assert isinstance(self.schema, JsonObject)
-        assert not self.schema.as_list
         assert self.schema.name == "PlanDetails"
 
     def test_schema_top_level_members_field_types_are_correct(self) -> None:

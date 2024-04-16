@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -46,7 +46,7 @@ class GetMemberDashboardViewModel:
 class GetMemberDashboardPresenter:
     translator: Translator
     url_index: UrlIndex
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def present(
         self, use_case_response: GetMemberDashboard.Response
@@ -86,7 +86,7 @@ class GetMemberDashboardPresenter:
     ) -> PlanDetailsWeb:
         return PlanDetailsWeb(
             prd_name=plan_detail.prd_name,
-            activation_date=self.datetime_service.format_datetime(
+            activation_date=self.datetime_formatter.format_datetime(
                 date=plan_detail.activation_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.",

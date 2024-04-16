@@ -113,7 +113,6 @@ class TestSchema(BaseTestCase):
     def test_schema_top_level(self) -> None:
         schema = self.presenter.get_schema()
         assert isinstance(schema, JsonObject)
-        assert not schema.as_list
         assert schema.name == "LoginCompanyResponse"
 
     def test_schema_top_level_members(self) -> None:

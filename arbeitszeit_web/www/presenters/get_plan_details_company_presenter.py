@@ -51,9 +51,9 @@ class GetPlanDetailsCompanyPresenter:
             details=self.plan_details_service.format_plan_details(plan_details),
             show_own_plan_action_section=show_own_plan_action_section,
             own_plan_action=self._create_own_plan_action_section(plan_details),
-            show_productive_consumption_url=True
-            if not current_user_is_planner
-            else False,
+            show_productive_consumption_url=(
+                True if not current_user_is_planner else False
+            ),
             productive_consumption_url=self.url_index.get_register_productive_consumption_url(
                 plan_details.plan_id
             ),
@@ -63,13 +63,17 @@ class GetPlanDetailsCompanyPresenter:
     def _create_own_plan_action_section(self, plan: PlanDetails) -> OwnPlanAction:
         section = OwnPlanAction(
             is_cooperating=plan.is_cooperating,
-            end_coop_url=self.url_index.get_end_coop_url(
-                plan_id=plan.plan_id, cooperation_id=plan.cooperation
-            )
-            if (plan.cooperation and plan.is_cooperating)
-            else None,
-            request_coop_url=self.url_index.get_request_coop_url()
-            if not plan.is_cooperating
-            else None,
+            end_coop_url=(
+                self.url_index.get_end_coop_url(
+                    plan_id=plan.plan_id, cooperation_id=plan.cooperation
+                )
+                if (plan.cooperation and plan.is_cooperating)
+                else None
+            ),
+            request_coop_url=(
+                self.url_index.get_request_coop_url()
+                if not plan.is_cooperating
+                else None
+            ),
         )
         return section
