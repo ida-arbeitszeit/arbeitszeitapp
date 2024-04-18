@@ -38,15 +38,9 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         self.company = self.login_company()
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
 
-    def test_post_user_canceling_leads_to_302_and_no_draft_gets_created(self) -> None:
-        test_data = self._create_form_data()
-        response = self.client.post("/company/create_draft", data=test_data)
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(self._count_drafts_of_company())
-
     def test_post_user_saving_draft_leads_to_302_and_draft_gets_created(self) -> None:
         self.assertFalse(self._count_drafts_of_company())
-        test_data = self._create_form_data(action="save_draft")
+        test_data = self._create_form_data()
         response = self.client.post("/company/create_draft", data=test_data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
@@ -54,7 +48,7 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
             1,
         )
 
-    def _create_form_data(self, action: str = "cancel") -> Dict:
+    def _create_form_data(self) -> Dict:
         return dict(
             prd_name="test name",
             description="test description",
@@ -65,7 +59,6 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
             costs_r=Decimal("15"),
             costs_a=Decimal("20"),
             productive_or_public=True,
-            action=action,
         )
 
     def _count_drafts_of_company(self) -> int:

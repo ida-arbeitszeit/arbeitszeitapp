@@ -35,7 +35,7 @@ class GetPrefilledDraftDataPresenter:
         form.is_public_service_field().set_value(draft_data.is_public_service)
         return self.ViewModel(
             save_draft_url=self.url_index.get_create_draft_url(),
-            cancel_url=self.url_index.get_create_draft_url(),
+            cancel_url=self.url_index.get_my_plans_url(),
         )
 
 

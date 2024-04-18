@@ -28,14 +28,12 @@
             </button>
           </div>
           <div class="control">
-            <button class="button is-light"
-                    name="action"
-                    value="cancel"
-                    type="submit"
-                    formaction="{{ view_model.cancel_url }}"
-                    formnovalidate>
-              {{ gettext("Cancel")}}
-            </button>
+            <div class="control">
+              <a class="button is-light"
+                 href="{{ view_model.cancel_url }}">
+                {{ gettext("Cancel")}}
+              </a>
+            </div>
           </div>
         </div>
       </form>
