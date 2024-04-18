@@ -1,27 +1,38 @@
+from _typeshed import Incomplete
+from flask import Flask as Flask
+
 from .calendar import Calendar as Calendar
 from .clock import SystemClock as SystemClock
-from .configuration import Configuration as Configuration, DeferredArchivist as DeferredArchivist
-from .controllers.get_details_controller import GetDetailsController as GetDetailsController
-from .controllers.get_route_overview_controller import GetRouteOverviewController as GetRouteOverviewController
-from .controllers.get_summary_controller import GetSummaryController as GetSummaryController
+from .configuration import Configuration as Configuration
+from .configuration import DeferredArchivist as DeferredArchivist
+from .controllers.get_details_controller import (
+    GetDetailsController as GetDetailsController,
+)
+from .controllers.get_route_overview_controller import (
+    GetRouteOverviewController as GetRouteOverviewController,
+)
+from .controllers.get_summary_controller import (
+    GetSummaryController as GetSummaryController,
+)
 from .measured_route import MeasuredRouteFactory as MeasuredRouteFactory
 from .presenters.get_details_presenter import GetDetailsPresenter as GetDetailsPresenter
-from .presenters.get_route_overview_presenter import GetRouteOverviewPresenter as GetRouteOverviewPresenter
+from .presenters.get_route_overview_presenter import (
+    GetRouteOverviewPresenter as GetRouteOverviewPresenter,
+)
 from .presenters.get_summary_presenter import GetSummaryPresenter as GetSummaryPresenter
 from .request import WrappedRequest as WrappedRequest
 from .use_cases.get_details_use_case import GetDetailsUseCase as GetDetailsUseCase
-from .use_cases.get_route_overview import GetRouteOverviewUseCase as GetRouteOverviewUseCase
+from .use_cases.get_route_overview import (
+    GetRouteOverviewUseCase as GetRouteOverviewUseCase,
+)
 from .use_cases.get_summary_use_case import GetSummaryUseCase as GetSummaryUseCase
 from .views.get_details_view import GetDetailsView as GetDetailsView
 from .views.get_route_overview_view import GetRouteOverviewView as GetRouteOverviewView
 from .views.get_summary_view import GetSummaryView as GetSummaryView
-from _typeshed import Incomplete
-from flask import Flask as Flask
-from typing import Optional
 
 class DependencyInjector:
     app: Incomplete
-    def __init__(self, *, app: Optional[Flask] = ...) -> None: ...
+    def __init__(self, *, app: Flask | None = None) -> None: ...
     def get_clock(self) -> SystemClock: ...
     def get_configuration(self) -> Configuration: ...
     def get_summary_use_case(self) -> GetSummaryUseCase: ...

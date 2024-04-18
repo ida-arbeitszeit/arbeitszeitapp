@@ -112,7 +112,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
 
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(plots_routes.plots)
-        app.register_blueprint(company.blueprint.main_company)
+        app.register_blueprint(company.blueprint.main_company, url_prefix="/company")
         app.register_blueprint(member.blueprint.main_member, url_prefix="/member")
         app.register_blueprint(accountant.blueprint.main_accountant)
         app.register_blueprint(user.blueprint, url_prefix="/user")

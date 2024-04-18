@@ -104,6 +104,50 @@ class GetCompanySummaryPresenterTests(BaseTestCase):
             self.assertEqual(deviation.percentage, expected_percentages[count])
             self.assertEqual(deviation.is_critical, expected_is_critical[count])
 
+    def test_that_p_account_overview_url_points_to_url_returned_by_url_index(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        assert (
+            view_model.p_account_overview_url
+            == self.url_index.get_company_account_p_url(
+                company_id=RESPONSE_WITH_2_PLANS.id
+            )
+        )
+
+    def test_that_r_account_overview_url_points_to_url_returned_by_url_index(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        assert (
+            view_model.r_account_overview_url
+            == self.url_index.get_company_account_r_url(
+                company_id=RESPONSE_WITH_2_PLANS.id
+            )
+        )
+
+    def test_that_a_account_overview_url_points_to_url_returned_by_url_index(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        assert (
+            view_model.a_account_overview_url
+            == self.url_index.get_company_account_a_url(
+                company_id=RESPONSE_WITH_2_PLANS.id
+            )
+        )
+
+    def test_that_prd_account_overview_url_points_to_url_returned_by_url_index(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(RESPONSE_WITH_2_PLANS)
+        assert (
+            view_model.prd_account_overview_url
+            == self.url_index.get_company_account_prd_url(
+                company_id=RESPONSE_WITH_2_PLANS.id
+            )
+        )
+
 
 class PlansOfCompanyTests(BaseTestCase):
     def setUp(self) -> None:

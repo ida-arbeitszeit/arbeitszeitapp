@@ -1,6 +1,9 @@
 from _typeshed import Incomplete
-from matplotlib._constrained_layout import do_constrained_layout as do_constrained_layout
-from matplotlib._tight_layout import get_subplotspec_list as get_subplotspec_list, get_tight_layout_figure as get_tight_layout_figure
+from matplotlib._constrained_layout import (
+    do_constrained_layout as do_constrained_layout,
+)
+from matplotlib._tight_layout import get_subplotspec_list as get_subplotspec_list
+from matplotlib._tight_layout import get_tight_layout_figure as get_tight_layout_figure
 
 class LayoutEngine:
     def __init__(self, **kwargs) -> None: ...
@@ -17,11 +20,44 @@ class PlaceHolderLayoutEngine(LayoutEngine):
     def execute(self, fig) -> None: ...
 
 class TightLayoutEngine(LayoutEngine):
-    def __init__(self, *, pad: float = ..., h_pad: Incomplete | None = ..., w_pad: Incomplete | None = ..., rect=..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        *,
+        pad: float = 1.08,
+        h_pad: Incomplete | None = None,
+        w_pad: Incomplete | None = None,
+        rect=(0, 0, 1, 1),
+        **kwargs,
+    ) -> None: ...
     def execute(self, fig) -> None: ...
-    def set(self, *, pad: Incomplete | None = ..., w_pad: Incomplete | None = ..., h_pad: Incomplete | None = ..., rect: Incomplete | None = ...) -> None: ...
+    def set(
+        self,
+        *,
+        pad: Incomplete | None = None,
+        w_pad: Incomplete | None = None,
+        h_pad: Incomplete | None = None,
+        rect: Incomplete | None = None,
+    ) -> None: ...
 
 class ConstrainedLayoutEngine(LayoutEngine):
-    def __init__(self, *, h_pad: Incomplete | None = ..., w_pad: Incomplete | None = ..., hspace: Incomplete | None = ..., wspace: Incomplete | None = ..., rect=..., compress: bool = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        *,
+        h_pad: Incomplete | None = None,
+        w_pad: Incomplete | None = None,
+        hspace: Incomplete | None = None,
+        wspace: Incomplete | None = None,
+        rect=(0, 0, 1, 1),
+        compress: bool = False,
+        **kwargs,
+    ) -> None: ...
     def execute(self, fig): ...
-    def set(self, *, h_pad: Incomplete | None = ..., w_pad: Incomplete | None = ..., hspace: Incomplete | None = ..., wspace: Incomplete | None = ..., rect: Incomplete | None = ...) -> None: ...
+    def set(
+        self,
+        *,
+        h_pad: Incomplete | None = None,
+        w_pad: Incomplete | None = None,
+        hspace: Incomplete | None = None,
+        wspace: Incomplete | None = None,
+        rect: Incomplete | None = None,
+    ) -> None: ...

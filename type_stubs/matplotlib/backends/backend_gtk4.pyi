@@ -1,14 +1,26 @@
-from ._backend_gtk import _BackendGTK, _FigureCanvasGTK, _FigureManagerGTK, _NavigationToolbar2GTK
 from _typeshed import Incomplete
 from gi.repository import Gtk
-from matplotlib import backend_tools as backend_tools, cbook as cbook
-from matplotlib.backend_bases import CloseEvent as CloseEvent, KeyEvent as KeyEvent, LocationEvent as LocationEvent, MouseEvent as MouseEvent, ResizeEvent as ResizeEvent, ToolContainerBase as ToolContainerBase
+from matplotlib import backend_tools as backend_tools
+from matplotlib import cbook as cbook
+from matplotlib.backend_bases import CloseEvent as CloseEvent
+from matplotlib.backend_bases import KeyEvent as KeyEvent
+from matplotlib.backend_bases import LocationEvent as LocationEvent
+from matplotlib.backend_bases import MouseEvent as MouseEvent
+from matplotlib.backend_bases import ResizeEvent as ResizeEvent
+from matplotlib.backend_bases import ToolContainerBase as ToolContainerBase
+
+from ._backend_gtk import (
+    _BackendGTK,
+    _FigureCanvasGTK,
+    _FigureManagerGTK,
+    _NavigationToolbar2GTK,
+)
 
 class FigureCanvasGTK4(_FigureCanvasGTK, Gtk.DrawingArea):
     required_interactive_framework: str
     supports_blit: bool
     manager_class: Incomplete
-    def __init__(self, figure: Incomplete | None = ...) -> None: ...
+    def __init__(self, figure: Incomplete | None = None) -> None: ...
     def destroy(self) -> None: ...
     def set_cursor(self, cursor) -> None: ...
     def scroll_event(self, controller, dx, dy): ...
@@ -32,7 +44,9 @@ class NavigationToolbar2GTK4(_NavigationToolbar2GTK, Gtk.Box):
 
 class ToolbarGTK4(ToolContainerBase, Gtk.Box):
     def __init__(self, toolmanager) -> None: ...
-    def add_toolitem(self, name, group, position, image_file, description, toggle) -> None: ...
+    def add_toolitem(
+        self, name, group, position, image_file, description, toggle
+    ) -> None: ...
     def toggle_toolitem(self, name, toggled) -> None: ...
     def remove_toolitem(self, name) -> None: ...
     def set_message(self, s) -> None: ...
@@ -45,6 +59,7 @@ class HelpGTK4(backend_tools.ToolHelpBase):
 
 class ToolCopyToClipboardGTK4(backend_tools.ToolCopyToClipboardBase):
     def trigger(self, *args, **kwargs) -> None: ...
+
 Toolbar = ToolbarGTK4
 
 class FigureManagerGTK4(_FigureManagerGTK): ...

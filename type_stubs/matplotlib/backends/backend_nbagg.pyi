@@ -1,8 +1,15 @@
-from .backend_webagg_core import FigureCanvasWebAggCore as FigureCanvasWebAggCore, FigureManagerWebAgg as FigureManagerWebAgg, NavigationToolbar2WebAgg as NavigationToolbar2WebAgg, TimerAsyncio as TimerAsyncio, TimerTornado as TimerTornado
 from _typeshed import Incomplete
 from matplotlib import is_interactive as is_interactive
 from matplotlib._pylab_helpers import Gcf as Gcf
-from matplotlib.backend_bases import CloseEvent as CloseEvent, NavigationToolbar2 as NavigationToolbar2, _Backend
+from matplotlib.backend_bases import CloseEvent as CloseEvent
+from matplotlib.backend_bases import NavigationToolbar2 as NavigationToolbar2
+from matplotlib.backend_bases import _Backend
+
+from .backend_webagg_core import FigureCanvasWebAggCore as FigureCanvasWebAggCore
+from .backend_webagg_core import FigureManagerWebAgg as FigureManagerWebAgg
+from .backend_webagg_core import NavigationToolbar2WebAgg as NavigationToolbar2WebAgg
+from .backend_webagg_core import TimerAsyncio as TimerAsyncio
+from .backend_webagg_core import TimerTornado as TimerTornado
 
 def connection_info(): ...
 
@@ -20,7 +27,7 @@ class FigureManagerNbAgg(FigureManagerWebAgg):
     @property
     def connected(self): ...
     @classmethod
-    def get_javascript(cls, stream: Incomplete | None = ...): ...
+    def get_javascript(cls, stream: Incomplete | None = None): ...
     def destroy(self) -> None: ...
     web_sockets: Incomplete
     def clearup_closed(self) -> None: ...

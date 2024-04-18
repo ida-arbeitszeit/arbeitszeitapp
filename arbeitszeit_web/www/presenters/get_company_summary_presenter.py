@@ -2,12 +2,12 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
 from arbeitszeit.control_thresholds import ControlThresholds
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.use_cases.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
     Supplier,
 )
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
@@ -48,6 +48,10 @@ class GetCompanySummaryViewModel:
     plan_details: List[PlanDetailsWeb]
     suppliers_ordered_by_volume: List[SuppliersWeb]
     show_suppliers: bool
+    p_account_overview_url: str
+    r_account_overview_url: str
+    a_account_overview_url: str
+    prd_account_overview_url: str
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -59,7 +63,7 @@ class GetCompanySummarySuccessPresenter:
     translator: Translator
     url_index: UrlIndex
     control_thresholds: ControlThresholds
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def present(
         self, use_case_response: GetCompanySummarySuccess
@@ -71,7 +75,7 @@ class GetCompanySummarySuccessPresenter:
             id=str(use_case_response.id),
             name=use_case_response.name,
             email=use_case_response.email,
-            registered_on=self.datetime_service.format_datetime(
+            registered_on=self.datetime_formatter.format_datetime(
                 use_case_response.registered_on, zone="Europe/Berlin", fmt="%d.%m.%Y"
             ),
             expectations=[
@@ -100,6 +104,18 @@ class GetCompanySummarySuccessPresenter:
             ],
             suppliers_ordered_by_volume=suppliers_ordered_by_volume,
             show_suppliers=bool(suppliers_ordered_by_volume),
+            p_account_overview_url=self.url_index.get_company_account_p_url(
+                company_id=use_case_response.id
+            ),
+            r_account_overview_url=self.url_index.get_company_account_r_url(
+                company_id=use_case_response.id
+            ),
+            a_account_overview_url=self.url_index.get_company_account_a_url(
+                company_id=use_case_response.id
+            ),
+            prd_account_overview_url=self.url_index.get_company_account_prd_url(
+                company_id=use_case_response.id
+            ),
         )
 
     def _get_plan_details(self, plan_details: PlanDetails) -> PlanDetailsWeb:
@@ -109,9 +125,11 @@ class GetCompanySummarySuccessPresenter:
             url=self.user_url_index.get_plan_details_url(
                 plan_details.id,
             ),
-            status=self.translator.gettext("Active")
-            if plan_details.is_active
-            else self.translator.gettext("Inactive"),
+            status=(
+                self.translator.gettext("Active")
+                if plan_details.is_active
+                else self.translator.gettext("Inactive")
+            ),
             sales_volume=f"{round(plan_details.sales_volume, 2)}",
             sales_balance=f"{round(plan_details.sales_balance, 2)}",
             deviation_relative=Deviation(

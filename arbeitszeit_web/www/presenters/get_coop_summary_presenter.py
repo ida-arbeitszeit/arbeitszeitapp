@@ -46,11 +46,13 @@ class GetCoopSummarySuccessPresenter:
             coop_id=str(response.coop_id),
             coop_name=response.coop_name,
             coop_definition=response.coop_definition.splitlines(),
-            transfer_coordination_url=self.url_index.get_request_coordination_transfer_url(
-                coop_id=response.coop_id
-            )
-            if response.requester_is_coordinator
-            else None,
+            transfer_coordination_url=(
+                self.url_index.get_request_coordination_transfer_url(
+                    coop_id=response.coop_id
+                )
+                if response.requester_is_coordinator
+                else None
+            ),
             current_coordinator_id=str(response.current_coordinator),
             current_coordinator_name=response.current_coordinator_name,
             current_coordinator_url=self.url_index.get_company_summary_url(
@@ -59,9 +61,11 @@ class GetCoopSummarySuccessPresenter:
             list_of_coordinators_url=self.url_index.get_list_of_coordinators_url(
                 cooperation_id=response.coop_id,
             ),
-            coop_price="-"
-            if response.coop_price is None
-            else self.__format_price(response.coop_price),
+            coop_price=(
+                "-"
+                if response.coop_price is None
+                else self.__format_price(response.coop_price)
+            ),
             plans=[
                 AssociatedPlan(
                     plan_name=plan.plan_name,

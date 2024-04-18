@@ -8,7 +8,6 @@ LOGGER = getLogger(__name__)
 
 
 TARGET_PACKAGES = [
-    "deepdiff",
     "flask_babel",
     "flask_login",
     "flask_mail",

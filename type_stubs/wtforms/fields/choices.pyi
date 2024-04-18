@@ -1,14 +1,24 @@
-from _typeshed import Incomplete
 from collections.abc import Generator
+
+from _typeshed import Incomplete
 from wtforms.fields.core import Field
+
+__all__ = ["SelectField", "SelectMultipleField", "RadioField"]
 
 class SelectFieldBase(Field):
     option_widget: Incomplete
-    def __init__(self, label: Incomplete | None = ..., validators: Incomplete | None = ..., option_widget: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        label: Incomplete | None = None,
+        validators: Incomplete | None = None,
+        option_widget: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def iter_choices(self) -> None: ...
     def has_groups(self): ...
     def iter_groups(self) -> None: ...
     def __iter__(self): ...
+
     class _Option(Field):
         checked: bool
 
@@ -17,7 +27,15 @@ class SelectField(SelectFieldBase):
     coerce: Incomplete
     choices: Incomplete
     validate_choice: Incomplete
-    def __init__(self, label: Incomplete | None = ..., validators: Incomplete | None = ..., coerce=..., choices: Incomplete | None = ..., validate_choice: bool = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        label: Incomplete | None = None,
+        validators: Incomplete | None = None,
+        coerce=...,
+        choices: Incomplete | None = None,
+        validate_choice: bool = True,
+        **kwargs,
+    ) -> None: ...
     def iter_choices(self): ...
     def has_groups(self): ...
     def iter_groups(self) -> Generator[Incomplete, None, None]: ...

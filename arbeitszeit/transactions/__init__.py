@@ -52,9 +52,11 @@ class UserAccountingService:
             assert receiving_account_type
             yield AccountStatementRow(
                 transaction=transaction,
-                volume=-transaction.amount_sent
-                if user_is_sender
-                else transaction.amount_received,
+                volume=(
+                    -transaction.amount_sent
+                    if user_is_sender
+                    else transaction.amount_received
+                ),
                 transaction_type=self._get_transaction_type(
                     user_is_sender=user_is_sender,
                     sending_account=sending_account_type,

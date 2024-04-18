@@ -24,7 +24,7 @@ class ShowCompanyWorkInviteDetailsPresenter:
         if (details := response.details) is not None:
             return self.ViewModel(
                 answer_invite_url=self.url_index.get_answer_company_work_invite_url(
-                    invite_id=details.invite_id
+                    invite_id=details.invite_id, is_absolute=False
                 ),
                 explanation_text=self.translator.gettext(
                     'The company "%(company_name)s" invites you to join them. Do you want to accept this invitation?'

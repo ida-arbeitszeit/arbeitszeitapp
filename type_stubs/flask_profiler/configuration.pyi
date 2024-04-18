@@ -1,19 +1,27 @@
-from .database import Database as Database
-from .entities import measurement_archive as measurement_archive
-from .fallback_storage import MeasurementArchivistPlaceholder as MeasurementArchivistPlaceholder
-from .sqlite import Sqlite as Sqlite
+from typing import Any, Dict, Protocol
+
 from _typeshed import Incomplete
 from flask import Flask as Flask
-from typing import Any, Dict, Optional, Protocol
+
+from .database import Database as Database
+from .entities import measurement_archive as measurement_archive
+from .fallback_storage import (
+    MeasurementArchivistPlaceholder as MeasurementArchivistPlaceholder,
+)
+from .sqlite import Sqlite as Sqlite
 
 logger: Incomplete
 
-class MeasurementDatabase(measurement_archive.MeasurementArchivist, Database, Protocol): ...
+class MeasurementDatabase(
+    measurement_archive.MeasurementArchivist, Database, Protocol
+): ...
 
 class DeferredArchivist:
     configuration: Incomplete
     def __init__(self, configuration: Configuration) -> None: ...
-    def record_measurement(self, measurement: measurement_archive.Measurement) -> int: ...
+    def record_measurement(
+        self, measurement: measurement_archive.Measurement
+    ) -> int: ...
     def get_records(self) -> measurement_archive.RecordedMeasurements: ...
 
 class Configuration:
@@ -36,5 +44,5 @@ class Configuration:
     @property
     def collection(self) -> MeasurementDatabase: ...
     @classmethod
-    def cleanup_appcontext(cls, exception: Optional[BaseException]) -> None: ...
+    def cleanup_appcontext(cls, exception: BaseException | None) -> None: ...
     def read_config(self) -> Dict[str, Any]: ...

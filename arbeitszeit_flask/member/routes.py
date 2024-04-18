@@ -32,14 +32,12 @@ from .blueprint import MemberRoute
 
 @MemberRoute("/consumptions")
 @as_flask_view()
-class consumptions(QueryPrivateConsumptionsView):
-    ...
+class consumptions(QueryPrivateConsumptionsView): ...
 
 
 @MemberRoute("/register_private_consumption", methods=["GET", "POST"])
 @as_flask_view()
-class register_private_consumption(RegisterPrivateConsumptionView):
-    ...
+class register_private_consumption(RegisterPrivateConsumptionView): ...
 
 
 @MemberRoute("/dashboard")
@@ -102,5 +100,4 @@ class plan_details:
 
 @MemberRoute("/invite_details/<uuid:invite_id>", methods=["GET", "POST"])
 @as_flask_view()
-class show_company_work_invite(CompanyWorkInviteView):
-    ...
+class show_company_work_invite(CompanyWorkInviteView): ...

@@ -1,6 +1,8 @@
 from decimal import Decimal
 from uuid import UUID, uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.send_accountant_registration_token import (
@@ -100,12 +102,15 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    @parameterized.expand([True, False])
     def test_url_for_answering_existing_work_invite_leads_to_functional_url(
-        self,
+        self, is_absolute: bool
     ) -> None:
         member = self.login_member()
         invite_id = self._create_invite(member)
-        url = self.url_index.get_answer_company_work_invite_url(invite_id=invite_id)
+        url = self.url_index.get_answer_company_work_invite_url(
+            invite_id=invite_id, is_absolute=is_absolute
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

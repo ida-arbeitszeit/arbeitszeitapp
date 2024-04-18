@@ -58,6 +58,16 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         self.assertIsInstance(trans.purpose, str)
 
+    def test_that_sum_of_planned_p_is_rounded_to_two_decimal_places(self) -> None:
+        response = self._use_case_response(sum_of_planned_p=Decimal(10.002))
+        view_model = self.presenter.present(response)
+        assert view_model.sum_of_planned_p == "10.00"
+
+    def test_that_sum_of_consumed_p_is_rounded_to_two_decimal_places(self) -> None:
+        response = self._use_case_response(sum_of_consumed_p=Decimal(10.002))
+        view_model = self.presenter.present(response)
+        assert view_model.sum_of_consumed_p == "10.00"
+
     def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
         response = self._use_case_response(
             transactions=[DEFAULT_INFO1, DEFAULT_INFO2], account_balance=Decimal(100)
@@ -96,6 +106,8 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self,
         company_id: UUID = uuid4(),
         transactions: List[UseCase.TransactionInfo] | None = None,
+        sum_of_planned_p: Decimal = Decimal(0),
+        sum_of_consumed_p: Decimal = Decimal(0),
         account_balance: Decimal = Decimal(0),
         plot: UseCase.PlotDetails | None = None,
     ) -> UseCase.Response:
@@ -103,4 +115,11 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transactions = []
         if plot is None:
             plot = UseCase.PlotDetails([], [])
-        return UseCase.Response(company_id, transactions, account_balance, plot)
+        return UseCase.Response(
+            company_id=company_id,
+            transactions=transactions,
+            sum_of_planned_p=sum_of_planned_p,
+            sum_of_consumed_p=sum_of_consumed_p,
+            account_balance=account_balance,
+            plot=plot,
+        )

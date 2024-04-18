@@ -1,15 +1,51 @@
 from _typeshed import Incomplete
 
+__all__ = [
+    "DataRequired",
+    "data_required",
+    "Email",
+    "email",
+    "EqualTo",
+    "equal_to",
+    "IPAddress",
+    "ip_address",
+    "InputRequired",
+    "input_required",
+    "Length",
+    "length",
+    "NumberRange",
+    "number_range",
+    "Optional",
+    "optional",
+    "Regexp",
+    "regexp",
+    "URL",
+    "url",
+    "AnyOf",
+    "any_of",
+    "NoneOf",
+    "none_of",
+    "MacAddress",
+    "mac_address",
+    "UUID",
+    "ValidationError",
+    "StopValidation",
+    "readonly",
+    "ReadOnly",
+    "disabled",
+    "Disabled",
+]
+
 class ValidationError(ValueError):
-    def __init__(self, message: str = ..., *args, **kwargs) -> None: ...
+    def __init__(self, message: str = "", *args, **kwargs) -> None: ...
 
 class StopValidation(Exception):
-    def __init__(self, message: str = ..., *args, **kwargs) -> None: ...
+    def __init__(self, message: str = "", *args, **kwargs) -> None: ...
 
 class EqualTo:
     fieldname: Incomplete
     message: Incomplete
-    def __init__(self, fieldname, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, fieldname, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class Length:
@@ -17,7 +53,9 @@ class Length:
     max: Incomplete
     message: Incomplete
     field_flags: Incomplete
-    def __init__(self, min: int = ..., max: int = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self, min: int = -1, max: int = -1, message: Incomplete | None = None
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class NumberRange:
@@ -25,32 +63,39 @@ class NumberRange:
     max: Incomplete
     message: Incomplete
     field_flags: Incomplete
-    def __init__(self, min: Incomplete | None = ..., max: Incomplete | None = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        min: Incomplete | None = None,
+        max: Incomplete | None = None,
+        message: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class Optional:
     string_check: Incomplete
     field_flags: Incomplete
-    def __init__(self, strip_whitespace: bool = ...) -> None: ...
+    def __init__(self, strip_whitespace: bool = True) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class DataRequired:
     message: Incomplete
     field_flags: Incomplete
-    def __init__(self, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class InputRequired:
     message: Incomplete
     field_flags: Incomplete
-    def __init__(self, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class Regexp:
     regex: Incomplete
     message: Incomplete
-    def __init__(self, regex, flags: int = ..., message: Incomplete | None = ...) -> None: ...
-    def __call__(self, form, field, message: Incomplete | None = ...): ...
+    def __init__(
+        self, regex, flags: int = 0, message: Incomplete | None = None
+    ) -> None: ...
+    def __call__(self, form, field, message: Incomplete | None = None): ...
 
 class Email:
     message: Incomplete
@@ -58,14 +103,23 @@ class Email:
     check_deliverability: Incomplete
     allow_smtputf8: Incomplete
     allow_empty_local: Incomplete
-    def __init__(self, message: Incomplete | None = ..., granular_message: bool = ..., check_deliverability: bool = ..., allow_smtputf8: bool = ..., allow_empty_local: bool = ...) -> None: ...
+    def __init__(
+        self,
+        message: Incomplete | None = None,
+        granular_message: bool = False,
+        check_deliverability: bool = False,
+        allow_smtputf8: bool = True,
+        allow_empty_local: bool = False,
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class IPAddress:
     ipv4: Incomplete
     ipv6: Incomplete
     message: Incomplete
-    def __init__(self, ipv4: bool = ..., ipv6: bool = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self, ipv4: bool = True, ipv6: bool = False, message: Incomplete | None = None
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
     @classmethod
     def check_ipv4(cls, value): ...
@@ -73,24 +127,34 @@ class IPAddress:
     def check_ipv6(cls, value): ...
 
 class MacAddress(Regexp):
-    def __init__(self, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class URL(Regexp):
     validate_hostname: Incomplete
-    def __init__(self, require_tld: bool = ..., allow_ip: bool = ..., message: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        require_tld: bool = True,
+        allow_ip: bool = True,
+        message: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class UUID:
     message: Incomplete
-    def __init__(self, message: Incomplete | None = ...) -> None: ...
+    def __init__(self, message: Incomplete | None = None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 class AnyOf:
     values: Incomplete
     message: Incomplete
     values_formatter: Incomplete
-    def __init__(self, values, message: Incomplete | None = ..., values_formatter: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        values,
+        message: Incomplete | None = None,
+        values_formatter: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
     @staticmethod
     def default_values_formatter(values): ...
@@ -99,7 +163,12 @@ class NoneOf:
     values: Incomplete
     message: Incomplete
     values_formatter: Incomplete
-    def __init__(self, values, message: Incomplete | None = ..., values_formatter: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        values,
+        message: Incomplete | None = None,
+        values_formatter: Incomplete | None = None,
+    ) -> None: ...
     def __call__(self, form, field) -> None: ...
     @staticmethod
     def default_values_formatter(v): ...
@@ -109,7 +178,7 @@ class HostnameValidation:
     tld_part: Incomplete
     require_tld: Incomplete
     allow_ip: Incomplete
-    def __init__(self, require_tld: bool = ..., allow_ip: bool = ...) -> None: ...
+    def __init__(self, require_tld: bool = True, allow_ip: bool = False) -> None: ...
     def __call__(self, hostname): ...
 
 class ReadOnly:
@@ -121,6 +190,7 @@ class Disabled:
     field_flags: Incomplete
     def __init__(self) -> None: ...
     def __call__(self, form, field) -> None: ...
+
 email = Email
 equal_to = EqualTo
 ip_address = IPAddress

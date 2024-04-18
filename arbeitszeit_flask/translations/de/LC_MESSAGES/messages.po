@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
-"POT-Creation-Date: 2024-01-25 19:58+0100\n"
-"PO-Revision-Date: 2024-01-25 22:19+0100\n"
+"POT-Creation-Date: 2024-03-14 18:45+0100\n"
+"PO-Revision-Date: 2024-03-11 22:27+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
 "Language-Team: de <LL@li.org>\n"
@@ -32,16 +32,16 @@ msgstr "Zahl muss 0 oder größer sein."
 msgid "This field is required."
 msgstr "Dies ist ein Pflichtfeld."
 
-#: arbeitszeit_flask/forms.py:69 arbeitszeit_flask/forms.py:207
-#: arbeitszeit_flask/forms.py:208 arbeitszeit_flask/forms.py:349
+#: arbeitszeit_flask/forms.py:69 arbeitszeit_flask/forms.py:213
+#: arbeitszeit_flask/forms.py:214 arbeitszeit_flask/forms.py:359
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:27
 #: arbeitszeit_flask/templates/member/register_private_consumption.html:27
-#: arbeitszeit_web/formatters/plan_details_formatter.py:44
+#: arbeitszeit_web/formatters/plan_details_formatter.py:41
 msgid "Plan ID"
 msgstr "Plan-ID"
 
 #: arbeitszeit_flask/forms.py:70
-#: arbeitszeit_flask/templates/macros/draft_form.html:15
+#: arbeitszeit_flask/templates/macros/draft_form.html:12
 msgid "Product name"
 msgstr "Name des Produkts"
 
@@ -49,7 +49,7 @@ msgstr "Name des Produkts"
 msgid "Search Plans"
 msgstr "Pläne suchen"
 
-#: arbeitszeit_flask/forms.py:79 arbeitszeit_flask/forms.py:239
+#: arbeitszeit_flask/forms.py:79 arbeitszeit_flask/forms.py:245
 msgid "Search term"
 msgstr "Suchbegriff"
 
@@ -62,8 +62,8 @@ msgstr "Neuest"
 msgid "Company name"
 msgstr "Name Betrieb"
 
-#: arbeitszeit_flask/forms.py:104 arbeitszeit_flask/forms.py:142
-#: arbeitszeit_flask/forms.py:179 arbeitszeit_flask/forms.py:231
+#: arbeitszeit_flask/forms.py:104 arbeitszeit_flask/forms.py:148
+#: arbeitszeit_flask/forms.py:185 arbeitszeit_flask/forms.py:237
 #: arbeitszeit_flask/templates/auth/login_accountant.html:18
 #: arbeitszeit_flask/templates/auth/login_company.html:18
 #: arbeitszeit_flask/templates/auth/login_member.html:18
@@ -78,21 +78,25 @@ msgstr "E-Mail"
 msgid "Proper email address required"
 msgstr "Richtige E-Mail-Adresse erforderlich"
 
-#: arbeitszeit_flask/forms.py:112 arbeitszeit_flask/forms.py:150
-#: arbeitszeit_flask/forms.py:230 arbeitszeit_flask/forms.py:321
+#: arbeitszeit_flask/forms.py:112 arbeitszeit_flask/forms.py:156
+#: arbeitszeit_flask/forms.py:236 arbeitszeit_flask/forms.py:331
 #: arbeitszeit_flask/templates/auth/signup_accountant.html:27
 #: arbeitszeit_flask/templates/auth/signup_member.html:27
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:31
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:18
 #: arbeitszeit_flask/templates/company/my_consumptions.html:24
 #: arbeitszeit_flask/templates/macros/company_summary.html:20
-#: arbeitszeit_flask/templates/macros/coop_summary.html:16
 #: arbeitszeit_flask/templates/member/consumptions.html:27
+#: arbeitszeit_flask/templates/user/coop_summary.html:22
+#: arbeitszeit_flask/templates/user/list_all_cooperations.html:18
 msgid "Name"
 msgstr "Name"
 
-#: arbeitszeit_flask/forms.py:116 arbeitszeit_flask/forms.py:156
-#: arbeitszeit_flask/forms.py:188
+#: arbeitszeit_flask/forms.py:114 arbeitszeit_flask/forms.py:158
+msgid "Name is required"
+msgstr "Name ist erforderlich"
+
+#: arbeitszeit_flask/forms.py:118 arbeitszeit_flask/forms.py:162
+#: arbeitszeit_flask/forms.py:194
 #: arbeitszeit_flask/templates/auth/login_accountant.html:27
 #: arbeitszeit_flask/templates/auth/login_company.html:27
 #: arbeitszeit_flask/templates/auth/login_member.html:27
@@ -102,129 +106,127 @@ msgstr "Name"
 msgid "Password"
 msgstr "Passwort"
 
-#: arbeitszeit_flask/forms.py:120 arbeitszeit_flask/forms.py:160
+#: arbeitszeit_flask/forms.py:122 arbeitszeit_flask/forms.py:166
 msgid "The password must be at least 8 characters in length"
 msgstr "Das Passwort muss mindestens 8 Zeichen lang sein"
 
-#: arbeitszeit_flask/forms.py:145
+#: arbeitszeit_flask/forms.py:127
+msgid "Passwords must match"
+msgstr "Passwörter müssen übereinstimmen"
+
+#: arbeitszeit_flask/forms.py:131
+#: arbeitszeit_flask/templates/auth/signup_company.html:42
+#: arbeitszeit_flask/templates/auth/signup_member.html:45
+msgid "Repeat Password"
+msgstr "Passwort wiederholen"
+
+#: arbeitszeit_flask/forms.py:151
 msgid "Email address is required"
 msgstr "E-Mail-Adresse ist erforderlich"
 
-#: arbeitszeit_flask/forms.py:152
-msgid "Name is required"
-msgstr "Name ist erforderlich"
-
-#: arbeitszeit_flask/forms.py:182
+#: arbeitszeit_flask/forms.py:188
 msgid "Email address required"
 msgstr "E-Mail-Adresse erforderlich"
 
-#: arbeitszeit_flask/forms.py:190
+#: arbeitszeit_flask/forms.py:196
 msgid "Password is required"
 msgstr "Passwort ist erforderlich"
 
-#: arbeitszeit_flask/forms.py:193
+#: arbeitszeit_flask/forms.py:199
 msgid "Remember login?"
 msgstr "Login merken?"
 
-#: arbeitszeit_flask/forms.py:214 arbeitszeit_flask/forms.py:215
-#: arbeitszeit_flask/forms.py:355 arbeitszeit_flask/plots/routes.py:88
+#: arbeitszeit_flask/forms.py:220 arbeitszeit_flask/forms.py:221
+#: arbeitszeit_flask/forms.py:365 arbeitszeit_flask/plots/routes.py:93
 #: arbeitszeit_flask/templates/company/my_consumptions.html:28
 #: arbeitszeit_flask/templates/company/register_hours_worked.html:20
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:33
 #: arbeitszeit_flask/templates/macros/draft_form.html:54
 #: arbeitszeit_flask/templates/member/consumptions.html:30
 #: arbeitszeit_flask/templates/member/register_private_consumption.html:33
-#: arbeitszeit_web/formatters/plan_details_formatter.py:76
+#: arbeitszeit_web/formatters/plan_details_formatter.py:73
 msgid "Amount"
 msgstr "Menge"
 
-#: arbeitszeit_flask/forms.py:234
+#: arbeitszeit_flask/forms.py:240
 msgid "Search for company"
 msgstr "Betrieb suchen"
 
-#: arbeitszeit_flask/forms.py:275
+#: arbeitszeit_flask/forms.py:266
+msgid "Days"
+msgstr "Tage"
+
+#: arbeitszeit_flask/forms.py:274 arbeitszeit_flask/forms.py:278
+#: arbeitszeit_flask/forms.py:282 arbeitszeit_flask/plots/routes.py:43
+#: arbeitszeit_flask/plots/routes.py:74
+msgid "Hours"
+msgstr "Stunden"
+
+#: arbeitszeit_flask/forms.py:285
 msgid "This plan is a public service"
 msgstr "Dieser Plan ist eine öffentliche Dienstleistung"
 
-#: arbeitszeit_flask/forms.py:310
+#: arbeitszeit_flask/forms.py:320
 msgid "Required"
 msgstr "Erforderlich"
 
-#: arbeitszeit_flask/forms.py:312
+#: arbeitszeit_flask/forms.py:322
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:30
 msgid "Member ID"
 msgstr "Mitglied ID"
 
-#: arbeitszeit_flask/forms.py:325
-#: arbeitszeit_flask/templates/macros/coop_summary.html:20
+#: arbeitszeit_flask/forms.py:335
+#: arbeitszeit_flask/templates/user/coop_summary.html:26
 msgid "Definition"
 msgstr "Definition"
 
-#: arbeitszeit_flask/forms.py:362
+#: arbeitszeit_flask/forms.py:372
 #: arbeitszeit_web/www/presenters/company_consumptions_presenter.py:63
 msgid "Fixed means of production"
 msgstr "Feste Produktionsmittel"
 
-#: arbeitszeit_flask/forms.py:365
+#: arbeitszeit_flask/forms.py:375
 #: arbeitszeit_web/www/presenters/company_consumptions_presenter.py:61
 msgid "Liquid means of production"
 msgstr "Flüssige Produktionsmittel"
 
-#: arbeitszeit_flask/forms.py:369
+#: arbeitszeit_flask/forms.py:379
 msgid "Type of consumption"
 msgstr "Art des Konsums"
 
-#: arbeitszeit_flask/forms.py:407
+#: arbeitszeit_flask/forms.py:417
 msgid "Email address is required."
 msgstr "E-Mail-Adresse ist erforderlich."
 
-#: arbeitszeit_flask/plots/routes.py:29
+#: arbeitszeit_flask/plots/routes.py:34
 msgid "Work certificates"
 msgstr "Arbeitszertifikate"
 
-#: arbeitszeit_flask/plots/routes.py:30
+#: arbeitszeit_flask/plots/routes.py:35
 msgid "Available product"
 msgstr "Verfügbares Produkt"
 
-#: arbeitszeit_flask/plots/routes.py:38 arbeitszeit_flask/plots/routes.py:69
-msgid "Hours"
-msgstr "Stunden"
-
-#: arbeitszeit_flask/plots/routes.py:54
+#: arbeitszeit_flask/plots/routes.py:59
 msgctxt "Text should be short"
 msgid "Fixed means"
 msgstr "Feste PM"
 
-#: arbeitszeit_flask/plots/routes.py:55
+#: arbeitszeit_flask/plots/routes.py:60
 msgctxt "Text should be short"
 msgid "Liquid means"
 msgstr "Flüssige PM"
 
-#: arbeitszeit_flask/plots/routes.py:56
+#: arbeitszeit_flask/plots/routes.py:61
 msgid "Work"
 msgstr "Arbeit"
 
-#: arbeitszeit_flask/plots/routes.py:82
+#: arbeitszeit_flask/plots/routes.py:87
 msgid "Productive plans"
 msgstr "Produktive Pläne"
 
-#: arbeitszeit_flask/plots/routes.py:83
+#: arbeitszeit_flask/plots/routes.py:88
 msgid "Public plans"
 msgstr "Öffentliche Pläne"
-
-#: arbeitszeit_flask/templates/accountant/coop_summary.html:4
-#: arbeitszeit_flask/templates/company/coop_summary.html:4
-#: arbeitszeit_flask/templates/company/my_cooperations.html:144
-#: arbeitszeit_flask/templates/company/my_cooperations.html:185
-#: arbeitszeit_flask/templates/company/request_coordination_transfer.html:26
-#: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:19
-#: arbeitszeit_flask/templates/macros/coop_summary.html:5
-#: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:12
-#: arbeitszeit_flask/templates/member/coop_summary.html:4
-#: arbeitszeit_web/www/presenters/list_coordinations_of_cooperation_presenter.py:70
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:31
-msgid "Cooperation"
-msgstr "Kooperation"
 
 #: arbeitszeit_flask/templates/accountant/dashboard.html:7
 #: arbeitszeit_flask/templates/company/dashboard.html:7
@@ -270,7 +272,7 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/accountant/plan_details.html:4
 #: arbeitszeit_flask/templates/company/plan_details.html:4
-#: arbeitszeit_flask/templates/macros/plan_details.html:5
+#: arbeitszeit_flask/templates/macros/plan_details.html:6
 #: arbeitszeit_flask/templates/member/plan_details.html:4
 msgid "Plan information"
 msgstr "Planinformationen"
@@ -338,8 +340,8 @@ msgid "Sign up accountant"
 msgstr "Buchhalter*in registrieren"
 
 #: arbeitszeit_flask/templates/auth/signup_accountant.html:43
-#: arbeitszeit_flask/templates/auth/signup_company.html:40
-#: arbeitszeit_flask/templates/auth/signup_member.html:43
+#: arbeitszeit_flask/templates/auth/signup_company.html:48
+#: arbeitszeit_flask/templates/auth/signup_member.html:52
 msgid "Sign Up"
 msgstr "Registrieren"
 
@@ -347,8 +349,8 @@ msgstr "Registrieren"
 msgid "Sign up company"
 msgstr "Betrieb registrieren"
 
-#: arbeitszeit_flask/templates/auth/signup_company.html:45
-#: arbeitszeit_flask/templates/auth/signup_member.html:48
+#: arbeitszeit_flask/templates/auth/signup_company.html:53
+#: arbeitszeit_flask/templates/auth/signup_member.html:57
 msgid "Click here to log in with an existing account."
 msgstr "Klicke hier um dich mit einem existierenden Konto anzumelden."
 
@@ -368,7 +370,7 @@ msgstr "Mitglied"
 
 #: arbeitszeit_flask/templates/auth/start.html:14
 #: arbeitszeit_flask/templates/company/dashboard.html:66
-#: arbeitszeit_flask/templates/company/my_cooperations.html:86
+#: arbeitszeit_flask/templates/company/my_cooperations.html:70
 msgid "Company"
 msgstr "Betrieb"
 
@@ -377,7 +379,7 @@ msgid "Accountant"
 msgstr "Buchhalter*in"
 
 #: arbeitszeit_flask/templates/auth/start.html:18
-#: arbeitszeit_flask/templates/company/dashboard.html:120
+#: arbeitszeit_flask/templates/company/dashboard.html:134
 #: arbeitszeit_flask/templates/member/dashboard.html:86
 msgid "Latest plans"
 msgstr "Neueste Pläne"
@@ -410,72 +412,6 @@ msgstr "Du hast keine E-Mail erhalten?"
 #: arbeitszeit_flask/templates/auth/unconfirmed_member.html:17
 msgid "Resend mail"
 msgstr "E-Mail erneut senden"
-
-#: arbeitszeit_flask/templates/company/account_a.html:4
-#: arbeitszeit_flask/templates/company/account_p.html:4
-#: arbeitszeit_flask/templates/company/account_prd.html:4
-#: arbeitszeit_flask/templates/company/account_r.html:4
-#: arbeitszeit_flask/templates/company/dashboard.html:82
-#: arbeitszeit_flask/templates/company/list_all_transactions.html:4
-#: arbeitszeit_flask/templates/company/my_accounts.html:4
-#: arbeitszeit_flask/templates/company/my_accounts.html:13
-msgid "Accounts"
-msgstr "Konten"
-
-#: arbeitszeit_flask/templates/company/account_a.html:5
-#: arbeitszeit_flask/templates/company/account_a.html:16
-#: arbeitszeit_flask/templates/company/my_accounts.html:54
-#: arbeitszeit_flask/templates/macros/company_summary.html:52
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:60
-msgid "Account a"
-msgstr "A-Konto"
-
-#: arbeitszeit_flask/templates/company/account_a.html:21
-msgid "The account for work certificates"
-msgstr "Das Konto für Arbeitszertifikate"
-
-#: arbeitszeit_flask/templates/company/account_a.html:23
-#: arbeitszeit_flask/templates/company/account_p.html:23
-#: arbeitszeit_flask/templates/company/account_prd.html:22
-#: arbeitszeit_flask/templates/company/account_r.html:23
-msgid "Balance:"
-msgstr "Kontostand:"
-
-#: arbeitszeit_flask/templates/company/account_p.html:5
-#: arbeitszeit_flask/templates/company/account_p.html:16
-#: arbeitszeit_flask/templates/company/my_accounts.html:32
-#: arbeitszeit_flask/templates/macros/company_summary.html:48
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:58
-msgid "Account p"
-msgstr "P-Konto"
-
-#: arbeitszeit_flask/templates/company/account_p.html:21
-msgid "The account for fixed means of production."
-msgstr "Das Konto für feste Produktionsmittel."
-
-#: arbeitszeit_flask/templates/company/account_prd.html:5
-#: arbeitszeit_flask/templates/company/account_prd.html:16
-#: arbeitszeit_flask/templates/company/my_accounts.html:65
-#: arbeitszeit_flask/templates/macros/company_summary.html:55
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:61
-msgid "Account prd"
-msgstr "Prd-Konto"
-
-#: arbeitszeit_flask/templates/company/account_prd.html:20
-msgid "The account for product transfers (sales)."
-msgstr "Das Konto für Produktweitergaben (Verkäufe)."
-
-#: arbeitszeit_flask/templates/company/account_r.html:5
-#: arbeitszeit_flask/templates/company/account_r.html:16
-#: arbeitszeit_flask/templates/company/my_accounts.html:43
-#: arbeitszeit_flask/templates/macros/company_summary.html:50
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:59
-msgid "Account r"
-msgstr "R-Konto"
-
-#: arbeitszeit_flask/templates/company/account_r.html:21
-msgid "The account for liquid means of production"
-msgstr "Das Konto für flüssige Produktionsmittel"
 
 #: arbeitszeit_flask/templates/company/create_cooperation.html:4
 #: arbeitszeit_flask/templates/company/my_cooperations.html:4
@@ -529,7 +465,7 @@ msgid "Save as draft"
 msgstr "Als Entwurf speichern"
 
 #: arbeitszeit_flask/templates/company/create_draft.html:42
-#: arbeitszeit_flask/templates/company/my_cooperations.html:153
+#: arbeitszeit_flask/templates/company/my_cooperations.html:137
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -564,8 +500,8 @@ msgstr "Dein Betrieb"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:73
 #: arbeitszeit_flask/templates/macros/company_summary.html:107
-#: arbeitszeit_flask/templates/macros/statistics.html:24
-#: arbeitszeit_flask/templates/macros/statistics.html:45
+#: arbeitszeit_flask/templates/user/statistics.html:30
+#: arbeitszeit_flask/templates/user/statistics.html:51
 msgid "Plans"
 msgstr "Pläne"
 
@@ -573,64 +509,67 @@ msgstr "Pläne"
 msgid "Your plans"
 msgstr "Deine Pläne"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:83
-msgid "You have four accounts"
-msgstr "Du hast vier Konten"
-
-#: arbeitszeit_flask/templates/company/dashboard.html:91
-#: arbeitszeit_flask/templates/macros/statistics.html:30
+#: arbeitszeit_flask/templates/company/dashboard.html:93
+#: arbeitszeit_flask/templates/user/statistics.html:36
 msgid "Cooperations"
 msgstr "Kooperationen"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:93
+#: arbeitszeit_flask/templates/company/dashboard.html:95
 msgid "Your cooperations"
 msgstr "Deine Kooperationen"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:99
+#: arbeitszeit_flask/templates/company/dashboard.html:101
 msgid "Consumptions"
 msgstr "Verbräuche"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:101
+#: arbeitszeit_flask/templates/company/dashboard.html:103
 msgid "Your consumptions"
 msgstr "Deine Verbräuche"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:107
-#: arbeitszeit_flask/templates/macros/statistics.html:18
+#: arbeitszeit_flask/templates/company/dashboard.html:109
+msgid "Product transfers"
+msgstr "Produktweitergaben"
+
+#: arbeitszeit_flask/templates/company/dashboard.html:111
+msgid "Your product transfers"
+msgstr "Deine Produktweitergaben"
+
+#: arbeitszeit_flask/templates/company/dashboard.html:119
+#: arbeitszeit_flask/templates/user/statistics.html:24
 msgid "Workers"
 msgstr "Arbeiter*innen"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:108
+#: arbeitszeit_flask/templates/company/dashboard.html:120
 msgid "Members of your collective"
 msgstr "Mitglieder deines Kollektivs"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:113
+#: arbeitszeit_flask/templates/company/dashboard.html:127
 #: arbeitszeit_flask/templates/member/dashboard.html:79
 msgid "Public accounting"
 msgstr "Öffentliche Buchhaltung"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:139
-#: arbeitszeit_flask/templates/company/statistics.html:4
-#: arbeitszeit_flask/templates/macros/statistics.html:5
+#: arbeitszeit_flask/templates/company/dashboard.html:153
 #: arbeitszeit_flask/templates/member/dashboard.html:105
-#: arbeitszeit_flask/templates/member/statistics.html:4
+#: arbeitszeit_flask/templates/user/statistics.html:4
+#: arbeitszeit_flask/templates/user/statistics.html:11
 msgid "Global statistics"
 msgstr "Globale Statistiken"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:147
+#: arbeitszeit_flask/templates/company/dashboard.html:161
 #: arbeitszeit_flask/templates/member/dashboard.html:113
 #: arbeitszeit_flask/templates/user/query_companies.html:4
 msgid "All companies"
 msgstr "Alle Betriebe"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:154
+#: arbeitszeit_flask/templates/company/dashboard.html:168
 #: arbeitszeit_flask/templates/member/dashboard.html:120
 #: arbeitszeit_flask/templates/user/query_plans.html:5
 msgid "All plans"
 msgstr "Alle Pläne"
 
-#: arbeitszeit_flask/templates/company/dashboard.html:163
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:4
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:11
+#: arbeitszeit_flask/templates/company/dashboard.html:177
+#: arbeitszeit_flask/templates/user/list_all_cooperations.html:4
+#: arbeitszeit_flask/templates/user/list_all_cooperations.html:11
 msgid "All cooperations"
 msgstr "Alle Kooperationen"
 
@@ -646,48 +585,6 @@ msgstr "Einladen"
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:26
 msgid "Workers of the company"
 msgstr "Arbeiter*innen des Betriebs"
-
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:19
-#: arbeitszeit_flask/templates/company/my_cooperations.html:59
-msgid "Number of plans"
-msgstr "Anzahl Pläne"
-
-#: arbeitszeit_flask/templates/company/list_all_cooperations.html:34
-msgid "No cooperations found"
-msgstr "Keine Kooperationen gefunden"
-
-#: arbeitszeit_flask/templates/company/list_all_transactions.html:5
-#: arbeitszeit_flask/templates/company/list_all_transactions.html:15
-msgid "All transactions"
-msgstr "Alle Transaktionen"
-
-#: arbeitszeit_flask/templates/company/list_all_transactions.html:20
-msgid "All transactions made or received so far."
-msgstr "Alle bisher getätigten oder erhaltenen Transaktionen."
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:17
-msgid "Each company has four accounts."
-msgstr "Jeder Betrieb hat vier Konten."
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:35
-msgid "Account for fixed means of production"
-msgstr "Konto für feste Produktionsmittel"
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:46
-msgid "Account for liquid means of production"
-msgstr "Konto für flüssige Produktionsmittel"
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:57
-msgid "Account for work certificates (wages)"
-msgstr "Konto für Arbeitszertifikate (Löhne)"
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:67
-msgid "Account for product transfers (sales)"
-msgstr "Konto für Produktweitergaben (Verkäufe)"
-
-#: arbeitszeit_flask/templates/company/my_accounts.html:76
-msgid "List all transactions"
-msgstr "Alle Transaktionen anzeigen"
 
 #: arbeitszeit_flask/templates/company/my_consumptions.html:4
 #: arbeitszeit_flask/templates/member/consumptions.html:4
@@ -739,49 +636,66 @@ msgstr "Kooperation erstellen "
 msgid "Cooperations that I coordinate"
 msgstr "Kooperationen, die ich koordiniere"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:66
+#: arbeitszeit_flask/templates/company/my_cooperations.html:43
+#: arbeitszeit_flask/templates/user/list_all_cooperations.html:19
+msgid "Number of plans"
+msgstr "Anzahl Pläne"
+
+#: arbeitszeit_flask/templates/company/my_cooperations.html:50
 msgid "You do not coordinate any cooperation"
 msgstr "Du koordinierst keine Kooperationen"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:74
+#: arbeitszeit_flask/templates/company/my_cooperations.html:58
 msgid "Incoming cooperation request (by others)"
 msgstr "Eingehende Kooperationsanfragen (von anderen)"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:91
-#: arbeitszeit_flask/templates/company/my_cooperations.html:140
+#: arbeitszeit_flask/templates/company/my_cooperations.html:75
+#: arbeitszeit_flask/templates/company/my_cooperations.html:124
 msgid "Plan"
 msgstr "Plan"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:95
+#: arbeitszeit_flask/templates/company/my_cooperations.html:79
 msgid "My cooperation"
 msgstr "Meine Kooperation"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:104
+#: arbeitszeit_flask/templates/company/my_cooperations.html:88
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:10
 msgid "Accept"
 msgstr "Annehmen"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:109
+#: arbeitszeit_flask/templates/company/my_cooperations.html:93
 msgid "Decline"
 msgstr "Ablehnen"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:121
+#: arbeitszeit_flask/templates/company/my_cooperations.html:105
 msgid "You don't have open requests"
 msgstr "Du hast keine offenen Anfragen"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:128
+#: arbeitszeit_flask/templates/company/my_cooperations.html:112
 msgid "Outgoing cooperation requests (own requests)"
 msgstr "Ausgehende Kooperationsanfragen (eigene Anfragen)"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:162
+#: arbeitszeit_flask/templates/company/my_cooperations.html:128
+#: arbeitszeit_flask/templates/company/my_cooperations.html:169
+#: arbeitszeit_flask/templates/company/request_coordination_transfer.html:26
+#: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:19
+#: arbeitszeit_flask/templates/user/coop_summary.html:4
+#: arbeitszeit_flask/templates/user/coop_summary.html:11
+#: arbeitszeit_flask/templates/user/list_coordinations_of_cooperation.html:19
+#: arbeitszeit_web/www/presenters/list_coordinations_of_cooperation_presenter.py:67
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:28
+msgid "Cooperation"
+msgstr "Kooperation"
+
+#: arbeitszeit_flask/templates/company/my_cooperations.html:146
 msgid "You haven't requested any cooperation"
 msgstr "Du hast keine Kooperationen angefragt"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:170
+#: arbeitszeit_flask/templates/company/my_cooperations.html:154
 msgid "My cooperating plans"
 msgstr "Meine kooperierenden Pläne"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:192
+#: arbeitszeit_flask/templates/company/my_cooperations.html:176
 msgid "You don't have any cooperating plans."
 msgstr "DU hast keine kooperierenden Pläne."
 
@@ -791,90 +705,85 @@ msgid "My plans"
 msgstr "Meine Pläne"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:13
-#: arbeitszeit_web/formatters/plan_details_formatter.py:47
+#: arbeitszeit_web/formatters/plan_details_formatter.py:44
 #: arbeitszeit_web/www/presenters/get_company_summary_presenter.py:112
 msgid "Active"
 msgstr "Aktiv"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:32
 #: arbeitszeit_flask/templates/user/query_plans.html:72
-msgid "Product not available"
-msgstr "Produkt nicht verfügbar"
-
-#: arbeitszeit_flask/templates/company/my_plans.html:35
-#: arbeitszeit_flask/templates/user/query_plans.html:75
 msgid "Cooperating plan"
 msgstr "Kooperierender Plan"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:38
-#: arbeitszeit_flask/templates/user/query_plans.html:78
-#: arbeitszeit_web/formatters/plan_details_formatter.py:91
-#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:198
+#: arbeitszeit_flask/templates/company/my_plans.html:35
+#: arbeitszeit_flask/templates/user/query_plans.html:75
+#: arbeitszeit_web/formatters/plan_details_formatter.py:88
+#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:196
 msgid "Public"
 msgstr "Öffentlich"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:52
+#: arbeitszeit_flask/templates/company/my_plans.html:49
 msgid "You don't have active plans."
 msgstr "Du hast keine aktiven Pläne."
 
-#: arbeitszeit_flask/templates/company/my_plans.html:57
+#: arbeitszeit_flask/templates/company/my_plans.html:54
 msgid "Waiting"
 msgstr "Wartend"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:64
+#: arbeitszeit_flask/templates/company/my_plans.html:61
 msgid "Costs"
 msgstr "Kosten"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:65
-#: arbeitszeit_web/formatters/plan_details_formatter.py:90
+#: arbeitszeit_flask/templates/company/my_plans.html:62
+#: arbeitszeit_web/formatters/plan_details_formatter.py:87
 msgid "Type"
 msgstr "Typ"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:66
+#: arbeitszeit_flask/templates/company/my_plans.html:63
 msgid "Plan created"
 msgstr "Plan erstellt"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:67
+#: arbeitszeit_flask/templates/company/my_plans.html:64
 msgid "Revoke"
 msgstr "Widerrufen"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:79
+#: arbeitszeit_flask/templates/company/my_plans.html:76
 msgid "Revoke plan filing"
 msgstr "Planeinreichung widerrufen"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:92
+#: arbeitszeit_flask/templates/company/my_plans.html:89
 msgid "You don't have plans waiting for activation."
 msgstr "Du hast keine Pläne, die auf Aktivierung warten."
 
-#: arbeitszeit_flask/templates/company/my_plans.html:99
+#: arbeitszeit_flask/templates/company/my_plans.html:96
 msgid "Drafts"
 msgstr "Entwürfe"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:120
+#: arbeitszeit_flask/templates/company/my_plans.html:117
 msgid "File plan"
 msgstr "Plan einreichen"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:126
+#: arbeitszeit_flask/templates/company/my_plans.html:123
 msgid "Delete plan"
 msgstr "Plan löschen"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:132
+#: arbeitszeit_flask/templates/company/my_plans.html:129
 msgid "Edit plan"
 msgstr "Plan bearbeiten"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:142
+#: arbeitszeit_flask/templates/company/my_plans.html:139
 msgid "You don't have any drafts saved."
 msgstr "Du hast keine Entwürfe gespeichert."
 
-#: arbeitszeit_flask/templates/company/my_plans.html:147
+#: arbeitszeit_flask/templates/company/my_plans.html:144
 msgid "Expired"
 msgstr "Abgelaufen"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:168
+#: arbeitszeit_flask/templates/company/my_plans.html:165
 msgid "Renew plan"
 msgstr "Plan erneuern"
 
-#: arbeitszeit_flask/templates/company/my_plans.html:181
+#: arbeitszeit_flask/templates/company/my_plans.html:178
 msgid "You don't have expired plans."
 msgstr "Du hast keine abgelaufenen Pläne."
 
@@ -893,23 +802,19 @@ msgstr "Aktionen"
 msgid "Register consumption"
 msgstr "Registriere Konsum"
 
-#: arbeitszeit_flask/templates/company/plan_details.html:44
-msgid "Change availability:"
-msgstr "Verfügbarkeit ändern:"
-
-#: arbeitszeit_flask/templates/company/plan_details.html:56
+#: arbeitszeit_flask/templates/company/plan_details.html:45
 msgid "End cooperation:"
 msgstr "Kooperation beenden:"
 
-#: arbeitszeit_flask/templates/company/plan_details.html:58
+#: arbeitszeit_flask/templates/company/plan_details.html:47
 msgid "End"
 msgstr "Beenden"
 
-#: arbeitszeit_flask/templates/company/plan_details.html:61
+#: arbeitszeit_flask/templates/company/plan_details.html:50
 msgid "Join a cooperation"
 msgstr "Einer Kooperation beitreten"
 
-#: arbeitszeit_flask/templates/company/plan_details.html:63
+#: arbeitszeit_flask/templates/company/plan_details.html:52
 msgid "Join"
 msgstr "Beitreten"
 
@@ -984,6 +889,14 @@ msgstr "Kandidaten-ID"
 msgid "Request transfer"
 msgstr "Übergabe anfragen"
 
+#: arbeitszeit_flask/templates/company/review_registered_consumptions.html:4
+msgid "My product transfers"
+msgstr "Meine Produktweitergaben"
+
+#: arbeitszeit_flask/templates/company/review_registered_consumptions.html:10
+msgid "My product transfers (sales)"
+msgstr "Meine Produktweitergaben (Verkäufe)"
+
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:5
 msgid "Coordination Transfer Request"
 msgstr "Anfrage Koordinationsübergabe"
@@ -994,7 +907,7 @@ msgstr "Anfragedatum"
 
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:15
 #: arbeitszeit_flask/templates/macros/company_summary.html:116
-#: arbeitszeit_web/formatters/plan_details_formatter.py:46
+#: arbeitszeit_web/formatters/plan_details_formatter.py:43
 msgid "Status"
 msgstr "Status"
 
@@ -1040,7 +953,7 @@ msgid "Company overview"
 msgstr "Betriebsübersicht"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:16
-#: arbeitszeit_flask/templates/macros/coop_summary.html:12
+#: arbeitszeit_flask/templates/user/coop_summary.html:18
 msgid "ID"
 msgstr "ID"
 
@@ -1051,6 +964,38 @@ msgstr "Angemeldet seit"
 #: arbeitszeit_flask/templates/macros/company_summary.html:39
 msgid "Metrics"
 msgstr "Kennzahlen"
+
+#: arbeitszeit_flask/templates/macros/company_summary.html:48
+#: arbeitszeit_flask/templates/user/company_account_p.html:16
+#: arbeitszeit_flask/templates/user/company_accounts.html:32
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:66
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:54
+msgid "Account p"
+msgstr "P-Konto"
+
+#: arbeitszeit_flask/templates/macros/company_summary.html:50
+#: arbeitszeit_flask/templates/user/company_account_r.html:16
+#: arbeitszeit_flask/templates/user/company_accounts.html:43
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:67
+#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:52
+msgid "Account r"
+msgstr "R-Konto"
+
+#: arbeitszeit_flask/templates/macros/company_summary.html:52
+#: arbeitszeit_flask/templates/user/company_account_a.html:16
+#: arbeitszeit_flask/templates/user/company_accounts.html:54
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:68
+#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:52
+msgid "Account a"
+msgstr "A-Konto"
+
+#: arbeitszeit_flask/templates/macros/company_summary.html:55
+#: arbeitszeit_flask/templates/user/company_account_prd.html:16
+#: arbeitszeit_flask/templates/user/company_accounts.html:65
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:69
+#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:59
+msgid "Account prd"
+msgstr "Prd-Konto"
 
 #: arbeitszeit_flask/templates/macros/company_summary.html:61
 msgid "Expectations"
@@ -1084,76 +1029,15 @@ msgstr "Verkaufsabweichung"
 msgid "Sales deviation (&percnt;)"
 msgstr "Verkaufsabweichung (&percnt;)"
 
-#: arbeitszeit_flask/templates/macros/coop_summary.html:26
-msgid "Current coordinator"
-msgstr "Aktuelle*r Koordinator*in"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:35
-msgid "Transfer coordination"
-msgstr "Koordination übergeben"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:42
-#: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:5
-msgid "History of coordinators"
-msgstr "Abfolge von Koordinator*innen"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:47
-msgid "Cooperation price"
-msgstr "Kooperationspreis"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:57
-msgid "Participating plans"
-msgstr "Teilnehmende Pläne"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:79
-msgid "End cooperation"
-msgstr "Kooperation beenden"
-
-#: arbeitszeit_flask/templates/macros/coop_summary.html:90
-msgid "Individual price"
-msgstr "Individualpreis"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:22
-msgid "Product description"
-msgstr "Produktbeschreibung"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:34
-#: arbeitszeit_web/formatters/plan_details_formatter.py:68
-msgid "Planning timeframe (days)"
-msgstr "Planungszeitraum (Tage)"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:46
-#: arbeitszeit_web/formatters/plan_details_formatter.py:73
-msgid "Smallest delivery unit"
-msgstr "Kleinste Abgabeeinheit"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:49
-msgid ""
-"E.g. 1 package of 100 pieces, 1 kilogram, 1 language lesson of 1.5 hour, "
-"etc."
-msgstr ""
-"Z.B. 1 Packung à 100 Stück, 1 Kilogramm, 1 Sprachunterrichtseinheit à 1,5 "
-"Stunden, etc."
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:66
-#: arbeitszeit_web/formatters/plan_details_formatter.py:78
-msgid "Costs for fixed means of production"
-msgstr "Kosten für feste Produktionsmittel"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:73
-#: arbeitszeit_web/formatters/plan_details_formatter.py:82
-msgid "Costs for liquid means of production"
-msgstr "Kosten für flüssige Produktionsmittel"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:80
-msgid "Costs for labour"
-msgstr "Kosten für Arbeit"
-
-#: arbeitszeit_flask/templates/macros/draft_form.html:98
+#: arbeitszeit_flask/templates/macros/draft_form.html:9
 msgid "Specify product name and description."
 msgstr "Gib Produktname und Produktbeschreibung an."
 
-#: arbeitszeit_flask/templates/macros/draft_form.html:99
+#: arbeitszeit_flask/templates/macros/draft_form.html:19
+msgid "Product description"
+msgstr "Produktbeschreibung"
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:28
 msgid ""
 "Choose a planning timeframe in which you are planning to produce and "
 "deliver your product."
@@ -1161,21 +1045,93 @@ msgstr ""
 "Wähle einen Planungszeitraum, in dem du planst, dein Produkt herzustellen "
 "und zu liefern."
 
-#: arbeitszeit_flask/templates/macros/draft_form.html:100
-msgid "Estimate what costs you will have in the given timeframe."
-msgstr "Schätze, welche Kosten du im angegebenen Zeitraum haben wirst."
+#: arbeitszeit_flask/templates/macros/draft_form.html:31
+msgid "Planning timeframe"
+msgstr "Planungszeitraum"
 
-#: arbeitszeit_flask/templates/macros/draft_form.html:101
+#: arbeitszeit_flask/templates/macros/draft_form.html:41
 msgid ""
-"Describe the smallest delivery unit and what amount of these units you will"
-" produce."
+"This value is used for informational purposes only, i.e. you do not have to"
+" adhere to any rules here. For example, if you plan to produce beverages, "
+"you are free to choose if your smallest delivery unit is one can or one "
+"six-pack of cans."
 msgstr ""
-"Beschreibe die kleinste Abgabeeinheit und welche Menge von diesen Einheiten"
-" du produzieren wirst."
+"Dieser Wert dient nur zu Informationszwecken, du musst dich hier an keine "
+"Regeln halten. Wenn du z.B. planst, Getränke herzustellen, könnte deine "
+"kleinste Abgabeeinheit sowohl eine Dose als auch ein Sixpack sein."
 
-#: arbeitszeit_flask/templates/macros/draft_form.html:102
-msgid "The type of plan. Productive plans are the norm."
-msgstr "Die Art des Plans. Produktive Pläne sind die Regel."
+#: arbeitszeit_flask/templates/macros/draft_form.html:43
+#: arbeitszeit_web/formatters/plan_details_formatter.py:70
+msgid "Smallest delivery unit"
+msgstr "Kleinste Abgabeeinheit"
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:46
+msgid "E.g. 1 package, 1 kilogram, 20 bottles, 1 language lesson, etc."
+msgstr "Z.B. 1 Packung, 1 Kilogramm, 20 Flaschen, 1 Lektion Sprachunterricht, etc."
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:52
+msgid ""
+"How many of your \"smallest delivery unit\" will you produce in total? By "
+"dividing the sum of your production costs by this amount, the app "
+"calculates how much labour time is required to produce one piece of your "
+"product."
+msgstr ""
+"Wie viel deiner \"kleinsten Abgabeeinheit\" wirst du insgesamt produzieren?"
+" Indem die App die Summe der Produktionskosten durch diesen Wert teilt, "
+"errechnet sie wie viel Arbeitszeit es braucht, um eine Einheit deines "
+"Produktes herzustellen."
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:64
+#: arbeitszeit_flask/templates/macros/plan_details.html:126
+msgid ""
+"This field is mainly to account for wear and tear of machines. E.g. if you "
+"plan to use a machine that cost 10000 hours to produce, for 10 years, and "
+"you have ten one-year-plans, then for this fixed mean of production, the "
+"value would be 1000."
+msgstr ""
+"Dieses Feld wird hauptsächlich dafür genutzt, der Abnutzung von Maschinen "
+"Rechnung zu tragen. Z.B. würdest du bei zehn Ein-Jahres-Plänen für eine "
+"Maschine, die die ganzen 10 Jahre im Einsatz sein soll und 10000 Stunden "
+"gekostet hat, für dieses feste Produktionsmittel den Wert 1000 eintragen."
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:66
+#: arbeitszeit_web/formatters/plan_details_formatter.py:75
+msgid "Costs for fixed means of production"
+msgstr "Kosten für feste Produktionsmittel"
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:74
+#: arbeitszeit_flask/templates/macros/plan_details.html:133
+msgid ""
+"Here, recurring costs from raw materials and consumables are summarized, "
+"e.g. electricity, rent for production halls, maintenance of machines etc."
+msgstr ""
+"Hier sollten wiederkehrende Kosten aus Rohstoffen und Verbrauchsmaterialien"
+" zusammengefasst werden, z.B. Strom, Miete für Produktionshallen, Wartung "
+"von Maschinen usw."
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:76
+#: arbeitszeit_web/formatters/plan_details_formatter.py:79
+msgid "Costs for liquid means of production"
+msgstr "Kosten für flüssige Produktionsmittel"
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:84
+#: arbeitszeit_flask/templates/macros/plan_details.html:140
+msgid "Planned hours of human work."
+msgstr "Geplante Stunden menschlicher Arbeit."
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:86
+msgid "Costs for labour"
+msgstr "Kosten für Arbeit"
+
+#: arbeitszeit_flask/templates/macros/draft_form.html:95
+msgid ""
+"Products and services within a supply chain should not be marked public. "
+"Only checkmark this box if your product will be generally and freely "
+"available."
+msgstr ""
+"Produkte und Dienstleistungen innerhalb einer Lieferkette sollten hier "
+"nicht als öffentlich markiert werden. Setze das Häkchen nur, wenn dein "
+"Produkt allgemein und frei verfügbar sein wird."
 
 #: arbeitszeit_flask/templates/macros/help.html:189
 #: arbeitszeit_flask/templates/macros/help.html:194
@@ -1251,79 +1207,66 @@ msgstr "Produktion"
 msgid "Language"
 msgstr "Sprache"
 
-#: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:30
-msgid "Start of coordination"
-msgstr "Beginn der Koordination"
+#: arbeitszeit_flask/templates/macros/plan_details.html:15
+msgid ""
+"This plan ID identifies your plan. It is used to account for labour time by"
+" workers and companies that work on, or respectively consume, the planned "
+"product or service."
+msgstr ""
+"Mit Hilfe dieser Plan ID wird dein Plan identifiziert. Sie wird von "
+"Arbeiter*innen und Betrieben genutzt, während sie an der Herstellung eines "
+"Produktes arbeiten bzw. wenn sie ein Produkt konsumieren, um Arbeitszeit zu"
+" verbuchen."
 
-#: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:32
-msgid "End of coordination"
-msgstr "Ende der Koordination"
+#: arbeitszeit_flask/templates/macros/plan_details.html:66
+msgid ""
+"Status can be \"Active\", i.e. plan was approved and current date is within"
+" planning timeframe, or \"Inactive\", i.e. plan is not yet approved or it "
+"is expired."
+msgstr ""
+"Status kann \"Aktiv\" sein, d.h. der Plan wurde genehmigt und das aktuelle "
+"Datum liegt innerhalb des Planungszeitraums, oder \"Inaktiv\", d.h. der "
+"Plan ist noch nicht genehmigt oder abgelaufen."
 
-#: arbeitszeit_flask/templates/macros/list_coordinations_of_cooperation.html:41
-msgid "No coordinators found."
-msgstr "Keine Koordinator*innen gefunden."
-
-#: arbeitszeit_flask/templates/macros/plan_details.html:81
+#: arbeitszeit_flask/templates/macros/plan_details.html:88
 msgid "Plan creation"
 msgstr "Planerstellung"
 
-#: arbeitszeit_flask/templates/macros/plan_details.html:84
+#: arbeitszeit_flask/templates/macros/plan_details.html:91
 msgid "Plan approval"
 msgstr "Plangenehmigung"
 
-#: arbeitszeit_flask/templates/macros/plan_details.html:87
+#: arbeitszeit_flask/templates/macros/plan_details.html:94
 msgid "Plan expiration"
 msgstr "Planende"
 
-#: arbeitszeit_flask/templates/macros/statistics.html:12
-msgid "Companies"
-msgstr "Betriebe"
+#: arbeitszeit_flask/templates/macros/plan_details.html:109
+msgid "This is the amount you plan to deliver."
+msgstr "Dies ist die Menge, die du planst zu produzieren."
 
-#: arbeitszeit_flask/templates/macros/statistics.html:38
-msgid "FIC (Payout factor)"
-msgstr "FIK (Auszahlungsfaktor)"
+#: arbeitszeit_flask/templates/macros/plan_details.html:156
+msgid ""
+"\"Type\" can be either \"Productive\" or \"Public\". Products from the "
+"latter can be consumed for free, and are funded via the Factor of "
+"Individual Consumption (FIC)."
+msgstr ""
+"Der \"Typ\" eines Plans kann entweder \"Produktiv\" oder \"Öffentlich\" "
+"sein. Produkte aus öffentlichen Plänen werden umsonst konsumiert, ihre "
+"Kosten werden über den Faktor Individueller Konsumtion (FIK) gedeckt."
 
-#: arbeitszeit_flask/templates/macros/statistics.html:53
-msgid "Planned ressources"
-msgstr "Geplante Ressourcen"
+#: arbeitszeit_flask/templates/macros/plan_details.html:165
+msgid ""
+"This is the amount of time that is debited when the product is consumed. 0 "
+"for public plans."
+msgstr ""
+"Dies ist die Menge an Zeit, die abgebucht wird, wenn das Produkt konsumiert"
+" wird. 0 für öffentliche Pläne."
 
-#: arbeitszeit_flask/templates/macros/statistics.html:61
-msgid "Certificates and products"
-msgstr "Zertifikate und Produkte"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:71
-#: arbeitszeit_flask/templates/user/query_plans.html:13
-msgid "Active plans"
-msgstr "Aktive Pläne"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:72
-msgid "Public active plans"
-msgstr "Öffentliche aktive Pläne"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:73
-#: arbeitszeit_flask/templates/macros/statistics.html:84
-msgid "Average plan duration"
-msgstr "Durchschnittliche Plandauer"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:74
-msgid "Currently planned fixed means"
-msgstr "Aktuell geplante feste Produktionsmittel"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:75
-msgid "Currently planned liquid means"
-msgstr "Aktuell geplante flüssige Produktionmittel"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:76
-msgid "Currently planned work"
-msgstr "Aktuell geplante Arbeit"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:77
-msgid "Available work certificates"
-msgstr "Verfügbare Arbeitszertifikate"
-
-#: arbeitszeit_flask/templates/macros/statistics.html:78
-msgid "Available product (no public products)"
-msgstr "Verfügbares Produkt (keine öffentlichen Produkte)"
+#: arbeitszeit_flask/templates/macros/plan_details.html:180
+msgid "This field shows working hours spent per produced unit."
+msgstr ""
+"Dieses Feld zeigt die Anzahl der benötigten Arbeitsstunden pro "
+"hergestellter Einheit."
 
 #: arbeitszeit_flask/templates/member/consumptions.html:17
 msgid "Your past consumptions are shown here."
@@ -1358,7 +1301,7 @@ msgid "My area"
 msgstr "Mein Bereich"
 
 #: arbeitszeit_flask/templates/member/dashboard.html:59
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:86
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:94
 msgid "Private consumption"
 msgstr "Privater Konsum"
 
@@ -1401,6 +1344,118 @@ msgstr "Konto-ID:"
 msgid "Email address:"
 msgstr "E-Mail-Adresse:"
 
+#: arbeitszeit_flask/templates/user/company_account_a.html:21
+msgid "The account for work certificates"
+msgstr "Das Konto für Arbeitszertifikate"
+
+#: arbeitszeit_flask/templates/user/company_account_a.html:23
+#: arbeitszeit_flask/templates/user/company_account_p.html:23
+#: arbeitszeit_flask/templates/user/company_account_prd.html:22
+#: arbeitszeit_flask/templates/user/company_account_r.html:23
+msgid "Balance:"
+msgstr "Kontostand:"
+
+#: arbeitszeit_flask/templates/user/company_account_p.html:21
+msgid "The account for fixed means of production."
+msgstr "Das Konto für feste Produktionsmittel."
+
+#: arbeitszeit_flask/templates/user/company_account_prd.html:20
+msgid "The account for product transfers (sales)."
+msgstr "Das Konto für Produktweitergaben (Verkäufe)."
+
+#: arbeitszeit_flask/templates/user/company_account_r.html:21
+msgid "The account for liquid means of production"
+msgstr "Das Konto für flüssige Produktionsmittel"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:4
+#: arbeitszeit_flask/templates/user/company_accounts.html:13
+#: arbeitszeit_web/www/presenters/get_company_dashboard_presenter.py:76
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:107
+#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:47
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:49
+#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:53
+#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:47
+msgid "Accounts"
+msgstr "Konten"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:17
+msgid "Each company has four accounts."
+msgstr "Jeder Betrieb hat vier Konten."
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:35
+msgid "Account for fixed means of production"
+msgstr "Konto für feste Produktionsmittel"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:46
+msgid "Account for liquid means of production"
+msgstr "Konto für flüssige Produktionsmittel"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:57
+msgid "Account for work certificates (wages)"
+msgstr "Konto für Arbeitszertifikate (Löhne)"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:67
+msgid "Account for product transfers (sales)"
+msgstr "Konto für Produktweitergaben (Verkäufe)"
+
+#: arbeitszeit_flask/templates/user/company_accounts.html:76
+msgid "List all transactions"
+msgstr "Alle Transaktionen anzeigen"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:32
+msgid "Current coordinator"
+msgstr "Aktuelle*r Koordinator*in"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:41
+msgid "Transfer coordination"
+msgstr "Koordination übergeben"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:48
+#: arbeitszeit_flask/templates/user/list_coordinations_of_cooperation.html:12
+msgid "History of coordinators"
+msgstr "Abfolge von Koordinator*innen"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:53
+msgid "Cooperation price"
+msgstr "Kooperationspreis"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:63
+msgid "Participating plans"
+msgstr "Teilnehmende Pläne"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:85
+msgid "End cooperation"
+msgstr "Kooperation beenden"
+
+#: arbeitszeit_flask/templates/user/coop_summary.html:96
+msgid "Individual price"
+msgstr "Individualpreis"
+
+#: arbeitszeit_flask/templates/user/get_company_transactions.html:15
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:111
+msgid "All transactions"
+msgstr "Alle Transaktionen"
+
+#: arbeitszeit_flask/templates/user/get_company_transactions.html:20
+msgid "All transactions made or received so far."
+msgstr "Alle bisher getätigten oder erhaltenen Transaktionen."
+
+#: arbeitszeit_flask/templates/user/list_all_cooperations.html:34
+msgid "No cooperations found"
+msgstr "Keine Kooperationen gefunden"
+
+#: arbeitszeit_flask/templates/user/list_coordinations_of_cooperation.html:37
+msgid "Start of coordination"
+msgstr "Beginn der Koordination"
+
+#: arbeitszeit_flask/templates/user/list_coordinations_of_cooperation.html:39
+msgid "End of coordination"
+msgstr "Ende der Koordination"
+
+#: arbeitszeit_flask/templates/user/list_coordinations_of_cooperation.html:48
+msgid "No coordinators found."
+msgstr "Keine Koordinator*innen gefunden."
+
 #: arbeitszeit_flask/templates/user/query_companies.html:11
 msgid "Search companies"
 msgstr "Betriebe suchen"
@@ -1419,6 +1474,11 @@ msgstr "Suche"
 msgid "Results"
 msgstr "Ergebnisse"
 
+#: arbeitszeit_flask/templates/user/query_plans.html:13
+#: arbeitszeit_flask/templates/user/statistics.html:77
+msgid "Active plans"
+msgstr "Aktive Pläne"
+
 #: arbeitszeit_flask/templates/user/query_plans.html:22
 msgid "Search by plan ID or product name"
 msgstr "Nach Plan-ID oder Produktname suchen"
@@ -1427,7 +1487,7 @@ msgstr "Nach Plan-ID oder Produktname suchen"
 msgid "Change email address"
 msgstr "E-Mail-Adresse ändern"
 
-#: arbeitszeit_flask/templates/user/request_email_address_change.html:19
+#: arbeitszeit_flask/templates/user/request_email_address_change.html:21
 msgid "Submit"
 msgstr "Senden"
 
@@ -1440,17 +1500,64 @@ msgid ""
 msgstr ""
 "Liebe*r Nutzer*in der Arbeitszeitapp,\n"
 "\n"
-"jemand hat versucht, die E-Mail-Adresse für dein Nutzerkonto zu ändern. Falls das du warst, besuche bitte den folgenden Link, um diese Änderung zu bestätigen."
+"jemand hat versucht, die E-Mail-Adresse für dein Nutzerkonto zu ändern. "
+"Falls das du warst, besuche bitte den folgenden Link, um diese Änderung zu "
+"bestätigen."
 
-#: arbeitszeit_flask/views/create_draft_view.py:39
+#: arbeitszeit_flask/templates/user/statistics.html:18
+msgid "Companies"
+msgstr "Betriebe"
+
+#: arbeitszeit_flask/templates/user/statistics.html:44
+msgid "FIC (Payout factor)"
+msgstr "FIK (Auszahlungsfaktor)"
+
+#: arbeitszeit_flask/templates/user/statistics.html:59
+msgid "Planned ressources"
+msgstr "Geplante Ressourcen"
+
+#: arbeitszeit_flask/templates/user/statistics.html:67
+msgid "Certificates and products"
+msgstr "Zertifikate und Produkte"
+
+#: arbeitszeit_flask/templates/user/statistics.html:78
+msgid "Public active plans"
+msgstr "Öffentliche aktive Pläne"
+
+#: arbeitszeit_flask/templates/user/statistics.html:79
+#: arbeitszeit_flask/templates/user/statistics.html:90
+msgid "Average plan duration"
+msgstr "Durchschnittliche Plandauer"
+
+#: arbeitszeit_flask/templates/user/statistics.html:80
+msgid "Currently planned fixed means"
+msgstr "Aktuell geplante feste Produktionsmittel"
+
+#: arbeitszeit_flask/templates/user/statistics.html:81
+msgid "Currently planned liquid means"
+msgstr "Aktuell geplante flüssige Produktionmittel"
+
+#: arbeitszeit_flask/templates/user/statistics.html:82
+msgid "Currently planned work"
+msgstr "Aktuell geplante Arbeit"
+
+#: arbeitszeit_flask/templates/user/statistics.html:83
+msgid "Available work certificates"
+msgstr "Verfügbare Arbeitszertifikate"
+
+#: arbeitszeit_flask/templates/user/statistics.html:84
+msgid "Available product (no public products)"
+msgstr "Verfügbares Produkt (keine öffentlichen Produkte)"
+
+#: arbeitszeit_flask/views/create_draft_view.py:38
 msgid "Draft successfully saved."
 msgstr "Entwurf erfolgreich gespeichert."
 
-#: arbeitszeit_flask/views/create_draft_view.py:44
+#: arbeitszeit_flask/views/create_draft_view.py:43
 msgid "Plan creation has been canceled."
 msgstr "Planerstellung wurde abgebrochen."
 
-#: arbeitszeit_web/query_plans.py:127
+#: arbeitszeit_web/query_plans.py:126
 msgid "No results."
 msgstr "Keine Ergebnisse."
 
@@ -1481,7 +1588,7 @@ msgstr "Einladung von einem Betrieb in der Arbeitszeitapp"
 
 #: arbeitszeit_web/email/notify_accountant_about_new_plan_presenter.py:20
 msgid "Plan was filed"
-msgstr "Plan wurde eingereicht."
+msgstr "Plan wurde eingereicht"
 
 #: arbeitszeit_web/email/registration_email_presenter.py:41
 msgid "Account confirmation"
@@ -1497,49 +1604,48 @@ msgid ""
 "Hello %(candidate)s,<br>Your are asked to be the coordinator of the "
 "cooperation '%(cooperation)s'. Please follow this link to check the request"
 " in the Arbeitszeitapp: <a href='%(url)s'>LINK</a>."
-msgstr "Hallo %(candidate)s,<br>Du wirst angefragt, Koordinator*in der Kooperation '%(cooperation)s' zu sein. Bitte folge diesem Link, um die Anfrage in der Arbeitszeitapp zu prüfen: <a href='%(url)s'>LINK</a>."
+msgstr ""
+"Hallo %(candidate)s,<br>Du wirst angefragt, Koordinator*in der Kooperation "
+"'%(cooperation)s' zu sein. Bitte folge diesem Link, um die Anfrage in der "
+"Arbeitszeitapp zu prüfen: <a href='%(url)s'>LINK</a>."
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:49
+#: arbeitszeit_web/formatters/plan_details_formatter.py:46
 #: arbeitszeit_web/www/presenters/get_company_summary_presenter.py:114
 msgid "Inactive"
 msgstr "Inaktiv"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:52
+#: arbeitszeit_web/formatters/plan_details_formatter.py:49
 msgid "Planning company"
 msgstr "Planender Betrieb"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:60
+#: arbeitszeit_web/formatters/plan_details_formatter.py:57
 msgid "Name of product"
 msgstr "Name des Produkts"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:64
+#: arbeitszeit_web/formatters/plan_details_formatter.py:61
 msgid "Description of product"
 msgstr "Beschreibung des Produkts"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:86
+#: arbeitszeit_web/formatters/plan_details_formatter.py:65
+msgid "Planning timeframe (days)"
+msgstr "Planungszeitraum (Tage)"
+
+#: arbeitszeit_web/formatters/plan_details_formatter.py:83
 msgid "Costs for work"
 msgstr "Kosten für Arbeit"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:93
-#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:200
+#: arbeitszeit_web/formatters/plan_details_formatter.py:90
+#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:198
 msgid "Productive"
 msgstr "Produktiv"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:96
-msgid "Price (per unit)"
-msgstr "Preis (pro Einheit)"
+#: arbeitszeit_web/formatters/plan_details_formatter.py:93
+msgid "Price (hours/unit)"
+msgstr "Preis (Stunden/Einheit)"
 
-#: arbeitszeit_web/formatters/plan_details_formatter.py:106
-msgid "Product currently available"
-msgstr "Produkt momentan verfügbar"
-
-#: arbeitszeit_web/formatters/plan_details_formatter.py:107
-msgid "Yes"
-msgstr "Ja"
-
-#: arbeitszeit_web/formatters/plan_details_formatter.py:109
-msgid "No"
-msgstr "Nein"
+#: arbeitszeit_web/formatters/plan_details_formatter.py:101
+msgid "Labour time (hours/unit)"
+msgstr "Arbeitszeit (Stunden/Einheit)"
 
 #: arbeitszeit_web/www/authentication.py:37
 #: arbeitszeit_web/www/authentication.py:110
@@ -1551,15 +1657,15 @@ msgstr "Bitte logge dich ein, um diese Seite zu sehen."
 msgid "You are not logged in with the correct account."
 msgstr "Du bist nicht mit dem korrekten Konto angemeldet."
 
-#: arbeitszeit_web/www/formfield_parsers.py:19
+#: arbeitszeit_web/www/formfield_parsers.py:18
 msgid "Invalid UUID."
 msgstr "Ungültige UUID."
 
-#: arbeitszeit_web/www/formfield_parsers.py:44
+#: arbeitszeit_web/www/formfield_parsers.py:43
 msgid "This is not an integer."
 msgstr "Das ist keine ganze Zahl."
 
-#: arbeitszeit_web/www/formfield_parsers.py:51
+#: arbeitszeit_web/www/formfield_parsers.py:50
 msgid "Must be a number larger than zero."
 msgstr "Muss eine Nummer größer als Null sein."
 
@@ -1575,21 +1681,23 @@ msgstr "Ungültige Plan-ID."
 msgid "Invalid cooperation ID."
 msgstr "Ungültige Kooperations-ID."
 
-#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:42
+#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:40
 msgid ""
 "Successfully accepted the request. You are now coordinator of the "
 "cooperation."
-msgstr "Anfrage erfolgreich angenommen. Du bist jetzt Koordinator*in der Kooperation."
+msgstr ""
+"Anfrage erfolgreich angenommen. Du bist jetzt Koordinator*in der "
+"Kooperation."
 
-#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:61
+#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:59
 msgid "Transfer request not found."
 msgstr "Übergabeanfrage nicht gefunden."
 
-#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:68
+#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:66
 msgid "This request is not valid anymore."
 msgstr "Diese Anfrage ist nicht mehr gültig."
 
-#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:75
+#: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:73
 msgid "You are not the candidate of this request."
 msgstr "Du bist nicht der*die Kandidat*in dieser Anfrage."
 
@@ -1656,62 +1764,66 @@ msgstr "Plan erfolgreich bei öffentlicher Buchhaltung eingereicht"
 msgid "Could not file plan with social accounting"
 msgstr "Konnte Plan nicht bei öffentlicher Buchhaltung einreichen"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:67
+#: arbeitszeit_web/www/presenters/get_company_dashboard_presenter.py:77
+msgid "You have four accounts"
+msgstr "Du hast vier Konten"
+
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:75
 msgid "Credit for wages"
 msgstr "Kredit für Löhne"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:68
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:76
 msgid "Payment of wages"
 msgstr "Bezahlung von Löhnen"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:69
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:77
 msgid "Incoming wages"
 msgstr "Eingehende Löhne"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:70
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:78
 msgid "Credit for fixed means of production"
 msgstr "Kredit für feste Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:73
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:81
 msgid "Consumption of fixed means of production"
 msgstr "Konsum fester Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:76
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:84
 msgid "Credit for liquid means of production"
 msgstr "Kredit für flüssige Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:79
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:87
 msgid "Consumption of liquid means of production"
 msgstr "Konsum flüssiger Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:82
-#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:61
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:90
+#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:75
 msgid "Debit expected sales"
 msgstr "Erwartetes Verkaufssoll"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:83
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:91
 msgid "Sale of consumer product"
 msgstr "Verkauf Konsumprodukt"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:87
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:95
 msgid "Sale of fixed means of production"
 msgstr "Verkauf feste Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:90
+#: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:98
 msgid "Sale of liquid means of production"
 msgstr "Verkauf flüssige Produktionsmittel"
 
-#: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:47
+#: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:45
 msgid "Pending"
 msgstr "Ausstehend"
 
-#: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:49
+#: arbeitszeit_web/www/presenters/get_coordination_transfer_request_details_presenter.py:47
 msgid "Closed"
 msgstr "Abgeschlossen"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:40
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:51
-#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:51
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:62
+#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:60
 msgid "Consumption"
 msgstr "Konsum"
 
@@ -1755,7 +1867,7 @@ msgstr "Arbeiter*in wurde erfolgreich eingeladen."
 msgid "Worker could not be invited."
 msgstr "Arbeiter*in konnte nicht eingeladen werden."
 
-#: arbeitszeit_web/www/presenters/list_coordinations_of_cooperation_presenter.py:77
+#: arbeitszeit_web/www/presenters/list_coordinations_of_cooperation_presenter.py:73
 msgid "Coordinators"
 msgstr "Koordinator*innen"
 
@@ -1881,7 +1993,7 @@ msgid "The specified type of consumption is invalid."
 msgstr "Die angegebene Art des Konsums ist ungültig."
 
 #: arbeitszeit_web/www/presenters/request_cooperation_presenter.py:30
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:93
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:89
 msgid "Request has been sent."
 msgstr "Anfrage wurde gesendet."
 
@@ -1890,7 +2002,7 @@ msgid "Plan not found."
 msgstr "Plan nicht gefunden."
 
 #: arbeitszeit_web/www/presenters/request_cooperation_presenter.py:42
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:87
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:83
 msgid "Cooperation not found."
 msgstr "Kooperation nicht gefunden."
 
@@ -1910,23 +2022,23 @@ msgstr "Öffentliche Pläne können nicht kooperieren."
 msgid "Only the creator of a plan can request a cooperation."
 msgstr "Nur der Planersteller kann eine Kooperation anfragen."
 
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:38
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:34
 msgid "Request Coordination Transfer"
 msgstr "Koordinationsübergabe anfragen"
 
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:53
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:49
 msgid "The candidate is not a company."
 msgstr "Der*die Kandidat*in ist kein Betrieb."
 
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:61
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:57
 msgid "You are not the coordinator."
 msgstr "Du bist nicht der Koordinator."
 
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:69
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:65
 msgid "The candidate is already the coordinator."
 msgstr "Der Kandidat ist bereits der Koordinator."
 
-#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:77
+#: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:73
 msgid "Request has not been sent. You have a pending transfer request."
 msgstr "Anfrage wurde nicht gesendet. Du hast eine ausstehende Übergabeanfrage."
 
@@ -1946,13 +2058,13 @@ msgstr "Unerwarteter Fehler: Nicht möglich, die Planeinreichung zu wiederrufen.
 msgid "Filing of plan has been successfully revoked."
 msgstr "Planeinreichung wurde erfolgreich widerrufen."
 
-#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:51
+#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:60
 msgid "Payment"
 msgstr "Bezahlung"
 
-#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:53
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:54
-#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:54
+#: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:62
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:65
+#: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:63
 msgid "Credit"
 msgstr "Gutschrift"
 
@@ -1965,52 +2077,56 @@ msgstr ""
 "Der Betrieb \"%(company_name)s\" hat dich zum Beitritt eingeladen. Möchtest"
 " du die Einladung annehmen?"
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:241
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:211
 msgid "Cooperation request has been accepted."
 msgstr "Kooperationsanfrage wurde angenommen."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:252
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:308
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:220
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:264
 msgid "Plan or cooperation not found."
 msgstr "Plan oder Kooperation nicht gefunden."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:261
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:229
 msgid "Something's wrong with that plan."
 msgstr "Etwas stimmt nicht mit diesem Plan."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:268
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:315
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:236
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:271
 msgid "This cooperation request does not exist."
 msgstr "Diese Kooperationsanfrage existiert nicht."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:275
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:322
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:243
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:278
 msgid "You are not coordinator of this cooperation."
 msgstr "Du bist nicht Koordinator dieser Kooperation."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:297
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:255
 msgid "Cooperation request has been denied."
 msgstr "Kooperationsanfrage wurde abgelehnt."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:329
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:286
 msgid "Could not deny cooperation"
 msgstr "Konnte Kooperation nicht ablehnen"
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:339
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:294
 msgid "Cooperation request has been canceled."
 msgstr "Kooperationsanfrage wurde abgebrochen."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:343
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:298
 msgid "Error: Not possible to cancel request."
 msgstr "Fehler: Abbrechen der Anfrage nicht möglich."
 
-#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:102
+#: arbeitszeit_web/www/presenters/show_my_plans_presenter.py:101
 msgid "You don't have any plans."
 msgstr "Du hast keine Pläne."
 
-#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:63
+#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:77
 msgid "Sale"
 msgstr "Verkauf"
+
+#: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:114
+msgid "Anonymous worker"
+msgstr "Anonyme*r Arbeiter*in"
 
 #~ msgid "Statistics"
 #~ msgstr "Statistiken"
@@ -2071,9 +2187,6 @@ msgstr "Verkauf"
 
 #~ msgid "You don't have any drafts"
 #~ msgstr "Du hast keine Entwürfe"
-
-#~ msgid "Planning timeframe"
-#~ msgstr "Planungszeitraum"
 
 #~ msgid "Ends in (days)"
 #~ msgstr "Endet in (Tagen)"
@@ -2365,19 +2478,122 @@ msgstr "Verkauf"
 #~ msgid "You have four different accounts."
 #~ msgstr "Du hast vier verschiedene Konten."
 
+#~ msgid "Product not available"
+#~ msgstr "Produkt nicht verfügbar"
+
+#~ msgid "Change availability:"
+#~ msgstr "Verfügbarkeit ändern:"
+
 #~ msgid ""
-#~ "Hello %(candidate)s,<br>Your are asked to "
-#~ "be the coordinator of the cooperation "
-#~ "'%(cooperation)s'. Please check the request "
-#~ "in the Arbeitszeitapp."
+#~ "E.g. 1 package of 100 pieces, 1 "
+#~ "kilogram, 1 language lesson of 1.5 "
+#~ "hour, etc."
 #~ msgstr ""
+#~ "Z.B. 1 Packung à 100 Stück, 1 "
+#~ "Kilogramm, 1 Sprachunterrichtseinheit à 1,5 "
+#~ "Stunden, etc."
 
-#~ msgid "Invalid UUID"
-#~ msgstr ""
+#~ msgid "Estimate what costs you will have in the given timeframe."
+#~ msgstr "Schätze, welche Kosten du im angegebenen Zeitraum haben wirst."
 
-#~ msgid "The requesting coordination tenure has a pending transfer request."
+#~ msgid ""
+#~ "Describe the smallest delivery unit and"
+#~ " what amount of these units you "
+#~ "will produce."
 #~ msgstr ""
+#~ "Beschreibe die kleinste Abgabeeinheit und "
+#~ "welche Menge von diesen Einheiten du "
+#~ "produzieren wirst."
 
-#~ msgid "Unknown error ocurred. Request has not been sent."
+#~ msgid "The type of plan. Productive plans are the norm."
+#~ msgstr "Die Art des Plans. Produktive Pläne sind die Regel."
+
+#~ msgid "Product currently available"
+#~ msgstr "Produkt momentan verfügbar"
+
+#~ msgid "Yes"
+#~ msgstr "Ja"
+
+#~ msgid "No"
+#~ msgstr "Nein"
+
+#~ msgid "This is the amount you promise to deliver."
+#~ msgstr "Dies ist die Menge, die du planst zu produzieren."
+
+#~ msgid "Price (per unit)"
+#~ msgstr "Preis (pro Einheit)"
+
+#~ msgid "Labour (per unit)"
+#~ msgstr "Arbeitszeit (Stunden/Einheit)"
+
+#~ msgid ""
+#~ "This is sometimes also called "
+#~ "depreciation, e.g. if you plan to "
+#~ "use a machine that cost 10000 hours"
+#~ " to produce, for 10 years, and "
+#~ "you have ten one-year-plans, then"
+#~ " for this fixed mean of production, "
+#~ "the value would be 1000."
 #~ msgstr ""
+#~ "Manchmal auch Abnutzung genannt, z.B. "
+#~ "würdest du bei zehn Ein-Jahres-"
+#~ "Plänen, für eine Maschine, die die "
+#~ "ganzen 10 Jahre im Einsatz sein soll"
+#~ " und 10000 Stunden gekostet hat, für"
+#~ " dieses feste Produktionsmittel den Wert "
+#~ "1000 eintragen."
+
+#~ msgid ""
+#~ "Products and services within a supply "
+#~ "chain should not be marked public. "
+#~ "Only if your product should be "
+#~ "consumed for free by all members of"
+#~ " society - funded via the Factor "
+#~ "of Individual Consumption (FIC) - then "
+#~ "please checkmark this box."
+#~ msgstr ""
+#~ "Produkte und Dienstleistungen innerhalb einer"
+#~ " Lieferkette sollten hier nicht als "
+#~ "öffentlich markiert werden. Nur wenn dein"
+#~ " Produkt von allen Menschen der "
+#~ "Gesellschaft umsonst konsumiert werden soll "
+#~ "-  im Rahmen des Faktors Individueller "
+#~ "Konsumtion (FIK) -  solltest du hier "
+#~ "ein Häkchen setzen."
+
+#~ msgid ""
+#~ "This field is mainly to account for"
+#~ " depreciation of machines, e.g. if you"
+#~ " plan to use a machine that cost"
+#~ " 10000 hours to produce, for 10 "
+#~ "years, and you have ten one-year-"
+#~ "plans, then for this fixed mean of"
+#~ " production, the value would be 1000."
+#~ msgstr ""
+#~ "Dieses Feld wird hauptsächlich dafür "
+#~ "genutzt, der Wertminderung von Maschinen "
+#~ "Rechnung zu tragen, z.B. würdest du "
+#~ "bei zehn Ein-Jahres-Plänen für eine"
+#~ " Maschine, die die ganzen 10 Jahre "
+#~ "im Einsatz sein soll und 10000 "
+#~ "Stunden gekostet hat, für dieses feste "
+#~ "Produktionsmittel den Wert 1000 eintragen."
+
+#~ msgid ""
+#~ "This field is mainly to account for"
+#~ " depreciation of machines. E.g. if you"
+#~ " plan to use a machine that cost"
+#~ " 10000 hours to produce, for 10 "
+#~ "years, and you have ten one-year-"
+#~ "plans, then for this fixed mean of"
+#~ " production, the value would be 1000."
+#~ msgstr ""
+#~ "Dieses Feld wird hauptsächlich dafür "
+#~ "genutzt, der Wertminderung von Maschinen "
+#~ "Rechnung zu tragen. Z.B. würdest du "
+#~ "bei zehn Ein-Jahres-Plänen für eine"
+#~ " Maschine, die die ganzen 10 Jahre "
+#~ "im Einsatz sein soll und 10000 "
+#~ "Stunden gekostet hat, für dieses feste "
+#~ "Produktionsmittel den Wert 1000 eintragen."
 

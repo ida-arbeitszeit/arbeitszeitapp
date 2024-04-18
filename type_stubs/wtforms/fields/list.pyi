@@ -1,5 +1,8 @@
-from .core import Field
 from _typeshed import Incomplete
+
+from .core import Field
+
+__all__ = ["FieldList"]
 
 class FieldList(Field):
     widget: Incomplete
@@ -7,12 +10,24 @@ class FieldList(Field):
     min_entries: Incomplete
     max_entries: Incomplete
     last_index: int
-    def __init__(self, unbound_field, label: Incomplete | None = ..., validators: Incomplete | None = ..., min_entries: int = ..., max_entries: Incomplete | None = ..., separator: str = ..., default=..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        unbound_field,
+        label: Incomplete | None = None,
+        validators: Incomplete | None = None,
+        min_entries: int = 0,
+        max_entries: Incomplete | None = None,
+        separator: str = "-",
+        default=(),
+        **kwargs,
+    ) -> None: ...
     entries: Incomplete
     object_data: Incomplete
-    def process(self, formdata, data=..., extra_filters: Incomplete | None = ...) -> None: ...
+    def process(
+        self, formdata, data=..., extra_filters: Incomplete | None = None
+    ) -> None: ...
     errors: Incomplete
-    def validate(self, form, extra_validators=...): ...
+    def validate(self, form, extra_validators=()): ...
     def populate_obj(self, obj, name) -> None: ...
     def append_entry(self, data=...): ...
     def pop_entry(self): ...

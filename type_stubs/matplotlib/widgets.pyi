@@ -1,8 +1,18 @@
-from . import backend_tools as backend_tools, cbook as cbook, collections as collections, colors as colors, ticker as ticker, transforms as transforms
-from .lines import Line2D as Line2D
-from .patches import Circle as Circle, Ellipse as Ellipse, Polygon as Polygon, Rectangle as Rectangle
-from .transforms import Affine2D as Affine2D, TransformedPatchPath as TransformedPatchPath
 from _typeshed import Incomplete
+
+from . import backend_tools as backend_tools
+from . import cbook as cbook
+from . import collections as collections
+from . import colors as colors
+from . import ticker as ticker
+from . import transforms as transforms
+from .lines import Line2D as Line2D
+from .patches import Circle as Circle
+from .patches import Ellipse as Ellipse
+from .patches import Polygon as Polygon
+from .patches import Rectangle as Rectangle
+from .transforms import Affine2D as Affine2D
+from .transforms import TransformedPatchPath as TransformedPatchPath
 
 class LockDraw:
     def __init__(self) -> None: ...
@@ -31,7 +41,16 @@ class Button(AxesWidget):
     label: Incomplete
     color: Incomplete
     hovercolor: Incomplete
-    def __init__(self, ax, label, image: Incomplete | None = ..., color: str = ..., hovercolor: str = ..., *, useblit: bool = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        label,
+        image: Incomplete | None = None,
+        color: str = "0.85",
+        hovercolor: str = "0.95",
+        *,
+        useblit: bool = True,
+    ) -> None: ...
     def on_clicked(self, func): ...
     def disconnect(self, cid) -> None: ...
 
@@ -44,7 +63,18 @@ class SliderBase(AxesWidget):
     valstep: Incomplete
     drag_active: bool
     valfmt: Incomplete
-    def __init__(self, ax, orientation, closedmin, closedmax, valmin, valmax, valfmt, dragging, valstep) -> None: ...
+    def __init__(
+        self,
+        ax,
+        orientation,
+        closedmin,
+        closedmax,
+        valmin,
+        valmax,
+        valfmt,
+        dragging,
+        valstep,
+    ) -> None: ...
     def disconnect(self, cid) -> None: ...
     def reset(self) -> None: ...
 
@@ -59,7 +89,27 @@ class Slider(SliderBase):
     vline: Incomplete
     label: Incomplete
     valtext: Incomplete
-    def __init__(self, ax, label, valmin, valmax, valinit: float = ..., valfmt: Incomplete | None = ..., closedmin: bool = ..., closedmax: bool = ..., slidermin: Incomplete | None = ..., slidermax: Incomplete | None = ..., dragging: bool = ..., valstep: Incomplete | None = ..., orientation: str = ..., *, initcolor: str = ..., track_color: str = ..., handle_style: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        ax,
+        label,
+        valmin,
+        valmax,
+        valinit: float = 0.5,
+        valfmt: Incomplete | None = None,
+        closedmin: bool = True,
+        closedmax: bool = True,
+        slidermin: Incomplete | None = None,
+        slidermax: Incomplete | None = None,
+        dragging: bool = True,
+        valstep: Incomplete | None = None,
+        orientation: str = "horizontal",
+        *,
+        initcolor: str = "r",
+        track_color: str = "lightgrey",
+        handle_style: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def set_val(self, val) -> None: ...
     def on_changed(self, func): ...
 
@@ -70,7 +120,23 @@ class RangeSlider(SliderBase):
     poly: Incomplete
     label: Incomplete
     valtext: Incomplete
-    def __init__(self, ax, label, valmin, valmax, valinit: Incomplete | None = ..., valfmt: Incomplete | None = ..., closedmin: bool = ..., closedmax: bool = ..., dragging: bool = ..., valstep: Incomplete | None = ..., orientation: str = ..., track_color: str = ..., handle_style: Incomplete | None = ..., **kwargs) -> None: ...
+    def __init__(
+        self,
+        ax,
+        label,
+        valmin,
+        valmax,
+        valinit: Incomplete | None = None,
+        valfmt: Incomplete | None = None,
+        closedmin: bool = True,
+        closedmax: bool = True,
+        dragging: bool = True,
+        valstep: Incomplete | None = None,
+        orientation: str = "horizontal",
+        track_color: str = "lightgrey",
+        handle_style: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def set_min(self, min) -> None: ...
     def set_max(self, max) -> None: ...
     def set_val(self, val) -> None: ...
@@ -78,7 +144,17 @@ class RangeSlider(SliderBase):
 
 class CheckButtons(AxesWidget):
     labels: Incomplete
-    def __init__(self, ax, labels, actives: Incomplete | None = ..., *, useblit: bool = ..., label_props: Incomplete | None = ..., frame_props: Incomplete | None = ..., check_props: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        labels,
+        actives: Incomplete | None = None,
+        *,
+        useblit: bool = True,
+        label_props: Incomplete | None = None,
+        frame_props: Incomplete | None = None,
+        check_props: Incomplete | None = None,
+    ) -> None: ...
     def set_label_props(self, props) -> None: ...
     def set_frame_props(self, props) -> None: ...
     def set_check_props(self, props) -> None: ...
@@ -99,11 +175,20 @@ class TextBox(AxesWidget):
     color: Incomplete
     hovercolor: Incomplete
     capturekeystrokes: bool
-    def __init__(self, ax, label, initial: str = ..., color: str = ..., hovercolor: str = ..., label_pad: float = ..., textalignment: str = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        label,
+        initial: str = "",
+        color: str = ".95",
+        hovercolor: str = "1",
+        label_pad: float = 0.01,
+        textalignment: str = "left",
+    ) -> None: ...
     @property
     def text(self): ...
     def set_val(self, val) -> None: ...
-    def begin_typing(self, x: Incomplete | None = ...) -> None: ...
+    def begin_typing(self, x: Incomplete | None = None) -> None: ...
     def stop_typing(self) -> None: ...
     def on_text_change(self, func): ...
     def on_submit(self, func): ...
@@ -112,11 +197,23 @@ class TextBox(AxesWidget):
 class RadioButtons(AxesWidget):
     value_selected: Incomplete
     labels: Incomplete
-    def __init__(self, ax, labels, active: int = ..., activecolor: Incomplete | None = ..., *, useblit: bool = ..., label_props: Incomplete | None = ..., radio_props: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        labels,
+        active: int = 0,
+        activecolor: Incomplete | None = None,
+        *,
+        useblit: bool = True,
+        label_props: Incomplete | None = None,
+        radio_props: Incomplete | None = None,
+    ) -> None: ...
     def set_label_props(self, props) -> None: ...
     def set_radio_props(self, props) -> None: ...
     @property
     def activecolor(self): ...
+    @activecolor.setter
+    def activecolor(self, activecolor) -> None: ...
     def set_active(self, index) -> None: ...
     def on_clicked(self, func): ...
     def disconnect(self, cid) -> None: ...
@@ -138,7 +235,14 @@ class Cursor(AxesWidget):
     linev: Incomplete
     background: Incomplete
     needclear: bool
-    def __init__(self, ax, horizOn: bool = ..., vertOn: bool = ..., useblit: bool = ..., **lineprops) -> None: ...
+    def __init__(
+        self,
+        ax,
+        horizOn: bool = True,
+        vertOn: bool = True,
+        useblit: bool = False,
+        **lineprops,
+    ) -> None: ...
     def clear(self, event) -> None: ...
     def onmove(self, event) -> None: ...
 
@@ -150,7 +254,16 @@ class MultiCursor(Widget):
     useblit: Incomplete
     vlines: Incomplete
     hlines: Incomplete
-    def __init__(self, canvas, axes, *, useblit: bool = ..., horizOn: bool = ..., vertOn: bool = ..., **lineprops) -> None: ...
+    def __init__(
+        self,
+        canvas,
+        axes,
+        *,
+        useblit: bool = True,
+        horizOn: bool = False,
+        vertOn: bool = True,
+        **lineprops,
+    ) -> None: ...
     needclear: Incomplete
     def connect(self) -> None: ...
     def disconnect(self) -> None: ...
@@ -162,7 +275,15 @@ class _SelectorWidget(AxesWidget):
     useblit: Incomplete
     background: Incomplete
     validButtons: Incomplete
-    def __init__(self, ax, onselect, useblit: bool = ..., button: Incomplete | None = ..., state_modifier_keys: Incomplete | None = ..., use_data_coordinates: bool = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        onselect,
+        useblit: bool = False,
+        button: Incomplete | None = None,
+        state_modifier_keys: Incomplete | None = None,
+        use_data_coordinates: bool = False,
+    ) -> None: ...
     def set_active(self, active) -> None: ...
     def update_background(self, event): ...
     def connect_default_events(self) -> None: ...
@@ -194,18 +315,46 @@ class SpanSelector(_SelectorWidget):
     drag_from_anywhere: Incomplete
     ignore_event_outside: Incomplete
     canvas: Incomplete
-    def __init__(self, ax, onselect, direction, minspan: int = ..., useblit: bool = ..., props: Incomplete | None = ..., onmove_callback: Incomplete | None = ..., interactive: bool = ..., button: Incomplete | None = ..., handle_props: Incomplete | None = ..., grab_range: int = ..., state_modifier_keys: Incomplete | None = ..., drag_from_anywhere: bool = ..., ignore_event_outside: bool = ..., snap_values: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        onselect,
+        direction,
+        minspan: int = 0,
+        useblit: bool = False,
+        props: Incomplete | None = None,
+        onmove_callback: Incomplete | None = None,
+        interactive: bool = False,
+        button: Incomplete | None = None,
+        handle_props: Incomplete | None = None,
+        grab_range: int = 10,
+        state_modifier_keys: Incomplete | None = None,
+        drag_from_anywhere: bool = False,
+        ignore_event_outside: bool = False,
+        snap_values: Incomplete | None = None,
+    ) -> None: ...
     ax: Incomplete
-    def new_axes(self, ax, *, _props: Incomplete | None = ...) -> None: ...
+    def new_axes(self, ax, *, _props: Incomplete | None = None) -> None: ...
     def connect_default_events(self) -> None: ...
     @property
     def direction(self): ...
+    @direction.setter
+    def direction(self, direction) -> None: ...
     @property
     def extents(self): ...
+    @extents.setter
+    def extents(self, extents) -> None: ...
 
 class ToolLineHandles:
     ax: Incomplete
-    def __init__(self, ax, positions, direction, line_props: Incomplete | None = ..., useblit: bool = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        positions,
+        direction,
+        line_props: Incomplete | None = None,
+        useblit: bool = True,
+    ) -> None: ...
     @property
     def artists(self): ...
     @property
@@ -220,14 +369,22 @@ class ToolLineHandles:
 
 class ToolHandles:
     ax: Incomplete
-    def __init__(self, ax, x, y, marker: str = ..., marker_props: Incomplete | None = ..., useblit: bool = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        x,
+        y,
+        marker: str = "o",
+        marker_props: Incomplete | None = None,
+        useblit: bool = True,
+    ) -> None: ...
     @property
     def x(self): ...
     @property
     def y(self): ...
     @property
     def artists(self): ...
-    def set_data(self, pts, y: Incomplete | None = ...) -> None: ...
+    def set_data(self, pts, y: Incomplete | None = None) -> None: ...
     def set_visible(self, val) -> None: ...
     def set_animated(self, val) -> None: ...
     def closest(self, x, y): ...
@@ -239,7 +396,25 @@ class RectangleSelector(_SelectorWidget):
     minspany: Incomplete
     spancoords: Incomplete
     grab_range: Incomplete
-    def __init__(self, ax, onselect, *, minspanx: int = ..., minspany: int = ..., useblit: bool = ..., props: Incomplete | None = ..., spancoords: str = ..., button: Incomplete | None = ..., grab_range: int = ..., handle_props: Incomplete | None = ..., interactive: bool = ..., state_modifier_keys: Incomplete | None = ..., drag_from_anywhere: bool = ..., ignore_event_outside: bool = ..., use_data_coordinates: bool = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        onselect,
+        *,
+        minspanx: int = 0,
+        minspany: int = 0,
+        useblit: bool = False,
+        props: Incomplete | None = None,
+        spancoords: str = "data",
+        button: Incomplete | None = None,
+        grab_range: int = 10,
+        handle_props: Incomplete | None = None,
+        interactive: bool = False,
+        state_modifier_keys: Incomplete | None = None,
+        drag_from_anywhere: bool = False,
+        ignore_event_outside: bool = False,
+        use_data_coordinates: bool = False,
+    ) -> None: ...
     @property
     def corners(self): ...
     @property
@@ -248,8 +423,12 @@ class RectangleSelector(_SelectorWidget):
     def center(self): ...
     @property
     def extents(self): ...
+    @extents.setter
+    def extents(self, extents) -> None: ...
     @property
     def rotation(self): ...
+    @rotation.setter
+    def rotation(self, value) -> None: ...
     @property
     def geometry(self): ...
 
@@ -257,14 +436,35 @@ class EllipseSelector(RectangleSelector): ...
 
 class LassoSelector(_SelectorWidget):
     verts: Incomplete
-    def __init__(self, ax, onselect, useblit: bool = ..., props: Incomplete | None = ..., button: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        onselect,
+        useblit: bool = True,
+        props: Incomplete | None = None,
+        button: Incomplete | None = None,
+    ) -> None: ...
 
 class PolygonSelector(_SelectorWidget):
     grab_range: Incomplete
-    def __init__(self, ax, onselect, useblit: bool = ..., props: Incomplete | None = ..., handle_props: Incomplete | None = ..., grab_range: int = ..., *, draw_bounding_box: bool = ..., box_handle_props: Incomplete | None = ..., box_props: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        ax,
+        onselect,
+        useblit: bool = False,
+        props: Incomplete | None = None,
+        handle_props: Incomplete | None = None,
+        grab_range: int = 10,
+        *,
+        draw_bounding_box: bool = False,
+        box_handle_props: Incomplete | None = None,
+        box_props: Incomplete | None = None,
+    ) -> None: ...
     def onmove(self, event): ...
     @property
     def verts(self): ...
+    @verts.setter
+    def verts(self, xys) -> None: ...
 
 class Lasso(AxesWidget):
     useblit: Incomplete
@@ -272,6 +472,6 @@ class Lasso(AxesWidget):
     verts: Incomplete
     line: Incomplete
     callback: Incomplete
-    def __init__(self, ax, xy, callback, useblit: bool = ...) -> None: ...
+    def __init__(self, ax, xy, callback, useblit: bool = True) -> None: ...
     def onrelease(self, event) -> None: ...
     def onmove(self, event) -> None: ...

@@ -114,73 +114,61 @@ def change_email_address(token: str) -> Response:
 
 @AuthenticatedUserRoute("/query_plans", methods=["GET"])
 @as_flask_view()
-class query_plans(QueryPlansView):
-    ...
+class query_plans(QueryPlansView): ...
 
 
 @AuthenticatedUserRoute("/query_companies", methods=["GET"])
 @as_flask_view()
-class query_companies(QueryCompaniesView):
-    ...
+class query_companies(QueryCompaniesView): ...
 
 
 @AuthenticatedUserRoute("/statistics")
 @as_flask_view()
-class statistics(GetStatisticsView):
-    ...
+class statistics(GetStatisticsView): ...
 
 
 @AuthenticatedUserRoute("/cooperation_summary/<uuid:coop_id>")
 @as_flask_view()
-class coop_summary(CoopSummaryView):
-    ...
+class coop_summary(CoopSummaryView): ...
 
 
 @AuthenticatedUserRoute(
     "/cooperation_summary/<uuid:coop_id>/coordinators", methods=["GET"]
 )
 @as_flask_view()
-class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView):
-    ...
+class list_coordinators_of_cooperation(ListCoordinationsOfCooperationView): ...
 
 
 @AuthenticatedUserRoute("/list_all_cooperations")
 @as_flask_view()
-class list_all_cooperations(ListAllCooperationsView):
-    ...
+class list_all_cooperations(ListAllCooperationsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/accounts")
 @as_flask_view()
-class company_accounts(CompanyAccountsView):
-    ...
+class company_accounts(CompanyAccountsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_p")
 @as_flask_view()
-class company_account_p(ShowPAccountDetailsView):
-    ...
+class company_account_p(ShowPAccountDetailsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_r")
 @as_flask_view()
-class company_account_r(ShowRAccountDetailsView):
-    ...
+class company_account_r(ShowRAccountDetailsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_a")
 @as_flask_view()
-class company_account_a(ShowAAccountDetailsView):
-    ...
+class company_account_a(ShowAAccountDetailsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_prd")
 @as_flask_view()
-class company_account_prd(ShowPRDAccountDetailsView):
-    ...
+class company_account_prd(ShowPRDAccountDetailsView): ...
 
 
 @AuthenticatedUserRoute("/company/<uuid:company_id>/transactions")
 @as_flask_view()
-class get_company_transactions(GetCompanyTransactionsView):
-    ...
+class get_company_transactions(GetCompanyTransactionsView): ...

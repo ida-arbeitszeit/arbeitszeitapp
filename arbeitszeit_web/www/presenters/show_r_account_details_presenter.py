@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.transactions import TransactionTypes
 from arbeitszeit.use_cases import show_r_account_details
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -29,7 +29,7 @@ class ShowRAccountDetailsPresenter:
 
     translator: Translator
     url_index: UrlIndex
-    datetime_service: DatetimeService
+    datetime_formatter: DatetimeFormatter
 
     def present(self, use_case_response: show_r_account_details.Response) -> ViewModel:
         transactions = [
@@ -64,7 +64,7 @@ class ShowRAccountDetailsPresenter:
         )
         return self.TransactionInfo(
             transaction_type,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
             str(round(transaction.transaction_volume, 2)),

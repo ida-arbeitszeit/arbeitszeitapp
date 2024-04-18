@@ -6,7 +6,6 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit import records
-from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit_flask.database import models
@@ -641,7 +640,7 @@ class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.datetime_service = self.injector.get(DatetimeService)  # type: ignore
+        self.datetime_service = self.injector.get(FakeDatetimeService)
 
     def test_that_one_result_is_yieled_with_one_cooperating_plan_in_db(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
@@ -672,6 +671,7 @@ class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
         self,
     ) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
         self.plan_generator.create_plan(cooperation=cooperation)
         self.plan_generator.create_plan(cooperation=cooperation)
         results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(

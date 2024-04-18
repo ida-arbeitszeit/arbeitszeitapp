@@ -195,7 +195,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
         self.assertTupleEqual(
             web_details.price_per_unit,
             (
-                self.translator.gettext("Price (per unit)"),
+                self.translator.gettext("Price (hours/unit)"),
                 "0.06",
                 True,
                 self.url_index.get_coop_summary_url(coop_id=COOP_ID),

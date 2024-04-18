@@ -1,8 +1,11 @@
-from . import cbook as cbook
-from ._enums import CapStyle as CapStyle, JoinStyle as JoinStyle
-from .path import Path as Path
-from .transforms import Affine2D as Affine2D, IdentityTransform as IdentityTransform
 from _typeshed import Incomplete
+
+from . import cbook as cbook
+from ._enums import CapStyle as CapStyle
+from ._enums import JoinStyle as JoinStyle
+from .path import Path as Path
+from .transforms import Affine2D as Affine2D
+from .transforms import IdentityTransform as IdentityTransform
 
 TICKLEFT: Incomplete
 TICKRIGHT: Incomplete
@@ -21,7 +24,14 @@ class MarkerStyle:
     markers: Incomplete
     filled_markers: Incomplete
     fillstyles: Incomplete
-    def __init__(self, marker, fillstyle: Incomplete | None = ..., transform: Incomplete | None = ..., capstyle: Incomplete | None = ..., joinstyle: Incomplete | None = ...) -> None: ...
+    def __init__(
+        self,
+        marker,
+        fillstyle: Incomplete | None = None,
+        transform: Incomplete | None = None,
+        capstyle: Incomplete | None = None,
+        joinstyle: Incomplete | None = None,
+    ) -> None: ...
     def __bool__(self) -> bool: ...
     def is_filled(self): ...
     def get_fillstyle(self): ...
@@ -35,5 +45,7 @@ class MarkerStyle:
     def get_snap_threshold(self): ...
     def get_user_transform(self): ...
     def transformed(self, transform: Affine2D): ...
-    def rotated(self, *, deg: Incomplete | None = ..., rad: Incomplete | None = ...): ...
-    def scaled(self, sx, sy: Incomplete | None = ...): ...
+    def rotated(
+        self, *, deg: Incomplete | None = None, rad: Incomplete | None = None
+    ): ...
+    def scaled(self, sx, sy: Incomplete | None = None): ...

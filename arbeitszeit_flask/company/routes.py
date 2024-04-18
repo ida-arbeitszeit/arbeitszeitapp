@@ -111,13 +111,12 @@ from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPr
 from .blueprint import CompanyRoute
 
 
-@CompanyRoute("/company/dashboard")
+@CompanyRoute("/dashboard")
 @as_flask_view()
-class dashboard(CompanyDashboardView):
-    ...
+class dashboard(CompanyDashboardView): ...
 
 
-@CompanyRoute("/company/consumptions")
+@CompanyRoute("/consumptions")
 def my_consumptions(
     query_consumptions: QueryCompanyConsumptions,
     presenter: CompanyConsumptionsPresenter,
@@ -132,7 +131,7 @@ def my_consumptions(
     )
 
 
-@CompanyRoute("/company/draft/delete/<uuid:draft_id>", methods=["POST"])
+@CompanyRoute("/draft/delete/<uuid:draft_id>", methods=["POST"])
 @commit_changes
 def delete_draft(
     draft_id: UUID,
@@ -149,7 +148,7 @@ def delete_draft(
     return redirect(view_model.redirect_target)
 
 
-@CompanyRoute("/company/draft/from-plan/<uuid:plan_id>", methods=["POST"])
+@CompanyRoute("/draft/from-plan/<uuid:plan_id>", methods=["POST"])
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
@@ -163,13 +162,12 @@ def create_draft_from_plan(
     return redirect(view_model.redirect_url)
 
 
-@CompanyRoute("/company/create_draft", methods=["GET", "POST"])
+@CompanyRoute("/create_draft", methods=["GET", "POST"])
 @as_flask_view()
-class create_draft(CreateDraftView):
-    ...
+class create_draft(CreateDraftView): ...
 
 
-@CompanyRoute("/company/file_plan/<draft_id>", methods=["POST"])
+@CompanyRoute("/file_plan/<draft_id>", methods=["POST"])
 @commit_changes
 def file_plan(
     draft_id: str,
@@ -189,7 +187,7 @@ def file_plan(
     return redirect(view_model.redirect_url)
 
 
-@CompanyRoute("/company/draft/<draft_id>", methods=["GET"])
+@CompanyRoute("/draft/<draft_id>", methods=["GET"])
 def get_draft_details(
     draft_id: str,
     use_case: GetDraftDetails,
@@ -202,14 +200,14 @@ def get_draft_details(
     view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
     return FlaskResponse(
         render_template(
-            "company/create_draft.html",
+            "company/draft_details.html",
             view_model=view_model,
             form=form,
         )
     )
 
 
-@CompanyRoute("/company/my_plans", methods=["GET"])
+@CompanyRoute("/my_plans", methods=["GET"])
 def my_plans(
     show_my_plans_use_case: ShowMyPlansUseCase,
     show_my_plans_presenter: ShowMyPlansPresenter,
@@ -223,7 +221,7 @@ def my_plans(
     )
 
 
-@CompanyRoute("/company/plan/revoke/<uuid:plan_id>", methods=["POST"])
+@CompanyRoute("/plan/revoke/<uuid:plan_id>", methods=["POST"])
 @commit_changes
 def revoke_plan_filing(
     plan_id: UUID,
@@ -237,7 +235,7 @@ def revoke_plan_filing(
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
+@CompanyRoute("/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
 def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     response = hide_plan(plan_id)
@@ -245,19 +243,17 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
     return redirect(url_for("main_company.my_plans"))
 
 
-@CompanyRoute("/company/register_hours_worked", methods=["GET", "POST"])
+@CompanyRoute("/register_hours_worked", methods=["GET", "POST"])
 @as_flask_view()
-class register_hours_worked(RegisterHoursWorkedView):
-    ...
+class register_hours_worked(RegisterHoursWorkedView): ...
 
 
-@CompanyRoute("/company/register_productive_consumption", methods=["GET", "POST"])
+@CompanyRoute("/register_productive_consumption", methods=["GET", "POST"])
 @as_flask_view()
-class register_productive_consumption(RegisterProductiveConsumptionView):
-    ...
+class register_productive_consumption(RegisterProductiveConsumptionView): ...
 
 
-@CompanyRoute("/company/plan_details/<uuid:plan_id>")
+@CompanyRoute("/plan_details/<uuid:plan_id>")
 def plan_details(
     plan_id: UUID,
     use_case: GetPlanDetailsUseCase,
@@ -272,36 +268,32 @@ def plan_details(
 
 
 @CompanyRoute(
-    "/company/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
+    "/cooperation_summary/<uuid:coop_id>/request_coordination_transfer",
     methods=["GET", "POST"],
 )
 @as_flask_view()
-class request_coordination_transfer(RequestCoordinationTransferView):
-    ...
+class request_coordination_transfer(RequestCoordinationTransferView): ...
 
 
 @CompanyRoute(
-    "/company/show_coordination_transfer_request/<uuid:transfer_request>",
+    "/show_coordination_transfer_request/<uuid:transfer_request>",
     methods=["GET", "POST"],
 )
 @as_flask_view()
-class show_coordination_transfer_request(ShowCoordinationTransferRequestView):
-    ...
+class show_coordination_transfer_request(ShowCoordinationTransferRequestView): ...
 
 
-@CompanyRoute("/company/create_cooperation", methods=["GET", "POST"])
+@CompanyRoute("/create_cooperation", methods=["GET", "POST"])
 @as_flask_view()
-class create_cooperation(CreateCooperationView):
-    ...
+class create_cooperation(CreateCooperationView): ...
 
 
-@CompanyRoute("/company/request_cooperation", methods=["GET", "POST"])
+@CompanyRoute("/request_cooperation", methods=["GET", "POST"])
 @as_flask_view()
-class request_cooperation(RequestCooperationView):
-    ...
+class request_cooperation(RequestCooperationView): ...
 
 
-@CompanyRoute("/company/my_cooperations", methods=["GET", "POST"])
+@CompanyRoute("/my_cooperations", methods=["GET", "POST"])
 @commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
@@ -363,19 +355,16 @@ def my_cooperations(
     return render_template("company/my_cooperations.html", **view_model.to_dict())
 
 
-@CompanyRoute("/company/invite_worker_to_company", methods=["GET", "POST"])
+@CompanyRoute("/invite_worker_to_company", methods=["GET", "POST"])
 @as_flask_view()
-class invite_worker_to_company(InviteWorkerToCompanyView):
-    ...
+class invite_worker_to_company(InviteWorkerToCompanyView): ...
 
 
-@CompanyRoute("/company/end_cooperation")
+@CompanyRoute("/end_cooperation")
 @as_flask_view()
-class end_cooperation(EndCooperationView):
-    ...
+class end_cooperation(EndCooperationView): ...
 
 
-@CompanyRoute("/company/review_registered_consumptions")
+@CompanyRoute("/review_registered_consumptions")
 @as_flask_view()
-class review_registered_consumptions(ReviewRegisteredConsumptionsView):
-    ...
+class review_registered_consumptions(ReviewRegisteredConsumptionsView): ...
