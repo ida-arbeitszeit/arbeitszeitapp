@@ -18,7 +18,7 @@ class TextRenderer(Protocol):
     ) -> str:
         ...
 
-    def render_email_change_warning(self, *, admin_email_address: str) -> str:
+    def render_email_change_warning(self, *, admin_email_address: str | None) -> str:
         ...
 
     def render_email_change_notification(self, *, change_email_url: str) -> str:

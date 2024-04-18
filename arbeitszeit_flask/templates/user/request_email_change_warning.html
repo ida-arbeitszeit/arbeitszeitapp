@@ -1,5 +1,7 @@
 {{ gettext("Dear Arbeitszeitapp user,
 
-someone tried to change the email address for your user account. If this was not you, please contact the administrators via the following email adress:") }}
-
+someone tried to change the email address for your user account. If this was not you, please contact the administrators of the app.") }}
+{% if admin_email_address %}
+{{ gettext("Admin email address:") }}
 <a href="{{ admin_email_address }}">{{ admin_email_address }}</a>
+{% endif %}

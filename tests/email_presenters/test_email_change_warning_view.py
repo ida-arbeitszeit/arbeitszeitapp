@@ -34,7 +34,10 @@ class EmailChangeWarningViewTests(BaseTestCase):
         )
         assert self.email_service.sent_mails[-1].recipients == [expected_email_address]
 
-    def test_that_the_content_of_the_mail_is_rendered_correctly(self) -> None:
+    def test_that_the_content_of_the_mail_is_rendered_correctly_when_admin_mail_is_set(
+        self,
+    ) -> None:
+        self.email_configuration.set_admin_email_address("admin@test.test")
         old_email = "test@test.test"
         self.view.render_email_change_warning(
             self.create_email_change_warning(
@@ -45,6 +48,21 @@ class EmailChangeWarningViewTests(BaseTestCase):
             -1
         ].html == self.text_renderer.render_email_change_warning(
             admin_email_address=self.email_configuration.get_admin_email_address(),
+        )
+
+    def test_that_the_content_of_the_mail_is_rendered_correctly_when_admin_mail_is_none(
+        self,
+    ) -> None:
+        old_email = "test@test.test"
+        self.view.render_email_change_warning(
+            self.create_email_change_warning(
+                old_email_address=old_email,
+            )
+        )
+        assert self.email_service.sent_mails[
+            -1
+        ].html == self.text_renderer.render_email_change_warning(
+            admin_email_address=None,
         )
 
     def test_that_the_subject_line_of_the_sent_mail_is_correct(self) -> None:

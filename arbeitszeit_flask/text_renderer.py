@@ -31,7 +31,7 @@ class TextRendererImpl:
             invitation_url=invitation_url,
         )
 
-    def render_email_change_warning(self, *, admin_email_address: str) -> str:
+    def render_email_change_warning(self, *, admin_email_address: str | None) -> str:
         return render_template(
             "user/request_email_change_warning.html",
             admin_email_address=admin_email_address,
