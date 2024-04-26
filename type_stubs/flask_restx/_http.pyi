@@ -1,8 +1,9 @@
-from _typeshed import Incomplete
 from enum import IntEnum
 
+from _typeshed import Incomplete
+
 class HTTPStatus(IntEnum):
-    def __new__(cls, value, phrase, description: str = ...): ...
+    def __new__(cls, value, phrase, description: str = ""): ...
     CONTINUE: Incomplete
     SWITCHING_PROTOCOLS: Incomplete
     PROCESSING: Incomplete

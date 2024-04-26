@@ -1,5 +1,6 @@
-from _typeshed import Incomplete
 from enum import Enum
+
+from _typeshed import Incomplete
 
 class _AutoStringNameEnum(Enum):
     def __hash__(self): ...

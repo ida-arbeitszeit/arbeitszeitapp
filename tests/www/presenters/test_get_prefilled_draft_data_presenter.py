@@ -59,12 +59,9 @@ class PlanDetailsPresenterTests(BaseTestCase):
         view_model = self.presenter.show_prefilled_draft_data(
             self.plan_details, form=form
         )
-        self.assertEqual(view_model.cancel_url, self.url_index.get_create_draft_url())
+        self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
         self.assertEqual(
             view_model.save_draft_url, self.url_index.get_create_draft_url()
-        )
-        self.assertEqual(
-            view_model.load_draft_url, self.url_index.get_my_plan_drafts_url()
         )
 
 
@@ -116,10 +113,7 @@ class DraftDetailsPresenterTests(BaseTestCase):
         view_model = self.presenter.show_prefilled_draft_data(
             TEST_DRAFT_SUMMARY_SUCCESS, form=form
         )
-        self.assertEqual(view_model.cancel_url, self.url_index.get_create_draft_url())
+        self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
         self.assertEqual(
             view_model.save_draft_url, self.url_index.get_create_draft_url()
-        )
-        self.assertEqual(
-            view_model.load_draft_url, self.url_index.get_my_plan_drafts_url()
         )

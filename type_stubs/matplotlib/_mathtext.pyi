@@ -1,13 +1,23 @@
-import typing as T
 import abc
 import enum
-from . import cbook as cbook
-from ._mathtext_data import latex_to_bakoma as latex_to_bakoma, stix_glyph_fixes as stix_glyph_fixes, stix_virtual_fonts as stix_virtual_fonts, tex2uni as tex2uni
-from .font_manager import FontProperties as FontProperties, findfont as findfont, get_font as get_font
-from .ft2font import FT2Font as FT2Font, FT2Image as FT2Image, Glyph as Glyph, KERNING_DEFAULT as KERNING_DEFAULT
-from _typeshed import Incomplete
-from pyparsing import ParseResults, ParserElement
+import typing as T
 from typing import NamedTuple
+
+from _typeshed import Incomplete
+from pyparsing import ParserElement, ParseResults
+
+from . import cbook as cbook
+from ._mathtext_data import latex_to_bakoma as latex_to_bakoma
+from ._mathtext_data import stix_glyph_fixes as stix_glyph_fixes
+from ._mathtext_data import stix_virtual_fonts as stix_virtual_fonts
+from ._mathtext_data import tex2uni as tex2uni
+from .font_manager import FontProperties as FontProperties
+from .font_manager import findfont as findfont
+from .font_manager import get_font as get_font
+from .ft2font import KERNING_DEFAULT as KERNING_DEFAULT
+from .ft2font import FT2Font as FT2Font
+from .ft2font import FT2Image as FT2Image
+from .ft2font import Glyph as Glyph
 
 def get_unicode_index(symbol: str) -> int: ...
 
@@ -57,40 +67,100 @@ class FontInfo(NamedTuple):
 class Fonts(abc.ABC):
     default_font_prop: Incomplete
     load_glyph_flags: Incomplete
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
-    def get_kern(self, font1: str, fontclass1: str, sym1: str, fontsize1: float, font2: str, fontclass2: str, sym2: str, fontsize2: float, dpi: float) -> float: ...
-    def get_metrics(self, font: str, font_class: str, sym: str, fontsize: float, dpi: float) -> FontMetrics: ...
-    def render_glyph(self, output: Output, ox: float, oy: float, font: str, font_class: str, sym: str, fontsize: float, dpi: float) -> None: ...
-    def render_rect_filled(self, output: Output, x1: float, y1: float, x2: float, y2: float) -> None: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
+    def get_kern(
+        self,
+        font1: str,
+        fontclass1: str,
+        sym1: str,
+        fontsize1: float,
+        font2: str,
+        fontclass2: str,
+        sym2: str,
+        fontsize2: float,
+        dpi: float,
+    ) -> float: ...
+    def get_metrics(
+        self, font: str, font_class: str, sym: str, fontsize: float, dpi: float
+    ) -> FontMetrics: ...
+    def render_glyph(
+        self,
+        output: Output,
+        ox: float,
+        oy: float,
+        font: str,
+        font_class: str,
+        sym: str,
+        fontsize: float,
+        dpi: float,
+    ) -> None: ...
+    def render_rect_filled(
+        self, output: Output, x1: float, y1: float, x2: float, y2: float
+    ) -> None: ...
     def get_xheight(self, font: str, fontsize: float, dpi: float) -> float: ...
-    def get_underline_thickness(self, font: str, fontsize: float, dpi: float) -> float: ...
-    def get_sized_alternatives_for_symbol(self, fontname: str, sym: str) -> list[tuple[str, str]]: ...
+    def get_underline_thickness(
+        self, font: str, fontsize: float, dpi: float
+    ) -> float: ...
+    def get_sized_alternatives_for_symbol(
+        self, fontname: str, sym: str
+    ) -> list[tuple[str, str]]: ...
 
 class TruetypeFonts(Fonts, metaclass=abc.ABCMeta):
     fontmap: Incomplete
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
     def get_xheight(self, fontname: str, fontsize: float, dpi: float) -> float: ...
-    def get_underline_thickness(self, font: str, fontsize: float, dpi: float) -> float: ...
-    def get_kern(self, font1: str, fontclass1: str, sym1: str, fontsize1: float, font2: str, fontclass2: str, sym2: str, fontsize2: float, dpi: float) -> float: ...
+    def get_underline_thickness(
+        self, font: str, fontsize: float, dpi: float
+    ) -> float: ...
+    def get_kern(
+        self,
+        font1: str,
+        fontclass1: str,
+        sym1: str,
+        fontsize1: float,
+        font2: str,
+        fontclass2: str,
+        sym2: str,
+        fontsize2: float,
+        dpi: float,
+    ) -> float: ...
 
 class BakomaFonts(TruetypeFonts):
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
-    def get_sized_alternatives_for_symbol(self, fontname: str, sym: str) -> list[tuple[str, str]]: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
+    def get_sized_alternatives_for_symbol(
+        self, fontname: str, sym: str
+    ) -> list[tuple[str, str]]: ...
 
 class UnicodeFonts(TruetypeFonts):
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
-    def get_sized_alternatives_for_symbol(self, fontname: str, sym: str) -> list[tuple[str, str]]: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
+    def get_sized_alternatives_for_symbol(
+        self, fontname: str, sym: str
+    ) -> list[tuple[str, str]]: ...
 
 class DejaVuFonts(UnicodeFonts, metaclass=abc.ABCMeta):
     bakoma: Incomplete
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
 
 class DejaVuSerifFonts(DejaVuFonts): ...
 class DejaVuSansFonts(DejaVuFonts): ...
 
 class StixFonts(UnicodeFonts):
-    def __init__(self, default_font_prop: FontProperties, load_glyph_flags: int) -> None: ...
-    def get_sized_alternatives_for_symbol(self, fontname: str, sym: str) -> list[tuple[str, str]] | list[tuple[int, str]]: ...
+    def __init__(
+        self, default_font_prop: FontProperties, load_glyph_flags: int
+    ) -> None: ...
+    def get_sized_alternatives_for_symbol(
+        self, fontname: str, sym: str
+    ) -> list[tuple[str, str]] | list[tuple[int, str]]: ...
 
 class StixSansFonts(StixFonts): ...
 
@@ -147,7 +217,9 @@ class Box(Node):
     depth: Incomplete
     def __init__(self, width: float, height: float, depth: float) -> None: ...
     def shrink(self) -> None: ...
-    def render(self, output: Output, x1: float, y1: float, x2: float, y2: float) -> None: ...
+    def render(
+        self, output: Output, x1: float, y1: float, x2: float, y2: float
+    ) -> None: ...
 
 class Vbox(Box):
     def __init__(self, height: float, depth: float) -> None: ...
@@ -182,7 +254,13 @@ class List(Box):
     def shrink(self) -> None: ...
 
 class Hlist(List):
-    def __init__(self, elements: T.Sequence[Node], w: float = ..., m: T.Literal['additional', 'exactly'] = ..., do_kern: bool = ...) -> None: ...
+    def __init__(
+        self,
+        elements: T.Sequence[Node],
+        w: float = 0.0,
+        m: T.Literal["additional", "exactly"] = "additional",
+        do_kern: bool = True,
+    ) -> None: ...
     children: Incomplete
     def kern(self) -> None: ...
     height: Incomplete
@@ -191,25 +269,41 @@ class Hlist(List):
     glue_sign: int
     glue_order: int
     glue_ratio: float
-    def hpack(self, w: float = ..., m: T.Literal['additional', 'exactly'] = ...) -> None: ...
+    def hpack(
+        self, w: float = 0.0, m: T.Literal["additional", "exactly"] = "additional"
+    ) -> None: ...
 
 class Vlist(List):
-    def __init__(self, elements: T.Sequence[Node], h: float = ..., m: T.Literal['additional', 'exactly'] = ...) -> None: ...
+    def __init__(
+        self,
+        elements: T.Sequence[Node],
+        h: float = 0.0,
+        m: T.Literal["additional", "exactly"] = "additional",
+    ) -> None: ...
     width: Incomplete
     depth: Incomplete
     height: Incomplete
     glue_sign: int
     glue_order: int
     glue_ratio: float
-    def vpack(self, h: float = ..., m: T.Literal['additional', 'exactly'] = ..., l: float = ...) -> None: ...
+    def vpack(
+        self,
+        h: float = 0.0,
+        m: T.Literal["additional", "exactly"] = "additional",
+        l: float = ...,
+    ) -> None: ...
 
 class Rule(Box):
     fontset: Incomplete
-    def __init__(self, width: float, height: float, depth: float, state: ParserState) -> None: ...
-    def render(self, output: Output, x: float, y: float, w: float, h: float) -> None: ...
+    def __init__(
+        self, width: float, height: float, depth: float, state: ParserState
+    ) -> None: ...
+    def render(
+        self, output: Output, x: float, y: float, w: float, h: float
+    ) -> None: ...
 
 class Hrule(Rule):
-    def __init__(self, state: ParserState, thickness: float | None = ...) -> None: ...
+    def __init__(self, state: ParserState, thickness: float | None = None) -> None: ...
 
 class Vrule(Rule):
     def __init__(self, state: ParserState) -> None: ...
@@ -223,7 +317,22 @@ class _GlueSpec(NamedTuple):
 
 class Glue(Node):
     glue_spec: Incomplete
-    def __init__(self, glue_type: _GlueSpec | T.Literal['fil', 'fill', 'filll', 'neg_fil', 'neg_fill', 'neg_filll', 'empty', 'ss']) -> None: ...
+    def __init__(
+        self,
+        glue_type: (
+            _GlueSpec
+            | T.Literal[
+                "fil",
+                "fill",
+                "filll",
+                "neg_fil",
+                "neg_fill",
+                "neg_filll",
+                "empty",
+                "ss",
+            ]
+        ),
+    ) -> None: ...
     def shrink(self) -> None: ...
 
 class HCentered(Hlist):
@@ -241,13 +350,28 @@ class Kern(Node):
 
 class AutoHeightChar(Hlist):
     shift_amount: Incomplete
-    def __init__(self, c: str, height: float, depth: float, state: ParserState, always: bool = ..., factor: float | None = ...) -> None: ...
+    def __init__(
+        self,
+        c: str,
+        height: float,
+        depth: float,
+        state: ParserState,
+        always: bool = False,
+        factor: float | None = None,
+    ) -> None: ...
 
 class AutoWidthChar(Hlist):
     width: Incomplete
-    def __init__(self, c: str, width: float, state: ParserState, always: bool = ..., char_class: type[Char] = ...) -> None: ...
+    def __init__(
+        self,
+        c: str,
+        width: float,
+        state: ParserState,
+        always: bool = False,
+        char_class: type[Char] = ...,
+    ) -> None: ...
 
-def ship(box: Box, xy: tuple[float, float] = ...) -> Output: ...
+def ship(box: Box, xy: tuple[float, float] = (0, 0)) -> Output: ...
 def Error(msg: str) -> ParserElement: ...
 
 class ParserState:
@@ -255,10 +379,14 @@ class ParserState:
     font_class: Incomplete
     fontsize: Incomplete
     dpi: Incomplete
-    def __init__(self, fontset: Fonts, font: str, font_class: str, fontsize: float, dpi: float) -> None: ...
+    def __init__(
+        self, fontset: Fonts, font: str, font_class: str, fontsize: float, dpi: float
+    ) -> None: ...
     def copy(self) -> ParserState: ...
     @property
     def font(self) -> str: ...
+    @font.setter
+    def font(self, name: str) -> None: ...
     def get_current_underline_thickness(self) -> float: ...
 
 def cmd(expr: str, args: ParserElement) -> ParserElement: ...
@@ -269,8 +397,11 @@ class Parser:
         TEXTSTYLE: int
         SCRIPTSTYLE: int
         SCRIPTSCRIPTSTYLE: int
+
     def __init__(self) -> None: ...
-    def parse(self, s: str, fonts_object: Fonts, fontsize: float, dpi: float) -> Hlist: ...
+    def parse(
+        self, s: str, fonts_object: Fonts, fontsize: float, dpi: float
+    ) -> Hlist: ...
     def get_state(self) -> ParserState: ...
     def pop_state(self) -> None: ...
     def push_state(self) -> None: ...
@@ -282,7 +413,9 @@ class Parser:
     def text(self, toks: ParseResults) -> T.Any: ...
     def space(self, toks: ParseResults) -> T.Any: ...
     def customspace(self, toks: ParseResults) -> T.Any: ...
-    def symbol(self, s: str, loc: int, toks: ParseResults | dict[str, str]) -> T.Any: ...
+    def symbol(
+        self, s: str, loc: int, toks: ParseResults | dict[str, str]
+    ) -> T.Any: ...
     def unknown_symbol(self, s: str, loc: int, toks: ParseResults) -> T.Any: ...
     def accent(self, toks: ParseResults) -> T.Any: ...
     def function(self, s: str, loc: int, toks: ParseResults) -> T.Any: ...

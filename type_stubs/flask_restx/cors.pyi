@@ -1,3 +1,12 @@
 from _typeshed import Incomplete
 
-def crossdomain(origin: Incomplete | None = ..., methods: Incomplete | None = ..., headers: Incomplete | None = ..., expose_headers: Incomplete | None = ..., max_age: int = ..., attach_to_all: bool = ..., automatic_options: bool = ..., credentials: bool = ...): ...
+def crossdomain(
+    origin: Incomplete | None = None,
+    methods: Incomplete | None = None,
+    headers: Incomplete | None = None,
+    expose_headers: Incomplete | None = None,
+    max_age: int = 21600,
+    attach_to_all: bool = True,
+    automatic_options: bool = True,
+    credentials: bool = False,
+): ...

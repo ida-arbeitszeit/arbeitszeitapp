@@ -16,7 +16,6 @@ from arbeitszeit_web.url_index import UrlIndex
 class GetPrefilledDraftDataPresenter:
     @dataclass
     class ViewModel:
-        load_draft_url: str
         save_draft_url: str
         cancel_url: str
 
@@ -35,9 +34,8 @@ class GetPrefilledDraftDataPresenter:
         form.labour_cost_field().set_value(draft_data.labour_cost)
         form.is_public_service_field().set_value(draft_data.is_public_service)
         return self.ViewModel(
-            load_draft_url=self.url_index.get_my_plan_drafts_url(),
             save_draft_url=self.url_index.get_create_draft_url(),
-            cancel_url=self.url_index.get_create_draft_url(),
+            cancel_url=self.url_index.get_my_plans_url(),
         )
 
 

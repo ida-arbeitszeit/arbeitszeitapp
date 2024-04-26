@@ -1,6 +1,8 @@
-from _typeshed import Incomplete
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
+
+from _typeshed import Incomplete
 
 class OptionalStringField:
     name: Incomplete
@@ -9,7 +11,7 @@ class OptionalStringField:
     def __init__(self, name: str, normalize: Callable[[str], str] = ...) -> None: ...
     def set_field_name(self, name: str) -> None: ...
     def parse_value(self, form: Dict[str, str]) -> None: ...
-    def get_value(self) -> Optional[str]: ...
+    def get_value(self) -> str | None: ...
 
 class OptionalDatetimeField:
     name: Incomplete
@@ -17,14 +19,17 @@ class OptionalDatetimeField:
     def __init__(self, name: str) -> None: ...
     def set_field_name(self, name: str) -> None: ...
     def parse_value(self, form: Dict[str, str]) -> None: ...
-    def get_value(self) -> Optional[datetime]: ...
+    def get_value(self) -> datetime | None: ...
 
+@dataclass
 class FilterFormData:
-    name: Optional[str]
-    method: Optional[str]
-    requested_after: Optional[datetime]
-    requested_before: Optional[datetime]
-    sorted_by: Optional[str]
+    name: str | None
+    method: str | None
+    requested_after: datetime | None
+    requested_before: datetime | None
+    sorted_by: str | None
     @classmethod
     def parse_from_from(self, args: Dict[str, str]) -> FilterFormData: ...
-    def __init__(self, name, method, requested_after, requested_before, sorted_by) -> None: ...
+    def __init__(
+        self, name, method, requested_after, requested_before, sorted_by
+    ) -> None: ...

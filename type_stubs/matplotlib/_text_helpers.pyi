@@ -1,6 +1,9 @@
-from .ft2font import KERNING_DEFAULT as KERNING_DEFAULT, LOAD_NO_HINTING as LOAD_NO_HINTING
-from _typeshed import Incomplete
 from collections.abc import Generator
+
+from _typeshed import Incomplete
+
+from .ft2font import KERNING_DEFAULT as KERNING_DEFAULT
+from .ft2font import LOAD_NO_HINTING as LOAD_NO_HINTING
 
 LayoutItem: Incomplete
 

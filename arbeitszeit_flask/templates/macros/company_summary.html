@@ -42,20 +42,47 @@
             <br>
             <div class="table-container">
                 <table class="table has-text-left mx-auto">
-                    <thead class="has-text-centered">
-                        <tr>
-                            <th></th>
-                            <th><span class="icon"><i class="fas fa-industry"></i></span><br>{{ gettext("Account p") }}
-                            </th>
-                            <th><span class="icon"><i class="fas fa-oil-can"></i></span><br>{{ gettext("Account r") }}
-                            </th>
-                            <th><span class="icon"><i class="fas fa-users"></i></span><br>{{ gettext("Account a") }}
-                            </th>
-                            <th><span class="icon"><i class="fas fa-exchange-alt"></i></span>
-                                <br>{{ gettext("Account prd") }}
-                            </th>
-                        </tr>
-                    </thead>
+                  <thead class="has-text-centered">
+                    <tr>
+                      <th></th>
+                      <th>
+                        <span class="icon">
+                          <i class="fas fa-industry"></i>
+                        </span>
+                        <br>
+                        <a href="{{ view_model.p_account_overview_url }}">
+                          {{ gettext("Account p") }}
+                        </a>
+                      </th>
+                      <th>
+                        <span class="icon">
+                          <i class="fas fa-oil-can"></i>
+                        </span>
+                        <br>
+                        <a href="{{ view_model.r_account_overview_url }}">
+                          {{ gettext("Account r") }}
+                        </a>
+                      </th>
+                      <th>
+                        <span class="icon">
+                          <i class="fas fa-users"></i>
+                        </span>
+                        <br>
+                        <a href="{{ view_model.a_account_overview_url }}">
+                          {{ gettext("Account a") }}
+                        </a>
+                      </th>
+                      <th>
+                        <span class="icon">
+                          <i class="fas fa-exchange-alt"></i>
+                        </span>
+                        <br>
+                        <a href="{{ view_model.prd_account_overview_url }}">
+                          {{ gettext("Account prd") }}
+                        </a>
+                      </th>
+                    </tr>
+                  </thead>
                     <tbody>
                         <tr>
                             <td>{{ gettext("Expectations") }}</td>

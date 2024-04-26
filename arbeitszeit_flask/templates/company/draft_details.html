@@ -3,13 +3,13 @@
 {% from 'macros/draft_form.html' import draft_form %}
 
 {% block navbar_start %}
-<div class="navbar-item">{{ gettext("Create plan") }}</div>
+<div class="navbar-item">{{ gettext("Edit draft") }}</div>
 {% endblock %}
 
 {% block content %}
 <div class="section has-text-centered">
   <h1 class="title">
-    {{ gettext("Create plan") }}
+    {{ gettext("Edit draft") }}
   </h1>
   <div class="columns is-centered">
     <div class="column is-three-fifths">
@@ -20,15 +20,20 @@
         <div class="field is-grouped is-grouped-centered">
           <div class="control">
             <button class="button is-primary is-light"
-                    type="submit">
-              {{ gettext("Save as draft")}}
+                    name="action"
+                    value="save_draft"
+                    type="submit"
+                    formaction="{{ view_model.save_draft_url }}">
+              {{ gettext("Save draft")}}
             </button>
           </div>
           <div class="control">
-            <a class="button is-light"
-               href="{{ cancel_url }}">
-              {{ gettext("Cancel")}}
-            </a>
+            <div class="control">
+              <a class="button is-light"
+                 href="{{ view_model.cancel_url }}">
+                {{ gettext("Cancel")}}
+              </a>
+            </div>
           </div>
         </div>
       </form>

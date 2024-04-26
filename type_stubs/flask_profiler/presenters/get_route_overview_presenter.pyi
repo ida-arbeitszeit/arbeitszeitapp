@@ -1,6 +1,9 @@
-from flask_profiler.use_cases import get_route_overview as use_case
-from typing import Iterable, List, Optional
+from dataclasses import dataclass
+from typing import Iterable, List
 
+from flask_profiler.use_cases import get_route_overview as use_case
+
+@dataclass
 class Plot:
     data_points: list[Point]
     x_axis: Line
@@ -12,6 +15,7 @@ class Plot:
     def transform(self, transformation: Conversion) -> Plot: ...
     def __init__(self, data_points, x_axis, y_axis, x_markings, y_markings) -> None: ...
 
+@dataclass
 class Point:
     @property
     def x(self) -> str: ...
@@ -19,10 +23,11 @@ class Point:
     def y(self) -> str: ...
     def __init__(self, _x, _y) -> None: ...
 
+@dataclass
 class Line:
     p1: Point
     p2: Point
-    label: Optional[str]
+    label: str | None = ...
     @property
     def x1(self) -> str: ...
     @property
@@ -33,6 +38,7 @@ class Line:
     def y2(self) -> str: ...
     def __init__(self, p1, p2, label) -> None: ...
 
+@dataclass
 class Graph:
     title: str
     width: str
@@ -40,6 +46,7 @@ class Graph:
     plot: Plot
     def __init__(self, title, width, height, plot) -> None: ...
 
+@dataclass
 class ViewModel:
     headline: str
     graphs: List[Graph]
@@ -48,12 +55,13 @@ class ViewModel:
 class GetRouteOverviewPresenter:
     def present_response(self, response: use_case.Response) -> ViewModel: ...
 
+@dataclass
 class Conversion:
     rows: List[List[float]]
     @classmethod
-    def stretch(cls, *, x: float = ..., y: float = ...) -> Conversion: ...
+    def stretch(cls, *, x: float = 1, y: float = 1) -> Conversion: ...
     @classmethod
-    def translation(cls, *, x: float = ..., y: float = ...) -> Conversion: ...
+    def translation(cls, *, x: float = 0, y: float = 0) -> Conversion: ...
     @classmethod
     def mirror_y(cls) -> Conversion: ...
     def transform_point(self, p: Point) -> Point: ...

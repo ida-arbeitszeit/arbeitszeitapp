@@ -1,10 +1,12 @@
+from collections import OrderedDict
+from collections.abc import MutableMapping
+
+from _typeshed import Incomplete
+
 from ._http import HTTPStatus as HTTPStatus
 from .errors import abort as abort
 from .mask import Mask as Mask
 from .utils import not_none as not_none
-from _typeshed import Incomplete
-from collections import OrderedDict
-from collections.abc import MutableMapping
 
 RE_REQUIRED: Incomplete
 
@@ -22,7 +24,12 @@ class ModelBase:
     def __schema__(self): ...
     @classmethod
     def inherit(cls, name, *parents): ...
-    def validate(self, data, resolver: Incomplete | None = ..., format_checker: Incomplete | None = ...) -> None: ...
+    def validate(
+        self,
+        data,
+        resolver: Incomplete | None = None,
+        format_checker: Incomplete | None = None,
+    ) -> None: ...
     def format_error(self, error): ...
     def __unicode__(self): ...
 
@@ -43,5 +50,5 @@ class OrderedModel(RawModel, OrderedDict, MutableMapping):
     wrapper = OrderedDict
 
 class SchemaModel(ModelBase):
-    def __init__(self, name, schema: Incomplete | None = ...) -> None: ...
+    def __init__(self, name, schema: Incomplete | None = None) -> None: ...
     def __unicode__(self): ...
