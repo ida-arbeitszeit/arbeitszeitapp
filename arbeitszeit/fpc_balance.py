@@ -58,4 +58,9 @@ def _calculate_public_plans_costs(public_plans: Iterable[Plan]) -> Decimal:
 
 
 def _calculate_public_plans_credit(transactions: Iterable[Transaction]) -> Decimal:
-    return Decimal(sum(1 - transaction.amount_received for transaction in transactions))
+    return Decimal(
+        sum(
+            transaction.amount_sent - transaction.amount_received
+            for transaction in transactions
+        )
+    )
