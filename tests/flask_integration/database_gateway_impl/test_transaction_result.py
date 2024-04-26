@@ -80,11 +80,9 @@ class TransactionRepositoryTests(FlaskTestCase):
     def test_transactions_from_labour_accounts_can_be_filtered(
         self,
     ) -> None:
-        labour_sending_account_from_company_one = self.database_gateway.create_account()
-        labour_sending_account_from_company_two = self.database_gateway.create_account()
-        labour_sending_account_from_company_three = (
-            self.database_gateway.create_account()
-        )
+        labour_sending_account_from_company_one = self.create_account()
+        labour_sending_account_from_company_two = self.create_account()
+        labour_sending_account_from_company_three = self.create_account()
 
         worker_receiver_account_one = self.create_account()
         worker_receiver_account_two = self.create_account()
@@ -92,7 +90,7 @@ class TransactionRepositoryTests(FlaskTestCase):
 
         transaction_one = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=labour_sending_account_from_company_one.id,
+            sending_account=labour_sending_account_from_company_one,
             receiving_account=worker_receiver_account_one,
             amount_sent=Decimal(1),
             amount_received=Decimal(1),
@@ -101,7 +99,7 @@ class TransactionRepositoryTests(FlaskTestCase):
 
         transaction_two = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=labour_sending_account_from_company_two.id,
+            sending_account=labour_sending_account_from_company_two,
             receiving_account=worker_receiver_account_two,
             amount_sent=Decimal(2),
             amount_received=Decimal(2),
@@ -110,17 +108,20 @@ class TransactionRepositoryTests(FlaskTestCase):
 
         transaction_three = self.database_gateway.create_transaction(
             self.datetime_service.now(),
-            sending_account=labour_sending_account_from_company_three.id,
+            sending_account=labour_sending_account_from_company_three,
             receiving_account=worker_receiver_account_three,
             amount_sent=Decimal(3),
             amount_received=Decimal(3),
             purpose="test purpose 3",
         )
 
-        all_accounts = self.database_gateway.get_accounts()
         assert list(
-            self.database_gateway.get_transactions().where_sender_is_labour_account(
-                all_accounts
+            self.database_gateway.get_transactions().where_account_is_sender(
+                *[
+                    labour_sending_account_from_company_one,
+                    labour_sending_account_from_company_two,
+                    labour_sending_account_from_company_three,
+                ]
             )
         ) == [transaction_one, transaction_two, transaction_three]
 

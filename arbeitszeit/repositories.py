@@ -349,10 +349,6 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
 
     def where_sender_is_social_accounting(self) -> Self: ...
 
-    def where_sender_is_labour_account(
-        self, labour_accounts: AccountResult
-    ) -> Self: ...
-
     def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
         """Filter all transactions in the current result set such that
         the new result set contains only those transactions that are

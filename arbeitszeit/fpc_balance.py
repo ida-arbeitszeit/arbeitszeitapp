@@ -19,9 +19,11 @@ class PublicFundService:
         labour_accounts = (
             self.database_gateway.get_accounts().that_are_labour_accounts()
         )
+        labour_account_ids = [labour_account.id for labour_account in labour_accounts]
+
         lohn_transactions = (
-            self.database_gateway.get_transactions().where_sender_is_labour_account(
-                labour_accounts
+            self.database_gateway.get_transactions().where_account_is_sender(
+                *labour_account_ids
             )
         )
 
