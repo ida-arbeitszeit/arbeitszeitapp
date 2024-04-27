@@ -572,7 +572,8 @@ configuration options are available
 
 .. py:data:: MAIL_ADMIN
 
-   The email address of the app administrator. Users may use this email address to contact the administrator.
+   The email address of the app administrator. Users may use this email 
+   address to contact the administrator.
 
 .. py:data:: SECRET_KEY
    

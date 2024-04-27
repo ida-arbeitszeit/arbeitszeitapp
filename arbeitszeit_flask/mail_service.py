@@ -12,7 +12,7 @@ class FlaskEmailConfiguration:
         return current_app.config["MAIL_DEFAULT_SENDER"]
 
     def get_admin_email_address(self) -> str | None:
-        return current_app.config["MAIL_ADMIN"]
+        return current_app.config.get("MAIL_ADMIN")
 
 
 def get_mail_service() -> MailService:
