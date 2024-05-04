@@ -38,6 +38,11 @@ class WorkerInvitation:
 
 
 @dataclass
+class EmailChangeWarning:
+    old_email_address: str
+
+
+@dataclass
 class EmailChangeConfirmation:
     old_email_address: str
     new_email_address: str
@@ -77,6 +82,7 @@ Message: TypeAlias = Union[
     CompanyRegistration,
     CooperationRequestEmail,
     CoordinationTransferRequest,
+    EmailChangeWarning,
     EmailChangeConfirmation,
     MemberRegistration,
     ResetPasswordConfirmation,
