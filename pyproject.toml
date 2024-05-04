@@ -17,8 +17,12 @@ profiling = ["flask_profiler"]
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.packages]
-find = {}
+[tool.setuptools.packages.find]
+include = [
+    "arbeitszeit_flask",
+    "arbeitszeit",
+    "arbeitszeit_web",
+]
 
 [tool.black]
 target-version = ['py311']
