@@ -89,12 +89,12 @@ from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
 from arbeitszeit_web.www.presenters.create_draft_from_plan_presenter import (
     CreateDraftFromPlanPresenter,
 )
-from arbeitszeit_web.www.presenters.create_draft_presenter import (
-    GetPrefilledDraftDataPresenter,
-)
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
+)
+from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
+    GetDraftDetailsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
@@ -191,13 +191,13 @@ def file_plan(
 def get_draft_details(
     draft_id: str,
     use_case: GetDraftDetails,
-    presenter: GetPrefilledDraftDataPresenter,
+    presenter: GetDraftDetailsPresenter,
 ) -> Response:
     use_case_response = use_case(UUID(draft_id))
     if use_case_response is None:
         return http_404()
     form = CreateDraftForm()
-    view_model = presenter.show_prefilled_draft_data(use_case_response, form=form)
+    view_model = presenter.present_draft_details(use_case_response, form=form)
     return FlaskResponse(
         render_template(
             "company/draft_details.html",
