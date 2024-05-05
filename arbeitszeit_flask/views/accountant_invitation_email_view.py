@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import render_template
 
-from arbeitszeit_flask.mail_service import MailService
+from arbeitszeit_web.email import MailService
 from arbeitszeit_web.email.accountant_invitation_presenter import ViewModel
 
 

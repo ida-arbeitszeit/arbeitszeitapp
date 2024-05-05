@@ -20,17 +20,14 @@ from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
+from arbeitszeit_flask.email_configuration import FlaskEmailConfiguration
 from arbeitszeit_flask.extensions import db
 from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
-from arbeitszeit_flask.mail_service import (
-    FlaskEmailConfiguration,
-    MailService,
-    get_mail_service,
-)
+from arbeitszeit_flask.mail_service import get_mail_service
 from arbeitszeit_flask.notifications import FlaskFlashNotifier
 from arbeitszeit_flask.password_hasher import provide_password_hasher
 from arbeitszeit_flask.text_renderer import TextRendererImpl
@@ -41,7 +38,7 @@ from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
 from arbeitszeit_web.colors import Colors
-from arbeitszeit_web.email import EmailConfiguration
+from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
 )
