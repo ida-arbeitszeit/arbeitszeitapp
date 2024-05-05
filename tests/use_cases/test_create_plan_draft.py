@@ -31,7 +31,7 @@ REQUEST = Request(
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.create_plan_draft = self.injector.get(CreatePlanDraft)
+        self.use_case = self.injector.get(CreatePlanDraft)
         self.get_draft_details = self.injector.get(get_draft_details.GetDraftDetails)
 
     def test_that_plan_plan_details_can_be_accessed_after_draft_is_created(
@@ -39,7 +39,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner)
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert not response.is_rejected
         assert response.draft_id
         assert self.get_draft_details(response.draft_id)
@@ -47,7 +47,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_create_plan_returns_a_draft_id(self) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner)
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.draft_id
 
     def test_that_create_plan_gets_rejected_with_non_existing_planner(self) -> None:
@@ -55,7 +55,7 @@ class UseCaseTests(BaseTestCase):
             REQUEST,
             planner=uuid4(),
         )
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.is_rejected
         assert response.rejection_reason == RejectionReason.planner_does_not_exist
         assert not response.draft_id
@@ -69,7 +69,7 @@ class UseCaseTests(BaseTestCase):
             planner=planner,
             costs=ProductionCosts(Decimal(-1), Decimal(-1), Decimal(-1)),
         )
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.is_rejected
         assert response.rejection_reason == RejectionReason.negative_plan_input
         assert not response.draft_id
@@ -79,21 +79,21 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner, production_amount=-1)
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.is_rejected
         assert not response.draft_id
 
     def test_that_create_plan_gets_rejected_with_negative_timeframe(self) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner, timeframe_in_days=-1)
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.is_rejected
         assert not response.draft_id
 
     def test_that_drafted_plan_has_same_planner_as_specified_on_creation(self) -> None:
         planner = self.company_generator.create_company()
         request = replace(REQUEST, planner=planner)
-        response = self.create_plan_draft(request)
+        response = self.use_case.create_draft(request)
         assert response.draft_id
         details = self.get_draft_details(response.draft_id)
         assert details
