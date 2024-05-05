@@ -3,7 +3,7 @@ from typing import Any, List, Optional
 from unittest import TestCase
 from uuid import UUID
 
-from flask import Flask
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.injector import Module
@@ -20,6 +20,7 @@ from tests.data_generators import (
     MemberGenerator,
     PlanGenerator,
 )
+from tests.flask_integration.mail_service import MockEmailService
 from tests.markers import database_required
 
 from .dependency_injection import get_dependency_injector
@@ -55,6 +56,9 @@ class FlaskTestCase(TestCase):
 
     def get_injection_modules(self) -> List[Module]:
         return []
+
+    def email_service(self) -> MockEmailService:
+        return current_app.extensions["arbeitszeit_email_plugin"]
 
 
 class ViewTestCase(FlaskTestCase):
