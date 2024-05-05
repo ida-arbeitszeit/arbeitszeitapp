@@ -1,6 +1,7 @@
 from .. import cbook as cbook
 from . import backend_agg as backend_agg
 from . import backend_gtk4 as backend_gtk4
+from .backend_gtk4 import GLib as GLib
 from .backend_gtk4 import Gtk as Gtk
 from .backend_gtk4 import _BackendGTK4
 
