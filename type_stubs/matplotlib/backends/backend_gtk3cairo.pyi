@@ -1,5 +1,6 @@
 from .backend_cairo import FigureCanvasCairo as FigureCanvasCairo
 from .backend_gtk3 import FigureCanvasGTK3 as FigureCanvasGTK3
+from .backend_gtk3 import GLib as GLib
 from .backend_gtk3 import Gtk as Gtk
 from .backend_gtk3 import _BackendGTK3
 
