@@ -417,22 +417,6 @@ for translation.
     python -m build_support.translations compile
 
 
-E-mail Configuration
---------------------
-
-There are two e-mail backend implementations available.  One
-implementation is meant for production using ``flask_mail``.
-The other one, meant for development, is used by default.  To choose the e-mail
-backend, set the ``MAIL_BACKEND`` variable in your flask configuration
-appropriately:
-
-* ``MAIL_BACKEND = "flask_mail"`` to use the production backend.
-* ``MAIL_BACKEND`` with any other value to use the development backend.
-
-See the `flask mail documentation
-<https://pythonhosted.org/Flask-Mail/>`_ on how to configure the
-production backend.
-
 Profiling
 ---------
 
