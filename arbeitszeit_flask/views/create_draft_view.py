@@ -20,15 +20,15 @@ from arbeitszeit_web.www.controllers.create_draft_controller import (
 class CreateDraftView:
     notifier: Notifier
     translator: Translator
-    prefilled_data_controller: CreateDraftController
-    create_draft: CreatePlanDraft
+    controller: CreateDraftController
+    use_case: CreatePlanDraft
     url_index: GeneralUrlIndex
 
     @commit_changes
     def POST(self) -> Response:
         form = CreateDraftForm(request.form)
-        use_case_request = self.prefilled_data_controller.import_form_data(form)
-        response = self.create_draft(use_case_request)
+        use_case_request = self.controller.import_form_data(form)
+        response = self.use_case.create_draft(use_case_request)
         if response.is_rejected:
             return http_403()
         self.notifier.display_info(self.translator.gettext("Draft successfully saved."))
