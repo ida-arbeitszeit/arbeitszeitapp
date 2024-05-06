@@ -1,7 +1,6 @@
 from parameterized import parameterized
 
 from arbeitszeit.injector import Binder, CallableProvider, Module
-from arbeitszeit_flask.extensions import mail
 from tests.flask_integration.dependency_injection import FlaskConfiguration
 
 from .flask import LogInUser, ViewTestCase
@@ -106,7 +105,7 @@ class SentEmailTestsWithoutAdminMailInConfig(SentEmailTestCase):
 
     def test_that_two_emails_get_sent_when_posting_with_new_email_address(self) -> None:
         self.login_member()
-        with mail.record_messages() as outbox:  # type: ignore[attr-defined]
+        with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={
@@ -120,7 +119,7 @@ class SentEmailTestsWithoutAdminMailInConfig(SentEmailTestCase):
         old_email = "old_email@test.test"
         new_email = "new_email@test.test"
         self.login_member(email=old_email)
-        with mail.record_messages() as outbox:  # type: ignore[attr-defined]
+        with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={
@@ -136,14 +135,14 @@ class SentEmailTestsWithoutAdminMailInConfig(SentEmailTestCase):
 
 class SentEmailTestsWithAdminMailInConfig(SentEmailTestCase):
     @property
-    def expected_admin_mail(self) -> str | None:
+    def expected_admin_mail(self) -> str:
         return "test_admin_mail@mail.org"
 
     def test_that_admin_email_address_appears_in_html_of_one_mail_but_not_in_both(
         self,
     ) -> None:
         self.login_member()
-        with mail.record_messages() as outbox:  # type: ignore[attr-defined]
+        with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={

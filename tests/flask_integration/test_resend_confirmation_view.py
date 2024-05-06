@@ -2,8 +2,6 @@ from typing import Optional
 
 from parameterized import parameterized
 
-from arbeitszeit_flask.extensions import mail
-
 from .flask import LogInUser, ViewTestCase
 
 
@@ -41,7 +39,7 @@ class AuthenticatedButUnconfirmedMemberTests(ViewTestCase):
         self,
     ) -> None:
         response = self.client.get(self.url)
-        with mail.record_messages() as outbox:  # type: ignore
+        with self.email_service().record_messages() as outbox:  # type: ignore
             response = self.client.get(
                 self.url,
             )
@@ -59,7 +57,7 @@ class ConfirmedMemberTests(ViewTestCase):
         self,
     ) -> None:
         response = self.client.get(self.url)
-        with mail.record_messages() as outbox:  # type: ignore
+        with self.email_service().record_messages() as outbox:  # type: ignore
             response = self.client.get(
                 self.url,
             )
