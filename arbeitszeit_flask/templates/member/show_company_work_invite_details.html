@@ -9,11 +9,9 @@
     <button name="is_accepted" value="true" type="submit" class="button primary is-success">
       {{ gettext('Accept') }}
     </button>
-    </from>
-    <form action="{{ view_model.answer_invite_url }}" method="post">
-      <button name="is_accepted" value="false" type="submit" class="button is-danger">
-        {{ gettext('Reject') }}
-      </button>
-      </from>
+    <button name="is_accepted" value="false" type="submit" class="button is-danger">
+      {{ gettext('Reject') }}
+    </button>
+  </form>
 </div>
 {% endblock %}
