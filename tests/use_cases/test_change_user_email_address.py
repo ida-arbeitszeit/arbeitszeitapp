@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
@@ -126,6 +126,26 @@ class ChangeUserEmailAddressTests(BaseTestCase):
         request = Request(user=member, new_email=new_email)
         self.use_case.change_user_email_address(request)
         assert self.can_log_in_member(email_address=new_email, password=password)
+
+    def test_that_member_can_change_back_to_original_email_address(self) -> None:
+        old_email = "old@test.test"
+        member = self.member_generator.create_member(email=old_email)
+        self._can_change_to_email(member, "some_email@test.test")
+        self._can_change_to_email(member, old_email)
+
+    def test_that_company_can_change_to_email_address_after_member_changed_away_from_it(
+        self,
+    ) -> None:
+        disputed_email = "popular_email@test.test"
+        member = self.member_generator.create_member(email=disputed_email)
+        company = self.company_generator.create_company()
+        self._can_change_to_email(member, "some_email@test.test")
+        self._can_change_to_email(company, disputed_email)
+
+    def _can_change_to_email(self, user: UUID, email: str) -> None:
+        request = Request(user=user, new_email=email)
+        response = self.use_case.change_user_email_address(request)
+        assert not response.is_rejected
 
     def can_log_in_member(self, email_address: str, password: str) -> bool:
         response = self.log_in_member_use_case.log_in_member(

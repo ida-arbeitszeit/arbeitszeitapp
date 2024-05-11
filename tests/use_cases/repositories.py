@@ -1291,6 +1291,12 @@ class EmailAddressResult(QueryResultImpl[records.EmailAddress]):
 
         return self.from_iterable(items=items)
 
+    def delete(self) -> None:
+        addresses_to_delete = [address.address for address in self.items()]
+        for address in addresses_to_delete:
+            if address in self.database.email_addresses:
+                del self.database.email_addresses[address]
+
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(
             items=self.items,
