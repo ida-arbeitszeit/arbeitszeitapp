@@ -570,11 +570,11 @@ msgstr "Alle Kooperationen"
 #: arbeitszeit_flask/templates/company/draft_details.html:6
 #: arbeitszeit_flask/templates/company/draft_details.html:12
 msgid "Edit draft"
-msgstr ""
+msgstr "Entwurf bearbeiten"
 
 #: arbeitszeit_flask/templates/company/draft_details.html:27
 msgid "Save draft"
-msgstr ""
+msgstr "Entwurf speichern"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:4
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:14
@@ -1256,6 +1256,8 @@ msgid ""
 "You have been invited by a company to join them as a member on "
 "Arbeitszeitapp. Accept or reject via this link:"
 msgstr ""
+"Du wurdest von einem Betrieb eingeladen, Mitglied bei ihnen auf "
+"Arbeitszeitapp zu werden. Akzeptiere oder lehne ab über diesen Link:"
 
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
 msgid "Reject"
@@ -1290,11 +1292,11 @@ msgstr "Das Konto für feste Produktionsmittel."
 
 #: arbeitszeit_flask/templates/user/company_account_p.html:24
 msgid "Sum of planned fixed means of production:"
-msgstr ""
+msgstr "Summe der geplanten festen Produktionsmittel:"
 
 #: arbeitszeit_flask/templates/user/company_account_p.html:27
 msgid "Sum of consumed fixed means of production:"
-msgstr ""
+msgstr "Summe der konsumierten festen Produktionsmittel:"
 
 #: arbeitszeit_flask/templates/user/company_account_prd.html:20
 msgid "The account for product transfers (sales)."
@@ -1448,10 +1450,14 @@ msgid ""
 "someone tried to change the email address for your user account. If this "
 "was not you, please contact the administrators of the app."
 msgstr ""
+"Liebe*r Nutzer*in der Arbeitszeitapp,\n"
+"\n"
+"jemand hat versucht, die E-Mail-Adresse für dein Nutzerkonto zu ändern. "
+"Falls das nicht du warst, kontaktiere bitte die Administrator*innen der App."
 
 #: arbeitszeit_flask/templates/user/request_email_change_warning.html:5
 msgid "Admin email address:"
-msgstr ""
+msgstr "Admin-E-Mail-Adresse:"
 
 #: arbeitszeit_flask/templates/user/statistics.html:18
 msgid "Companies"
