@@ -37,7 +37,7 @@ class FlaskConfiguration(dict):
                 "MAIL_ADMIN": "test_admin@cp.org",
                 "MAIL_PLUGIN_MODULE": MockEmailService.__module__,
                 "MAIL_PLUGIN_CLASS": MockEmailService.__name__,
-                "LANGUAGES": {"en": "English", "de": "Deutsch"},
+                "LANGUAGES": {"en": "English", "de": "Deutsch", "es": "Español"},
                 "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",
             }
         )

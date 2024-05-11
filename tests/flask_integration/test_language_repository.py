@@ -40,13 +40,13 @@ class TwoLanguagesAvailableTests(LanguageRepositoryTestCase):
 
     @property
     def expected_languages(self) -> Dict[str, str]:
-        return {"en": "English", "de": "Deutsch"}
+        return {"en": "English", "de": "Deutsch", "es": "Español"}
 
     def test_that_repository_returns_at_least_one_code(self) -> None:
         self.assertTrue(self.repository.get_available_language_codes())
 
-    def test_that_repository_returns_exactly_two_codes(self) -> None:
-        self.assertEqual(len(list(self.repository.get_available_language_codes())), 2)
+    def test_that_repository_returns_exactly_three_codes(self) -> None:
+        self.assertEqual(len(list(self.repository.get_available_language_codes())), 3)
 
     def test_that_proper_language_name_is_returned_for_english(self) -> None:
         self.assertEqual(
@@ -58,6 +58,12 @@ class TwoLanguagesAvailableTests(LanguageRepositoryTestCase):
         self.assertEqual(
             self.repository.get_language_name("de"),
             "Deutsch",
+        )
+
+    def test_that_proper_language_name_is_returned_for_spanish(self) -> None:
+        self.assertEqual(
+            self.repository.get_language_name("es"),
+            "Español",
         )
 
 
