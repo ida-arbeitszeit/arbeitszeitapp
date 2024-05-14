@@ -11,6 +11,9 @@ from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetails
 from arbeitszeit.use_cases.request_email_address_change import (
     RequestEmailAddressChangeUseCase,
 )
+from arbeitszeit.use_cases.request_user_password_reset import (
+    RequestUserPasswordResetUseCase,
+)
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.forms import RequestEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
@@ -35,6 +38,9 @@ from arbeitszeit_flask.views.show_r_account_details_view import ShowRAccountDeta
 from arbeitszeit_web.www.controllers.request_email_address_change_controller import (
     RequestEmailAddressChangeController,
 )
+from arbeitszeit_web.www.controllers.request_user_password_reset_controller import (
+    RequestUserPasswordResetController,
+)
 from arbeitszeit_web.www.controllers.user_account_details_controller import (
     UserAccountDetailsController,
 )
@@ -43,6 +49,9 @@ from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
 )
 from arbeitszeit_web.www.presenters.request_email_address_change_presenter import (
     RequestEmailAddressChangePresenter,
+)
+from arbeitszeit_web.www.presenters.request_user_password_reset_presenter import (
+    RequestUserPasswordResetPresenter,
 )
 from arbeitszeit_web.www.presenters.user_account_details_presenter import (
     UserAccountDetailsPresenter,
@@ -105,6 +114,15 @@ def request_email_change(
                 )
         case _:
             return FlaskResponse(render_template(template_name, form=form), status=200)
+
+
+@AuthenticatedUserRoute("/request-password-change", methods=["POST"])
+def request_user_password_reset(
+    controller: RequestEmailAddressChangeController,
+    presenter: RequestUserPasswordResetPresenter,
+    use_case: RequestUserPasswordResetUseCase,
+) -> Response:
+    raise NotImplemented("Not yet impl")
 
 
 @AuthenticatedUserRoute("/change-email/<token>")
