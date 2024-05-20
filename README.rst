@@ -404,7 +404,8 @@ for translation.
 
 #. Translate language-specific ``.po`` files. For translation
    programs, see `this page
-   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_. 
+   There is also an extension for VS Code called "gettext".
 
 
 #. Compile translation files (.mo-files): This is necessary if you
