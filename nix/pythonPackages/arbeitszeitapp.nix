@@ -12,7 +12,6 @@
   flask-restx,
   flask-talisman,
   flask_login,
-  flask_mail,
   flask_migrate,
   flask_wtf,
   is_safe_url,
@@ -44,7 +43,6 @@ buildPythonPackage {
     flask-babel
     flask-talisman
     flask_login
-    flask_mail
     flask_migrate
     flask-restx
     flask_wtf

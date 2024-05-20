@@ -74,7 +74,6 @@ ignore_errors = true
 module = [
     "flask_babel",
     "flask_login",
-    "flask_mail.*",
     "flask_restx.*",
     "flask_sqlalchemy.*",
     "flask_wtf",

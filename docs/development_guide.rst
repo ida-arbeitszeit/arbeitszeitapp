@@ -546,25 +546,25 @@ configuration options are available
 
    Default: ``True``
 
-.. py:data:: MAIL_BACKEND
-
-    This option is deprecated. Use ``MAIL_PLUGIN_MODULE`` and
-    ``MAIL_PLUGIN_CLASS`` instead.  Setting this to "flask_mail" will
-    bypass the proper loading mechanism for the email plugin and
-    configure the arbeitszeitapp to use the legacy ``flask_mail``
-    email plugin.
-
 .. py:data:: MAIL_PLUGIN_MODULE
 
    This option must be a python module path to the email plugin to be
    used.  By default a mock email service will be used that is
    intended for development purposes.
 
+   The arbeitszeitapp provides a very basic mechanism for sending
+   emails synchronously via SMTP. This plugin is found in the
+   ``arbeitszeit_flask.mail_service.smtp_mail_service`` module.
+
 .. py:data:: MAIL_PLUGIN_CLASS
 
    This option must be the class name of the email service found under
    ``MAIL_PLUGIN_MODULE``.  By default a mock email service will be
    used that is intended for development purposes.
+
+   The arbeitszeitapp provides a very basic mechanism for sending
+   emails synchronously via SMTP. The name of this class in
+   ``SmtpMailService``
 
 .. py:data:: MAIL_SERVER
    
