@@ -38,5 +38,10 @@ class RequestEmailAddressChangePresenter:
                 )
             )
         else:
+            self.notifier.display_info(
+                self.translator.gettext(
+                    "A confirmation mail has been sent to your new email address."
+                )
+            )
             redirect_url = self.url_index.get_user_account_details_url()
         return ViewModel(redirect_url=redirect_url)

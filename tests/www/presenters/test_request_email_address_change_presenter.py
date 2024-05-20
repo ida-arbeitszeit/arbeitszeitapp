@@ -79,6 +79,15 @@ class RequestEmailAddressChangePresenterTests(BaseTestCase):
         )
         assert expected_message not in self.notifier.warnings
 
+    def test_on_success_show_a_info_that_a_confirmation_mail_was_sent(self) -> None:
+        self.session.login_member(self.member_generator.create_member())
+        response = use_case.Response(is_rejected=False)
+        self.presenter.render_response(response, self._create_form())
+        expected_message = self.translator.gettext(
+            "A confirmation mail has been sent to your new email address."
+        )
+        assert expected_message in self.notifier.infos
+
     def test_that_error_message_is_added_to_new_email_field_on_rejection(self) -> None:
         self.session.login_member(self.member_generator.create_member())
         response = use_case.Response(is_rejected=True)
