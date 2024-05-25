@@ -23,8 +23,6 @@ class ShowPAccountDetailsPresenter:
     @dataclass
     class ViewModel:
         transactions: List[ShowPAccountDetailsPresenter.TransactionInfo]
-        sum_of_planned_p: str
-        sum_of_consumed_p: str
         account_balance: str
         plot_url: str
         navbar_items: list[NavbarItem]
@@ -42,8 +40,6 @@ class ShowPAccountDetailsPresenter:
         ]
         return self.ViewModel(
             transactions=transactions,
-            sum_of_planned_p=str(round(use_case_response.sum_of_planned_p, 2)),
-            sum_of_consumed_p=str(round(use_case_response.sum_of_consumed_p, 2)),
             account_balance=str(round(use_case_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_p_account(
                 use_case_response.company_id

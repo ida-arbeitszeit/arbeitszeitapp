@@ -7,7 +7,6 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transactions import TransactionTypes, UserAccountingService
 
@@ -34,8 +33,6 @@ class ShowPAccountDetailsUseCase:
     class Response:
         company_id: UUID
         transactions: List[ShowPAccountDetailsUseCase.TransactionInfo]
-        sum_of_planned_p: Decimal
-        sum_of_consumed_p: Decimal
         account_balance: Decimal
         plot: ShowPAccountDetailsUseCase.PlotDetails
 
@@ -56,21 +53,7 @@ class ShowPAccountDetailsUseCase:
                 company, [company.means_account]
             )
         ]
-        sum_of_planned_p = decimal_sum(
-            [
-                t.transaction_volume
-                for t in transactions
-                if t.transaction_type == TransactionTypes.credit_for_fixed_means
-            ]
-        )
-        sum_of_consumed_p = decimal_sum(
-            [
-                -t.transaction_volume
-                for t in transactions
-                if t.transaction_type == TransactionTypes.consumption_of_fixed_means
-            ]
-        )
-        account_balance = sum_of_planned_p - sum_of_consumed_p
+        account_balance = self._get_account_balance(company.means_account)
         plot = self.PlotDetails(
             timestamps=self._get_plot_dates(transactions),
             accumulated_volumes=self._get_plot_volumes(transactions),
@@ -78,11 +61,16 @@ class ShowPAccountDetailsUseCase:
         return self.Response(
             company_id=request.company,
             transactions=transactions,
-            sum_of_planned_p=sum_of_planned_p,
-            sum_of_consumed_p=sum_of_consumed_p,
             account_balance=account_balance,
             plot=plot,
         )
+
+    def _get_account_balance(self, account: UUID) -> Decimal:
+        result = (
+            self.database.get_accounts().with_id(account).joined_with_balance().first()
+        )
+        assert result
+        return result[1]
 
     def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
         timestamps = [t.date for t in transactions]
