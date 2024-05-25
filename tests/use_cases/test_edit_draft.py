@@ -4,7 +4,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.edit_draft import EditDraftUseCase
+from arbeitszeit.use_cases.edit_draft import EditDraftUseCase, Request
 from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess, GetDraftDetails
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
@@ -186,10 +186,10 @@ class UseCaseTests(TestCase):
         is_public_service: Optional[bool] = None,
         timeframe: Optional[int] = None,
         unit_of_distribution: Optional[str] = None,
-    ) -> EditDraftUseCase.Request:
+    ) -> Request:
         if editor is None:
             editor = uuid4()
-        return EditDraftUseCase.Request(
+        return Request(
             draft=draft,
             editor=editor,
             product_name=product_name,

@@ -20,6 +20,10 @@ class GetDraftDetailsPresenter:
     def present_draft_details(
         self, draft_data: PlanDetails | DraftDetailsSuccess, form: DraftForm
     ) -> ViewModel:
+        if isinstance(draft_data, PlanDetails):
+            draft_id = draft_data.plan_id
+        else:
+            draft_id = draft_data.draft_id
         form.product_name_field().set_value(draft_data.product_name)
         form.description_field().set_value(draft_data.description)
         form.timeframe_field().set_value(draft_data.timeframe)
@@ -30,6 +34,6 @@ class GetDraftDetailsPresenter:
         form.labour_cost_field().set_value(draft_data.labour_cost)
         form.is_public_service_field().set_value(draft_data.is_public_service)
         return self.ViewModel(
-            save_draft_url=self.url_index.get_create_draft_url(),
+            save_draft_url=self.url_index.get_draft_details_url(draft_id),
             cancel_url=self.url_index.get_my_plans_url(),
         )

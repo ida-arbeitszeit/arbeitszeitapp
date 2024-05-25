@@ -7,24 +7,27 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class EditDraftUseCase:
-    @dataclass
-    class Request:
-        draft: UUID
-        editor: UUID
-        product_name: Optional[str]
-        amount: Optional[int]
-        description: Optional[str]
-        labour_cost: Optional[Decimal]
-        means_cost: Optional[Decimal]
-        resource_cost: Optional[Decimal]
-        is_public_service: Optional[bool]
-        timeframe: Optional[int]
-        unit_of_distribution: Optional[str]
+class Request:
+    draft: UUID
+    editor: UUID
+    product_name: Optional[str]
+    amount: Optional[int]
+    description: Optional[str]
+    labour_cost: Optional[Decimal]
+    means_cost: Optional[Decimal]
+    resource_cost: Optional[Decimal]
+    is_public_service: Optional[bool]
+    timeframe: Optional[int]
+    unit_of_distribution: Optional[str]
 
-    @dataclass
-    class Response:
-        is_success: bool
+
+@dataclass
+class Response:
+    is_success: bool
+
+
+@dataclass
+class EditDraftUseCase:
 
     database: DatabaseGateway
 
@@ -56,6 +59,6 @@ class EditDraftUseCase:
             is_success = True
         else:
             is_success = False
-        return self.Response(
+        return Response(
             is_success=is_success,
         )
