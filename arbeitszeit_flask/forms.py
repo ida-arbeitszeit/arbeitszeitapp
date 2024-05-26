@@ -284,7 +284,6 @@ class CreateDraftForm(Form):
     productive_or_public = BooleanField(
         trans.lazy_gettext("This plan is a public service")
     )
-    action = StringField()
 
     def product_name_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="prd_name")

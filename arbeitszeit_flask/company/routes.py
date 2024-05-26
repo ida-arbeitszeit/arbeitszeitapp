@@ -22,7 +22,6 @@ from arbeitszeit.use_cases.deny_cooperation import (
     DenyCooperationResponse,
 )
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.list_coordinations_of_company import (
@@ -47,7 +46,6 @@ from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
-from arbeitszeit_flask.forms import CreateDraftForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     EndCooperationView,
@@ -57,6 +55,7 @@ from arbeitszeit_flask.views import (
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.draft_details_view import DraftDetailsView
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
@@ -92,9 +91,6 @@ from arbeitszeit_web.www.presenters.create_draft_from_plan_presenter import (
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from arbeitszeit_web.www.presenters.file_plan_with_accounting_presenter import (
     FilePlanWithAccountingPresenter,
-)
-from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
-    GetDraftDetailsPresenter,
 )
 from arbeitszeit_web.www.presenters.get_plan_details_company_presenter import (
     GetPlanDetailsCompanyPresenter,
@@ -187,24 +183,9 @@ def file_plan(
     return redirect(view_model.redirect_url)
 
 
-@CompanyRoute("/draft/<draft_id>", methods=["GET"])
-def get_draft_details(
-    draft_id: str,
-    use_case: GetDraftDetails,
-    presenter: GetDraftDetailsPresenter,
-) -> Response:
-    use_case_response = use_case(UUID(draft_id))
-    if use_case_response is None:
-        return http_404()
-    form = CreateDraftForm()
-    view_model = presenter.present_draft_details(use_case_response, form=form)
-    return FlaskResponse(
-        render_template(
-            "company/draft_details.html",
-            view_model=view_model,
-            form=form,
-        )
-    )
+@CompanyRoute("/draft/<uuid:draft_id>", methods=["GET", "POST"])
+@as_flask_view()
+class get_draft_details(DraftDetailsView): ...
 
 
 @CompanyRoute("/my_plans", methods=["GET"])
