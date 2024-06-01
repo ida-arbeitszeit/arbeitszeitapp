@@ -8,11 +8,11 @@ from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
-class PublicFundService:
+class PublicSectorFundService:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def calculate_fpc_balance(self) -> Decimal:
+    def calculate_psf_balance(self) -> Decimal:
         public_plans = (
             self.database_gateway.get_plans().that_are_public().that_are_approved()
         )
@@ -27,13 +27,13 @@ class PublicFundService:
             )
         )
 
-        return calculate_fpc_balance(public_plans, wage_transactions)
+        return calculate_psf_balance(public_plans, wage_transactions)
 
-    def get_current_fpc_balance(self) -> Decimal:
-        return self.calculate_fpc_balance()
+    def get_current_psf_balance(self) -> Decimal:
+        return self.calculate_psf_balance()
 
 
-def calculate_fpc_balance(
+def calculate_psf_balance(
     public_plans: Iterable[Plan], transactions: Iterable[Transaction]
 ) -> Decimal:
     if public_plans and transactions:
