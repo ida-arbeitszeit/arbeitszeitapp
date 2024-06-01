@@ -3,8 +3,8 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
-from arbeitszeit_web.www.presenters.create_draft_presenter import (
-    GetPrefilledDraftDataPresenter,
+from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
+    GetDraftDetailsPresenter,
 )
 from tests.forms import DraftForm
 from tests.www.base_test_case import BaseTestCase
@@ -29,13 +29,13 @@ TEST_DRAFT_SUMMARY_SUCCESS = DraftDetailsSuccess(
 class PlanDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
+        self.presenter = self.injector.get(GetDraftDetailsPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
         self.plan_details = self.plan_details_generator.create_plan_details()
 
     def test_correct_form_data_is_returned_for_plan_details(self) -> None:
         form = DraftForm()
-        self.presenter.show_prefilled_draft_data(self.plan_details, form=form)
+        self.presenter.present_draft_details(self.plan_details, form=form)
         assert form.product_name_field().get_value() == self.plan_details.product_name
         assert form.description_field().get_value() == self.plan_details.description
         assert form.timeframe_field().get_value() == self.plan_details.timeframe
@@ -56,23 +56,22 @@ class PlanDetailsPresenterTests(BaseTestCase):
 
     def test_correct_view_model_is_returned_for_plan_details(self) -> None:
         form = DraftForm()
-        view_model = self.presenter.show_prefilled_draft_data(
-            self.plan_details, form=form
-        )
+        view_model = self.presenter.present_draft_details(self.plan_details, form=form)
         self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
         self.assertEqual(
-            view_model.save_draft_url, self.url_index.get_create_draft_url()
+            view_model.save_draft_url,
+            self.url_index.get_draft_details_url(self.plan_details.plan_id),
         )
 
 
 class DraftDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.presenter = self.injector.get(GetPrefilledDraftDataPresenter)
+        self.presenter = self.injector.get(GetDraftDetailsPresenter)
 
     def test_correct_form_data_is_returned_for_draft_details(self) -> None:
         form = DraftForm()
-        self.presenter.show_prefilled_draft_data(
+        self.presenter.present_draft_details(
             TEST_DRAFT_SUMMARY_SUCCESS,
             form=form,
         )
@@ -110,10 +109,11 @@ class DraftDetailsPresenterTests(BaseTestCase):
 
     def test_correct_view_model_is_returned_for_draft_details(self) -> None:
         form = DraftForm()
-        view_model = self.presenter.show_prefilled_draft_data(
+        view_model = self.presenter.present_draft_details(
             TEST_DRAFT_SUMMARY_SUCCESS, form=form
         )
         self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
         self.assertEqual(
-            view_model.save_draft_url, self.url_index.get_create_draft_url()
+            view_model.save_draft_url,
+            self.url_index.get_draft_details_url(TEST_DRAFT_SUMMARY_SUCCESS.draft_id),
         )

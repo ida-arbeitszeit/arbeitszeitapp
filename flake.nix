@@ -57,8 +57,10 @@
             # artifacts. This is why we can test for the system
             # python3 interpreter and also explicitly list all
             # versions we want to support.
-            arbeitszeit-python3 = pkgs.python3.pkgs.arbeitszeitapp;
-            arbeitszeit-python311 = pkgs.python311.pkgs.arbeitszeitapp;
+            arbeitszeit-python3-nixpkgs-unstable = pkgs.python3.pkgs.arbeitszeitapp;
+            arbeitszeit-python311-nixpkgs-unstable = pkgs.python311.pkgs.arbeitszeitapp;
+            arbeitszeit-python3-nixpkgs-stable = pkgs-23-11.python3.pkgs.arbeitszeitapp;
+            arbeitszeit-python311-nixpkgs-stable = pkgs-23-11.python311.pkgs.arbeitszeitapp;
           };
         }
       );

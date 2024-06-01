@@ -13,6 +13,7 @@ from .query_plans_sorted_by_activation_date_benchmark import (
 )
 from .runner import BenchmarkCatalog, BenchmarkResult, render_results_as_json
 from .show_prd_account_details_benchmark import ShowPrdAccountDetailsBenchmark
+from .show_r_account_details_benchmark import ShowRAccountDetailsBenchmark
 
 
 def main() -> None:
@@ -25,6 +26,9 @@ def main() -> None:
     )
     catalog.register_benchmark(
         name="show_prd_account_details", benchmark_class=ShowPrdAccountDetailsBenchmark
+    )
+    catalog.register_benchmark(
+        name="show_r_account_details", benchmark_class=ShowRAccountDetailsBenchmark
     )
     catalog.register_benchmark(
         name="get_statistics", benchmark_class=GetStatisticsBenchmark

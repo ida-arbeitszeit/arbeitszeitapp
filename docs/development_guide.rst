@@ -546,6 +546,26 @@ configuration options are available
 
    Default: ``True``
 
+.. py:data:: MAIL_PLUGIN_MODULE
+
+   This option must be a python module path to the email plugin to be
+   used.  By default a mock email service will be used that is
+   intended for development purposes.
+
+   The arbeitszeitapp provides a very basic mechanism for sending
+   emails synchronously via SMTP. This plugin is found in the
+   ``arbeitszeit_flask.mail_service.smtp_mail_service`` module.
+
+.. py:data:: MAIL_PLUGIN_CLASS
+
+   This option must be the class name of the email service found under
+   ``MAIL_PLUGIN_MODULE``.  By default a mock email service will be
+   used that is intended for development purposes.
+
+   The arbeitszeitapp provides a very basic mechanism for sending
+   emails synchronously via SMTP. The name of this class in
+   ``SmtpMailService``
+
 .. py:data:: MAIL_SERVER
    
    The server name of the SMTP server used to send mails.
@@ -569,6 +589,11 @@ configuration options are available
 .. py:data:: MAIL_DEFAULT_SENDER
    
    The sender address used when sending out mail.
+
+.. py:data:: MAIL_ADMIN
+
+   The email address of the app administrator. Users may use this email 
+   address to contact the administrator.
 
 .. py:data:: SECRET_KEY
    

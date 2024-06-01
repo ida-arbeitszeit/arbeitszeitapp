@@ -1,24 +1,25 @@
 {
   buildPythonPackage,
-  pytestCheckHook,
+  postgresql,
 
   # python packages
+  Babel,
+  psycopg2,
   email_validator,
   flask,
   flask-babel,
+  flask-profiler,
+  flask-restx,
   flask-talisman,
   flask_login,
-  flask_mail,
   flask_migrate,
-  flask-restx,
   flask_wtf,
   is_safe_url,
   matplotlib,
-  sphinx,
-  flask-profiler,
   parameterized,
-  Babel,
+  pytest,
   setuptools,
+  sphinx,
 }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
@@ -31,7 +32,6 @@ buildPythonPackage {
   postPhases = [ "buildDocsPhase" ];
   format = "pyproject";
   buildInputs = [
-    pytestCheckHook
     sphinx
     parameterized
     Babel
@@ -43,12 +43,16 @@ buildPythonPackage {
     flask-babel
     flask-talisman
     flask_login
-    flask_mail
     flask_migrate
     flask-restx
     flask_wtf
     is_safe_url
     matplotlib
+  ];
+  nativeBuildInputs = [
+    pytest
+    postgresql
+    psycopg2
   ];
   buildDocsPhase = ''
     mkdir -p $doc/share/doc/arbeitszeitapp
@@ -57,5 +61,20 @@ buildPythonPackage {
   passthru.optional-dependencies = {
     profiling = [ flask-profiler ];
   };
-  DISABLED_TESTS = "database_required";
+  checkPhase = ''
+    runHook preCheck
+
+    # Set up postgres so that we can run the DB tests.
+    POSTGRES_DIR=$(mktemp -d)
+    initdb -D $POSTGRES_DIR
+    postgres -h "" -k $POSTGRES_DIR -D $POSTGRES_DIR &
+    POSTGRES_PID=$!
+    until createdb -h $POSTGRES_DIR; do echo "Retry createdb"; done
+
+    ARBEITSZEITAPP_TEST_DB="postgresql:///?host=$POSTGRES_DIR" pytest -x
+
+    kill $POSTGRES_PID
+
+    runHook postCheck
+  '';
 }

@@ -9,7 +9,8 @@ from jinja2 import StrictUndefined
 import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
-from arbeitszeit_flask.extensions import csrf_protect, login_manager, mail
+from arbeitszeit_flask.extensions import csrf_protect, login_manager
+from arbeitszeit_flask.mail_service import load_email_plugin
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
@@ -53,6 +54,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     )
 
     load_configuration(app=app, configuration=config)
+    load_email_plugin(app)
 
     if db is None:
         db = arbeitszeit_flask.extensions.db
@@ -75,7 +77,6 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     db.init_app(app)
     login_manager.init_app(app)
     initialize_migrations(app=app, db=db)
-    mail.init_app(app)
     initialize_babel(app)
 
     # Setup template filter

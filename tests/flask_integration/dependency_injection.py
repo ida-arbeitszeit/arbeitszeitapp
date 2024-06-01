@@ -10,6 +10,7 @@ from arbeitszeit_flask import create_app
 from arbeitszeit_flask.dependency_injection import FlaskModule
 from arbeitszeit_flask.extensions import db
 from tests.dependency_injection import TestingModule
+from tests.flask_integration.mail_service import MockEmailService
 
 
 class FlaskConfiguration(dict):
@@ -33,8 +34,10 @@ class FlaskConfiguration(dict):
                 "SECURITY_PASSWORD_SALT": "dev password salt",
                 "TESTING": True,
                 "MAIL_DEFAULT_SENDER": "test_sender@cp.org",
-                "MAIL_BACKEND": "flask_mail",
-                "LANGUAGES": {"en": "English", "de": "Deutsch"},
+                "MAIL_ADMIN": "test_admin@cp.org",
+                "MAIL_PLUGIN_MODULE": MockEmailService.__module__,
+                "MAIL_PLUGIN_CLASS": MockEmailService.__name__,
+                "LANGUAGES": {"en": "English", "de": "Deutsch", "es": "Español"},
                 "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",
             }
         )

@@ -404,7 +404,8 @@ for translation.
 
 #. Translate language-specific ``.po`` files. For translation
    programs, see `this page
-   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_
+   <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_. 
+   There is also an extension for VS Code called "gettext".
 
 
 #. Compile translation files (.mo-files): This is necessary if you
@@ -416,22 +417,6 @@ for translation.
 
     python -m build_support.translations compile
 
-
-E-mail Configuration
---------------------
-
-There are two e-mail backend implementations available.  One
-implementation is meant for production using ``flask_mail``.
-The other one, meant for development, is used by default.  To choose the e-mail
-backend, set the ``MAIL_BACKEND`` variable in your flask configuration
-appropriately:
-
-* ``MAIL_BACKEND = "flask_mail"`` to use the production backend.
-* ``MAIL_BACKEND`` with any other value to use the development backend.
-
-See the `flask mail documentation
-<https://pythonhosted.org/Flask-Mail/>`_ on how to configure the
-production backend.
 
 Profiling
 ---------

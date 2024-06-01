@@ -40,7 +40,7 @@ class CreatePlanDraft:
     database: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, request: Request) -> Response:
+    def create_draft(self, request: Request) -> Response:
         if (
             request.costs.labour_cost < 0
             or request.costs.means_cost < 0

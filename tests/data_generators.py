@@ -255,7 +255,7 @@ class PlanGenerator:
             planner = self.company_generator.create_company()
         if timeframe is None:
             timeframe = 14
-        response = self.create_plan_draft_use_case(
+        response = self.create_plan_draft_use_case.create_draft(
             request=Request(
                 costs=costs,
                 product_name=product_name,
