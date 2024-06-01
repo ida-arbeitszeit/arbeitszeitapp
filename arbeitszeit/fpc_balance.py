@@ -21,13 +21,13 @@ class PublicFundService:
         )
         labour_account_ids = [labour_account.id for labour_account in labour_accounts]
 
-        lohn_transactions = (
+        wage_transactions = (
             self.database_gateway.get_transactions().where_account_is_sender(
                 *labour_account_ids
             )
         )
 
-        return calculate_fpc_balance(public_plans, lohn_transactions)
+        return calculate_fpc_balance(public_plans, wage_transactions)
 
     def get_current_fpc_balance(self) -> Decimal:
         return self.calculate_fpc_balance()

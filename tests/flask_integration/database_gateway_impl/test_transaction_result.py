@@ -83,10 +83,12 @@ class TransactionRepositoryTests(FlaskTestCase):
         labour_sending_account_from_company_one = self.create_account()
         labour_sending_account_from_company_two = self.create_account()
         labour_sending_account_from_company_three = self.create_account()
+        labour_sending_account_from_company_four = self.create_account()
 
         worker_receiver_account_one = self.create_account()
         worker_receiver_account_two = self.create_account()
         worker_receiver_account_three = self.create_account()
+        worker_receiver_account_four = self.create_account()
 
         transaction_one = self.database_gateway.create_transaction(
             self.datetime_service.now(),
@@ -113,6 +115,15 @@ class TransactionRepositoryTests(FlaskTestCase):
             amount_sent=Decimal(3),
             amount_received=Decimal(3),
             purpose="test purpose 3",
+        )
+
+        self.database_gateway.create_transaction(
+            self.datetime_service.now(),
+            sending_account=labour_sending_account_from_company_four,
+            receiving_account=worker_receiver_account_four,
+            amount_sent=Decimal(4),
+            amount_received=Decimal(4),
+            purpose="test purpose 4",
         )
 
         assert list(

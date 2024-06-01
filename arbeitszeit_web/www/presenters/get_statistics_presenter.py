@@ -91,7 +91,7 @@ class GetStatisticsPresenter:
         return str(self._round_with_precision(payout_factor, 2))
 
     def _format_fpc_balance(self, fpc_balance: Decimal) -> str:
-        return str(self._round_with_precision(fpc_balance, 1))
+        return str(self._round_with_precision(fpc_balance, 2))
 
     def _round_with_precision(self, number: Decimal, precision: int) -> Decimal:
         return round(number, precision)
