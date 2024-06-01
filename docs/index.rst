@@ -14,6 +14,7 @@ Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
    introduction
    development_setup
    development_guide
+   datamodel
    license
 
 Indices and tables
