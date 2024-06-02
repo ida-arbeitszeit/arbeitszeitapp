@@ -23,6 +23,7 @@ class GetStatisticsViewModel:
     planned_resources_hours: str
     planned_means_hours: str
     payout_factor: str
+    psf_balance: str
 
     barplot_for_certificates_url: str
     barplot_means_of_production_url: str
@@ -67,6 +68,7 @@ class GetStatisticsPresenter:
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,
             payout_factor=self._format_payout_factor(use_case_response.payout_factor),
+            psf_balance=self._format_psf_balance(use_case_response.psf_balance),
             barplot_for_certificates_url=self.url_index.get_global_barplot_for_certificates_url(
                 use_case_response.certificates_count,
                 use_case_response.available_product,
@@ -86,4 +88,10 @@ class GetStatisticsPresenter:
         )
 
     def _format_payout_factor(self, payout_factor: Decimal) -> str:
-        return round(payout_factor, 2).__str__()
+        return str(self._round_with_precision(payout_factor, 2))
+
+    def _format_psf_balance(self, psf_balance: Decimal) -> str:
+        return str(self._round_with_precision(psf_balance, 2))
+
+    def _round_with_precision(self, number: Decimal, precision: int) -> Decimal:
+        return round(number, precision)

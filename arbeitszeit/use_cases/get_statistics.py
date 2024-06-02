@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.payout_factor import PayoutFactorService
+from arbeitszeit.psf_balance import PublicSectorFundService
 from arbeitszeit.repositories import AccountResult, DatabaseGateway
 
 
@@ -20,6 +21,7 @@ class StatisticsResponse:
     planned_resources: Decimal
     planned_means: Decimal
     payout_factor: Decimal
+    psf_balance: Decimal
 
 
 @dataclass
@@ -27,9 +29,11 @@ class GetStatistics:
     database: DatabaseGateway
     datetime_service: DatetimeService
     fic_service: PayoutFactorService
+    psf_service: PublicSectorFundService
 
     def __call__(self) -> StatisticsResponse:
         fic = self.fic_service.get_current_payout_factor()
+        psf_balance = self.psf_service.get_current_psf_balance()
         certs_total = self._estimate_total_certificates(fic)
         available_product = self._estimate_available_product()
         now = self.datetime_service.now()
@@ -52,6 +56,7 @@ class GetStatistics:
             planned_resources=planning_statistics.total_planned_costs.resource_cost,
             planned_means=planning_statistics.total_planned_costs.means_cost,
             payout_factor=fic,
+            psf_balance=psf_balance,
         )
 
     def _estimate_total_certificates(self, fic: Decimal) -> Decimal:

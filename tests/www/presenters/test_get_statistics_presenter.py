@@ -20,6 +20,7 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     planned_resources=Decimal("400.1"),
     planned_means=Decimal("215.23"),
     payout_factor=Decimal("0.74516"),
+    psf_balance=Decimal("8.76123"),
 )
 
 
@@ -198,5 +199,13 @@ class GetStatisticsPresenterTests(BaseTestCase):
         view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
         self.assertEqual(
             view_model.payout_factor,
-            round(TESTING_RESPONSE_MODEL.payout_factor, 2).__str__(),
+            str(round(TESTING_RESPONSE_MODEL.payout_factor, 2)),
+        )
+
+    def test_that_psf_balance_is_correctly_shown_when_it_exists(self) -> None:
+        assert TESTING_RESPONSE_MODEL.psf_balance is not None
+        view_model = self.presenter.present(TESTING_RESPONSE_MODEL)
+        self.assertEqual(
+            view_model.psf_balance,
+            str(round(TESTING_RESPONSE_MODEL.psf_balance, 2)),
         )
