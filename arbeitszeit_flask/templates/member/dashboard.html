@@ -14,11 +14,11 @@
           <p>{{ view_model.email }}</p>
           <p class="has-text-weight-semibold">{{ gettext("Your credit") }}:</p>
           <p>{{ view_model.account_balance }}</p>
-          <p class="has-text-weight-semibold">{{ gettext("Your workplace") }}:</p>
+          <p class="has-text-weight-semibold">{{ gettext("Your workplaces") }}:</p>
           {% if view_model.show_workplaces %}
           <ul>
             {% for workplace in view_model.workplaces %}
-            <li>{{ workplace.name }} ({{ workplace.email }})</li>
+            <li>{{ workplace.name }} (<a href="mailto:{{ workplace.email }}">{{ workplace.email }}</a>)</li>
             {% endfor %}
           </ul>
           {% endif %}
