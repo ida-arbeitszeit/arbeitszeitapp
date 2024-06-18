@@ -192,3 +192,11 @@ class RequestCoordinationTransferFormImpl:
 
     def cooperation_field(self) -> FormFieldImpl[str]:
         return self._cooperation_field
+
+
+class ConfirmEmailAddressChangeFormImpl:
+    def __init__(self, is_accepted: bool) -> None:
+        self._is_accepted_field = FormFieldImpl(value=is_accepted)
+
+    def is_accepted_field(self) -> FormFieldImpl[bool]:
+        return self._is_accepted_field
