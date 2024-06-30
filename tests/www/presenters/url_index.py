@@ -80,6 +80,7 @@ class UrlIndexTestImpl:
     get_renew_plan_url = UrlIndexMethod()
     get_request_coop_url = UrlIndexMethod()
     get_request_coordination_transfer_url = UrlIndexMethod()
+    get_request_change_email_url = UrlIndexMethod()
     get_revoke_plan_filing_url = UrlIndexMethod()
     get_show_coordination_transfer_request_url = UrlIndexMethod()
     get_unconfirmed_member_url = UrlIndexMethod()

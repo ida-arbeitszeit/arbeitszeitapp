@@ -29,3 +29,13 @@ class UserAccountDetailsPresenterTests(BaseTestCase):
         )
         view_model = self.presenter.render_user_account_details(response)
         assert view_model.email_address == expected_email_address
+
+    def test_that_request_email_address_change_url_is_shown(self) -> None:
+        response = use_case.Response(
+            user_info=use_case.UserInfo(id=uuid4(), email_address="test@test.test")
+        )
+        view_model = self.presenter.render_user_account_details(response)
+        assert (
+            view_model.request_email_address_change_url
+            == self.url_index.get_request_change_email_url()
+        )
