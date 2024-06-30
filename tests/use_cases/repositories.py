@@ -909,6 +909,27 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
         return self._filter_elements(transaction_filter)
 
+    def joined_with_receiver(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Transaction, records.AccountOwner]]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member,) = members
+                return self.database.members[member]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company,) = companies
+                return self.database.companies[company]
+            return self.database.social_accounting
+
+        def items() -> Iterable[Tuple[records.Transaction, records.AccountOwner]]:
+            for transaction in self.items():
+                yield transaction, get_account_owner(transaction.receiving_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
     def joined_with_sender_and_receiver(
         self,
     ) -> QueryResultImpl[
