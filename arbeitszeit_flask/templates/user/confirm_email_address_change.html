@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="section has-text-centered">
+    <div>
+        {{ gettext(
+            'Do you really want to change your email address from "%(old_email)s" to "%(new_email)s"?',
+            old_email=old_email,
+            new_email=new_email
+        ) }}
+    </div>
+    <div>
+        {{ gettext(
+            'If you have more than one account with this email address, the address of all accounts will change.'
+        ) }}
+    </div>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button" type="submit" name="is_accepted" value="true">{{ gettext("Yes") }}</button>
+        <button class="button" type="submit" name="is_accepted" value="false">{{ gettext("No") }}</button>
+    </form>
+</div>
+
+{% endblock %}
