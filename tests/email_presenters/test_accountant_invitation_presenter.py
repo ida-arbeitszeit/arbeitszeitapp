@@ -6,7 +6,6 @@ from arbeitszeit_web.email.accountant_invitation_presenter import (
     ViewModel,
 )
 from tests.email import FakeEmailConfiguration
-from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
 
 from .accountant_invitation_email_view import AccountantInvitationEmailViewImpl
@@ -18,7 +17,6 @@ class PresenterTests(BaseTestCase):
         self.view = self.injector.get(AccountantInvitationEmailViewImpl)
         self.presenter = self.injector.get(AccountantInvitationEmailPresenter)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
-        self.token_service = self.injector.get(FakeTokenService)
 
     def test_that_token_recipient_is_also_mail_recipient(self) -> None:
         expected_recipient = "test@test.test"

@@ -5,6 +5,7 @@ from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberG
 from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailService
 from tests.session import FakeSession
+from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
 from tests.www.presenters.notifier import NotifierTestImpl
 from tests.www.presenters.url_index import UrlIndexTestImpl
@@ -61,5 +62,6 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     notifier = _lazy_property(NotifierTestImpl)
     session = _lazy_property(FakeSession)
+    token_service = _lazy_property(FakeTokenService)
     translator = _lazy_property(FakeTranslator)
     url_index = _lazy_property(UrlIndexTestImpl)

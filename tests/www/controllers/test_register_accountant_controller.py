@@ -3,7 +3,6 @@ from typing import Optional
 from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,
 )
-from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -11,7 +10,6 @@ class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(RegisterAccountantController)
-        self.token_service = self.injector.get(FakeTokenService)
 
     def test_that_if_token_is_just_some_random_string_then_no_request_is_returned(
         self,

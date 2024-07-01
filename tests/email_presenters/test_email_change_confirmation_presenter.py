@@ -8,7 +8,6 @@ from arbeitszeit_web.email.email_change_confirmation_presenter import (
 )
 from tests.email import FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
-from tests.token import FakeTokenService
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -17,7 +16,6 @@ class EmailChangeConfirmationPresenterTests(BaseTestCase):
         super().setUp()
         self.presenter = self.injector.get(EmailChangeConfirmationPresenter)
         self.text_renderer = self.injector.get(TextRendererImpl)
-        self.token_service = self.injector.get(FakeTokenService)
         self.email_configuration = self.injector.get(FakeEmailConfiguration)
 
     def test_that_one_email_is_sent_when_presenting(self) -> None:
