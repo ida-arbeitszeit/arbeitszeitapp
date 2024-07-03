@@ -364,6 +364,10 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
         UUID.
         """
 
+    def joined_with_receiver(
+        self,
+    ) -> QueryResult[Tuple[records.Transaction, records.AccountOwner]]: ...
+
     def joined_with_sender_and_receiver(
         self,
     ) -> QueryResult[
