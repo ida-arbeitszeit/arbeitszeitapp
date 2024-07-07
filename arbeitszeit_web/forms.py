@@ -8,6 +8,9 @@ class RequestEmailAddressChangeForm(Protocol):
     @property
     def new_email_field(self) -> FormField[str]: ...
 
+    @property
+    def current_password_field(self) -> FormField[str]: ...
+
 
 class LoginMemberForm(Protocol):
     def email_field(self) -> FormField[str]: ...
