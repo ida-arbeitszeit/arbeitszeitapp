@@ -6,6 +6,18 @@ from arbeitszeit.use_cases import request_email_address_change as use_case
 from .base_test_case import BaseTestCase
 
 
+def create_use_case_request(
+    current_email_address: str,
+    new_email_address: str,
+    current_password: str,
+) -> use_case.Request:
+    return use_case.Request(
+        current_email_address=current_email_address,
+        new_email_address=new_email_address,
+        current_password=current_password,
+    )
+
+
 class RequestEmailAddressChangeTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -20,46 +32,59 @@ class RequestEmailAddressChangeTests(BaseTestCase):
     def test_that_request_is_rejected_for_unknown_email_address(
         self, current: str, new: str
     ) -> None:
-        request = use_case.Request(
+        request = create_use_case_request(
             current_email_address=current,
             new_email_address=new,
+            current_password="some_pw",
         )
         response = self.use_case.request_email_address_change(request)
         assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == response.RejectionReason.current_email_address_does_not_exist
+        )
 
     def test_that_confirmed_members_requests_are_accepted(self) -> None:
         member_email_address = "test@test.test"
+        current_password = "some_password"
         new_email_address = "new@test.test"
-        self.member_generator.create_member(email=member_email_address, confirmed=True)
-        request = use_case.Request(
+        self.member_generator.create_member(
+            email=member_email_address, password=current_password, confirmed=True
+        )
+        request = create_use_case_request(
             current_email_address=member_email_address,
             new_email_address=new_email_address,
+            current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
         assert not response.is_rejected
 
     def test_that_confirmed_companies_requests_are_accepted(self) -> None:
         company_email_address = "test@test.test"
+        current_password = "some_password"
         new_email_address = "new@test.test"
         self.company_generator.create_company(
-            email=company_email_address, confirmed=True
+            email=company_email_address, password=current_password, confirmed=True
         )
-        request = use_case.Request(
+        request = create_use_case_request(
             current_email_address=company_email_address,
             new_email_address=new_email_address,
+            current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
         assert not response.is_rejected
 
     def test_that_accountants_requests_are_accepted(self) -> None:
         accountant_email_address = "test@test.test"
+        current_password = "some_password"
         new_email_address = "new@test.test"
         self.accountant_generator.create_accountant(
-            email_address=accountant_email_address
+            email_address=accountant_email_address, password=current_password
         )
-        request = use_case.Request(
+        request = create_use_case_request(
             current_email_address=accountant_email_address,
             new_email_address=new_email_address,
+            current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
         assert not response.is_rejected
@@ -67,16 +92,24 @@ class RequestEmailAddressChangeTests(BaseTestCase):
     def test_that_requests_are_rejected_if_new_email_address_is_already_taken_by_member(
         self,
     ) -> None:
-        old_email_address = "test@test.test"
+        current_email_address = "test@test.test"
+        current_password = "some_password"
         new_email_address = "new@test.test"
-        self.member_generator.create_member(email=old_email_address)
+        self.member_generator.create_member(
+            email=current_email_address, password=current_password
+        )
         self.member_generator.create_member(email=new_email_address)
-        request = use_case.Request(
-            current_email_address=old_email_address,
+        request = create_use_case_request(
+            current_email_address=current_email_address,
             new_email_address=new_email_address,
+            current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
         assert response.is_rejected
+        assert (
+            response.rejection_reason
+            == response.RejectionReason.new_email_address_already_taken
+        )
 
     @parameterized.expand(
         [
@@ -90,13 +123,44 @@ class RequestEmailAddressChangeTests(BaseTestCase):
         self, invalid: str
     ) -> None:
         original_email_address = "test@test.test"
-        self.member_generator.create_member(email=original_email_address)
-        request = use_case.Request(
+        current_password = "some_password"
+        self.member_generator.create_member(
+            email=original_email_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_email_address,
             new_email_address=invalid,
+            current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
         assert response.is_rejected
+        assert (
+            response.rejection_reason == response.RejectionReason.invalid_email_address
+        )
+
+    @parameterized.expand(
+        [
+            ("pw_1", "pw1"),
+            ("", "pw1"),
+            ("pw_1", ""),
+        ]
+    )
+    def test_that_request_is_rejected_if_passwords_do_not_match(
+        self, correct_password: str, submitted_password: str
+    ) -> None:
+        member_email_address = "test@test.test"
+        new_email_address = "new@test.test"
+        self.member_generator.create_member(
+            email=member_email_address, password=correct_password, confirmed=True
+        )
+        request = create_use_case_request(
+            current_email_address=member_email_address,
+            new_email_address=new_email_address,
+            current_password=submitted_password,
+        )
+        response = self.use_case.request_email_address_change(request)
+        assert response.is_rejected
+        assert response.rejection_reason == response.RejectionReason.incorrect_password
 
 
 class RequestEmailAddressChangeNotificationTests(BaseTestCase):
@@ -108,11 +172,15 @@ class RequestEmailAddressChangeNotificationTests(BaseTestCase):
         self,
     ) -> None:
         original_address = "test@test.test"
+        current_password = "some_password"
         new_address = "new@test.test"
-        self.member_generator.create_member(email=original_address)
-        request = use_case.Request(
+        self.member_generator.create_member(
+            email=original_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_address,
             new_email_address=new_address,
+            current_password=current_password,
         )
         self.use_case.request_email_address_change(request)
         assert len(self.delivered_change_warning_notifications()) == 1
@@ -121,11 +189,15 @@ class RequestEmailAddressChangeNotificationTests(BaseTestCase):
         self,
     ) -> None:
         original_address = "test@test.test"
+        current_password = "some_password"
         new_address = "new@test.test"
-        self.member_generator.create_member(email=original_address)
-        request = use_case.Request(
+        self.member_generator.create_member(
+            email=original_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_address,
             new_email_address=new_address,
+            current_password=current_password,
         )
         self.use_case.request_email_address_change(request)
         assert len(self.delivered_change_confirmation_notifications()) == 1
@@ -134,11 +206,15 @@ class RequestEmailAddressChangeNotificationTests(BaseTestCase):
         self,
     ) -> None:
         original_address = "test@test.test"
+        current_password = "some_password"
         new_address = "new@test.test"
-        self.member_generator.create_member(email=original_address)
-        request = use_case.Request(
+        self.member_generator.create_member(
+            email=original_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_address,
             new_email_address=new_address,
+            current_password=current_password,
         )
         self.use_case.request_email_address_change(request)
         notification = self.delivered_change_warning_notifications()[0]
@@ -153,11 +229,15 @@ class RequestEmailAddressChangeNotificationTests(BaseTestCase):
     def test_that_change_confirmation_mail_contains_current_email_address_as_requested(
         self, original_address: str
     ) -> None:
-        self.member_generator.create_member(email=original_address)
+        current_password = "some_password"
         new_address = "new@test.test"
-        request = use_case.Request(
+        self.member_generator.create_member(
+            email=original_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_address,
             new_email_address=new_address,
+            current_password=current_password,
         )
         self.use_case.request_email_address_change(request)
         notification = self.delivered_change_confirmation_notifications()[0]
@@ -173,19 +253,45 @@ class RequestEmailAddressChangeNotificationTests(BaseTestCase):
         self, new_address: str
     ) -> None:
         original_address = "origional@test.test"
-        self.member_generator.create_member(email=original_address)
-        request = use_case.Request(
+        current_password = "some_password"
+        self.member_generator.create_member(
+            email=original_address, password=current_password
+        )
+        request = create_use_case_request(
             current_email_address=original_address,
             new_email_address=new_address,
+            current_password=current_password,
         )
         self.use_case.request_email_address_change(request)
         notification = self.delivered_change_confirmation_notifications()[0]
         assert notification.new_email_address == new_address
 
-    def test_that_no_notification_is_delivered_if_email_address_is_unkown(self) -> None:
-        request = use_case.Request(
+    def test_that_no_notifications_are_delivered_if_email_address_is_unkown(
+        self,
+    ) -> None:
+        request = create_use_case_request(
             current_email_address="test@test.test",
             new_email_address="new@test.test",
+            current_password="some_pw",
+        )
+        self.use_case.request_email_address_change(request)
+        assert not self.delivered_change_confirmation_notifications()
+        assert not self.delivered_change_warning_notifications()
+
+    def test_that_no_notifications_are_delivered_if_passwords_are_not_matching(
+        self,
+    ) -> None:
+        correct_password = "some password"
+        submitted_password = correct_password + "x"
+        member_email_address = "test@test.test"
+        new_email_address = "new@test.test"
+        self.member_generator.create_member(
+            email=member_email_address, password=correct_password, confirmed=True
+        )
+        request = create_use_case_request(
+            current_email_address=member_email_address,
+            new_email_address=new_email_address,
+            current_password=submitted_password,
         )
         self.use_case.request_email_address_change(request)
         assert not self.delivered_change_confirmation_notifications()
