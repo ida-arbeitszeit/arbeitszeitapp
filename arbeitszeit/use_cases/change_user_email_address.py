@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.email import is_possibly_an_email_address
 from arbeitszeit.repositories import AccountCredentialsResult, DatabaseGateway
 
@@ -10,6 +11,7 @@ from arbeitszeit.repositories import AccountCredentialsResult, DatabaseGateway
 @dataclass
 class ChangeUserEmailAddressUseCase:
     database: DatabaseGateway
+    datetime_service: DatetimeService
 
     def change_user_email_address(self, request: Request) -> Response:
         account_credentials = (
@@ -30,6 +32,9 @@ class ChangeUserEmailAddressUseCase:
                 request.new_email
             ).perform()
             self.database.get_email_addresses().with_address(old_email).delete()
+            self.database.get_email_addresses().with_address(
+                request.new_email
+            ).update().set_confirmation_timestamp(self.datetime_service.now()).perform()
             return Response(is_rejected=False)
         return Response(is_rejected=True)
 

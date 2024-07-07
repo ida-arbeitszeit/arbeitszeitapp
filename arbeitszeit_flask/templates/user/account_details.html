@@ -10,6 +10,10 @@
     <p>
       {{ gettext("Email address:") }} {{ view_model.email_address }}
     </p>
+      <a href="{{ view_model.request_email_address_change_url }}">
+        {{ gettext("Change email address") }}
+      </a>
+    </p>
   </div>
 </div>
 {% endblock %}
