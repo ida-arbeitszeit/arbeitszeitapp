@@ -13,16 +13,19 @@ class FakeDatetimeService(DatetimeService):
     def __init__(self) -> None:
         self.frozen_time: Optional[datetime] = None
 
-    def freeze_time(self, timestamp: datetime) -> None:
-        self.frozen_time = timestamp
+    def freeze_time(self, timestamp: Optional[datetime] = None) -> None:
+        self.frozen_time = timestamp if timestamp else datetime.min
 
     def unfreeze_time(self) -> None:
         self.frozen_time = None
 
-    def advance_time(self, dt: timedelta) -> datetime:
-        assert dt > timedelta(0)
+    def advance_time(self, dt: Optional[timedelta] = None) -> datetime:
         assert self.frozen_time
-        self.frozen_time += dt
+        if dt is not None:
+            assert dt > timedelta(0)
+            self.frozen_time += dt
+        else:
+            self.frozen_time += timedelta(seconds=1)
         return self.frozen_time
 
     def now(self) -> datetime:
