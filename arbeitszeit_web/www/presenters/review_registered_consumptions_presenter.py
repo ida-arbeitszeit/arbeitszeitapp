@@ -59,6 +59,6 @@ class ReviewRegisteredConsumptionsPresenter:
 
     def _get_consumer_type_icon(self, consumption: RegisteredConsumption) -> str:
         if consumption.is_private_consumption:
-            return "fas fa-user"
+            return "user"
         else:
-            return "fas fa-industry"
+            return "industry"

@@ -106,7 +106,7 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
         consumption = self._create_consumption(is_private_consumption=True)
         use_case_response = UseCase.Response(consumptions=[consumption])
         view_model = self.presenter.present(use_case_response)
-        assert view_model.consumptions[0].consumer_type_icon == "fas fa-user"
+        assert view_model.consumptions[0].consumer_type_icon == "user"
 
     def test_that_the_view_model_has_a_productive_consumer_type_icon_if_the_consumption_is_productive(
         self,
@@ -114,7 +114,7 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
         consumption = self._create_consumption(is_private_consumption=False)
         use_case_response = UseCase.Response(consumptions=[consumption])
         view_model = self.presenter.present(use_case_response)
-        assert view_model.consumptions[0].consumer_type_icon == "fas fa-industry"
+        assert view_model.consumptions[0].consumer_type_icon == "industry"
 
     def test_that_an_use_case_response_results_in_a_view_model_with_the_product_name(
         self,

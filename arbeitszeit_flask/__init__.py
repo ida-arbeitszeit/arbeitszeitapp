@@ -10,6 +10,7 @@ import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
+from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.mail_service import load_email_plugin
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
@@ -67,7 +68,7 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
         app.jinja_env.undefined = StrictUndefined
     else:
         # Init Flask-Talisman
-        csp = {"default-src": ["'self'", "'unsafe-inline'", "*.fontawesome.com"]}
+        csp = {"default-src": ["'self'", "'unsafe-inline'"]}
         Talisman(
             app, content_security_policy=csp, force_https=app.config["FORCE_HTTPS"]
         )
@@ -79,8 +80,9 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     initialize_migrations(app=app, db=db)
     initialize_babel(app)
 
-    # Setup template filter
+    # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
+    app.template_filter("icon")(icon_filter)
 
     with app.app_context():
         from arbeitszeit_flask.commands import invite_accountant

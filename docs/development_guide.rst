@@ -641,6 +641,150 @@ configuration options are available
 
    Default: ``33``
 
+Icon Templates: Integration and Usage
+-----------------------------------------
+
+The icon template directory ``arbeitszeit_flask/templates/icons``
+contains Flask-based (Jinja2) HTML template icon files of form
+``<icon-name>.html``. These icon files containing one HTML SVG element
+must follow a simple but specific code style to ensure proper integration
+within the application.
+
+**Icon Template Format**
+
+Each icon template file must adhere to the following structure:
+
+1. ``<svg>``: The root element must include exactly one HTML SVG
+   element with a ``viewBox`` attribute.
+2. ``<path>``: Each path within the SVG element should use
+   ``fill="currentColor"`` unless a different color is intended for
+   specific design purposes.
+
+**Example**
+
+.. code:: html
+
+   <svg viewBox="0 0 448 512">
+     <path
+       fill="currentColor"
+       d="M438.6 105.4C451.1 117.9 451.1 138.1 4H438.6z"
+     ></path>
+   </svg>
+
+1. **ViewBox Attribute**: The ``viewBox`` attribute defines the position
+   and dimension of the SVG viewport. It is essential for correct rendering
+   of the SVG.
+
+   .. code:: html
+
+      <svg viewBox="0 0 448 512"></svg>
+
+2. **Path Elements**: Each ``<path>`` element within the SVG should use
+   ``fill="currentColor"`` to inherit the current text color. This
+   allows the icon color to be easily controlled via CSS.
+
+   .. code:: html
+
+      <path fill="currentColor" d="..."></path>
+
+3. **Multiple Paths**: If your SVG contains multiple paths, ensure each
+   path uses ``fill="currentColor"`` unless you intentionally want a
+   path to have a different fill color.
+
+**Example with Multiple Paths**
+
+.. code:: html
+
+   <svg viewBox="0 0 64 64">
+     <path
+       fill="currentColor"
+       d="..."
+     ></path>
+     <path
+       fill="currentColor"
+       d="..."
+     ></path>
+   </svg>
+
+**Adding Existing SVGs**
+
+To add an existing SVG, remove all attributes from the SVG icon except
+the ``viewBox`` attribute. The ``viewBox`` attribute might have
+different dimensions than our examples, which is acceptable. This
+ensures consistency and proper styling within the application. The Flask
+app will populate the proper attributes in a later step automatically.
+
+**Example: Before**
+
+.. code:: html
+
+   <svg
+     xmlns="http://www.w3.org/2000/svg"
+     width="0.88em"
+     height="1em"
+     viewBox="0 0 448 512"
+   >
+     <path
+       fill="currentColor"
+       d="..."
+     ></path>
+   </svg>
+
+**After your hand-made adjustments**
+
+.. code:: html
+
+   <svg viewBox="0 0 448 512">
+     <path
+       fill="currentColor"
+       d="..."
+     ></path>
+   </svg>
+
+**Icon Resources**
+
+A comprehensive collection of icon sets can be found on
+`Iconify <https://icon-sets.iconify.design/>`__. This project mostly
+uses icons from the FontAwesome
+`solid <https://icon-sets.iconify.design/fa6-solid/>`__ and
+`regular <https://icon-sets.iconify.design/fa6-regular/>`__ collections.
+However, you are free to use icons from other collections as long as
+they fit into the visual style.
+
+**Best Practices**
+
+-  **Naming Conventions**: Use meaningful names for your icon template
+   files that reflect the icon’s purpose or design.
+-  **File Size**: Ensure that your HTML SVG elements are small in size (your
+   icon template files should not exceed 1 KB in size)
+
+By following these guidelines, you ensure that SVG icons are displayed
+correctly and consistently throughout the application.
+
+**Usage**
+
+Assuming your icon template file is named ``name.html`` in the icon template
+directory, you can use the ``icon`` filter in Flask template file as follows:
+
+.. code:: html
+
+   {{ "name"|icon }}
+
+This will include the ``name`` SVG icon in the HTML with the specified
+attributes.
+
+**Extended Usage**
+
+If you want to extend or override SVG attributes, do the following:
+
+.. code:: html
+
+   {{ "name"|icon(attrs={"data-type": "toggle", "class": "foo bar baz"}) }}
+
+**Icon Filter Implementation**
+
+More info, concerning the ``icon`` filter implementation, can be found in
+``arbeitszeit_flask/filters.py:icon_filter``.
 
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
 .. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/
