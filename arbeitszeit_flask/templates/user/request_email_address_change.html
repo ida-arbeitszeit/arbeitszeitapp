@@ -6,6 +6,7 @@
   <form method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="field">
+      {{ form.new_email.label(class="label") }}
       <div class="control">
         {{ form.new_email() }}
       </div>
@@ -15,6 +16,16 @@
       {% endfor %}
       {% endif %}
     </div>
+    <div class="field">
+      {{ form.current_password.label(class="label") }}
+      <div class="control">
+        {{ form.current_password() }}
+      </div>
+      {% if form.current_password.errors is defined and form.current_password.errors %}
+      {% for error in form.errors['current_password'] %}
+      <p class="help is-danger">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
     <div class="field">
       <div class="control">
         <button class="button is-primary" type="submit">
