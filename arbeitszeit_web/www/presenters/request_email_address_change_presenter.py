@@ -26,11 +26,34 @@ class RequestEmailAddressChangePresenter:
     ) -> ViewModel:
         redirect_url: Optional[str]
         if uc_response.is_rejected:
-            form.new_email_field.attach_error(
-                self.translator.gettext(
-                    "The email address seems to be invalid or already taken."
+            if (
+                uc_response.rejection_reason
+                == use_case.Response.RejectionReason.invalid_email_address
+            ):
+                form.new_email_field.attach_error(
+                    self.translator.gettext("The email address seems to be invalid.")
                 )
-            )
+            elif (
+                uc_response.rejection_reason
+                == use_case.Response.RejectionReason.current_email_address_does_not_exist
+            ):
+                pass
+            elif (
+                uc_response.rejection_reason
+                == use_case.Response.RejectionReason.new_email_address_already_taken
+            ):
+                form.new_email_field.attach_error(
+                    self.translator.gettext(
+                        "The email address seems to be already taken."
+                    )
+                )
+            elif (
+                uc_response.rejection_reason
+                == use_case.Response.RejectionReason.incorrect_password
+            ):
+                form.current_password_field.attach_error(
+                    self.translator.gettext("The password is incorrect.")
+                )
             redirect_url = None
             self.notifier.display_warning(
                 self.translator.gettext(
