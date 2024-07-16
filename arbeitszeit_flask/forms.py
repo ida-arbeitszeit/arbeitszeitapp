@@ -421,3 +421,10 @@ class RequestEmailAddressChangeForm(Form):
     @property
     def new_email_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="new_email")
+
+
+class ConfirmEmailAddressChangeForm(Form):
+    is_accepted = BooleanField()
+
+    def is_accepted_field(self) -> WtFormField[bool]:
+        return WtFormField(form=self, field_name="is_accepted")

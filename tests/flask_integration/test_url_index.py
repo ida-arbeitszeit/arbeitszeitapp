@@ -482,3 +482,11 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_company_transactions_url(company_id=company)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_request_email_change_url_leads_to_functional_url(
+        self,
+    ) -> None:
+        self.login_member()
+        url = self.url_index.get_request_change_email_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

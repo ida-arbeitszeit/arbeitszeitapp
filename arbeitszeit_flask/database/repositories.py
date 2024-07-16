@@ -1600,6 +1600,9 @@ class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
             .filter(companies.id == str(company))
         )
 
+    def delete(self) -> None:
+        self.query.delete()
+
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(db=self.db, query=self.query)
 

@@ -75,6 +75,7 @@ class ViewTestCase(FlaskTestCase):
             CoordinationTransferRequestGenerator
         )
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
+        self.token_service = self.injector.get(FlaskTokenService)
 
     def login_member(
         self,

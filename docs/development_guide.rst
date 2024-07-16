@@ -568,27 +568,25 @@ configuration options are available
 
 .. py:data:: MAIL_SERVER
    
-   The server name of the SMTP server used to send mails.
+   The hostname of the SMTP server used for sending emails.
 
 .. py:data:: MAIL_PORT
    
-   Port of the SMTP server used to send mails.
+   Port of the SMTP server used to send emails.
 
    Default: ``25``
 
 .. py:data:: MAIL_USERNAME
    
-   The username used to log in to the ``SMPT`` server used to send
-   mail.
+   The username required to log in to the ``SMTP`` server for sending emails.
 
 .. py:data:: MAIL_PASSWORD
    
-   The password used to log in to the ``SMPT`` server used to send
-   mail.
+   The password required to log in to the ``SMTP`` server for sending emails.
 
 .. py:data:: MAIL_DEFAULT_SENDER
    
-   The sender address used when sending out mail.
+   The sender address used for outgoing emails.
 
 .. py:data:: MAIL_ADMIN
 

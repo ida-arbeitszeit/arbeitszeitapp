@@ -59,3 +59,13 @@ class ThatBelongToCompanyTests(EmailAddressResultTests):
         assert self.database_gateway.get_email_addresses().that_belong_to_company(
             company
         )
+
+
+class DeleteTests(EmailAddressResultTests):
+    def test_can_delete_email_address(self) -> None:
+        ADDRESS = "example@mail.org"
+        assert not self.database_gateway.get_email_addresses()
+        self.database_gateway.create_email_address(address=ADDRESS, confirmed_on=None)
+        assert self.database_gateway.get_email_addresses()
+        self.database_gateway.get_email_addresses().with_address(ADDRESS).delete()
+        assert not self.database_gateway.get_email_addresses()
