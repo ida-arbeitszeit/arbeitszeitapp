@@ -62,12 +62,20 @@ class RegisterHoursWorked:
                 rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
             )
         fic = self.fic_service.get_current_payout_factor()
-        self.database_gateway.create_transaction(
-            date=self.datetime_service.now(),
+        now = self.datetime_service.now()
+        transaction = self.database_gateway.create_transaction(
+            date=now,
             sending_account=company.work_account,
             receiving_account=worker.account,
             amount_sent=use_case_request.hours_worked,
             amount_received=use_case_request.hours_worked * fic,
             purpose="Lohn",
+        )
+        self.database_gateway.create_registered_hours_worked(
+            company=company.id,
+            member=worker.id,
+            amount=use_case_request.hours_worked,
+            transaction=transaction.id,
+            registered_on=now,
         )
         return RegisterHoursWorkedResponse(rejection_reason=None)

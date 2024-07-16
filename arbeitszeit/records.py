@@ -347,3 +347,13 @@ class PasswordResetRequest:
     email_address: str
     reset_token: str
     created_at: datetime
+
+
+@dataclass
+class RegisteredHoursWorked:
+    id: UUID
+    company: UUID
+    member: UUID
+    amount: Decimal
+    transaction: UUID
+    registered_on: datetime
