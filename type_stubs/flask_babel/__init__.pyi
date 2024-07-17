@@ -1,6 +1,6 @@
 from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Callable, List
+from typing import Callable
 
 from _typeshed import Incomplete
 from babel import Locale
@@ -14,8 +14,8 @@ class BabelConfiguration:
     default_locale: str
     default_timezone: str
     default_domain: str
-    default_directories: List[str]
-    translation_directories: List[str]
+    default_directories: list[str]
+    translation_directories: list[str]
     instance: Babel
     locale_selector: Callable | None = ...
     timezone_selector: Callable | None = ...
@@ -27,8 +27,8 @@ class BabelConfiguration:
         default_directories,
         translation_directories,
         instance,
-        locale_selector,
-        timezone_selector,
+        locale_selector=...,
+        timezone_selector=...,
     ) -> None: ...
 
 def get_babel(app: Incomplete | None = None) -> BabelConfiguration: ...

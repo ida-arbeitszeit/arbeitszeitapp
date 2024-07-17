@@ -1,5 +1,7 @@
 from _typeshed import Incomplete
 
+def kwarg_doc(text): ...
+
 class Substitution:
     params: Incomplete
     def __init__(self, *args, **kwargs) -> None: ...

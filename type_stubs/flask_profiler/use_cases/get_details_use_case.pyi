@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
 
 from flask_profiler.entities import measurement_archive as measurement_archive
 
@@ -24,15 +23,15 @@ class Request:
         self,
         limit,
         offset,
-        name_filter,
-        method_filter,
-        requested_after,
-        requested_before,
+        name_filter=...,
+        method_filter=...,
+        requested_after=...,
+        requested_before=...,
     ) -> None: ...
 
 @dataclass
 class Response:
-    measurements: List[Measurement]
+    measurements: list[Measurement]
     request: Request
     total_result_count: int
     def __init__(self, measurements, request, total_result_count) -> None: ...

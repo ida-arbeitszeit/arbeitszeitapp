@@ -27,9 +27,9 @@ from matplotlib.backend_bases import FigureCanvasBase as FigureCanvasBase
 from matplotlib.backend_bases import FigureManagerBase as FigureManagerBase
 from matplotlib.backend_bases import MouseButton as MouseButton
 from matplotlib.backend_bases import RendererBase as RendererBase
+from matplotlib.backends import BackendFilter as BackendFilter
+from matplotlib.backends import backend_registry as backend_registry
 from matplotlib.cm import ScalarMappable as ScalarMappable
-from matplotlib.cm import register_cmap as register_cmap
-from matplotlib.collections import BrokenBarHCollection as BrokenBarHCollection
 from matplotlib.collections import Collection as Collection
 from matplotlib.collections import EventCollection as EventCollection
 from matplotlib.collections import LineCollection as LineCollection
@@ -122,8 +122,8 @@ def new_figure_manager(*args, **kwargs): ...
 def draw_if_interactive(*args, **kwargs): ...
 def show(*args, **kwargs) -> None: ...
 def isinteractive() -> bool: ...
-def ioff() -> ExitStack: ...
-def ion() -> ExitStack: ...
+def ioff() -> AbstractContextManager: ...
+def ion() -> AbstractContextManager: ...
 def pause(interval: float) -> None: ...
 def rc(group: str, **kwargs) -> None: ...
 def rc_context(
@@ -372,6 +372,7 @@ def axhspan(
 ) -> Polygon: ...
 def axis(
     arg: tuple[float, float, float, float] | bool | str | None = None,
+    /,
     *,
     emit: bool = True,
     **kwargs,
@@ -435,7 +436,7 @@ def boxplot(
     showbox: bool | None = None,
     showfliers: bool | None = None,
     boxprops: dict[str, Any] | None = None,
-    labels: Sequence[str] | None = None,
+    tick_labels: Sequence[str] | None = None,
     flierprops: dict[str, Any] | None = None,
     medianprops: dict[str, Any] | None = None,
     meanprops: dict[str, Any] | None = None,
@@ -445,6 +446,7 @@ def boxplot(
     autorange: bool = False,
     zorder: float | None = None,
     capwidths: float | ArrayLike | None = None,
+    label: Sequence[str] | None = None,
     *,
     data: Incomplete | None = None,
 ) -> dict[str, Any]: ...
@@ -454,7 +456,7 @@ def broken_barh(
     *,
     data: Incomplete | None = None,
     **kwargs,
-) -> BrokenBarHCollection: ...
+) -> PolyCollection: ...
 def clabel(CS: ContourSet, levels: ArrayLike | None = None, **kwargs) -> list[Text]: ...
 def cohere(
     x: ArrayLike,
@@ -844,6 +846,7 @@ def stackplot(
     *args,
     labels=(),
     colors: Incomplete | None = None,
+    hatch: Incomplete | None = None,
     baseline: str = "zero",
     data: Incomplete | None = None,
     **kwargs,
@@ -911,7 +914,7 @@ def tick_params(axis: Literal["both", "x", "y"] = "both", **kwargs) -> None: ...
 def ticklabel_format(
     *,
     axis: Literal["both", "x", "y"] = "both",
-    style: Literal["", "sci", "scientific", "plain"] = "",
+    style: Literal["", "sci", "scientific", "plain"] | None = None,
     scilimits: tuple[int, int] | None = None,
     useOffset: bool | float | None = None,
     useLocale: bool | None = None,
@@ -944,6 +947,7 @@ def violinplot(
     bw_method: (
         Literal["scott", "silverman"] | float | Callable[[GaussianKDE], float] | None
     ) = None,
+    side: Literal["both", "low", "high"] = "both",
     *,
     data: Incomplete | None = None,
 ) -> dict[str, Collection]: ...

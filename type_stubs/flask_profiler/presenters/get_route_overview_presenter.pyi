@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, List
+from typing import Iterable
 
 from flask_profiler.use_cases import get_route_overview as use_case
 
@@ -36,7 +36,7 @@ class Line:
     def x2(self) -> str: ...
     @property
     def y2(self) -> str: ...
-    def __init__(self, p1, p2, label) -> None: ...
+    def __init__(self, p1, p2, label=...) -> None: ...
 
 @dataclass
 class Graph:
@@ -49,7 +49,7 @@ class Graph:
 @dataclass
 class ViewModel:
     headline: str
-    graphs: List[Graph]
+    graphs: list[Graph]
     def __init__(self, headline, graphs) -> None: ...
 
 class GetRouteOverviewPresenter:
@@ -57,7 +57,7 @@ class GetRouteOverviewPresenter:
 
 @dataclass
 class Conversion:
-    rows: List[List[float]]
+    rows: list[list[float]]
     @classmethod
     def stretch(cls, *, x: float = 1, y: float = 1) -> Conversion: ...
     @classmethod
@@ -67,5 +67,5 @@ class Conversion:
     def transform_point(self, p: Point) -> Point: ...
     def transform_line(self, line: Line) -> Line: ...
     def concat(self, other: Conversion) -> Conversion: ...
-    def __getitem__(self, x: int) -> List[float]: ...
+    def __getitem__(self, x: int) -> list[float]: ...
     def __init__(self, rows) -> None: ...

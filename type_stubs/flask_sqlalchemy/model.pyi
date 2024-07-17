@@ -25,7 +25,7 @@ class BindMixin:
     __fsa__: SQLAlchemy
     metadata: sa.MetaData
     @classmethod
-    def __init_subclass__(cls, **kwargs: t.Dict[str, t.Any]) -> None: ...
+    def __init_subclass__(cls, **kwargs: dict[str, t.Any]) -> None: ...
 
 class NameMetaMixin(type):
     metadata: sa.MetaData
@@ -41,7 +41,7 @@ class NameMixin:
     __tablename__: str
     __table__: sa.Table
     @classmethod
-    def __init_subclass__(cls, **kwargs: t.Dict[str, t.Any]) -> None: ...
+    def __init_subclass__(cls, **kwargs: dict[str, t.Any]) -> None: ...
     @classmethod
     def __table_cls__(cls, *args: t.Any, **kwargs: t.Any) -> sa.Table | None: ...
 

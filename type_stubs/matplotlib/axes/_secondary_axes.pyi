@@ -1,11 +1,21 @@
 from _typeshed import Incomplete
+from matplotlib import transforms as transforms
 from matplotlib.axes._base import _AxesBase
 from matplotlib.axis import Axis as Axis
+from matplotlib.transforms import Transform as Transform
 
 class SecondaryAxis(_AxesBase):
-    def __init__(self, parent, orientation, location, functions, **kwargs) -> None: ...
+    def __init__(
+        self,
+        parent,
+        orientation,
+        location,
+        functions,
+        transform: Incomplete | None = None,
+        **kwargs,
+    ) -> None: ...
     def set_alignment(self, align) -> None: ...
-    def set_location(self, location) -> None: ...
+    def set_location(self, location, transform: Incomplete | None = None) -> None: ...
     def apply_aspect(self, position: Incomplete | None = None) -> None: ...
     stale: bool
     def set_ticks(

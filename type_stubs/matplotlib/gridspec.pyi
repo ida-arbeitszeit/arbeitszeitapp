@@ -18,7 +18,7 @@ class GridSpecBase:
     def get_width_ratios(self): ...
     def set_height_ratios(self, height_ratios) -> None: ...
     def get_height_ratios(self): ...
-    def get_grid_positions(self, fig, raw: bool = False): ...
+    def get_grid_positions(self, fig): ...
     def __getitem__(self, key): ...
     def subplots(
         self,
@@ -101,3 +101,29 @@ class SubplotSpec:
     def __eq__(self, other): ...
     def __hash__(self): ...
     def subgridspec(self, nrows, ncols, **kwargs): ...
+
+class SubplotParams:
+    def __init__(
+        self,
+        left: Incomplete | None = None,
+        bottom: Incomplete | None = None,
+        right: Incomplete | None = None,
+        top: Incomplete | None = None,
+        wspace: Incomplete | None = None,
+        hspace: Incomplete | None = None,
+    ) -> None: ...
+    left: Incomplete
+    right: Incomplete
+    bottom: Incomplete
+    top: Incomplete
+    wspace: Incomplete
+    hspace: Incomplete
+    def update(
+        self,
+        left: Incomplete | None = None,
+        bottom: Incomplete | None = None,
+        right: Incomplete | None = None,
+        top: Incomplete | None = None,
+        wspace: Incomplete | None = None,
+        hspace: Incomplete | None = None,
+    ) -> None: ...

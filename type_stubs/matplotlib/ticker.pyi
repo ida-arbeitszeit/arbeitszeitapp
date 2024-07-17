@@ -1,3 +1,5 @@
+import string
+
 from _typeshed import Incomplete
 
 __all__ = [
@@ -79,6 +81,9 @@ class FormatStrFormatter(Formatter):
     fmt: Incomplete
     def __init__(self, fmt) -> None: ...
     def __call__(self, x, pos: Incomplete | None = None): ...
+
+class _UnicodeMinusFormat(string.Formatter):
+    def format_field(self, value, format_spec): ...
 
 class StrMethodFormatter(Formatter):
     fmt: Incomplete

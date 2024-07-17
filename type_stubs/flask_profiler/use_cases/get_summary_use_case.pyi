@@ -1,7 +1,6 @@
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
 
 from _typeshed import Incomplete
 from flask_profiler.entities import measurement_archive as measurement_archive
@@ -49,15 +48,15 @@ class Request:
         offset,
         sorting_order,
         sorting_field,
-        method,
-        name_filter,
-        requested_after,
-        requested_before,
+        method=...,
+        name_filter=...,
+        requested_after=...,
+        requested_before=...,
     ) -> None: ...
 
 @dataclass
 class Response:
-    measurements: List[Measurement]
+    measurements: list[Measurement]
     total_results: int
     request: Request
     def __init__(self, measurements, total_results, request) -> None: ...
