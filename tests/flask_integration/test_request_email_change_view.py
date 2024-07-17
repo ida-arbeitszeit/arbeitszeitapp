@@ -30,14 +30,30 @@ class RequestEmailChangeViewTests(ViewTestCase):
     def test_that_member_gets_redirected_when_posting_with_new_email_address(
         self,
     ) -> None:
-        self.login_member()
+        password = "123password"
+        self.login_member(password=password)
         response = self.client.post(
             URL,
             data={
                 "new_email": "new_email@test.test",
+                "current_password": password,
             },
         )
         assert response.status_code == 302
+
+    def test_that_member_gets_400_when_posting_with_wrong_password(
+        self,
+    ) -> None:
+        password = "123password"
+        self.login_member(password=password)
+        response = self.client.post(
+            URL,
+            data={
+                "new_email": "new_email@test.test",
+                "current_password": password + "wrong",
+            },
+        )
+        assert response.status_code == 400
 
     def test_that_unauthenticated_users_get_redirect_response_on_post_without_data(
         self,
@@ -104,26 +120,30 @@ class SentEmailTestsWithoutAdminMailInConfig(SentEmailTestCase):
         return None
 
     def test_that_two_emails_get_sent_when_posting_with_new_email_address(self) -> None:
-        self.login_member()
+        password = "123_pw"
+        self.login_member(password=password)
         with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={
                     "new_email": "new_email@test.test",
+                    "current_password": password,
                 },
             )
             assert response.status_code == 302
             assert len(outbox) == 2
 
     def test_that_one_email_is_sent_to_old_and_one_to_new_email_address(self) -> None:
+        password = "123_pw"
         old_email = "old_email@test.test"
         new_email = "new_email@test.test"
-        self.login_member(email=old_email)
+        self.login_member(email=old_email, password=password)
         with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={
                     "new_email": new_email,
+                    "current_password": password,
                 },
             )
             assert response.status_code == 302
@@ -141,12 +161,14 @@ class SentEmailTestsWithAdminMailInConfig(SentEmailTestCase):
     def test_that_admin_email_address_appears_in_html_of_one_mail_but_not_in_both(
         self,
     ) -> None:
-        self.login_member()
+        password = "123_pw"
+        self.login_member(password=password)
         with self.email_service().record_messages() as outbox:
             response = self.client.post(
                 URL,
                 data={
                     "new_email": "new_email@test.test",
+                    "current_password": password,
                 },
             )
             assert response.status_code == 302
