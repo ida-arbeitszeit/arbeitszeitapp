@@ -38,7 +38,6 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password="some_pw",
         )
         response = self.use_case.request_email_address_change(request)
-        assert response.is_rejected
         assert (
             response.rejection_reason
             == response.RejectionReason.current_email_address_does_not_exist
@@ -57,7 +56,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert not response.is_rejected
+        assert not response.rejection_reason
 
     def test_that_confirmed_companies_requests_are_accepted(self) -> None:
         company_email_address = "test@test.test"
@@ -72,7 +71,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert not response.is_rejected
+        assert not response.rejection_reason
 
     def test_that_accountants_requests_are_accepted(self) -> None:
         accountant_email_address = "test@test.test"
@@ -87,7 +86,7 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert not response.is_rejected
+        assert not response.rejection_reason
 
     def test_that_requests_are_rejected_if_new_email_address_is_already_taken_by_member(
         self,
@@ -105,7 +104,6 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert response.is_rejected
         assert (
             response.rejection_reason
             == response.RejectionReason.new_email_address_already_taken
@@ -133,7 +131,6 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=current_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert response.is_rejected
         assert (
             response.rejection_reason == response.RejectionReason.invalid_email_address
         )
@@ -159,7 +156,6 @@ class RequestEmailAddressChangeTests(BaseTestCase):
             current_password=submitted_password,
         )
         response = self.use_case.request_email_address_change(request)
-        assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.incorrect_password
 
 

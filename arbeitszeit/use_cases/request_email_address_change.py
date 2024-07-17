@@ -81,7 +81,3 @@ class Response:
         incorrect_password = enum.auto()
 
     rejection_reason: RejectionReason | None
-
-    @property
-    def is_rejected(self) -> bool:
-        return self.rejection_reason is not None
