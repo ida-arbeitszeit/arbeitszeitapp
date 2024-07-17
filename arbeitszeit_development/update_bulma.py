@@ -35,7 +35,7 @@ class BulmaUpdater:
         release = self.get_latest_bulma_release()
         self.logger.info(f"Found bulma release {release.name}")
         target_path = self.get_target_path()
-        source_path = "bulma/css/bulma.css"
+        source_path = "bulma/css/bulma.min.css"
         asset_name = self.get_asset_name(release)
         with release.download_asset(asset_name) as bulma_archive_path:
             bulma_archive = self.zip_factory.create_zip_archive(bulma_archive_path)
