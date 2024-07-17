@@ -5,11 +5,6 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.accept_cooperation import (
-    AcceptCooperation,
-    AcceptCooperationRequest,
-    AcceptCooperationResponse,
-)
 from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
@@ -51,6 +46,9 @@ from arbeitszeit_flask.views import (
     EndCooperationView,
     InviteWorkerToCompanyView,
     RequestCooperationView,
+)
+from arbeitszeit_flask.views.accept_cooperation_request_view import (
+    AcceptCooperationRequestView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
@@ -279,25 +277,16 @@ class request_cooperation(RequestCooperationView): ...
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
     list_inbound_coop_requests: ListInboundCoopRequests,
-    accept_cooperation: AcceptCooperation,
     deny_cooperation: DenyCooperation,
     list_outbound_coop_requests: ListOutboundCoopRequests,
     list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
     cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
-    accept_cooperation_response: Optional[AcceptCooperationResponse] = None
     deny_cooperation_response: Optional[DenyCooperationResponse] = None
     cancel_cooperation_solicitation_response: Optional[bool] = None
     if request.method == "POST":
-        if request.form.get("accept"):
-            coop_id, plan_id = [
-                UUID(id.strip()) for id in request.form["accept"].split(",")
-            ]
-            accept_cooperation_response = accept_cooperation(
-                AcceptCooperationRequest(UUID(current_user.id), plan_id, coop_id)
-            )
-        elif request.form.get("deny"):
+        if request.form.get("deny"):
             coop_id, plan_id = [
                 UUID(id.strip()) for id in request.form["deny"].split(",")
             ]
@@ -329,11 +318,15 @@ def my_cooperations(
         list_inbound_coop_requests_response=list_inbound_coop_requests_response,
         list_outbound_coop_requests_response=list_outbound_coop_requests_response,
         list_my_cooperating_plans_response=list_my_coop_plans_response,
-        accept_cooperation_response=accept_cooperation_response,
         deny_cooperation_response=deny_cooperation_response,
         cancel_cooperation_solicitation_response=cancel_cooperation_solicitation_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
+
+
+@CompanyRoute("/accept_cooperation_request", methods=["POST"])
+@as_flask_view()
+class accept_cooperation_request(AcceptCooperationRequestView): ...
 
 
 @CompanyRoute("/invite_worker_to_company", methods=["GET", "POST"])
