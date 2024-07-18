@@ -37,18 +37,18 @@ class ListRegisteredHoursWorkedUseCase:
         work_account = company.get_account_by_type(AccountTypes.a)
         assert work_account
         records = (
-            self.database_gateway.get_transactions()
-            .where_account_is_sender(work_account)
-            .ordered_by_transaction_date(descending=True)
-            .joined_with_receiver()
+            self.database_gateway.get_registered_hours_worked()
+            .at_company(request.company_id)
+            .ordered_by_registration_time(is_ascending=False)
+            .joined_with_worker()
         )
         registered_hours_worked = [
             RegisteredHoursWorked(
-                hours=transaction.amount_sent,
-                worker_id=worker.id,
+                hours=registered_hours.amount,
+                worker_id=registered_hours.member,
                 worker_name=worker.get_name(),
-                registered_on=transaction.date,
+                registered_on=registered_hours.registered_on,
             )
-            for transaction, worker in records
+            for registered_hours, worker in records
         ]
         return Response(registered_hours_worked=registered_hours_worked)
