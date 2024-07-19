@@ -67,7 +67,7 @@ def icon_filter(
     """
     try:
         # Treat empty icon_name as intentionally set null value
-        if icon_name.strip() is "":
+        if icon_name.strip() == "":
             return Markup("")
         file_path = os.path.join(ICON_PATH, f"{icon_name}.html")
         svg_content = reader(file_path)
