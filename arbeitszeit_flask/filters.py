@@ -66,7 +66,7 @@ def icon_filter(
     section in the developement guide.
     """
     try:
-        # Treat empty strings as intentionally set null values
+        # Treat empty icon_name as intentionally set null value
         if icon_name.strip() is "":
             return Markup("")
         file_path = os.path.join(ICON_PATH, f"{icon_name}.html")
@@ -78,9 +78,7 @@ def icon_filter(
                     f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
                 )
             else:
-                return Markup(
-                    f'<!-- Icon "{icon_name}" does not contain valid SVG content -->'
-                )
+                return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
 
         default_attributes = {
             "data-icon": icon_name,
@@ -103,11 +101,11 @@ def icon_filter(
         return Markup(svg_with_attrs)
     except FileNotFoundError as e:
         if os.getenv("FLASK_DEBUG") == "1":
-            raise FileNotFoundError(f'Icon "{icon_name}" not found: {str(e)}')
+            raise FileNotFoundError(f'Error for "{icon_name}" icon: {str(e)}')
         else:
             return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
     except Exception as e:
         if os.getenv("FLASK_DEBUG") == "1":
-            raise Exception(f'Error for "{icon_name}" icon: {str(e)}')
+            raise Exception(f'Exception for "{icon_name}" icon: {str(e)}')
         else:
             return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
