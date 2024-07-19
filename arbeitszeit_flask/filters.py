@@ -54,10 +54,11 @@ def icon_filter(
     ---------------
     The function includes robust error handling to manage various issues that
     may arise:
-    - If the SVG file is not found.
-    - If the SVG HTML template file is missing an <svg> tag.
-    - If any other error occurs, the exception message will be displayed if
-      `FLASK_DEBUG` is set to `1`.
+    - If the SVG file is not found
+    - If the SVG HTML template file is missing an <svg> tag
+    - If any other exception occurs
+    - If `FLASK_DEBUG` is set to `1` an exception will be raised
+    - If `FLASK_DEBUG` is NOT set to `1` an HTML comment will be rendered
 
     Icon Implementation:
     --------------------
@@ -65,13 +66,21 @@ def icon_filter(
     section in the developement guide.
     """
     try:
+        # Treat empty strings as intentionally set null values
+        if icon_name.strip() is "":
+            return Markup("")
         file_path = os.path.join(ICON_PATH, f"{icon_name}.html")
         svg_content = reader(file_path)
 
         if "<svg" not in svg_content:
-            return Markup(
-                f'<!-- Icon "{icon_name}" does not contain valid SVG content -->'
-            )
+            if os.getenv("FLASK_DEBUG") == "1":
+                raise Exception(
+                    f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
+                )
+            else:
+                return Markup(
+                    f'<!-- Icon "{icon_name}" does not contain valid SVG content -->'
+                )
 
         default_attributes = {
             "data-icon": icon_name,
