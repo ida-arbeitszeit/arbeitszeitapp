@@ -176,10 +176,14 @@ class RegisterFormImpl:
 @dataclass
 class RequestEmailAddressChangeFormImpl:
     new_email_field: FormFieldImpl[str]
+    current_password_field: FormFieldImpl[str]
 
     @classmethod
-    def from_values(cls, new_email_address: str) -> Self:
-        return cls(new_email_field=FormFieldImpl(value=new_email_address))
+    def from_values(cls, new_email_address: str, current_password: str) -> Self:
+        return cls(
+            new_email_field=FormFieldImpl(value=new_email_address),
+            current_password_field=FormFieldImpl(value=current_password),
+        )
 
 
 class RequestCoordinationTransferFormImpl:

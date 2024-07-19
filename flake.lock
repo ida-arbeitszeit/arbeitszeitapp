@@ -71,6 +71,22 @@
         "type": "github"
       }
     },
+    "nixos-24-05": {
+      "locked": {
+        "lastModified": 1720954236,
+        "narHash": "sha256-1mEKHp4m9brvfQ0rjCca8P1WHpymK3TOr3v34ydv9bs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "53e81e790209e41f0c1efa9ff26ff2fd7ab35e27",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1706732774,
@@ -108,6 +124,7 @@
         "flake-utils": "flake-utils",
         "flask-profiler": "flask-profiler",
         "nixos-23-11": "nixos-23-11",
+        "nixos-24-05": "nixos-24-05",
         "nixpkgs": "nixpkgs_2"
       }
     },

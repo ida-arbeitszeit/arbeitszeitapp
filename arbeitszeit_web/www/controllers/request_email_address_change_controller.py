@@ -41,4 +41,5 @@ class RequestEmailAddressChangeController:
         return use_case.Request(
             current_email_address=email_address.address,
             new_email_address=form.new_email_field.get_value(),
+            current_password=form.current_password_field.get_value(),
         )

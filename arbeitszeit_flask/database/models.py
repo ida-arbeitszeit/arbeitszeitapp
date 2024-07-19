@@ -205,6 +205,15 @@ class ProductiveConsumption(db.Model):
     amount = db.Column(db.Integer, nullable=False)
 
 
+class RegisteredHoursWorked(db.Model):
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)
+    worker = db.Column(db.String, db.ForeignKey("member.id"), nullable=False)
+    amount = db.Column(db.Numeric(), nullable=False)
+    transaction = db.Column(db.String, db.ForeignKey("transaction.id"), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+
+
 class CompanyWorkInvite(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     company = db.Column(db.String, db.ForeignKey("company.id"), nullable=False)

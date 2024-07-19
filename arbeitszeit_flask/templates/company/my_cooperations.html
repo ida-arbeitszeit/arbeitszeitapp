@@ -81,20 +81,25 @@
                 </div>
             </div>
             <div class="media-right">
-                <form action="" method="post">
+              <form action="/company/accept_cooperation_request" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="plan_id" value="{{ req.plan_id }}">
+                <input type="hidden" name="cooperation_id" value="{{ req.coop_id }}">
+                <button class="button large-button is-primary"
+                        type="submit"
+                        title="{{ gettext('Accept') }}">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              <form action="" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="content pt-1">
-                    <button class="button large-button is-primary" name="accept" 
-                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Accept') }}">
-                        {{ "check"|icon }}
-                    </button>
-                    &nbsp;
                     <button class="button large-button is-danger" name="deny" 
                         value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Decline') }}">
                         {{ "times"|icon }}
                     </button>
                 </div>
-                </form>                
+              </form>                
             </div>
         </article>  
     

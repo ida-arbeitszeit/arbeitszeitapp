@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.accept_cooperation import AcceptCooperationResponse
 from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
@@ -140,23 +139,6 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             str(LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].count_plans_in_coop),
         )
 
-    def test_successfull_accept_request_response_is_presented_correctly(self) -> None:
-        self.presenter.present(
-            list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
-            list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
-            accept_cooperation_response=AcceptCooperationResponse(
-                rejection_reason=None
-            ),
-        )
-        assert len(self.notifier.infos) == 1
-        assert not self.notifier.warnings
-        assert self.notifier.infos[0] == self.translator.gettext(
-            "Cooperation request has been accepted."
-        )
-        assert not self.notifier.warnings
-
     def test_successfull_deny_request_response_is_presented_correctly(self) -> None:
         self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
@@ -169,22 +151,6 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
         assert not self.notifier.warnings
         assert self.notifier.infos[0] == self.translator.gettext(
             "Cooperation request has been denied."
-        )
-
-    def test_failed_accept_request_response_is_presented_correctly(self) -> None:
-        self.presenter.present(
-            list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
-            list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
-            accept_cooperation_response=AcceptCooperationResponse(
-                rejection_reason=AcceptCooperationResponse.RejectionReason.plan_not_found
-            ),
-        )
-        assert len(self.notifier.warnings) == 1
-        assert not self.notifier.infos
-        assert self.notifier.warnings[0] == self.translator.gettext(
-            "Plan or cooperation not found."
         )
 
     def test_failed_deny_request_response_is_presented_correctly(self) -> None:
@@ -345,9 +311,6 @@ class CooperatingPlansTest(BaseTestCase):
         self.view_model = self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
             list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            accept_cooperation_response=AcceptCooperationResponse(
-                rejection_reason=None
-            ),
             list_outbound_coop_requests_response=get_outbound_response_length_1(),
             list_my_cooperating_plans_response=get_coop_plans_response_length_1(
                 plan_id=self.PLAN_ID, coop_id=self.COOP_ID

@@ -1632,6 +1632,47 @@ class EmailAddressUpdate:
         return self.db.session.execute(sql_statement).rowcount  # type: ignore
 
 
+class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked]):
+    def at_company(self, company: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.RegisteredHoursWorked.company == str(company)
+            )
+        )
+
+    def ordered_by_registration_time(self, *, is_ascending: bool = True) -> Self:
+        ordering = models.RegisteredHoursWorked.registered_on
+        if not is_ascending:
+            ordering = ordering.desc()
+        return self._with_modified_query(lambda query: query.order_by(ordering))
+
+    def joined_with_worker(self) -> FlaskQueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.RegisteredHoursWorked, records.Member]:
+            hours_orm, member_orm = orm
+            return (
+                DatabaseGatewayImpl.registered_hours_worked_from_orm(hours_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+            )
+
+        members = aliased(models.Member)
+        query = self.query.join(
+            members, members.id == models.RegisteredHoursWorked.worker
+        ).with_entities(models.RegisteredHoursWorked, models.Member)
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
+
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
         id_ = str(user_id)
@@ -2460,3 +2501,42 @@ class DatabaseGatewayImpl:
         self.db.session.add(new_entry)
         self.db.session.flush()
         return self.password_reset_request_from_orm(new_entry)
+
+    def create_registered_hours_worked(
+        self,
+        company: UUID,
+        member: UUID,
+        amount: Decimal,
+        transaction: UUID,
+        registered_on: datetime,
+    ) -> records.RegisteredHoursWorked:
+        db_record = models.RegisteredHoursWorked(
+            company=str(company),
+            worker=str(member),
+            amount=amount,
+            transaction=str(transaction),
+            registered_on=registered_on,
+        )
+        self.db.session.add(db_record)
+        self.db.session.flush()
+        return self.registered_hours_worked_from_orm(db_record)
+
+    def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult:
+        return RegisteredHoursWorkedResult(
+            mapper=self.registered_hours_worked_from_orm,
+            db=self.db,
+            query=models.RegisteredHoursWorked.query,
+        )
+
+    @classmethod
+    def registered_hours_worked_from_orm(
+        cls, db_record: models.RegisteredHoursWorked
+    ) -> records.RegisteredHoursWorked:
+        return records.RegisteredHoursWorked(
+            id=UUID(db_record.id),
+            company=UUID(db_record.company),
+            member=UUID(db_record.worker),
+            registered_on=db_record.registered_on,
+            amount=db_record.amount,
+            transaction=UUID(db_record.transaction),
+        )

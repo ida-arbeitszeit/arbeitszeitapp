@@ -410,7 +410,7 @@ class RequestCoordinationTransferForm(Form):
 
 class RequestEmailAddressChangeForm(Form):
     new_email = StringField(
-        default="",
+        label=trans.lazy_gettext("New email address"),
         validators=[
             validators.InputRequired(
                 message=trans.lazy_gettext("Email address is required.")
@@ -418,9 +418,20 @@ class RequestEmailAddressChangeForm(Form):
         ],
     )
 
+    current_password = PasswordField(
+        label=trans.lazy_gettext("Current password"),
+        validators=[
+            validators.InputRequired(message=trans.lazy_gettext("Password is required"))
+        ],
+    )
+
     @property
     def new_email_field(self) -> WtFormField[str]:
         return WtFormField(form=self, field_name="new_email")
+
+    @property
+    def current_password_field(self) -> WtFormField[str]:
+        return WtFormField(form=self, field_name="current_password")
 
 
 class ConfirmEmailAddressChangeForm(Form):
