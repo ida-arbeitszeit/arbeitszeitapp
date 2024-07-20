@@ -1664,7 +1664,7 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
         members = aliased(models.Member)
         query = self.query.join(
             members, members.id == models.RegisteredHoursWorked.worker
-        ).with_entities(models.RegisteredHoursWorked, models.Member)
+        ).with_entities(models.RegisteredHoursWorked, members)
 
         return FlaskQueryResult(
             db=self.db,
