@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-11 13:13+0200\n"
+"Project-Id-Version: Arbeitszeitapp\n"
+"Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
+"POT-Creation-Date: 2024-07-19 07:08+0200\n"
 "PO-Revision-Date: 2024-05-11 13:29+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -33,7 +33,7 @@ msgid "This field is required."
 msgstr "Este campo es obligatorio."
 
 #: arbeitszeit_flask/forms.py:69 arbeitszeit_flask/forms.py:213
-#: arbeitszeit_flask/forms.py:214 arbeitszeit_flask/forms.py:359
+#: arbeitszeit_flask/forms.py:214 arbeitszeit_flask/forms.py:358
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:27
 #: arbeitszeit_flask/templates/member/register_private_consumption.html:27
 #: arbeitszeit_web/formatters/plan_details_formatter.py:42
@@ -79,7 +79,7 @@ msgid "Proper email address required"
 msgstr "Se requiere una dirección de correo electrónico válida"
 
 #: arbeitszeit_flask/forms.py:112 arbeitszeit_flask/forms.py:156
-#: arbeitszeit_flask/forms.py:236 arbeitszeit_flask/forms.py:331
+#: arbeitszeit_flask/forms.py:236 arbeitszeit_flask/forms.py:330
 #: arbeitszeit_flask/templates/auth/signup_accountant.html:27
 #: arbeitszeit_flask/templates/auth/signup_member.html:27
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:31
@@ -128,7 +128,7 @@ msgstr "Se requiere una dirección de correo electrónico"
 msgid "Email address required"
 msgstr "Se requiere una dirección de correo electrónico"
 
-#: arbeitszeit_flask/forms.py:196
+#: arbeitszeit_flask/forms.py:196 arbeitszeit_flask/forms.py:424
 msgid "Password is required"
 msgstr "Se requiere una contraseña"
 
@@ -137,7 +137,7 @@ msgid "Remember login?"
 msgstr "¿Recordar inicio de sesión?"
 
 #: arbeitszeit_flask/forms.py:220 arbeitszeit_flask/forms.py:221
-#: arbeitszeit_flask/forms.py:365 arbeitszeit_flask/plots/routes.py:93
+#: arbeitszeit_flask/forms.py:364 arbeitszeit_flask/plots/routes.py:93
 #: arbeitszeit_flask/templates/company/my_consumptions.html:28
 #: arbeitszeit_flask/templates/company/register_hours_worked.html:20
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:33
@@ -166,37 +166,45 @@ msgstr "Horas"
 msgid "This plan is a public service"
 msgstr "Este plan es un servicio público"
 
-#: arbeitszeit_flask/forms.py:320
+#: arbeitszeit_flask/forms.py:319
 msgid "Required"
 msgstr "Requerido"
 
-#: arbeitszeit_flask/forms.py:322
+#: arbeitszeit_flask/forms.py:321
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:30
 msgid "Member ID"
 msgstr "ID del miembro"
 
-#: arbeitszeit_flask/forms.py:335
+#: arbeitszeit_flask/forms.py:334
 #: arbeitszeit_flask/templates/user/coop_summary.html:26
 msgid "Definition"
 msgstr "Definición"
 
-#: arbeitszeit_flask/forms.py:372
+#: arbeitszeit_flask/forms.py:371
 #: arbeitszeit_web/www/presenters/company_consumptions_presenter.py:63
 msgid "Fixed means of production"
 msgstr "Medios de producción fijos"
 
-#: arbeitszeit_flask/forms.py:375
+#: arbeitszeit_flask/forms.py:374
 #: arbeitszeit_web/www/presenters/company_consumptions_presenter.py:61
 msgid "Liquid means of production"
 msgstr "Medios de producción líquidos"
 
-#: arbeitszeit_flask/forms.py:379
+#: arbeitszeit_flask/forms.py:378
 msgid "Type of consumption"
 msgstr "Tipo de consumo"
 
-#: arbeitszeit_flask/forms.py:417
+#: arbeitszeit_flask/forms.py:413
+msgid "New email address"
+msgstr "Nueva dirección de correo electrónico"
+
+#: arbeitszeit_flask/forms.py:416
 msgid "Email address is required."
 msgstr "Se requiere una dirección de correo electrónico."
+
+#: arbeitszeit_flask/forms.py:422
+msgid "Current password"
+msgstr "Contraseña actual"
 
 #: arbeitszeit_flask/plots/routes.py:34
 msgid "Work certificates"
@@ -267,8 +275,8 @@ msgid ""
 "A company filed a new plan for \"%(product_name)s\". Log in as an "
 "accountant to conduct a review."
 msgstr ""
-"Una empresa presentó un nuevo plan para \"%(product_name)s\". Inicia sesión "
-"como contador/a para realizar una revisión."
+"Una empresa presentó un nuevo plan para \"%(product_name)s\". Inicia sesión"
+" como contador/a para realizar una revisión."
 
 #: arbeitszeit_flask/templates/accountant/plan_details.html:4
 #: arbeitszeit_flask/templates/company/plan_details.html:4
@@ -296,7 +304,7 @@ msgid ""
 "%(link)s to register."
 msgstr ""
 "Hola. Fuiste invitado/a a ser un/a contador/a público/a en Arbeitszeitapp. "
-"Ve a %(link)s para registrarte." 
+"Ve a %(link)s para registrarte."
 
 #: arbeitszeit_flask/templates/auth/activate.html:1
 msgid ""
@@ -460,13 +468,15 @@ msgstr "Guardar como borrador"
 
 #: arbeitszeit_flask/templates/company/create_draft.html:30
 #: arbeitszeit_flask/templates/company/draft_details.html:34
-#: arbeitszeit_flask/templates/company/my_cooperations.html:137
+#: arbeitszeit_flask/templates/company/my_cooperations.html:142
 msgid "Cancel"
 msgstr "Cancelar"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:21
 msgid "No workers are registered with your company. Click here to add some."
-msgstr "No hay trabajadores registrados en tu empresa. Haz clic aquí para añadir algunos."
+msgstr ""
+"No hay trabajadores registrados en tu empresa. Haz clic aquí para añadir "
+"algunos."
 
 #: arbeitszeit_flask/templates/company/dashboard.html:42
 msgid "Create new plan"
@@ -493,7 +503,7 @@ msgstr "Tu empresa"
 #: arbeitszeit_flask/templates/company/dashboard.html:78
 #: arbeitszeit_flask/templates/macros/company_summary.html:134
 #: arbeitszeit_flask/templates/user/statistics.html:26
-#: arbeitszeit_flask/templates/user/statistics.html:45
+#: arbeitszeit_flask/templates/user/statistics.html:51
 msgid "Plans"
 msgstr "Planes"
 
@@ -651,7 +661,7 @@ msgid "Incoming cooperation request (by others)"
 msgstr "Solicitud de cooperación entrante (de otros)"
 
 #: arbeitszeit_flask/templates/company/my_cooperations.html:75
-#: arbeitszeit_flask/templates/company/my_cooperations.html:124
+#: arbeitszeit_flask/templates/company/my_cooperations.html:129
 msgid "Plan"
 msgstr "Plan"
 
@@ -659,25 +669,25 @@ msgstr "Plan"
 msgid "My cooperation"
 msgstr "Mi cooperación"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:88
+#: arbeitszeit_flask/templates/company/my_cooperations.html:90
 #: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:10
 msgid "Accept"
 msgstr "Aceptar"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:93
+#: arbeitszeit_flask/templates/company/my_cooperations.html:98
 msgid "Decline"
 msgstr "Rechazar"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:105
+#: arbeitszeit_flask/templates/company/my_cooperations.html:110
 msgid "You don't have open requests"
 msgstr "No tienes solicitudes abiertas"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:112
+#: arbeitszeit_flask/templates/company/my_cooperations.html:117
 msgid "Outgoing cooperation requests (own requests)"
 msgstr "Solicitudes de cooperación salientes (propias)"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:128
-#: arbeitszeit_flask/templates/company/my_cooperations.html:169
+#: arbeitszeit_flask/templates/company/my_cooperations.html:133
+#: arbeitszeit_flask/templates/company/my_cooperations.html:174
 #: arbeitszeit_flask/templates/company/request_coordination_transfer.html:26
 #: arbeitszeit_flask/templates/company/show_coordination_transfer_request.html:19
 #: arbeitszeit_flask/templates/user/coop_summary.html:4
@@ -688,15 +698,15 @@ msgstr "Solicitudes de cooperación salientes (propias)"
 msgid "Cooperation"
 msgstr "Cooperación"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:146
+#: arbeitszeit_flask/templates/company/my_cooperations.html:151
 msgid "You haven't requested any cooperation"
 msgstr "No has solicitado ninguna cooperación"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:154
+#: arbeitszeit_flask/templates/company/my_cooperations.html:159
 msgid "My cooperating plans"
 msgstr "Mis planes cooperativos"
 
-#: arbeitszeit_flask/templates/company/my_cooperations.html:176
+#: arbeitszeit_flask/templates/company/my_cooperations.html:181
 msgid "You don't have any cooperating plans."
 msgstr "No tienes ningún plan cooperativo."
 
@@ -856,8 +866,7 @@ msgstr "Aquí puedes solicitar una cooperación."
 msgid ""
 "The coordinator of the cooperation decides if they add your plan to the "
 "cooperation."
-msgstr ""
-"El coordinador de la cooperación decide si añade tu plan a la cooperación."
+msgstr "El coordinador de la cooperación decide si añade tu plan a la cooperación."
 
 #: arbeitszeit_flask/templates/company/request_cooperation.html:18
 msgid "All plans in a cooperation should offer the same or a similar product."
@@ -969,7 +978,7 @@ msgstr "Métricas"
 #: arbeitszeit_flask/templates/user/company_account_p.html:16
 #: arbeitszeit_flask/templates/user/company_accounts.html:32
 #: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:66
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:58
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:54
 msgid "Account p"
 msgstr "Cuenta p"
 
@@ -1090,8 +1099,8 @@ msgid ""
 "you have ten one-year-plans, then for this fixed mean of production, the "
 "value would be 1000."
 msgstr ""
-"Este campo es principalmente para contabilizar el desgaste de las máquinas. "
-"Por ejemplo, si planeas usar una máquina que cuesta 10000 horas para "
+"Este campo es principalmente para contabilizar el desgaste de las máquinas."
+" Por ejemplo, si planeas usar una máquina que cuesta 10000 horas para "
 "producir, durante 10 años, y tienes diez planes de un año, entonces para "
 "este medio de producción fijo, el valor sería 1000."
 
@@ -1130,8 +1139,8 @@ msgid ""
 "Only checkmark this box if your product will be generally and freely "
 "available."
 msgstr ""
-"Los productos y servicios dentro de una cadena de suministro no deben estar "
-"marcados como públicos. Marca esta casilla solo si tu producto estará "
+"Los productos y servicios dentro de una cadena de suministro no deben estar"
+" marcados como públicos. Marca esta casilla solo si tu producto estará "
 "disponible de forma general y gratuita."
 
 #: arbeitszeit_flask/templates/macros/language_selection.html:5
@@ -1145,8 +1154,8 @@ msgid ""
 "product or service."
 msgstr ""
 "Este ID de plan identifica tu plan. Se utiliza para contabilizar el tiempo "
-"de trabajo de los trabajadores y empresas que trabajan en, o respectivamente "
-"consumen, el producto o servicio planificado."
+"de trabajo de los trabajadores y empresas que trabajan en, o "
+"respectivamente consumen, el producto o servicio planificado."
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:50
 msgid ""
@@ -1155,8 +1164,8 @@ msgid ""
 "is expired."
 msgstr ""
 "El estado puede ser \"Activo\", es decir, el plan fue aprobado y la fecha "
-"actual está dentro del plazo de planificación, o \"Inactivo\", es decir, el "
-"plan aún no ha sido aprobado o ha caducado."
+"actual está dentro del plazo de planificación, o \"Inactivo\", es decir, el"
+" plan aún no ha sido aprobado o ha caducado."
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:65
 msgid "Plan creation"
@@ -1189,8 +1198,8 @@ msgid ""
 "This is the amount of time that is debited when the product is consumed. 0 "
 "for public plans."
 msgstr ""
-"Esta es la cantidad de tiempo que se debita cuando el producto es consumido. "
-"0 para planes públicos."
+"Esta es la cantidad de tiempo que se debita cuando el producto es "
+"consumido. 0 para planes públicos."
 
 #: arbeitszeit_flask/templates/macros/plan_details.html:139
 msgid "This field shows working hours spent per produced unit."
@@ -1213,8 +1222,8 @@ msgid "Your credit"
 msgstr "Tu crédito"
 
 #: arbeitszeit_flask/templates/member/dashboard.html:17
-msgid "Your workplace"
-msgstr "Tu lugar de trabajo"
+msgid "Your workplaces"
+msgstr "Tus lugares de trabajo"
 
 #: arbeitszeit_flask/templates/member/dashboard.html:30
 msgid ""
@@ -1254,7 +1263,7 @@ msgstr ""
 "Has sido invitado/a por una empresa a unirte a ellos como miembro en "
 "Arbeitszeitapp. Acepta o rechaza a través de este enlace:"
 
-#: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:15
+#: arbeitszeit_flask/templates/member/show_company_work_invite_details.html:13
 msgid "Reject"
 msgstr "Rechazar"
 
@@ -1270,12 +1279,17 @@ msgstr "ID de la cuenta:"
 msgid "Email address:"
 msgstr "Dirección de correo electrónico:"
 
+#: arbeitszeit_flask/templates/user/account_details.html:14
+#: arbeitszeit_flask/templates/user/request_email_address_change.html:5
+msgid "Change email address"
+msgstr "Cambiar dirección de correo electrónico"
+
 #: arbeitszeit_flask/templates/user/company_account_a.html:21
 msgid "The account for work certificates"
 msgstr "La cuenta para certificados de trabajo"
 
 #: arbeitszeit_flask/templates/user/company_account_a.html:23
-#: arbeitszeit_flask/templates/user/company_account_p.html:30
+#: arbeitszeit_flask/templates/user/company_account_p.html:23
 #: arbeitszeit_flask/templates/user/company_account_prd.html:22
 #: arbeitszeit_flask/templates/user/company_account_r.html:23
 msgid "Balance:"
@@ -1284,14 +1298,6 @@ msgstr "Saldo:"
 #: arbeitszeit_flask/templates/user/company_account_p.html:21
 msgid "The account for fixed means of production."
 msgstr "La cuenta para medios de producción fijos."
-
-#: arbeitszeit_flask/templates/user/company_account_p.html:24
-msgid "Sum of planned fixed means of production:"
-msgstr "Suma de medios de producción fijos planificados:"
-
-#: arbeitszeit_flask/templates/user/company_account_p.html:27
-msgid "Sum of consumed fixed means of production:"
-msgstr "Suma de medios de producción fijos consumidos:"
 
 #: arbeitszeit_flask/templates/user/company_account_prd.html:20
 msgid "The account for product transfers (sales)."
@@ -1306,7 +1312,7 @@ msgstr "La cuenta para medios de producción líquidos"
 #: arbeitszeit_web/www/presenters/get_company_dashboard_presenter.py:76
 #: arbeitszeit_web/www/presenters/get_company_transactions_presenter.py:107
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:47
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:53
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:49
 #: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:53
 #: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:47
 msgid "Accounts"
@@ -1335,6 +1341,31 @@ msgstr "Cuenta para transferencias de productos (ventas)"
 #: arbeitszeit_flask/templates/user/company_accounts.html:76
 msgid "List all transactions"
 msgstr "Listar todas las transacciones"
+
+#: arbeitszeit_flask/templates/user/confirm_email_address_change.html:6
+#, python-format
+msgid ""
+"Do you really want to change your email address from \"%(old_email)s\" to "
+"\"%(new_email)s\"?"
+msgstr ""
+"¿Realmente quieres cambiar tu dirección de correo electrónico de "
+"\"%(old_email)s\" a \"%(new_email)s\"?"
+
+#: arbeitszeit_flask/templates/user/confirm_email_address_change.html:13
+msgid ""
+"If you have more than one account with this email address, the address of "
+"all accounts will change."
+msgstr ""
+"Si tienes más de una cuenta con esta dirección de correo electrónico, la "
+"dirección de todas las cuentas cambiará."
+
+#: arbeitszeit_flask/templates/user/confirm_email_address_change.html:19
+msgid "Yes"
+msgstr "Sí"
+
+#: arbeitszeit_flask/templates/user/confirm_email_address_change.html:20
+msgid "No"
+msgstr "No"
 
 #: arbeitszeit_flask/templates/user/coop_summary.html:32
 msgid "Current coordinator"
@@ -1409,7 +1440,7 @@ msgid "Results"
 msgstr "Resultados"
 
 #: arbeitszeit_flask/templates/user/query_plans.html:13
-#: arbeitszeit_flask/templates/user/statistics.html:67
+#: arbeitszeit_flask/templates/user/statistics.html:73
 msgid "Active plans"
 msgstr "Planes activos"
 
@@ -1417,11 +1448,7 @@ msgstr "Planes activos"
 msgid "Search by plan ID or product name"
 msgstr "Buscar por ID de plan o nombre del producto"
 
-#: arbeitszeit_flask/templates/user/request_email_address_change.html:5
-msgid "Change email address"
-msgstr "Cambiar dirección de correo electrónico"
-
-#: arbeitszeit_flask/templates/user/request_email_address_change.html:21
+#: arbeitszeit_flask/templates/user/request_email_address_change.html:32
 msgid "Submit"
 msgstr "Enviar"
 
@@ -1463,40 +1490,44 @@ msgstr "Empresas"
 msgid "FIC (Payout factor)"
 msgstr "FCI (Factor de pago)"
 
-#: arbeitszeit_flask/templates/user/statistics.html:51
+#: arbeitszeit_flask/templates/user/statistics.html:44
+msgid "Balance for Public Sector Fund (PSF)"
+msgstr "Saldo para el Fondo del Sector Público (FSP)"
+
+#: arbeitszeit_flask/templates/user/statistics.html:57
 msgid "Planned ressources"
 msgstr "Recursos planificados"
 
-#: arbeitszeit_flask/templates/user/statistics.html:57
+#: arbeitszeit_flask/templates/user/statistics.html:63
 msgid "Certificates and products"
 msgstr "Certificados y productos"
 
-#: arbeitszeit_flask/templates/user/statistics.html:68
+#: arbeitszeit_flask/templates/user/statistics.html:74
 msgid "Public active plans"
 msgstr "Planes activos públicos"
 
-#: arbeitszeit_flask/templates/user/statistics.html:69
-#: arbeitszeit_flask/templates/user/statistics.html:78
+#: arbeitszeit_flask/templates/user/statistics.html:75
+#: arbeitszeit_flask/templates/user/statistics.html:84
 msgid "Average plan duration"
 msgstr "Duración media del plan"
 
-#: arbeitszeit_flask/templates/user/statistics.html:70
+#: arbeitszeit_flask/templates/user/statistics.html:76
 msgid "Currently planned fixed means"
 msgstr "Medios fijos planificados actualmente"
 
-#: arbeitszeit_flask/templates/user/statistics.html:71
+#: arbeitszeit_flask/templates/user/statistics.html:77
 msgid "Currently planned liquid means"
 msgstr "Medios líquidos planificados actualmente"
 
-#: arbeitszeit_flask/templates/user/statistics.html:72
+#: arbeitszeit_flask/templates/user/statistics.html:78
 msgid "Currently planned work"
 msgstr "Trabajo planificado actualmente"
 
-#: arbeitszeit_flask/templates/user/statistics.html:73
+#: arbeitszeit_flask/templates/user/statistics.html:79
 msgid "Available work certificates"
 msgstr "Certificados de trabajo disponibles"
 
-#: arbeitszeit_flask/templates/user/statistics.html:74
+#: arbeitszeit_flask/templates/user/statistics.html:80
 msgid "Available product (no public products)"
 msgstr "Producto disponible (sin productos públicos)"
 
@@ -1522,8 +1553,8 @@ msgid ""
 "Hello %(coordinator)s,<br>A company wants to be part of a cooperation that "
 "you are coordinating. Please check the request in the Arbeitszeitapp."
 msgstr ""
-"Hola %(coordinator)s,<br>Una empresa quiere ser parte de una cooperación que "
-"estás coordinando. Por favor, revisa la solicitud en la Arbeitszeitapp."
+"Hola %(coordinator)s,<br>Una empresa quiere ser parte de una cooperación "
+"que estás coordinando. Por favor, revisa la solicitud en la Arbeitszeitapp."
 
 #: arbeitszeit_web/email/email_change_confirmation_presenter.py:24
 #: arbeitszeit_web/email/email_change_warning_view.py:20
@@ -1553,9 +1584,9 @@ msgid ""
 "cooperation '%(cooperation)s'. Please follow this link to check the request"
 " in the Arbeitszeitapp: <a href='%(url)s'>LINK</a>."
 msgstr ""
-"Hola %(candidate)s,<br>Se te pide que seas el coordinador de la cooperación "
-"'%(cooperation)s'. Por favor, sigue este enlace para revisar la solicitud en "
-"la Arbeitszeitapp: <a href='%(url)s'>ENLACE</a>."
+"Hola %(candidate)s,<br>Se te pide que seas el coordinador de la cooperación"
+" '%(cooperation)s'. Por favor, sigue este enlace para revisar la solicitud "
+"en la Arbeitszeitapp: <a href='%(url)s'>ENLACE</a>."
 
 #: arbeitszeit_web/formatters/plan_details_formatter.py:48
 #: arbeitszeit_web/www/presenters/get_company_summary_presenter.py:131
@@ -1617,6 +1648,42 @@ msgstr "Esto no es un número entero."
 msgid "Must be a number larger than zero."
 msgstr "Debe ser un número mayor que cero."
 
+#: arbeitszeit_web/www/controllers/change_user_email_address_controller.py:27
+msgid "Email address remains unchanged."
+msgstr "La dirección de correo electrónico no cambia."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:21
+msgid "The product name field cannot be empty."
+msgstr "El campo del nombre del producto no puede estar vacío."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:27
+msgid "The description field cannot be empty."
+msgstr "El campo de descripción no puede estar vacío."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:33
+msgid "The smallest delivery unit field cannot be empty."
+msgstr "El campo de la unidad de entrega más pequeña no puede estar vacío."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:43
+msgid "At least one of the costs fields must be a positive number of hours."
+msgstr "Al menos uno de los campos de costes debe ser un número positivo de horas."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:51
+msgid "The product amount planned cannot be 0."
+msgstr "La cantidad de producto planificada no puede ser 0."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:56
+msgid "The planned product amount cannot be negative."
+msgstr "La cantidad de producto planificada no puede ser negativa."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:64
+msgid "The planning timeframe cannot be 0 days."
+msgstr "El marco de tiempo de planificación no puede ser de 0 días."
+
+#: arbeitszeit_web/www/controllers/edit_draft_controller.py:69
+msgid "The planning timeframe cannot be a negative number of days."
+msgstr "El marco de tiempo de planificación no puede ser un número negativo de días."
+
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:30
 msgid "Plan ID is invalid."
 msgstr "El ID del plan no es válido."
@@ -1629,12 +1696,34 @@ msgstr "ID de plan no válido."
 msgid "Invalid cooperation ID."
 msgstr "ID de cooperación no válido."
 
+#: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:21
+msgid "Cooperation request has been accepted."
+msgstr "Solicitud de cooperación aceptada."
+
+#: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:29
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:217
+msgid "Plan or cooperation not found."
+msgstr "Plan o cooperación no encontrada."
+
+#: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:37
+msgid "Something's wrong with that plan."
+msgstr "Algo está mal con ese plan."
+
+#: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:44
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:224
+msgid "This cooperation request does not exist."
+msgstr "Esta solicitud de cooperación no existe."
+
+#: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:51
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:231
+msgid "You are not coordinator of this cooperation."
+msgstr "No eres el coordinador de esta cooperación."
+
 #: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:40
 msgid ""
 "Successfully accepted the request. You are now coordinator of the "
 "cooperation."
-msgstr ""
-"Solicitud aceptada con éxito. Ahora eres el coordinador de la cooperación."
+msgstr "Solicitud aceptada con éxito. Ahora eres el coordinador de la cooperación."
 
 #: arbeitszeit_web/www/presenters/accept_coordination_transfer_presenter.py:59
 msgid "Transfer request not found."
@@ -1669,6 +1758,18 @@ msgstr "Plan aprobado con éxito"
 #: arbeitszeit_web/www/presenters/approve_plan_presenter.py:28
 msgid "Plan approval failed"
 msgstr "La aprobación del plan falló"
+
+#: arbeitszeit_web/www/presenters/change_user_email_address_presenter.py:25
+msgid ""
+"Something went wrong. Perhaps the email address is not valid or already in "
+"use."
+msgstr ""
+"Algo salió mal. Quizás la dirección de correo electrónico no es válida o ya"
+" está en uso."
+
+#: arbeitszeit_web/www/presenters/change_user_email_address_presenter.py:32
+msgid "Email address changed successfully."
+msgstr "Dirección de correo electrónico cambiada con éxito."
 
 #: arbeitszeit_web/www/presenters/create_cooperation_presenter.py:24
 msgid "Successfully created cooperation."
@@ -1769,7 +1870,7 @@ msgid "Closed"
 msgstr "Cerrado"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:41
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:66
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:62
 #: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:60
 msgid "Consumption"
 msgstr "Consumo"
@@ -1779,9 +1880,9 @@ msgid "Wages"
 msgstr "Salarios"
 
 #: arbeitszeit_web/www/presenters/get_member_dashboard_presenter.py:64
-#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:44
-#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:47
-#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:50
+#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:45
+#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:48
+#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:51
 #, python-format
 msgid "%(num).2f hours"
 msgstr "%(num).2f horas"
@@ -1796,7 +1897,7 @@ msgstr "¡Bienvenido/a, %s!"
 msgid "Company %(company)s has invited you!"
 msgstr "¡La empresa %(company)s te ha invitado!"
 
-#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:41
+#: arbeitszeit_web/www/presenters/get_statistics_presenter.py:42
 #, python-format
 msgid "%(num).2f days"
 msgstr "%(num).2f días"
@@ -1825,7 +1926,9 @@ msgstr "Contraseña incorrecta"
 
 #: arbeitszeit_web/www/presenters/log_in_accountant_presenter.py:34
 msgid "This email address does not belong to a registered accountant"
-msgstr "Esta dirección de correo electrónico no pertenece a un/a contable registrado/a"
+msgstr ""
+"Esta dirección de correo electrónico no pertenece a un/a contable "
+"registrado/a"
 
 #: arbeitszeit_web/www/presenters/log_in_company_presenter.py:41
 msgid "Password is incorrect"
@@ -1837,7 +1940,9 @@ msgstr "La dirección de correo electrónico no es correcta. ¿Ya estás registr
 
 #: arbeitszeit_web/www/presenters/log_in_member_presenter.py:40
 msgid "Email address incorrect. Are you already registered as a member?"
-msgstr "La dirección de correo electrónico es incorrecta. ¿Ya estás registrado/a como miembro?"
+msgstr ""
+"La dirección de correo electrónico es incorrecta. ¿Ya estás registrado/a "
+"como miembro?"
 
 #: arbeitszeit_web/www/presenters/query_companies_presenter.py:46
 msgid "No results"
@@ -1890,8 +1995,8 @@ msgid ""
 "The specified plan has been expired. Please contact the selling company to "
 "provide you with an up-to-date plan ID."
 msgstr ""
-"El plan especificado ha caducado. Por favor, contacta a la empresa vendedora "
-"para que te proporcione un ID de plan actualizado."
+"El plan especificado ha caducado. Por favor, contacta a la empresa "
+"vendedora para que te proporcione un ID de plan actualizado."
 
 #: arbeitszeit_web/www/presenters/register_private_consumption_presenter.py:39
 msgid "You do not have enough work certificates."
@@ -1981,13 +2086,29 @@ msgstr "El candidato ya es el coordinador."
 
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:73
 msgid "Request has not been sent. You have a pending transfer request."
-msgstr "La solicitud no ha sido enviada. Tienes una solicitud de transferencia pendiente."
+msgstr ""
+"La solicitud no ha sido enviada. Tienes una solicitud de transferencia "
+"pendiente."
 
-#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:30
-msgid "The email address seems to be invalid or already taken."
-msgstr "La dirección de correo electrónico parece ser inválida o ya está en uso."
+#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:34
+msgid "The email address seems to be invalid."
+msgstr "La dirección de correo electrónico parece ser inválida."
 
-#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:36
+#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:43
+msgid "The email address seems to be already taken."
+msgstr "La dirección de correo electrónico parece estar ya en uso."
+
+#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:51
+msgid "The password is incorrect."
+msgstr "La contraseña es incorrecta."
+
+#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:58
+msgid "A confirmation mail has been sent to your new email address."
+msgstr ""
+"Se ha enviado un correo de confirmación a tu nueva dirección de correo "
+"electrónico."
+
+#: arbeitszeit_web/www/presenters/request_email_address_change_presenter.py:65
 msgid "Your request for an email address change was rejected."
 msgstr "Tu solicitud de cambio de dirección de correo electrónico fue rechazada."
 
@@ -2004,7 +2125,7 @@ msgid "Payment"
 msgstr "Pago"
 
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:62
-#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:69
+#: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:65
 #: arbeitszeit_web/www/presenters/show_r_account_details_presenter.py:63
 msgid "Credit"
 msgstr "Crédito"
@@ -2015,45 +2136,22 @@ msgid ""
 "The company \"%(company_name)s\" invites you to join them. Do you want to "
 "accept this invitation?"
 msgstr ""
-"La empresa \"%(company_name)s\" te invita a unirte a ellos. ¿Quieres aceptar "
-"esta invitación?"
+"La empresa \"%(company_name)s\" te invita a unirte a ellos. ¿Quieres "
+"aceptar esta invitación?"
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:211
-msgid "Cooperation request has been accepted."
-msgstr "Solicitud de cooperación aceptada."
-
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:220
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:264
-msgid "Plan or cooperation not found."
-msgstr "Plan o cooperación no encontrada."
-
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:229
-msgid "Something's wrong with that plan."
-msgstr "Algo está mal con ese plan."
-
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:236
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:271
-msgid "This cooperation request does not exist."
-msgstr "Esta solicitud de cooperación no existe."
-
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:243
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:278
-msgid "You are not coordinator of this cooperation."
-msgstr "No eres el coordinador de esta cooperación."
-
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:255
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:208
 msgid "Cooperation request has been denied."
 msgstr "Solicitud de cooperación denegada."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:286
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:239
 msgid "Could not deny cooperation"
 msgstr "No se pudo denegar la cooperación"
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:294
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:247
 msgid "Cooperation request has been canceled."
 msgstr "Solicitud de cooperación cancelada."
 
-#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:298
+#: arbeitszeit_web/www/presenters/show_my_cooperations_presenter.py:251
 msgid "Error: Not possible to cancel request."
 msgstr "Error: No es posible cancelar la solicitud."
 
@@ -2068,3 +2166,16 @@ msgstr "Venta"
 #: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:114
 msgid "Anonymous worker"
 msgstr "Trabajador/a anónimo/a"
+
+#~ msgid "Your workplace"
+#~ msgstr "Tu lugar de trabajo"
+
+#~ msgid "Sum of planned fixed means of production:"
+#~ msgstr "Suma de medios de producción fijos planificados:"
+
+#~ msgid "Sum of consumed fixed means of production:"
+#~ msgstr "Suma de medios de producción fijos consumidos:"
+
+#~ msgid "The email address seems to be invalid or already taken."
+#~ msgstr "La dirección de correo electrónico parece ser inválida o ya está en uso."
+
