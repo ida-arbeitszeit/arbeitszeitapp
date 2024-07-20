@@ -1,6 +1,8 @@
 from uuid import UUID
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint
+from flask import Response as FlaskResponse
+from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
@@ -117,7 +119,9 @@ def login_member(
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
         else:
-            render_template("auth/login_member.html", form=login_form)
+            return FlaskResponse(
+                render_template("auth/login_member.html", form=login_form), status=401
+            )
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_member():
@@ -175,7 +179,9 @@ def login_company(
         )
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
-        return render_template("auth/login_company.html", form=login_form)
+        return FlaskResponse(
+            render_template("auth/login_company.html", form=login_form), status=401
+        )
 
     if current_user.is_authenticated:
         if flask_session.is_logged_in_as_company():
@@ -247,6 +253,9 @@ def login_accountant(
         )
         if view_model.redirect_url is not None:
             return redirect(view_model.redirect_url)
+        return FlaskResponse(
+            render_template("auth/login_accountant.html", form=form), status=401
+        )
     return render_template("auth/login_accountant.html", form=form)
 
 
