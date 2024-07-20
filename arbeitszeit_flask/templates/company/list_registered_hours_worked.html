@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Registered working hours") }}</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="section has-text-centered">
+    <h1 class="title">
+        {{ gettext("Registered working hours") }}
+    </h1>
+</div>
+
+{% for record in view_model.registered_hours_worked %}
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            <p>
+                <div>{{ record.registered_on }}</div>
+                <div>{{ record.worker_name }} ({{ record.worker_id }})</div>
+                <div>{{ record.hours }}</div>
+            </p>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

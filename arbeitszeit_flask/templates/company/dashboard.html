@@ -121,6 +121,13 @@
             <div class="subtitle is-6">{{ gettext("Members of your collective") }}</div>
           </a>
         </li>
+        <li class="cell box has-background-primary-light mb-0">
+          <a href="{{ url_for('main_company.list_registered_hours_worked') }}">
+            <h1 class="title is-5"><span class="icon">{{ "list"|icon }}</span> {{
+              gettext("Hours worked") }}</h1>
+            <div class="subtitle is-6">{{ gettext("Your registered working hours") }}</div>
+          </a>
+        </li>
       </ul>
     </div>
     <div class="has-text-centered py-5">

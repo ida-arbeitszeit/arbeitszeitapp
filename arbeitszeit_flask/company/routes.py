@@ -55,6 +55,9 @@ from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationVie
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.draft_details_view import DraftDetailsView
 from arbeitszeit_flask.views.http_error_view import http_404
+from arbeitszeit_flask.views.list_registered_hours_worked_view import (
+    ListRegisteredHoursWorkedView,
+)
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
@@ -342,3 +345,8 @@ class end_cooperation(EndCooperationView): ...
 @CompanyRoute("/review_registered_consumptions")
 @as_flask_view()
 class review_registered_consumptions(ReviewRegisteredConsumptionsView): ...
+
+
+@CompanyRoute("/list_registered_hours_worked")
+@as_flask_view()
+class list_registered_hours_worked(ListRegisteredHoursWorkedView): ...
