@@ -25,7 +25,7 @@
 
           {% if view_model.show_workplace_registration_info %}
           <div>
-            <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+            <span class="icon">{{ "exclamation-triangle"|icon }}</span>
             <p>
               {{ gettext("You are not registered with any company. Tell your company your member ID so that they register you.") }}
             </p>
@@ -56,21 +56,21 @@
       <ul class="grid">
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_member.register_private_consumption') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "file-circle-plus"|icon }}</span> {{
               gettext("Private consumption") }}</h1>
             <div class="subtitle"></div>
           </a>
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_member.my_account') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "industry"|icon }}</span> {{
               gettext("My account") }}
             </h1>
           </a>
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_member.consumptions') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "file"|icon }}</span>
               {{ gettext("My consumptions") }}
             </h1>
           </a>
@@ -104,7 +104,7 @@
       <ul class="grid">
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.statistics') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "chart-pie"|icon }}</span> {{
               gettext("Global statistics") }}
             </h1>
             <div class="subtitle"></div>
@@ -112,14 +112,14 @@
         </li>
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.query_plans') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "file"|icon }}</span>
               {{ gettext("All plans") }}</h1>
             <div class="subtitle"></div>
           </a>  
         </li>
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.query_companies') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "industry"|icon }}</span>
               {{ gettext("All companies") }}</h1>
             <div class="subtitle"></div>
           </a>

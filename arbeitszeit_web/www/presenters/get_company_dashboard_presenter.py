@@ -75,7 +75,7 @@ class GetCompanyDashboardPresenter:
         return self.Tile(
             title=self.translator.gettext("Accounts"),
             subtitle=self.translator.gettext("You have four accounts"),
-            icon="fas fa-chart-line",
+            icon="chart-line",
             url=self.url_index.get_company_accounts_url(
                 company_id=use_case_response.company_info.id
             ),

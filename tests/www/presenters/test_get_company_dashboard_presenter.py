@@ -144,7 +144,7 @@ class CompanyDashboardTileTests(CompanyDashboardBaseTestCase):
 
     def test_accounts_tile_has_correct_icon(self) -> None:
         view_model = self.presenter.present(self.get_use_case_response())
-        self.assertEqual(view_model.accounts_tile.icon, "fas fa-chart-line")
+        self.assertEqual(view_model.accounts_tile.icon, "chart-line")
 
     def test_accounts_tile_has_url_that_leads_to_accounts_of_company_from_use_case_response(
         self,

@@ -16,7 +16,7 @@
           <div class="content">
             {% if not view_model.has_workers %}
             <div class="block pt-3">
-              <span class="icon"><i class="fas fa-exclamation-triangle"></i></span><br>
+              <span class="icon">{{ "exclamation-triangle"|icon }}</span><br>
               <a href="{{ url_for('main_company.invite_worker_to_company') }}">
                 {{ gettext("No workers are registered with your company. Click here to add some.")
                 }}
@@ -38,7 +38,7 @@
         <li class="cell box has-background-danger-light mb-0">
           <a href="{{ url_for('main_company.create_draft') }}">
             <h1 class="title is-5">
-              <span class="icon"><i class="fa-solid fa-file-circle-plus"></i></span>
+              <span class="icon">{{ "file-circle-plus"|icon }}</span>
               {{ gettext("Create new plan") }}
             </h1>
             <div class="subtitle"></div>
@@ -46,14 +46,14 @@
         </li>
         <li class="cell box has-background-danger-light mb-0">
           <a href="{{ url_for('main_company.register_productive_consumption') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "credit-card"|icon }}</i></span>
               {{ gettext("Register productive consumption") }}</h1>
             <div class="subtitle"></div>
           </a>
         </li>
         <li class="cell box has-background-danger-light mb-0">
           <a href="{{ url_for('main_company.register_hours_worked') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-regular fa-credit-card"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "credit-card"|icon }}</i></span>
               {{ gettext("Register hours worked") }}</h1>
             <div class="subtitle"></div>
           </a>
@@ -67,7 +67,7 @@
       <ul class="grid">
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_user.company_summary', company_id=current_user.id) }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "industry"|icon }}</span> {{
               gettext("Company") }}
             </h1>
             <div class="subtitle is-6">{{ gettext("Your company") }} "{{ view_model.company_name }}"</div>
@@ -75,7 +75,7 @@
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_company.my_plans') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span> {{ gettext("Plans")
+            <h1 class="title is-5"><span class="icon">{{ "file"|icon }}</span> {{ gettext("Plans")
               }}
             </h1>
             <div class="subtitle is-6">{{ gettext("Your plans") }}</div>
@@ -84,7 +84,7 @@
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ view_model.accounts_tile.url }}">
             <h1 class="title is-5">
-              <span class="icon"><i class="{{ view_model.accounts_tile.icon }}"></i></span>
+              <span class="icon">{{ view_model.accounts_tile.icon|icon }}</i></span>
               {{ view_model.accounts_tile.title }}
             </h1>
             <div class="subtitle is-6">{{ view_model.accounts_tile.subtitle }}</div>
@@ -92,7 +92,7 @@
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_company.my_cooperations') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "hands-helping"|icon }}</span> {{
               gettext("Cooperations") }}
             </h1>
             <div class="subtitle is-6">{{ gettext("Your cooperations") }}</div>
@@ -100,7 +100,7 @@
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_company.my_consumptions') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-basket-shopping"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "basket-shopping"|icon }}</i></span> {{
               gettext("Consumptions") }}
             </h1>
             <div class="subtitle is-6">{{ gettext("Your consumptions") }}</div>
@@ -108,7 +108,7 @@
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_company.review_registered_consumptions') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-exchange"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "exchange-alt"|icon }}</i></span> {{
               gettext("Product transfers") }}
             </h1>
             <div class="subtitle is-6">{{ gettext("Your product transfers") }}</div>
@@ -116,7 +116,7 @@
         </li>
         <li class="cell box has-background-primary-light mb-0">
           <a href="{{ url_for('main_company.invite_worker_to_company') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-users"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "users"|icon }}</span> {{
               gettext("Workers") }}</h1>
             <div class="subtitle is-6">{{ gettext("Members of your collective") }}</div>
           </a>
@@ -148,7 +148,7 @@
       <ul class="grid">
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.statistics') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fa-solid fa-chart-pie"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "chart-pie"|icon }}</span> {{
               gettext("Global statistics") }}
             </h1>
             <div class="subtitle"></div>
@@ -156,21 +156,21 @@
         </li>
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.query_companies') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-industry"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "industry"|icon }}</span>
               {{ gettext("All companies") }}</h1>
             <div class="subtitle"></div>
           </a>
         </li>
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.query_plans') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-file"></i></span>
+            <h1 class="title is-5"><span class="icon">{{ "file"|icon }}</span>
               {{ gettext("All plans") }}</h1>
             <div class="subtitle"></div>
           </a>
         </li>
         <li class="cell box has-background-warning-light mb-0">
           <a href="{{ url_for('main_user.list_all_cooperations') }}">
-            <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span> {{
+            <h1 class="title is-5"><span class="icon">{{ "hands-helping"|icon }}</span> {{
               gettext("All cooperations") }}
             </h1>
             <div class="subtitle"></div>

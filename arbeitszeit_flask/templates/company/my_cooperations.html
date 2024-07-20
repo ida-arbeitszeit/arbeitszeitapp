@@ -16,7 +16,7 @@
         <div class="tile is-parent"></div>
         <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
             <div class="tile is-child box has-background-primary-light">
-                <h1 class="title is-5"><span class="icon"><i class="fas fa-hands-helping"></i></span>
+                <h1 class="title is-5"><span class="icon">{{ "hands-helping"|icon }}</span>
                     {{ gettext("Create cooperation ") }}</h1>
                 <div class="subtitle"></div>
             </div>
@@ -94,10 +94,10 @@
               <form action="" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="content pt-1">
-                  <button class="button large-button is-danger" name="deny" 
-                          value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Decline') }}">
-                    <i class="fas fa-times"></i>
-                  </button>
+                    <button class="button large-button is-danger" name="deny" 
+                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Decline') }}">
+                        {{ "times"|icon }}
+                    </button>
                 </div>
               </form>                
             </div>
@@ -140,7 +140,7 @@
                     <div class="content pt-1">
                         <button class="button large-button is-danger" name="cancel" 
                             value="{{ req.plan_id }}" type="submit" title="{{ gettext('Cancel') }}">
-                            <i class="fas fa-times"></i>
+                            {{ "times"|icon }}
                         </button>
                     </div>
                     </form>
