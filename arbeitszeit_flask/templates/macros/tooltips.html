@@ -1,23 +1,22 @@
 {% macro info_tooltip(id, text) %}
 <div class="dropdown is-right">
-    <div class="dropdown-trigger">
-        <span class="icon" aria-haspopup="true" aria-controls="{{ id }}">
-            <i class="fa-solid fa-info-circle">
-                <span class="icon is-small">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                </span>
-            </i>
+    <button
+        class="dropdown-trigger"
+        aria-haspopup="true"
+        aria-controls="{{ id }}"
+        aria-describedby="{{ id }}"
+        role="tooltip"
+        >
+        <span class="icon">
+            {{ "info-circle"|icon(attrs={"width": "16px", "height": "16px"}) }}
         </span>
-    </div>
+    </button>
     <div class="dropdown-menu" id="{{ id }}" role="menu">
         <div class="dropdown-content">
-            <div class="dropdown-item has-text-left is-size-6">
-                <p>
-                    {{ text }}
-                </p>
-            </div>
+            <p class="dropdown-item has-text-left is-size-6">
+                {{ text }}
+            </p>
         </div>
     </div>
 </div>
-
 {% endmacro %}

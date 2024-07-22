@@ -43,7 +43,7 @@ class IntegrationTests(ViewTestCase):
         provider = self.company_generator.create_company()
         self.register_private_consumption(provider=provider)
         response = self.client.get(self.create_url(account_owner=provider))
-        assert "fa-user" in response.text
+        assert 'data-icon="user"' in response.text
 
     def test_the_industry_icon_appears_in_html_if_productive_consumption_was_registered(
         self,
@@ -52,7 +52,7 @@ class IntegrationTests(ViewTestCase):
         provider = self.company_generator.create_company()
         self.register_productive_consumption(provider=provider)
         response = self.client.get(self.create_url(account_owner=provider))
-        assert "fa-industry" in response.text
+        assert 'data-icon="industry"' in response.text
 
     def register_private_consumption(self, provider: UUID) -> None:
         plan = self.plan_generator.create_plan(planner=provider)
