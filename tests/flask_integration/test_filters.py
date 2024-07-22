@@ -12,10 +12,6 @@ class IconFilterUnitTests(unittest.TestCase):
         super().setUp()
         self.mock_file_reader = Mock()
 
-    def tearDown(self):
-        del self.mock_file_reader
-        super().tearDown()
-
     def test_that_icon_filter_returns_empty_string_for_empty_icon_name(
         self,
     ):
@@ -156,7 +152,7 @@ class IconFilterUnitTests(unittest.TestCase):
 
 
 class IconFilterIntegrationTest(ViewTestCase):
-    def test_that_icon_filter_return_the_in_the_login_form_present_key_icon_correctly(
+    def test_that_icon_filter_renders_a_valid_key_icon_svg_element_in_the_login_form_on_page_load(
         self,
     ):
         response = self.client.get("/login-member")
