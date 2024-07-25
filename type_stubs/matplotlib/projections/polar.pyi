@@ -14,8 +14,8 @@ class PolarTransform(mtransforms.Transform):
         self,
         axis: Incomplete | None = None,
         use_rmin: bool = True,
-        _apply_theta_transforms: bool = True,
         *,
+        apply_theta_transforms: bool = True,
         scale_transform: Incomplete | None = None,
     ) -> None: ...
     def transform_non_affine(self, values): ...
@@ -33,7 +33,8 @@ class InvertedPolarTransform(mtransforms.Transform):
         self,
         axis: Incomplete | None = None,
         use_rmin: bool = True,
-        _apply_theta_transforms: bool = True,
+        *,
+        apply_theta_transforms: bool = True,
     ) -> None: ...
     def transform_non_affine(self, values): ...
     def inverted(self): ...

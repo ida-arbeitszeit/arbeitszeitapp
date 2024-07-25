@@ -1,4 +1,5 @@
 from _typeshed import Incomplete
+from matplotlib import cbook as cbook
 from matplotlib import colors as colors
 from matplotlib import offsetbox as offsetbox
 from matplotlib.artist import Artist as Artist
@@ -102,7 +103,6 @@ class Legend(Artist):
         ncol: int = 1,
         draggable: bool = False,
     ) -> None: ...
-    legendHandles: Incomplete
     def set_loc(self, loc: Incomplete | None = None) -> None: ...
     def set_ncols(self, ncols) -> None: ...
     stale: bool

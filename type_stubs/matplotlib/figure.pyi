@@ -9,6 +9,7 @@ from matplotlib.backend_bases import FigureCanvasBase as FigureCanvasBase
 from matplotlib.backend_bases import MouseButton as MouseButton
 from matplotlib.backend_bases import NonGuiException as NonGuiException
 from matplotlib.gridspec import GridSpec as GridSpec
+from matplotlib.gridspec import SubplotParams as SubplotParams
 from matplotlib.layout_engine import ConstrainedLayoutEngine as ConstrainedLayoutEngine
 from matplotlib.layout_engine import LayoutEngine as LayoutEngine
 from matplotlib.layout_engine import PlaceHolderLayoutEngine as PlaceHolderLayoutEngine
@@ -27,32 +28,6 @@ class _AxesStack:
     def bubble(self, a) -> None: ...
     def add(self, a) -> None: ...
     def current(self): ...
-
-class SubplotParams:
-    def __init__(
-        self,
-        left: Incomplete | None = None,
-        bottom: Incomplete | None = None,
-        right: Incomplete | None = None,
-        top: Incomplete | None = None,
-        wspace: Incomplete | None = None,
-        hspace: Incomplete | None = None,
-    ) -> None: ...
-    left: Incomplete
-    right: Incomplete
-    bottom: Incomplete
-    top: Incomplete
-    wspace: Incomplete
-    hspace: Incomplete
-    def update(
-        self,
-        left: Incomplete | None = None,
-        bottom: Incomplete | None = None,
-        right: Incomplete | None = None,
-        top: Incomplete | None = None,
-        wspace: Incomplete | None = None,
-        hspace: Incomplete | None = None,
-    ) -> None: ...
 
 class FigureBase(Artist):
     artists: Incomplete
@@ -130,6 +105,7 @@ class FigureBase(Artist):
     ) -> None: ...
     def align_xlabels(self, axs: Incomplete | None = None) -> None: ...
     def align_ylabels(self, axs: Incomplete | None = None) -> None: ...
+    def align_titles(self, axs: Incomplete | None = None) -> None: ...
     def align_labels(self, axs: Incomplete | None = None) -> None: ...
     def add_gridspec(self, nrows: int = 1, ncols: int = 1, **kwargs): ...
     def subfigures(

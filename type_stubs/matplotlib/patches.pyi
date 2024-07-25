@@ -182,6 +182,14 @@ class Arrow(Patch):
     def __init__(self, x, y, dx, dy, *, width: float = 1.0, **kwargs) -> None: ...
     def get_path(self): ...
     def get_patch_transform(self): ...
+    def set_data(
+        self,
+        x: Incomplete | None = None,
+        y: Incomplete | None = None,
+        dx: Incomplete | None = None,
+        dy: Incomplete | None = None,
+        width: Incomplete | None = None,
+    ) -> None: ...
 
 class FancyArrow(Polygon):
     def __init__(
@@ -358,9 +366,6 @@ class BoxStyle(_Style):
 
 class ConnectionStyle(_Style):
     class _Base:
-        class SimpleEvent:
-            def __init__(self, xy) -> None: ...
-
         def __call__(
             self,
             posA,

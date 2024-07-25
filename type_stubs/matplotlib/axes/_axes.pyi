@@ -1,4 +1,3 @@
-import matplotlib.table as mtable
 from _typeshed import Incomplete
 from matplotlib.axes._base import _AxesBase
 from matplotlib.axes._secondary_axes import SecondaryAxis as SecondaryAxis
@@ -40,10 +39,20 @@ class Axes(_AxesBase):
     ): ...
     def indicate_inset_zoom(self, inset_ax, **kwargs): ...
     def secondary_xaxis(
-        self, location, *, functions: Incomplete | None = None, **kwargs
+        self,
+        location,
+        *,
+        functions: Incomplete | None = None,
+        transform: Incomplete | None = None,
+        **kwargs,
     ): ...
     def secondary_yaxis(
-        self, location, *, functions: Incomplete | None = None, **kwargs
+        self,
+        location,
+        *,
+        functions: Incomplete | None = None,
+        transform: Incomplete | None = None,
+        **kwargs,
     ): ...
     def text(self, x, y, s, fontdict: Incomplete | None = None, **kwargs): ...
     def annotate(
@@ -238,7 +247,7 @@ class Axes(_AxesBase):
         showbox: Incomplete | None = None,
         showfliers: Incomplete | None = None,
         boxprops: Incomplete | None = None,
-        labels: Incomplete | None = None,
+        tick_labels: Incomplete | None = None,
         flierprops: Incomplete | None = None,
         medianprops: Incomplete | None = None,
         meanprops: Incomplete | None = None,
@@ -248,6 +257,7 @@ class Axes(_AxesBase):
         autorange: bool = False,
         zorder: Incomplete | None = None,
         capwidths: Incomplete | None = None,
+        label: Incomplete | None = None,
     ): ...
     def bxp(
         self,
@@ -271,6 +281,7 @@ class Axes(_AxesBase):
         manage_ticks: bool = True,
         zorder: Incomplete | None = None,
         capwidths: Incomplete | None = None,
+        label: Incomplete | None = None,
     ): ...
     def scatter(
         self,
@@ -566,6 +577,7 @@ class Axes(_AxesBase):
         quantiles: Incomplete | None = None,
         points: int = 100,
         bw_method: Incomplete | None = None,
+        side: str = "both",
     ): ...
     def violin(
         self,
@@ -576,8 +588,9 @@ class Axes(_AxesBase):
         showmeans: bool = False,
         showextrema: bool = True,
         showmedians: bool = False,
+        side: str = "both",
     ): ...
-    table = mtable.table
+    table: Incomplete
     stackplot: Incomplete
     streamplot: Incomplete
     tricontour: Incomplete

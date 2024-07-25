@@ -19,7 +19,7 @@ class Cell(Rectangle):
         facecolor: str = "w",
         fill: bool = True,
         text: str = "",
-        loc: Incomplete | None = None,
+        loc: str = "right",
         fontproperties: Incomplete | None = None,
         visible_edges: str = "closed",
     ) -> None: ...

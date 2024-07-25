@@ -8,6 +8,7 @@ def stackplot(
     *args,
     labels=(),
     colors: Incomplete | None = None,
+    hatch: Incomplete | None = None,
     baseline: str = "zero",
     **kwargs,
 ): ...

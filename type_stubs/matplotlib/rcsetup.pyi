@@ -7,13 +7,19 @@ from matplotlib._enums import JoinStyle as JoinStyle
 from matplotlib._fontconfig_pattern import (
     parse_fontconfig_pattern as parse_fontconfig_pattern,
 )
+from matplotlib.backends import BackendFilter as BackendFilter
+from matplotlib.backends import backend_registry as backend_registry
 from matplotlib.cbook import ls_mapper as ls_mapper
 from matplotlib.colors import Colormap as Colormap
 from matplotlib.colors import is_color_like as is_color_like
 
-interactive_bk: Incomplete
-non_interactive_bk: Incomplete
-all_backends: Incomplete
+class __getattr__:
+    @property
+    def interactive_bk(self): ...
+    @property
+    def non_interactive_bk(self): ...
+    @property
+    def all_backends(self): ...
 
 class ValidateInStrings:
     key: Incomplete

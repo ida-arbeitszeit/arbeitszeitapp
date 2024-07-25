@@ -17,9 +17,10 @@ from matplotlib.backend_bases import ToolContainerBase as ToolContainerBase
 from matplotlib.backend_bases import _Backend
 from matplotlib.backend_bases import cursors as cursors
 
+from ._tkagg import TK_PHOTO_COMPOSITE_OVERLAY as TK_PHOTO_COMPOSITE_OVERLAY
+from ._tkagg import TK_PHOTO_COMPOSITE_SET as TK_PHOTO_COMPOSITE_SET
+
 cursord: Incomplete
-TK_PHOTO_COMPOSITE_OVERLAY: int
-TK_PHOTO_COMPOSITE_SET: int
 
 def blit(photoimage, aggimage, offsets, bbox: Incomplete | None = None) -> None: ...
 
@@ -79,17 +80,7 @@ class NavigationToolbar2Tk(NavigationToolbar2, tk.Frame):
     def save_figure(self, *args) -> None: ...
     def set_history_buttons(self) -> None: ...
 
-class ToolTip:
-    @staticmethod
-    def createToolTip(widget, text) -> None: ...
-    widget: Incomplete
-    tipwindow: Incomplete
-    id: Incomplete
-    x: int
-    def __init__(self, widget) -> None: ...
-    text: Incomplete
-    def showtip(self, text) -> None: ...
-    def hidetip(self) -> None: ...
+def add_tooltip(widget, text) -> None: ...
 
 class RubberbandTk(backend_tools.RubberbandBase):
     def draw_rubberband(self, x0, y0, x1, y1) -> None: ...

@@ -7,7 +7,6 @@ from . import colors as colors
 from . import ticker as ticker
 from . import transforms as transforms
 from .lines import Line2D as Line2D
-from .patches import Circle as Circle
 from .patches import Ellipse as Ellipse
 from .patches import Polygon as Polygon
 from .patches import Rectangle as Rectangle
@@ -95,6 +94,7 @@ class Slider(SliderBase):
         label,
         valmin,
         valmax,
+        *,
         valinit: float = 0.5,
         valfmt: Incomplete | None = None,
         closedmin: bool = True,
@@ -104,7 +104,6 @@ class Slider(SliderBase):
         dragging: bool = True,
         valstep: Incomplete | None = None,
         orientation: str = "horizontal",
-        *,
         initcolor: str = "r",
         track_color: str = "lightgrey",
         handle_style: Incomplete | None = None,
@@ -126,6 +125,7 @@ class RangeSlider(SliderBase):
         label,
         valmin,
         valmax,
+        *,
         valinit: Incomplete | None = None,
         valfmt: Incomplete | None = None,
         closedmin: bool = True,
@@ -158,14 +158,12 @@ class CheckButtons(AxesWidget):
     def set_label_props(self, props) -> None: ...
     def set_frame_props(self, props) -> None: ...
     def set_check_props(self, props) -> None: ...
-    def set_active(self, index) -> None: ...
+    def set_active(self, index, state: Incomplete | None = None) -> None: ...
+    def clear(self) -> None: ...
     def get_status(self): ...
+    def get_checked_labels(self): ...
     def on_clicked(self, func): ...
     def disconnect(self, cid) -> None: ...
-    @property
-    def rectangles(self): ...
-    @property
-    def lines(self): ...
 
 class TextBox(AxesWidget):
     label: Incomplete
@@ -180,6 +178,7 @@ class TextBox(AxesWidget):
         ax,
         label,
         initial: str = "",
+        *,
         color: str = ".95",
         hovercolor: str = "1",
         label_pad: float = 0.01,
@@ -188,7 +187,7 @@ class TextBox(AxesWidget):
     @property
     def text(self): ...
     def set_val(self, val) -> None: ...
-    def begin_typing(self, x: Incomplete | None = None) -> None: ...
+    def begin_typing(self) -> None: ...
     def stop_typing(self) -> None: ...
     def on_text_change(self, func): ...
     def on_submit(self, func): ...
@@ -196,6 +195,7 @@ class TextBox(AxesWidget):
 
 class RadioButtons(AxesWidget):
     value_selected: Incomplete
+    index_selected: Incomplete
     labels: Incomplete
     def __init__(
         self,
@@ -215,10 +215,9 @@ class RadioButtons(AxesWidget):
     @activecolor.setter
     def activecolor(self, activecolor) -> None: ...
     def set_active(self, index) -> None: ...
+    def clear(self) -> None: ...
     def on_clicked(self, func): ...
     def disconnect(self, cid) -> None: ...
-    @property
-    def circles(self): ...
 
 class SubplotTool(Widget):
     figure: Incomplete
@@ -238,6 +237,7 @@ class Cursor(AxesWidget):
     def __init__(
         self,
         ax,
+        *,
         horizOn: bool = True,
         vertOn: bool = True,
         useblit: bool = False,
@@ -264,7 +264,6 @@ class MultiCursor(Widget):
         vertOn: bool = True,
         **lineprops,
     ) -> None: ...
-    needclear: Incomplete
     def connect(self) -> None: ...
     def disconnect(self) -> None: ...
     def clear(self, event) -> None: ...
@@ -320,6 +319,7 @@ class SpanSelector(_SelectorWidget):
         ax,
         onselect,
         direction,
+        *,
         minspan: int = 0,
         useblit: bool = False,
         props: Incomplete | None = None,
@@ -352,6 +352,7 @@ class ToolLineHandles:
         ax,
         positions,
         direction,
+        *,
         line_props: Incomplete | None = None,
         useblit: bool = True,
     ) -> None: ...
@@ -374,6 +375,7 @@ class ToolHandles:
         ax,
         x,
         y,
+        *,
         marker: str = "o",
         marker_props: Incomplete | None = None,
         useblit: bool = True,
@@ -440,6 +442,7 @@ class LassoSelector(_SelectorWidget):
         self,
         ax,
         onselect,
+        *,
         useblit: bool = True,
         props: Incomplete | None = None,
         button: Incomplete | None = None,
@@ -451,11 +454,11 @@ class PolygonSelector(_SelectorWidget):
         self,
         ax,
         onselect,
+        *,
         useblit: bool = False,
         props: Incomplete | None = None,
         handle_props: Incomplete | None = None,
         grab_range: int = 10,
-        *,
         draw_bounding_box: bool = False,
         box_handle_props: Incomplete | None = None,
         box_props: Incomplete | None = None,
@@ -472,6 +475,8 @@ class Lasso(AxesWidget):
     verts: Incomplete
     line: Incomplete
     callback: Incomplete
-    def __init__(self, ax, xy, callback, useblit: bool = True) -> None: ...
+    def __init__(
+        self, ax, xy, callback, *, useblit: bool = True, props: Incomplete | None = None
+    ) -> None: ...
     def onrelease(self, event) -> None: ...
     def onmove(self, event) -> None: ...

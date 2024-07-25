@@ -1,7 +1,6 @@
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List
 
 from _typeshed import Incomplete
 from flask_profiler.calendar import Calendar as Calendar
@@ -30,7 +29,7 @@ class Request:
 @dataclass
 class Response:
     request: Request
-    timeseries: Dict[str, List[IntervalMeasurement]]
+    timeseries: dict[str, list[IntervalMeasurement]]
     def __init__(self, request, timeseries) -> None: ...
 
 class Interval(enum.Enum):
