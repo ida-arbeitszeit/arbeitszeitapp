@@ -69,7 +69,7 @@ def icon_filter(
     """
     try:
         # Treat empty icon_name as intentionally set null value
-        if icon_name.strip() == "":
+        if not icon_name.strip():
             return Markup("")
 
         file_name = f"{icon_name}.html"
