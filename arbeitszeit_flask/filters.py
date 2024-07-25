@@ -8,8 +8,8 @@ ICON_PACKAGE = "arbeitszeit_flask.templates.icons"
 
 
 def icon_file_reader(file_name: str) -> str:
-    traversable = resources.files(ICON_PACKAGE).joinpath(file_name)
-    with resources.as_file(traversable) as icon_file:
+    file_path = resources.files(ICON_PACKAGE).joinpath(file_name)
+    with resources.as_file(file_path) as icon_file:
         return icon_file.read_text(encoding="utf-8")
 
 
