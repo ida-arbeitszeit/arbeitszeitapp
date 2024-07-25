@@ -123,16 +123,20 @@ class VersionStringCleaner:
 
 
 class PackageFilter:
-    # Since we use a custom flask-profiler package we need to exclude it from
-    # constraints.txt.  Unfortunately jsonschema packages with nixpkgs is not
-    # officially supported by flask-restx. That's why we exclude it
-    # here. docutils as distributed by nixpkgs is not officially supported by
-    # the current sphinx version.
     PACKAGE_BLACKLIST = {
-        "flask_profiler",
-        "jsonschema",
-        "docutils",
         "arbeitszeitapp",
+        # docutils as distributed by nixpkgs is not officially supported by the
+        # current sphinx version.
+        "docutils",
+        # Flask-Login in nixpkgs is a 0.7 prerelease which is not available on
+        # PyPI at the time of writing this comment.
+        "Flask-Login",
+        # Since we use a custom flask-profiler package we need to exclude it
+        # from constraints.txt.
+        "flask_profiler",
+        # Unfortunately jsonschema packages with nixpkgs is not officially
+        # supported by flask-restx.
+        "jsonschema",
     }
 
     def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:
