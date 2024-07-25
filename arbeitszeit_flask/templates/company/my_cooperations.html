@@ -91,14 +91,15 @@
                         {{ "check"|icon }}
                 </button>
               </form>
-              <form action="" method="post">
+              <form action="/company/deny_cooperation_request" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="content pt-1">
-                    <button class="button large-button is-danger" name="deny" 
-                        value="{{ req.coop_id }},{{ req.plan_id }}" type="submit" title="{{ gettext('Decline') }}">
+                <input type="hidden" name="plan_id" value="{{ req.plan_id }}">
+                <input type="hidden" name="cooperation_id" value="{{ req.coop_id }}">
+                <button class="button large-button is-danger"
+                        type="submit"
+                        title="{{ gettext('Decline') }}">
                         {{ "times"|icon }}
-                    </button>
-                </div>
+                </button>
               </form>                
             </div>
         </article>  

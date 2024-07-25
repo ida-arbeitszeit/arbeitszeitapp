@@ -1,7 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
-from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
@@ -105,7 +104,6 @@ class ShowMyCooperationsPresenter:
         list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
         list_my_cooperating_plans_response: ListMyCooperatingPlansUseCase.Response,
-        deny_cooperation_response: Optional[DenyCooperationResponse] = None,
         cancel_cooperation_solicitation_response: Optional[bool] = None,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
@@ -121,7 +119,6 @@ class ShowMyCooperationsPresenter:
             ]
         )
 
-        self._create_deny_message(deny_cooperation_response)
         self._create_cancel_message(cancel_cooperation_solicitation_response)
 
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
@@ -197,47 +194,6 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
             coop_url=self.url_index.get_coop_summary_url(coop_id=plan.coop_id),
         )
-
-    def _create_deny_message(
-        self, deny_cooperation_response: DenyCooperationResponse | None
-    ) -> None:
-        if not deny_cooperation_response:
-            return
-        if not deny_cooperation_response.is_rejected:
-            self.notifier.display_info(
-                self.translator.gettext("Cooperation request has been denied.")
-            )
-        else:
-            if (
-                deny_cooperation_response
-                == DenyCooperationResponse.RejectionReason.plan_not_found
-                or DenyCooperationResponse.RejectionReason.cooperation_not_found
-            ):
-                self.notifier.display_warning(
-                    self.translator.gettext("Plan or cooperation not found.")
-                )
-            elif (
-                deny_cooperation_response
-                == DenyCooperationResponse.RejectionReason.cooperation_was_not_requested
-            ):
-                self.notifier.display_warning(
-                    self.translator.gettext("This cooperation request does not exist.")
-                )
-            elif (
-                deny_cooperation_response
-                == DenyCooperationResponse.RejectionReason.requester_is_not_coordinator
-            ):
-                self.notifier.display_warning(
-                    self.translator.gettext(
-                        "You are not coordinator of this cooperation."
-                    )
-                )
-            else:
-                # catchall for rejected responses where rejection
-                # reason cannot be handled by presenter.
-                self.notifier.display_warning(
-                    self.translator.gettext("Could not deny cooperation")
-                )
 
     def _create_cancel_message(self, cancel_coop_response: Optional[bool]) -> None:
         if cancel_coop_response is None:
