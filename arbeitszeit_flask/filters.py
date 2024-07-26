@@ -1,19 +1,21 @@
 import os
+from importlib import resources
 from typing import Callable, Dict
 
 from markupsafe import Markup
 
-ICON_PATH = "arbeitszeit_flask/templates/icons"
+ICON_PACKAGE = "arbeitszeit_flask.templates.icons"
 
 
-def file_reader(file_path: str) -> str:
-    with open(file_path, "r") as file:
-        return file.read()
+def icon_file_reader(file_name: str) -> str:
+    file_path = resources.files(ICON_PACKAGE).joinpath(file_name)
+    with resources.as_file(file_path) as icon_file:
+        return icon_file.read_text(encoding="utf-8")
 
 
 def icon_filter(
     icon_name: str,
-    reader: Callable[[str], str] = file_reader,
+    reader: Callable[[str], str] = icon_file_reader,
     attrs: Dict[str, str] = {},
 ) -> Markup:
     """
@@ -67,10 +69,11 @@ def icon_filter(
     """
     try:
         # Treat empty icon_name as intentionally set null value
-        if icon_name.strip() == "":
+        if not icon_name.strip():
             return Markup("")
-        file_path = os.path.join(ICON_PATH, f"{icon_name}.html")
-        svg_content = reader(file_path)
+
+        file_name = f"{icon_name}.html"
+        svg_content = reader(file_name)
 
         if "<svg" not in svg_content:
             if os.getenv("FLASK_DEBUG") == "1":
