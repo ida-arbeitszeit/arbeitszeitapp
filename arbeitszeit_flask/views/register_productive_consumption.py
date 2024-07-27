@@ -26,6 +26,9 @@ class RegisterProductiveConsumptionView:
     @commit_changes
     def GET(self) -> Response:
         form = RegisterProductiveConsumptionForm(request.form)
+        plan_id: str | None = request.args.get("plan_id")
+        if plan_id:
+            form.plan_id_field().set_value(plan_id)
         return FlaskResponse(self._render_template(form), status=200)
 
     @commit_changes
