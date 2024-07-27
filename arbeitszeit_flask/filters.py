@@ -1,4 +1,3 @@
-import os
 from importlib import resources
 from typing import Callable, Dict
 
@@ -76,12 +75,9 @@ def icon_filter(
         svg_content = reader(file_name)
 
         if "<svg" not in svg_content:
-            if os.getenv("FLASK_DEBUG") == "1":
-                raise Exception(
-                    f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
-                )
-            else:
-                return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
+            raise Exception(
+                f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
+            )
 
         default_attributes = {
             "data-icon": icon_name,
@@ -103,12 +99,6 @@ def icon_filter(
 
         return Markup(svg_with_attrs)
     except FileNotFoundError as e:
-        if os.getenv("FLASK_DEBUG") == "1":
-            raise FileNotFoundError(f'Error for "{icon_name}" icon: {str(e)}')
-        else:
-            return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
+        raise FileNotFoundError(f'Error for "{icon_name}" icon: {str(e)}')
     except Exception as e:
-        if os.getenv("FLASK_DEBUG") == "1":
-            raise Exception(f'Exception for "{icon_name}" icon: {str(e)}')
-        else:
-            return Markup(f'<!-- An error for "{icon_name}" icon occurred -->')
+        raise Exception(f'Exception for "{icon_name}" icon: {str(e)}')
