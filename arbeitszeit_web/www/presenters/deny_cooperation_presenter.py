@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -14,6 +15,7 @@ class ViewModel:
 class DenyCooperationPresenter:
     translator: Translator
     notifier: Notifier
+    url_index: UrlIndex
 
     def render_response(
         self, deny_cooperation_response: DenyCooperationResponse
@@ -53,4 +55,4 @@ class DenyCooperationPresenter:
                 self.notifier.display_warning(
                     self.translator.gettext("Could not deny cooperation")
                 )
-        return ViewModel(redirection_url="/company/my_cooperations")
+        return ViewModel(redirection_url=self.url_index.get_my_cooperations_url())
