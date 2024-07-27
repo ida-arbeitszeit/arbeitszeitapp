@@ -12,6 +12,13 @@ class CompanyTests(ViewTestCase):
         response = self.client.get("/company/register_productive_consumption")
         self.assertEqual(response.status_code, 200)
 
+    def test_that_plan_id_from_query_string_appears_in_response_html(self) -> None:
+        EXPECTED_PLAN_ID = uuid4()
+        response = self.client.get(
+            f"/company/register_productive_consumption?plan_id={EXPECTED_PLAN_ID}"
+        )
+        assert str(EXPECTED_PLAN_ID) in response.text
+
     def test_that_logged_in_company_receives_200_when_posting_valid_data(
         self,
     ) -> None:
