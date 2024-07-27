@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
 from arbeitszeit_web.www.presenters.deny_cooperation_presenter import (
     DenyCooperationPresenter,
@@ -29,3 +31,16 @@ class DenyCooperationPresenterTests(BaseTestCase):
         assert self.notifier.warnings[0] == self.translator.gettext(
             "Plan or cooperation not found."
         )
+
+    @parameterized.expand(
+        [(reason,) for reason in DenyCooperationResponse.RejectionReason] + [(None,)]
+    )
+    def test_that_user_gets_redirected_to_my_cooperations_view(
+        self, rejection_reason: DenyCooperationResponse.RejectionReason | None
+    ) -> None:
+        response = self.presenter.render_response(
+            deny_cooperation_response=DenyCooperationResponse(
+                rejection_reason=rejection_reason
+            )
+        )
+        assert response.redirection_url == self.url_index.get_my_cooperations_url()

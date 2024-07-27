@@ -70,6 +70,7 @@ class UrlIndexTestImpl:
     get_list_of_coordinators_url = UrlIndexMethod()
     get_member_confirmation_url = UrlIndexMethod()
     get_member_dashboard_url = UrlIndexMethod()
+    get_my_cooperations_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()
     get_my_plans_url = UrlIndexMethod()
     get_plan_details_url = UrlIndexMethod()

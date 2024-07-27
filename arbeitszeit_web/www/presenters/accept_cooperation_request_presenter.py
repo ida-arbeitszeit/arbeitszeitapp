@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from arbeitszeit.use_cases.accept_cooperation import AcceptCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
@@ -14,6 +15,7 @@ class ViewModel:
 class AcceptCooperationRequestPresenter:
     translator: Translator
     notifier: Notifier
+    url_index: UrlIndex
 
     def render_response(self, response: AcceptCooperationResponse) -> ViewModel:
         if not response.is_rejected:
@@ -52,4 +54,4 @@ class AcceptCooperationRequestPresenter:
                         "You are not coordinator of this cooperation."
                     )
                 )
-        return ViewModel(redirection_url="/company/my_cooperations")
+        return ViewModel(redirection_url=self.url_index.get_my_cooperations_url())
