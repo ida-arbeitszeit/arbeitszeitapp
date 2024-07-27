@@ -40,30 +40,18 @@ class IconFilterUnitTests(unittest.TestCase):
         expected_output = ""
         self.assertEqual(result, expected_output)
 
-    def test_that_icon_filter_raises_exception_for_invalid_template_with_debug_1(
+    def test_that_icon_filter_raises_exception_for_invalid_template(
         self,
     ):
         non_valid_icon_template_content = "<div>No SVG content here</div>"
         self.mock_file_reader.return_value = non_valid_icon_template_content
 
-        with patch.dict("os.environ", {"FLASK_DEBUG": "1"}):
-            with self.assertRaises(Exception) as context:
-                icon_filter(icon_name="test-name", reader=self.mock_file_reader)
+        with self.assertRaises(Exception) as context:
+            icon_filter(icon_name="test-name", reader=self.mock_file_reader)
             self.assertIn(
                 'Exception for "test-name" icon: Icon "test-name" does not contain valid SVG content: <div>No SVG content here</div>',
                 str(context.exception),
             )
-
-    def test_that_icon_filter_returns_generic_error_comment_for_invalid_template_with_debug_not_1(
-        self,
-    ):
-        svg_content = "<div>No SVG content here</div>"
-        self.mock_file_reader.return_value = svg_content
-
-        with patch.dict("os.environ", {"FLASK_DEBUG": "foo"}):
-            result = icon_filter(icon_name="test-name", reader=self.mock_file_reader)
-            expected_output = Markup('<!-- An error for "test-name" icon occurred -->')
-            self.assertEqual(result, expected_output)
 
     def test_that_icon_filter_transforms_valid_template_to_html_svg_with_default_attributes(
         self,
@@ -104,51 +92,27 @@ class IconFilterUnitTests(unittest.TestCase):
         )
         self.assertEqual(result, expected_output)
 
-    def test_that_icon_filter_passes_enriched_file_not_found_error_with_debug_1(
+    def test_that_icon_filter_passes_enriched_file_not_found_error(
         self,
     ):
         self.mock_file_reader.side_effect = FileNotFoundError("File not found")
 
-        with patch.dict("os.environ", {"FLASK_DEBUG": "1"}):
-            with self.assertRaises(FileNotFoundError) as context:
-                icon_filter(icon_name="nonexistent", reader=self.mock_file_reader)
+        with self.assertRaises(FileNotFoundError) as context:
+            icon_filter(icon_name="nonexistent", reader=self.mock_file_reader)
 
             self.assertIn(
                 'Error for "nonexistent" icon: File not found', str(context.exception)
             )
 
-    def test_that_icon_filter_returns_generic_error_comment_for_file_not_found_with_debug_not_1(
-        self,
-    ):
-        self.mock_file_reader.side_effect = FileNotFoundError("File not found")
-
-        with patch.dict("os.environ", {"FLASK_DEBUG": "bar"}):
-            result = icon_filter(icon_name="nonexistent", reader=self.mock_file_reader)
-            expected_output = Markup(
-                '<!-- An error for "nonexistent" icon occurred -->'
-            )
-            self.assertEqual(result, expected_output)
-
-    def test_that_icon_filter_passes_generic_exception_with_debug_1(self):
+    def test_that_icon_filter_passes_generic_exception(self):
         self.mock_file_reader.side_effect = Exception("Some error message")
 
-        with patch.dict("os.environ", {"FLASK_DEBUG": "1"}):
-            with self.assertRaises(Exception) as context:
-                icon_filter(icon_name="test-name", reader=self.mock_file_reader)
+        with self.assertRaises(Exception) as context:
+            icon_filter(icon_name="test-name", reader=self.mock_file_reader)
             self.assertIn(
                 'Exception for "test-name" icon: Some error message',
                 str(context.exception),
             )
-
-    def test_that_icon_filter_returns_generic_error_comment_for_generic_exception_with_debug_not_1(
-        self,
-    ):
-        self.mock_file_reader.side_effect = Exception("Some error message")
-
-        with patch.dict("os.environ", {"FLASK_DEBUG": "baz"}):
-            result = icon_filter(icon_name="test-name", reader=self.mock_file_reader)
-            expected_output = Markup('<!-- An error for "test-name" icon occurred -->')
-            self.assertEqual(result, expected_output)
 
 
 class IconFilterIntegrationTest(ViewTestCase):
