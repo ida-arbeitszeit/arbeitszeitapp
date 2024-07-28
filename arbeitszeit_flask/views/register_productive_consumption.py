@@ -44,7 +44,7 @@ class RegisterProductiveConsumptionView:
         view_model = self.presenter.present(use_case_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
-        return FlaskResponse(self._render_template(form), status=200)
+        return FlaskResponse(self._render_template(form), status=400)
 
     def _render_template(self, form: RegisterProductiveConsumptionForm) -> str:
         return render_template(
