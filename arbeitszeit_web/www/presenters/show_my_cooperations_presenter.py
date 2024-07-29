@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
@@ -16,9 +16,7 @@ from arbeitszeit.use_cases.list_outbound_coop_requests import (
     ListedOutboundCoopRequest,
     ListOutboundCoopRequestsResponse,
 )
-from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import UserRole
-from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -94,8 +92,6 @@ class ShowMyCooperationsViewModel:
 @dataclass
 class ShowMyCooperationsPresenter:
     url_index: UrlIndex
-    translator: Translator
-    notifier: Notifier
 
     def present(
         self,
@@ -104,7 +100,6 @@ class ShowMyCooperationsPresenter:
         list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
         list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
         list_my_cooperating_plans_response: ListMyCooperatingPlansUseCase.Response,
-        cancel_cooperation_solicitation_response: Optional[bool] = None,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -119,8 +114,6 @@ class ShowMyCooperationsPresenter:
             ]
         )
 
-        self._create_cancel_message(cancel_cooperation_solicitation_response)
-
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
             rows=[
                 self._display_outbound_coop_requests(plan)
@@ -133,7 +126,6 @@ class ShowMyCooperationsPresenter:
                 for plan in list_my_cooperating_plans_response.cooperating_plans
             ]
         )
-
         return ShowMyCooperationsViewModel(
             list_of_coordinations,
             list_of_inbound_coop_requests,
@@ -194,15 +186,3 @@ class ShowMyCooperationsPresenter:
             coop_name=plan.coop_name,
             coop_url=self.url_index.get_coop_summary_url(coop_id=plan.coop_id),
         )
-
-    def _create_cancel_message(self, cancel_coop_response: Optional[bool]) -> None:
-        if cancel_coop_response is None:
-            return
-        elif cancel_coop_response == True:
-            self.notifier.display_info(
-                self.translator.gettext("Cooperation request has been canceled.")
-            )
-        else:
-            self.notifier.display_warning(
-                self.translator.gettext("Error: Not possible to cancel request.")
-            )

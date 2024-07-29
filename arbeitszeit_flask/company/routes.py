@@ -1,14 +1,9 @@
-from typing import Optional
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
-    CancelCooperationSolicitation,
-    CancelCooperationSolicitationRequest,
-)
 from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
@@ -44,6 +39,9 @@ from arbeitszeit_flask.views import (
 )
 from arbeitszeit_flask.views.accept_cooperation_request_view import (
     AcceptCooperationRequestView,
+)
+from arbeitszeit_flask.views.cancel_cooperation_request_view import (
+    CancelCooperationRequestView,
 )
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
@@ -271,7 +269,7 @@ class create_cooperation(CreateCooperationView): ...
 class request_cooperation(RequestCooperationView): ...
 
 
-@CompanyRoute("/my_cooperations", methods=["GET", "POST"])
+@CompanyRoute("/my_cooperations", methods=["GET"])
 @commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
@@ -279,17 +277,7 @@ def my_cooperations(
     list_outbound_coop_requests: ListOutboundCoopRequests,
     list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
-    cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
-    cancel_cooperation_solicitation_response: Optional[bool] = None
-    if request.method == "POST":
-        if request.form.get("cancel"):
-            plan_id = UUID(request.form["cancel"])
-            requester_id = UUID(current_user.id)
-            cancel_cooperation_solicitation_response = cancel_cooperation_solicitation(
-                CancelCooperationSolicitationRequest(requester_id, plan_id)
-            )
-
     list_coord_response = list_coordinations(
         ListCoordinationsOfCompanyRequest(UUID(current_user.id))
     )
@@ -302,13 +290,11 @@ def my_cooperations(
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
         ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
     )
-
     view_model = presenter.present(
         list_coord_response=list_coord_response,
         list_inbound_coop_requests_response=list_inbound_coop_requests_response,
         list_outbound_coop_requests_response=list_outbound_coop_requests_response,
         list_my_cooperating_plans_response=list_my_coop_plans_response,
-        cancel_cooperation_solicitation_response=cancel_cooperation_solicitation_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
 
@@ -321,6 +307,11 @@ class accept_cooperation_request(AcceptCooperationRequestView): ...
 @CompanyRoute("/deny_cooperation_request", methods=["POST"])
 @as_flask_view()
 class deny_cooperation_request(DenyCooperationView): ...
+
+
+@CompanyRoute("/cancel_cooperation_request", methods=["POST"])
+@as_flask_view()
+class cancel_cooperation_request(CancelCooperationRequestView): ...
 
 
 @CompanyRoute("/invite_worker_to_company", methods=["GET", "POST"])

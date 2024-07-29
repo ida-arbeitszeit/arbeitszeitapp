@@ -136,15 +136,15 @@
                 </div>
             </div>
             <div class="media-right">
-                <form action="" method="post">
+                <form action="/company/cancel_cooperation_request" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="content pt-1">
-                        <button class="button large-button is-danger" name="cancel" 
-                            value="{{ req.plan_id }}" type="submit" title="{{ gettext('Cancel') }}">
-                            {{ "times"|icon }}
-                        </button>
-                    </div>
-                    </form>
+                    <input type="hidden" name="plan_id" value="{{ req.plan_id }}">
+                    <button class="button large-button is-danger"
+                            type="submit"
+                            title="{{ gettext('Cancel') }}">
+                        {{ "times"|icon }}
+                    </button>
+                </form>
             </div>
         </article>
         {% endfor %}

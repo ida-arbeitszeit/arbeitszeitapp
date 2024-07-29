@@ -138,34 +138,6 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
             str(LIST_COORDINATIONS_RESPONSE_LEN_1.coordinations[0].count_plans_in_coop),
         )
 
-    def test_successfull_cancel_request_response_is_presented_correctly(self) -> None:
-        self.presenter.present(
-            list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
-            cancel_cooperation_solicitation_response=True,
-            list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
-        )
-        assert len(self.notifier.infos) == 1
-        assert not self.notifier.warnings
-        assert self.notifier.infos[0] == self.translator.gettext(
-            "Cooperation request has been canceled."
-        )
-
-    def test_failed_cancel_request_response_is_presented_correctly(self) -> None:
-        self.presenter.present(
-            list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
-            cancel_cooperation_solicitation_response=False,
-            list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
-        )
-        assert len(self.notifier.warnings) == 1
-        assert not self.notifier.infos
-        assert self.notifier.warnings[0] == self.translator.gettext(
-            "Error: Not possible to cancel request."
-        )
-
 
 class InboundTest(BaseTestCase):
     def setUp(self) -> None:
