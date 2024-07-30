@@ -259,37 +259,37 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_leads_to_functional_url(
+    def test_url_for_selection_of_productive_consumption_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_register_productive_consumption_url()
+        url = self.url_index.get_select_productive_consumption_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_with_plan_parameter_leads_to_functional_url(
+    def test_url_for_selection_of_productive_consumption_with_plan_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_register_productive_consumption_url(uuid4())
+        url = self.url_index.get_select_productive_consumption_url(uuid4())
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_with_amount_parameter_leads_to_functional_url(
+    def test_url_for_selection_of_productive_consumption_with_amount_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_register_productive_consumption_url(
+        url = self.url_index.get_select_productive_consumption_url(
             plan_id=uuid4(), amount=3
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_with_type_of_consumption_parameter_leads_to_functional_url(
+    def test_url_for_selection_of_productive_consumption_with_type_of_consumption_parameter_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_register_productive_consumption_url(
+        url = self.url_index.get_select_productive_consumption_url(
             plan_id=uuid4(),
             amount=3,
             consumption_type=ConsumptionType.means_of_prod,

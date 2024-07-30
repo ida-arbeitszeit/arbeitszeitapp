@@ -32,7 +32,7 @@ class RegisterProductiveConsumptionPresenter:
             self.user_notifier.display_info(
                 self.trans.gettext("Successfully registered.")
             )
-            redirect_url = self.url_index.get_register_productive_consumption_url()
+            redirect_url = self.url_index.get_select_productive_consumption_url()
         elif use_case_response.rejection_reason == reasons.plan_not_found:
             self.user_notifier.display_warning(
                 self.trans.gettext("Plan does not exist.")

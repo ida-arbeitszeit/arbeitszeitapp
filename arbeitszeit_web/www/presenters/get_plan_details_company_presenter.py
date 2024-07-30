@@ -54,7 +54,7 @@ class GetPlanDetailsCompanyPresenter:
             show_productive_consumption_url=(
                 True if not current_user_is_planner else False
             ),
-            productive_consumption_url=self.url_index.get_register_productive_consumption_url(
+            productive_consumption_url=self.url_index.get_select_productive_consumption_url(
                 plan_details.plan_id
             ),
         )

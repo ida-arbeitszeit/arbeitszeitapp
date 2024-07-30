@@ -157,5 +157,5 @@ class TestPresenterForNonPlanningCompany(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertEqual(
             view_model.productive_consumption_url,
-            self.url_index.get_register_productive_consumption_url(expected_plan_id),
+            self.url_index.get_select_productive_consumption_url(expected_plan_id),
         )

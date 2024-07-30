@@ -62,6 +62,9 @@ from arbeitszeit_flask.views.request_coordination_transfer_view import (
 from arbeitszeit_flask.views.review_registered_consumptions_view import (
     ReviewRegisteredConsumptionsView,
 )
+from arbeitszeit_flask.views.select_productive_consumption import (
+    SelectProductiveConsumptionView,
+)
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
@@ -224,7 +227,12 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 class register_hours_worked(RegisterHoursWorkedView): ...
 
 
-@CompanyRoute("/register_productive_consumption", methods=["GET", "POST"])
+@CompanyRoute("/select_productive_consumption")
+@as_flask_view()
+class select_productive_consumption(SelectProductiveConsumptionView): ...
+
+
+@CompanyRoute("/register_productive_consumption", methods=["POST"])
 @as_flask_view()
 class register_productive_consumption(RegisterProductiveConsumptionView): ...
 
