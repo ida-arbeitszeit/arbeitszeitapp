@@ -24,32 +24,22 @@ class RegisterProductiveConsumptionView:
     presenter: RegisterProductiveConsumptionPresenter
 
     @commit_changes
-    def GET(self) -> Response:
-        form = RegisterProductiveConsumptionForm(request.form)
-        plan_id: str | None = request.args.get("plan_id")
-        if plan_id:
-            form.plan_id_field().set_value(plan_id)
-        return FlaskResponse(self._render_template(form), status=200)
-
-    @commit_changes
     def POST(self) -> Response:
         form = RegisterProductiveConsumptionForm(request.form)
         if not form.validate():
-            return self._handle_invalid_form(form)
+            return self._handle_rejection(form)
         try:
             data = self.controller.process_input_data(form)
         except self.controller.FormError:
-            return self._handle_invalid_form(form)
+            return self._handle_rejection(form)
         use_case_response = self.register_productive_consumption(data)
         view_model = self.presenter.present(use_case_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
-        return FlaskResponse(self._render_template(form), status=400)
+        return self._handle_rejection(form)
 
-    def _render_template(self, form: RegisterProductiveConsumptionForm) -> str:
-        return render_template(
-            "company/register_productive_consumption.html", form=form
+    def _handle_rejection(self, form: RegisterProductiveConsumptionForm) -> Response:
+        return FlaskResponse(
+            render_template("/company/register_productive_consumption.html", form=form),
+            status=400,
         )
-
-    def _handle_invalid_form(self, form: RegisterProductiveConsumptionForm) -> Response:
-        return FlaskResponse(self._render_template(form), status=400)

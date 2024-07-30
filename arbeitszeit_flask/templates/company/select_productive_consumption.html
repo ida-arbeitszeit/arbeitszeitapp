@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Registration of productive consumption") }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="section is-medium has-text-centered">
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-6">
+            <div class="content">
+                <h1 class="title">
+                    {{ gettext("Registration of productive consumption") }}
+                </h1>
+            </div>
+            <form method="POST" action="{{ url_for('main_company.register_productive_consumption') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label class="label">{{ gettext("Plan ID") }}</label>
+                    <div class="control">
+                        {{ form.plan_id(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">{{ gettext("Amount") }}</label>
+                    <div class="control">
+                        {{ form.amount(class_="input") }}
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">{{ form.type_of_consumption.label }}</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="type_of_consumption" required>
+                                {% for option in form.type_of_consumption %}
+                                {{ option }}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">{{ gettext("Register") }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="column"></div>
+    </div>
+</div>
+{% endblock %}

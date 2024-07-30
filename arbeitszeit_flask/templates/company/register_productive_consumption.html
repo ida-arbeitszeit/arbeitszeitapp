@@ -21,38 +21,6 @@
             </div>
             {% endfor %}
             {% endfor %}
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="field">
-                    <label class="label">{{ gettext("Plan ID") }}</label>
-                    <div class="control">
-                        {{ form.plan_id(class_="input") }}
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">{{ gettext("Amount") }}</label>
-                    <div class="control">
-                        {{ form.amount(class_="input") }}
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">{{ form.type_of_consumption.label }}</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="type_of_consumption" required>
-                                {% for option in form.type_of_consumption %}
-                                {{ option }}
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <button class="button is-primary" type="submit">{{ gettext("Register") }}</button>
-                    </div>
-                </div>
-            </form>
         </div>
         <div class="column"></div>
     </div>

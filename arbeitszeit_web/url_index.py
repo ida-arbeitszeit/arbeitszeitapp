@@ -67,7 +67,7 @@ class UrlIndex(Protocol):
         self, amount: Optional[int] = None, plan_id: Optional[UUID] = None
     ) -> str: ...
 
-    def get_register_productive_consumption_url(
+    def get_select_productive_consumption_url(
         self,
         plan_id: Optional[UUID] = None,
         amount: Optional[int] = None,
