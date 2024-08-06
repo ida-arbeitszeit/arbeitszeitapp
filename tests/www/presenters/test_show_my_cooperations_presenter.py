@@ -6,16 +6,13 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
 )
-from arbeitszeit.use_cases.list_inbound_coop_requests import (
-    ListedInboundCoopRequest,
-    ListInboundCoopRequestsResponse,
-)
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
-from arbeitszeit.use_cases.list_outbound_coop_requests import (
-    ListedOutboundCoopRequest,
-    ListOutboundCoopRequestsResponse,
+from arbeitszeit.use_cases.show_company_cooperations import (
+    InboundCoopRequest,
+    OutboundCoopRequest,
+    Response,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
@@ -34,50 +31,6 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
         )
     ]
 )
-
-
-def get_inbound_response_length_1(
-    coop_id: Optional[UUID] = None,
-    plan_id: Optional[UUID] = None,
-    planner_id: Optional[UUID] = None,
-) -> ListInboundCoopRequestsResponse:
-    if coop_id is None:
-        coop_id = uuid4()
-    if plan_id is None:
-        plan_id = uuid4()
-    if planner_id is None:
-        planner_id = uuid4()
-    return ListInboundCoopRequestsResponse(
-        cooperation_requests=[
-            ListedInboundCoopRequest(
-                coop_id=coop_id,
-                coop_name="coop name",
-                plan_id=plan_id,
-                plan_name="plan name",
-                planner_name="planner name",
-                planner_id=planner_id,
-            )
-        ]
-    )
-
-
-def get_outbound_response_length_1(
-    plan_id: Optional[UUID] = None, coop_id: Optional[UUID] = None
-) -> ListOutboundCoopRequestsResponse:
-    if plan_id is None:
-        plan_id = uuid4()
-    if coop_id is None:
-        coop_id = uuid4()
-    return ListOutboundCoopRequestsResponse(
-        cooperation_requests=[
-            ListedOutboundCoopRequest(
-                plan_id=plan_id,
-                plan_name="plan name",
-                coop_id=coop_id,
-                coop_name="coop name",
-            )
-        ]
-    )
 
 
 def get_coop_plans_response_length_1(
@@ -107,8 +60,26 @@ class ShowMyCooperationsPresenterTests(BaseTestCase):
     def test_coordinations_are_presented_correctly(self) -> None:
         presentation = self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
+            show_company_cooperations_response=Response(
+                inbound_cooperation_requests=[
+                    InboundCoopRequest(
+                        coop_id=uuid4(),
+                        coop_name="coop name",
+                        plan_id=uuid4(),
+                        plan_name="plan name",
+                        planner_name="planner name",
+                        planner_id=uuid4(),
+                    )
+                ],
+                outbound_cooperation_requests=[
+                    OutboundCoopRequest(
+                        plan_id=uuid4(),
+                        plan_name="plan name",
+                        coop_id=uuid4(),
+                        coop_name="coop name",
+                    )
+                ],
+            ),
             list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
         )
         self.assertEqual(len(presentation.list_of_coordinations.rows), 1)
@@ -148,10 +119,19 @@ class InboundTest(BaseTestCase):
         self.PLANNER_ID = uuid4()
         self.view_model = self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(
-                coop_id=self.COOP_ID, plan_id=self.PLAN_ID, planner_id=self.PLANNER_ID
+            show_company_cooperations_response=Response(
+                inbound_cooperation_requests=[
+                    InboundCoopRequest(
+                        coop_id=self.COOP_ID,
+                        coop_name="coop name",
+                        plan_id=self.PLAN_ID,
+                        plan_name="plan name",
+                        planner_name="planner name",
+                        planner_id=self.PLANNER_ID,
+                    )
+                ],
+                outbound_cooperation_requests=[],
             ),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
             list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
         )
 
@@ -205,9 +185,16 @@ class OutboundTest(BaseTestCase):
         self.PLAN_ID = uuid4()
         self.view_model = self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(
-                plan_id=self.PLAN_ID, coop_id=self.COOP_ID
+            show_company_cooperations_response=Response(
+                outbound_cooperation_requests=[
+                    OutboundCoopRequest(
+                        plan_id=self.PLAN_ID,
+                        plan_name="plan name",
+                        coop_id=self.COOP_ID,
+                        coop_name="coop name",
+                    )
+                ],
+                inbound_cooperation_requests=[],
             ),
             list_my_cooperating_plans_response=get_coop_plans_response_length_1(),
         )
@@ -251,8 +238,10 @@ class CooperatingPlansTest(BaseTestCase):
         self.PLAN_ID = uuid4()
         self.view_model = self.presenter.present(
             list_coord_response=LIST_COORDINATIONS_RESPONSE_LEN_1,
-            list_inbound_coop_requests_response=get_inbound_response_length_1(),
-            list_outbound_coop_requests_response=get_outbound_response_length_1(),
+            show_company_cooperations_response=Response(
+                outbound_cooperation_requests=[],
+                inbound_cooperation_requests=[],
+            ),
             list_my_cooperating_plans_response=get_coop_plans_response_length_1(
                 plan_id=self.PLAN_ID, coop_id=self.COOP_ID
             ),
