@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from arbeitszeit.use_cases import list_outbound_coop_requests
+from arbeitszeit.use_cases import show_company_cooperations
 from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
     CancelCooperationSolicitation,
     CancelCooperationSolicitationRequest,
@@ -13,8 +13,8 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(CancelCooperationSolicitation)
-        self.list_outbound_coop_requests_use_case = self.injector.get(
-            list_outbound_coop_requests.ListOutboundCoopRequests
+        self.show_company_cooperations = self.injector.get(
+            show_company_cooperations.ShowCompanyCooperationsUseCase
         )
 
     def test_that_false_is_returned_when_requester_is_not_planner(self) -> None:
@@ -50,12 +50,10 @@ class UseCaseTests(BaseTestCase):
         assert response
 
     def _is_plan_requesting_cooperation(self, plan: UUID, planner: UUID) -> bool:
-        response = self.list_outbound_coop_requests_use_case(
-            list_outbound_coop_requests.ListOutboundCoopRequestsRequest(
-                requester_id=planner
-            )
+        response = self.show_company_cooperations.show_company_cooperations(
+            show_company_cooperations.Request(company=planner)
         )
         return any(
             plan == coop_request.plan_id
-            for coop_request in response.cooperation_requests
+            for coop_request in response.outbound_cooperation_requests
         )

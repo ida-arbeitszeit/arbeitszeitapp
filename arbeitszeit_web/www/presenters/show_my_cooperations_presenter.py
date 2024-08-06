@@ -5,16 +5,13 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
 )
-from arbeitszeit.use_cases.list_inbound_coop_requests import (
-    ListedInboundCoopRequest,
-    ListInboundCoopRequestsResponse,
-)
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
-from arbeitszeit.use_cases.list_outbound_coop_requests import (
-    ListedOutboundCoopRequest,
-    ListOutboundCoopRequestsResponse,
+from arbeitszeit.use_cases.show_company_cooperations import (
+    InboundCoopRequest,
+    OutboundCoopRequest,
+    Response,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.url_index import UrlIndex
@@ -97,8 +94,7 @@ class ShowMyCooperationsPresenter:
         self,
         *,
         list_coord_response: ListCoordinationsOfCompanyResponse,
-        list_inbound_coop_requests_response: ListInboundCoopRequestsResponse,
-        list_outbound_coop_requests_response: ListOutboundCoopRequestsResponse,
+        show_company_cooperations_response: Response,
         list_my_cooperating_plans_response: ListMyCooperatingPlansUseCase.Response,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
@@ -110,14 +106,14 @@ class ShowMyCooperationsPresenter:
         list_of_inbound_coop_requests = ListOfInboundCooperationRequestsTable(
             rows=[
                 self._display_inbound_coop_requests(plan)
-                for plan in list_inbound_coop_requests_response.cooperation_requests
+                for plan in show_company_cooperations_response.inbound_cooperation_requests
             ]
         )
 
         list_of_outbound_coop_requests = ListOfOutboundCooperationRequestsTable(
             rows=[
                 self._display_outbound_coop_requests(plan)
-                for plan in list_outbound_coop_requests_response.cooperation_requests
+                for plan in show_company_cooperations_response.outbound_cooperation_requests
             ]
         )
         list_of_my_cooperating_plans = ListOfMyCooperatingPlans(
@@ -146,7 +142,7 @@ class ShowMyCooperationsPresenter:
         )
 
     def _display_inbound_coop_requests(
-        self, plan: ListedInboundCoopRequest
+        self, plan: InboundCoopRequest
     ) -> ListOfInboundCooperationRequestsRow:
         return ListOfInboundCooperationRequestsRow(
             coop_id=str(plan.coop_id),
@@ -163,7 +159,7 @@ class ShowMyCooperationsPresenter:
         )
 
     def _display_outbound_coop_requests(
-        self, plan: ListedOutboundCoopRequest
+        self, plan: OutboundCoopRequest
     ) -> ListOfOutboundCooperationRequestsRow:
         return ListOfOutboundCooperationRequestsRow(
             plan_id=str(plan.plan_id),
