@@ -1,6 +1,8 @@
 from decimal import Decimal
 from typing import Dict
 
+from parameterized import parameterized
+
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from tests.data_generators import PlanGenerator
 from tests.request import FakeRequest
@@ -47,6 +49,24 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
             self._count_drafts_of_company(),
             1,
         )
+
+    def test_posting_invalid_form_data_yields_status_code_400(self) -> None:
+        response = self.client.post("/company/create_draft", data={})
+        assert response.status_code == 400
+
+    @parameterized.expand(
+        [
+            ("testname 123",),
+            ("other test name",),
+        ]
+    )
+    def test_posting_invalid_form_data_yields_response_that_contains_the_original_form_field_values(
+        self, expected_product_name
+    ) -> None:
+        response = self.client.post(
+            "/company/create_draft", data=dict(prd_name=expected_product_name)
+        )
+        assert expected_product_name in response.text
 
     def _create_form_data(self) -> Dict:
         return dict(
