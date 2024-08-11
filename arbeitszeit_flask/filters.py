@@ -67,38 +67,36 @@ def icon_filter(
     section in the developement guide.
     """
     try:
-        # Treat empty icon_name as intentionally set null value
-        if not icon_name.strip():
-            return Markup("")
-
-        file_name = f"{icon_name}.html"
-        svg_content = reader(file_name)
-
-        if "<svg" not in svg_content:
-            raise Exception(
-                f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
-            )
-
-        default_attributes = {
-            "data-icon": icon_name,
-            "width": "24px",
-            "height": "20px",
-            "aria-hidden": "true",
-            "focusable": "false",
-            "role": "img",
-            "xmlns": "http://www.w3.org/2000/svg",
-        }
-
-        combined_attributes = {**default_attributes, **attrs}
-
-        attributes_str = " ".join(
-            [f'{key}="{value}"' for key, value in combined_attributes.items()]
-        )
-
-        svg_with_attrs = svg_content.replace("<svg", f"<svg {attributes_str}", 1)
-
-        return Markup(svg_with_attrs)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f'Error for "{icon_name}" icon: {str(e)}')
+        return load_icon_with_name(icon_name, reader, attrs)
     except Exception as e:
-        raise Exception(f'Exception for "{icon_name}" icon: {str(e)}')
+        e.add_note(f'Error occurred while trying to load icon "{icon_name}".')
+        raise e
+
+
+def load_icon_with_name(
+    icon_name: str, reader: Callable[[str], str], attrs: dict[str, str]
+) -> Markup:
+    # Treat empty icon_name as intentionally set null value
+    if not icon_name.strip():
+        return Markup("")
+    file_name = f"{icon_name}.html"
+    svg_content = reader(file_name)
+    if "<svg" not in svg_content:
+        raise ValueError(
+            f'Icon "{icon_name}" does not contain valid SVG content: {svg_content}'
+        )
+    default_attributes = {
+        "data-icon": icon_name,
+        "width": "24px",
+        "height": "20px",
+        "aria-hidden": "true",
+        "focusable": "false",
+        "role": "img",
+        "xmlns": "http://www.w3.org/2000/svg",
+    }
+    combined_attributes = {**default_attributes, **attrs}
+    attributes_str = " ".join(
+        [f'{key}="{value}"' for key, value in combined_attributes.items()]
+    )
+    svg_with_attrs = svg_content.replace("<svg", f"<svg {attributes_str}", 1)
+    return Markup(svg_with_attrs)
