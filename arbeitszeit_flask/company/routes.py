@@ -13,19 +13,15 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
 )
-from arbeitszeit.use_cases.list_inbound_coop_requests import (
-    ListInboundCoopRequests,
-    ListInboundCoopRequestsRequest,
-)
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
-from arbeitszeit.use_cases.list_outbound_coop_requests import (
-    ListOutboundCoopRequests,
-    ListOutboundCoopRequestsRequest,
-)
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
+from arbeitszeit.use_cases.show_company_cooperations import (
+    Request,
+    ShowCompanyCooperationsUseCase,
+)
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
@@ -273,27 +269,24 @@ class request_cooperation(RequestCooperationView): ...
 @commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
-    list_inbound_coop_requests: ListInboundCoopRequests,
-    list_outbound_coop_requests: ListOutboundCoopRequests,
+    show_company_cooperations: ShowCompanyCooperationsUseCase,
     list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
 ):
     list_coord_response = list_coordinations(
         ListCoordinationsOfCompanyRequest(UUID(current_user.id))
     )
-    list_inbound_coop_requests_response = list_inbound_coop_requests(
-        ListInboundCoopRequestsRequest(UUID(current_user.id))
-    )
-    list_outbound_coop_requests_response = list_outbound_coop_requests(
-        ListOutboundCoopRequestsRequest(UUID(current_user.id))
+    show_company_cooperations_response = (
+        show_company_cooperations.show_company_cooperations(
+            Request(UUID(current_user.id))
+        )
     )
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
         ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
     )
     view_model = presenter.present(
         list_coord_response=list_coord_response,
-        list_inbound_coop_requests_response=list_inbound_coop_requests_response,
-        list_outbound_coop_requests_response=list_outbound_coop_requests_response,
+        show_company_cooperations_response=show_company_cooperations_response,
         list_my_cooperating_plans_response=list_my_coop_plans_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
