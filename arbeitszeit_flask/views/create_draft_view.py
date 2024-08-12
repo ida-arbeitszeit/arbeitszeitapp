@@ -27,6 +27,8 @@ class CreateDraftView:
     @commit_changes
     def POST(self) -> Response:
         form = CreateDraftForm(request.form)
+        if not form.validate():
+            return self._render_form(form, status_code=400)
         use_case_request = self.controller.import_form_data(form)
         response = self.use_case.create_draft(use_case_request)
         if response.is_rejected:
@@ -35,10 +37,17 @@ class CreateDraftView:
         return redirect(self.url_index.get_my_plan_drafts_url())
 
     def GET(self) -> Response:
+        return self._render_form(
+            form=CreateDraftForm(),
+            status_code=200,
+        )
+
+    def _render_form(self, form: CreateDraftForm, status_code: int) -> Response:
         return FlaskResponse(
             render_template(
                 "company/create_draft.html",
-                form=CreateDraftForm(),
+                form=form,
                 cancel_url=self.url_index.get_my_plan_drafts_url(),
-            )
+            ),
+            status=status_code,
         )
