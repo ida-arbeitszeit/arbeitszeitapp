@@ -4,6 +4,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
@@ -16,7 +17,11 @@ from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.approve_plan_controller import (
     ApprovePlanController,
 )
+from arbeitszeit_web.www.controllers.reject_plan_controller import (
+    RejectPlanController,
+)
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
+from arbeitszeit_web.www.presenters.reject_plan_presenter import RejectPlanPresenter
 from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
@@ -70,6 +75,20 @@ def approve_plan(
     request = controller.approve_plan(plan)
     response = use_case.approve_plan(request)
     view_model = presenter.approve_plan(response)
+    return redirect(view_model.redirect_url)
+
+
+@AccountantRoute("/accountant/plans/<uuid:plan>/reject", methods=["POST"])
+@commit_changes
+def reject_plan(
+    plan: UUID,
+    controller: RejectPlanController,
+    use_case: RejectPlanUseCase,
+    presenter: RejectPlanPresenter,
+) -> Response:
+    request = controller.reject_plan(plan)
+    response = use_case.reject_plan(request)
+    view_model = presenter.reject_plan(response)
     return redirect(view_model.redirect_url)
 
 

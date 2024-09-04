@@ -206,6 +206,7 @@ class Plan:
     timeframe: int
     is_public_service: bool
     approval_date: Optional[datetime]
+    rejection_date: Optional[datetime]
     activation_date: Optional[datetime]
     requested_cooperation: Optional[UUID]
     hidden_by_user: bool
@@ -225,7 +226,11 @@ class Plan:
 
     @property
     def is_approved(self) -> bool:
-        return self.approval_date is not None
+        return self.approval_date is not None and self.rejection_date is None
+
+    @property
+    def is_rejected(self) -> bool:
+        return self.rejection_date is not None and self.approval_date is None
 
     @property
     def expiration_date(self) -> Optional[datetime]:

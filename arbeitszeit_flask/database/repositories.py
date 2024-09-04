@@ -521,6 +521,14 @@ class PlanUpdate:
             ),
         )
 
+    def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
+        return replace(
+            self,
+            review_update_values=dict(
+                self.review_update_values, rejection_date=rejection_date
+            ),
+        )
+
     def set_activation_timestamp(
         self, activation_timestamp: Optional[datetime]
     ) -> Self:
@@ -2033,6 +2041,7 @@ class DatabaseGatewayImpl:
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date,
+            rejection_date=plan.review.rejection_date,
             activation_date=plan.activation_date,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None

@@ -159,6 +159,11 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         value counts all the plans that were changed by this methods.
         """
 
+    def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
+        """Set the rejection date of all matching plans. The return
+        value counts all the plans that were changed by this methods.
+        """
+
     def hide(self) -> Self: ...
 
 

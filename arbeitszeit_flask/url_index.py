@@ -171,6 +171,9 @@ class GeneralUrlIndex:
     def get_approve_plan_url(self, plan_id: UUID) -> str:
         return url_for("main_accountant.approve_plan", plan=plan_id)
 
+    def get_reject_plan_url(self, plan_id: UUID) -> str:
+        return url_for("main_accountant.reject_plan", plan=plan_id)
+
     def get_create_draft_url(self) -> str:
         return url_for("main_company.create_draft")
 
