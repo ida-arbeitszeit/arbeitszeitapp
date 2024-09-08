@@ -1732,6 +1732,7 @@ class MockDatabase:
             is_public_service=is_public_service,
             activation_date=None,
             approval_date=None,
+            rejection_date=None,
             requested_cooperation=None,
             hidden_by_user=False,
         )
