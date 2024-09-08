@@ -135,7 +135,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == "fas fa-user"
+        assert view_model.transactions[0].peer_type_icon == "user"
 
     def test_company_peer_icon_is_shown_if_transaction_was_with_company(
         self,
@@ -151,7 +151,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == "fas fa-industry"
+        assert view_model.transactions[0].peer_type_icon == "industry"
 
     def test_peer_type_icon_is_empty_string_if_transaction_is_of_type_expected_sales(
         self,

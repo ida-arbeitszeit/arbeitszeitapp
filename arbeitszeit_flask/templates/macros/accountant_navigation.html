@@ -8,7 +8,7 @@
       <a href="{{ url_for('main_user.account_details') }}"
          class="navbar-item"
          >
-        <span class="icon"><i class="fas fa-book"></i></span>&nbsp;
+        <span class="icon">{{ "book"|icon }}</span>&nbsp;
         {{ current_user.name|truncate(20, True) }}
       </a>
     </div>

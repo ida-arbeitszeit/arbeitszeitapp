@@ -89,7 +89,6 @@ class Quiver(mcollections.PolyCollection):
     V: Incomplete
     Umask: Incomplete
     def set_UVC(self, U, V, C: Incomplete | None = None) -> None: ...
-    quiver_doc: Incomplete
 
 class Barbs(mcollections.PolyCollection):
     sizes: Incomplete
@@ -119,4 +118,3 @@ class Barbs(mcollections.PolyCollection):
     stale: bool
     def set_UVC(self, U, V, C: Incomplete | None = None) -> None: ...
     def set_offsets(self, xy) -> None: ...
-    barbs_doc: Incomplete

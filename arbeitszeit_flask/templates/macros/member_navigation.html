@@ -9,7 +9,7 @@
          class="navbar-item"
          >
         <span class="icon">
-          <i class="fas fa-user"></i>
+          {{ "user"|icon }}
         </span>&nbsp;
         {{ current_user.name|truncate(20, True) }}
       </a>

@@ -18,17 +18,6 @@ class ColormapRegistry(Mapping):
     def unregister(self, name) -> None: ...
     def get_cmap(self, cmap): ...
 
-def register_cmap(
-    name: Incomplete | None = None,
-    cmap: Incomplete | None = None,
-    *,
-    override_builtin: bool = False,
-) -> None: ...
-
-get_cmap: Incomplete
-
-def unregister_cmap(name): ...
-
 class ScalarMappable:
     cmap: Incomplete
     colorbar: Incomplete

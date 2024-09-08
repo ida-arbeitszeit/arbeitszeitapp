@@ -23,11 +23,7 @@ from . import _backend_pdf_ps
 
 debugPS: bool
 
-class PsBackendHelper:
-    def __init__(self) -> None: ...
-
 class __getattr__:
-    ps_backend_helper: Incomplete
     psDefs: Incomplete
 
 papersize: Incomplete
@@ -97,7 +93,6 @@ class RendererPS(_backend_pdf_ps.RendererPDFPSBase):
         mtext: Incomplete | None = None,
     ): ...
     def draw_mathtext(self, gc, x, y, s, prop, angle) -> None: ...
-    def draw_gouraud_triangle(self, gc, points, colors, trans) -> None: ...
     def draw_gouraud_triangles(self, gc, points, colors, trans) -> None: ...
 
 class _Orientation(Enum):

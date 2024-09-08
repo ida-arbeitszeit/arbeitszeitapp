@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from sqlite3 import Cursor
-from typing import Any, Callable, Generic, Iterator, List, TypeVar
+from typing import Any, Callable, Generic, Iterator, TypeVar
 
 from _typeshed import Incomplete
 from flask_profiler import query as q
@@ -27,7 +27,7 @@ class SelectQuery(Generic[T]):
 class RecordResult(SelectQuery[interface.Record]):
     def summarize(self) -> SummarizedMeasurementsImpl: ...
     def summarize_by_interval(
-        self, timestamps: List[datetime]
+        self, timestamps: list[datetime]
     ) -> SummarizedMeasurementsImpl: ...
     @classmethod
     def summary_mapping(cls, row: Any) -> interface.Summary: ...

@@ -1,5 +1,3 @@
-import threading
-
 import tornado.web
 import tornado.websocket
 from _typeshed import Incomplete
@@ -9,9 +7,6 @@ from matplotlib.backend_bases import _Backend
 from . import backend_webagg_core as core
 from .backend_webagg_core import TimerAsyncio as TimerAsyncio
 from .backend_webagg_core import TimerTornado as TimerTornado
-
-class ServerThread(threading.Thread):
-    def run(self) -> None: ...
 
 webagg_server_thread: Incomplete
 

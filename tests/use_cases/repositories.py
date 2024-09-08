@@ -1346,6 +1346,29 @@ class EmailAddressUpdate:
         return email_addresses_affected
 
 
+class RegisteredHoursWorkedResult(QueryResultImpl[records.RegisteredHoursWorked]):
+    def at_company(self, company: UUID) -> Self:
+        return self._filter_elements(lambda record: record.company == company)
+
+    def ordered_by_registration_time(self, is_ascending: bool = True) -> Self:
+        return self.sorted_by(
+            key=lambda record: record.registered_on, reverse=not is_ascending
+        )
+
+    def joined_with_worker(
+        self,
+    ) -> QueryResultImpl[Tuple[records.RegisteredHoursWorked, records.Member]]:
+        def items() -> Iterable[Tuple[records.RegisteredHoursWorked, records.Member]]:
+            for registered_hours in self:
+                worker = self.database.members[registered_hours.member]
+                yield registered_hours, worker
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+
 class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
         def items() -> Generator[records.AccountCredentials, None, None]:
@@ -1619,6 +1642,7 @@ class MockDatabase:
         self.email_addresses: Dict[str, records.EmailAddress] = dict()
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.reset_password_requests: List[records.PasswordResetRequest] = list()
+        self.registered_hours_worked: list[records.RegisteredHoursWorked] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -2004,6 +2028,31 @@ class MockDatabase:
         )
         self.reset_password_requests.append(record)
         return record
+
+    def create_registered_hours_worked(
+        self,
+        company: UUID,
+        member: UUID,
+        amount: Decimal,
+        transaction: UUID,
+        registered_on: datetime,
+    ) -> records.RegisteredHoursWorked:
+        record = records.RegisteredHoursWorked(
+            id=uuid4(),
+            company=company,
+            member=member,
+            amount=amount,
+            transaction=transaction,
+            registered_on=registered_on,
+        )
+        self.registered_hours_worked.append(record)
+        return record
+
+    def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult:
+        return RegisteredHoursWorkedResult(
+            database=self,
+            items=lambda: self.registered_hours_worked,
+        )
 
 
 class Index(Generic[Key, Value]):

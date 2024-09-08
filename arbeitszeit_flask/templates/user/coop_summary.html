@@ -36,7 +36,7 @@
                             {% if view_model.transfer_coordination_url is not none %}
                             <a class="button is-small is-primary" href="{{ view_model.transfer_coordination_url }}">
                                 <span class="icon">
-                                    <i class="fas fa-square-arrow-up-right"></i>
+                                    {{ "square-arrow-up-right"|icon }}
                                 </span>
                                 <span>{{ gettext("Transfer coordination") }}</span>
                             </a>
@@ -80,7 +80,7 @@
                         {% if plan.show_end_coop_button %}
                         <a class="button is-small is-danger" href="{{ plan.end_coop_url }}">
                             <span class="icon">
-                                <i class="fas fa-times"></i>
+                                {{ "times"|icon }}
                             </span>
                             <span>{{ gettext("End cooperation") }}</span>
                         </a>

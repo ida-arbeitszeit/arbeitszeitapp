@@ -24,7 +24,7 @@
                 <div class="media-content">
                     <div class="content">
                         <p>
-                            <span class="icon"><i class='{{ c.consumer_type_icon }}'></i></span>
+                            <span class="icon">{{ c.consumer_type_icon|icon }}</i></span>
                             {% if c.consumer_url is none %}
                             <span>{{ c.consumer_name }}</span>
                             {% else %}

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Generic, Iterator, List, Protocol, TypeVar
+from typing import Generic, Iterator, Protocol, TypeVar
 
 from typing_extensions import Self
 
@@ -40,7 +40,7 @@ class Record:
 class RecordedMeasurements(FiledData[Record], Protocol):
     def summarize(self) -> SummarizedMeasurements: ...
     def summarize_by_interval(
-        self, timestamps: List[datetime]
+        self, timestamps: list[datetime]
     ) -> SummarizedMeasurements: ...
     def with_method(self, method: str) -> RecordedMeasurements: ...
     def with_name(self, name: str) -> RecordedMeasurements: ...

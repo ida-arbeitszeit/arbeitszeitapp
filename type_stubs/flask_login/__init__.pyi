@@ -1,5 +1,3 @@
-from .__about__ import __version__ as __version__
-from .config import AUTH_HEADER_NAME as AUTH_HEADER_NAME
 from .config import COOKIE_DURATION as COOKIE_DURATION
 from .config import COOKIE_HTTPONLY as COOKIE_HTTPONLY
 from .config import COOKIE_NAME as COOKIE_NAME
@@ -37,8 +35,6 @@ from .utils import make_next_param as make_next_param
 from .utils import set_login_view as set_login_view
 
 __all__ = [
-    "__version__",
-    "AUTH_HEADER_NAME",
     "COOKIE_DURATION",
     "COOKIE_HTTPONLY",
     "COOKIE_NAME",

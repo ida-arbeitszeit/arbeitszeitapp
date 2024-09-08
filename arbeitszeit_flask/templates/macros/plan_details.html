@@ -1,4 +1,5 @@
 {% from 'macros/tooltips.html' import info_tooltip %}
+{% from 'macros/copy_toggle.html' import copy_toggle %}
 {% macro plan_details(view_model) %}
 <div class="section has-text-centered">
     <div class="section">
@@ -14,12 +15,7 @@
                     <p class="title is-4">{{ view_model.details.plan_id[0] }}</p>
                     <p class="subtitle">
                         {{ view_model.details.plan_id[1] }}&nbsp;
-                        <a  
-                        role="button" 
-                        onclick="copyTextToClipboard('{{ view_model.details.plan_id[1] }}'); 
-                        changeElementIconToCheckIcon('changeableIcon')">
-                            <span class="icon"><i id="changeableIcon" class="fa-regular fa-copy"></i></span>
-                        </a>
+                        {{ copy_toggle(view_model.details.plan_id[1]) }}
                     </p>
                 </div>
                 <div class="cell notification has-background-primary-light is-row-span-2 is-row-span-1-mobile mb-0">
@@ -129,7 +125,8 @@
                     <p class="subtitle">{{ view_model.details.price_per_unit[1] }}
                         {% if view_model.details.price_per_unit[2] %} <span>
                             <a href="{{ view_model.details.price_per_unit[3] }}">
-                                <i class="fas fa-hands-helping"></i></a>
+                                {{ "hands-helping"|icon }}
+                            </a>
                         </span>
                         {% endif %}
                     </p>

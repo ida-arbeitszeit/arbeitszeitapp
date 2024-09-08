@@ -494,6 +494,19 @@ class LanguageRepository(Protocol):
     def get_available_language_codes(self) -> Iterable[str]: ...
 
 
+class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Protocol):
+    def at_company(self, company: UUID) -> Self: ...
+
+    def ordered_by_registration_time(self, *, is_ascending: bool = ...) -> Self: ...
+
+    def joined_with_worker(self) -> QueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+        ]
+    ]: ...
+
+
 class DatabaseGateway(Protocol):
     def create_private_consumption(
         self, transaction: UUID, amount: int, plan: UUID
@@ -632,3 +645,14 @@ class DatabaseGateway(Protocol):
     def create_password_reset_request(
         self, email_address: str, reset_token: str, created_at: datetime
     ) -> records.PasswordResetRequest: ...
+
+    def create_registered_hours_worked(
+        self,
+        company: UUID,
+        member: UUID,
+        amount: Decimal,
+        transaction: UUID,
+        registered_on: datetime,
+    ) -> records.RegisteredHoursWorked: ...
+
+    def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult: ...

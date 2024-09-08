@@ -1,26 +1,11 @@
-from typing import Optional
 from uuid import UUID
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.accept_cooperation import (
-    AcceptCooperation,
-    AcceptCooperationRequest,
-    AcceptCooperationResponse,
-)
-from arbeitszeit.use_cases.cancel_cooperation_solicitation import (
-    CancelCooperationSolicitation,
-    CancelCooperationSolicitationRequest,
-)
 from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
-from arbeitszeit.use_cases.deny_cooperation import (
-    DenyCooperation,
-    DenyCooperationRequest,
-    DenyCooperationResponse,
-)
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.hide_plan import HidePlan
@@ -28,19 +13,15 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
 )
-from arbeitszeit.use_cases.list_inbound_coop_requests import (
-    ListInboundCoopRequests,
-    ListInboundCoopRequestsRequest,
-)
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
-from arbeitszeit.use_cases.list_outbound_coop_requests import (
-    ListOutboundCoopRequests,
-    ListOutboundCoopRequestsRequest,
-)
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
+from arbeitszeit.use_cases.show_company_cooperations import (
+    Request,
+    ShowCompanyCooperationsUseCase,
+)
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
@@ -52,11 +33,21 @@ from arbeitszeit_flask.views import (
     InviteWorkerToCompanyView,
     RequestCooperationView,
 )
+from arbeitszeit_flask.views.accept_cooperation_request_view import (
+    AcceptCooperationRequestView,
+)
+from arbeitszeit_flask.views.cancel_cooperation_request_view import (
+    CancelCooperationRequestView,
+)
 from arbeitszeit_flask.views.company_dashboard_view import CompanyDashboardView
 from arbeitszeit_flask.views.create_cooperation_view import CreateCooperationView
 from arbeitszeit_flask.views.create_draft_view import CreateDraftView
+from arbeitszeit_flask.views.deny_cooperation_view import DenyCooperationView
 from arbeitszeit_flask.views.draft_details_view import DraftDetailsView
 from arbeitszeit_flask.views.http_error_view import http_404
+from arbeitszeit_flask.views.list_registered_hours_worked_view import (
+    ListRegisteredHoursWorkedView,
+)
 from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWorkedView
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
@@ -274,66 +265,46 @@ class create_cooperation(CreateCooperationView): ...
 class request_cooperation(RequestCooperationView): ...
 
 
-@CompanyRoute("/my_cooperations", methods=["GET", "POST"])
+@CompanyRoute("/my_cooperations", methods=["GET"])
 @commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
-    list_inbound_coop_requests: ListInboundCoopRequests,
-    accept_cooperation: AcceptCooperation,
-    deny_cooperation: DenyCooperation,
-    list_outbound_coop_requests: ListOutboundCoopRequests,
+    show_company_cooperations: ShowCompanyCooperationsUseCase,
     list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
-    cancel_cooperation_solicitation: CancelCooperationSolicitation,
 ):
-    accept_cooperation_response: Optional[AcceptCooperationResponse] = None
-    deny_cooperation_response: Optional[DenyCooperationResponse] = None
-    cancel_cooperation_solicitation_response: Optional[bool] = None
-    if request.method == "POST":
-        if request.form.get("accept"):
-            coop_id, plan_id = [
-                UUID(id.strip()) for id in request.form["accept"].split(",")
-            ]
-            accept_cooperation_response = accept_cooperation(
-                AcceptCooperationRequest(UUID(current_user.id), plan_id, coop_id)
-            )
-        elif request.form.get("deny"):
-            coop_id, plan_id = [
-                UUID(id.strip()) for id in request.form["deny"].split(",")
-            ]
-            deny_cooperation_response = deny_cooperation(
-                DenyCooperationRequest(UUID(current_user.id), plan_id, coop_id)
-            )
-        elif request.form.get("cancel"):
-            plan_id = UUID(request.form["cancel"])
-            requester_id = UUID(current_user.id)
-            cancel_cooperation_solicitation_response = cancel_cooperation_solicitation(
-                CancelCooperationSolicitationRequest(requester_id, plan_id)
-            )
-
     list_coord_response = list_coordinations(
         ListCoordinationsOfCompanyRequest(UUID(current_user.id))
     )
-    list_inbound_coop_requests_response = list_inbound_coop_requests(
-        ListInboundCoopRequestsRequest(UUID(current_user.id))
-    )
-    list_outbound_coop_requests_response = list_outbound_coop_requests(
-        ListOutboundCoopRequestsRequest(UUID(current_user.id))
+    show_company_cooperations_response = (
+        show_company_cooperations.show_company_cooperations(
+            Request(UUID(current_user.id))
+        )
     )
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
         ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
     )
-
     view_model = presenter.present(
         list_coord_response=list_coord_response,
-        list_inbound_coop_requests_response=list_inbound_coop_requests_response,
-        list_outbound_coop_requests_response=list_outbound_coop_requests_response,
+        show_company_cooperations_response=show_company_cooperations_response,
         list_my_cooperating_plans_response=list_my_coop_plans_response,
-        accept_cooperation_response=accept_cooperation_response,
-        deny_cooperation_response=deny_cooperation_response,
-        cancel_cooperation_solicitation_response=cancel_cooperation_solicitation_response,
     )
     return render_template("company/my_cooperations.html", **view_model.to_dict())
+
+
+@CompanyRoute("/accept_cooperation_request", methods=["POST"])
+@as_flask_view()
+class accept_cooperation_request(AcceptCooperationRequestView): ...
+
+
+@CompanyRoute("/deny_cooperation_request", methods=["POST"])
+@as_flask_view()
+class deny_cooperation_request(DenyCooperationView): ...
+
+
+@CompanyRoute("/cancel_cooperation_request", methods=["POST"])
+@as_flask_view()
+class cancel_cooperation_request(CancelCooperationRequestView): ...
 
 
 @CompanyRoute("/invite_worker_to_company", methods=["GET", "POST"])
@@ -349,3 +320,8 @@ class end_cooperation(EndCooperationView): ...
 @CompanyRoute("/review_registered_consumptions")
 @as_flask_view()
 class review_registered_consumptions(ReviewRegisteredConsumptionsView): ...
+
+
+@CompanyRoute("/list_registered_hours_worked")
+@as_flask_view()
+class list_registered_hours_worked(ListRegisteredHoursWorkedView): ...

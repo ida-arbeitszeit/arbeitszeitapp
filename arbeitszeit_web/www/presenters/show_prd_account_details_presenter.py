@@ -96,9 +96,9 @@ class ShowPRDAccountDetailsPresenter:
         ),
     ) -> str:
         if isinstance(peer, show_prd_account_details.MemberPeer):
-            return "fas fa-user"
+            return "user"
         elif isinstance(peer, show_prd_account_details.CompanyPeer):
-            return "fas fa-industry"
+            return "industry"
         else:
             return ""
 

@@ -23,8 +23,8 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.activation_date }}</small>
-              <small><i class="fa-solid fa-hourglass"></i>&nbsp;{{ plan.expiration_relative }}</small>
+              <small>{{ "calendar"|icon }}&nbsp;{{ plan.activation_date }}</small>
+              <small>{{ "hourglass"|icon }}&nbsp;{{ plan.expiration_relative }}</small>
             </p>
           </div>
           <div>
@@ -74,7 +74,7 @@
           <td><form method="post" action="{{ plan.revoke_plan_filing_url }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="button is-ghost" type="submit" title="{{ gettext('Revoke plan filing') }}">
-            <i class="fas fa-times"></i>
+            {{ "times"|icon }}
           </button>
           </form>
           </td>
@@ -106,7 +106,7 @@
                 <a href="{{ draft.draft_details_url }}">{{ draft.product_name }}</a>
               </strong>
               <br>
-              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ draft.draft_creation_date }}</small>
+              <small>{{ "calendar"|icon }}&nbsp;{{ draft.draft_creation_date }}</small>
             </p>
           </div>
         </div>
@@ -114,20 +114,23 @@
           <div class="content pt-1">
             <form method="post" action="{{ draft.file_plan_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="button is-ghost" type="submit" title="{{ gettext('File plan') }}"><i
-                  class="fas fa-envelope"></i></button>
+              <button class="button is-ghost" type="submit" title="{{ gettext('File plan') }}">
+                {{ "envelope"|icon }}
+              </button>
             </form>
             &nbsp;
             <form method="post" action="{{ draft.draft_delete_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="button is-ghost" type="submit" title="{{ gettext('Delete plan') }}"><i
-                  class="fas fa-trash"></i></button>
+              <button class="button is-ghost" type="submit" title="{{ gettext('Delete plan') }}">
+                {{ "trash"|icon }}
+              </button>
             </form>
             &nbsp;
             <form method="get" action="{{ draft.edit_plan_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="button is-ghost" type="submit" title="{{ gettext('Edit plan') }}"><i
-                  class="fas fa-edit"></i></button>
+              <button class="button is-ghost" type="submit" title="{{ gettext('Edit plan') }}">
+                {{ "edit"|icon }}
+              </button>
             </form>
           </div>
         </div>
@@ -154,7 +157,7 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small><i class="fa-solid fa-calendar"></i>&nbsp;{{ plan.plan_creation_date }}</small>
+              <small>{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}</small>
             </p>
           </div>
         </div>
@@ -163,11 +166,11 @@
             <form method="post" action="{{ plan.renew_plan_url }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="button is-ghost" type="submit" title="{{ gettext('Renew plan') }}">
-                <i class="fas fa-redo"></i>
+                {{ "redo"|icon }}
               </button>
             </form>
             &nbsp;
-            <a href="{{ plan.hide_plan_url }}"><i class="fas fa-trash"></i></a>
+            <a href="{{ plan.hide_plan_url }}">{{ "trash"|icon }}</a>
           </div>
         </div>
       </article>

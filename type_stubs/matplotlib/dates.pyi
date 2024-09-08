@@ -61,9 +61,6 @@ __all__ = [
     "rrulewrapper",
 ]
 
-class __getattr__:
-    JULIAN_OFFSET: Incomplete
-
 MICROSECONDLY: Incomplete
 
 def set_epoch(epoch) -> None: ...

@@ -26,6 +26,9 @@ class RegisterProductiveConsumptionView:
     @commit_changes
     def GET(self) -> Response:
         form = RegisterProductiveConsumptionForm(request.form)
+        plan_id: str | None = request.args.get("plan_id")
+        if plan_id:
+            form.plan_id_field().set_value(plan_id)
         return FlaskResponse(self._render_template(form), status=200)
 
     @commit_changes
@@ -41,7 +44,7 @@ class RegisterProductiveConsumptionView:
         view_model = self.presenter.present(use_case_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
-        return FlaskResponse(self._render_template(form), status=200)
+        return FlaskResponse(self._render_template(form), status=400)
 
     def _render_template(self, form: RegisterProductiveConsumptionForm) -> str:
         return render_template(

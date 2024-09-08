@@ -43,6 +43,9 @@ class GeneralUrlIndex:
     def get_work_invite_url(self, invite_id: UUID) -> str:
         return url_for("main_member.show_company_work_invite", invite_id=invite_id)
 
+    def get_my_cooperations_url(self) -> str:
+        return url_for("main_company.my_cooperations")
+
     def get_coop_summary_url(self, coop_id: UUID) -> str:
         return url_for("main_user.coop_summary", coop_id=coop_id)
 
