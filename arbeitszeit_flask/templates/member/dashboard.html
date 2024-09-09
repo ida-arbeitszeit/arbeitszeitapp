@@ -18,7 +18,7 @@
           {% if view_model.show_workplaces %}
           <ul>
             {% for workplace in view_model.workplaces %}
-            <li>{{ workplace.name }} (<a href="mailto:{{ workplace.email }}">{{ workplace.email }}</a>)</li>
+            <li><a href="{{ workplace.url}}">{{ workplace.name }}</a></li>
             {% endfor %}
           </ul>
           {% endif %}

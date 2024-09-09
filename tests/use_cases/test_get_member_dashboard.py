@@ -11,17 +11,16 @@ class UseCaseTests(BaseTestCase):
         self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
         self.member = self.member_generator.create_member()
 
-    def test_that_correct_workplace_email_is_shown(self):
-        self.company_generator.create_company_record(
-            email="companyname@mail.com",
+    def test_that_correct_workplace_id_is_shown(self):
+        company = self.company_generator.create_company(
             workers=[self.member],
         )
         request = get_member_dashboard.Request(member=self.member)
         member_info = self.use_case.get_member_dashboard(request)
-        assert member_info.workplaces[0].workplace_email == "companyname@mail.com"
+        assert member_info.workplaces[0].workplace_id == company
 
     def test_that_correct_workplace_name_is_shown(self):
-        self.company_generator.create_company_record(
+        self.company_generator.create_company(
             name="SomeCompanyNameXY",
             workers=[self.member],
         )

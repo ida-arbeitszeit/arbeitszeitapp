@@ -11,7 +11,7 @@ from arbeitszeit_web.url_index import UrlIndex
 @dataclass
 class Workplace:
     name: str
-    email: str
+    url: str
 
 
 @dataclass
@@ -67,7 +67,9 @@ class GetMemberDashboardPresenter:
             workplaces=[
                 Workplace(
                     name=workplace.workplace_name,
-                    email=workplace.workplace_email,
+                    url=self.url_index.get_company_summary_url(
+                        company_id=workplace.workplace_id
+                    ),
                 )
                 for workplace in use_case_response.workplaces
             ],
