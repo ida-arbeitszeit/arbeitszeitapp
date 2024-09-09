@@ -6,6 +6,7 @@ from flask import render_template
 from flask_login import current_user
 
 from arbeitszeit import use_cases
+from arbeitszeit.use_cases import get_member_dashboard
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
@@ -44,11 +45,12 @@ class register_private_consumption(RegisterPrivateConsumptionView): ...
 @as_flask_view()
 @dataclass
 class dashboard:
-    get_member_dashboard: use_cases.get_member_dashboard.GetMemberDashboard
+    use_case: get_member_dashboard.GetMemberDashboardUseCase
     presenter: GetMemberDashboardPresenter
 
     def GET(self) -> Response:
-        response = self.get_member_dashboard(UUID(current_user.id))
+        request = get_member_dashboard.Request(member=UUID(current_user.id))
+        response = self.use_case.get_member_dashboard(request)
         view_model = self.presenter.present(response)
         return FlaskResponse(
             render_template(

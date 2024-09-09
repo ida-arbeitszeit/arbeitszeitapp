@@ -1,6 +1,7 @@
 from arbeitszeit import email_notifications
+from arbeitszeit.use_cases import get_member_dashboard
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
-from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
+from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboardUseCase
 from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
 
@@ -18,7 +19,9 @@ class RegisterMemberTests(BaseTestCase):
         super().setUp()
         self.use_case = self.injector.get(RegisterMemberUseCase)
         self.login_use_case = self.injector.get(LogInMemberUseCase)
-        self.get_member_dashboard = self.injector.get(GetMemberDashboard)
+        self.get_member_dashboard_use_case = self.injector.get(
+            GetMemberDashboardUseCase
+        )
         self.confirm_company_use_case = self.injector.get(ConfirmCompanyUseCase)
 
     def test_that_a_token_is_sent_out_when_a_member_registers(self) -> None:
@@ -53,7 +56,10 @@ class RegisterMemberTests(BaseTestCase):
         request = RegisterMemberUseCase.Request(**DEFAULT)
         response = self.use_case.register_member(request)
         assert response.user_id
-        dashboard_response = self.get_member_dashboard(response.user_id)
+        dashboard_request = get_member_dashboard.Request(member=response.user_id)
+        dashboard_response = self.get_member_dashboard_use_case.get_member_dashboard(
+            dashboard_request
+        )
         assert dashboard_response.email == DEFAULT["email"]
         assert dashboard_response.name == DEFAULT["name"]
 
