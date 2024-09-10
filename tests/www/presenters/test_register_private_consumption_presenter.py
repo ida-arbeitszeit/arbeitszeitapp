@@ -5,6 +5,7 @@ from arbeitszeit.use_cases.register_private_consumption import (
 from arbeitszeit_web.www.presenters.register_private_consumption_presenter import (
     RegisterPrivateConsumptionPresenter,
 )
+from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -17,7 +18,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self,
     ) -> None:
         self.presenter.present(
-            RegisterPrivateConsumptionResponse(rejection_reason=None)
+            RegisterPrivateConsumptionResponse(rejection_reason=None),
+            request=FakeRequest(),
         )
         self.assertIn(
             self.translator.gettext("Consumption successfully registered."),
@@ -28,7 +30,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.plan_inactive
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertIn(
             self.translator.gettext(
@@ -41,7 +44,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.plan_not_found
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertIn(
             self.translator.gettext(
@@ -56,7 +60,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.insufficient_balance
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertIn(
             self.translator.gettext("You do not have enough work certificates."),
@@ -67,7 +72,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         view_model = self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.plan_not_found
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertEqual(view_model.status_code, 404)
 
@@ -75,7 +81,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self,
     ) -> None:
         view_model = self.presenter.present(
-            RegisterPrivateConsumptionResponse(rejection_reason=None)
+            RegisterPrivateConsumptionResponse(rejection_reason=None),
+            request=FakeRequest(),
         )
         self.assertEqual(view_model.status_code, 200)
 
@@ -83,7 +90,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         view_model = self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.plan_inactive
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertEqual(view_model.status_code, 410)
 
@@ -93,7 +101,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         view_model = self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.insufficient_balance
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertEqual(view_model.status_code, 406)
 
@@ -103,7 +112,8 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.consumer_does_not_exist
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertIn(
             self.translator.gettext(
@@ -118,6 +128,7 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         view_model = self.presenter.present(
             RegisterPrivateConsumptionResponse(
                 rejection_reason=RejectionReason.consumer_does_not_exist
-            )
+            ),
+            request=FakeRequest(),
         )
         self.assertEqual(view_model.status_code, 404)
