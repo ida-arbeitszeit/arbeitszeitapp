@@ -266,7 +266,6 @@ class request_cooperation(RequestCooperationView): ...
 
 
 @CompanyRoute("/my_cooperations", methods=["GET"])
-@commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
     show_company_cooperations: ShowCompanyCooperationsUseCase,

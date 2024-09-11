@@ -26,7 +26,6 @@ class RegisterPrivateConsumptionView:
     controller: RegisterPrivateConsumptionController
     presenter: RegisterPrivateConsumptionPresenter
 
-    @commit_changes
     def GET(self) -> Response:
         form = RegisterPrivateConsumptionForm(request.form)
         amount: Optional[str] = request.args.get("amount")

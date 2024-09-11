@@ -23,7 +23,6 @@ class RegisterProductiveConsumptionView:
     register_productive_consumption: RegisterProductiveConsumption
     presenter: RegisterProductiveConsumptionPresenter
 
-    @commit_changes
     def GET(self) -> Response:
         form = RegisterProductiveConsumptionForm(request.form)
         plan_id: str | None = request.args.get("plan_id")

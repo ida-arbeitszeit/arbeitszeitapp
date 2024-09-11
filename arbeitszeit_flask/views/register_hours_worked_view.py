@@ -23,7 +23,6 @@ class RegisterHoursWorkedView:
     presenter: RegisterHoursWorkedPresenter
     list_workers: ListWorkers
 
-    @commit_changes
     def GET(self) -> Response:
         return self.create_response(status=200)
 
