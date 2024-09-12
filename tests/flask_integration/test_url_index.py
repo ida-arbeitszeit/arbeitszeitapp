@@ -314,7 +314,7 @@ class GeneralUrlIndexTests(ViewTestCase):
             coordinator=company, plans=[plan]
         )
         url = self.url_index.get_end_coop_url(plan, coop)
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
 
     def test_delete_draft_url_does_not_produce_404(

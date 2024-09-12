@@ -21,7 +21,7 @@ class EndCooperationView:
     presenter: EndCooperationPresenter
 
     @commit_changes
-    def GET(self) -> types.Response:
+    def POST(self) -> types.Response:
         use_case_request = self.controller.process_request_data()
         if use_case_request is None:
             return http_404()
