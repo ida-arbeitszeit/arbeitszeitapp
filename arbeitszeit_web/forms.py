@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Protocol
 
@@ -56,12 +57,6 @@ class DraftForm(Protocol):
     def is_public_service_field(self) -> FormField[bool]: ...
 
 
-class RegisterPrivateConsumptionForm(Protocol):
-    def amount_field(self) -> FormField[str]: ...
-
-    def plan_id_field(self) -> FormField[str]: ...
-
-
 class RegisterProductiveConsumptionForm(Protocol):
     def amount_field(self) -> FormField[str]: ...
 
@@ -89,3 +84,11 @@ class RequestCoordinationTransferForm(Protocol):
 
 class ConfirmEmailAddressChangeForm(Protocol):
     def is_accepted_field(self) -> FormField[bool]: ...
+
+
+@dataclass
+class RegisterPrivateConsumptionForm:
+    plan_id_value: str
+    amount_value: str
+    plan_id_errors: list[str] = field(default_factory=list)
+    amount_errors: list[str] = field(default_factory=list)
