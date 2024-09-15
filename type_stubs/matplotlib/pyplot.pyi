@@ -6,7 +6,7 @@ from collections.abc import Hashable, Iterable, Sequence
 from contextlib import AbstractContextManager, ExitStack
 from typing import Any, BinaryIO, Literal, overload
 
-import matplotlib
+import matplotlib.axes
 import numpy as np
 import PIL.Image
 from _typeshed import Incomplete
@@ -166,19 +166,48 @@ def delaxes(ax: matplotlib.axes.Axes | None = None) -> None: ...
 def sca(ax: Axes) -> None: ...
 def cla() -> None: ...
 def subplot(*args, **kwargs) -> Axes: ...
+@overload
 def subplots(
-    nrows: int = 1,
-    ncols: int = 1,
+    nrows: Literal[1] = ...,
+    ncols: Literal[1] = ...,
     *,
-    sharex: bool | Literal["none", "all", "row", "col"] = False,
-    sharey: bool | Literal["none", "all", "row", "col"] = False,
-    squeeze: bool = True,
-    width_ratios: Sequence[float] | None = None,
-    height_ratios: Sequence[float] | None = None,
-    subplot_kw: dict[str, Any] | None = None,
-    gridspec_kw: dict[str, Any] | None = None,
+    sharex: bool | Literal["none", "all", "row", "col"] = ...,
+    sharey: bool | Literal["none", "all", "row", "col"] = ...,
+    squeeze: Literal[True] = ...,
+    width_ratios: Sequence[float] | None = ...,
+    height_ratios: Sequence[float] | None = ...,
+    subplot_kw: dict[str, Any] | None = ...,
+    gridspec_kw: dict[str, Any] | None = ...,
     **fig_kw,
-) -> tuple[Figure, Any]: ...
+) -> tuple[Figure, Axes]: ...
+@overload
+def subplots(
+    nrows: int = ...,
+    ncols: int = ...,
+    *,
+    sharex: bool | Literal["none", "all", "row", "col"] = ...,
+    sharey: bool | Literal["none", "all", "row", "col"] = ...,
+    squeeze: Literal[False],
+    width_ratios: Sequence[float] | None = ...,
+    height_ratios: Sequence[float] | None = ...,
+    subplot_kw: dict[str, Any] | None = ...,
+    gridspec_kw: dict[str, Any] | None = ...,
+    **fig_kw,
+) -> tuple[Figure, np.ndarray]: ...
+@overload
+def subplots(
+    nrows: int = ...,
+    ncols: int = ...,
+    *,
+    sharex: bool | Literal["none", "all", "row", "col"] = ...,
+    sharey: bool | Literal["none", "all", "row", "col"] = ...,
+    squeeze: bool = ...,
+    width_ratios: Sequence[float] | None = ...,
+    height_ratios: Sequence[float] | None = ...,
+    subplot_kw: dict[str, Any] | None = ...,
+    gridspec_kw: dict[str, Any] | None = ...,
+    **fig_kw,
+) -> tuple[Figure, Axes | np.ndarray]: ...
 @overload
 def subplot_mosaic(
     mosaic: str,
@@ -369,7 +398,7 @@ def autoscale(
 def axhline(y: float = 0, xmin: float = 0, xmax: float = 1, **kwargs) -> Line2D: ...
 def axhspan(
     ymin: float, ymax: float, xmin: float = 0, xmax: float = 1, **kwargs
-) -> Polygon: ...
+) -> Rectangle: ...
 def axis(
     arg: tuple[float, float, float, float] | bool | str | None = None,
     /,
@@ -387,7 +416,7 @@ def axline(
 def axvline(x: float = 0, ymin: float = 0, ymax: float = 1, **kwargs) -> Line2D: ...
 def axvspan(
     xmin: float, xmax: float, ymin: float = 0, ymax: float = 1, **kwargs
-) -> Polygon: ...
+) -> Rectangle: ...
 def bar(
     x: float | ArrayLike,
     height: float | ArrayLike,
