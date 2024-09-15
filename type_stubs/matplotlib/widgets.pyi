@@ -31,8 +31,8 @@ class Widget:
 
 class AxesWidget(Widget):
     ax: Incomplete
-    canvas: Incomplete
     def __init__(self, ax) -> None: ...
+    canvas: Incomplete
     def connect_event(self, event, callback) -> None: ...
     def disconnect_events(self) -> None: ...
 
@@ -313,7 +313,6 @@ class SpanSelector(_SelectorWidget):
     grab_range: Incomplete
     drag_from_anywhere: Incomplete
     ignore_event_outside: Incomplete
-    canvas: Incomplete
     def __init__(
         self,
         ax,
@@ -334,7 +333,9 @@ class SpanSelector(_SelectorWidget):
         snap_values: Incomplete | None = None,
     ) -> None: ...
     ax: Incomplete
-    def new_axes(self, ax, *, _props: Incomplete | None = None) -> None: ...
+    def new_axes(
+        self, ax, *, _props: Incomplete | None = None, _init: bool = False
+    ) -> None: ...
     def connect_default_events(self) -> None: ...
     @property
     def direction(self): ...
