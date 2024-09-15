@@ -28,16 +28,14 @@
               {{ 'check'|icon }}
             </button>
           </form>
-        </div>
-        <div class="content pt-1">
           <form method="post" action="{{ plan.reject_plan_url }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="button is-ghost" type="submit" title="{{ gettext('Reject plan') }}">
-              <i class="fas fa-times"></i>
+              {{ "times"|icon }}
             </button>
           </form>
-        </div>        
-      </div>    
+        </div>
+      </div>
     </article>
     {% endfor %}
   </div>

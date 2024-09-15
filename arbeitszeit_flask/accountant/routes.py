@@ -4,12 +4,12 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
-from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit.use_cases.list_plans_with_pending_review import (
     ListPlansWithPendingReviewUseCase,
 )
+from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
@@ -17,11 +17,8 @@ from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.approve_plan_controller import (
     ApprovePlanController,
 )
-from arbeitszeit_web.www.controllers.reject_plan_controller import (
-    RejectPlanController,
-)
+from arbeitszeit_web.www.controllers.reject_plan_controller import RejectPlanController
 from arbeitszeit_web.www.presenters.approve_plan_presenter import ApprovePlanPresenter
-from arbeitszeit_web.www.presenters.reject_plan_presenter import RejectPlanPresenter
 from arbeitszeit_web.www.presenters.get_accountant_dashboard_presenter import (
     GetAccountantDashboardPresenter,
 )
@@ -31,6 +28,7 @@ from arbeitszeit_web.www.presenters.get_plan_details_accountant_presenter import
 from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
     ListPlansWithPendingReviewPresenter,
 )
+from arbeitszeit_web.www.presenters.reject_plan_presenter import RejectPlanPresenter
 
 from .blueprint import AccountantRoute
 

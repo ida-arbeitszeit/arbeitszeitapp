@@ -13,6 +13,7 @@ class StartPagePresenter:
     class Plan:
         prd_name: str
         activation_date: str
+        rejection_date: str
 
     @dataclass
     class ViewModel:
@@ -30,6 +31,9 @@ class StartPagePresenter:
                 self.Plan(
                     prd_name=plan.product_name,
                     activation_date=self.datetime_formatter.format_datetime(
+                        plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
+                    ),
+                    rejection_date=self.datetime_formatter.format_datetime(
                         plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
                     ),
                 )

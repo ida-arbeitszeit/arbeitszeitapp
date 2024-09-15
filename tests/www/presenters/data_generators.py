@@ -27,6 +27,7 @@ class QueriedPlanGenerator:
         is_cooperating: Optional[bool] = None,
         description: Optional[str] = None,
         activation_date: Optional[datetime] = None,
+        rejection_date: Optional[datetime] = None,
         price_per_unit: Optional[Decimal] = None,
         labour_cost_per_unit: Optional[Decimal] = None,
     ) -> QueriedPlan:
@@ -40,6 +41,8 @@ class QueriedPlanGenerator:
             description = "For eating\nNext paragraph\rThird one"
         if activation_date is None:
             activation_date = datetime.now()
+        if rejection_date is None:
+            rejection_date = datetime.now()
         if price_per_unit is None:
             price_per_unit = Decimal(5)
         if labour_cost_per_unit is None:
@@ -55,6 +58,7 @@ class QueriedPlanGenerator:
             is_public_service=False,
             is_cooperating=is_cooperating,
             activation_date=activation_date,
+            rejection_date=rejection_date,
         )
 
     def get_response(

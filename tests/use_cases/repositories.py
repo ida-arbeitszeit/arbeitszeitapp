@@ -119,6 +119,14 @@ class PlanResult(QueryResultImpl[Plan]):
             reverse=not ascending,
         )
 
+    def ordered_by_rejection_date(self, ascending: bool = True) -> Self:
+        return self.sorted_by(
+            key=lambda plan: (
+                plan.rejection_date if plan.rejection_date else datetime.min
+            ),
+            reverse=not ascending,
+        )
+
     def ordered_by_planner_name(self, ascending: bool = True) -> Self:
         def get_company_name(planner_id: UUID) -> str:
             planner = self.database.get_company_by_id(planner_id)
@@ -140,7 +148,14 @@ class PlanResult(QueryResultImpl[Plan]):
         )
 
     def that_are_approved(self) -> Self:
-        return self._filter_elements(lambda plan: plan.approval_date is not None)
+        return self._filter_elements(
+            lambda plan: plan.approval_date is not None and plan.rejection_date is None
+        )
+
+    def that_are_rejected(self) -> Self:
+        return self._filter_elements(
+            lambda plan: plan.rejection_date is not None and plan.approval_date is None
+        )
 
     def that_were_activated_before(self, timestamp: datetime) -> Self:
         return self._filter_elements(
@@ -179,7 +194,9 @@ class PlanResult(QueryResultImpl[Plan]):
         return self._filter_elements(lambda plan: plan.id in id_)
 
     def without_completed_review(self) -> Self:
-        return self._filter_elements(lambda plan: plan.approval_date is None)
+        return self._filter_elements(
+            lambda plan: plan.approval_date is None and plan.rejection_date is None
+        )
 
     def with_open_cooperation_request(
         self, *, cooperation: Optional[UUID] = None
@@ -412,6 +429,12 @@ class PlanUpdate:
     def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
         def update(plan: Plan) -> None:
             plan.approval_date = approval_date
+
+        return self._add_update(update)
+
+    def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
+        def update(plan: Plan) -> None:
+            plan.rejection_date = rejection_date
 
         return self._add_update(update)
 

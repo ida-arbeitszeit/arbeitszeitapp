@@ -107,6 +107,7 @@ class Plan(db.Model):
     timeframe = db.Column(db.Numeric(), nullable=False)
     is_public_service = db.Column(db.Boolean, nullable=False, default=False)
     activation_date = db.Column(db.DateTime, nullable=True)
+    rejection_date = db.Column(db.DateTime, nullable=True)
     requested_cooperation = db.Column(
         db.String, db.ForeignKey("cooperation.id"), nullable=True
     )

@@ -73,6 +73,21 @@ class DraftsTable:
 
 
 @dataclass
+class RejectedPlansRow:
+    plan_details_url: str
+    prd_name: str
+    price_per_unit: str
+    rejection_date: str
+    is_cooperating: bool
+    is_public_service: bool
+
+
+@dataclass
+class RejectedPlansTable:
+    rows: List[RejectedPlansRow]
+
+
+@dataclass
 class ShowMyPlansViewModel:
     show_non_active_plans: bool
     non_active_plans: NonActivePlansTable
@@ -82,6 +97,8 @@ class ShowMyPlansViewModel:
     expired_plans: ExpiredPlansTable
     show_drafts: bool
     drafts: DraftsTable
+    show_rejected_plans: bool
+    rejected_plans: RejectedPlansTable
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -109,6 +126,8 @@ class ShowMyPlansPresenter:
             expired_plans=self._create_expired_plans_table(response),
             show_drafts=bool(response.drafts),
             drafts=self._create_drafts_table(response),
+            show_rejected_plans=bool(response.rejected_plans),
+            rejected_plans=self._create_rejected_plans_table(response),
         )
 
     def _create_active_plans_table(
@@ -181,6 +200,23 @@ class ShowMyPlansPresenter:
                 )
                 for draft in response.drafts
             ]
+        )
+
+    def _create_rejected_plans_table(
+        self, response: ShowMyPlansResponse
+    ) -> RejectedPlansTable:
+        return RejectedPlansTable(
+            rows=[
+                RejectedPlansRow(
+                    rejection_date=self.__format_date(plan.rejection_date),
+                    plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
+                    prd_name=f"{plan.prd_name}",
+                    price_per_unit=self.__format_price(plan.price_per_unit),
+                    is_cooperating=plan.is_cooperating,
+                    is_public_service=plan.is_public_service,
+                )
+                for plan in response.rejected_plans
+            ],
         )
 
     def _format_days_until_expiration(

@@ -8,6 +8,7 @@ from parameterized import parameterized
 from arbeitszeit import records
 from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
+from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit_flask.database import models
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
@@ -69,6 +70,16 @@ class PlanResultTests(FlaskTestCase):
         assert changed_plan
         assert changed_plan.approval_date == expected_approval_date
 
+    def test_that_created_plan_can_have_its_rejection_date_changed(self) -> None:
+        plan = self.create_plan()
+        expected_rejection_date = datetime(2020, 1, 1)
+        self.database_gateway.get_plans().with_id(plan.id).update().set_rejection_date(
+            expected_rejection_date
+        ).perform()
+        changed_plan = self.database_gateway.get_plans().with_id(plan.id).first()
+        assert changed_plan
+        assert changed_plan.rejection_date == expected_rejection_date
+
     def test_that_plan_gets_deleted(self) -> None:
         plan = self.create_plan()
         self.database_gateway.get_plans().with_id(plan.id).delete()
@@ -101,6 +112,7 @@ class GetActivePlansTests(FlaskTestCase):
         self.datetime_service = self.injector.get(FakeDatetimeService)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
+        self.reject_plan_use_case = self.injector.get(RejectPlanUseCase)
 
     def test_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
@@ -145,6 +157,31 @@ class GetActivePlansTests(FlaskTestCase):
         retrieved_plans = list(
             self.database_gateway.get_plans()
             .ordered_by_activation_date(ascending=False)
+            .limit(3)
+        )
+        assert len(retrieved_plans) == 3
+        assert retrieved_plans[0].id == plans[1]
+        assert retrieved_plans[1].id == plans[2]
+        assert retrieved_plans[2].id == plans[4]
+
+    def test_plans_can_be_ordered_by_rejection_date_in_descending_order(
+        self,
+    ) -> None:
+        rejection_dates = [
+            self.datetime_service.now_minus_ten_days(),
+            self.datetime_service.now(),
+            self.datetime_service.now_minus_20_hours(),
+            self.datetime_service.now_minus_25_hours(),
+            self.datetime_service.now_minus_one_day(),
+        ]
+        plans: List[UUID] = list()
+        for timestamp in rejection_dates:
+            self.datetime_service.freeze_time(timestamp)
+            plans.append(self.plan_generator.create_plan(approved=False, rejected=True))
+        self.datetime_service.unfreeze_time()
+        retrieved_plans = list(
+            self.database_gateway.get_plans()
+            .ordered_by_rejection_date(ascending=False)
             .limit(3)
         )
         assert len(retrieved_plans) == 3
@@ -239,17 +276,25 @@ class GetAllPlans(FlaskTestCase):
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
         assert not list(self.database_gateway.get_plans())
 
-    def test_that_unapproved_plans_are_returned(self) -> None:
+    def test_that_only_unapproved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=False)
+        self.plan_generator.create_plan(rejected=False)
         assert list(self.database_gateway.get_plans())
 
-    def test_that_approved_plans_are_returned(self) -> None:
+    def test_that_only_approved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        assert list(self.database_gateway.get_plans())
+        self.plan_generator.create_plan(rejected=True)
+        assert len(list(self.database_gateway.get_plans())) == 1
 
     def test_that_can_filter_unapproved_plans_from_results(self) -> None:
-        self.plan_generator.create_plan(approved=False)
+        self.plan_generator.create_plan(approved=False, rejected=False)
+        self.plan_generator.create_plan(approved=False, rejected=True)
         assert not list(self.database_gateway.get_plans().that_are_approved())
+
+    def test_that_can_filter_unrejected_plans_from_results(self) -> None:
+        self.plan_generator.create_plan(approved=False, rejected=False)
+        self.plan_generator.create_plan(approved=True, rejected=False)
+        assert not list(self.database_gateway.get_plans().that_are_rejected())
 
     def test_can_filter_public_plans(self) -> None:
         self.plan_generator.create_plan(is_public_service=False)
@@ -315,13 +360,15 @@ class GetAllPlans(FlaskTestCase):
 
     def test_can_filter_results_for_unreviewed_plans(self) -> None:
         self.plan_generator.create_plan(approved=True)
+        self.plan_generator.create_plan(rejected=True)
         assert not self.database_gateway.get_plans().without_completed_review()
 
     def test_filtering_unreviewed_plans_will_still_contain_unreviewed_plans(
         self,
     ) -> None:
         self.plan_generator.create_plan(approved=False)
-        assert self.database_gateway.get_plans().without_completed_review()
+        self.plan_generator.create_plan(rejected=False)
+        assert len(self.database_gateway.get_plans().without_completed_review()) == 2
 
     def test_that_plans_with_open_cooperation_request_can_be_filtered(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
@@ -450,6 +497,13 @@ class GetAllPlans(FlaskTestCase):
         expected_approval_date = datetime(2000, 3, 2)
         assert plans.update().set_approval_date(expected_approval_date).perform()
         assert all(plan.approval_date == expected_approval_date for plan in plans)
+
+    def test_can_set_rejection_date(self) -> None:
+        plan = self.plan_generator.create_plan(approved=False, rejected=True)
+        plans = self.database_gateway.get_plans().with_id(plan)
+        expected_rejection_date = datetime(2000, 3, 2)
+        assert plans.update().set_rejection_date(expected_rejection_date).perform()
+        assert all(plan.rejection_date == expected_rejection_date for plan in plans)
 
 
 class GetStatisticsTests(FlaskTestCase):

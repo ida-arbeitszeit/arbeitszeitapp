@@ -51,6 +51,46 @@
 </div>
 
 <div class="section">
+  <h1 class="title is-4 has-text-centered">{{ gettext("Rejected")}}</h1>
+  {% if show_rejected_plans %}
+  <div class="columns is-centered has-text-left">
+    <div class="column is-one-third">
+      {% for plan in rejected_plans.rows %}
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong class="is-size-5">
+                <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
+              </strong>
+              <br>
+              <small>{{ "calendar"|icon }}&nbsp;{{ plan.rejection_date }}</small>
+            </p>
+          </div>
+          <div>
+            {% if plan.is_cooperating %}
+            <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
+            {% endif %}
+            {% if plan.is_public_service %}
+            <span class="tag is-warning">{{ gettext("Public") }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="media-right">
+          <p class="is-size-5 pt-1">
+            {{ plan.price_per_unit }}
+          </p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p class="has-text-centered">{{ gettext("You don't have rejected plans.")}}</p>
+  {% endif %}
+</div>
+
+<div class="section">
   <h1 class="title is-4 has-text-centered">{{ gettext("Waiting")}}</h1>
   <div class="table-container">
     {% if show_non_active_plans %}

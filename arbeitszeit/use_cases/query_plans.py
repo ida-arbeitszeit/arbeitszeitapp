@@ -25,6 +25,7 @@ class PlanFilter(enum.Enum):
 class PlanSorting(enum.Enum):
     by_activation = enum.auto()
     by_company_name = enum.auto()
+    by_rejection = enum.auto()
 
 
 @dataclass
@@ -45,7 +46,8 @@ class QueriedPlan:
     labour_cost_per_unit: Decimal
     is_public_service: bool
     is_cooperating: bool
-    activation_date: datetime
+    activation_date: Optional[datetime]
+    rejection_date: Optional[datetime]
 
 
 @dataclass
@@ -101,6 +103,8 @@ class QueryPlans:
     def _apply_sorting(self, plans: PlanResult, sort_by: PlanSorting) -> PlanResult:
         if sort_by == PlanSorting.by_company_name:
             plans = plans.ordered_by_planner_name()
+        elif sort_by == PlanSorting.by_rejection:
+            plans = plans.ordered_by_rejection_date(ascending=False)
         else:
             plans = plans.ordered_by_activation_date(ascending=False)
         return plans
@@ -117,7 +121,6 @@ class QueryPlans:
             price_per_unit = calculate_average_costs(cooperating_plans)
         else:
             price_per_unit = calculate_individual_price(plan)
-        assert plan.activation_date
         return QueriedPlan(
             plan_id=plan.id,
             company_name=planner.name,
@@ -129,4 +132,5 @@ class QueryPlans:
             is_public_service=plan.is_public_service,
             is_cooperating=bool(cooperation),
             activation_date=plan.activation_date,
+            rejection_date=plan.rejection_date,
         )
