@@ -8,18 +8,21 @@ from arbeitszeit_web.forms import RegisterPrivateConsumptionForm
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
 class RegisterPrivateConsumptionViewModel:
-    status_code: int
+    status_code: int | None
     form: RegisterPrivateConsumptionForm
+    redirect_url: str | None = None
 
 
 @dataclass
 class RegisterPrivateConsumptionPresenter:
     user_notifier: Notifier
     translator: Translator
+    url_index: UrlIndex
 
     def present(
         self,
@@ -34,7 +37,11 @@ class RegisterPrivateConsumptionPresenter:
             self.user_notifier.display_info(
                 self.translator.gettext("Consumption successfully registered.")
             )
-            return RegisterPrivateConsumptionViewModel(status_code=200, form=form)
+            return RegisterPrivateConsumptionViewModel(
+                status_code=None,
+                form=form,
+                redirect_url=self.url_index.get_register_private_consumption_url(),
+            )
         elif use_case_response.rejection_reason == RejectionReason.plan_inactive:
             self.user_notifier.display_warning(
                 self.translator.gettext(
@@ -63,4 +70,6 @@ class RegisterPrivateConsumptionPresenter:
                     "There is no plan with the specified ID in the database."
                 )
             )
-            return RegisterPrivateConsumptionViewModel(status_code=404, form=form)
+            return RegisterPrivateConsumptionViewModel(
+                status_code=404, form=form, redirect_url=None
+            )
