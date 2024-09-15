@@ -17,7 +17,7 @@ class Request:
 @dataclass
 class Workplace:
     workplace_name: str
-    workplace_email: str
+    workplace_id: UUID
 
 
 @dataclass
@@ -98,11 +98,11 @@ class GetMemberDashboardUseCase:
         return [
             Workplace(
                 workplace_name=company.name,
-                workplace_email=email.address,
+                workplace_id=company.id,
             )
-            for company, email in self.database_gateway.get_companies()
-            .that_are_workplace_of_member(member)
-            .joined_with_email_address()
+            for company in self.database_gateway.get_companies().that_are_workplace_of_member(
+                member
+            )
         ]
 
     def _get_invites(self, member: UUID) -> List[WorkInvitation]:

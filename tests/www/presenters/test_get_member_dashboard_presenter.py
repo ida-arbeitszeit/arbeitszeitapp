@@ -4,6 +4,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from dateutil import tz
+from parameterized import parameterized
 
 from arbeitszeit.use_cases import get_member_dashboard
 from arbeitszeit_web.session import UserRole
@@ -38,7 +39,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         response = self.get_response(
             workplaces=[
                 get_member_dashboard.Workplace(
-                    workplace_name="workplace_name", workplace_email="workplace@cp.org"
+                    workplace_name="workplace_name", workplace_id=uuid4()
                 ),
             ]
         )
@@ -46,11 +47,42 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         self.assertTrue(presentation.show_workplaces)
         self.assertTrue(presentation.workplaces)
 
+    @parameterized.expand(
+        [
+            ("Workplace Name 1",),
+            ("Workplace Name 2",),
+        ]
+    )
+    def test_that_the_correct_name_of_workplace_is_shown(self, workplace_name: str):
+        response = self.get_response(
+            workplaces=[
+                get_member_dashboard.Workplace(
+                    workplace_name=workplace_name, workplace_id=uuid4()
+                ),
+            ]
+        )
+        presentation = self.presenter.present(response)
+        assert presentation.workplaces[0].name == workplace_name
+
+    def test_that_url_of_workplace_leads_to_company_summary_page(self):
+        workplace_id = uuid4()
+        response = self.get_response(
+            workplaces=[
+                get_member_dashboard.Workplace(
+                    workplace_name="workplace_name", workplace_id=workplace_id
+                ),
+            ]
+        )
+        presentation = self.presenter.present(response)
+        assert presentation.workplaces[0].url == self.url_index.get_company_summary_url(
+            company_id=workplace_id
+        )
+
     def test_that_work_registration_info_is_not_shown_when_worker_is_employed(self):
         response = self.get_response(
             workplaces=[
                 get_member_dashboard.Workplace(
-                    workplace_name="workplace_name", workplace_email="workplace@cp.org"
+                    workplace_name="workplace_name", workplace_id=uuid4()
                 ),
             ]
         )
