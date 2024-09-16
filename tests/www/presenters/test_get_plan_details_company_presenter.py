@@ -42,27 +42,39 @@ class TestPresenterForPlanner(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_own_plan_action_section)
 
-    def test_url_for_ending_cooperation_is_displayed_correctly_when_plan_is_cooperating(
+    def test_plan_id_is_displayed_correctly(self):
+        expected_plan_id = uuid4()
+        response = UseCaseResponse(
+            plan_details=self.plan_details_generator.create_plan_details(
+                plan_id=expected_plan_id, planner_id=self.expected_planner
+            ),
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.own_plan_action.plan_id == str(expected_plan_id)
+
+    def test_cooperation_id_is_displayed_correctly_when_plan_is_cooperating(
         self,
     ):
-        expected_plan_id = uuid4()
         expected_cooperation_id = uuid4()
         response = UseCaseResponse(
             plan_details=self.plan_details_generator.create_plan_details(
                 is_cooperating=True,
-                plan_id=expected_plan_id,
+                plan_id=uuid4(),
                 cooperation=expected_cooperation_id,
                 planner_id=self.expected_planner,
             ),
         )
         view_model = self.presenter.present(response)
-        self.assertEqual(
-            view_model.own_plan_action.end_coop_url,
-            self.url_index.get_end_coop_url(
-                plan_id=expected_plan_id,
-                cooperation_id=expected_cooperation_id,
+        assert view_model.own_plan_action.cooperation_id == str(expected_cooperation_id)
+
+    def test_cooperation_id_is_none_when_plan_is_not_cooperating(self):
+        response = UseCaseResponse(
+            plan_details=self.plan_details_generator.create_plan_details(
+                is_cooperating=False, planner_id=self.expected_planner
             ),
         )
+        view_model = self.presenter.present(response)
+        assert not view_model.own_plan_action.cooperation_id
 
     def test_no_url_for_requesting_cooperation_is_displayed_when_plan_is_cooperating(
         self,
@@ -74,17 +86,6 @@ class TestPresenterForPlanner(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         self.assertIsNone(view_model.own_plan_action.request_coop_url)
-
-    def test_no_url_for_ending_cooperation_is_displayed_when_plan_is_not_cooperating(
-        self,
-    ):
-        response = UseCaseResponse(
-            plan_details=self.plan_details_generator.create_plan_details(
-                is_cooperating=False, cooperation=None, planner_id=self.expected_planner
-            ),
-        )
-        view_model = self.presenter.present(response)
-        self.assertIsNone(view_model.own_plan_action.end_coop_url)
 
     def test_url_for_requesting_cooperation_is_displayed_correctly_when_plan_is_not_cooperating(
         self,
