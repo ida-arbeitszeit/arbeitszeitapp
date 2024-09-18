@@ -86,9 +86,10 @@ class ConfirmEmailAddressChangeForm(Protocol):
     def is_accepted_field(self) -> FormField[bool]: ...
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RegisterPrivateConsumptionForm:
     plan_id_value: str
     amount_value: str
     plan_id_errors: list[str] = field(default_factory=list)
     amount_errors: list[str] = field(default_factory=list)
+    general_errors: list[str] = field(default_factory=list)
