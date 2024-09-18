@@ -58,7 +58,6 @@ class QueriedPlanGenerator:
             is_public_service=False,
             is_cooperating=is_cooperating,
             activation_date=activation_date,
-            rejection_date=rejection_date,
         )
 
     def get_response(

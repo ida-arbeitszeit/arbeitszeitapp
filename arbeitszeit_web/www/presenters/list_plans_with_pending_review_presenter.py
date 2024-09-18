@@ -42,7 +42,7 @@ class ListPlansWithPendingReviewPresenter:
                     company_summary_url=self.url_index.get_company_summary_url(
                         company_id=plan.planner_id
                     ),
-                    reject_plan_url=self.url_index.get_reject_plan_url(plan_id=plan.id),
+                    reject_plan_url=self.url_index.get_reject_plan_url(plan.id),
                 )
                 for plan in response.plans
             ],

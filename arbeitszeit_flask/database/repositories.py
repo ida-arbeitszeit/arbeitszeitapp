@@ -89,10 +89,16 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def ordered_by_rejection_date(self, ascending: bool = True) -> Self:
-        ordering = models.Plan.rejection_date
+        review = aliased(models.PlanReview)
+        ordering = review.rejection_date
         if not ascending:
             ordering = ordering.desc()
-        return self._with_modified_query(lambda query: query.order_by(ordering))
+        query = self._with_modified_query(
+            lambda query: query.join(review, review.plan_id == models.Plan.id).order_by(
+                ordering
+            )
+        )
+        return query
 
     def with_id_containing(self, query: str) -> Self:
         return self._with_modified_query(

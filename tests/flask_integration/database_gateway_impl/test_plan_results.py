@@ -276,24 +276,23 @@ class GetAllPlans(FlaskTestCase):
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
         assert not list(self.database_gateway.get_plans())
 
-    def test_that_only_unapproved_plans_are_returned(self) -> None:
+    def test_that_unapproved_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=False)
-        self.plan_generator.create_plan(rejected=False)
         assert list(self.database_gateway.get_plans())
 
-    def test_that_only_approved_plans_are_returned(self) -> None:
+    def test_that_approved_and_rejected_plans_are_returned(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        self.plan_generator.create_plan(rejected=True)
-        assert len(list(self.database_gateway.get_plans())) == 1
+        self.plan_generator.create_plan(approved=False, rejected=True)
+        assert len(list(self.database_gateway.get_plans())) == 2
 
     def test_that_can_filter_unapproved_plans_from_results(self) -> None:
-        self.plan_generator.create_plan(approved=False, rejected=False)
+        self.plan_generator.create_plan(approved=False)
         self.plan_generator.create_plan(approved=False, rejected=True)
         assert not list(self.database_gateway.get_plans().that_are_approved())
 
     def test_that_can_filter_unrejected_plans_from_results(self) -> None:
-        self.plan_generator.create_plan(approved=False, rejected=False)
         self.plan_generator.create_plan(approved=True, rejected=False)
+        self.plan_generator.create_plan(approved=False, rejected=False)
         assert not list(self.database_gateway.get_plans().that_are_rejected())
 
     def test_can_filter_public_plans(self) -> None:
@@ -360,15 +359,16 @@ class GetAllPlans(FlaskTestCase):
 
     def test_can_filter_results_for_unreviewed_plans(self) -> None:
         self.plan_generator.create_plan(approved=True)
-        self.plan_generator.create_plan(rejected=True)
+        self.plan_generator.create_plan(approved=False, rejected=True)
         assert not self.database_gateway.get_plans().without_completed_review()
 
     def test_filtering_unreviewed_plans_will_still_contain_unreviewed_plans(
         self,
     ) -> None:
-        self.plan_generator.create_plan(approved=False)
-        self.plan_generator.create_plan(rejected=False)
-        assert len(self.database_gateway.get_plans().without_completed_review()) == 2
+        self.plan_generator.create_plan(approved=False, rejected=False)
+        self.plan_generator.create_plan(approved=True)
+        self.plan_generator.create_plan(approved=False, rejected=True)
+        assert len(self.database_gateway.get_plans().without_completed_review()) == 1
 
     def test_that_plans_with_open_cooperation_request_can_be_filtered(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
