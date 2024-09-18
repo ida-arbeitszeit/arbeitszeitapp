@@ -15,7 +15,9 @@ from arbeitszeit_web.www.controllers.register_private_consumption_controller imp
     RegisterPrivateConsumptionController,
 )
 from arbeitszeit_web.www.presenters.register_private_consumption_presenter import (
+    Redirect,
     RegisterPrivateConsumptionPresenter,
+    RenderForm,
 )
 
 
@@ -48,14 +50,16 @@ class RegisterPrivateConsumptionView:
             use_case_request
         )
         view_model = self.presenter.present(response, request=FlaskRequest())
-        if view_model.redirect_url:
-            return redirect(view_model.redirect_url)
-        return FlaskResponse(
-            render_template(
-                "member/register_private_consumption.html", form=view_model.form
-            ),
-            status=view_model.status_code,
-        )
+        match view_model:
+            case Redirect(url):
+                return redirect(url)
+            case RenderForm(status_code=status_code, form=form):
+                return FlaskResponse(
+                    render_template(
+                        "member/register_private_consumption.html", form=form
+                    ),
+                    status=status_code,
+                )
 
     def _render_template(self, form: RegisterPrivateConsumptionForm) -> str:
         return render_template("member/register_private_consumption.html", form=form)

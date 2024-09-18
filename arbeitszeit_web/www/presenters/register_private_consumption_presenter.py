@@ -12,10 +12,17 @@ from arbeitszeit_web.url_index import UrlIndex
 
 
 @dataclass
-class RegisterPrivateConsumptionViewModel:
-    status_code: int | None
+class RenderForm:
+    status_code: int
     form: RegisterPrivateConsumptionForm
-    redirect_url: str | None = None
+
+
+@dataclass
+class Redirect:
+    url: str
+
+
+RegisterPrivateConsumptionViewModel = Redirect | RenderForm
 
 
 @dataclass
@@ -29,47 +36,46 @@ class RegisterPrivateConsumptionPresenter:
         use_case_response: RegisterPrivateConsumptionResponse,
         request: Request,
     ) -> RegisterPrivateConsumptionViewModel:
-        form = RegisterPrivateConsumptionForm(
-            plan_id_value="",
-            amount_value="",
-        )
         if use_case_response.rejection_reason is None:
             self.user_notifier.display_info(
                 self.translator.gettext("Consumption successfully registered.")
             )
-            return RegisterPrivateConsumptionViewModel(
-                status_code=None,
-                form=form,
-                redirect_url=self.url_index.get_register_private_consumption_url(),
-            )
-        elif use_case_response.rejection_reason == RejectionReason.plan_inactive:
-            self.user_notifier.display_warning(
+            return Redirect(url=self.url_index.get_register_private_consumption_url())
+        form = self._create_form(request)
+        status_code = 400
+        if use_case_response.rejection_reason == RejectionReason.plan_inactive:
+            form.plan_id_errors.append(
                 self.translator.gettext(
                     "The specified plan has been expired. Please contact the selling company to provide you with an up-to-date plan ID."
                 )
             )
-            return RegisterPrivateConsumptionViewModel(status_code=410, form=form)
+            status_code = 410
         elif use_case_response.rejection_reason == RejectionReason.insufficient_balance:
-            self.user_notifier.display_warning(
+            form.general_errors.append(
                 self.translator.gettext("You do not have enough work certificates.")
             )
-            return RegisterPrivateConsumptionViewModel(status_code=406, form=form)
+            status_code = 406
         elif (
             use_case_response.rejection_reason
             == RejectionReason.consumer_does_not_exist
         ):
-            self.user_notifier.display_warning(
+            form.general_errors.append(
                 self.translator.gettext(
                     "Failed to register private consumption. Are you logged in as a member?"
                 )
             )
-            return RegisterPrivateConsumptionViewModel(status_code=404, form=form)
+            status_code = 404
         else:
-            self.user_notifier.display_warning(
+            form.plan_id_errors.append(
                 self.translator.gettext(
                     "There is no plan with the specified ID in the database."
                 )
             )
-            return RegisterPrivateConsumptionViewModel(
-                status_code=404, form=form, redirect_url=None
-            )
+            status_code = 404
+        return RenderForm(status_code=status_code, form=form)
+
+    def _create_form(self, request: Request) -> RegisterPrivateConsumptionForm:
+        return RegisterPrivateConsumptionForm(
+            plan_id_value=request.get_form("plan_id") or "",
+            amount_value=request.get_form("amount") or "",
+        )

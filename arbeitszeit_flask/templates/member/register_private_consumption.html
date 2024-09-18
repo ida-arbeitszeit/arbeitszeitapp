@@ -14,6 +14,13 @@
             </h1>
             <br>
             <div class="content">
+                {% if form.general_errors %}
+                <ul>
+                  {% for error in form.general_errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
