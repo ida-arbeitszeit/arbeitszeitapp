@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from flask import Response as FlaskResponse
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
@@ -48,8 +48,8 @@ class RegisterPrivateConsumptionView:
             use_case_request
         )
         view_model = self.presenter.present(response, request=FlaskRequest())
-        if view_model.status_code == 200:
-            return redirect(url_for("main_member.register_private_consumption"))
+        if view_model.redirect_url:
+            return redirect(view_model.redirect_url)
         return FlaskResponse(
             render_template(
                 "member/register_private_consumption.html", form=view_model.form

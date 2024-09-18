@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumptionResponse,
     RejectionReason,
@@ -77,14 +79,43 @@ class RegisterPrivateConsumptionPresenterTests(BaseTestCase):
         )
         self.assertEqual(view_model.status_code, 404)
 
-    def test_presenter_returns_200_status_code_when_registration_was_accepted(
+    def test_status_code_is_none_when_response_is_success(
         self,
     ) -> None:
         view_model = self.presenter.present(
             RegisterPrivateConsumptionResponse(rejection_reason=None),
             request=FakeRequest(),
         )
-        self.assertEqual(view_model.status_code, 200)
+        assert view_model.status_code is None
+
+    def test_that_successful_response_results_in_redirect_url_being_set(self) -> None:
+        view_model = self.presenter.present(
+            RegisterPrivateConsumptionResponse(rejection_reason=None),
+            request=FakeRequest(),
+        )
+        assert view_model.redirect_url
+
+    def test_that_successful_response_results_in_redirect_to_register_private_consumption_url(
+        self,
+    ) -> None:
+        view_model = self.presenter.present(
+            RegisterPrivateConsumptionResponse(rejection_reason=None),
+            request=FakeRequest(),
+        )
+        assert (
+            view_model.redirect_url
+            == self.url_index.get_register_private_consumption_url()
+        )
+
+    @parameterized.expand([(reason,) for reason in RejectionReason])
+    def test_that_error_response_results_in_redirect_url_not_being_set(
+        self, reason: RejectionReason
+    ) -> None:
+        view_model = self.presenter.present(
+            RegisterPrivateConsumptionResponse(rejection_reason=reason),
+            request=FakeRequest(),
+        )
+        assert view_model.redirect_url is None
 
     def test_presenter_returns_410_status_code_when_plan_is_inactive(self) -> None:
         view_model = self.presenter.present(
