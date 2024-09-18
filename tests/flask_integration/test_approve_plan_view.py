@@ -9,7 +9,7 @@ class AccountantTests(ViewTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
 
     def test_that_logged_in_accountant_gets_redirected(self) -> None:
-        plan = self.plan_generator.create_plan(approved=True)
+        plan = self.plan_generator.create_plan()
         self.assert_response_has_expected_code(
             url=f"/accountant/plans/{plan}/approve",
             method="post",
@@ -18,7 +18,7 @@ class AccountantTests(ViewTestCase):
         )
 
     def test_that_unauthenticated_user_gets_redirected(self) -> None:
-        plan = self.plan_generator.create_plan(approved=True)
+        plan = self.plan_generator.create_plan()
         self.assert_response_has_expected_code(
             url=f"/accountant/plans/{plan}/approve",
             method="post",
