@@ -4,8 +4,9 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from dateutil import tz
+from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
+from arbeitszeit.use_cases import get_member_dashboard
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
@@ -37,8 +38,8 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
     def test_that_workplaces_are_shown_when_worker_is_employed(self):
         response = self.get_response(
             workplaces=[
-                GetMemberDashboard.Workplace(
-                    workplace_name="workplace_name", workplace_email="workplace@cp.org"
+                get_member_dashboard.Workplace(
+                    workplace_name="workplace_name", workplace_id=uuid4()
                 ),
             ]
         )
@@ -46,11 +47,42 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         self.assertTrue(presentation.show_workplaces)
         self.assertTrue(presentation.workplaces)
 
+    @parameterized.expand(
+        [
+            ("Workplace Name 1",),
+            ("Workplace Name 2",),
+        ]
+    )
+    def test_that_the_correct_name_of_workplace_is_shown(self, workplace_name: str):
+        response = self.get_response(
+            workplaces=[
+                get_member_dashboard.Workplace(
+                    workplace_name=workplace_name, workplace_id=uuid4()
+                ),
+            ]
+        )
+        presentation = self.presenter.present(response)
+        assert presentation.workplaces[0].name == workplace_name
+
+    def test_that_url_of_workplace_leads_to_company_summary_page(self):
+        workplace_id = uuid4()
+        response = self.get_response(
+            workplaces=[
+                get_member_dashboard.Workplace(
+                    workplace_name="workplace_name", workplace_id=workplace_id
+                ),
+            ]
+        )
+        presentation = self.presenter.present(response)
+        assert presentation.workplaces[0].url == self.url_index.get_company_summary_url(
+            company_id=workplace_id
+        )
+
     def test_that_work_registration_info_is_not_shown_when_worker_is_employed(self):
         response = self.get_response(
             workplaces=[
-                GetMemberDashboard.Workplace(
-                    workplace_name="workplace_name", workplace_email="workplace@cp.org"
+                get_member_dashboard.Workplace(
+                    workplace_name="workplace_name", workplace_id=uuid4()
                 ),
             ]
         )
@@ -79,7 +111,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         expected_name = "test name"
         response = self.get_response(
             three_latest_plans=[
-                GetMemberDashboard.PlanDetails(
+                get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name=expected_name,
                     activation_date=datetime.now(),
@@ -93,7 +125,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         now = datetime.now(tz=tz.gettz("Europe/Berlin"))
         response = self.get_response(
             three_latest_plans=[
-                GetMemberDashboard.PlanDetails(
+                get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name="test name",
                     activation_date=now,
@@ -109,7 +141,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         plan_id = uuid4()
         response = self.get_response(
             three_latest_plans=[
-                GetMemberDashboard.PlanDetails(
+                get_member_dashboard.PlanDetails(
                     plan_id=plan_id,
                     prd_name="test name",
                     activation_date=datetime.now(),
@@ -166,22 +198,22 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
 
     def get_invite(
         self, invite_id: Optional[UUID] = None, company_name: Optional[str] = None
-    ) -> GetMemberDashboard.WorkInvitation:
+    ) -> get_member_dashboard.WorkInvitation:
         if invite_id is None:
             invite_id = uuid4()
         if company_name is None:
             company_name = ""
-        return GetMemberDashboard.WorkInvitation(
+        return get_member_dashboard.WorkInvitation(
             invite_id=invite_id, company_id=uuid4(), company_name=company_name
         )
 
     def get_response(
         self,
-        workplaces: Optional[List[GetMemberDashboard.Workplace]] = None,
+        workplaces: Optional[List[get_member_dashboard.Workplace]] = None,
         account_balance: Optional[Decimal] = None,
-        three_latest_plans: Optional[List[GetMemberDashboard.PlanDetails]] = None,
-        invites: Optional[List[GetMemberDashboard.WorkInvitation]] = None,
-    ) -> GetMemberDashboard.Response:
+        three_latest_plans: Optional[List[get_member_dashboard.PlanDetails]] = None,
+        invites: Optional[List[get_member_dashboard.WorkInvitation]] = None,
+    ) -> get_member_dashboard.Response:
         if workplaces is None:
             workplaces = []
         if account_balance is None:
@@ -190,7 +222,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
             three_latest_plans = []
         if invites is None:
             invites = []
-        return GetMemberDashboard.Response(
+        return get_member_dashboard.Response(
             workplaces=workplaces,
             invites=invites,
             three_latest_plans=three_latest_plans,

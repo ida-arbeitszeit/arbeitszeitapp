@@ -41,9 +41,9 @@ class PresentUseCaseResponseTests(BaseTestCase):
         self.assertTrue(self.notifier.infos)
         self.assertFalse(self.notifier.warnings)
 
-    def test_presenter_returns_status_200_if_use_case_response_is_successfull(self):
+    def test_presenter_returns_status_302_if_use_case_response_is_successfull(self):
         code = self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)
-        self.assertEqual(code, 200)
+        self.assertEqual(code, 302)
 
     def test_that_the_user_is_notified_about_success(self) -> None:
         self.presenter.present_use_case_response(SUCCESS_USE_CASE_RESPONSE)

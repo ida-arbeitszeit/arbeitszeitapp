@@ -16,7 +16,7 @@ class AccountBalances:
 @dataclass
 class BalanceChecker:
     get_company_summary: get_company_summary.GetCompanySummary
-    get_member_dashboard: get_member_dashboard.GetMemberDashboard
+    get_member_dashboard_use_case: get_member_dashboard.GetMemberDashboardUseCase
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:
         response = self.get_company_summary(company_id=company)
@@ -29,5 +29,8 @@ class BalanceChecker:
         )
 
     def get_member_account_balance(self, member: UUID) -> Decimal:
-        response = self.get_member_dashboard(member=member)
+        request = get_member_dashboard.Request(member=member)
+        response = self.get_member_dashboard_use_case.get_member_dashboard(
+            request=request
+        )
         return response.account_balance

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.get_member_dashboard import GetMemberDashboard
+from arbeitszeit.use_cases import get_member_dashboard
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
@@ -11,7 +11,7 @@ from arbeitszeit_web.url_index import UrlIndex
 @dataclass
 class Workplace:
     name: str
-    email: str
+    url: str
 
 
 @dataclass
@@ -49,7 +49,7 @@ class GetMemberDashboardPresenter:
     datetime_formatter: DatetimeFormatter
 
     def present(
-        self, use_case_response: GetMemberDashboard.Response
+        self, use_case_response: get_member_dashboard.Response
     ) -> GetMemberDashboardViewModel:
         latest_plans = [
             self._get_plan_details_web(plan_detail)
@@ -67,7 +67,9 @@ class GetMemberDashboardPresenter:
             workplaces=[
                 Workplace(
                     name=workplace.workplace_name,
-                    email=workplace.workplace_email,
+                    url=self.url_index.get_company_summary_url(
+                        company_id=workplace.workplace_id
+                    ),
                 )
                 for workplace in use_case_response.workplaces
             ],
@@ -82,7 +84,7 @@ class GetMemberDashboardPresenter:
         )
 
     def _get_plan_details_web(
-        self, plan_detail: GetMemberDashboard.PlanDetails
+        self, plan_detail: get_member_dashboard.PlanDetails
     ) -> PlanDetailsWeb:
         return PlanDetailsWeb(
             prd_name=plan_detail.prd_name,
@@ -96,7 +98,7 @@ class GetMemberDashboardPresenter:
             ),
         )
 
-    def _get_invites_web(self, invite: GetMemberDashboard.WorkInvitation) -> Invite:
+    def _get_invites_web(self, invite: get_member_dashboard.WorkInvitation) -> Invite:
         return Invite(
             invite_details_url=self.url_index.get_work_invite_url(invite.invite_id),
             invite_message=self.translator.gettext(

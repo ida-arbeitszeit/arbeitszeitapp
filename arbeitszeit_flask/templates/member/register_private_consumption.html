@@ -14,26 +14,49 @@
             </h1>
             <br>
             <div class="content">
-                {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                <div class="notification is-danger">
-                    {{ form[field_name].label }}: {{ error }}
-                </div>
-                {% endfor %}
-                {% endfor %}
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
                         <label class="label">{{ gettext("Plan ID") }}</label>
                         <div class="control">
-                            {{ form.plan_id(class_="input") }}
+                          <input
+                            class="input"
+                            id="plan_id"
+                            name="plan_id"
+                            placeholder="{{ gettext('Plan ID') }}"
+                            type="text"
+                            value="{{ form.plan_id_value }}"
+                            required
+                            >
                         </div>
+                        {% if form.plan_id_errors %}
+                        <ul>
+                          {% for error in form.plan_id_errors %}
+                          <li>{{ error }}</li>
+                          {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
                     <div class="field">
                         <label class="label">{{ gettext("Amount") }}</label>
                         <div class="control">
-                            {{ form.amount(class_="input") }}
+                          <input
+                            class="input"
+                            id="amount"
+                            name="amount"
+                            placeholder="{{ gettext('Amount') }}"
+                            type="text"
+                            value="{{ form.amount_value }}"
+                            required
+                            >
                         </div>
+                        {% if form.amount_errors %}
+                        <ul>
+                          {% for error in form.amount_errors %}
+                          <li>{{ error }}</li>
+                          {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
                     <div class="field">
                         <div class="control">

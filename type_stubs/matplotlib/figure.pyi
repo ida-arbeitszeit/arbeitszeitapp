@@ -146,7 +146,6 @@ class SubFigure(FigureBase):
     figure: Incomplete
     subplotpars: Incomplete
     dpi_scale_trans: Incomplete
-    canvas: Incomplete
     transFigure: Incomplete
     bbox_relative: Incomplete
     figbbox: Incomplete
@@ -164,6 +163,8 @@ class SubFigure(FigureBase):
         frameon: Incomplete | None = None,
         **kwargs,
     ) -> None: ...
+    @property
+    def canvas(self): ...
     @property
     def dpi(self): ...
     @dpi.setter

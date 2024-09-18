@@ -1,13 +1,15 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
+import pytest
+
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumptionRequest,
 )
 from arbeitszeit_web.www.controllers.register_private_consumption_controller import (
     RegisterPrivateConsumptionController,
 )
-from tests.forms import RegisterPrivateConsumptionFakeForm
+from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 
 ControllerResult = Optional[RegisterPrivateConsumptionRequest]
@@ -17,11 +19,17 @@ class RegisterPrivateConsumptionControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(RegisterPrivateConsumptionController)
-        self.form = RegisterPrivateConsumptionFakeForm()
 
     def test_error_is_raised_when_form_data_is_empty_strings(self) -> None:
         with self.assertRaises(self.controller.FormError):
             self._process_form(plan_id="", amount="")
+
+    def test_errors_message_when_amount_is_empty(self) -> None:
+        with pytest.raises(self.controller.FormError) as error:
+            self._process_form(amount="")
+        assert error.value.form.amount_errors == [
+            self.translator.gettext("You must specify an amount.")
+        ]
 
     def test_error_is_raised_when_plan_id_is_emtpy(self) -> None:
         with self.assertRaises(self.controller.FormError):
@@ -51,65 +59,56 @@ class RegisterPrivateConsumptionControllerTests(BaseTestCase):
     def test_correct_error_message_returned_for_plan_id_when_form_data_is_empty_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(plan_id="", amount="")
-        self.assertEqual(
-            self.form.plan_id_errors, [self.translator.gettext("Plan ID is invalid.")]
-        )
+        assert error.value.form.plan_id_errors == [
+            self.translator.gettext("Plan ID is invalid.")
+        ]
 
     def test_correct_error_message_returned_when_plan_id_is_invalid_uuid(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(plan_id="aa18781hh")
-        self.assertEqual(
-            self.form.plan_id_errors,
-            [self.translator.gettext("Plan ID is invalid.")],
-        )
+        assert error.value.form.plan_id_errors == [
+            self.translator.gettext("Plan ID is invalid.")
+        ]
 
     def test_correct_error_message_returned_when_amount_is_negative_int_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(amount="-1")
-        self.assertEqual(
-            self.form.amount_errors,
-            [self.translator.gettext("Must be a number larger than zero.")],
-        )
+        assert error.value.form.amount_errors == [
+            self.translator.gettext("Must be a number larger than zero.")
+        ]
 
     def test_correct_error_message_returned_when_amount_is_positive_float_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(amount="1.1")
-        self.assertEqual(
-            self.form.amount_errors,
-            [
-                self.translator.gettext("This is not an integer."),
-            ],
-        )
+        assert error.value.form.amount_errors == [
+            self.translator.gettext("This is not an integer."),
+        ]
 
     def test_correct_error_message_returned_when_amount_is_negative_float_string(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(amount="-1.1")
-        self.assertEqual(
-            self.form.amount_errors,
-            [
-                self.translator.gettext("This is not an integer."),
-            ],
-        )
+        assert error.value.form.amount_errors == [
+            self.translator.gettext("This is not an integer."),
+        ]
 
     def test_correct_error_message_returned_when_amount_string_contains_letters(
         self,
     ) -> None:
-        with self.assertRaises(self.controller.FormError):
+        with pytest.raises(self.controller.FormError) as error:
             self._process_form(amount="1a")
-        self.assertEqual(
-            self.form.amount_errors,
-            [self.translator.gettext("This is not an integer.")],
-        )
+        assert error.value.form.amount_errors == [
+            self.translator.gettext("This is not an integer.")
+        ]
 
     def test_valid_data_returned_when_uuid_is_valid_and_amount_is_number(self):
         result = self._process_form()
@@ -138,13 +137,16 @@ class RegisterPrivateConsumptionControllerTests(BaseTestCase):
         plan_id: Optional[str] = None,
         amount: Optional[str] = None,
     ) -> ControllerResult:
+        request = FakeRequest()
         if plan_id is None:
-            plan_id = str(uuid4())
+            request.set_form("plan_id", str(uuid4()))
+        else:
+            request.set_form("plan_id", plan_id)
         if amount is None:
-            amount = "1"
-        self.form.set_amount(amount)
-        self.form.set_plan_id(plan_id)
+            request.set_form("amount", "1")
+        else:
+            request.set_form("amount", amount)
         return self.controller.import_form_data(
             current_user=uuid4() if buyer is None else buyer,
-            form=self.form,
+            request=request,
         )

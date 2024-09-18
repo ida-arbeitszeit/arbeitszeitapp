@@ -208,29 +208,6 @@ class LoginForm(Form):
         return WtFormField(form=self, field_name="remember")
 
 
-class RegisterPrivateConsumptionForm(Form):
-    plan_id = StringField(
-        trans.lazy_gettext("Plan ID"),
-        render_kw={"placeholder": trans.lazy_gettext("Plan ID")},
-        validators=[
-            validators.InputRequired(),
-        ],
-    )
-    amount = StringField(
-        trans.lazy_gettext("Amount"),
-        render_kw={"placeholder": trans.lazy_gettext("Amount")},
-        validators=[
-            validators.InputRequired(),
-        ],
-    )
-
-    def amount_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="amount")
-
-    def plan_id_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="plan_id")
-
-
 class CompanySearchForm(Form):
     choices = [
         ("Name", trans.lazy_gettext("Name")),

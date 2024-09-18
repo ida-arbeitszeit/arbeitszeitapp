@@ -30,7 +30,7 @@ class RegisterHoursWorkedPresenter:
             self.notifier.display_info(
                 self.translator.gettext("Labour hours successfully registered")
             )
-            return 200
+            return 302
 
     def present_controller_warnings(
         self, controller_rejection: ControllerRejection

@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import Response, render_template
+from flask import Response as FlaskResponse
+from flask import redirect, render_template, url_for
 from flask_login import current_user
 
 from arbeitszeit.use_cases.list_workers import ListWorkers, ListWorkersRequest
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
     RegisterHoursWorkedController,
@@ -23,7 +25,6 @@ class RegisterHoursWorkedView:
     presenter: RegisterHoursWorkedPresenter
     list_workers: ListWorkers
 
-    @commit_changes
     def GET(self) -> Response:
         return self.create_response(status=200)
 
@@ -36,13 +37,15 @@ class RegisterHoursWorkedView:
         else:
             use_case_response = self.register_hours_worked(controller_response)
             status_code = self.presenter.present_use_case_response(use_case_response)
+            if status_code == 302:
+                return redirect(url_for("main_company.register_hours_worked"))
             return self.create_response(status=status_code)
 
     def create_response(self, status: int) -> Response:
         workers_list = self.list_workers(
             ListWorkersRequest(company=UUID(current_user.id))
         )
-        return Response(
+        return FlaskResponse(
             render_template(
                 "company/register_hours_worked.html",
                 workers_list=workers_list.workers,
