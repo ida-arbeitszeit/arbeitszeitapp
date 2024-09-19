@@ -92,3 +92,9 @@ class RegisterPrivateConsumptionForm:
     amount_value: str
     plan_id_errors: list[str] = field(default_factory=list)
     amount_errors: list[str] = field(default_factory=list)
+
+
+@dataclass
+class InviteWorkerToCompanyForm:
+    worker_id_value: str
+    worker_id_errors: list[str] = field(default_factory=list)

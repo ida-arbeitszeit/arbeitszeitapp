@@ -33,11 +33,11 @@ class TestExistingMemberWithNonMatchingInvite(TestCase):
         self.use_case = self.injector.get(ShowCompanyWorkInviteDetailsUseCase)
         self.member_generator = self.injector.get(MemberGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
-        self.invite_worker = self.injector.get(InviteWorkerToCompanyUseCase)
+        self.invite_worker_use_case = self.injector.get(InviteWorkerToCompanyUseCase)
         self.invited_member = self.member_generator.create_member()
         self.other_member = self.member_generator.create_member()
         self.company = self.company_generator.create_company_record()
-        invite_response = self.invite_worker(
+        invite_response = self.invite_worker_use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.invited_member,
@@ -83,7 +83,7 @@ class TestExistingMemberWithMatchingInvite(TestCase):
         self.company = self.company_generator.create_company_record(
             name=self.expected_company_name
         )
-        invite_response = self.invite_worker(
+        invite_response = self.invite_worker.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company.id,
                 worker=self.member,

@@ -11,88 +11,105 @@ class InviteWorkerTests(BaseTestCase):
         super().setUp()
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
+        self.use_case = self.injector.get(InviteWorkerToCompanyUseCase)
 
-    def test_can_successfully_invite_worker_which_was_not_previously_invited(
-        self,
-    ) -> None:
-        response = self.invite_worker_to_company(
-            InviteWorkerToCompanyUseCase.Request(
-                company=self.company,
-                worker=self.member,
-            )
+    def test_same_company_cannot_invite_same_worker_twice(self) -> None:
+        request = self.create_use_case_request()
+        self.use_case.invite_worker(request)
+        response = self.use_case.invite_worker(request)
+        assert (
+            response.rejection_reason
+            == InviteWorkerToCompanyUseCase.Response.RejectionReason.INVITATION_ALREADY_ISSUED
         )
-        self.assertTrue(response.is_success)
-
-    def test_cannot_invite_worker_twices(self) -> None:
-        request = InviteWorkerToCompanyUseCase.Request(
-            company=self.company,
-            worker=self.member,
-        )
-        self.invite_worker_to_company(request)
-        response = self.invite_worker_to_company(request)
-        assert not response.is_success
 
     def test_can_invite_different_workers(self) -> None:
-        first_member = self.member_generator.create_member()
-        second_member = self.member_generator.create_member()
-        self.invite_worker_to_company(
+        first_worker = self.member_generator.create_member()
+        second_worker = self.member_generator.create_member()
+        self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
-                worker=first_member,
+                worker=first_worker,
             )
         )
-        response = self.invite_worker_to_company(
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
-                worker=second_member,
+                worker=second_worker,
             )
         )
-        self.assertTrue(response.is_success)
+        assert not response.rejection_reason
+        assert response.invite_id
 
     def test_can_invite_same_worker_to_different_companies(self) -> None:
-        first_company = self.company_generator.create_company_record()
-        second_company = self.company_generator.create_company_record()
-        self.invite_worker_to_company(
+        first_company = self.company_generator.create_company()
+        second_company = self.company_generator.create_company()
+        self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
-                company=first_company.id,
+                company=first_company,
                 worker=self.member,
             )
         )
-        response = self.invite_worker_to_company(
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
-                company=second_company.id,
+                company=second_company,
                 worker=self.member,
             )
         )
-        self.assertTrue(response.is_success)
+        assert not response.rejection_reason
+        assert response.invite_id
 
     def test_cannot_invite_worker_that_does_not_exist(self) -> None:
-        response = self.invite_worker_to_company(
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=uuid4(),
             )
         )
-        self.assertFalse(response.is_success)
+        assert (
+            response.rejection_reason
+            == InviteWorkerToCompanyUseCase.Response.RejectionReason.WORKER_NOT_FOUND
+        )
 
     def test_cannot_invite_worker_to_company_that_does_not_exist(self) -> None:
-        response = self.invite_worker_to_company(
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=uuid4(),
                 worker=self.member,
             )
         )
-        self.assertFalse(response.is_success)
+        assert (
+            response.rejection_reason
+            == InviteWorkerToCompanyUseCase.Response.RejectionReason.COMPANY_NOT_FOUND
+        )
 
-    def test_response_uuid_is_not_none_on_successful_invite(self) -> None:
-        response = self.invite_worker_to_company(
+    def test_cannot_invite_worker_that_already_works_for_company(self) -> None:
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker])
+        response = self.use_case.invite_worker(
+            InviteWorkerToCompanyUseCase.Request(
+                company=company,
+                worker=worker,
+            )
+        )
+        assert (
+            response.rejection_reason
+            == InviteWorkerToCompanyUseCase.Response.RejectionReason.WORKER_ALREADY_WORKS_FOR_COMPANY
+        )
+
+    def test_invite_id_in_response_is_not_none_on_successful_invite(self) -> None:
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=self.member,
             )
         )
-        self.assertIsNotNone(response.invite_id)
+        assert response.invite_id
+
+    def create_use_case_request(self) -> InviteWorkerToCompanyUseCase.Request:
+        return InviteWorkerToCompanyUseCase.Request(
+            company=self.company,
+            worker=self.member,
+        )
 
 
 class NotificationTests(BaseTestCase):
@@ -100,52 +117,48 @@ class NotificationTests(BaseTestCase):
         super().setUp()
         self.company = self.company_generator.create_company()
         self.member = self.member_generator.create_member()
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
+        self.use_case = self.injector.get(InviteWorkerToCompanyUseCase)
 
     def test_no_invite_gets_send_if_invite_was_not_successful(self) -> None:
-        self.invite_worker_to_company(
+        self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=uuid4(),
             )
         )
         invites = self.get_sent_notifications()
-        self.assertEqual(len(invites), 0)
+        assert not invites
 
     def test_one_worker_gets_notified_on_successful_invite(self) -> None:
-        self.invite_worker_to_company(
+        self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=self.member,
             )
         )
         invites = self.get_sent_notifications()
-        self.assertEqual(len(invites), 1)
+        assert len(invites) == 1
 
     def test_correct_worker_gets_notified_on_successful_invite(self) -> None:
         expected_email = "test@test.test"
         company = self.company_generator.create_company()
         member = self.member_generator.create_member(email=expected_email)
-        self.invite_worker_to_company(
+        self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=company,
                 worker=member,
             )
         )
-        self.assertEqual(
-            self.get_latest_invite_notification().worker_email, expected_email
-        )
+        assert self.get_latest_invite_notification().worker_email == expected_email
 
     def test_worker_gets_notified_about_correct_invite(self) -> None:
-        response = self.invite_worker_to_company(
+        response = self.use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=self.member,
             )
         )
-        self.assertEqual(
-            self.get_latest_invite_notification().invite, response.invite_id
-        )
+        assert self.get_latest_invite_notification().invite == response.invite_id
 
     def get_latest_invite_notification(self) -> email_notifications.WorkerInvitation:
         notifications = self.get_sent_notifications()

@@ -218,7 +218,7 @@ class AnwerCompanyWorkInviteTests(BaseTestCase):
         self.assertIsNone(response.company_name)
 
     def _invite_worker(self) -> UUID:
-        invite_response = self.invite_worker_to_company(
+        invite_response = self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 self.company.id,
                 self.member,
