@@ -1,16 +1,12 @@
 from decimal import Decimal
 from uuid import uuid4
 
-from tests.data_generators import PlanGenerator, TransactionGenerator
-
 from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.transaction_generator = self.injector.get(TransactionGenerator)
         self.member = self.login_member()
         self.url = "/member/register_private_consumption"
 

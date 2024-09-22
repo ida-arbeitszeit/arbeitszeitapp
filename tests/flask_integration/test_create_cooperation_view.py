@@ -2,7 +2,6 @@ from typing import Optional
 
 from parameterized import parameterized
 
-from tests.data_generators import CooperationGenerator
 from tests.flask_integration.flask import LogInUser, ViewTestCase
 
 
@@ -34,7 +33,6 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = "/company/create_cooperation"
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
 
     def test_returns_302_when_posting_data(self) -> None:
         self.assert_response_has_expected_code(

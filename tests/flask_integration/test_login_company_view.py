@@ -1,5 +1,3 @@
-from tests.data_generators import CompanyGenerator
-
 from .flask import ViewTestCase
 
 
@@ -7,7 +5,6 @@ class LoginTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = "/company/login"
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_get_200_when_accessing_login_view(self) -> None:
         response = self.client.get(self.url)

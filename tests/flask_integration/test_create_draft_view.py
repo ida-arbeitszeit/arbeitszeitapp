@@ -4,7 +4,6 @@ from typing import Dict
 from parameterized import parameterized
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
-from tests.data_generators import PlanGenerator
 from tests.request import FakeRequest
 
 from .flask import ViewTestCase
@@ -13,7 +12,6 @@ from .flask import ViewTestCase
 class AuthenticatedCompanyTestsForGet(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.company = self.login_company()
 
     def test_get_200_without_url_parameter(
@@ -35,7 +33,6 @@ class AuthenticatedCompanyTestsForGet(ViewTestCase):
 class AuthenticatedCompanyTestsForPost(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.form = self.injector.get(FakeRequest)
         self.company = self.login_company()
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)

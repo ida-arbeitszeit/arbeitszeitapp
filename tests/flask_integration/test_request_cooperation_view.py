@@ -1,7 +1,5 @@
 from uuid import uuid4
 
-from tests.data_generators import PlanGenerator
-
 from .flask import ViewTestCase
 
 
@@ -29,7 +27,6 @@ class NotLoggedInCompanyTests(ViewTestCase):
 class LoggedInCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.company = self.login_company()
         self.url = "/company/request_cooperation"
 

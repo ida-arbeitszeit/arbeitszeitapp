@@ -1,7 +1,5 @@
 from uuid import UUID, uuid4
 
-from tests.data_generators import PlanGenerator
-
 from .flask import ViewTestCase
 
 
@@ -9,7 +7,6 @@ class ViewTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company = self.login_company()
-        self.plan_generator = self.injector.get(PlanGenerator)
 
     def test_get_proper_response_code_with_correct_draft_id(self) -> None:
         draft = self.plan_generator.draft_plan(planner=self.company.id)

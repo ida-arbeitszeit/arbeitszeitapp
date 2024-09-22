@@ -1,21 +1,10 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
-from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
 
 class ProductiveConsumptionResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def test_that_by_default_no_company_consumptions_are_in_db(self) -> None:
         assert not self.database_gateway.get_productive_consumptions()
 
@@ -239,13 +228,6 @@ class ProductiveConsumptionResultTests(FlaskTestCase):
 
 
 class FilterWhereProviderIsCompanyTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-
     def test_no_consumption_is_returned_when_queried_providing_company_does_not_exist(
         self,
     ) -> None:

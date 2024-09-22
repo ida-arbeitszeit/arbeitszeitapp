@@ -1,15 +1,11 @@
 from uuid import uuid4
 
-from tests.data_generators import CooperationGenerator, PlanGenerator
-
 from .flask import ViewTestCase
 
 
 class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.company = self.login_company()
 
     def test_get_404_when_no_query_arguments_are_sent(

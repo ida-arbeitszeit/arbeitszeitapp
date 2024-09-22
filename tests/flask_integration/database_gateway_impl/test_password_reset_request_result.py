@@ -2,18 +2,11 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from arbeitszeit import records
-from tests.data_generators import EmailGenerator
-from tests.datetime_service import FakeDatetimeService
 
 from ..flask import FlaskTestCase
 
 
 class PasswordResetRequestResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.email_generator = self.injector.get(EmailGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def _generateResetToken(self) -> str:
         return str(uuid4())
 

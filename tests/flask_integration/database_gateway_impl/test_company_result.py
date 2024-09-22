@@ -5,11 +5,6 @@ from uuid import UUID, uuid4
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit import records
-from tests.data_generators import (
-    CompanyGenerator,
-    CooperationGenerator,
-    MemberGenerator,
-)
 
 from ..flask import FlaskTestCase
 from .utility import Utility
@@ -54,11 +49,6 @@ class CompanyResultTests(FlaskTestCase):
 
 
 class RepositoryTester(CompanyResultTests):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.member_generator = self.injector.get(MemberGenerator)
-
     def test_cannot_retrieve_company_from_arbitrary_uuid(self) -> None:
         assert not self.database_gateway.get_companies().with_id(uuid4())
 
@@ -159,7 +149,6 @@ class CreateCompanyTests(CompanyResultTests):
     def setUp(self) -> None:
         super().setUp()
         self.db = self.injector.get(SQLAlchemy)
-        self.member_generator = self.injector.get(MemberGenerator)
 
     def test_that_company_can_be_created_while_member_with_same_email_exists(
         self,
@@ -177,11 +166,6 @@ class CreateCompanyTests(CompanyResultTests):
 
 
 class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.member_generator = self.injector.get(MemberGenerator)
-
     def test_that_by_default_random_members_are_not_assigned_to_a_company(self) -> None:
         self.company_generator.create_company()
         member = self.member_generator.create_member()
@@ -212,7 +196,6 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
 class WithNameContainingTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_companies_can_be_filtered_by_name(self):
         expected_company_id = self.company_generator.create_company(name="abc123")
@@ -240,10 +223,6 @@ class WithNameContainingTests(FlaskTestCase):
 
 
 class WithEmailContainingTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-
     def test_that_companies_can_be_filtered_by_email(self):
         expected_company_id = self.company_generator.create_company(
             email="some.mail@cp.org"
@@ -289,7 +268,6 @@ class WithEmailContainingTests(FlaskTestCase):
 class JoinedWithEmailTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def test_that_company_email_is_yielded(self) -> None:
         expected_email = "test@test.test"
@@ -304,11 +282,6 @@ class JoinedWithEmailTests(FlaskTestCase):
 
 
 class ThatIsCoordinatingCooperationTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-
     def test_that_unrelated_company_is_not_included(self) -> None:
         company = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation()

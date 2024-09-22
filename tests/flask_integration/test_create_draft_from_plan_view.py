@@ -1,14 +1,11 @@
 from uuid import UUID
 
-from tests.data_generators import PlanGenerator
-
 from .flask import ViewTestCase
 
 
 class ViewTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.company = self.login_company()
 
     def test_can_create_render_creation_page_from_existing_plan(self) -> None:

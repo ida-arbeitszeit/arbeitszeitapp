@@ -4,15 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.records import SocialAccounting, Transaction
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.data_generators import (
-    CompanyGenerator,
-    ConsumptionGenerator,
-    MemberGenerator,
-    PlanGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
 
 from ..flask import FlaskTestCase
 
@@ -20,11 +12,6 @@ from ..flask import FlaskTestCase
 class TransactionRepositoryTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.plan_generator: PlanGenerator = self.injector.get(PlanGenerator)
-        self.datetime_service: FakeDatetimeService = self.injector.get(
-            FakeDatetimeService
-        )
         self.social_accounting: SocialAccounting = self.injector.get(SocialAccounting)
 
     def test_created_transactions_show_up_in_all_transactions_received_by_account(
@@ -205,13 +192,6 @@ class TransactionRepositoryTests(FlaskTestCase):
 
 
 class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.datetime_service: FakeDatetimeService = self.injector.get(
-            FakeDatetimeService
-        )
-
     def test_transactions_are_presented_in_result_when_receiver_matches_account_id(
         self,
     ) -> None:
@@ -257,9 +237,6 @@ class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
 class ThatWereASaleForPlanResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(1000000)
 
@@ -312,9 +289,6 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
 class JoinedWithSenderAndReceiverTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.social_accounting: SocialAccounting = self.injector.get(SocialAccounting)
 
     def test_that_with_no_transactions_in_db_the_joined_result_set_is_empty(

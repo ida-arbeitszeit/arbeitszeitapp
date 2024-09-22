@@ -1,14 +1,11 @@
 from uuid import uuid4
 
-from tests.data_generators import PlanGenerator
-
 from .flask import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.member = self.login_member()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
@@ -26,7 +23,6 @@ class AuthenticatedMemberTests(ViewTestCase):
 class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.company = self.login_company()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
@@ -44,7 +40,6 @@ class AuthenticatedCompanyTests(ViewTestCase):
 class AuthenticatedAccountantTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.accountant = self.login_accountant()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
