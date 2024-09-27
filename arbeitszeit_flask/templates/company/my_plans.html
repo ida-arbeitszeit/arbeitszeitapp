@@ -64,13 +64,10 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small>{{ "calendar"|icon }}&nbsp;{{ plan.rejection_date }}</small>
+              <small>{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}&nbsp;{{ "times"|icon }}&nbsp;{{ plan.rejection_date }}</small>
             </p>
           </div>
           <div>
-            {% if plan.is_cooperating %}
-            <span class="tag is-primary">{{ gettext("Cooperating plan") }}</span>
-            {% endif %}
             {% if plan.is_public_service %}
             <span class="tag is-warning">{{ gettext("Public") }}</span>
             {% endif %}

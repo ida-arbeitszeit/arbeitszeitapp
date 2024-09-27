@@ -362,7 +362,7 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(approved=False, rejected=True)
         assert not self.database_gateway.get_plans().without_completed_review()
 
-    def test_filtering_unreviewed_plans_will_still_contain_unreviewed_plans(
+    def test_that_only_not_approved_and_not_rejected_plans_are_returned_when_filtering_for_unreviewed_plans(
         self,
     ) -> None:
         self.plan_generator.create_plan(approved=False, rejected=False)

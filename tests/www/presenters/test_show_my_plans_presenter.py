@@ -249,10 +249,6 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             presentation.rejected_plans.rows[0].is_public_service,
             plan.is_public_service,
         )
-        self.assertEqual(
-            presentation.rejected_plans.rows[0].is_cooperating,
-            False,
-        )
 
     def _convert_into_plan_info(
         self, plan: Plan, cooperation: UUID | None = None

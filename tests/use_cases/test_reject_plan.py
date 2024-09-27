@@ -3,7 +3,6 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases import get_company_transactions
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
@@ -26,9 +25,6 @@ class UseCaseTests(BaseTestCase):
         self.get_company_summary = self.injector.get(GetCompanySummary)
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
-        )
-        self.get_company_transactions_use_case = self.injector.get(
-            get_company_transactions.GetCompanyTransactionsUseCase
         )
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
 

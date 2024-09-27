@@ -207,7 +207,7 @@ class PlanGenerator:
             response = self.approve_plan_use_case.approve_plan(
                 ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
             )
-            assert response.is_approved
+            assert response.is_plan_approved
         if rejected:
             rejected_response = self.reject_plan_use_case.reject_plan(
                 RejectPlanUseCase.Request(plan=file_plan_response.plan_id)

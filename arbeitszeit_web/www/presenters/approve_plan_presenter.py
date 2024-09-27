@@ -19,7 +19,7 @@ class ApprovePlanPresenter:
     translator: Translator
 
     def approve_plan(self, response: UseCase.Response) -> ViewModel:
-        if response.is_approved:
+        if response.is_plan_approved:
             self.notifier.display_info(
                 self.translator.gettext("Plan was approved successfully")
             )

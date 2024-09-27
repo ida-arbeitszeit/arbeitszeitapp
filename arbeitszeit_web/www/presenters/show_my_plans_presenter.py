@@ -78,8 +78,8 @@ class RejectedPlansRow:
     prd_name: str
     price_per_unit: str
     rejection_date: str
-    is_cooperating: bool
     is_public_service: bool
+    plan_creation_date: str
 
 
 @dataclass
@@ -212,8 +212,8 @@ class ShowMyPlansPresenter:
                     plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
                     prd_name=f"{plan.prd_name}",
                     price_per_unit=self.__format_price(plan.price_per_unit),
-                    is_cooperating=plan.is_cooperating,
                     is_public_service=plan.is_public_service,
+                    plan_creation_date=self.__format_date(plan.plan_creation_date),
                 )
                 for plan in response.rejected_plans
             ],
