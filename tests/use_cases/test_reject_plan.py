@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompan
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
+    RegisterProductiveConsumptionResponse,
 )
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.show_my_plans import (
@@ -70,7 +71,10 @@ class UseCaseTests(BaseTestCase):
                 consumption_type=ConsumptionType.means_of_prod,
             )
         )
-        self.assertTrue(consumption_response.is_rejected)
+        assert (
+            consumption_response.rejection_reason
+            == RegisterProductiveConsumptionResponse.RejectionReason.plan_is_rejected
+        )
 
     def test_that_company_account_balance_is_not_changed_when_plan_is_rejected(
         self,
