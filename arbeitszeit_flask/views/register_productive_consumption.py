@@ -6,30 +6,66 @@ from flask import redirect, render_template, request
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
 )
+from arbeitszeit.use_cases.select_productive_consumption import (
+    SelectProductiveConsumptionUseCase,
+)
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
     RegisterProductiveConsumptionController,
 )
+from arbeitszeit_web.www.controllers.select_productive_consumption_controller import (
+    SelectProductiveConsumptionController,
+)
 from arbeitszeit_web.www.presenters.register_productive_consumption_presenter import (
     RegisterProductiveConsumptionPresenter,
+)
+from arbeitszeit_web.www.presenters.select_productive_consumption_presenter import (
+    SelectProductiveConsumptionPresenter,
 )
 
 
 @dataclass
 class RegisterProductiveConsumptionView:
+    select_productive_consumption_controller: SelectProductiveConsumptionController
+    select_productive_consumption_use_case: SelectProductiveConsumptionUseCase
+    select_productive_consumption_presenter: SelectProductiveConsumptionPresenter
     controller: RegisterProductiveConsumptionController
     register_productive_consumption: RegisterProductiveConsumption
     presenter: RegisterProductiveConsumptionPresenter
 
     @commit_changes
     def GET(self) -> Response:
-        form = RegisterProductiveConsumptionForm(request.form)
-        plan_id: str | None = request.args.get("plan_id")
-        if plan_id:
-            form.plan_id_field().set_value(plan_id)
-        return FlaskResponse(self._render_template(form), status=200)
+        try:
+            use_case_request = (
+                self.select_productive_consumption_controller.process_input_data()
+            )
+        except self.select_productive_consumption_controller.InputDataError:
+            return self._handle_invalid_form(RegisterProductiveConsumptionForm())
+        use_case_response = (
+            self.select_productive_consumption_use_case.select_productive_consumption(
+                use_case_request
+            )
+        )
+        view_model = self.select_productive_consumption_presenter.render_response(
+            use_case_response
+        )
+        form = RegisterProductiveConsumptionForm(
+            plan_id=view_model.plan_id,
+            amount=view_model.amount,
+            type_of_consumption=(
+                "fixed" if view_model.is_consumption_of_fixed_means else "liquid"
+            ),
+        )
+        return FlaskResponse(
+            render_template(
+                "company/register_productive_consumption.html",
+                form=form,
+                view_model=view_model,
+            ),
+            status=view_model.status_code,
+        )
 
     @commit_changes
     def POST(self) -> Response:
@@ -48,7 +84,7 @@ class RegisterProductiveConsumptionView:
 
     def _render_template(self, form: RegisterProductiveConsumptionForm) -> str:
         return render_template(
-            "company/register_productive_consumption.html", form=form
+            "company/register_productive_consumption.html", form=form, view_model=None
         )
 
     def _handle_invalid_form(self, form: RegisterProductiveConsumptionForm) -> Response:
