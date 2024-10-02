@@ -13,11 +13,24 @@
       <div class="content">
         <h1 class="title">{{ gettext("Invite worker") }}</h1>
         <form method="post">
-          <div class="field has-addons has-addons-centered">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            {{ form.member_id(class_="input") }}
-            <button class="button is-primary">{{ gettext("Invite") }}</button>
-          </div>
+            <input 
+            class="input"
+            id="worker_id"
+            name="worker_id"
+            value="{{ form.worker_id_value }}"
+            placeholder="{{ gettext('Member ID') }}"
+            type="text"
+            required
+            >
+            {% if form.worker_id_errors %}
+            <ul class="has-text-danger has-text-left">
+              {% for error in form.worker_id_errors %}
+              <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            <button class="button is-primary" type="submit">{{ gettext("Invite") }}</button>
         </form>
       </div>
 

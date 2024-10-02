@@ -48,7 +48,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_invites_are_shown_when_worker_was_previously_invited(self):
         inviting_company = self.company_generator.create_company_record()
-        self.invite_worker_to_company(
+        self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
         request = get_member_dashboard.Request(member=self.member)
@@ -57,7 +57,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_show_id_of_company_that_sent_the_invite(self):
         inviting_company = self.company_generator.create_company_record()
-        self.invite_worker_to_company(
+        self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
         request = get_member_dashboard.Request(member=self.member)
@@ -66,7 +66,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_show_name_of_company_that_sent_the_invite(self):
         inviting_company = self.company_generator.create_company_record()
-        self.invite_worker_to_company(
+        self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
         request = get_member_dashboard.Request(member=self.member)
@@ -75,7 +75,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_show_correct_invite_id(self):
         inviting_company = self.company_generator.create_company_record()
-        invite_response = self.invite_worker_to_company(
+        invite_response = self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(inviting_company.id, self.member)
         )
         request = get_member_dashboard.Request(member=self.member)

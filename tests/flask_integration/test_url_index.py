@@ -86,7 +86,9 @@ class GeneralUrlIndexTests(ViewTestCase):
         super().setUp()
         self.plan_generator = self.injector.get(PlanGenerator)
         self.url_index = self.injector.get(GeneralUrlIndex)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
+        self.invite_worker_to_company_use_case = self.injector.get(
+            InviteWorkerToCompanyUseCase
+        )
         self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
@@ -230,7 +232,7 @@ class GeneralUrlIndexTests(ViewTestCase):
 
     def _create_invite(self, member: UUID) -> UUID:
         company = self.company_generator.create_company_record()
-        response = self.invite_worker_to_company(
+        response = self.invite_worker_to_company_use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=company.id,
                 worker=member,

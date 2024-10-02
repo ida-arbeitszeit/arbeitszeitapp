@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from flask import Response, flash, render_template, request
+from flask import Response as FlaskResponse
+from flask import redirect, render_template, url_for
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.list_workers import ListWorkers
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.forms import InviteWorkerToCompanyForm
+from arbeitszeit_flask.flask_request import FlaskRequest
+from arbeitszeit_flask.types import Response
+from arbeitszeit_web.forms import InviteWorkerToCompanyForm
 from arbeitszeit_web.www.controllers.invite_worker_to_company_controller import (
     InviteWorkerToCompanyController,
 )
@@ -16,74 +19,76 @@ from arbeitszeit_web.www.controllers.list_workers_controller import (
 )
 from arbeitszeit_web.www.presenters.invite_worker_to_company_presenter import (
     InviteWorkerToCompanyPresenter,
-    ViewModel,
 )
 from arbeitszeit_web.www.presenters.list_workers_presenter import ListWorkersPresenter
+
+TEMPLATE_NAME = "company/invite_worker_to_company.html"
 
 
 @dataclass
 class InviteWorkerToCompanyView:
-    post_request_handler: InviteWorkerPostRequestHandler
-    get_request_handler: InviteWorkerGetRequestHandler
+    list_workers_controller: ListWorkersController
+    list_workers_use_case: ListWorkers
+    list_workers_presenter: ListWorkersPresenter
+    invite_worker_controller: InviteWorkerToCompanyController
+    invite_worker_use_case: InviteWorkerToCompanyUseCase
+    invite_worker_presenter: InviteWorkerToCompanyPresenter
 
     def GET(self) -> Response:
-        form = InviteWorkerToCompanyForm(request.form)
-        return self.get_request_handler.respond_to_get(form)
-
-    @commit_changes
-    def POST(self) -> Response:
-        form = InviteWorkerToCompanyForm(request.form)
-        return self.post_request_handler.respond_to_post(form)
-
-
-@dataclass
-class InviteWorkerGetRequestHandler:
-    controller: ListWorkersController
-    use_case: ListWorkers
-    presenter: ListWorkersPresenter
-
-    def respond_to_get(self, form: InviteWorkerToCompanyForm) -> Response:
-        template_name = "company/invite_worker_to_company.html"
-        use_case_request = self.controller.create_use_case_request()
-        use_case_response = self.use_case(use_case_request)
-        view_model = self.presenter.show_workers_list(use_case_response)
-        return Response(
+        list_workers_use_case_request = (
+            self.list_workers_controller.create_use_case_request()
+        )
+        list_workers_use_case_response = self.list_workers_use_case(
+            list_workers_use_case_request
+        )
+        list_workers_view_model = self.list_workers_presenter.show_workers_list(
+            list_workers_use_case_response
+        )
+        return FlaskResponse(
             render_template(
-                template_name,
-                form=form,
-                view_model=view_model,
+                TEMPLATE_NAME,
+                form=InviteWorkerToCompanyForm(""),
+                view_model=list_workers_view_model,
             )
         )
 
-
-@dataclass
-class InviteWorkerPostRequestHandler:
-    use_case: InviteWorkerToCompanyUseCase
-    presenter: InviteWorkerToCompanyPresenter
-    controller: InviteWorkerToCompanyController
-
-    def respond_to_post(self, form: InviteWorkerToCompanyForm) -> Response:
-        template_name = "company/invite_worker_to_company.html"
-        if not form.validate():
-            return self._display_form_errors(form, template_name)
+    @commit_changes
+    def POST(self) -> Response:
         try:
-            use_case_request = self.controller.import_request_data(form)
-        except ValueError:
-            return self._display_form_errors(form, template_name)
-        use_case_response = self.use_case(use_case_request)
-        view_model = self.presenter.present(use_case_response)
-        for notification in view_model.notifications:
-            flash(notification)
-        return Response(
-            render_template(template_name, form=form, view_model=view_model),
-            status=200,
+            invite_worker_use_case_request = (
+                self.invite_worker_controller.import_request_data(
+                    request=FlaskRequest()
+                )
+            )
+        except self.invite_worker_controller.FormError as error:
+            return self._handle_failed_invitation(error.form)
+        invite_worker_use_case_response = self.invite_worker_use_case.invite_worker(
+            invite_worker_use_case_request
+        )
+        view_model = self.invite_worker_presenter.present(
+            invite_worker_use_case_response
+        )
+        if view_model.status_code == 302:
+            return redirect(url_for("main_company.invite_worker_to_company"))
+        return self._handle_failed_invitation(
+            InviteWorkerToCompanyForm(worker_id_value=view_model.worker)
         )
 
-    def _display_form_errors(
-        self, form: InviteWorkerToCompanyForm, template_name: str
-    ) -> Response:
-        view_model = ViewModel(notifications=["Ungültiges Formular"])
-        return Response(
-            render_template(template_name, form=form, view_model=view_model),
+    def _handle_failed_invitation(self, form: InviteWorkerToCompanyForm) -> Response:
+        list_workers_use_case_request = (
+            self.list_workers_controller.create_use_case_request()
+        )
+        list_workers_use_case_response = self.list_workers_use_case(
+            list_workers_use_case_request
+        )
+        list_workers_view_model = self.list_workers_presenter.show_workers_list(
+            list_workers_use_case_response
+        )
+        return FlaskResponse(
+            render_template(
+                TEMPLATE_NAME,
+                form=form,
+                view_model=list_workers_view_model,
+            ),
             status=400,
         )
