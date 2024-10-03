@@ -35,7 +35,6 @@ class RegisterProductiveConsumptionView:
     register_productive_consumption: RegisterProductiveConsumption
     presenter: RegisterProductiveConsumptionPresenter
 
-    @commit_changes
     def GET(self) -> Response:
         try:
             use_case_request = (
