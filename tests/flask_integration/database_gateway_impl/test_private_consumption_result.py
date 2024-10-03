@@ -1,26 +1,12 @@
 from datetime import datetime, timedelta
 
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.data_generators import (
-    CompanyGenerator,
-    ConsumptionGenerator,
-    MemberGenerator,
-    PlanGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
 
 class PrivateConsumptionTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(1000)
 

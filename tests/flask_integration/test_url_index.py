@@ -8,10 +8,8 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
-from tests.data_generators import CooperationGenerator, PlanGenerator
 
 from .flask import ViewTestCase
 
@@ -84,16 +82,13 @@ class PlotUrlIndexTests(ViewTestCase):
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.url_index = self.injector.get(GeneralUrlIndex)
         self.invite_worker_to_company_use_case = self.injector.get(
             InviteWorkerToCompanyUseCase
         )
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
-        self.token_service = self.injector.get(FlaskTokenService)
 
     def test_invite_url_for_existing_invite_leads_to_functional_url_for_member(
         self,

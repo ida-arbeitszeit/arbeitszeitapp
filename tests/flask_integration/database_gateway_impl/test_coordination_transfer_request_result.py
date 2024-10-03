@@ -2,44 +2,28 @@ from datetime import datetime
 from uuid import UUID
 
 from arbeitszeit.records import CoordinationTransferRequest
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
-from tests.data_generators import (
-    CompanyGenerator,
-    CooperationGenerator,
-    CoordinationTenureGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
 
 class CoordinationTransferRequestResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.db_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.coordination_tenure_generator = self.injector.get(
-            CoordinationTenureGenerator
-        )
-
     def test_that_a_priori_no_coordination_transfer_requests_are_in_db(
         self,
     ) -> None:
         coordination_transfer_request_results = (
-            self.db_gateway.get_coordination_transfer_requests()
+            self.database_gateway.get_coordination_transfer_requests()
         )
         assert not coordination_transfer_request_results
 
     def test_that_there_is_at_least_one_coordination_transfer_request_after_creating_one(
         self,
     ) -> None:
-        self.db_gateway.create_coordination_transfer_request(
+        self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=self.coordination_tenure_generator.create_coordination_tenure(),
             candidate=self.company_generator.create_company(),
             request_date=self.datetime_service.now(),
         )
         coordination_transfer_request_results = (
-            self.db_gateway.get_coordination_transfer_requests()
+            self.database_gateway.get_coordination_transfer_requests()
         )
         assert coordination_transfer_request_results
 
@@ -51,7 +35,7 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
         )
         expected_candidate = self.company_generator.create_company()
         expected_request_date = datetime(2020, 5, 1)
-        result = self.db_gateway.create_coordination_transfer_request(
+        result = self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=expected_requesting_coordination_tenure,
             candidate=expected_candidate,
             request_date=expected_request_date,
@@ -68,7 +52,7 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
     ) -> None:
         coordination_transfer_request = self.create_coordination_transfer_request()
         coordination_transfer_request_results = (
-            self.db_gateway.get_coordination_transfer_requests()
+            self.database_gateway.get_coordination_transfer_requests()
         )
         assert coordination_transfer_request_results.with_id(
             coordination_transfer_request.id
@@ -81,13 +65,13 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
         other_coordination_transfer_request = (
             self.create_coordination_transfer_request()
         )
-        results = self.db_gateway.get_coordination_transfer_requests()
+        results = self.database_gateway.get_coordination_transfer_requests()
         assert other_coordination_transfer_request not in list(
             results.with_id(coordination_transfer_request.id)
         )
 
     def create_coordination_transfer_request(self) -> CoordinationTransferRequest:
-        return self.db_gateway.create_coordination_transfer_request(
+        return self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=self.coordination_tenure_generator.create_coordination_tenure(),
             candidate=self.company_generator.create_company(),
             request_date=self.datetime_service.now(),
@@ -95,15 +79,6 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
 
 
 class RequestedByCoordinationTenureTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.db_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.coordination_tenure_generator = self.injector.get(
-            CoordinationTenureGenerator
-        )
-
     def test_results_filtered_by_requesting_coordination_tenure_does_return_transfer_request_of_that_coordination_tenure(
         self,
     ) -> None:
@@ -113,7 +88,7 @@ class RequestedByCoordinationTenureTests(FlaskTestCase):
         transfer_request = self.create_coordination_transfer_request(
             requesting_coordination_tenure=coordination_tenure,
         )
-        results = self.db_gateway.get_coordination_transfer_requests()
+        results = self.database_gateway.get_coordination_transfer_requests()
         assert transfer_request in list(results.requested_by(coordination_tenure))
 
     def test_results_filtered_by_requesting_coordination_tenure_dont_include_transfer_request_of_other_coordination_tenure(
@@ -131,7 +106,7 @@ class RequestedByCoordinationTenureTests(FlaskTestCase):
         other_transfer_request = self.create_coordination_transfer_request(
             requesting_coordination_tenure=other_coordination_tenure,
         )
-        results = self.db_gateway.get_coordination_transfer_requests()
+        results = self.database_gateway.get_coordination_transfer_requests()
         assert transfer_request in list(results.requested_by(coordination_tenure))
         assert other_transfer_request not in list(
             results.requested_by(coordination_tenure)
@@ -144,7 +119,7 @@ class RequestedByCoordinationTenureTests(FlaskTestCase):
             requesting_coordination_tenure = (
                 self.coordination_tenure_generator.create_coordination_tenure()
             )
-        return self.db_gateway.create_coordination_transfer_request(
+        return self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=requesting_coordination_tenure,
             candidate=self.company_generator.create_company(),
             request_date=self.datetime_service.now(),
@@ -152,16 +127,6 @@ class RequestedByCoordinationTenureTests(FlaskTestCase):
 
 
 class JoinedWithCooperationTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.db_gateway = self.injector.get(DatabaseGatewayImpl)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.coordination_tenure_generator = self.injector.get(
-            CoordinationTenureGenerator
-        )
-
     def test_that_joining_with_cooperation_returns_the_cooperation_from_which_the_request_has_been_issued(
         self,
     ) -> None:
@@ -175,7 +140,7 @@ class JoinedWithCooperationTests(FlaskTestCase):
             requesting_coordination_tenure=coordination_tenure,
         )
         results = (
-            self.db_gateway.get_coordination_transfer_requests().joined_with_cooperation()
+            self.database_gateway.get_coordination_transfer_requests().joined_with_cooperation()
         )
         assert len(results) == 1
         transfer_request_and_cooperation = results.first()
@@ -196,7 +161,7 @@ class JoinedWithCooperationTests(FlaskTestCase):
             requesting_coordination_tenure=coordination_tenure,
         )
         results = (
-            self.db_gateway.get_coordination_transfer_requests().joined_with_cooperation()
+            self.database_gateway.get_coordination_transfer_requests().joined_with_cooperation()
         )
         assert len(results) == 1
         transfer_request_and_cooperation = results.first()
@@ -225,7 +190,7 @@ class JoinedWithCooperationTests(FlaskTestCase):
             requesting_coordination_tenure=other_coordination_tenure,
         )
         results = (
-            self.db_gateway.get_coordination_transfer_requests().joined_with_cooperation()
+            self.database_gateway.get_coordination_transfer_requests().joined_with_cooperation()
         )
         assert len(results) == 2
         for transfer_request, cooperation in results:
@@ -241,7 +206,7 @@ class JoinedWithCooperationTests(FlaskTestCase):
             requesting_coordination_tenure = (
                 self.coordination_tenure_generator.create_coordination_tenure()
             )
-        return self.db_gateway.create_coordination_transfer_request(
+        return self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=requesting_coordination_tenure,
             candidate=self.company_generator.create_company(),
             request_date=self.datetime_service.now(),

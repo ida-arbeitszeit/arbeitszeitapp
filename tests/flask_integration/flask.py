@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Any, List, Optional
+from typing import Any, Generic, List, Optional, Type, TypeVar
 from unittest import TestCase
 from uuid import UUID
 
@@ -15,15 +15,44 @@ from tests.data_generators import (
     CompanyGenerator,
     ConsumptionGenerator,
     CooperationGenerator,
+    CoordinationTenureGenerator,
     CoordinationTransferRequestGenerator,
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
+    TransactionGenerator,
 )
+from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.mail_service import MockEmailService
 from tests.markers import database_required
 
 from .dependency_injection import get_dependency_injector
+
+T = TypeVar("T")
+
+
+# This class is a descriptor.
+class _lazy_property(Generic[T]):
+    def __init__(self, cls: Type[T]):
+        """Implement a lazy property for the FlaskTestCase.  If the
+        implementor asks for this attribute then it is generated on
+        demand and cached.
+        """
+        self.cls = cls
+
+    def __set_name__(self, owner, name: str) -> None:
+        self._attribute_name = name
+
+    def __get__(self, obj: Any, objtype=None) -> T:
+        cache = obj._lazy_property_cache
+        instance = cache.get(self._attribute_name)
+        if instance is None:
+            instance = obj.injector.get(self.cls)
+            cache[self._attribute_name] = instance
+        return instance
+
+    def __set__(self, obj: Any, value: T) -> None:
+        raise Exception("This attribute is read-only")
 
 
 class LogInUser(Enum):
@@ -38,6 +67,7 @@ class LogInUser(Enum):
 class FlaskTestCase(TestCase):
     def setUp(self) -> None:
         super().setUp()
+        self._lazy_property_cache: dict[str, Any] = dict()
         self.injector = get_dependency_injector(self.get_injection_modules())
         self.db = self.injector.get(SQLAlchemy)
         self.app = self.injector.get(Flask)
@@ -47,9 +77,9 @@ class FlaskTestCase(TestCase):
         self.db.drop_all()
         self.db.create_all()
         self.db.session.flush()
-        self.database_gateway = self.injector.get(DatabaseGatewayImpl)
 
     def tearDown(self) -> None:
+        self._lazy_property_cache = dict()
         self.db.session.flush()
         self.app_context.pop()
         super().tearDown()
@@ -60,22 +90,29 @@ class FlaskTestCase(TestCase):
     def email_service(self) -> MockEmailService:
         return current_app.extensions["arbeitszeit_email_plugin"]
 
+    # It would be nice to have the following list sorted
+    # alphabetically
+    accountant_generator = _lazy_property(AccountantGenerator)
+    company_generator = _lazy_property(CompanyGenerator)
+    consumption_generator = _lazy_property(ConsumptionGenerator)
+    cooperation_generator = _lazy_property(CooperationGenerator)
+    coordination_tenure_generator = _lazy_property(CoordinationTenureGenerator)
+    coordination_transfer_request_generator = _lazy_property(
+        CoordinationTransferRequestGenerator
+    )
+    database_gateway = _lazy_property(DatabaseGatewayImpl)
+    datetime_service = _lazy_property(FakeDatetimeService)
+    email_generator = _lazy_property(EmailGenerator)
+    member_generator = _lazy_property(MemberGenerator)
+    plan_generator = _lazy_property(PlanGenerator)
+    token_service = _lazy_property(FlaskTokenService)
+    transaction_generator = _lazy_property(TransactionGenerator)
+
 
 class ViewTestCase(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.client = self.app.test_client()
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.email_generator = self.injector.get(EmailGenerator)
-        self.accountant_generator = self.injector.get(AccountantGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.coordination_transfer_request_generator = self.injector.get(
-            CoordinationTransferRequestGenerator
-        )
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
-        self.token_service = self.injector.get(FlaskTokenService)
 
     def login_member(
         self,
