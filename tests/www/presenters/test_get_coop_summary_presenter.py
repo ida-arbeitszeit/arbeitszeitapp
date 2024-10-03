@@ -140,16 +140,10 @@ class GetCoopSummarySuccessPresenterTests(BaseTestCase):
         view_model = self.presenter.present(coop_summary)
         self.assertEqual(view_model.plans[0].plan_individual_price, expected_price)
 
-    def test_first_plans_end_coop_url_is_displayed_correctly(self):
+    def test_first_plans_plan_id_is_displayed_correctly(self):
         coop_summary = self.get_coop_summary()
         view_model = self.presenter.present(coop_summary)
-        self.assertEqual(
-            view_model.plans[0].end_coop_url,
-            self.url_index.get_end_coop_url(
-                plan_id=coop_summary.plans[0].plan_id,
-                cooperation_id=coop_summary.coop_id,
-            ),
-        )
+        assert view_model.plans[0].plan_id == str(coop_summary.plans[0].plan_id)
 
     def test_first_plans_planner_name_is_displayed_correctly(self):
         coop_summary = self.get_coop_summary()

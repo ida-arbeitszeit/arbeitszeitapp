@@ -29,7 +29,6 @@ class RequestCooperationView:
     controller: RequestCooperationController
     presenter: RequestCooperationPresenter
 
-    @commit_changes
     def GET(self) -> Response:
         list_plans_view_model = self._get_list_plans_view_model()
         return Response(

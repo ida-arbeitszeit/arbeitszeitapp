@@ -290,18 +290,6 @@ class CreateDraftForm(Form):
         return WtFormField(form=self, field_name="productive_or_public")
 
 
-class InviteWorkerToCompanyForm(Form):
-    member_id = StringField(
-        validators=[
-            FieldMustExist(message=trans.lazy_gettext("Required")),
-        ],
-        render_kw={"placeholder": trans.lazy_gettext("Member ID")},
-    )
-
-    def get_worker_id(self) -> str:
-        return self.data["member_id"]
-
-
 class CreateCooperationForm(Form):
     name = StringField(
         render_kw={"placeholder": trans.lazy_gettext("Name")},

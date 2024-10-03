@@ -78,12 +78,17 @@
                     </div>
                     <div>
                         {% if plan.show_end_coop_button %}
-                        <a class="button is-small is-danger" href="{{ plan.end_coop_url }}">
-                            <span class="icon">
-                                {{ "times"|icon }}
-                            </span>
-                            <span>{{ gettext("End cooperation") }}</span>
-                        </a>
+                         <form action="{{ url_for('main_company.end_cooperation') }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.plan_id }}">
+                            <input type="hidden" name="cooperation_id" value="{{ view_model.coop_id }}">
+                            <button class="button is-small is-danger" type="submit">
+                                <span class="icon">
+                                    {{ "times"|icon }}
+                                </span>
+                                <span>{{ gettext("End cooperation") }}</span>
+                            </button>
+                        </form>
                         {% endif %}
                     </div>
                 </div>

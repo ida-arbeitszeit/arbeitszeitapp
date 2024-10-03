@@ -9,10 +9,10 @@ from ...url_index import UrlIndex, UserUrlIndex
 
 @dataclass
 class AssociatedPlan:
+    plan_id: str
     plan_name: str
     plan_url: str
     plan_individual_price: str
-    end_coop_url: str
     planner_name: str
     planner_url: str
     show_end_coop_button: bool
@@ -68,13 +68,11 @@ class GetCoopSummarySuccessPresenter:
             ),
             plans=[
                 AssociatedPlan(
+                    plan_id=str(plan.plan_id),
                     plan_name=plan.plan_name,
                     plan_url=self.user_url_index.get_plan_details_url(plan.plan_id),
                     plan_individual_price=self.__format_price(
                         plan.plan_individual_price
-                    ),
-                    end_coop_url=self.url_index.get_end_coop_url(
-                        plan_id=plan.plan_id, cooperation_id=response.coop_id
                     ),
                     planner_name=plan.planner_name,
                     planner_url=self.url_index.get_company_summary_url(

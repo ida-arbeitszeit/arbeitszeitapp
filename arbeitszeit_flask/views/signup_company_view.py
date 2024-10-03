@@ -24,7 +24,6 @@ class SignupCompanyView:
     presenter: RegisterCompanyPresenter
     flask_session: FlaskSession
 
-    @commit_changes
     def GET(self) -> Response:
         register_form = RegisterForm(request.form)
         if current_user.is_authenticated:

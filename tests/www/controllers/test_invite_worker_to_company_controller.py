@@ -1,9 +1,11 @@
-from dataclasses import dataclass
 from uuid import uuid4
+
+from parameterized import parameterized
 
 from arbeitszeit_web.www.controllers.invite_worker_to_company_controller import (
     InviteWorkerToCompanyController,
 )
+from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -14,48 +16,33 @@ class InviteWorkerToCompanyControllerTests(BaseTestCase):
         self.company_id = uuid4()
         self.session.login_company(company=self.company_id)
 
-    def test_current_user_is_company_in_use_case_request(self) -> None:
-        use_case_request = self.controller.import_request_data(
-            form=Form(worker_id=str(uuid4())),
-        )
-        self.assertEqual(use_case_request.company, self.company_id)
+    @parameterized.expand(
+        [
+            ("",),
+            ("1",),
+            ("123-456",),
+        ]
+    )
+    def test_controller_raises_form_error_if_form_has_incorrectly_formed_worker_id(
+        self, worker_id: str
+    ) -> None:
+        request = FakeRequest()
+        request.set_form("worker_id", worker_id)
+        with self.assertRaises(InviteWorkerToCompanyController.FormError):
+            self.controller.import_request_data(request)
 
-    def test_raise_value_error_if_worker_id_is_empty_string(self) -> None:
-        with self.assertRaisesRegex(ValueError, "worker_id"):
-            self.controller.import_request_data(
-                form=Form(worker_id=""),
-            )
+    def test_controller_returns_use_case_request_with_id_of_currently_logged_in_company(
+        self,
+    ) -> None:
+        EXPECTED_COMPANY = self.company_id
+        request = FakeRequest()
+        request.set_form("worker_id", str(uuid4()))
+        use_case_request = self.controller.import_request_data(request)
+        assert use_case_request.company == EXPECTED_COMPANY
 
-    def test_raise_value_error_if_worker_id_is_not_a_uuid(self) -> None:
-        with self.assertRaises(ValueError):
-            self.controller.import_request_data(
-                form=Form(worker_id="1"),
-            )
-
-    def test_use_case_request_contains_specified_worker_id(self) -> None:
-        expected_worker_id = uuid4()
-        use_case_request = self.controller.import_request_data(
-            form=Form(worker_id=str(expected_worker_id)),
-        )
-        self.assertEqual(use_case_request.worker, expected_worker_id)
-
-
-class AnonymousUserTests(BaseTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.controller = self.injector.get(InviteWorkerToCompanyController)
-        self.session.logout()
-
-    def test_raise_value_error_if_user_is_not_logged_in(self) -> None:
-        with self.assertRaisesRegex(ValueError, r"User is not logged in"):
-            self.controller.import_request_data(
-                form=Form(worker_id=str(uuid4())),
-            )
-
-
-@dataclass
-class Form:
-    worker_id: str
-
-    def get_worker_id(self) -> str:
-        return self.worker_id
+    def test_controller_returns_use_case_request_with_worker_id_from_form(self) -> None:
+        EXPECTED_WORKER = uuid4()
+        request = FakeRequest()
+        request.set_form("worker_id", str(EXPECTED_WORKER))
+        use_case_request = self.controller.import_request_data(request)
+        assert use_case_request.worker == EXPECTED_WORKER

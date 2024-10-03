@@ -266,7 +266,6 @@ class request_cooperation(RequestCooperationView): ...
 
 
 @CompanyRoute("/my_cooperations", methods=["GET"])
-@commit_changes
 def my_cooperations(
     list_coordinations: ListCoordinationsOfCompany,
     show_company_cooperations: ShowCompanyCooperationsUseCase,
@@ -312,7 +311,7 @@ class cancel_cooperation_request(CancelCooperationRequestView): ...
 class invite_worker_to_company(InviteWorkerToCompanyView): ...
 
 
-@CompanyRoute("/end_cooperation")
+@CompanyRoute("/end_cooperation", methods=["POST"])
 @as_flask_view()
 class end_cooperation(EndCooperationView): ...
 

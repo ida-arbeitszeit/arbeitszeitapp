@@ -24,7 +24,6 @@ class SignupMemberView:
     register_member_presenter: RegisterMemberPresenter
     flask_session: FlaskSession
 
-    @commit_changes
     def GET(self):
         if current_user.is_authenticated:
             if self.flask_session.is_logged_in_as_member():

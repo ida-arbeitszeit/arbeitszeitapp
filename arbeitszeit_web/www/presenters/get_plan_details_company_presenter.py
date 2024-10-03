@@ -15,7 +15,8 @@ from ...url_index import UrlIndex
 @dataclass
 class OwnPlanAction:
     is_cooperating: bool
-    end_coop_url: Optional[str]
+    plan_id: str
+    cooperation_id: str | None
     request_coop_url: Optional[str]
 
 
@@ -63,13 +64,8 @@ class GetPlanDetailsCompanyPresenter:
     def _create_own_plan_action_section(self, plan: PlanDetails) -> OwnPlanAction:
         section = OwnPlanAction(
             is_cooperating=plan.is_cooperating,
-            end_coop_url=(
-                self.url_index.get_end_coop_url(
-                    plan_id=plan.plan_id, cooperation_id=plan.cooperation
-                )
-                if (plan.cooperation and plan.is_cooperating)
-                else None
-            ),
+            plan_id=str(plan.plan_id),
+            cooperation_id=str(plan.cooperation) if plan.cooperation else None,
             request_coop_url=(
                 self.url_index.get_request_coop_url()
                 if not plan.is_cooperating
