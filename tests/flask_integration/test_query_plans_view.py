@@ -73,3 +73,21 @@ class QueryPlansTests(ViewTestCase):
         )
         assert EXPECTED_PLAN_NAME in response.text
         assert UNEXPECTED_PLAN_NAME not in response.text
+
+    def test_that_plans_can_get_ordered_by_planner_name(self) -> None:
+        self.login_member()
+        COMPANY_NAME_1 = f"A-{uuid4()}"
+        COMPANY_NAME_2 = f"C-{uuid4()}"
+        COMPANY_NAME_3 = f"B-{uuid4()}"
+        planner_1 = self.company_generator.create_company(name=COMPANY_NAME_1)
+        planner_2 = self.company_generator.create_company(name=COMPANY_NAME_2)
+        planner_3 = self.company_generator.create_company(name=COMPANY_NAME_3)
+        self.plan_generator.create_plan(planner=planner_1)
+        self.plan_generator.create_plan(planner=planner_2)
+        self.plan_generator.create_plan(planner=planner_3)
+        response = self.client.get(URL, query_string={"radio": "company_name"})
+        assert (
+            response.text.index(COMPANY_NAME_1)
+            < response.text.index(COMPANY_NAME_3)
+            < response.text.index(COMPANY_NAME_2)
+        )
