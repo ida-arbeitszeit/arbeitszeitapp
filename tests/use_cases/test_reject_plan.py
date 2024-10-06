@@ -32,14 +32,14 @@ class UseCaseTests(BaseTestCase):
     def test_that_an_unreviewed_plan_will_be_rejected(self) -> None:
         plan = self.plan_generator.create_plan(approved=False, rejected=False)
         rejection_response = self.use_case.reject_plan(self.create_request(plan=plan))
-        assert rejection_response.is_rejected
+        assert rejection_response.is_plan_rejected
 
     def test_cannot_reject_plan_that_was_already_rejected(self) -> None:
         plan = self.plan_generator.create_plan(approved=False, rejected=False)
         request = self.create_request(plan=plan)
         self.use_case.reject_plan(request)
         rejection_response = self.use_case.reject_plan(request)
-        assert not rejection_response.is_rejected
+        assert not rejection_response.is_plan_rejected
 
     def test_that_rejection_date_is_set_correctly(self) -> None:
         expected_rejection_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
@@ -49,7 +49,7 @@ class UseCaseTests(BaseTestCase):
             planner=planner.id, approved=False, rejected=False
         )
         response = self.use_case.reject_plan(self.create_request(plan=plan))
-        assert response.is_rejected
+        assert response.is_plan_rejected
         assert (
             self.get_latest_rejected_plan(planner.id).rejection_date
             == expected_rejection_timestamp

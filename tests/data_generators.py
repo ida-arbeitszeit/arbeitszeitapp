@@ -212,7 +212,7 @@ class PlanGenerator:
             rejected_response = self.reject_plan_use_case.reject_plan(
                 RejectPlanUseCase.Request(plan=file_plan_response.plan_id)
             )
-            assert rejected_response.is_rejected
+            assert rejected_response.is_plan_rejected
         if requested_cooperation:
             request_cooperation_response = self.request_cooperation(
                 RequestCooperationRequest(

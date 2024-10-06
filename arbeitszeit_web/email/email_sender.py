@@ -7,6 +7,7 @@ from arbeitszeit_web.email.request_coordination_transfer_presenter import (
 )
 
 from .accountant_invitation_presenter import AccountantInvitationEmailPresenter
+from .company_notifier import CompanyNotifier
 from .cooperation_request_email_presenter import CooperationRequestEmailPresenter
 from .email_change_confirmation_presenter import EmailChangeConfirmationPresenter
 from .invite_worker_presenter import InviteWorkerPresenterImpl
@@ -28,6 +29,7 @@ class EmailSender:
     request_coordination_transfer_email_presenter: (
         RequestCoordinationTransferEmailPresenter
     )
+    company_notifier: CompanyNotifier
 
     def send_email(self, message: interface.Message) -> None:
         if isinstance(message, interface.MemberRegistration):
@@ -61,5 +63,8 @@ class EmailSender:
             )
         elif isinstance(message, interface.CoordinationTransferRequest):
             self.request_coordination_transfer_email_presenter.present(message)
+        elif isinstance(message, interface.RejectedPlanNotification):
+            self.company_notifier.notify_planning_company_about_rejected_plan(message)
+
         else:
             raise NotImplementedError()
