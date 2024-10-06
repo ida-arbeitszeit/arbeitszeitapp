@@ -1,15 +1,9 @@
 from uuid import UUID, uuid4
 
-from tests.data_generators import PlanGenerator
-
 from .flask import ViewTestCase
 
 
 class DeleteDraftViewTests(ViewTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-
     def test_get_405_when_getting_url_as_company(self) -> None:
         company = self.login_company()
         draft = self.plan_generator.draft_plan(planner=company.id)

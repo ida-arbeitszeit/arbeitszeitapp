@@ -21,14 +21,35 @@
             </div>
             {% endfor %}
             {% endfor %}
+            {% if view_model.valid_plan_selected is defined and view_model.valid_plan_selected %}
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% else %}
+            <form method="get">
+            {% endif %}
                 <div class="field">
                     <label class="label">{{ gettext("Plan ID") }}</label>
                     <div class="control">
+                        {% if view_model.valid_plan_selected is defined and view_model.valid_plan_selected %}
+                        {{ form.plan_id(class_="input", readonly=true) }}
+                        {% else %}
                         {{ form.plan_id(class_="input") }}
+                        {% endif %}
                     </div>
                 </div>
+                {% if view_model.valid_plan_selected is defined and view_model.valid_plan_selected %}
+                <div class="notification is-info">
+                    <p>
+                        {{ gettext("Plan ID") }}: {{ view_model.plan_id }}
+                    </p>
+                    <p>
+                        {{ gettext("Plan name") }}: {{ view_model.plan_name }}
+                    </p>
+                    <p>
+                        {{ gettext("Plan description") }}: {{ view_model.plan_description }}
+                    </p>
+                </div>
+                {% endif %}
                 <div class="field">
                     <label class="label">{{ gettext("Amount") }}</label>
                     <div class="control">
@@ -49,7 +70,12 @@
                 </div>
                 <div class="field">
                     <div class="control">
+                        {% if view_model.valid_plan_selected is defined and view_model.valid_plan_selected %}
                         <button class="button is-primary" type="submit">{{ gettext("Register") }}</button>
+                        <a class="button is-light" href="{{ url_for('main_company.register_productive_consumption') }}">{{ gettext("Cancel") }}</a>
+                        {% else %}
+                        <button class="button is-primary" type="submit">{{ gettext("Select") }}</button>
+                        {% endif %}
                     </div>
                 </div>
             </form>

@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from parameterized import parameterized
 
 from arbeitszeit import records
-from tests.data_generators import AccountantGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
 from .utility import Utility
@@ -13,7 +12,6 @@ from .utility import Utility
 class AccountantResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accountant_generator = self.injector.get(AccountantGenerator)
 
     def create_accountant(
         self, *, email_address: str = "test@test.test", name: str = "test name"
@@ -51,7 +49,6 @@ class CreateAccountantWithExistingMemberEmailTests(AccountantResultTests):
     def setUp(self) -> None:
         super().setUp()
         self.db = self.injector.get(SQLAlchemy)
-        self.member_generator = self.injector.get(MemberGenerator)
         self.expected_email = "test@test.test"
 
     def test_can_create_accountant_with_same_email_address_as_member(self) -> None:

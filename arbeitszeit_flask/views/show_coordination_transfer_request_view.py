@@ -31,7 +31,6 @@ class ShowCoordinationTransferRequestView:
     accept_use_case: AcceptCoordinationTransferUseCase
     accept_presenter: AcceptCoordinationTransferPresenter
 
-    @commit_changes
     def GET(self, transfer_request: UUID) -> types.Response:
         details_uc_response = self.details_use_case.get_details(
             request=GetCoordinationTransferRequestDetailsUseCase.Request(

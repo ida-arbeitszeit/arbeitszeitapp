@@ -38,8 +38,10 @@ class EndCooperationPresenter:
     def _get_redirect_url(self) -> str:
         referer = self.request.get_header("Referer")
         query_string = self.request.query_string()
-        plan_id = query_string.get("plan_id")
-        cooperation_id = query_string.get("cooperation_id")
+        plan_id = query_string.get("plan_id") or self.request.get_form("plan_id")
+        cooperation_id = query_string.get("cooperation_id") or self.request.get_form(
+            "cooperation_id"
+        )
         assert plan_id
         assert cooperation_id
         if referer:

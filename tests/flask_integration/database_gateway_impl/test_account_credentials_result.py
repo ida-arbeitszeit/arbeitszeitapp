@@ -3,7 +3,6 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit import records
-from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
 
 from ..flask import FlaskTestCase
 
@@ -11,9 +10,6 @@ from ..flask import FlaskTestCase
 class AccountCredentialsResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accountant_generator = self.injector.get(AccountantGenerator)
-        self.member_generator = self.injector.get(MemberGenerator)
-        self.company_generator = self.injector.get(CompanyGenerator)
 
     def create_account_credentials(
         self, *, email_address: str = "test@cp.org", password_hash: str = ""

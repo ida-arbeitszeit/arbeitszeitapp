@@ -20,7 +20,6 @@ class SignupAccountantView:
     presenter: RegisterAccountantPresenter
     use_case: RegisterAccountantUseCase
 
-    @commit_changes
     def GET(self, token: str) -> types.Response:
         return Response(
             response=render_template(

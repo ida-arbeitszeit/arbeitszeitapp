@@ -146,13 +146,6 @@ class GeneralUrlIndex:
             type_of_consumption=type_string,
         )
 
-    def get_end_coop_url(self, plan_id: UUID, cooperation_id: UUID) -> str:
-        return url_for(
-            "main_company.end_cooperation",
-            plan_id=plan_id,
-            cooperation_id=cooperation_id,
-        )
-
     def get_request_coop_url(self) -> str:
         return url_for("main_company.request_cooperation")
 

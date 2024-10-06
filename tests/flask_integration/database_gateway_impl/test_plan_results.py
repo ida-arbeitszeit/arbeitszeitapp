@@ -11,23 +11,10 @@ from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit_flask.database import models
 from tests.control_thresholds import ControlThresholdsTestImpl
-from tests.data_generators import (
-    CompanyGenerator,
-    ConsumptionGenerator,
-    CooperationGenerator,
-    PlanGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.flask import FlaskTestCase
 
 
 class PlanResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.company_generator = self.injector.get(CompanyGenerator)
-
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.database_gateway.get_plans().with_id(plan).update().hide().perform()
@@ -108,9 +95,6 @@ class PlanResultTests(FlaskTestCase):
 class GetActivePlansTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.company_generator = self.injector.get(CompanyGenerator)
         self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
         self.reject_plan_use_case = self.injector.get(RejectPlanUseCase)
 
@@ -266,13 +250,6 @@ class GetActivePlansTests(FlaskTestCase):
 
 
 class GetAllPlans(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
         assert not list(self.database_gateway.get_plans())
 
@@ -507,13 +484,6 @@ class GetAllPlans(FlaskTestCase):
 
 
 class GetStatisticsTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-
     def test_with_no_plans_that_average_planning_duration_is_0(self) -> None:
         stats = self.database_gateway.get_plans().get_statistics()
         assert stats.average_plan_duration_in_days == Decimal(0)
@@ -573,11 +543,6 @@ class GetStatisticsTests(FlaskTestCase):
 
 
 class ThatWereActivatedBeforeTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def test_plan_activated_before_a_specified_timestamp_are_included_in_the_result(
         self,
     ) -> None:
@@ -607,11 +572,6 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
 
 
 class ThatWillExpireAfterTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def test_that_plan_that_will_expire_after_specified_date_is_included_in_results(
         self,
     ) -> None:
@@ -641,11 +601,6 @@ class ThatWillExpireAfterTests(FlaskTestCase):
 
 
 class ThatAreExpiredAsOfTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def test_that_plan_that_will_expire_after_specified_date_is_not_included_in_results(
         self,
     ) -> None:
@@ -675,10 +630,6 @@ class ThatAreExpiredAsOfTests(FlaskTestCase):
 
 
 class ThatAreNotHiddenTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-
     def test_that_plan_that_is_not_hidden_will_show_in_results(self) -> None:
         self.plan_generator.create_plan()
         assert self.database_gateway.get_plans().that_are_not_hidden()
@@ -690,12 +641,6 @@ class ThatAreNotHiddenTests(FlaskTestCase):
 
 
 class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-
     def test_that_one_result_is_yieled_with_one_cooperating_plan_in_db(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation)
@@ -792,11 +737,6 @@ class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
 
 
 class JoinedWithCooperationTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-
     def test_that_no_results_are_returned_if_no_plans_exist(self) -> None:
         assert not self.database_gateway.get_plans().joined_with_cooperation()
 
@@ -825,8 +765,6 @@ class JoinedWithCooperationTests(FlaskTestCase):
 class JoinedWithProvidedProductAmountTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
         self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
@@ -899,13 +837,6 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
 
 
 class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.plan_generator = self.injector.get(PlanGenerator)
-        self.datetime_service = self.injector.get(FakeDatetimeService)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
-
     def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()

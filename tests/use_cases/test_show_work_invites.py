@@ -21,7 +21,7 @@ class ShowWorkInvitesTests(BaseTestCase):
         self.assertFalse(response.invites)
 
     def test_invites_are_shown_when_worker_was_previously_invited(self) -> None:
-        self.invite_worker_to_company(
+        self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=self.member,
@@ -35,7 +35,7 @@ class ShowWorkInvitesTests(BaseTestCase):
         self.assertTrue(response.invites)
 
     def test_show_which_company_sent_the_invite(self) -> None:
-        self.invite_worker_to_company(
+        self.invite_worker_to_company.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=self.company,
                 worker=self.member,

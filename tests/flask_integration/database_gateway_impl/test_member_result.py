@@ -7,7 +7,6 @@ from parameterized import parameterized
 from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit import records
-from tests.data_generators import AccountantGenerator, CompanyGenerator, EmailGenerator
 
 from ..flask import FlaskTestCase
 from .utility import Utility
@@ -17,7 +16,6 @@ class MemberResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.db = self.injector.get(SQLAlchemy)
-        self.email_generator = self.injector.get(EmailGenerator)
 
     def create_member(self, email_address: Optional[str] = None) -> records.Member:
         if email_address is None:
@@ -41,10 +39,6 @@ class MemberResultTests(FlaskTestCase):
 
 
 class RepositoryTests(MemberResultTests):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-
     def test_that_member_can_be_retrieved_by_id(self) -> None:
         expected_member = self.create_member()
         retrieved_member = (
@@ -108,10 +102,6 @@ class RepositoryTests(MemberResultTests):
 
 
 class GetAllMembersTests(MemberResultTests):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-
     def test_with_empty_db_the_first_member_is_none(self) -> None:
         assert self.database_gateway.get_members().first() is None
 
@@ -177,11 +167,6 @@ class ConfirmMemberTests(MemberResultTests):
 
 
 class CreateMemberTests(MemberResultTests):
-    def setUp(self) -> None:
-        super().setUp()
-        self.company_generator = self.injector.get(CompanyGenerator)
-        self.accountant_generator = self.injector.get(AccountantGenerator)
-
     def test_can_create_member_with_same_email_as_company(self) -> None:
         email = "test@test.test"
         self.company_generator.create_company(email=email)

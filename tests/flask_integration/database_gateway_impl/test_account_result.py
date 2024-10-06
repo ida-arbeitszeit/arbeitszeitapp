@@ -7,7 +7,6 @@ from parameterized import parameterized
 
 from arbeitszeit import records
 from arbeitszeit.records import SocialAccounting
-from tests.data_generators import MemberGenerator, TransactionGenerator
 
 from ..flask import FlaskTestCase
 
@@ -15,10 +14,6 @@ from ..flask import FlaskTestCase
 class AccountResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.transaction_generator: TransactionGenerator = self.injector.get(
-            TransactionGenerator
-        )
-        self.member_generator = self.injector.get(MemberGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
 
     def test_that_a_priori_there_is_only_one_account_for_social_accounting(

@@ -24,7 +24,6 @@ class RequestCoordinationTransferView:
     controller: RequestCoordinationTransferController
     use_case: RequestCoordinationTransferUseCase
 
-    @commit_changes
     def GET(self, coop_id: UUID) -> types.Response:
         form = RequestCoordinationTransferForm()
         form.cooperation_field().set_value(str(coop_id))

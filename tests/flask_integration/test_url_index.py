@@ -8,10 +8,8 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
-from tests.data_generators import CooperationGenerator, PlanGenerator
 
 from .flask import ViewTestCase
 
@@ -84,14 +82,13 @@ class PlotUrlIndexTests(ViewTestCase):
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.plan_generator = self.injector.get(PlanGenerator)
         self.url_index = self.injector.get(GeneralUrlIndex)
-        self.invite_worker_to_company = self.injector.get(InviteWorkerToCompanyUseCase)
-        self.cooperation_generator = self.injector.get(CooperationGenerator)
+        self.invite_worker_to_company_use_case = self.injector.get(
+            InviteWorkerToCompanyUseCase
+        )
         self.invite_accountant_use_case = self.injector.get(
             SendAccountantRegistrationTokenUseCase
         )
-        self.token_service = self.injector.get(FlaskTokenService)
 
     def test_invite_url_for_existing_invite_leads_to_functional_url_for_member(
         self,
@@ -230,7 +227,7 @@ class GeneralUrlIndexTests(ViewTestCase):
 
     def _create_invite(self, member: UUID) -> UUID:
         company = self.company_generator.create_company_record()
-        response = self.invite_worker_to_company(
+        response = self.invite_worker_to_company_use_case.invite_worker(
             InviteWorkerToCompanyUseCase.Request(
                 company=company.id,
                 worker=member,
@@ -259,7 +256,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_leads_to_functional_url_without_params_provided(
         self,
     ) -> None:
         self.login_company()
@@ -267,30 +264,21 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_with_plan_parameter_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_leads_to_functional_url_with_params_provided(
         self,
     ) -> None:
         self.login_company()
-        url = self.url_index.get_register_productive_consumption_url(uuid4())
+        url = self.url_index.get_register_productive_consumption_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_url_for_registration_of_productive_consumption_with_amount_parameter_leads_to_functional_url(
+    def test_url_for_registration_of_productive_consumption_leads_to_functional_url(
         self,
     ) -> None:
         self.login_company()
+        plan = self.plan_generator.create_plan()
         url = self.url_index.get_register_productive_consumption_url(
-            plan_id=uuid4(), amount=3
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_url_for_registration_of_productive_consumption_with_type_of_consumption_parameter_leads_to_functional_url(
-        self,
-    ) -> None:
-        self.login_company()
-        url = self.url_index.get_register_productive_consumption_url(
-            plan_id=uuid4(),
+            plan_id=plan,
             amount=3,
             consumption_type=ConsumptionType.means_of_prod,
         )
@@ -304,18 +292,6 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_request_coop_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-    def test_end_coop_url_for_existing_plan_and_cooperation_leads_to_functional_url(
-        self,
-    ) -> None:
-        company = self.login_company()
-        plan = self.plan_generator.create_plan()
-        coop = self.cooperation_generator.create_cooperation(
-            coordinator=company, plans=[plan]
-        )
-        url = self.url_index.get_end_coop_url(plan, coop)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
 
     def test_delete_draft_url_does_not_produce_404(
         self,

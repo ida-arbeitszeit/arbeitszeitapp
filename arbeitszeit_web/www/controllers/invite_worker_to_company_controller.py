@@ -1,35 +1,46 @@
 from dataclasses import dataclass
-from typing import Protocol
 from uuid import UUID
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
+from arbeitszeit_web.forms import InviteWorkerToCompanyForm
+from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
-
-
-class InviteWorkerToCompanyForm(Protocol):
-    def get_worker_id(self) -> str: ...
+from arbeitszeit_web.translator import Translator
 
 
 @dataclass
 class InviteWorkerToCompanyController:
+    @dataclass
+    class FormError(Exception):
+        form: InviteWorkerToCompanyForm
+
     session: Session
+    translator: Translator
 
     def import_request_data(
-        self, form: InviteWorkerToCompanyForm
+        self,
+        request: Request,
     ) -> InviteWorkerToCompanyUseCase.Request:
+        worker_id = self._get_worker_id(request)
         return InviteWorkerToCompanyUseCase.Request(
             company=self._get_current_user_id(),
-            worker=self._get_worker_id(form),
+            worker=worker_id,
         )
 
     def _get_current_user_id(self) -> UUID:
         current_user = self.session.get_current_user()
-        if current_user is None:
-            raise ValueError("User is not logged in")
+        assert current_user
         return current_user
 
-    def _get_worker_id(self, form: InviteWorkerToCompanyForm) -> UUID:
+    def _get_worker_id(self, request: Request) -> UUID:
+        worker_id = request.get_form("worker_id") or ""
+        worker_id = worker_id.strip()
         try:
-            return UUID(form.get_worker_id())
+            return UUID(worker_id)
         except ValueError:
-            raise ValueError("worker_id is not a valid UUID")
+            raise self.FormError(
+                form=InviteWorkerToCompanyForm(
+                    worker_id_value=worker_id,
+                    worker_id_errors=[self.translator.gettext("Invalid UUID")],
+                )
+            )
