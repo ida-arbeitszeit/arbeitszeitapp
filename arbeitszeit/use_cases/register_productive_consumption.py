@@ -27,6 +27,7 @@ class RegisterProductiveConsumptionResponse:
         cannot_consume_public_service = auto()
         plan_is_not_active = auto()
         consumer_is_planner = auto()
+        plan_is_rejected = auto()
 
     rejection_reason: Optional[RejectionReason]
 
@@ -71,6 +72,8 @@ class RegisterProductiveConsumption:
         plan = self.database_gateway.get_plans().with_id(request.plan).first()
         if plan is None:
             raise RegisterProductiveConsumptionResponse.RejectionReason.plan_not_found
+        if plan.is_rejected:
+            raise RegisterProductiveConsumptionResponse.RejectionReason.plan_is_rejected
         if not plan.is_active_as_of(now):
             raise RegisterProductiveConsumptionResponse.RejectionReason.plan_is_not_active
         if plan.is_public_service:
