@@ -8,57 +8,68 @@ from arbeitszeit.use_cases.register_private_consumption import (
 )
 from arbeitszeit_web.forms import RegisterPrivateConsumptionForm
 from arbeitszeit_web.request import Request
+from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
+from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.response import Redirect
+
+
+@dataclass
+class FormError:
+    form: RegisterPrivateConsumptionForm
+
+
+ViewModel = RegisterPrivateConsumptionRequest | Redirect | FormError
 
 
 @dataclass
 class RegisterPrivateConsumptionController:
-    @dataclass
-    class FormError(Exception):
-        form: RegisterPrivateConsumptionForm
-
     translator: Translator
+    session: Session
+    url_index: UrlIndex
 
-    def import_form_data(
-        self, current_user: UUID, request: Request
-    ) -> RegisterPrivateConsumptionRequest:
+    def import_form_data(self, request: Request) -> ViewModel:
         plan_id: UUID
         amount: int
         if plan_id_field := request.get_form("plan_id"):
             try:
                 plan_id = UUID(plan_id_field)
             except ValueError:
-                raise self.create_form_error(
+                return self.create_form_error(
                     request,
                     plan_id_errors=[self.translator.gettext("Plan ID is invalid.")],
                 )
         else:
-            raise self.create_form_error(
+            return self.create_form_error(
                 request, plan_id_errors=[self.translator.gettext("Plan ID is invalid.")]
             )
         if amount_field := request.get_form("amount"):
             try:
                 amount = int(amount_field)
             except ValueError:
-                raise self.create_form_error(
+                return self.create_form_error(
                     request,
                     amount_errors=[self.translator.gettext("This is not an integer.")],
                 )
         else:
-            raise self.create_form_error(
+            return self.create_form_error(
                 request,
                 amount_errors=[self.translator.gettext("You must specify an amount.")],
             )
         if amount < 1:
-            raise self.create_form_error(
+            return self.create_form_error(
                 request,
                 amount_errors=[
                     self.translator.gettext("Must be a number larger than zero.")
                 ],
             )
-        return RegisterPrivateConsumptionRequest(
-            consumer=current_user, plan=plan_id, amount=amount
-        )
+        match self.session.get_current_user():
+            case None:
+                return Redirect(url=self.url_index.get_member_login_url())
+            case UUID() as user_id:
+                return RegisterPrivateConsumptionRequest(
+                    consumer=user_id, plan=plan_id, amount=amount
+                )
 
     def create_form_error(
         self,
@@ -71,7 +82,7 @@ class RegisterPrivateConsumptionController:
             plan_id_errors = []
         if amount_errors is None:
             amount_errors = []
-        return self.FormError(
+        return FormError(
             form=RegisterPrivateConsumptionForm(
                 plan_id_value=request.get_form("plan_id") or "",
                 plan_id_errors=plan_id_errors,
