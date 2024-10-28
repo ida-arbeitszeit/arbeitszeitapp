@@ -82,6 +82,12 @@ class QueryPlansControllerTests(BaseTestCase):
         )
         self.assertEqual(request.sorting_category, PlanSorting.by_company_name)
 
+    def test_that_empty_include_expired_plans_field_results_in_false(
+        self,
+    ) -> None:
+        request = self.controller.import_form_data()
+        self.assertFalse(request.include_expired_plans)
+
 
 class PaginationTests(BaseTestCase):
     def setUp(self) -> None:
@@ -127,11 +133,13 @@ def make_fake_form(
     query: Optional[str] = None,
     filter_category: Optional[str] = None,
     sorting_category: Optional[str] = None,
+    include_expired_plans: Optional[bool] = None,
 ) -> FakeQueryPlansForm:
     return FakeQueryPlansForm(
         query=query or "",
         products_filter=filter_category or "Produktname",
         sorting_category=sorting_category or "activation",
+        include_expired_plans=include_expired_plans or False,
     )
 
 
@@ -140,6 +148,7 @@ class FakeQueryPlansForm:
     query: str
     products_filter: str
     sorting_category: str
+    include_expired_plans: bool
 
     def get_query_string(self) -> str:
         return self.query
@@ -149,3 +158,6 @@ class FakeQueryPlansForm:
 
     def get_radio_string(self) -> str:
         return self.sorting_category
+
+    def get_checkbox_value(self) -> bool:
+        return self.include_expired_plans
