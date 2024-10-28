@@ -237,6 +237,7 @@ class UseCaseTests(BaseTestCase):
                 query_string=None,
                 filter_category=PlanFilter.by_plan_id,
                 sorting_category=PlanSorting.by_activation,
+                include_expired_plans=False,
             )
         )
         assert response.results

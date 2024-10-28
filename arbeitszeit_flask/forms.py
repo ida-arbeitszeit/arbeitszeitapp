@@ -89,6 +89,10 @@ class PlanSearchForm(Form):
         default="activation",
     )
 
+    include_expired_plans = BooleanField(
+        trans.lazy_gettext("Search also for expired plans"),
+    )
+
     def get_query_string(self) -> str:
         return self.data["search"]
 
@@ -97,6 +101,9 @@ class PlanSearchForm(Form):
 
     def get_radio_string(self) -> str:
         return self.data["radio"]
+
+    def get_checkbox_value(self) -> bool:
+        return self.data["include_expired_plans"]
 
 
 class RegisterForm(Form):

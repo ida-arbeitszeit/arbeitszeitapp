@@ -36,6 +36,7 @@ class QueryPlansApiController:
             query_string=None,
             filter_category=PlanFilter.by_plan_id,
             sorting_category=PlanSorting.by_activation,
+            include_expired_plans=False,
             offset=offset,
             limit=limit,
         )
