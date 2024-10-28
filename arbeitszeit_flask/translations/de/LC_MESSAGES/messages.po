@@ -540,11 +540,11 @@ msgstr "Mitglieder deines Kollektivs"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:127
 msgid "Hours worked"
-msgstr ""
+msgstr "Gearbeitete Stunden"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:128
 msgid "Your registered working hours"
-msgstr ""
+msgstr "Deine registrierten Arbeitsstunden"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:134
 #: arbeitszeit_flask/templates/member/dashboard.html:81
@@ -606,7 +606,7 @@ msgstr "Arbeiter*innen des Betriebs"
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:4
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:11
 msgid "Registered working hours"
-msgstr ""
+msgstr "Registrierte Arbeitsstunden"
 
 #: arbeitszeit_flask/templates/company/my_consumptions.html:4
 #: arbeitszeit_flask/templates/member/consumptions.html:4
@@ -865,15 +865,15 @@ msgstr "Registrierung produktiven Konsums"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:46
 msgid "Plan name"
-msgstr ""
+msgstr "Planname"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:49
 msgid "Plan description"
-msgstr ""
+msgstr "Planbeschreibung"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:77
 msgid "Select"
-msgstr ""
+msgstr "Auswählen"
 
 #: arbeitszeit_flask/templates/company/request_cooperation.html:4
 #: arbeitszeit_flask/templates/company/request_cooperation.html:10
@@ -1715,7 +1715,7 @@ msgstr "Der Planungszeitraum darf keine negative Anzahl an Tagen sein."
 
 #: arbeitszeit_web/www/controllers/invite_worker_to_company_controller.py:44
 msgid "Invalid UUID"
-msgstr ""
+msgstr "Ungültige UUID"
 
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:33
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:37
@@ -1724,7 +1724,7 @@ msgstr "Plan-ID ist ungültig."
 
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:50
 msgid "You must specify an amount."
-msgstr ""
+msgstr "Du musst eine Menge angeben."
 
 #: arbeitszeit_web/www/controllers/request_cooperation_controller.py:32
 msgid "Invalid plan ID."
@@ -1736,15 +1736,15 @@ msgstr "Ungültige Kooperations-ID."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:46
 msgid "The provided plan ID is not a valid UUID."
-msgstr ""
+msgstr "Die angegebene Plan-ID ist keine gültige UUID."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:66
 msgid "The provided amount is not a valid integer."
-msgstr ""
+msgstr "Die angegebene Menge ist keine gültige ganze Zahl."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:92
 msgid "The provided type of consumption is not valid."
-msgstr ""
+msgstr "Der angegebene Konsumtionstyp ist nicht gültig."
 
 #: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:23
 msgid "Cooperation request has been accepted."
@@ -1977,19 +1977,19 @@ msgstr "Abgelaufener Plan %(plan_id)s wird dir nicht mehr angezeigt."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:25
 msgid "Worker could not be found."
-msgstr ""
+msgstr "Arbeiter*in konnte nicht gefunden werden."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:32
 msgid "Company could not be found."
-msgstr ""
+msgstr "Betrieb konnte nicht gefunden werden."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:39
 msgid "Worker already works for the company."
-msgstr ""
+msgstr "Arbeiter*in arbeitet bereits für den Betrieb."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:46
 msgid "Invitation has already been issued."
-msgstr ""
+msgstr "Einladung wurde bereits verschickt."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:51
 msgid "Worker has been invited successfully."
@@ -2200,7 +2200,7 @@ msgstr "Planeinreichung wurde erfolgreich widerrufen."
 
 #: arbeitszeit_web/www/presenters/select_productive_consumption_presenter.py:44
 msgid "The selected plan does not exist or is not active anymore."
-msgstr ""
+msgstr "Der ausgewählte Plan existiert nicht oder ist nicht mehr aktiv."
 
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:60
 msgid "Payment"

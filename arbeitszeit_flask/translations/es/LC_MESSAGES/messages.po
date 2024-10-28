@@ -540,11 +540,11 @@ msgstr "Miembros de tu colectivo"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:127
 msgid "Hours worked"
-msgstr ""
+msgstr "Horas trabajadas"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:128
 msgid "Your registered working hours"
-msgstr ""
+msgstr "Tus horas trabajadas registradas"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:134
 #: arbeitszeit_flask/templates/member/dashboard.html:81
@@ -606,7 +606,7 @@ msgstr "Trabajadores de la empresa"
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:4
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:11
 msgid "Registered working hours"
-msgstr ""
+msgstr "Horas trabajadas registradas"
 
 #: arbeitszeit_flask/templates/company/my_consumptions.html:4
 #: arbeitszeit_flask/templates/member/consumptions.html:4
@@ -865,15 +865,15 @@ msgstr "Registro de consumo productivo"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:46
 msgid "Plan name"
-msgstr ""
+msgstr "Nombre del plan"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:49
 msgid "Plan description"
-msgstr ""
+msgstr "Descripción del plan"
 
 #: arbeitszeit_flask/templates/company/register_productive_consumption.html:77
 msgid "Select"
-msgstr ""
+msgstr "Seleccionar"
 
 #: arbeitszeit_flask/templates/company/request_cooperation.html:4
 #: arbeitszeit_flask/templates/company/request_cooperation.html:10
@@ -1711,7 +1711,7 @@ msgstr "El marco de tiempo de planificación no puede ser un número negativo de
 
 #: arbeitszeit_web/www/controllers/invite_worker_to_company_controller.py:44
 msgid "Invalid UUID"
-msgstr ""
+msgstr "UUID no válido"
 
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:33
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:37
@@ -1720,7 +1720,7 @@ msgstr "El ID del plan no es válido."
 
 #: arbeitszeit_web/www/controllers/register_private_consumption_controller.py:50
 msgid "You must specify an amount."
-msgstr ""
+msgstr "Debes especificar una cantidad."
 
 #: arbeitszeit_web/www/controllers/request_cooperation_controller.py:32
 msgid "Invalid plan ID."
@@ -1732,15 +1732,15 @@ msgstr "ID de cooperación no válido."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:46
 msgid "The provided plan ID is not a valid UUID."
-msgstr ""
+msgstr "El ID del plan proporcionado no es un UUID válido."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:66
 msgid "The provided amount is not a valid integer."
-msgstr ""
+msgstr "La cantidad proporcionada no es un número entero válido."
 
 #: arbeitszeit_web/www/controllers/select_productive_consumption_controller.py:92
 msgid "The provided type of consumption is not valid."
-msgstr ""
+msgstr "El tipo de consumo proporcionado no es válido."
 
 #: arbeitszeit_web/www/presenters/accept_cooperation_request_presenter.py:23
 msgid "Cooperation request has been accepted."
@@ -1971,19 +1971,19 @@ msgstr "El plan caducado %(plan_id)s ya no se muestra."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:25
 msgid "Worker could not be found."
-msgstr ""
+msgstr "El/la trabajador/a no se pudo encontrar."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:32
 msgid "Company could not be found."
-msgstr ""
+msgstr "La empresa no se pudo encontrar."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:39
 msgid "Worker already works for the company."
-msgstr ""
+msgstr "El/la trabajador/a ya trabaja para la empresa."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:46
 msgid "Invitation has already been issued."
-msgstr ""
+msgstr "La invitación ya ha sido emitida."
 
 #: arbeitszeit_web/www/presenters/invite_worker_to_company_presenter.py:51
 msgid "Worker has been invited successfully."
@@ -2196,7 +2196,7 @@ msgstr "La presentación del plan ha sido revocada con éxito."
 
 #: arbeitszeit_web/www/presenters/select_productive_consumption_presenter.py:44
 msgid "The selected plan does not exist or is not active anymore."
-msgstr ""
+msgstr "El plan seleccionado no existe o ya no está activo."
 
 #: arbeitszeit_web/www/presenters/show_a_account_details_presenter.py:60
 msgid "Payment"
