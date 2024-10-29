@@ -29,6 +29,7 @@ class QueriedPlanGenerator:
         activation_date: Optional[datetime] = None,
         price_per_unit: Optional[Decimal] = None,
         labour_cost_per_unit: Optional[Decimal] = None,
+        is_expired: Optional[bool] = None,
     ) -> QueriedPlan:
         if plan_id is None:
             plan_id = uuid4()
@@ -44,6 +45,8 @@ class QueriedPlanGenerator:
             price_per_unit = Decimal(5)
         if labour_cost_per_unit is None:
             labour_cost_per_unit = Decimal(1)
+        if is_expired is None:
+            is_expired = False
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",
@@ -55,6 +58,7 @@ class QueriedPlanGenerator:
             is_public_service=False,
             is_cooperating=is_cooperating,
             activation_date=activation_date,
+            is_expired=is_expired,
         )
 
     def get_response(
@@ -80,6 +84,7 @@ class QueriedPlanGenerator:
                 query_string=query_string,
                 filter_category=requested_filter_category,
                 sorting_category=requested_sorting_category,
+                include_expired_plans=False,
             ),
         )
 

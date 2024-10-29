@@ -27,6 +27,8 @@ class QueryPlansFormData(Protocol):
 
     def get_radio_string(self) -> str: ...
 
+    def get_checkbox_value(self) -> bool: ...
+
 
 _PAGE_SIZE = 15
 
@@ -42,15 +44,18 @@ class QueryPlansController:
             query = None
             filter_category = PlanFilter.by_product_name
             sorting_category = PlanSorting.by_activation
+            include_expired_plans = False
         else:
             query = form.get_query_string().strip() or None
             filter_category = self._import_filter_category(form)
             sorting_category = self._import_sorting_category(form)
+            include_expired_plans = self._import_include_expired(form)
         offset = self._get_pagination_offset(request) if request else 0
         return QueryPlansRequest(
             query_string=query,
             filter_category=filter_category,
             sorting_category=sorting_category,
+            include_expired_plans=include_expired_plans,
             offset=offset,
             limit=_PAGE_SIZE,
         )
@@ -80,6 +85,9 @@ class QueryPlansController:
             sorting_category = PlanSorting.by_activation
         return sorting_category
 
+    def _import_include_expired(self, form: QueryPlansFormData) -> bool:
+        return form.get_checkbox_value()
+
 
 @dataclass
 class ResultTableRow:
@@ -91,6 +99,7 @@ class ResultTableRow:
     price_per_unit: str
     is_public_service: bool
     is_cooperating: bool
+    is_expired: bool
 
 
 @dataclass
@@ -143,6 +152,7 @@ class QueryPlansPresenter:
                         price_per_unit=str(round(result.price_per_unit, 2)),
                         is_public_service=result.is_public_service,
                         is_cooperating=result.is_cooperating,
+                        is_expired=result.is_expired,
                     )
                     for result in response.results
                 ],
