@@ -17,7 +17,7 @@ class ApprovePlanUseCase:
 
     @dataclass
     class Response:
-        is_approved: bool = True
+        is_plan_approved: bool = True
 
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
@@ -31,7 +31,7 @@ class ApprovePlanUseCase:
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         if plan.is_approved:
-            return self.Response(is_approved=False)
+            return self.Response(is_plan_approved=False)
         matching_plans.update().set_approval_date(now).set_activation_timestamp(
             now
         ).perform()

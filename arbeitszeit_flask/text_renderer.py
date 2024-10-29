@@ -42,3 +42,13 @@ class TextRendererImpl:
             "user/request_email_change_notification.html",
             change_email_url=change_email_url,
         )
+
+    def render_company_notification_about_rejected_plan(
+        self, company_name: str, product_name: str, plan_id: str
+    ) -> str:
+        return render_template(
+            "company/rejected_plan_notification.html",
+            product_name=product_name,
+            plan_id=plan_id,
+            company_name=company_name,
+        )
