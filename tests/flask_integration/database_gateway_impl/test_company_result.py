@@ -192,6 +192,14 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
             .with_id(company)
         )
 
+    def test_that_workplace_is_not_returned_after_one_is_removed(self) -> None:
+        member = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[member])
+        self.database_gateway.get_companies().with_id(company).remove_worker(member)
+        assert not self.database_gateway.get_companies().that_are_workplace_of_member(
+            member
+        )
+
 
 class WithNameContainingTests(FlaskTestCase):
     def setUp(self) -> None:
