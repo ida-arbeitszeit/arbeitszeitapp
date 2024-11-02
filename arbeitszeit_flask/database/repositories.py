@@ -85,7 +85,9 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         if not ascending:
             ordering = ordering.desc()
         return self._with_modified_query(
-            lambda query: self.query.join(models.Company).order_by(func.lower(ordering))
+            lambda query: query.join(models.Company)
+            .order_by(func.lower(ordering))
+            .group_by(models.Plan.id, models.Company.id)
         )
 
     def ordered_by_rejection_date(self, ascending: bool = True) -> Self:

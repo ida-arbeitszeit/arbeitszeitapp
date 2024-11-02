@@ -735,6 +735,18 @@ class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
         for v in results:
             assert not v[2]
 
+    def test_that_it_is_possible_to_order_by_planner_name_and_join(self) -> None:
+        self.plan_generator.create_plan()
+        self.plan_generator.create_plan()
+        results = (
+            self.database_gateway.get_plans()
+            .ordered_by_planner_name()
+            .joined_with_planner_and_cooperation_and_cooperating_plans(
+                self.datetime_service.now()
+            )
+        )
+        results.first()
+
 
 class JoinedWithCooperationTests(FlaskTestCase):
     def test_that_no_results_are_returned_if_no_plans_exist(self) -> None:

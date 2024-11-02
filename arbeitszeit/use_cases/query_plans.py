@@ -46,6 +46,7 @@ class QueriedPlan:
     is_public_service: bool
     is_cooperating: bool
     activation_date: datetime
+    is_expired: bool
 
 
 @dataclass
@@ -53,6 +54,7 @@ class QueryPlansRequest:
     query_string: Optional[str]
     filter_category: PlanFilter
     sorting_category: PlanSorting
+    include_expired_plans: bool
     offset: Optional[int] = None
     limit: Optional[int] = None
 
@@ -64,13 +66,11 @@ class QueryPlans:
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
-        plans = (
-            self.database_gateway.get_plans()
-            .that_will_expire_after(now)
-            .that_were_activated_before(now)
-        )
-        total_results = len(plans)
+        plans = self.database_gateway.get_plans().that_were_activated_before(now)
+        if not request.include_expired_plans:
+            plans = plans.that_will_expire_after(now)
         plans = self._apply_filter(plans, request.query_string, request.filter_category)
+        total_results = len(plans)
         plans = self._apply_sorting(plans, request.sorting_category)
         planning_info = plans.joined_with_planner_and_cooperation_and_cooperating_plans(
             now
@@ -129,4 +129,5 @@ class QueryPlans:
             is_public_service=plan.is_public_service,
             is_cooperating=bool(cooperation),
             activation_date=plan.activation_date,
+            is_expired=plan.is_expired_as_of(self.datetime_service.now()),
         )
