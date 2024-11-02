@@ -320,20 +320,45 @@ class UseCaseTests(BaseTestCase):
             plan2
         )
 
-    def test_that_total_results_is_1_if_one_plan_is_present(
+    @parameterized.expand(
+        [
+            (0,),
+            (1,),
+            (6,),
+        ]
+    )
+    def test_total_results_equals_existing_plans_when_no_filter(
+        self,
+        number_of_plans: int,
+    ) -> None:
+        for _ in range(number_of_plans):
+            self.plan_generator.create_plan()
+        response = self.query_plans(self.make_request(query=""))
+        assert response.total_results == number_of_plans
+
+    def test_zero_total_results_when_single_plan_filtered_by_name(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(product_name="abc")
+        response = self.query_plans(
+            self.make_request(
+                search_strategy=SearchStrategy.by_name_sort_by_date_exclude_expired,
+                query="xyz",
+            )
+        )
+        self.assertEqual(response.total_results, 0)
+
+    def test_zero_total_results_when_single_plan_filtered_by_id(
         self,
     ) -> None:
         self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request())
-        self.assertEqual(response.total_results, 1)
-
-    def test_that_total_results_is_6_if_six_plans_are_present(
-        self,
-    ) -> None:
-        for _ in range(6):
-            self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request())
-        assert response.total_results == 6
+        response = self.query_plans(
+            self.make_request(
+                search_strategy=SearchStrategy.by_id_sort_by_date_exclude_expired,
+                query="123",
+            )
+        )
+        self.assertEqual(response.total_results, 0)
 
     def test_that_first_10_plans_are_returned_if_limit_is_10(
         self,
