@@ -69,8 +69,8 @@ class QueryPlans:
             .that_will_expire_after(now)
             .that_were_activated_before(now)
         )
-        total_results = len(plans)
         plans = self._apply_filter(plans, request.query_string, request.filter_category)
+        total_results = len(plans)
         plans = self._apply_sorting(plans, request.sorting_category)
         planning_info = plans.joined_with_planner_and_cooperation_and_cooperating_plans(
             now
