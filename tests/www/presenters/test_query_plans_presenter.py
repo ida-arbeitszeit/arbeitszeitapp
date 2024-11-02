@@ -1,6 +1,8 @@
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.session import UserRole
 from tests.request import FakeRequest
@@ -109,6 +111,20 @@ class QueryPlansPresenterTests(BaseTestCase):
         self.assertEqual(
             table_row.is_public_service,
             False,
+        )
+
+    @parameterized.expand([(True,), (False,)])
+    def test_that_is_expired_bool_is_passed_on_to_view_model(
+        self, is_expired: bool
+    ) -> None:
+        response = self.queried_plan_generator.get_response(
+            [self.queried_plan_generator.get_plan(is_expired=is_expired)]
+        )
+        presentation = self.presenter.present(response, self.request)
+        table_row = presentation.results.rows[0]
+        self.assertEqual(
+            table_row.is_expired,
+            is_expired,
         )
 
     def test_that_description_is_shown_without_line_returns(self) -> None:

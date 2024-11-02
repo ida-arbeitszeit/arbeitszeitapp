@@ -41,6 +41,7 @@ class QueryPlansSortedByActivationDateBenchmark:
             query_string=None,
             filter_category=query_plans.PlanFilter.by_product_name,
             sorting_category=query_plans.PlanSorting.by_activation,
+            include_expired_plans=False,
             limit=None,
             offset=None,
         )
