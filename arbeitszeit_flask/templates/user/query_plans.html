@@ -10,7 +10,7 @@
     <div class="columns is-centered">
         <div class="column is-one-third">
             <h1 class="title">
-                {{ gettext("Active plans") }}
+                {{ gettext("Plans") }}
             </h1>
             <form method="get">
                 <div class="field">
@@ -26,13 +26,16 @@
                         {{ form.search(class_="input is-large") }}
                     </div>
                 </div>
-                <p class="has-text-weight-semibold">Sort by:</p>
                 <div class="field">
+                    <label class="label">{{ gettext("Sort by") }}</label>
                     <div class="control">
                         {% for subfield in form.radio %}
                         <span>{{ subfield }} {{ subfield.label }}</span>
                         {% endfor %}
                     </div>
+                </div>
+                <div class="field">
+                    {{ form.include_expired_plans }} {{ form.include_expired_plans.label }}
                 </div>
                 <input type="hidden" name="page" value="1">
                 <button class="button is-block is-primary is-large is-fullwidth">
@@ -73,6 +76,9 @@
                         {% endif %}
                         {% if column.is_public_service %}
                         <span class="tag is-warning">{{ gettext("Public") }}</span>
+                        {% endif %}
+                        {% if column.is_expired %}
+                        <span class="tag is-danger">{{ gettext("Expired") }}</span>
                         {% endif %}
                     </div>
                 </div>
