@@ -29,6 +29,7 @@ class ResultsTable:
 
 @dataclass
 class QueryPlansViewModel:
+    total_results: int
     results: ResultsTable
     show_results: bool
     pagination: Pagination
@@ -53,6 +54,7 @@ class QueryPlansPresenter:
             current_offset=response.request.offset or 0,
         )
         return QueryPlansViewModel(
+            total_results=response.total_results,
             show_results=bool(response.results),
             results=ResultsTable(
                 rows=[
@@ -82,6 +84,7 @@ class QueryPlansPresenter:
 
     def get_empty_view_model(self) -> QueryPlansViewModel:
         return QueryPlansViewModel(
+            total_results=0,
             results=ResultsTable(rows=[]),
             show_results=False,
             pagination=Pagination(is_visible=False, pages=[]),

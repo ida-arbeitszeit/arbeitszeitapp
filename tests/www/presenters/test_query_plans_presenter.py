@@ -46,6 +46,24 @@ class QueryPlansPresenterTests(BaseTestCase):
         self.presenter.present(response, self.request)
         self.assertFalse(self.notifier.warnings)
 
+    @parameterized.expand(
+        [
+            (-1,),
+            (0,),
+            (1,),
+            (2,),
+        ]
+    )
+    def test_correct_number_of_total_results_is_passed_on_to_view_model(
+        self,
+        number_of_results: int,
+    ) -> None:
+        response = self.queried_plan_generator.get_response(
+            total_results=number_of_results
+        )
+        presentation = self.presenter.present(response, self.request)
+        self.assertEqual(presentation.total_results, number_of_results)
+
     def test_correct_plan_url_is_shown(self) -> None:
         plan_id = uuid4()
         response = self.queried_plan_generator.get_response(
