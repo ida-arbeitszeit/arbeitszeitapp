@@ -21,6 +21,7 @@ from arbeitszeit_web.api.response_errors import (
     Forbidden,
     NotFound,
     Unauthorized,
+    UnsupportedMediaType,
 )
 
 namespace = Namespace("consumptions", "Consumptions related endpoints.")
@@ -38,7 +39,13 @@ class LiquidMeansOfProduction(Resource):
     )
     @namespace.marshal_with(model, skip_none=True)
     @error_response_handling(
-        error_responses=[Unauthorized, BadRequest, NotFound, Forbidden],
+        error_responses=[
+            Unauthorized,
+            BadRequest,
+            NotFound,
+            Forbidden,
+            UnsupportedMediaType,
+        ],
         namespace=namespace,
     )
     @authentication_check

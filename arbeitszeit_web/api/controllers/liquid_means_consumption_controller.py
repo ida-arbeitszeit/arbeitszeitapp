@@ -56,7 +56,7 @@ class LiquidMeansConsumptionController:
         return current_user
 
     def _parse_plan_id(self) -> UUID:
-        plan_id = self.request.get_form("plan_id")
+        plan_id = self.request.get_json("plan_id")
         if not plan_id:
             raise BadRequest(message="Plan id missing.")
         try:
@@ -66,7 +66,7 @@ class LiquidMeansConsumptionController:
         return plan_uuid
 
     def _parse_amount(self) -> int:
-        amount = self.request.get_form("amount")
+        amount = self.request.get_json("amount")
         if not amount:
             raise BadRequest(message="Amount missing.")
         try:

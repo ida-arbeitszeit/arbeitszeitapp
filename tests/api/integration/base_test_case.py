@@ -15,7 +15,7 @@ class ApiTestCase(FlaskTestCase):
         )
         response = self.client.post(
             self.url_prefix + "/auth/login_member",
-            data=dict(
+            json=dict(
                 email=email,
                 password=password,
             ),
@@ -30,7 +30,7 @@ class ApiTestCase(FlaskTestCase):
         )
         response = self.client.post(
             self.url_prefix + "/auth/login_company",
-            data=dict(
+            json=dict(
                 email=email,
                 password=password,
             ),

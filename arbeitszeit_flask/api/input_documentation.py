@@ -43,7 +43,7 @@ class with_input_documentation:
     def _add_argument_to_parser(
         self, parser: RequestParser, input: FormParameter | QueryParameter
     ) -> RequestParser:
-        location = "query" if isinstance(input, QueryParameter) else "form"
+        location = "query" if isinstance(input, QueryParameter) else "json"
         return parser.add_argument(
             name=input.name,
             type=input.type,
