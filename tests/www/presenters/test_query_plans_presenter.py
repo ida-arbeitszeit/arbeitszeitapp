@@ -3,8 +3,8 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.query_plans_presenter import QueryPlansPresenter
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedPlanGenerator

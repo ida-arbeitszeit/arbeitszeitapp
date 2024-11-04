@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
-from arbeitszeit_web.query_plans import QueryPlansController
+from arbeitszeit_web.www.controllers.query_plans_controller import QueryPlansController
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 
