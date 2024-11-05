@@ -3,8 +3,8 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit_web.query_plans import QueryPlansPresenter
 from arbeitszeit_web.session import UserRole
+from arbeitszeit_web.www.presenters.query_plans_presenter import QueryPlansPresenter
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedPlanGenerator
@@ -45,6 +45,24 @@ class QueryPlansPresenterTests(BaseTestCase):
         )
         self.presenter.present(response, self.request)
         self.assertFalse(self.notifier.warnings)
+
+    @parameterized.expand(
+        [
+            (-1,),
+            (0,),
+            (1,),
+            (2,),
+        ]
+    )
+    def test_correct_number_of_total_results_is_passed_on_to_view_model(
+        self,
+        number_of_results: int,
+    ) -> None:
+        response = self.queried_plan_generator.get_response(
+            total_results=number_of_results
+        )
+        presentation = self.presenter.present(response, self.request)
+        self.assertEqual(presentation.total_results, number_of_results)
 
     def test_correct_plan_url_is_shown(self) -> None:
         plan_id = uuid4()

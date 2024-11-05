@@ -5,8 +5,8 @@ from flask import Response, render_template, request
 from arbeitszeit.use_cases import query_plans as use_case
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import PlanSearchForm
-from arbeitszeit_web.query_plans import (
-    QueryPlansController,
+from arbeitszeit_web.www.controllers.query_plans_controller import QueryPlansController
+from arbeitszeit_web.www.presenters.query_plans_presenter import (
     QueryPlansPresenter,
     QueryPlansViewModel,
 )
