@@ -9,17 +9,13 @@ from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.response import Redirect
 
 
 @dataclass
 class RenderForm:
     status_code: int
     form: RegisterPrivateConsumptionForm
-
-
-@dataclass
-class Redirect:
-    url: str
 
 
 RegisterPrivateConsumptionViewModel = Redirect | RenderForm
