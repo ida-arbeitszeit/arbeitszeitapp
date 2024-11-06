@@ -20,7 +20,11 @@ from arbeitszeit_web.api.presenters.login_company_api_presenter import (
 from arbeitszeit_web.api.presenters.login_member_api_presenter import (
     LoginMemberApiPresenter,
 )
-from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
+from arbeitszeit_web.api.response_errors import (
+    BadRequest,
+    Unauthorized,
+    UnsupportedMediaType,
+)
 
 namespace = Namespace("auth", "Authentification related endpoints.")
 
@@ -36,7 +40,8 @@ class LoginMember(Resource):
     )
     @namespace.marshal_with(login_member_model, skip_none=True)
     @error_response_handling(
-        error_responses=[Unauthorized, BadRequest], namespace=namespace
+        error_responses=[Unauthorized, BadRequest, UnsupportedMediaType],
+        namespace=namespace,
     )
     @with_injection()
     def post(
@@ -66,7 +71,8 @@ class LoginCompany(Resource):
     )
     @namespace.marshal_with(login_company_model, skip_none=True)
     @error_response_handling(
-        error_responses=[Unauthorized, BadRequest], namespace=namespace
+        error_responses=[Unauthorized, BadRequest, UnsupportedMediaType],
+        namespace=namespace,
     )
     @with_injection()
     def post(

@@ -27,14 +27,14 @@ class AuthenticatedCompanyTests(ApiTestCase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        response = self.client.post(self.url, data={"plan_id": plan, "amount": 10})
+        response = self.client.post(self.url, json={"plan_id": plan, "amount": 10})
         assert response.status_code == 200
 
     def test_post_request_of_authenticated_company_returns_bad_request_with_invalid_input(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan()
-        response = self.client.post(self.url, data={"plan_id": plan})
+        response = self.client.post(self.url, json={"plan_id": plan})
         assert response.status_code == 400
 
 

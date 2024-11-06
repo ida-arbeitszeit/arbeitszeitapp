@@ -22,13 +22,13 @@ class ControllerTests(BaseTestCase):
         self.assertEqual(err.exception.message, "Email missing.")
 
     def test_bad_request_raised_when_request_has_password_but_no_email(self) -> None:
-        self.request.set_form(key="password", value="123safe")
+        self.request.set_json(key="password", value="123safe")
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Email missing.")
 
     def test_bad_request_raised_when_request_has_email_but_no_password(self) -> None:
-        self.request.set_form(key="email", value="test@test.org")
+        self.request.set_json(key="email", value="test@test.org")
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request()
         self.assertEqual(err.exception.message, "Password missing.")
@@ -36,8 +36,8 @@ class ControllerTests(BaseTestCase):
     def test_email_and_password_are_passed_to_use_case_request(self) -> None:
         EXPECTED_MAIL = "test@test.org"
         EXPECTED_PASSWORD = "123safe"
-        self.request.set_form(key="email", value=EXPECTED_MAIL)
-        self.request.set_form(key="password", value=EXPECTED_PASSWORD)
+        self.request.set_json(key="email", value=EXPECTED_MAIL)
+        self.request.set_json(key="password", value=EXPECTED_PASSWORD)
         use_case_request = self.controller.create_request()
         assert use_case_request
         self.assertEqual(use_case_request.email_address, EXPECTED_MAIL)

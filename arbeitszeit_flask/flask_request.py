@@ -26,6 +26,9 @@ class FlaskRequest:
     def get_form(self, key: str) -> Optional[str]:
         return request.form.get(key, None)
 
+    def get_json(self, key: str) -> Optional[str]:
+        return request.get_json().get(key, None)
+
     def get_header(self, key: str) -> Optional[str]:
         return request.headers.get(key, None)
 

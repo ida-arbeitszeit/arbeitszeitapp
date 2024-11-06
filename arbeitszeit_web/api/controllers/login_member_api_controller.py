@@ -28,8 +28,8 @@ class LoginMemberApiController:
     request: Request
 
     def create_request(self) -> LogInMemberUseCase.Request:
-        email = self.request.get_form("email")
-        password = self.request.get_form("password")
+        email = self.request.get_json("email")
+        password = self.request.get_json("password")
         if not email:
             raise BadRequest(message="Email missing.")
         if not password:
