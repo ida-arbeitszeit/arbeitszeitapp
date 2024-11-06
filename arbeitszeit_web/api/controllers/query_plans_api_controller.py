@@ -42,14 +42,14 @@ class QueryPlansApiController:
         )
 
     def _parse_offset(self, request: Request) -> int:
-        offset_string = request.query_string().get("offset")
+        offset_string = request.query_string().get_last_value("offset")
         if not offset_string:
             return DEFAULT_OFFSET
         offset = query_parser.string_to_non_negative_integer(offset_string)
         return offset
 
     def _parse_limit(self, request: Request) -> int:
-        limit_string = request.query_string().get("limit")
+        limit_string = request.query_string().get_last_value("limit")
         if not limit_string:
             return DEFAULT_LIMIT
         limit = query_parser.string_to_non_negative_integer(limit_string)

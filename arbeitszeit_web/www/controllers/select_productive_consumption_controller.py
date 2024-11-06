@@ -28,7 +28,9 @@ class SelectProductiveConsumptionController:
         )
 
     def _process_plan_id(self) -> UUID | None:
-        plan_id_from_query_string = self.request.query_string().get("plan_id")
+        plan_id_from_query_string = self.request.query_string().get_last_value(
+            "plan_id"
+        )
         plan_id_from_form = self.request.get_form("plan_id")
         if not plan_id_from_query_string and not plan_id_from_form:
             return None
@@ -48,7 +50,7 @@ class SelectProductiveConsumptionController:
             raise self.InputDataError()
 
     def _process_amount(self) -> int | None:
-        amount_from_query_string = self.request.query_string().get("amount")
+        amount_from_query_string = self.request.query_string().get_last_value("amount")
         amount_from_form = self.request.get_form("amount")
         if not amount_from_query_string and not amount_from_form:
             return None
@@ -68,7 +70,7 @@ class SelectProductiveConsumptionController:
             raise self.InputDataError()
 
     def _process_consumption_type(self) -> ConsumptionType | None:
-        consumption_type_from_query_string = self.request.query_string().get(
+        consumption_type_from_query_string = self.request.query_string().get_last_value(
             "type_of_consumption"
         )
         consumption_type_from_form = self.request.get_form("type_of_consumption")

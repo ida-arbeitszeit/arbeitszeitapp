@@ -1,17 +1,38 @@
-from typing import Dict, Optional
+from dataclasses import dataclass, field
+from typing import Dict, Iterable, Optional
 
 from arbeitszeit.injector import singleton
+
+
+@dataclass
+class FakeQueryString:
+    values: dict[str, list[str]] = field(default_factory=dict)
+
+    def items(self) -> Iterable[tuple[str, str]]:
+        for key in self.values:
+            for value in self.values[key]:
+                yield key, value
+
+    def get(self, key: str) -> list[str]:
+        return self.values.get(key, [])
+
+    def get_last_value(self, key: str) -> str | None:
+        match self.values.get(key, []):
+            case []:
+                return None
+            case values:
+                return values[-1]
 
 
 @singleton
 class FakeRequest:
     def __init__(self) -> None:
-        self._args: Dict[str, str] = dict()
+        self._args = FakeQueryString()
         self._form: Dict[str, str] = dict()
         self._json: Dict[str, str] = dict()
         self._environ: Dict[str, str] = dict()
 
-    def query_string(self) -> Dict[str, str]:
+    def query_string(self) -> FakeQueryString:
         return self._args
 
     def get_form(self, key: str) -> Optional[str]:
@@ -24,7 +45,7 @@ class FakeRequest:
         return self._json.get(key, None)
 
     def set_arg(self, arg: str, value: object) -> None:
-        self._args[arg] = str(value)
+        self._args.values[arg] = [str(value)]
 
     def set_form(self, key: str, value: str) -> None:
         self._form[key] = value

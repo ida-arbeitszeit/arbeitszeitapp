@@ -41,7 +41,7 @@ class QueryCompaniesController:
         )
 
     def _get_pagination_offset(self) -> int:
-        page_str = self.request.query_string().get(PAGE_PARAMETER_NAME)
+        page_str = self.request.query_string().get_last_value(PAGE_PARAMETER_NAME)
         if page_str is None:
             return 0
         try:
