@@ -27,7 +27,6 @@ class ListLoginCompanyTests(ApiTestCase):
             self.url, query_string=dict(email=email, password=password)
         )
         self.assertEqual(response.status_code, 415)
-        # reponse shows expected content type
         self.assertEqual(response.content_type, "application/json")
 
     def test_post_returns_401_with_incorrect_data(self) -> None:
