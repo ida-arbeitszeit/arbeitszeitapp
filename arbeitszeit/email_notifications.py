@@ -38,6 +38,12 @@ class WorkerInvitation:
 
 
 @dataclass
+class WorkerRemovalNotification:
+    worker_email: str
+    company_name: str
+
+
+@dataclass
 class EmailChangeWarning:
     old_email_address: str
 
@@ -88,6 +94,7 @@ Message: TypeAlias = Union[
     ResetPasswordConfirmation,
     ResetPasswordRequest,
     WorkerInvitation,
+    WorkerRemovalNotification,
 ]
 # Implementations can rely on this set to contain all possible message
 # types.
