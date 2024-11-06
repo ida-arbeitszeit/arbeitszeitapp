@@ -5,6 +5,7 @@ from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
+    RegisterPrivateConsumptionRequest,
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -12,13 +13,14 @@ from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.forms import RegisterPrivateConsumptionForm
 from arbeitszeit_web.www.controllers.register_private_consumption_controller import (
+    FormError,
     RegisterPrivateConsumptionController,
 )
 from arbeitszeit_web.www.presenters.register_private_consumption_presenter import (
-    Redirect,
     RegisterPrivateConsumptionPresenter,
     RenderForm,
 )
+from arbeitszeit_web.www.response import Redirect
 
 
 @dataclass
@@ -37,14 +39,13 @@ class RegisterPrivateConsumptionView:
 
     @commit_changes
     def POST(self) -> Response:
-        current_user = self.flask_session.get_current_user()
-        assert current_user
-        try:
-            use_case_request = self.controller.import_form_data(
-                current_user, FlaskRequest()
-            )
-        except self.controller.FormError as error:
-            return FlaskResponse(self._render_template(error.form), status=400)
+        match self.controller.import_form_data(FlaskRequest()):
+            case FormError() as error:
+                return FlaskResponse(self._render_template(error.form), status=400)
+            case Redirect(url=url):
+                return redirect(url)
+            case RegisterPrivateConsumptionRequest() as use_case_request:
+                pass
         response = self.register_private_consumption.register_private_consumption(
             use_case_request
         )

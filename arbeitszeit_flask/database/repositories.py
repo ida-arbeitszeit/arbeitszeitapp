@@ -731,6 +731,15 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
             company.workers.append(member)
         return companies_changed
 
+    def remove_worker(self, member: UUID) -> int:
+        companies_changed = 0
+        member = models.Member.query.filter(models.Member.id == str(member)).first()
+        assert member
+        for company in self.query:
+            companies_changed += 1
+            company.workers.remove(member)
+        return companies_changed
+
     def with_name_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Company.name.ilike(f"%{query}%"))
