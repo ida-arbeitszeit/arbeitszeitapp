@@ -6,6 +6,8 @@ from typing import Iterable, Optional, Tuple
 from flask import request
 from werkzeug.datastructures import MultiDict
 
+from arbeitszeit_web.json import JsonValue
+
 
 @dataclass
 class QueryStringImpl:
@@ -34,8 +36,8 @@ class FlaskRequest:
     def get_form(self, key: str) -> Optional[str]:
         return request.form.get(key, None)
 
-    def get_json(self, key: str) -> Optional[str]:
-        return request.get_json().get(key, None)
+    def get_json(self) -> JsonValue | None:
+        return request.get_json()
 
     def get_header(self, key: str) -> Optional[str]:
         return request.headers.get(key, None)
