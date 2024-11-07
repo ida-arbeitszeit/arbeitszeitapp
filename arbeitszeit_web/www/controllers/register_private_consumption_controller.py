@@ -11,6 +11,9 @@ from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.controllers.register_private_consumption_form_validator import (
+    RegisterPrivateConsumptionFormValidator as Validator,
+)
 from arbeitszeit_web.www.response import Redirect
 
 
@@ -27,41 +30,26 @@ class RegisterPrivateConsumptionController:
     translator: Translator
     session: Session
     url_index: UrlIndex
+    validator: Validator
 
     def import_form_data(self, request: Request) -> ViewModel:
         plan_id: UUID
         amount: int
-        if plan_id_field := request.get_form("plan_id"):
-            try:
-                plan_id = UUID(plan_id_field)
-            except ValueError:
-                return self.create_form_error(
-                    request,
-                    plan_id_errors=[self.translator.gettext("Plan ID is invalid.")],
-                )
-        else:
+        plan_id_errors: list[str] = []
+        amount_errors: list[str] = []
+        match self.validator.validate_plan_id_string(request.get_form("plan_id") or ""):
+            case UUID() as plan_id:
+                pass
+            case list() as plan_id_errors:
+                pass
+        match self.validator.validate_amount_string(request.get_form("amount") or ""):
+            case int() as amount:
+                pass
+            case list() as amount_errors:
+                pass
+        if plan_id_errors or amount_errors:
             return self.create_form_error(
-                request, plan_id_errors=[self.translator.gettext("Plan ID is invalid.")]
-            )
-        if amount_field := request.get_form("amount"):
-            try:
-                amount = int(amount_field)
-            except ValueError:
-                return self.create_form_error(
-                    request,
-                    amount_errors=[self.translator.gettext("This is not an integer.")],
-                )
-        else:
-            return self.create_form_error(
-                request,
-                amount_errors=[self.translator.gettext("You must specify an amount.")],
-            )
-        if amount < 1:
-            return self.create_form_error(
-                request,
-                amount_errors=[
-                    self.translator.gettext("Must be a number larger than zero.")
-                ],
+                request, amount_errors=amount_errors, plan_id_errors=plan_id_errors
             )
         match self.session.get_current_user():
             case None:
