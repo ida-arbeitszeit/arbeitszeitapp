@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from flask import Response, render_template, request
 
 from arbeitszeit.use_cases import query_companies as use_case
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import CompanySearchForm
 from arbeitszeit_web.www.controllers.query_companies_controller import (
     QueryCompaniesController,
@@ -27,7 +28,9 @@ class QueryCompaniesView:
         search_form = CompanySearchForm(request.args)
         if not search_form.validate():
             return self._get_invalid_form_response(form=search_form)
-        use_case_request = self.controller.import_form_data(search_form)
+        use_case_request = self.controller.import_form_data(
+            form=search_form, request=FlaskRequest()
+        )
         return self._handle_use_case_request(
             use_case_request=use_case_request,
             search_form=search_form,
