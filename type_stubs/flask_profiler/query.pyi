@@ -119,11 +119,11 @@ class ColumnDefinition:
     def __init__(self, name, column_type, constraints=...) -> None: ...
 
 class ColumnType(enum.Enum):
-    NULL: str
-    INTEGER: str
-    REAL: str
-    TEXT: str
-    BLOB: str
+    NULL = "NULL"
+    INTEGER = "INTEGER"
+    REAL = "REAL"
+    TEXT = "TEXT"
+    BLOB = "BLOB"
     def as_type_def(self) -> str: ...
 
 @dataclass

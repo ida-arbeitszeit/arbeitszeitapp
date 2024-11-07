@@ -3,8 +3,8 @@ from enum import Enum
 from _typeshed import Incomplete
 
 class BackendFilter(Enum):
-    INTERACTIVE: int
-    NON_INTERACTIVE: int
+    INTERACTIVE = 0
+    NON_INTERACTIVE = 1
 
 class BackendRegistry:
     def __init__(self) -> None: ...

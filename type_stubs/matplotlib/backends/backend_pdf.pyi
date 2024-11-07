@@ -47,43 +47,43 @@ class Verbatim:
     def pdfRepr(self): ...
 
 class Op(Enum):
-    close_fill_stroke: bytes
-    fill_stroke: bytes
-    fill: bytes
-    closepath: bytes
-    close_stroke: bytes
-    stroke: bytes
-    endpath: bytes
-    begin_text: bytes
-    end_text: bytes
-    curveto: bytes
-    rectangle: bytes
-    lineto: bytes
-    moveto: bytes
-    concat_matrix: bytes
-    use_xobject: bytes
-    setgray_stroke: bytes
-    setgray_nonstroke: bytes
-    setrgb_stroke: bytes
-    setrgb_nonstroke: bytes
-    setcolorspace_stroke: bytes
-    setcolorspace_nonstroke: bytes
-    setcolor_stroke: bytes
-    setcolor_nonstroke: bytes
-    setdash: bytes
-    setlinejoin: bytes
-    setlinecap: bytes
-    setgstate: bytes
-    gsave: bytes
-    grestore: bytes
-    textpos: bytes
-    selectfont: bytes
-    textmatrix: bytes
-    show: bytes
-    showkern: bytes
-    setlinewidth: bytes
-    clip: bytes
-    shading: bytes
+    close_fill_stroke = b"b"
+    fill_stroke = b"B"
+    fill = b"f"
+    closepath = b"h"
+    close_stroke = b"s"
+    stroke = b"S"
+    endpath = b"n"
+    begin_text = b"BT"
+    end_text = b"ET"
+    curveto = b"c"
+    rectangle = b"re"
+    lineto = b"l"
+    moveto = b"m"
+    concat_matrix = b"cm"
+    use_xobject = b"Do"
+    setgray_stroke = b"G"
+    setgray_nonstroke = b"g"
+    setrgb_stroke = b"RG"
+    setrgb_nonstroke = b"rg"
+    setcolorspace_stroke = b"CS"
+    setcolorspace_nonstroke = b"cs"
+    setcolor_stroke = b"SCN"
+    setcolor_nonstroke = b"scn"
+    setdash = b"d"
+    setlinejoin = b"j"
+    setlinecap = b"J"
+    setgstate = b"gs"
+    gsave = b"q"
+    grestore = b"Q"
+    textpos = b"Td"
+    selectfont = b"Tf"
+    textmatrix = b"Tm"
+    show = b"Tj"
+    showkern = b"TJ"
+    setlinewidth = b"w"
+    clip = b"W"
+    shading = b"sh"
     def pdfRepr(self): ...
     @classmethod
     def paint_path(cls, fill, stroke): ...
