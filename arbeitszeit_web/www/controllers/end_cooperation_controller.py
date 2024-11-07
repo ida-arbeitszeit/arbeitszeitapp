@@ -10,11 +10,10 @@ from arbeitszeit_web.session import Session
 @dataclass
 class EndCooperationController:
     session: Session
-    request: Request
 
-    def process_request_data(self) -> Optional[EndCooperationRequest]:
-        plan_id = self.request.get_form("plan_id")
-        cooperation_id = self.request.get_form("cooperation_id")
+    def process_request_data(self, request: Request) -> Optional[EndCooperationRequest]:
+        plan_id = request.get_form("plan_id")
+        cooperation_id = request.get_form("cooperation_id")
         current_user = self.session.get_current_user()
         if not all([plan_id, cooperation_id, current_user]):
             return None
