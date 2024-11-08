@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.select_productive_consumption import (
     SelectProductiveConsumptionUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_productive_consumption_controller import (
@@ -38,7 +39,9 @@ class RegisterProductiveConsumptionView:
     def GET(self) -> Response:
         try:
             use_case_request = (
-                self.select_productive_consumption_controller.process_input_data()
+                self.select_productive_consumption_controller.process_input_data(
+                    FlaskRequest()
+                )
             )
         except self.select_productive_consumption_controller.InputDataError:
             return self._handle_invalid_form(RegisterProductiveConsumptionForm())
