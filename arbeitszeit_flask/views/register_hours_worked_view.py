@@ -8,6 +8,7 @@ from flask_login import current_user
 from arbeitszeit.use_cases.list_workers import ListWorkers, ListWorkersRequest
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
 from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
@@ -30,7 +31,7 @@ class RegisterHoursWorkedView:
 
     @commit_changes
     def POST(self) -> Response:
-        controller_response = self.controller.create_use_case_request()
+        controller_response = self.controller.create_use_case_request(FlaskRequest())
         if isinstance(controller_response, ControllerRejection):
             self.presenter.present_controller_warnings(controller_response)
             return self.create_response(status=400)

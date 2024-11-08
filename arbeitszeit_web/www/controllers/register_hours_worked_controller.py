@@ -21,14 +21,13 @@ class ControllerRejection:
 @dataclass
 class RegisterHoursWorkedController:
     session: Session
-    request: Request
 
     def create_use_case_request(
-        self,
+        self, request: Request
     ) -> Union[RegisterHoursWorkedRequest, ControllerRejection]:
         company_uuid = self.session.get_current_user()
-        worker_id = self.request.get_form("member_id")
-        amount_str = self.request.get_form("amount")
+        worker_id = request.get_form("member_id")
+        amount_str = request.get_form("amount")
         if not all([company_uuid, worker_id, amount_str]):
             return ControllerRejection(
                 reason=ControllerRejection.RejectionReason.invalid_input
