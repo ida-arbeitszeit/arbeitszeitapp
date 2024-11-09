@@ -46,14 +46,14 @@ class ControllerTests(BaseTestCase):
     def test_controller_raises_bad_request_when_plan_id_is_missing(self) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("amount", "10")
+        self.request.set_json({"amount": "10"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
     def test_controller_raises_bad_request_when_amount_is_missing(self) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
+        self.request.set_json({"plan_id": str(uuid4())})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
@@ -62,16 +62,14 @@ class ControllerTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", "invalid_uuid")
-        self.request.set_json("amount", "10")
+        self.request.set_json({"plan_id": "invalid_uuid", "amount": "10"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
     def test_controller_raises_bad_request_when_amount_is_a_character(self) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "invalid_amount")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "invalid_amount"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
@@ -80,24 +78,21 @@ class ControllerTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "10.5")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "10.5"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
     def test_controller_raises_bad_request_when_amount_is_zero(self) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "0")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "0"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
     def test_controller_raises_bad_request_when_amount_is_negative(self) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "-10")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "-10"})
         with self.assertRaises(BadRequest):
             self.controller.create_request()
 
@@ -106,8 +101,7 @@ class ControllerTests(BaseTestCase):
     ) -> None:
         expected_company = self.company_generator.create_company()
         self.session.login_company(expected_company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "10")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "10"})
         request = self.controller.create_request()
         self.assertEqual(request.consumer, expected_company)
 
@@ -117,8 +111,7 @@ class ControllerTests(BaseTestCase):
         company = self.company_generator.create_company()
         self.session.login_company(company)
         expected_plan_id = uuid4()
-        self.request.set_json("plan_id", str(expected_plan_id))
-        self.request.set_json("amount", "10")
+        self.request.set_json({"plan_id": str(expected_plan_id), "amount": "10"})
         request = self.controller.create_request()
         self.assertEqual(request.plan, expected_plan_id)
 
@@ -134,8 +127,7 @@ class ControllerTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", str(expected_amount))
+        self.request.set_json({"plan_id": str(uuid4()), "amount": str(expected_amount)})
         request = self.controller.create_request()
         self.assertEqual(request.amount, expected_amount)
 
@@ -144,8 +136,7 @@ class ControllerTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json("plan_id", str(uuid4()))
-        self.request.set_json("amount", "10")
+        self.request.set_json({"plan_id": str(uuid4()), "amount": "10"})
         request = self.controller.create_request()
         self.assertEqual(request.consumption_type, ConsumptionType.raw_materials)
 

@@ -56,9 +56,13 @@ class LiquidMeansConsumptionController:
         return current_user
 
     def _parse_plan_id(self) -> UUID:
-        plan_id = self.request.get_json("plan_id")
+        json_body = self.request.get_json()
+        if not isinstance(json_body, dict):
+            raise BadRequest(message="Plan id missing.")
+        plan_id = json_body.get("plan_id")
         if not plan_id:
             raise BadRequest(message="Plan id missing.")
+        assert isinstance(plan_id, str)
         try:
             plan_uuid = UUID(plan_id)
         except ValueError:
@@ -66,9 +70,13 @@ class LiquidMeansConsumptionController:
         return plan_uuid
 
     def _parse_amount(self) -> int:
-        amount = self.request.get_json("amount")
+        json_body = self.request.get_json()
+        assert isinstance(json_body, dict)
+        amount = json_body.get("amount")
         if not amount:
             raise BadRequest(message="Amount missing.")
+        if not isinstance(amount, (int, str, float)):
+            raise BadRequest(message=f"Amount must be an integer, got {amount}.")
         try:
             amount_int = int(amount)
         except ValueError:

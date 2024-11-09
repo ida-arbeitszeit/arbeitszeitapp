@@ -28,10 +28,15 @@ class LoginMemberApiController:
     request: Request
 
     def create_request(self) -> LogInMemberUseCase.Request:
-        email = self.request.get_json("email")
-        password = self.request.get_json("password")
+        json_body = self.request.get_json()
+        if not isinstance(json_body, dict):
+            raise BadRequest("Email missing.")
+        email = json_body.get("email")
+        password = json_body.get("password")
         if not email:
             raise BadRequest(message="Email missing.")
         if not password:
             raise BadRequest(message="Password missing.")
+        assert isinstance(email, str)
+        assert isinstance(password, str)
         return LogInMemberUseCase.Request(email=email, password=password)

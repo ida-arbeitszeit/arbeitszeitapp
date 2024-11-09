@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from typing import Iterable, Optional, Protocol, Tuple
 
+from arbeitszeit_web.json import JsonValue
+
 
 class Request(Protocol):
     def query_string(self) -> QueryString: ...
 
     def get_form(self, key: str) -> Optional[str]: ...
 
-    def get_json(self, key: str) -> Optional[str]: ...
+    def get_json(self) -> JsonValue | None: ...
 
     def get_header(self, key: str) -> Optional[str]: ...
 

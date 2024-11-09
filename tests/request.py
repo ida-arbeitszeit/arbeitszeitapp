@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Iterable, Optional
 
 from arbeitszeit.injector import singleton
+from arbeitszeit_web.json import JsonValue
 
 
 @dataclass
@@ -29,7 +30,7 @@ class FakeRequest:
     def __init__(self) -> None:
         self._args = FakeQueryString()
         self._form: Dict[str, str] = dict()
-        self._json: Dict[str, str] = dict()
+        self._json: JsonValue | None = None
         self._environ: Dict[str, str] = dict()
 
     def query_string(self) -> FakeQueryString:
@@ -41,8 +42,8 @@ class FakeRequest:
     def get_header(self, key: str) -> Optional[str]:
         return self._environ.get(key, None)
 
-    def get_json(self, key: str) -> Optional[str]:
-        return self._json.get(key, None)
+    def get_json(self) -> JsonValue | None:
+        return self._json
 
     def set_arg(self, arg: str, value: object) -> None:
         self._args.values[arg] = [str(value)]
@@ -57,8 +58,8 @@ class FakeRequest:
         else:
             self._environ[key] = value
 
-    def set_json(self, key: str, value: str) -> None:
-        self._json[key] = value
+    def set_json(self, value: JsonValue) -> None:
+        self._json = value
 
     def get_request_target(self) -> str:
         return "/"
