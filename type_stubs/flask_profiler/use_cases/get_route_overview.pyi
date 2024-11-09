@@ -2,7 +2,6 @@ import enum
 from dataclasses import dataclass
 from datetime import datetime
 
-from _typeshed import Incomplete
 from flask_profiler.calendar import Calendar as Calendar
 from flask_profiler.entities.measurement_archive import (
     MeasurementArchivist as MeasurementArchivist,
@@ -33,7 +32,7 @@ class Response:
     def __init__(self, request, timeseries) -> None: ...
 
 class Interval(enum.Enum):
-    daily: Incomplete
+    daily = ...
 
 @dataclass
 class IntervalMeasurement:

@@ -2,17 +2,16 @@ import enum
 from dataclasses import dataclass
 from datetime import datetime
 
-from _typeshed import Incomplete
 from flask_profiler.entities import measurement_archive as measurement_archive
 
 class SortingField(enum.Enum):
-    average_time: Incomplete
-    route_name: Incomplete
-    none: Incomplete
+    average_time = ...
+    route_name = ...
+    none = ...
 
 class SortingOrder(enum.Enum):
-    ascending: Incomplete
-    descending: Incomplete
+    ascending = ...
+    descending = ...
 
 @dataclass
 class Measurement:

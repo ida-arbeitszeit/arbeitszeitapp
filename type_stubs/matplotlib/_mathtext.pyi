@@ -393,10 +393,10 @@ def cmd(expr: str, args: ParserElement) -> ParserElement: ...
 
 class Parser:
     class _MathStyle(enum.Enum):
-        DISPLAYSTYLE: int
-        TEXTSTYLE: int
-        SCRIPTSTYLE: int
-        SCRIPTSCRIPTSTYLE: int
+        DISPLAYSTYLE = 0
+        TEXTSTYLE = 1
+        SCRIPTSTYLE = 2
+        SCRIPTSCRIPTSTYLE = 3
 
     def __init__(self) -> None: ...
     def parse(
