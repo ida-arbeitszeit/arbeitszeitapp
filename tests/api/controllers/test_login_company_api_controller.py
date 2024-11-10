@@ -12,32 +12,35 @@ class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(LoginCompanyApiController)
-        self.request = self.injector.get(FakeRequest)
 
     def test_bad_request_raised_when_request_has_no_email_and_no_password(
         self,
     ) -> None:
+        request = FakeRequest()
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(err.exception.message, "Email missing.")
 
     def test_bad_request_raised_when_request_has_password_but_no_email(self) -> None:
-        self.request.set_json({"password": "123safe"})
+        request = FakeRequest()
+        request.set_json({"password": "123safe"})
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(err.exception.message, "Email missing.")
 
     def test_bad_request_raised_when_request_has_email_but_no_password(self) -> None:
-        self.request.set_json({"email": "test@test.org"})
+        request = FakeRequest()
+        request.set_json({"email": "test@test.org"})
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(err.exception.message, "Password missing.")
 
     def test_email_and_password_are_passed_to_use_case_request(self) -> None:
         EXPECTED_MAIL = "test@test.org"
         EXPECTED_PASSWORD = "123safe"
-        self.request.set_json({"email": EXPECTED_MAIL, "password": EXPECTED_PASSWORD})
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        request.set_json({"email": EXPECTED_MAIL, "password": EXPECTED_PASSWORD})
+        use_case_request = self.controller.create_request(request)
         assert use_case_request
         self.assertEqual(use_case_request.email_address, EXPECTED_MAIL)
         self.assertEqual(use_case_request.password, EXPECTED_PASSWORD)
