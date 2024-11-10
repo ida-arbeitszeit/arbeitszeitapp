@@ -7,6 +7,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
 )
 from arbeitszeit_web.api.controllers.parameters import FormParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
+from arbeitszeit_web.json import JsonValue
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session, UserRole
 
@@ -30,15 +31,15 @@ liquid_means_expected_inputs = [
 
 @dataclass
 class LiquidMeansConsumptionController:
-    request: Request
     session: Session
 
-    def create_request(self) -> UseCaseRequest:
+    def create_request(self, request: Request) -> UseCaseRequest:
         company = self._validate_current_user()
+        json_body = request.get_json()
         return UseCaseRequest(
             consumer=company,
-            plan=self._parse_plan_id(),
-            amount=self._parse_amount(),
+            plan=self._parse_plan_id(json_body),
+            amount=self._parse_amount(json_body),
             consumption_type=ConsumptionType.raw_materials,
         )
 
@@ -55,8 +56,7 @@ class LiquidMeansConsumptionController:
             )
         return current_user
 
-    def _parse_plan_id(self) -> UUID:
-        json_body = self.request.get_json()
+    def _parse_plan_id(self, json_body: JsonValue) -> UUID:
         if not isinstance(json_body, dict):
             raise BadRequest(message="Plan id missing.")
         plan_id = json_body.get("plan_id")
@@ -69,8 +69,7 @@ class LiquidMeansConsumptionController:
             raise BadRequest(f"Plan id must be in UUID format, got {plan_id}.")
         return plan_uuid
 
-    def _parse_amount(self) -> int:
-        json_body = self.request.get_json()
+    def _parse_amount(self, json_body: JsonValue) -> int:
         assert isinstance(json_body, dict)
         amount = json_body.get("amount")
         if not amount:

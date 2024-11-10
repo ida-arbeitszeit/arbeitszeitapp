@@ -17,103 +17,115 @@ class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(LiquidMeansConsumptionController)
-        self.request = self.injector.get(FakeRequest)
 
     def test_controller_raises_unauthorized_for_anonymous_user(self) -> None:
+        request = FakeRequest()
         with self.assertRaises(Unauthorized):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_unauthorized_for_member(self) -> None:
+        request = FakeRequest()
         member = self.member_generator.create_member()
         self.session.login_member(member)
         with self.assertRaises(Unauthorized):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_unauthorized_for_accountant(self) -> None:
+        request = FakeRequest()
         accountant = self.accountant_generator.create_accountant()
         self.session.login_accountant(accountant)
         with self.assertRaises(Unauthorized):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_plan_id_and_amount_are_missing(
         self,
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_plan_id_is_missing(self) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"amount": "10"})
+        request.set_json({"amount": "10"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_amount_is_missing(self) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4())})
+        request.set_json({"plan_id": str(uuid4())})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_plan_id_is_not_in_uuid_format(
         self,
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": "invalid_uuid", "amount": "10"})
+        request.set_json({"plan_id": "invalid_uuid", "amount": "10"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_amount_is_a_character(self) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "invalid_amount"})
+        request.set_json({"plan_id": str(uuid4()), "amount": "invalid_amount"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_amount_is_a_floating_number(
         self,
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "10.5"})
+        request.set_json({"plan_id": str(uuid4()), "amount": "10.5"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_amount_is_zero(self) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "0"})
+        request.set_json({"plan_id": str(uuid4()), "amount": "0"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_raises_bad_request_when_amount_is_negative(self) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "-10"})
+        request.set_json({"plan_id": str(uuid4()), "amount": "-10"})
         with self.assertRaises(BadRequest):
-            self.controller.create_request()
+            self.controller.create_request(request)
 
     def test_controller_creates_request_with_consumer_set_to_currently_logged_in_company(
         self,
     ) -> None:
+        request = FakeRequest()
         expected_company = self.company_generator.create_company()
         self.session.login_company(expected_company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "10"})
-        request = self.controller.create_request()
-        self.assertEqual(request.consumer, expected_company)
+        request.set_json({"plan_id": str(uuid4()), "amount": "10"})
+        uc_request = self.controller.create_request(request)
+        self.assertEqual(uc_request.consumer, expected_company)
 
     def test_controller_creates_request_with_plan_as_specified_in_post_body(
         self,
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
         expected_plan_id = uuid4()
-        self.request.set_json({"plan_id": str(expected_plan_id), "amount": "10"})
-        request = self.controller.create_request()
-        self.assertEqual(request.plan, expected_plan_id)
+        request.set_json({"plan_id": str(expected_plan_id), "amount": "10"})
+        uc_request = self.controller.create_request(request)
+        self.assertEqual(uc_request.plan, expected_plan_id)
 
     @parameterized.expand(
         [
@@ -125,20 +137,22 @@ class ControllerTests(BaseTestCase):
     def test_controller_creates_request_with_amount_as_specified_in_post_body(
         self, expected_amount: int
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": str(expected_amount)})
-        request = self.controller.create_request()
-        self.assertEqual(request.amount, expected_amount)
+        request.set_json({"plan_id": str(uuid4()), "amount": str(expected_amount)})
+        uc_request = self.controller.create_request(request)
+        self.assertEqual(uc_request.amount, expected_amount)
 
     def test_controller_creates_request_with_consumption_type_set_to_raw_materials(
         self,
     ) -> None:
+        request = FakeRequest()
         company = self.company_generator.create_company()
         self.session.login_company(company)
-        self.request.set_json({"plan_id": str(uuid4()), "amount": "10"})
-        request = self.controller.create_request()
-        self.assertEqual(request.consumption_type, ConsumptionType.raw_materials)
+        request.set_json({"plan_id": str(uuid4()), "amount": "10"})
+        uc_request = self.controller.create_request(request)
+        self.assertEqual(uc_request.consumption_type, ConsumptionType.raw_materials)
 
 
 class ExpectedInputsTests(BaseTestCase):
