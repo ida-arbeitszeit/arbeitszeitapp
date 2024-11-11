@@ -27,11 +27,9 @@ active_plans_expected_inputs = [
 
 @dataclass
 class QueryPlansApiController:
-    request: Request
-
-    def create_request(self) -> QueryPlansRequest:
-        offset = self._parse_offset(self.request)
-        limit = self._parse_limit(self.request)
+    def create_request(self, request: Request) -> QueryPlansRequest:
+        offset = self._parse_offset(request)
+        limit = self._parse_limit(request)
         return QueryPlansRequest(
             query_string=None,
             filter_category=PlanFilter.by_plan_id,
