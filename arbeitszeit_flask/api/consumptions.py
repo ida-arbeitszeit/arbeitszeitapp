@@ -9,6 +9,7 @@ from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_web.api.controllers.liquid_means_consumption_controller import (
     LiquidMeansConsumptionController,
     liquid_means_expected_inputs,
@@ -57,9 +58,7 @@ class LiquidMeansOfProduction(Resource):
         register_productive_consumption: RegisterProductiveConsumption,
         presenter: LiquidMeansConsumptionPresenter,
     ):
-        """
-        Register consumption of liquid means of production.
-        """
-        use_case_request = controller.create_request()
+        "Register consumption of liquid means of production."
+        use_case_request = controller.create_request(FlaskRequest())
         use_case_response = register_productive_consumption(use_case_request)
         return presenter.create_view_model(use_case_response)
