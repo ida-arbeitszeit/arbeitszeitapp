@@ -17,13 +17,14 @@ class EndCooperationPresenter:
         show_404: bool
         redirect_url: str
 
-    request: Request
     notifier: Notifier
     url_index: UrlIndex
     translator: Translator
     session: Session
 
-    def present(self, response: EndCooperationResponse) -> ViewModel:
+    def present(
+        self, response: EndCooperationResponse, *, web_request: Request
+    ) -> ViewModel:
         if response.is_rejected:
             self.notifier.display_warning(
                 self.translator.gettext("Cooperation could not be terminated.")
@@ -32,18 +33,16 @@ class EndCooperationPresenter:
         self.notifier.display_info(
             self.translator.gettext("Cooperation has been terminated.")
         )
-        redirect_url = self._get_redirect_url()
+        redirect_url = self._get_redirect_url(web_request)
         return self.ViewModel(show_404=False, redirect_url=redirect_url)
 
-    def _get_redirect_url(self) -> str:
-        referer = self.request.get_header("Referer")
-        query_string = self.request.query_string()
-        plan_id = query_string.get_last_value("plan_id") or self.request.get_form(
-            "plan_id"
-        )
+    def _get_redirect_url(self, request: Request) -> str:
+        referer = request.get_header("Referer")
+        query_string = request.query_string()
+        plan_id = query_string.get_last_value("plan_id") or request.get_form("plan_id")
         cooperation_id = query_string.get_last_value(
             "cooperation_id"
-        ) or self.request.get_form("cooperation_id")
+        ) or request.get_form("cooperation_id")
         assert plan_id
         assert cooperation_id
         if referer:
