@@ -8,6 +8,7 @@ from arbeitszeit_flask.api.input_documentation import with_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_web.api.controllers.query_companies_api_controller import (
     QueryCompaniesApiController,
     query_companies_expected_inputs,
@@ -42,7 +43,7 @@ class QueryCompanies(Resource):
         presenter: QueryCompaniesApiPresenter,
     ):
         """Query companies."""
-        use_case_request = controller.create_request()
+        use_case_request = controller.create_request(FlaskRequest())
         response = query_companies(use_case_request)
         view_model = presenter.create_view_model(response)
         return view_model

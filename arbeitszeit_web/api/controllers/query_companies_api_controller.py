@@ -27,11 +27,9 @@ query_companies_expected_inputs = [
 
 @dataclass
 class QueryCompaniesApiController:
-    request: Request
-
-    def create_request(self) -> QueryCompaniesRequest:
-        offset = self._parse_offset(self.request)
-        limit = self._parse_limit(self.request)
+    def create_request(self, request: Request) -> QueryCompaniesRequest:
+        offset = self._parse_offset(request)
+        limit = self._parse_limit(request)
         return QueryCompaniesRequest(
             query_string=None,
             filter_category=CompanyFilter.by_name,
