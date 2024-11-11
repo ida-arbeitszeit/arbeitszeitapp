@@ -51,10 +51,8 @@ class LoginMember(Resource):
         login_member: LogInMemberUseCase,
         presenter: LoginMemberApiPresenter,
     ):
-        """
-        Login with a member account.
-        """
-        use_case_request = controller.create_request()
+        "Login with a member account."
+        use_case_request = controller.create_request(FlaskRequest())
         response = login_member.log_in_member(use_case_request)
         view_model = presenter.create_view_model(response)
         return view_model
