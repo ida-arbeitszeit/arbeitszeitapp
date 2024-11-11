@@ -145,7 +145,10 @@ def create_draft_from_plan(
 ) -> Response:
     uc_request = controller.create_use_case_request(plan_id)
     uc_response = use_case.create_draft_from_plan(uc_request)
-    view_model = presenter.render_response(uc_response)
+    view_model = presenter.render_response(
+        use_case_response=uc_response,
+        request=FlaskRequest(),
+    )
     return redirect(view_model.redirect_url)
 
 

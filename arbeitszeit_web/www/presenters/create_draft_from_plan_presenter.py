@@ -15,20 +15,25 @@ class ViewModel:
 @dataclass
 class CreateDraftFromPlanPresenter:
     url_index: UrlIndex
-    request: Request
     notifier: Notifier
     translator: Translator
 
-    def render_response(self, response: use_case.Response) -> ViewModel:
+    def render_response(
+        self,
+        use_case_response: use_case.Response,
+        request: Request,
+    ) -> ViewModel:
         self.notifier.display_info(
             self.translator.gettext("A new draft was created from an expired plan.")
         )
-        if response.draft:
+        if use_case_response.draft:
             return ViewModel(
-                redirect_url=self.url_index.get_draft_details_url(response.draft)
+                redirect_url=self.url_index.get_draft_details_url(
+                    use_case_response.draft
+                )
             )
         else:
             return ViewModel(
-                redirect_url=self.request.get_header("Referer")
+                redirect_url=request.get_header("Referer")
                 or self.url_index.get_my_plans_url()
             )
