@@ -15,32 +15,36 @@ class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(QueryPlansApiController)
-        self.request = self.injector.get(FakeRequest)
 
     def test_that_by_default_a_request_gets_returned_which_sorts_by_activation(self):
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.sorting_category, PlanSorting.by_activation)
 
     def test_that_by_default_a_request_gets_returned_which_filters_by_plan_id(self):
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.filter_category, PlanFilter.by_plan_id)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self):
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        use_case_request = self.controller.create_request(request)
         self.assertIsNone(use_case_request.query_string)
 
     def test_that_by_default_a_use_case_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
         self,
     ):
-        assert not self.request.query_string().get("offset")
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        assert not request.query_string().get("offset")
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.offset, 0)
 
     def test_that_by_default_a_use_case_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
         self,
     ):
-        assert not self.request.query_string().get("limit")
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        assert not request.query_string().get("limit")
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.limit, 30)
 
     @parameterized.expand(
@@ -53,8 +57,9 @@ class ControllerTests(BaseTestCase):
         self,
         expected_offset: int,
     ):
-        self.request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        request.set_arg(arg="offset", value=str(expected_offset))
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.offset, expected_offset)
 
     @parameterized.expand(
@@ -67,8 +72,9 @@ class ControllerTests(BaseTestCase):
         self,
         expected_limit: int,
     ):
-        self.request.set_arg(arg="limit", value=expected_limit)
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        request.set_arg(arg="limit", value=expected_limit)
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.limit, expected_limit)
 
     @parameterized.expand(
@@ -82,9 +88,10 @@ class ControllerTests(BaseTestCase):
         expected_limit: int,
         expected_offset: int,
     ):
-        self.request.set_arg(arg="limit", value=expected_limit)
-        self.request.set_arg(arg="offset", value=expected_offset)
-        use_case_request = self.controller.create_request()
+        request = FakeRequest()
+        request.set_arg(arg="limit", value=expected_limit)
+        request.set_arg(arg="offset", value=expected_offset)
+        use_case_request = self.controller.create_request(request)
         self.assertEqual(use_case_request.limit, expected_limit)
         self.assertEqual(use_case_request.offset, expected_offset)
 
@@ -99,9 +106,10 @@ class ControllerTests(BaseTestCase):
         self,
         offset: str,
     ):
-        self.request.set_arg(arg="offset", value=offset)
+        request = FakeRequest()
+        request.set_arg(arg="offset", value=offset)
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(
             err.exception.message, f"Input must be an integer, not {offset}."
         )
@@ -109,19 +117,21 @@ class ControllerTests(BaseTestCase):
     def test_controller_raises_bad_request_if_offset_query_string_is_negative_number(
         self,
     ):
+        request = FakeRequest()
         input = -123
-        self.request.set_arg(arg="offset", value=input)
+        request.set_arg(arg="offset", value=input)
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(
             err.exception.message, f"Input must be greater or equal zero, not {input}."
         )
 
     def test_controller_raises_bad_request_if_limit_query_string_has_letters(self):
+        request = FakeRequest()
         input = "123abc"
-        self.request.set_arg(arg="limit", value=input)
+        request.set_arg(arg="limit", value=input)
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(
             err.exception.message, f"Input must be an integer, not {input}."
         )
@@ -129,10 +139,11 @@ class ControllerTests(BaseTestCase):
     def test_controller_raises_bad_request_if_limit_query_string_is_negative_number(
         self,
     ):
+        request = FakeRequest()
         input = -123
-        self.request.set_arg(arg="limit", value=input)
+        request.set_arg(arg="limit", value=input)
         with self.assertRaises(BadRequest) as err:
-            self.controller.create_request()
+            self.controller.create_request(request)
         self.assertEqual(
             err.exception.message, f"Input must be greater or equal zero, not {input}."
         )
