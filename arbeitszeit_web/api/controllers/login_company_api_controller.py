@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
 from arbeitszeit_web.api.controllers.parameters import FormParameter
 from arbeitszeit_web.api.response_errors import BadRequest
@@ -23,12 +21,9 @@ login_company_expected_inputs = [
 ]
 
 
-@dataclass
 class LoginCompanyApiController:
-    request: Request
-
-    def create_request(self) -> LogInCompanyUseCase.Request:
-        json_body = self.request.get_json()
+    def create_request(self, request: Request) -> LogInCompanyUseCase.Request:
+        json_body = request.get_json()
         if not isinstance(json_body, dict):
             raise BadRequest("Email missing.")
         email = json_body.get("email")
