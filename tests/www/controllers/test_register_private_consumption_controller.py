@@ -119,9 +119,13 @@ class RegisterPrivateConsumptionControllerTests(BaseTestCase):
             self.translator.gettext("This is not an integer.")
         ]
 
-    def test_valid_data_returned_when_uuid_is_valid_and_amount_is_number(self):
-        result = self._process_form()
-        self.assertTrue(result)
+    def test_that_amount_and_plan_id_field_have_errors_messages_when_both_are_empty(
+        self,
+    ) -> None:
+        result = self._process_form(amount="", plan_id="")
+        assert isinstance(result, FormError)
+        assert result.form.plan_id_errors
+        assert result.form.amount_errors
 
     def test_correct_amount_is_returned(self) -> None:
         result = self._process_form(amount="1234")
