@@ -1,6 +1,6 @@
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.injector import AliasProvider, Binder, Module
+from arbeitszeit.injector import AliasProvider, Binder, CallableProvider, Module
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.request import Request
@@ -25,3 +25,10 @@ class TestingModule(Module):
         binder[Translator] = AliasProvider(FakeTranslator)
         binder[DatetimeService] = AliasProvider(FakeDatetimeService)
         binder[Request] = AliasProvider(FakeRequest)
+        binder[FakeRequest] = CallableProvider(
+            self.provide_fake_request, is_singleton=True
+        )
+
+    @classmethod
+    def provide_fake_request(self) -> FakeRequest:
+        return FakeRequest()
