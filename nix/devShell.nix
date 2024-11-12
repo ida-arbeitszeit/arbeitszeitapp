@@ -6,6 +6,7 @@
   glibcLocales,
   includeGlibcLocales,
   lib,
+  git,
 }:
 mkShell (
   {
@@ -27,6 +28,7 @@ mkShell (
       ++ [
         nixfmt
         sqlite
+        git
       ]
       ++ python3.pkgs.arbeitszeitapp.optional-dependencies.profiling;
     inputsFrom = [ python3.pkgs.arbeitszeitapp ];
