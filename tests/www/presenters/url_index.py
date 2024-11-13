@@ -61,6 +61,7 @@ class UrlIndexTestImpl:
     get_global_barplot_for_means_of_production_url = UrlIndexMethod()
     get_global_barplot_for_plans_url = UrlIndexMethod()
     get_hide_plan_url = UrlIndexMethod()
+    get_invite_worker_to_company_url = UrlIndexMethod()
     get_language_change_url = UrlIndexMethod()
     get_line_plot_of_company_a_account = UrlIndexMethod()
     get_line_plot_of_company_p_account = UrlIndexMethod()
