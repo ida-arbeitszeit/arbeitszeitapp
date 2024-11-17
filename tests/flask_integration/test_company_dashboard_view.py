@@ -57,7 +57,7 @@ class MemberTest(ViewTestCase):
 class UnconfirmedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company(confirm_company=False)
+        self.login_company(confirm_company=False)
         self.url = "/company/dashboard"
 
     def test_unconfirmed_company_gets_302(self) -> None:

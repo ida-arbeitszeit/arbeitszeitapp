@@ -7,7 +7,6 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.injector import Module
-from arbeitszeit.records import Company
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
@@ -181,7 +180,7 @@ class ViewTestCase(FlaskTestCase):
         password: Optional[str] = None,
         email: Optional[str] = None,
         confirm_company: bool = True,
-    ) -> Company:
+    ) -> UUID:
         if password is None:
             password = "password123"
         if email is None:
@@ -208,7 +207,7 @@ class ViewTestCase(FlaskTestCase):
             self.database_gateway.get_companies().with_email_address(email).first()
         )
         assert company
-        return company
+        return company.id
 
     def _confirm_company(
         self,
@@ -248,8 +247,8 @@ class ViewTestCase(FlaskTestCase):
         elif login == LogInUser.unconfirmed_member:
             return self.login_member(confirm_member=False)
         elif login == LogInUser.company:
-            return self.login_company().id
+            return self.login_company()
         elif login == LogInUser.unconfirmed_company:
-            return self.login_company(confirm_company=False).id
+            return self.login_company(confirm_company=False)
         elif login == LogInUser.accountant:
             return self.login_accountant()

@@ -23,7 +23,7 @@ class AuthenticatedMemberTests(ViewTestCase):
 class AuthenticatedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company()
+        self.login_company()
 
     def test_get_404_when_plan_does_not_exist(self) -> None:
         url = f"/company/plan_details/{uuid4()}"
