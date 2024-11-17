@@ -55,6 +55,13 @@ class PresenterTests(BaseTestCase):
             str(expected_id),
         )
 
+    def test_that_url_to_remove_workers_is_shown(self) -> None:
+        view_model = self.presenter.show_workers_list(self.create_empty_response())
+        assert (
+            view_model.url_to_remove_workers
+            == self.url_index.get_remove_worker_from_company_url()
+        )
+
     def create_empty_response(self) -> ListWorkersResponse:
         return ListWorkersResponse([])
 

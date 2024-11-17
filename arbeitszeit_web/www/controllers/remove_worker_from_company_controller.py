@@ -20,7 +20,7 @@ class RemoveWorkerFromCompanyController:
         worker = self._extract_worker_from_request(web_request)
         if worker is None:
             self.notifier.display_warning(
-                self.translator.gettext("Invalid or no worker id in request.")
+                self.translator.gettext("Worker ID in request is invalid or missing.")
             )
             return None
         return UseCaseRequest(company=company, worker=worker)

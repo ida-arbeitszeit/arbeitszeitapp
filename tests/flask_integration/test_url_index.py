@@ -471,3 +471,9 @@ class GeneralUrlIndexTests(ViewTestCase):
         url = self.url_index.get_member_login_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_that_get_remove_worker_from_company_url_returns_a_valid_url(self) -> None:
+        self.login_company()
+        url = self.url_index.get_remove_worker_from_company_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

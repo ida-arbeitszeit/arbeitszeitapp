@@ -243,3 +243,6 @@ class GeneralUrlIndex:
 
     def get_invite_worker_to_company_url(self) -> str:
         return url_for("main_company.invite_worker_to_company")
+
+    def get_remove_worker_from_company_url(self) -> str:
+        return url_for("main_company.remove_worker_from_company")
