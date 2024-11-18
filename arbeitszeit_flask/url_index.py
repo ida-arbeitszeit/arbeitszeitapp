@@ -240,3 +240,6 @@ class GeneralUrlIndex:
 
     def get_member_login_url(self) -> str:
         return url_for("auth.login_member")
+
+    def get_invite_worker_to_company_url(self) -> str:
+        return url_for("main_company.invite_worker_to_company")
