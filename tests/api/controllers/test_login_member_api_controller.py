@@ -2,7 +2,7 @@ from arbeitszeit_web.api.controllers.login_member_api_controller import (
     LoginMemberApiController,
     login_member_expected_inputs,
 )
-from arbeitszeit_web.api.controllers.parameters import FormParameter
+from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
@@ -59,9 +59,9 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[0]
         self.assertEqual(input.name, "email")
 
-    def test_input_email_is_form_param(self) -> None:
+    def test_input_email_is_body_param(self) -> None:
         input = self.inputs[0]
-        self.assertIsInstance(input, FormParameter)
+        self.assertIsInstance(input, BodyParameter)
 
     def test_input_email_has_correct_parameters(self) -> None:
         input = self.inputs[0]
@@ -75,9 +75,9 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[1]
         self.assertEqual(input.name, "password")
 
-    def test_input_limit_is_form_param(self) -> None:
+    def test_input_limit_is_body_param(self) -> None:
         input = self.inputs[1]
-        self.assertIsInstance(input, FormParameter)
+        self.assertIsInstance(input, BodyParameter)
 
     def test_input_limit_has_correct_parameters(self) -> None:
         input = self.inputs[1]

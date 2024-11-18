@@ -5,21 +5,21 @@ from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest as UseCaseRequest,
 )
-from arbeitszeit_web.api.controllers.parameters import FormParameter
+from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 from arbeitszeit_web.json import JsonValue
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session, UserRole
 
 liquid_means_expected_inputs = [
-    FormParameter(
+    BodyParameter(
         name="plan_id",
         type=str,
         description="The plan to consume.",
         default=None,
         required=True,
     ),
-    FormParameter(
+    BodyParameter(
         name="amount",
         type=int,
         description="The amount of product to consume.",

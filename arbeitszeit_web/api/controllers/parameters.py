@@ -3,7 +3,7 @@ from typing import Type, Union
 
 
 @dataclass
-class FormParameter:
+class BodyParameter:
     name: str
     type: Type
     description: str

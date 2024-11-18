@@ -7,7 +7,7 @@ from arbeitszeit_web.api.controllers.liquid_means_consumption_controller import 
     LiquidMeansConsumptionController,
     liquid_means_expected_inputs,
 )
-from arbeitszeit_web.api.controllers.parameters import FormParameter
+from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
@@ -168,9 +168,9 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[0]
         self.assertEqual(input.name, "plan_id")
 
-    def test_input_plan_id_is_of_type_form_param(self):
+    def test_input_plan_id_is_of_type_body_param(self):
         input = self.inputs[0]
-        assert isinstance(input, FormParameter)
+        assert isinstance(input, BodyParameter)
 
     def test_input_plan_id_has_correct_parameters(self):
         input = self.inputs[0]
@@ -184,9 +184,9 @@ class ExpectedInputsTests(BaseTestCase):
         input = self.inputs[1]
         self.assertEqual(input.name, "amount")
 
-    def test_input_amount_is_of_type_form_param(self):
+    def test_input_amount_is_of_type_body_param(self):
         input = self.inputs[1]
-        assert isinstance(input, FormParameter)
+        assert isinstance(input, BodyParameter)
 
     def test_input_amount_has_correct_parameters(self):
         input = self.inputs[1]

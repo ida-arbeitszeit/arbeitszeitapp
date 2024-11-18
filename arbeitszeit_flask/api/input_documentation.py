@@ -4,7 +4,7 @@ from flask_restx import Namespace
 from flask_restx.reqparse import RequestParser
 
 from arbeitszeit_web.api.controllers.parameters import (
-    FormParameter,
+    BodyParameter,
     PathParameter,
     QueryParameter,
 )
@@ -13,7 +13,7 @@ from arbeitszeit_web.api.controllers.parameters import (
 class with_input_documentation:
     def __init__(
         self,
-        expected_inputs: Sequence[QueryParameter | FormParameter | PathParameter],
+        expected_inputs: Sequence[QueryParameter | BodyParameter | PathParameter],
         namespace: Namespace,
     ) -> None:
         self._expected_inputs = expected_inputs
@@ -41,7 +41,7 @@ class with_input_documentation:
         decorator(func)
 
     def _add_argument_to_parser(
-        self, parser: RequestParser, input: FormParameter | QueryParameter
+        self, parser: RequestParser, input: BodyParameter | QueryParameter
     ) -> RequestParser:
         location = "query" if isinstance(input, QueryParameter) else "json"
         return parser.add_argument(
