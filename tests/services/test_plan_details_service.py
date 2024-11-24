@@ -265,4 +265,4 @@ class PlanDetailsServiceTests(TestCase):
     def approve_plan(self, plan: UUID) -> None:
         request = ApprovePlanUseCase.Request(plan=plan)
         response = self.approve_plan_use_case.approve_plan(request)
-        assert response.is_approved
+        assert response.is_plan_approved

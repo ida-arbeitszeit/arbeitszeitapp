@@ -90,6 +90,18 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             .group_by(models.Plan.id, models.Company.id)
         )
 
+    def ordered_by_rejection_date(self, ascending: bool = True) -> Self:
+        review = aliased(models.PlanReview)
+        ordering = review.rejection_date
+        if not ascending:
+            ordering = ordering.desc()
+        query = self._with_modified_query(
+            lambda query: query.join(review, review.plan_id == models.Plan.id).order_by(
+                ordering
+            )
+        )
+        return query
+
     def with_id_containing(self, query: str) -> Self:
         return self._with_modified_query(
             lambda db_query: db_query.filter(models.Plan.id.contains(query))
@@ -104,6 +116,13 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         return self._with_modified_query(
             lambda query: self.query.join(models.PlanReview).filter(
                 models.PlanReview.approval_date != None
+            )
+        )
+
+    def that_are_rejected(self) -> Self:
+        return self._with_modified_query(
+            lambda query: self.query.join(models.PlanReview).filter(
+                models.PlanReview.rejection_date != None
             )
         )
 
@@ -163,7 +182,10 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
     def without_completed_review(self) -> Self:
         return self._with_modified_query(
             lambda query: self.query.join(models.PlanReview).filter(
-                models.PlanReview.approval_date == None
+                and_(
+                    models.PlanReview.approval_date == None,
+                    models.PlanReview.rejection_date == None,
+                )
             )
         )
 
@@ -520,6 +542,14 @@ class PlanUpdate:
             self,
             review_update_values=dict(
                 self.review_update_values, approval_date=approval_date
+            ),
+        )
+
+    def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
+        return replace(
+            self,
+            review_update_values=dict(
+                self.review_update_values, rejection_date=rejection_date
             ),
         )
 
@@ -2061,7 +2091,7 @@ class DatabaseGatewayImpl:
             timeframe=duration_in_days,
             is_public_service=is_public_service,
         )
-        review = models.PlanReview(approval_date=None, plan=plan)
+        review = models.PlanReview(approval_date=None, plan=plan, rejection_date=None)
         self.db.session.add(plan)
         self.db.session.add(review)
         return self.plan_from_orm(plan)
@@ -2085,6 +2115,7 @@ class DatabaseGatewayImpl:
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date,
+            rejection_date=plan.review.rejection_date,
             activation_date=plan.activation_date,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None

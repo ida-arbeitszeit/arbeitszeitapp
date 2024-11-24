@@ -55,6 +55,15 @@ class PresenterTests(BaseTestCase):
             0
         ].approve_plan_url == self.url_index.get_approve_plan_url(plan_id)
 
+    def test_that_rejection_url_is_set_correctly(self) -> None:
+        plan_id = uuid4()
+        view_model = self.presenter.list_plans_with_pending_review(
+            self._get_response_with_one_plan(plan_id=plan_id)
+        )
+        assert view_model.plans[
+            0
+        ].reject_plan_url == self.url_index.get_reject_plan_url(plan_id)
+
     def test_that_plan_details_url_is_set_correctly(self) -> None:
         plan_id = uuid4()
         view_model = self.presenter.list_plans_with_pending_review(
