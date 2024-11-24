@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional, Protocol
 
 from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
@@ -15,12 +14,11 @@ class QueryCompaniesFormData(Protocol):
 _page_size = DEFAULT_PAGE_SIZE
 
 
-@dataclass
 class QueryCompaniesController:
-    request: Request
-
     def import_form_data(
         self,
+        *,
+        request: Request,
         form: Optional[QueryCompaniesFormData] = None,
     ) -> QueryCompaniesRequest:
         if form is None:
@@ -32,7 +30,7 @@ class QueryCompaniesController:
                 filter_category = CompanyFilter.by_email
             else:
                 filter_category = CompanyFilter.by_name
-        offset = self._get_pagination_offset()
+        offset = self._get_pagination_offset(request)
         return QueryCompaniesRequest(
             query_string=query,
             filter_category=filter_category,
@@ -40,8 +38,8 @@ class QueryCompaniesController:
             limit=_page_size,
         )
 
-    def _get_pagination_offset(self) -> int:
-        page_str = self.request.query_string().get(PAGE_PARAMETER_NAME)
+    def _get_pagination_offset(self, request: Request) -> int:
+        page_str = request.query_string().get_last_value(PAGE_PARAMETER_NAME)
         if page_str is None:
             return 0
         try:

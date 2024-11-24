@@ -806,6 +806,15 @@ class CompanyResult(QueryResultImpl[Company]):
             self.database.relationships.company_to_workers.relate(company.id, member)
         return companies_changed
 
+    def remove_worker(self, member: UUID) -> int:
+        companies_changed = 0
+        for company in self.items():
+            companies_changed += 1
+            self.database.relationships.company_to_workers.dissociate(
+                company.id, member
+            )
+        return companies_changed
+
     def with_name_containing(self, query: str) -> Self:
         return self._filter_elements(
             lambda company: query.lower() in company.name.lower()

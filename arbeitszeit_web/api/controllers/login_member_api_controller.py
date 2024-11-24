@@ -25,13 +25,16 @@ login_member_expected_inputs = [
 
 @dataclass
 class LoginMemberApiController:
-    request: Request
-
-    def create_request(self) -> LogInMemberUseCase.Request:
-        email = self.request.get_form("email")
-        password = self.request.get_form("password")
+    def create_request(self, request: Request) -> LogInMemberUseCase.Request:
+        json_body = request.get_json()
+        if not isinstance(json_body, dict):
+            raise BadRequest("Email missing.")
+        email = json_body.get("email")
+        password = json_body.get("password")
         if not email:
             raise BadRequest(message="Email missing.")
         if not password:
             raise BadRequest(message="Password missing.")
+        assert isinstance(email, str)
+        assert isinstance(password, str)
         return LogInMemberUseCase.Request(email=email, password=password)

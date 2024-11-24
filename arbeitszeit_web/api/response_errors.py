@@ -77,3 +77,15 @@ class NotFound(Exception):
     @classmethod
     def get_schema(cls) -> JsonValue:
         return error_response_schema
+
+
+class UnsupportedMediaType(Exception):
+    code = 415
+    description = "Unsupported Media Type"
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    @classmethod
+    def get_schema(cls) -> JsonValue:
+        return error_response_schema

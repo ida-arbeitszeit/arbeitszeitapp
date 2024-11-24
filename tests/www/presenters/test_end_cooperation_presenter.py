@@ -23,27 +23,31 @@ REJECTED_RESPONSE_COOPERATION_NOT_FOUND = EndCooperationResponse(
 class PresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.request = self.injector.get(FakeRequest)
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session.login_company(company=uuid4())
 
     def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
         self,
-    ):
-        view_model = self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND)
+    ) -> None:
+        request = FakeRequest()
+        view_model = self.presenter.present(
+            REJECTED_RESPONSE_PLAN_NOT_FOUND, web_request=request
+        )
         self.assertTrue(view_model.show_404)
         self.assertFalse(view_model.redirect_url)
 
     def test_notification_returned_when_operation_was_rejected_because_plan_was_not_found(
         self,
-    ):
-        self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND)
+    ) -> None:
+        request = FakeRequest()
+        self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND, web_request=request)
         self.assertTrue(self._get_warning_notifications())
 
     def test_correct_notification_is_returned_when_operation_was_rejected_because_plan_was_not_found(
         self,
-    ):
-        self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND)
+    ) -> None:
+        request = FakeRequest()
+        self.presenter.present(REJECTED_RESPONSE_PLAN_NOT_FOUND, web_request=request)
         self.assertIn(
             self.translator.gettext("Cooperation could not be terminated."),
             self._get_warning_notifications(),
@@ -51,20 +55,22 @@ class PresenterTests(BaseTestCase):
 
     def test_url_gets_returned_when_use_case_response_is_successfull(
         self,
-    ):
-        self.request.set_arg("plan_id", str(uuid4()))
-        self.request.set_arg("cooperation_id", str(uuid4()))
-        view_model = self.presenter.present(SUCCESSFUL_RESPONSE)
+    ) -> None:
+        request = FakeRequest()
+        request.set_arg("plan_id", str(uuid4()))
+        request.set_arg("cooperation_id", str(uuid4()))
+        view_model = self.presenter.present(SUCCESSFUL_RESPONSE, web_request=request)
         self.assertFalse(view_model.show_404)
         self.assertTrue(view_model.redirect_url)
 
     def test_coop_summary_url_gets_returned_as_default_when_no_referer_is_given(
         self,
-    ):
+    ) -> None:
+        request = FakeRequest()
         coop_id = uuid4()
-        self.request.set_arg("plan_id", str(uuid4()))
-        self.request.set_arg("cooperation_id", str(coop_id))
-        view_model = self.presenter.present(SUCCESSFUL_RESPONSE)
+        request.set_arg("plan_id", str(uuid4()))
+        request.set_arg("cooperation_id", str(coop_id))
+        view_model = self.presenter.present(SUCCESSFUL_RESPONSE, web_request=request)
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
@@ -73,12 +79,13 @@ class PresenterTests(BaseTestCase):
 
     def test_plan_details_url_gets_returned_when_plan_details_url_was_referer(
         self,
-    ):
+    ) -> None:
+        request = FakeRequest()
         plan_id = uuid4()
-        self.request.set_header("Referer", f"/company/plan_details/{str(plan_id)}")
-        self.request.set_arg("plan_id", str(plan_id))
-        self.request.set_arg("cooperation_id", str(uuid4()))
-        view_model = self.presenter.present(SUCCESSFUL_RESPONSE)
+        request.set_header("Referer", f"/company/plan_details/{str(plan_id)}")
+        request.set_arg("plan_id", str(plan_id))
+        request.set_arg("cooperation_id", str(uuid4()))
+        view_model = self.presenter.present(SUCCESSFUL_RESPONSE, web_request=request)
         self.assertFalse(view_model.show_404)
         self.assertEqual(
             view_model.redirect_url,
@@ -89,10 +96,11 @@ class PresenterTests(BaseTestCase):
 
     def test_correct_notification_is_returned_when_operation_was_successfull(
         self,
-    ):
-        self.request.set_arg("plan_id", str(uuid4()))
-        self.request.set_arg("cooperation_id", str(uuid4()))
-        self.presenter.present(SUCCESSFUL_RESPONSE)
+    ) -> None:
+        request = FakeRequest()
+        request.set_arg("plan_id", str(uuid4()))
+        request.set_arg("cooperation_id", str(uuid4()))
+        self.presenter.present(SUCCESSFUL_RESPONSE, web_request=request)
         self.assertIn(
             self.translator.gettext("Cooperation has been terminated."),
             self._get_info_notifications(),

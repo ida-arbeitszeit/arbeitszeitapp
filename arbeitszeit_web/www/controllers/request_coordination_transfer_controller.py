@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.request_coordination_transfer import (
 )
 from arbeitszeit_web.fields import parse_formfield
 from arbeitszeit_web.forms import RequestCoordinationTransferForm
-from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.www.formfield_parsers import UuidParser
 
@@ -16,7 +15,6 @@ from arbeitszeit_web.www.formfield_parsers import UuidParser
 @dataclass
 class RequestCoordinationTransferController:
     session: Session
-    request: Request
     uuid_parser: UuidParser
 
     def import_form_data(

@@ -240,3 +240,9 @@ class GeneralUrlIndex:
 
     def get_company_transactions_url(self, *, company_id: UUID) -> str:
         return url_for("main_user.get_company_transactions", company_id=company_id)
+
+    def get_member_login_url(self) -> str:
+        return url_for("auth.login_member")
+
+    def get_invite_worker_to_company_url(self) -> str:
+        return url_for("main_company.invite_worker_to_company")

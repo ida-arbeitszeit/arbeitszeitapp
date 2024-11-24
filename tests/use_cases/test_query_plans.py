@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum, auto
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
@@ -355,7 +355,7 @@ class UseCaseTests(BaseTestCase):
         response = self.query_plans(
             self.make_request(
                 search_strategy=SearchStrategy.by_id_sort_by_date_exclude_expired,
-                query="123",
+                query=f"{uuid4()}",
             )
         )
         self.assertEqual(response.total_results, 0)

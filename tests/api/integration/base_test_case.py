@@ -1,4 +1,11 @@
+from enum import Enum, auto
+
 from tests.flask_integration.flask import FlaskTestCase
+
+
+class LogInUser(Enum):
+    member = auto()
+    company = auto()
 
 
 class ApiTestCase(FlaskTestCase):
@@ -15,7 +22,7 @@ class ApiTestCase(FlaskTestCase):
         )
         response = self.client.post(
             self.url_prefix + "/auth/login_member",
-            data=dict(
+            json=dict(
                 email=email,
                 password=password,
             ),
@@ -30,9 +37,18 @@ class ApiTestCase(FlaskTestCase):
         )
         response = self.client.post(
             self.url_prefix + "/auth/login_company",
-            data=dict(
+            json=dict(
                 email=email,
                 password=password,
             ),
         )
         assert response.status_code < 400
+
+    def login_user(self, login: LogInUser) -> None:
+        match login:
+            case LogInUser.member:
+                self.login_member()
+            case LogInUser.company:
+                self.login_company()
+            case _:
+                raise ValueError("Invalid user type")

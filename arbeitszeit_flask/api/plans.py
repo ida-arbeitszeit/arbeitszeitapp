@@ -7,6 +7,7 @@ from arbeitszeit_flask.api.input_documentation import with_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
 from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_web.api.controllers.get_plan_api_controller import (
     GetPlanApiController,
     plan_detail_expected_input,
@@ -46,8 +47,8 @@ class ActivePlans(Resource):
         query_plans: QueryPlans,
         presenter: QueryPlansApiPresenter,
     ):
-        """List active plans."""
-        use_case_request = controller.create_request()
+        "List active plans."
+        use_case_request = controller.create_request(FlaskRequest())
         response = query_plans(request=use_case_request)
         view_model = presenter.create_view_model(response)
         return view_model

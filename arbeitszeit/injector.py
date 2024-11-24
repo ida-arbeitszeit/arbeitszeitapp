@@ -15,10 +15,12 @@ from typing import (
     get_type_hints,
 )
 
+S = TypeVar("S")
 T = TypeVar("T")
 T_cov = TypeVar("T_cov", covariant=True)
 CallableT = TypeVar("CallableT", bound=Callable)
 TypeT = TypeVar("TypeT", bound=Type)
+ProviderFunction = Callable[[Type[T]], "Provider[T]"]
 
 
 class Injector:
@@ -71,7 +73,7 @@ class Injector:
 
 
 class Binder:
-    def __init__(self, default: Callable[[Type[T]], Provider[T]]) -> None:
+    def __init__(self, default: ProviderFunction) -> None:
         self._default = default
         self._bindings: Dict[Type, Provider] = dict()
         self._instances: Dict[Type, Any] = dict()

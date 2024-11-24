@@ -14,10 +14,10 @@ class ListLoginCompanyTests(ApiTestCase):
         email = "some@mail.org"
         password = "safe123"
         self.company_generator.create_company(email=email, password=password)
-        response = self.client.post(self.url, data=dict(email=email, password=password))
+        response = self.client.post(self.url, json=dict(email=email, password=password))
         self.assertEqual(response.status_code, 200)
 
-    def test_post_returns_400_with_correct_data_in_query_string_but_missing_data_in_form(
+    def test_post_returns_415_with_correct_data_in_query_string_but_missing_data_in_form(
         self,
     ) -> None:
         email = "some@mail.org"
@@ -26,13 +26,14 @@ class ListLoginCompanyTests(ApiTestCase):
         response = self.client.post(
             self.url, query_string=dict(email=email, password=password)
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 415)
+        self.assertEqual(response.content_type, "application/json")
 
     def test_post_returns_401_with_incorrect_data(self) -> None:
         email = "some@mail.org"
         password = "safe123"
         self.company_generator.create_company(email=email, password=password)
         response = self.client.post(
-            self.url, data=dict(email=email + ".com", password=password)
+            self.url, json=dict(email=email + ".com", password=password)
         )
         self.assertEqual(response.status_code, 401)

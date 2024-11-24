@@ -15,21 +15,20 @@ class SelectProductiveConsumptionController:
     class InputDataError(Exception):
         pass
 
-    request: Request
     notifier: Notifier
     translator: Translator
 
-    def process_input_data(self) -> UseCaseRequest:
-        plan_id = self._process_plan_id()
-        amount = self._process_amount()
-        consumption_type = self._process_consumption_type()
+    def process_input_data(self, request: Request) -> UseCaseRequest:
+        plan_id = self._process_plan_id(request)
+        amount = self._process_amount(request)
+        consumption_type = self._process_consumption_type(request)
         return UseCaseRequest(
             plan_id=plan_id, amount=amount, consumption_type=consumption_type
         )
 
-    def _process_plan_id(self) -> UUID | None:
-        plan_id_from_query_string = self.request.query_string().get("plan_id")
-        plan_id_from_form = self.request.get_form("plan_id")
+    def _process_plan_id(self, request: Request) -> UUID | None:
+        plan_id_from_query_string = request.query_string().get_last_value("plan_id")
+        plan_id_from_form = request.get_form("plan_id")
         if not plan_id_from_query_string and not plan_id_from_form:
             return None
         elif plan_id_from_query_string:
@@ -47,9 +46,9 @@ class SelectProductiveConsumptionController:
             )
             raise self.InputDataError()
 
-    def _process_amount(self) -> int | None:
-        amount_from_query_string = self.request.query_string().get("amount")
-        amount_from_form = self.request.get_form("amount")
+    def _process_amount(self, request: Request) -> int | None:
+        amount_from_query_string = request.query_string().get_last_value("amount")
+        amount_from_form = request.get_form("amount")
         if not amount_from_query_string and not amount_from_form:
             return None
         elif amount_from_query_string:
@@ -67,11 +66,11 @@ class SelectProductiveConsumptionController:
             )
             raise self.InputDataError()
 
-    def _process_consumption_type(self) -> ConsumptionType | None:
-        consumption_type_from_query_string = self.request.query_string().get(
+    def _process_consumption_type(self, request: Request) -> ConsumptionType | None:
+        consumption_type_from_query_string = request.query_string().get_last_value(
             "type_of_consumption"
         )
-        consumption_type_from_form = self.request.get_form("type_of_consumption")
+        consumption_type_from_form = request.get_form("type_of_consumption")
         if not consumption_type_from_query_string and not consumption_type_from_form:
             return None
         elif consumption_type_from_query_string:
