@@ -159,13 +159,13 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         """Set the `activation_date` field of all selected plans."""
 
     def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        """Set the approval date of all matching plans. The return
-        value counts all the plans that were changed by this methods.
+        """Set the approval date on all matching plans. The return
+        value counts all the plans that were changed by this method.
         """
 
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
-        """Set the rejection date of all matching plans. The return
-        value counts all the plans that were changed by this methods.
+        """Set the rejection date on all matching plans. The return
+        value counts all the plans that were changed by this method.
         """
 
     def hide(self) -> Self: ...
