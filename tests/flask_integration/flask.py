@@ -115,18 +115,34 @@ class ViewTestCase(FlaskTestCase):
 
     def login_member(
         self,
-        password: Optional[str] = None,
-        email: Optional[str] = None,
+        password: str = "password123",
+        email: str | None = None,
         confirm_member: bool = True,
     ) -> UUID:
-        if password is None:
-            password = "password123"
         if email is None:
             email = self.email_generator.get_random_email()
-        if not self.database_gateway.get_members().with_email_address(email).first():
-            self.member_generator.create_member(
-                email=email, password=password, confirmed=False
-            )
+        member_id = self._get_or_create_member(email, password)
+        self._login_member(email, password)
+        if confirm_member:
+            self._confirm_member(email)
+        return member_id
+
+    def _get_or_create_member(self, email: str, password: str) -> UUID:
+        if (
+            member := self.database_gateway.get_members()
+            .with_email_address(email)
+            .first()
+        ):
+            return member.id
+        return self.member_generator.create_member(
+            email=email, password=password, confirmed=False
+        )
+
+    def _login_member(
+        self,
+        email: str,
+        password: str,
+    ) -> None:
         response = self.client.post(
             "/login-member",
             data=dict(
@@ -139,11 +155,6 @@ class ViewTestCase(FlaskTestCase):
             raise AssertionError(
                 f"Failed to log in member. Response status code: {response.status_code}."
             )
-        if confirm_member:
-            self._confirm_member(email)
-        member = self.database_gateway.get_members().with_email_address(email).first()
-        assert member
-        return member.id
 
     def _confirm_member(
         self,
@@ -177,18 +188,34 @@ class ViewTestCase(FlaskTestCase):
 
     def login_company(
         self,
-        password: Optional[str] = None,
-        email: Optional[str] = None,
+        password: str = "password123",
+        email: str | None = None,
         confirm_company: bool = True,
     ) -> UUID:
-        if password is None:
-            password = "password123"
         if email is None:
             email = self.email_generator.get_random_email()
-        if not self.database_gateway.get_companies().with_email_address(email).first():
-            self.company_generator.create_company(
-                email=email, password=password, confirmed=False
-            )
+        company_id = self._get_or_create_company(email, password)
+        self._login_company(email, password)
+        if confirm_company:
+            self._confirm_company(email)
+        return company_id
+
+    def _get_or_create_company(self, email: str, password: str) -> UUID:
+        if (
+            company := self.database_gateway.get_companies()
+            .with_email_address(email)
+            .first()
+        ):
+            return company.id
+        return self.company_generator.create_company(
+            email=email, password=password, confirmed=False
+        )
+
+    def _login_company(
+        self,
+        email: str,
+        password: str,
+    ) -> None:
         response = self.client.post(
             "/company/login",
             data=dict(
@@ -201,13 +228,6 @@ class ViewTestCase(FlaskTestCase):
             raise AssertionError(
                 f"Failed to log in company. Response status code: {response.status_code}."
             )
-        if confirm_company:
-            self._confirm_company(email)
-        company = (
-            self.database_gateway.get_companies().with_email_address(email).first()
-        )
-        assert company
-        return company.id
 
     def _confirm_company(
         self,
