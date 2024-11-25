@@ -1,17 +1,17 @@
 from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
-from arbeitszeit_web.api.controllers.parameters import FormParameter
+from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest
 from arbeitszeit_web.request import Request
 
 login_company_expected_inputs = [
-    FormParameter(
+    BodyParameter(
         name="email",
         type=str,
         description="Email.",
         default=None,
         required=True,
     ),
-    FormParameter(
+    BodyParameter(
         name="password",
         type=str,
         description="Password.",
