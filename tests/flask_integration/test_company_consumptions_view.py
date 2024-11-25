@@ -32,7 +32,7 @@ class AuthTests(ViewTestCase):
 class UnconfirmedCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company(confirm_company=False)
+        self.login_company(confirm_company=False)
         self.url = "/company/consumptions"
 
     def test_unconfirmed_company_gets_302(self) -> None:

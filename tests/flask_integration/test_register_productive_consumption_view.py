@@ -6,7 +6,7 @@ from .flask import ViewTestCase
 class CompanyGetTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company()
+        self.login_company()
 
     def test_that_logged_in_company_get_200_response(self) -> None:
         response = self.client.get("/company/register_productive_consumption")
@@ -107,7 +107,7 @@ class CompanyGetTests(ViewTestCase):
 class CompanyPostTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company()
+        self.login_company()
 
     def test_that_logged_in_company_receives_400_when_posting_non_existing_plan_id(
         self,

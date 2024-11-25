@@ -45,7 +45,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
     def test_302_is_returned_when_coop_and_plan_do_exist_and_requester_is_planner(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(planner=self.company.id)
+        plan = self.plan_generator.create_plan(planner=self.company)
         cooperation = self.cooperation_generator.create_cooperation(plans=[plan])
         data = {"plan_id": str(plan), "cooperation_id": str(cooperation)}
         response = self.client.post(URL, data=data)

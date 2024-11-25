@@ -51,7 +51,7 @@ class CompanyTest(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = "/member/consumptions"
-        self.company = self.login_company()
+        self.login_company()
 
     def test_company_gets_redirected_to_start_page_with_next_url_set_correctly(
         self,

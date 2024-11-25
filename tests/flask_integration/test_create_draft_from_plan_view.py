@@ -9,12 +9,12 @@ class ViewTests(ViewTestCase):
         self.company = self.login_company()
 
     def test_can_create_render_creation_page_from_existing_plan(self) -> None:
-        plan = self.plan_generator.create_plan(planner=self.company.id)
+        plan = self.plan_generator.create_plan(planner=self.company)
         response = self.client.post(self._get_url(plan))
         self.assertEqual(response.status_code, 302)
 
     def test_get_405_method_not_allowed_when_trying_to_get_the_route(self) -> None:
-        plan = self.plan_generator.create_plan(planner=self.company.id)
+        plan = self.plan_generator.create_plan(planner=self.company)
         response = self.client.get(self._get_url(plan))
         self.assertEqual(response.status_code, 405)
 

@@ -20,7 +20,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
 
     def test_company_gets_302_when_posting_correct_data(self) -> None:
         worker = self.member_generator.create_member()
-        self.company_manager.add_worker_to_company(self.company.id, worker)
+        self.company_manager.add_worker_to_company(self.company, worker)
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker), amount="10"),
@@ -41,7 +41,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member()
-        self.company_manager.add_worker_to_company(self.company.id, worker)
+        self.company_manager.add_worker_to_company(self.company, worker)
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker), amount="-10"),

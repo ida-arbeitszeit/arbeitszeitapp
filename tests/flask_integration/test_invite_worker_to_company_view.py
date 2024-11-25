@@ -36,7 +36,7 @@ class InviteWorkerToCompanyTests(ViewTestCase):
         company = self.login_company()
         company_manager = self.injector.get(CompanyManager)
         worker = self.member_generator.create_member(name=worker_name)
-        company_manager.add_worker_to_company(company.id, worker)
+        company_manager.add_worker_to_company(company, worker)
         response = self.client.get(URL)
         assert worker_name in response.text
 

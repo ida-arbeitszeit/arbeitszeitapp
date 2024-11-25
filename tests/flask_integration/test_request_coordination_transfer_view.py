@@ -41,7 +41,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
     def test_company_gets_code_403_on_post_request_when_current_user_is_not_coordinator(
         self,
     ) -> None:
-        self.login_company().id
+        self.login_company()
         cooperation = self.cooperation_generator.create_cooperation()
         candidate = self.company_generator.create_company()
         data = {"candidate": str(candidate), "cooperation": str(cooperation)}
@@ -71,7 +71,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
     ) -> None:
         current_user = self.login_company()
         cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=current_user.id
+            coordinator=current_user
         )
         candidate_mail = "candidate@mail.org"
         candidate = self.company_generator.create_company(email=candidate_mail)
@@ -90,7 +90,7 @@ class RequestCoordinationTransferTests(ViewTestCase):
     ) -> None:
         current_user = self.login_company()
         cooperation = self.cooperation_generator.create_cooperation(
-            coordinator=current_user.id
+            coordinator=current_user
         )
         candidate_mail = "candidate@mail.org"
         candidate = self.company_generator.create_company(email=candidate_mail)
