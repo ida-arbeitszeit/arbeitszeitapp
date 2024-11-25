@@ -31,48 +31,43 @@ class with_input_documentation:
     def __call__(self, func: Callable) -> Callable:
         """See https://swagger.io/specification/v2 for more information on the OpenAPI specification."""
         params: Dict[str, Any] = {}
-        for expected_input in self._expected_inputs:
-            if isinstance(expected_input, PathParameter):
-                self._add_path_parameter(params, expected_input)
-            elif isinstance(expected_input, QueryParameter):
-                self._add_query_parameter(params, expected_input)
-            else:
-                assert isinstance(expected_input, BodyParameter)
-                self._add_body_parameter(params, expected_input)
+        for input_ in self._expected_inputs:
+            match input_:
+                case PathParameter():
+                    params[input_.name] = {
+                        "description": input_.description,
+                        "type": "string",
+                        "required": True,
+                        "in": "path",
+                    }
+                case QueryParameter():
+                    params[input_.name] = {
+                        "description": input_.description,
+                        "type": type_lookup_table[input_.type],
+                        "default": input_.default,
+                        "required": input_.required,
+                        "in": "query",
+                    }
+                case BodyParameter():
+                    if "payload" not in params:
+                        params["payload"] = {
+                            "in": "body",
+                            "required": True,
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    input_.name: {
+                                        "type": type_lookup_table[input_.type]
+                                    }
+                                },
+                            },
+                        }
+                    else:
+                        params["payload"]["schema"]["properties"][input_.name] = {
+                            "type": type_lookup_table[input_.type]
+                        }
+                case _:
+                    raise ValueError(f"Unexpected parameter type: {type(input_)}")
         decorator = self._namespace.doc(params=params)
         decorator(func)
         return func
-
-    def _add_path_parameter(self, params: Dict[str, Any], param: PathParameter) -> None:
-        params[param.name] = {
-            "description": param.description,
-            "type": "string",
-            "required": True,
-            "in": "path",
-        }
-
-    def _add_query_parameter(
-        self, params: Dict[str, Any], param: QueryParameter
-    ) -> None:
-        params[param.name] = {
-            "description": param.description,
-            "type": type_lookup_table[param.type],
-            "default": param.default,
-            "required": param.required,
-            "in": "query",
-        }
-
-    def _add_body_parameter(self, params: Dict[str, Any], param: BodyParameter) -> None:
-        if "payload" not in params:
-            params["payload"] = {
-                "in": "body",
-                "required": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {param.name: {"type": type_lookup_table[param.type]}},
-                },
-            }
-        else:
-            params["payload"]["schema"]["properties"][param.name] = {
-                "type": type_lookup_table[param.type]
-            }
