@@ -48,32 +48,26 @@ class PlotUrlIndexTests(ViewTestCase):
 
     def test_url_for_lineplot_for_companies_own_prd_account_returns_png(self) -> None:
         url = self.url_index.get_line_plot_of_company_prd_account(
-            company_id=self.company.id
+            company_id=self.company
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
 
     def test_url_for_lineplot_for_companies_own_r_account_returns_png(self) -> None:
-        url = self.url_index.get_line_plot_of_company_r_account(
-            company_id=self.company.id
-        )
+        url = self.url_index.get_line_plot_of_company_r_account(company_id=self.company)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
 
     def test_url_for_lineplot_for_companies_own_p_account_returns_png(self) -> None:
-        url = self.url_index.get_line_plot_of_company_p_account(
-            company_id=self.company.id
-        )
+        url = self.url_index.get_line_plot_of_company_p_account(company_id=self.company)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
 
     def test_url_for_lineplot_for_companies_own_a_account_returns_png(self) -> None:
-        url = self.url_index.get_line_plot_of_company_a_account(
-            company_id=self.company.id
-        )
+        url = self.url_index.get_line_plot_of_company_a_account(company_id=self.company)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
@@ -139,7 +133,7 @@ class GeneralUrlIndexTests(ViewTestCase):
         self,
     ) -> None:
         company = self.login_company()
-        draft = self.plan_generator.draft_plan(planner=company.id)
+        draft = self.plan_generator.draft_plan(planner=company)
         url = self.url_index.get_draft_details_url(draft_id=draft)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -377,7 +371,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     def test_get_request_to_show_coordination_transfer_request_url_leads_to_functional_url(
         self,
     ) -> None:
-        current_user = self.login_company().id
+        current_user = self.login_company()
         coop_id = self.cooperation_generator.create_cooperation(
             coordinator=current_user
         )
@@ -393,7 +387,7 @@ class GeneralUrlIndexTests(ViewTestCase):
     def test_post_request_by_assignated_candidate_to_show_coordination_transfer_request_url_leads_to_functional_url(
         self,
     ) -> None:
-        candidate = self.login_company().id
+        candidate = self.login_company()
         coordinator = self.company_generator.create_company()
         coop_id = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         transfer_request_id = self.coordination_transfer_request_generator.create_coordination_transfer_request(

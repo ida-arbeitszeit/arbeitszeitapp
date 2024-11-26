@@ -39,14 +39,14 @@ class UseCaseTests(BaseTestCase):
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         approval_response = self.use_case.approve_plan(self.create_request(plan=plan))
-        assert approval_response.is_approved
+        assert approval_response.is_plan_approved
 
     def test_cannot_approve_plan_that_was_already_approved(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
         request = self.create_request(plan=plan)
         self.use_case.approve_plan(request)
         approval_response = self.use_case.approve_plan(request)
-        assert not approval_response.is_approved
+        assert not approval_response.is_plan_approved
 
     def test_that_plan_shows_up_in_activated_plans_after_approval(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
@@ -58,7 +58,7 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(expected_activation_timestamp)
         plan = self.plan_generator.create_plan(approved=False)
         response = self.use_case.approve_plan(self.create_request(plan=plan))
-        assert response.is_approved
+        assert response.is_plan_approved
         assert (
             self.get_latest_activated_plan().activation_date
             == expected_activation_timestamp

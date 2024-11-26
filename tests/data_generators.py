@@ -40,6 +40,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
     RegisterProductiveConsumptionResponse,
 )
+from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
@@ -161,6 +162,7 @@ class PlanGenerator:
     approve_plan_use_case: ApprovePlanUseCase
     hide_plan: HidePlan
     get_coop_summary_use_case: get_coop_summary.GetCoopSummary
+    reject_plan_use_case: RejectPlanUseCase
 
     def create_plan(
         self,
@@ -177,6 +179,7 @@ class PlanGenerator:
         requested_cooperation: Optional[UUID] = None,
         cooperation: Optional[UUID] = None,
         hidden_by_user: bool = False,
+        rejected: bool = False,
     ) -> UUID:
         if planner is None:
             planner = self.company_generator.create_company()
@@ -197,12 +200,19 @@ class PlanGenerator:
         )
         assert file_plan_response.plan_id
         assert file_plan_response.is_plan_successfully_filed
-        if not approved:
+        assert not (approved and rejected)
+        if not approved and not rejected:
             return file_plan_response.plan_id
-        response = self.approve_plan_use_case.approve_plan(
-            ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
-        )
-        assert response.is_approved
+        if approved:
+            response = self.approve_plan_use_case.approve_plan(
+                ApprovePlanUseCase.Request(plan=file_plan_response.plan_id)
+            )
+            assert response.is_plan_approved
+        if rejected:
+            rejected_response = self.reject_plan_use_case.reject_plan(
+                RejectPlanUseCase.Request(plan=file_plan_response.plan_id)
+            )
+            assert rejected_response.is_plan_rejected
         if requested_cooperation:
             request_cooperation_response = self.request_cooperation(
                 RequestCooperationRequest(

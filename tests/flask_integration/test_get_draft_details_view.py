@@ -9,7 +9,7 @@ class ViewTests(ViewTestCase):
         self.company = self.login_company()
 
     def test_get_proper_response_code_with_correct_draft_id(self) -> None:
-        draft = self.plan_generator.draft_plan(planner=self.company.id)
+        draft = self.plan_generator.draft_plan(planner=self.company)
         response = self.client.get(self.get_url(draft))
         self.assertEqual(response.status_code, 200)
 
@@ -29,7 +29,7 @@ class ViewTests(ViewTestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_posting_valid_data_for_existing_plan_results_in_302(self) -> None:
-        draft = self.plan_generator.draft_plan(planner=self.company.id)
+        draft = self.plan_generator.draft_plan(planner=self.company)
         response = self.client.post(self.get_url(draft), data=self._valid_form_data())
         self.assertEqual(response.status_code, 302)
 

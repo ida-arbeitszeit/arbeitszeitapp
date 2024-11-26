@@ -7,7 +7,6 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.injector import Module
-from arbeitszeit.records import Company
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
@@ -116,19 +115,34 @@ class ViewTestCase(FlaskTestCase):
 
     def login_member(
         self,
-        member: Optional[UUID] = None,
-        password: Optional[str] = None,
-        email: Optional[str] = None,
+        password: str = "password123",
+        email: str | None = None,
         confirm_member: bool = True,
     ) -> UUID:
-        if password is None:
-            password = "password123"
         if email is None:
             email = self.email_generator.get_random_email()
-        if member is None:
-            member = self.member_generator.create_member(
-                password=password, email=email, confirmed=False
-            )
+        member_id = self._get_or_create_member(email, password)
+        self._login_member(email, password)
+        if confirm_member:
+            self._confirm_member(email)
+        return member_id
+
+    def _get_or_create_member(self, email: str, password: str) -> UUID:
+        if (
+            member := self.database_gateway.get_members()
+            .with_email_address(email)
+            .first()
+        ):
+            return member.id
+        return self.member_generator.create_member(
+            email=email, password=password, confirmed=False
+        )
+
+    def _login_member(
+        self,
+        email: str,
+        password: str,
+    ) -> None:
         response = self.client.post(
             "/login-member",
             data=dict(
@@ -137,10 +151,10 @@ class ViewTestCase(FlaskTestCase):
             ),
             follow_redirects=True,
         )
-        assert response.status_code < 400
-        if confirm_member:
-            self._confirm_member(email)
-        return member
+        if not response.status_code < 400:
+            raise AssertionError(
+                f"Failed to log in member. Response status code: {response.status_code}."
+            )
 
     def _confirm_member(
         self,
@@ -166,24 +180,42 @@ class ViewTestCase(FlaskTestCase):
                 email=email,
             ),
         )
-        self.assertLess(response.status_code, 400)
+        if not response.status_code < 400:
+            raise AssertionError(
+                f"Failed to log in accountant. Response status code: {response.status_code}."
+            )
         return accountant
 
     def login_company(
         self,
-        company: Optional[UUID] = None,
-        password: Optional[str] = None,
-        email: Optional[str] = None,
+        password: str = "password123",
+        email: str | None = None,
         confirm_company: bool = True,
-    ) -> Company:
-        if password is None:
-            password = "password123"
+    ) -> UUID:
         if email is None:
             email = self.email_generator.get_random_email()
-        if company is None:
-            company = self.company_generator.create_company(
-                password=password, email=email, confirmed=False
-            )
+        company_id = self._get_or_create_company(email, password)
+        self._login_company(email, password)
+        if confirm_company:
+            self._confirm_company(email)
+        return company_id
+
+    def _get_or_create_company(self, email: str, password: str) -> UUID:
+        if (
+            company := self.database_gateway.get_companies()
+            .with_email_address(email)
+            .first()
+        ):
+            return company.id
+        return self.company_generator.create_company(
+            email=email, password=password, confirmed=False
+        )
+
+    def _login_company(
+        self,
+        email: str,
+        password: str,
+    ) -> None:
         response = self.client.post(
             "/company/login",
             data=dict(
@@ -192,14 +224,10 @@ class ViewTestCase(FlaskTestCase):
             ),
             follow_redirects=True,
         )
-        assert response.status_code < 400
-        if confirm_company:
-            self._confirm_company(email)
-        updated_company = (
-            self.database_gateway.get_companies().with_email_address(email).first()
-        )
-        assert updated_company
-        return updated_company
+        if not response.status_code < 400:
+            raise AssertionError(
+                f"Failed to log in company. Response status code: {response.status_code}."
+            )
 
     def _confirm_company(
         self,
@@ -239,8 +267,8 @@ class ViewTestCase(FlaskTestCase):
         elif login == LogInUser.unconfirmed_member:
             return self.login_member(confirm_member=False)
         elif login == LogInUser.company:
-            return self.login_company().id
+            return self.login_company()
         elif login == LogInUser.unconfirmed_company:
-            return self.login_company(confirm_company=False).id
+            return self.login_company(confirm_company=False)
         elif login == LogInUser.accountant:
             return self.login_accountant()

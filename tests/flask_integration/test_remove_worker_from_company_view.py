@@ -12,10 +12,10 @@ class TestGet(ViewTestCase):
         worker = self.member_generator.create_member()
         password = f"{uuid4()}"
         email = self.email_generator.get_random_email()
-        company = self.company_generator.create_company(
+        self.company_generator.create_company(
             workers=[worker], password=password, email=email
         )
-        self.login_company(company=company, password=password, email=email)
+        self.login_company(password=password, email=email)
         response = self.client.get(self.url)
         assert response.status_code == 200
 
@@ -29,10 +29,10 @@ class TestPost(ViewTestCase):
         worker = self.member_generator.create_member()
         password = f"{uuid4()}"
         email = self.email_generator.get_random_email()
-        company = self.company_generator.create_company(
+        self.company_generator.create_company(
             workers=[worker], password=password, email=email
         )
-        self.login_company(company=company, password=password, email=email)
+        self.login_company(password=password, email=email)
         response = self.client.post(self.url, data=dict(worker=f"{worker}"))
         assert response.status_code == 302
 
@@ -40,10 +40,10 @@ class TestPost(ViewTestCase):
         worker = self.member_generator.create_member()
         password = f"{uuid4()}"
         email = self.email_generator.get_random_email()
-        company = self.company_generator.create_company(
+        self.company_generator.create_company(
             workers=[worker], password=password, email=email
         )
-        self.login_company(company=company, password=password, email=email)
+        self.login_company(password=password, email=email)
         with self.email_service().record_messages() as outbox:
             response = self.client.post(self.url, data=dict(worker=f"{worker}"))
             assert response.status_code == 302
@@ -53,10 +53,10 @@ class TestPost(ViewTestCase):
         worker = self.member_generator.create_member()
         password = f"{uuid4()}"
         email = self.email_generator.get_random_email()
-        company = self.company_generator.create_company(
+        self.company_generator.create_company(
             workers=[worker], password=password, email=email
         )
-        self.login_company(company=company, password=password, email=email)
+        self.login_company(password=password, email=email)
         with self.email_service().record_messages() as outbox:
             assert len(outbox) == 0
             response = self.client.post(self.url, data=dict(worker="no-uuid"))

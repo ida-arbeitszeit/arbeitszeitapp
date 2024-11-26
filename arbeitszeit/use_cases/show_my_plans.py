@@ -24,6 +24,7 @@ class PlanInfo:
     plan_creation_date: datetime
     activation_date: Optional[datetime]
     expiration_date: Optional[datetime]
+    rejection_date: Optional[datetime]
     is_cooperating: bool
     cooperation: Optional[UUID]
 
@@ -35,6 +36,7 @@ class ShowMyPlansResponse:
     active_plans: List[PlanInfo]
     expired_plans: List[PlanInfo]
     drafts: List[PlanInfo]
+    rejected_plans: List[PlanInfo]
 
 
 @dataclass
@@ -65,6 +67,7 @@ class ShowMyPlansUseCase:
             for plan, cooperation in all_plans_of_company
             if (
                 not plan.is_approved
+                and not plan.is_rejected
                 and not plan.is_active_as_of(now)
                 and not plan.is_expired_as_of(now)
             )
@@ -83,12 +86,18 @@ class ShowMyPlansUseCase:
             for plan, cooperation in all_plans_of_company
             if plan.is_expired_as_of(now)
         ]
+        rejected_plans = [
+            self._create_plan_info_from_plan(plan, cooperation)
+            for plan, cooperation in all_plans_of_company
+            if plan.is_rejected
+        ]
         return ShowMyPlansResponse(
             count_all_plans=count_all_plans,
             non_active_plans=non_active_plans,
             active_plans=active_plans,
             expired_plans=expired_plans,
             drafts=drafts,
+            rejected_plans=rejected_plans,
         )
 
     def _create_plan_info_from_plan(
@@ -104,6 +113,7 @@ class ShowMyPlansUseCase:
             expiration_date=plan.expiration_date,
             is_cooperating=bool(cooperation),
             cooperation=cooperation.id if cooperation else None,
+            rejection_date=plan.rejection_date,
         )
 
     def _create_plan_info_from_draft(self, draft: records.PlanDraft) -> PlanInfo:
@@ -117,4 +127,5 @@ class ShowMyPlansUseCase:
             expiration_date=None,
             is_cooperating=False,
             cooperation=None,
+            rejection_date=None,
         )

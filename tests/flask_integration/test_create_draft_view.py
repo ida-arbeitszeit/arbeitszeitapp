@@ -11,7 +11,7 @@ from .flask import ViewTestCase
 class AuthenticatedCompanyTestsForGet(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.company = self.login_company()
+        self.login_company()
 
     def test_get_200_without_url_parameter(
         self,
@@ -77,6 +77,6 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
         )
 
     def _count_drafts_of_company(self) -> int:
-        request = ShowMyPlansRequest(company_id=self.company.id)
+        request = ShowMyPlansRequest(company_id=self.company)
         response = self.show_my_plans.show_company_plans(request)
         return len(response.drafts)

@@ -125,6 +125,7 @@ class PlanCooperation(db.Model):
 class PlanReview(db.Model):
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     approval_date = db.Column(db.DateTime, nullable=True, default=None)
+    rejection_date = db.Column(db.DateTime, nullable=True, default=None)
     plan_id = db.Column(
         db.String, db.ForeignKey("plan.id", ondelete="CASCADE"), nullable=False
     )
@@ -132,7 +133,7 @@ class PlanReview(db.Model):
     plan = db.relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
-        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r})"
+        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
 
 
 class AccountTypes(Enum):

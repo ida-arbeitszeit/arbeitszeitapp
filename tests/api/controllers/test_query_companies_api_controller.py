@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from arbeitszeit.use_cases.query_companies import CompanyFilter
 from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.api.controllers.query_companies_api_controller import (
@@ -26,89 +28,40 @@ class ControllerTests(BaseTestCase):
         use_case_request = self.controller.create_request(request)
         self.assertIsNone(use_case_request.query_string)
 
-    def test_that_by_default_a_use_case_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
+    @parameterized.expand(
+        [
+            ([], 30, 0),
+            ([("limit", "7")], 7, 0),
+            ([("offset", "8")], 30, 8),
+            ([("limit", "7"), ("offset", "8")], 7, 8),
+        ]
+    )
+    def test_that_setting_the_limit_and_offset_query_params_produces_expected_limit_and_offset_in_request(
         self,
-    ):
-        request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.offset, 0)
-
-    def test_that_by_default_a_use_case_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
-        self,
+        query_string: list[tuple[str, str]],
+        expected_limit: int,
+        expected_offset: int,
     ) -> None:
-        request = FakeRequest()
+        request = FakeRequest(query_string=query_string)
         use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, 30)
+        assert use_case_request.limit == expected_limit
+        assert use_case_request.offset == expected_offset
 
-    def test_correct_offset_gets_returned_if_it_was_set_in_query_string(self) -> None:
-        request = FakeRequest()
-        expected_offset = 8
-        request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.offset, expected_offset)
-
-    def test_correct_limit_gets_returned_if_it_was_set_in_query_string(self) -> None:
-        request = FakeRequest()
-        expected_limit = 7
-        request.set_arg(arg="limit", value=expected_limit)
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, expected_limit)
-
-    def test_both_correct_limit_and_offset_get_returned_if_specified_in_query_string(
-        self,
+    @parameterized.expand(
+        [
+            ([("offset", "-123")], "Input must be greater or equal zero, not -123."),
+            ([("offset", "123abc")], "Input must be an integer, not 123abc."),
+            ([("limit", "123abc")], "Input must be an integer, not 123abc."),
+            ([("limit", "-123")], "Input must be greater or equal zero, not -123."),
+        ]
+    )
+    def test_controller_raises_bad_request_if_limit_or_offset_are_set_incorrectly(
+        self, query_string: list[tuple[str, str]], expected_error_message: str
     ) -> None:
-        request = FakeRequest()
-        expected_limit = 7
-        request.set_arg(arg="limit", value=expected_limit)
-        expected_offset = 8
-        request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, expected_limit)
-        self.assertEqual(use_case_request.offset, expected_offset)
-
-    def test_controller_raises_bad_request_if_offset_query_string_has_letters(self):
-        request = FakeRequest()
-        input = "123abc"
-        request.set_arg(arg="offset", value=input)
+        request = FakeRequest(query_string=query_string)
         with self.assertRaises(BadRequest) as err:
             self.controller.create_request(request)
-        self.assertEqual(
-            err.exception.message, f"Input must be an integer, not {input}."
-        )
-
-    def test_controller_raises_bad_request_if_offset_query_string_is_negative_number(
-        self,
-    ):
-        request = FakeRequest()
-        input = "-123"
-        request.set_arg(arg="offset", value=input)
-        with self.assertRaises(BadRequest) as err:
-            self.controller.create_request(request)
-        self.assertEqual(
-            err.exception.message, f"Input must be greater or equal zero, not {input}."
-        )
-
-    def test_controller_raises_bad_request_if_limit_query_string_has_letters(self):
-        request = FakeRequest()
-        input = "123abc"
-        request.set_arg(arg="limit", value=input)
-        with self.assertRaises(BadRequest) as err:
-            self.controller.create_request(request)
-        self.assertEqual(
-            err.exception.message, f"Input must be an integer, not {input}."
-        )
-
-    def test_controller_raises_bad_request_if_limit_query_string_is_negative_number(
-        self,
-    ):
-        request = FakeRequest()
-        input = "-123"
-        request.set_arg(arg="limit", value=input)
-        with self.assertRaises(BadRequest) as err:
-            self.controller.create_request(request)
-        self.assertEqual(
-            err.exception.message, f"Input must be greater or equal zero, not {input}."
-        )
+        assert err.exception.message == expected_error_message
 
 
 class ExpectedInputsTests(BaseTestCase):

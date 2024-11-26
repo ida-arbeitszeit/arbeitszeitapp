@@ -23,7 +23,7 @@ class CompanyTest(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.url = "/member/dashboard"
-        self.company = self.login_company(confirm_company=True)
+        self.login_company(confirm_company=True)
 
     def test_company_gets_302(self) -> None:
         response = self.client.get(self.url)

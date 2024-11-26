@@ -1,13 +1,15 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, Optional
 
-from arbeitszeit.injector import singleton
 from arbeitszeit_web.json import JsonValue
 
 
 @dataclass
 class FakeQueryString:
-    values: dict[str, list[str]] = field(default_factory=dict)
+    values: defaultdict[str, list[str]] = field(
+        default_factory=lambda: defaultdict(lambda: list())
+    )
 
     def items(self) -> Iterable[tuple[str, str]]:
         for key in self.values:
@@ -24,11 +26,15 @@ class FakeQueryString:
             case values:
                 return values[-1]
 
+    def append(self, key: str, value: str) -> None:
+        self.values[key].append(value)
 
-@singleton
+
 class FakeRequest:
-    def __init__(self) -> None:
+    def __init__(self, *, query_string: list[tuple[str, str]] | None = None) -> None:
         self._args = FakeQueryString()
+        for key, value in query_string or []:
+            self._args.append(key, value)
         self._form: Dict[str, str] = dict()
         self._json: JsonValue | None = None
         self._environ: Dict[str, str] = dict()

@@ -44,6 +44,8 @@ class PlanResult(QueryResult[records.Plan], Protocol):
 
     def ordered_by_activation_date(self, ascending: bool = ...) -> Self: ...
 
+    def ordered_by_rejection_date(self, ascending: bool = ...) -> Self: ...
+
     def ordered_by_planner_name(self, ascending: bool = ...) -> Self: ...
 
     def with_id_containing(self, query: str) -> Self: ...
@@ -51,6 +53,8 @@ class PlanResult(QueryResult[records.Plan], Protocol):
     def with_product_name_containing(self, query: str) -> Self: ...
 
     def that_are_approved(self) -> Self: ...
+
+    def that_are_rejected(self) -> Self: ...
 
     def that_were_activated_before(self, timestamp: datetime) -> Self:
         """Plans that were approved exactly at `timestamp` should also
@@ -155,8 +159,13 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         """Set the `activation_date` field of all selected plans."""
 
     def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        """Set the approval date of all matching plans. The return
-        value counts all the plans that were changed by this methods.
+        """Set the approval date on all matching plans. The return
+        value counts all the plans that were changed by this method.
+        """
+
+    def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
+        """Set the rejection date on all matching plans. The return
+        value counts all the plans that were changed by this method.
         """
 
     def hide(self) -> Self: ...

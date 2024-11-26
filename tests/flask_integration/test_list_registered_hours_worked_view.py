@@ -35,9 +35,7 @@ class CompanyTests(ViewTestCase):
         company = self.company_generator.create_company(
             workers=[worker_id], email=company_email, password=company_password
         )
-        self.login_company(
-            company=company, email=company_email, password=company_password
-        )
+        self.login_company(email=company_email, password=company_password)
         request = RegisterHoursWorkedRequest(
             company_id=company, worker_id=worker_id, hours_worked=Decimal("10")
         )

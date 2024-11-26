@@ -79,6 +79,14 @@ class ResetPasswordConfirmation:
     email_address: str
 
 
+@dataclass
+class RejectedPlanNotification:
+    planner_email_address: str
+    planning_company_name: str
+    plan_id: UUID
+    product_name: str
+
+
 # This type definition can be used by implementations of the
 # EmailSender protocol for static type checking purposes. Keep this
 # list alphabetically sorted.
@@ -91,6 +99,7 @@ Message: TypeAlias = Union[
     EmailChangeWarning,
     EmailChangeConfirmation,
     MemberRegistration,
+    RejectedPlanNotification,
     ResetPasswordConfirmation,
     ResetPasswordRequest,
     WorkerInvitation,

@@ -33,6 +33,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
                 active_plans=[],
                 expired_plans=[],
                 drafts=[],
+                rejected_plans=[],
             )
         )
         self.assertTrue(self.notifier.display_info)
@@ -55,6 +56,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertTrue(presentation.show_active_plans)
         self.assertFalse(presentation.show_expired_plans)
         self.assertFalse(presentation.show_non_active_plans)
+        self.assertFalse(presentation.show_rejected_plans)
 
     def test_presenter_shows_correct_info_of_one_single_active_plan(self) -> None:
         plan = self.plan_generator.create_plan_record(cooperation=None)
@@ -219,6 +221,35 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             self.url_index.get_draft_details_url(draft_id),
         )
 
+    def test_do_only_show_rejected_plans_when_user_has_one_rejected_plan(self) -> None:
+        plan = self.plan_generator.create_plan_record()
+        RESPONSE_WITH_ONE_REJECTED_PLAN = self.response_with_one_rejected_plan(plan)
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_REJECTED_PLAN)
+        self.assertTrue(presentation.show_rejected_plans)
+        self.assertFalse(presentation.show_expired_plans)
+        self.assertFalse(presentation.show_non_active_plans)
+        self.assertFalse(presentation.show_active_plans)
+
+    def test_presenter_shows_correct_info_of_one_single_rejected_plan(self) -> None:
+        plan = self.plan_generator.create_plan_record(cooperation=None)
+        RESPONSE_WITH_ONE_REJECTED_PLAN = self.response_with_one_rejected_plan(plan)
+        presentation = self.presenter.present(RESPONSE_WITH_ONE_REJECTED_PLAN)
+        self.assertEqual(
+            presentation.rejected_plans.rows[0].plan_details_url,
+            self.url_index.get_plan_details_url(
+                user_role=UserRole.company, plan_id=plan.id
+            ),
+        )
+        self.assertEqual(presentation.rejected_plans.rows[0].prd_name, plan.prd_name)
+        self.assertEqual(
+            presentation.rejected_plans.rows[0].price_per_unit,
+            str("10.00"),
+        )
+        self.assertEqual(
+            presentation.rejected_plans.rows[0].is_public_service,
+            plan.is_public_service,
+        )
+
     def _convert_into_plan_info(
         self, plan: Plan, cooperation: UUID | None = None
     ) -> PlanInfo:
@@ -232,6 +263,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             expiration_date=plan.expiration_date,
             is_cooperating=bool(cooperation),
             cooperation=cooperation,
+            rejection_date=plan.rejection_date,
         )
 
     def _convert_draft_into_plan_info(self, plan: PlanDraft) -> PlanInfo:
@@ -245,6 +277,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             expiration_date=None,
             is_cooperating=False,
             cooperation=None,
+            rejection_date=None,
         )
 
     def response_with_one_draft(
@@ -266,6 +299,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             active_plans=[],
             expired_plans=[],
             drafts=[],
+            rejected_plans=[],
         )
 
     def response_with_one_plan(self, plan: Plan) -> ShowMyPlansResponse:
@@ -276,6 +310,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             active_plans=[plan_info],
             expired_plans=[],
             drafts=[],
+            rejected_plans=[],
         )
 
     def response_with_one_active_plan(
@@ -288,6 +323,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             active_plans=[plan_info],
             expired_plans=[],
             drafts=[],
+            rejected_plans=[],
         )
 
     def response_with_one_expired_plan(self) -> ShowMyPlansResponse:
@@ -306,6 +342,18 @@ class ShowMyPlansPresenterTests(BaseTestCase):
             active_plans=[],
             expired_plans=[],
             drafts=[],
+            rejected_plans=[],
+        )
+
+    def response_with_one_rejected_plan(self, plan: Plan) -> ShowMyPlansResponse:
+        plan_info = self._convert_into_plan_info(plan)
+        return ShowMyPlansResponse(
+            count_all_plans=1,
+            non_active_plans=[],
+            active_plans=[],
+            expired_plans=[],
+            drafts=[],
+            rejected_plans=[plan_info],
         )
 
     def _create_active_plan(self, timeframe: int = 1) -> Plan:
