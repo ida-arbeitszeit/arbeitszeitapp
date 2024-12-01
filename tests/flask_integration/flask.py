@@ -7,6 +7,7 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.injector import Module
+from arbeitszeit_flask.database.models import Base
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from tests.data_generators import (
@@ -73,8 +74,8 @@ class FlaskTestCase(TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.db.session.flush()
-        self.db.drop_all()
-        self.db.create_all()
+        Base.metadata.drop_all(self.db.engine)
+        Base.metadata.create_all(self.db.engine)
         self.db.session.flush()
 
     def tearDown(self) -> None:

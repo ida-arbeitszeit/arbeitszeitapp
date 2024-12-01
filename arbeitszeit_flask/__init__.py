@@ -100,11 +100,11 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
             if "user_type" in session:
                 user_type = session["user_type"]
                 if user_type == "member":
-                    return Member.query.get(user_id)
+                    return db.session.query(Member).get(user_id)
                 elif user_type == "company":
-                    return Company.query.get(user_id)
+                    return db.session.query(Company).get(user_id)
                 elif user_type == "accountant":
-                    return Accountant.query.get(user_id)
+                    return db.session.query(Accountant).get(user_id)
 
         # register blueprints
         from . import accountant, company, member, user

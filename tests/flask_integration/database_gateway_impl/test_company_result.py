@@ -2,8 +2,6 @@ from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 
-from flask_sqlalchemy import SQLAlchemy
-
 from arbeitszeit import records
 
 from ..flask import FlaskTestCase
@@ -146,10 +144,6 @@ class RepositoryTester(CompanyResultTests):
 
 
 class CreateCompanyTests(CompanyResultTests):
-    def setUp(self) -> None:
-        super().setUp()
-        self.db = self.injector.get(SQLAlchemy)
-
     def test_that_company_can_be_created_while_member_with_same_email_exists(
         self,
     ) -> None:

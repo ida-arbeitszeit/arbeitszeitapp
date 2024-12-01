@@ -1,16 +1,21 @@
+from dataclasses import dataclass
 from typing import Optional
 from urllib.parse import urlparse
 from uuid import UUID
 
 from flask import request, session
 from flask_login import current_user, login_user, logout_user
+from flask_sqlalchemy import SQLAlchemy
 from is_safe_url import is_safe_url
 
 from arbeitszeit_flask.database import models
 from arbeitszeit_web.session import UserRole
 
 
+@dataclass
 class FlaskSession:
+    db: SQLAlchemy
+
     ROLES = {
         "member": UserRole.member,
         "company": UserRole.company,
@@ -36,21 +41,31 @@ class FlaskSession:
             return None
 
     def login_member(self, member: UUID, remember: bool = False) -> None:
-        member = models.Member.query.filter(models.Member.id == (str(member))).first()
+        member = (
+            self.db.session.query(models.Member)
+            .filter(models.Member.id == (str(member)))
+            .first()
+        )
         assert member
         login_user(member, remember=remember)
         session["user_type"] = "member"
 
     def login_company(self, company: UUID, remember: bool = False) -> None:
-        company = models.Company.query.filter(models.Company.id == str(company)).first()
+        company = (
+            self.db.session.query(models.Company)
+            .filter(models.Company.id == str(company))
+            .first()
+        )
         assert company
         login_user(company, remember=remember)
         session["user_type"] = "company"
 
     def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
-        accountant = models.Accountant.query.filter(
-            models.Accountant.id == str(accountant)
-        ).first()
+        accountant = (
+            self.db.session.query(models.Accountant)
+            .filter(models.Accountant.id == str(accountant))
+            .first()
+        )
         assert accountant
         login_user(accountant, remember=remember)
         session["user_type"] = "accountant"
