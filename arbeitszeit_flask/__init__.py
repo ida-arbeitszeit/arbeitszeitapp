@@ -1,8 +1,10 @@
 import os
+from pathlib import Path
 from typing import Any, Optional
 
+from alembic import command as alembic_command
+from alembic.config import Config as AlembicConfig
 from flask import Flask, session
-from flask_migrate import upgrade
 from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
@@ -19,7 +21,7 @@ from arbeitszeit_flask.profiling import (  # type: ignore
 )
 
 
-def load_configuration(app: Any, configuration: Optional[Any] = None) -> None:
+def load_configuration(app: Flask, configuration: Optional[Any] = None) -> None:
     """Load the right configuration files for the application.
 
     We will try to load the configuration from top to bottom and use
@@ -37,16 +39,9 @@ def load_configuration(app: Any, configuration: Optional[Any] = None) -> None:
         app.config.from_pyfile("/etc/arbeitszeitapp/arbeitszeitapp.py", silent=True)
 
 
-def initialize_migrations(app: Any, db: Any) -> None:
-    migrate = arbeitszeit_flask.extensions.migrate
-    migrations_directory = os.path.join(os.path.dirname(__file__), "migrations")
-    migrate.init_app(app, db, directory=migrations_directory)
-    if app.config["AUTO_MIGRATE"]:
-        with app.app_context():
-            upgrade(migrations_directory)
-
-
-def create_app(config: Any = None, db: Any = None, template_folder: Any = None) -> Any:
+def create_app(
+    config: Any = None, db: Any = None, template_folder: Any = None
+) -> Flask:
     if template_folder is None:
         template_folder = "templates"
 
@@ -77,8 +72,11 @@ def create_app(config: Any = None, db: Any = None, template_folder: Any = None) 
     csrf_protect.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
-    initialize_migrations(app=app, db=db)
     initialize_babel(app)
+
+    if app.config["AUTO_MIGRATE"]:
+        alembic_cfg = AlembicConfig(Path(__file__).parent.parent / "alembic.ini")
+        alembic_command.upgrade(alembic_cfg, "head")
 
     # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
