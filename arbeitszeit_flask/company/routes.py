@@ -52,6 +52,9 @@ from arbeitszeit_flask.views.register_hours_worked_view import RegisterHoursWork
 from arbeitszeit_flask.views.register_productive_consumption import (
     RegisterProductiveConsumptionView,
 )
+from arbeitszeit_flask.views.remove_worker_from_company_view import (
+    RemoveWorkerFromCompanyView,
+)
 from arbeitszeit_flask.views.request_coordination_transfer_view import (
     RequestCoordinationTransferView,
 )
@@ -312,6 +315,11 @@ class cancel_cooperation_request(CancelCooperationRequestView): ...
 @CompanyRoute("/invite_worker_to_company", methods=["GET", "POST"])
 @as_flask_view()
 class invite_worker_to_company(InviteWorkerToCompanyView): ...
+
+
+@CompanyRoute("/remove_worker_from_company", methods=["GET", "POST"])
+@as_flask_view()
+class remove_worker_from_company(RemoveWorkerFromCompanyView): ...
 
 
 @CompanyRoute("/end_cooperation", methods=["POST"])

@@ -46,10 +46,14 @@
             {% for worker in view_model.workers %}
             <tr>
               <td>{{ worker.id }}</td>
-              <td>{{ worker.name}}</td>
+              <td>{{ worker.name}}</td>                
             </tr>
             {% endfor %}
           </table>
+        </div>
+        <h1 class="title">{{ gettext("Remove a worker") }}</h1>
+        <div>{{ gettext("Click here to remove a worker:") }}
+          <a href="{{ view_model.url_to_remove_workers }}">{{ gettext("Remove worker") }}</a>
         </div>
         {% endif %}
       </div>
