@@ -41,33 +41,33 @@ class FlaskSession:
             return None
 
     def login_member(self, member: UUID, remember: bool = False) -> None:
-        member = (
+        member_orm = (
             self.db.session.query(models.Member)
             .filter(models.Member.id == (str(member)))
             .first()
         )
-        assert member
-        login_user(member, remember=remember)
+        assert member_orm
+        login_user(member_orm, remember=remember)
         session["user_type"] = "member"
 
     def login_company(self, company: UUID, remember: bool = False) -> None:
-        company = (
+        company_orm = (
             self.db.session.query(models.Company)
             .filter(models.Company.id == str(company))
             .first()
         )
-        assert company
-        login_user(company, remember=remember)
+        assert company_orm
+        login_user(company_orm, remember=remember)
         session["user_type"] = "company"
 
     def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
-        accountant = (
+        accountant_orm = (
             self.db.session.query(models.Accountant)
             .filter(models.Accountant.id == str(accountant))
             .first()
         )
-        assert accountant
-        login_user(accountant, remember=remember)
+        assert accountant_orm
+        login_user(accountant_orm, remember=remember)
         session["user_type"] = "accountant"
 
     def logout(self) -> None:
