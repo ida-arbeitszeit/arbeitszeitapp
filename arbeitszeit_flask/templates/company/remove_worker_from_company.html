@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("Remove worker") }}</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="section is-medium has-text-centered">
+  <div class="columns">
+    <div class="column"></div>
+    <div class="column is-5">
+      <div class="content">
+        <h1 class="title">{{ gettext("Remove worker") }}</h1>
+      </div>
+      <div>
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="field">
+            <label class="label">{{ gettext("Worker") }}</label>
+            <div class="control">
+              <div class="select">
+                <select name="worker">
+                  {% for worker in workers %}
+                  <option value="{{ worker.id }}">{{ worker.name }} ({{ worker.id }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="control">
+              <button class="button is-danger" type="submit">{{ gettext("Remove worker") }}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="column"></div>
+  </div>
+</div>
+{% endblock %}

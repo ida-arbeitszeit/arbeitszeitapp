@@ -144,6 +144,8 @@ class UrlIndex(Protocol):
 
     def get_invite_worker_to_company_url(self) -> str: ...
 
+    def get_remove_worker_from_company_url(self) -> str: ...
+
 
 @dataclass
 class UserUrlIndex:
