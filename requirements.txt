@@ -1,10 +1,11 @@
+alembic
 email_validator
 Flask
 Flask-Babel
 Flask-Login
 Flask-Mail
-Flask-Migrate
 flask-restx
+Flask-SQLAlchemy
 Flask-Talisman
 Flask-WTF
 is_safe_url

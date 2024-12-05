@@ -1,6 +1,5 @@
 from uuid import uuid4
 
-from flask_sqlalchemy import SQLAlchemy
 from parameterized import parameterized
 
 from arbeitszeit import records
@@ -48,7 +47,6 @@ class CreateAccountantTests(AccountantResultTests):
 class CreateAccountantWithExistingMemberEmailTests(AccountantResultTests):
     def setUp(self) -> None:
         super().setUp()
-        self.db = self.injector.get(SQLAlchemy)
         self.expected_email = "test@test.test"
 
     def test_can_create_accountant_with_same_email_address_as_member(self) -> None:

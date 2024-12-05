@@ -10,7 +10,6 @@ LOGGER = getLogger(__name__)
 TARGET_PACKAGES = [
     "flask_babel",
     "flask_login",
-    "flask_migrate",
     "flask_profiler",
     "flask_restx",
     "flask_sqlalchemy",
