@@ -5,4 +5,11 @@ from .recaptcha import Recaptcha as Recaptcha
 from .recaptcha import RecaptchaField as RecaptchaField
 from .recaptcha import RecaptchaWidget as RecaptchaWidget
 
-__version__: str
+__all__ = [
+    "CSRFProtect",
+    "FlaskForm",
+    "Form",
+    "Recaptcha",
+    "RecaptchaField",
+    "RecaptchaWidget",
+]
