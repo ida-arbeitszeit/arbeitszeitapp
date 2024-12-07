@@ -3,6 +3,7 @@
   postgresql,
 
   # python packages
+  alembic,
   Babel,
   psycopg2,
   email_validator,
@@ -12,7 +13,6 @@
   flask-restx,
   flask-talisman,
   flask_login,
-  flask_migrate,
   flask_wtf,
   is_safe_url,
   matplotlib,
@@ -38,12 +38,12 @@ buildPythonPackage {
     setuptools
   ];
   propagatedBuildInputs = [
+    alembic
     email_validator
     flask
     flask-babel
     flask-talisman
     flask_login
-    flask_migrate
     flask-restx
     flask_wtf
     is_safe_url

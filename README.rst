@@ -268,7 +268,7 @@ Then, here is a sample ``custom_settings.py``:
      SERVER_NAME = "127.0.0.1:5000"
 
 After configuring the database connection, you need to run the database
-migrations via ``flask db upgrade``. It is mandatory to run this command 
+migrations via ``alembic upgrade head``. It is mandatory to run this command 
 once before developing for the first time.
 
 Afterwards, you can start the development server with ``flask
@@ -422,7 +422,7 @@ Profiling
 ---------
 
 This project uses ``flask_profiler`` to provided a very basic
-graphical user interface for response times.  More in-depth profiling
+graphical user interface for response times.  More profiling
 information is printed to ``stdout`` (the terminal) when detailed
 debugging is enabled. Run the following in the same terminal as where you
 start the development server to enable detailed profiling:

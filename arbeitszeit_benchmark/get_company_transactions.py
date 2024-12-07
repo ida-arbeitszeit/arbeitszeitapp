@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.use_cases import get_company_transactions
+from arbeitszeit_flask.database.db import Base, Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
@@ -16,12 +16,12 @@ class GetCompanyTransactionsBenchmark:
 
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
-        self.db = self.injector.get(SQLAlchemy)
+        self.db = self.injector.get(Database)
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
-        self.db.drop_all()
-        self.db.create_all()
+        Base.metadata.drop_all(self.db.engine)
+        Base.metadata.create_all(self.db.engine)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
@@ -36,7 +36,6 @@ class GetCompanyTransactionsBenchmark:
                     consumer=self.buyer, plan=plan
                 )
         self.db.session.commit()
-        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

@@ -1,9 +1,9 @@
+alembic
 email_validator
 Flask
 Flask-Babel
 Flask-Login
 Flask-Mail
-Flask-Migrate
 flask-restx
 Flask-Talisman
 Flask-WTF

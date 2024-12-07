@@ -2,10 +2,10 @@ import random
 from decimal import Decimal
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import query_plans
+from arbeitszeit_flask.database.db import Base, Database
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
@@ -16,9 +16,9 @@ class QueryPlansSortedByActivationDateBenchmark:
         app = injector.get(Flask)
         self.app_context = app.app_context()
         self.app_context.push()
-        db = injector.get(SQLAlchemy)
-        db.drop_all()
-        db.create_all()
+        db = injector.get(Database)
+        Base.metadata.drop_all(db.engine)
+        Base.metadata.create_all(db.engine)
         plan_generator = injector.get(PlanGenerator)
         cooperation_generator = injector.get(CooperationGenerator)
         self.query_plans = injector.get(query_plans.QueryPlans)
@@ -46,7 +46,6 @@ class QueryPlansSortedByActivationDateBenchmark:
             offset=None,
         )
         db.session.commit()
-        db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

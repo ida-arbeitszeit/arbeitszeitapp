@@ -8,7 +8,6 @@ from flask import Flask
 from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
 from arbeitszeit_flask import create_app
 from arbeitszeit_flask.dependency_injection import FlaskModule
-from arbeitszeit_flask.extensions import db
 from tests.dependency_injection import TestingModule
 from tests.flask_integration.mail_service import MockEmailService
 
@@ -73,7 +72,7 @@ class FlaskConfiguration(dict):
 
 
 def provide_app(config: FlaskConfiguration) -> Flask:
-    return create_app(config=config, db=db, template_folder=config.template_folder)
+    return create_app(config=config, template_folder=config.template_folder)
 
 
 class SqliteModule(Module):
