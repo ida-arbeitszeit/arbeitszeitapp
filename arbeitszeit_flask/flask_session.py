@@ -5,16 +5,16 @@ from uuid import UUID
 
 from flask import request, session
 from flask_login import current_user, login_user, logout_user
-from flask_sqlalchemy import SQLAlchemy
 from is_safe_url import is_safe_url
 
 from arbeitszeit_flask.database import models
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_web.session import UserRole
 
 
 @dataclass
 class FlaskSession:
-    db: SQLAlchemy
+    db: Database
 
     ROLES = {
         "member": UserRole.member,

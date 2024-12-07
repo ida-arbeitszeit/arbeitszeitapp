@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
@@ -8,8 +8,8 @@ from flask import Flask, session
 from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
-import arbeitszeit_flask.extensions
 from arbeitszeit_flask.babel import initialize_babel
+from arbeitszeit_flask.database.db import Database, init_db
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
@@ -17,11 +17,10 @@ from arbeitszeit_flask.mail_service import load_email_plugin
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
-    show_sql_queries,
 )
 
 
-def load_configuration(app: Flask, configuration: Optional[Any] = None) -> None:
+def load_configuration(app: Flask, configuration: Any = None) -> None:
     """Load the right configuration files for the application.
 
     We will try to load the configuration from top to bottom and use
@@ -40,7 +39,8 @@ def load_configuration(app: Flask, configuration: Optional[Any] = None) -> None:
 
 
 def create_app(
-    config: Any = None, db: Any = None, template_folder: Any = None
+    config: Any = None,
+    template_folder: Any = None,
 ) -> Flask:
     if template_folder is None:
         template_folder = "templates"
@@ -50,10 +50,8 @@ def create_app(
     )
 
     load_configuration(app=app, configuration=config)
+    init_db(uri=app.config["SQLALCHEMY_DATABASE_URI"])
     load_email_plugin(app)
-
-    if db is None:
-        db = arbeitszeit_flask.extensions.db
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
@@ -70,9 +68,12 @@ def create_app(
 
     # init flask extensions
     csrf_protect.init_app(app)
-    db.init_app(app)
     login_manager.init_app(app)
     initialize_babel(app)
+
+    @app.teardown_appcontext
+    def shutdown_session(exception: BaseException | None = None) -> None:
+        Database().session.remove()
 
     if app.config["AUTO_MIGRATE"]:
         alembic_cfg = AlembicConfig(Path(__file__).parent.parent / "alembic.ini")
@@ -98,11 +99,11 @@ def create_app(
             if "user_type" in session:
                 user_type = session["user_type"]
                 if user_type == "member":
-                    return db.session.query(Member).get(user_id)
+                    return Database().session.query(Member).get(user_id)
                 elif user_type == "company":
-                    return db.session.query(Company).get(user_id)
+                    return Database().session.query(Company).get(user_id)
                 elif user_type == "accountant":
-                    return db.session.query(Accountant).get(user_id)
+                    return Database().session.query(Accountant).get(user_id)
 
         # register blueprints
         from . import accountant, company, member, user
