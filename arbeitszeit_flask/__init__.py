@@ -122,7 +122,6 @@ def create_app(
 
         if app.config["DEBUG_DETAILS"] == True:
             show_profile_info(app)
-            show_sql_queries(app)
 
         # The profiler needs to be initialized last because all the
         # routes to monitor need to present in the app at that point
