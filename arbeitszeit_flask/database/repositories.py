@@ -762,29 +762,29 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = (
+        member_orm = (
             self.db.session.query(models.Member)
             .filter(models.Member.id == str(member))
             .first()
         )
-        assert member
+        assert member_orm
         for company in self.query:
             companies_changed += 1
-            company.workers.append(member)
+            company.workers.append(member_orm)
         self.db.session.flush()
         return companies_changed
 
     def remove_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = (
+        member_orm = (
             self.db.session.query(models.Member)
             .filter(models.Member.id == str(member))
             .first()
         )
-        assert member
+        assert member_orm
         for company in self.query:
             companies_changed += 1
-            company.workers.remove(member)
+            company.workers.remove(member_orm)
         self.db.session.flush()
         return companies_changed
 
