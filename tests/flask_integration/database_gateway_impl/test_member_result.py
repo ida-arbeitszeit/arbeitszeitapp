@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flask_sqlalchemy import SQLAlchemy
 from parameterized import parameterized
 from sqlalchemy.exc import IntegrityError
 
@@ -13,10 +12,6 @@ from .utility import Utility
 
 
 class MemberResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.db = self.injector.get(SQLAlchemy)
-
     def create_member(self, email_address: Optional[str] = None) -> records.Member:
         if email_address is None:
             email_address = self.email_generator.get_random_email()

@@ -268,7 +268,7 @@ Then, here is a sample ``custom_settings.py``:
      SERVER_NAME = "127.0.0.1:5000"
 
 After configuring the database connection, you need to run the database
-migrations via ``flask db upgrade``. It is mandatory to run this command 
+migrations via ``alembic upgrade head``. It is mandatory to run this command 
 once before developing for the first time.
 
 Afterwards, you can start the development server with ``flask

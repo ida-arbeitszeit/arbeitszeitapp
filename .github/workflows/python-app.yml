@@ -38,11 +38,11 @@ jobs:
       with:
         name: arbeitszeit
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix develop --command flask db upgrade
+    - run: nix develop --command alembic upgrade head
       env:
         ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
         FLASK_APP: arbeitszeit_flask
-    - run: nix develop --command flask db check
+    - run: nix develop --command alembic check
       env:
         ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
         FLASK_APP: arbeitszeit_flask
