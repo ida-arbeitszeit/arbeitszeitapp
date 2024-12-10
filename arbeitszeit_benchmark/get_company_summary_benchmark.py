@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.use_cases import get_company_summary
-from arbeitszeit_flask.database.models import Base
+from arbeitszeit_flask.database.db import Base, Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
@@ -17,7 +16,7 @@ class GetCompanySummaryBenchmark:
 
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
-        self.db = self.injector.get(SQLAlchemy)
+        self.db = self.injector.get(Database)
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
@@ -42,7 +41,6 @@ class GetCompanySummaryBenchmark:
         for _ in range(1000):
             self.plan_generator.create_plan(planner=self.company)
         self.db.session.commit()
-        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

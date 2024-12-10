@@ -1,8 +1,9 @@
 from logging.config import fileConfig
 
 from arbeitszeit_flask import load_configuration
+
+from arbeitszeit_flask.database.db import Database
 from flask import Flask
-from sqlalchemy import create_engine
 from collections.abc import Iterable
 from alembic.environment import MigrationContext
 from alembic.operations import MigrationScript
@@ -83,8 +84,9 @@ def run_migrations_online() -> None:
             assert script.upgrade_ops is not None
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                
-    connectable = create_engine(get_db_uri())
+
+    Database().configure(get_db_uri())   
+    connectable = Database().engine
 
     with connectable.connect() as connection:
         context.configure(

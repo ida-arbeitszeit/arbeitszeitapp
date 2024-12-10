@@ -178,4 +178,3 @@ class CreateMemberTests(MemberResultTests):
         self.create_member(email_address=email)
         with self.assertRaises(IntegrityError):
             self.create_member(email_address=email)
-            self.db.flush()

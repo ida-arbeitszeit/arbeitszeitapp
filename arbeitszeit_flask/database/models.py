@@ -9,11 +9,9 @@ from enum import Enum
 
 from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, Table
-from sqlalchemy.orm import DeclarativeBase, Mapped, backref, mapped_column, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
-
-class Base(DeclarativeBase):
-    pass
+from arbeitszeit_flask.database.db import Base
 
 
 def generate_uuid() -> str:

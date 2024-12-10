@@ -12,7 +12,6 @@ TARGET_PACKAGES = [
     "flask_login",
     "flask_profiler",
     "flask_restx",
-    "flask_sqlalchemy",
     "flask_talisman",
     "flask_wtf",
     "is_safe_url",

@@ -156,7 +156,6 @@ class CreateCompanyTests(CompanyResultTests):
         )
         assert credentials
         self.create_company_from_credentials(credentials=credentials.id)
-        self.db.session.flush()
 
 
 class ThatAreWorkplaceOfMemberTests(FlaskTestCase):

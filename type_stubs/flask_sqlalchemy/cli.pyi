@@ -1,3 +1,0 @@
-import typing as t
-
-def add_models_to_shell() -> dict[str, t.Any]: ...
