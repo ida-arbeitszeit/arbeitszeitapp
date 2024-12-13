@@ -1295,6 +1295,19 @@ class CompanyWorkInviteResult(QueryResultImpl[CompanyWorkInvite]):
             if invite.id not in invites_to_delete
         ]
 
+    def joined_with_member(
+        self,
+    ) -> QueryResultImpl[Tuple[CompanyWorkInvite, records.Member]]:
+        def items() -> Iterable[Tuple[CompanyWorkInvite, records.Member]]:
+            for invite in self.items():
+                member = self.database.members[invite.member]
+                yield invite, member
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
 
 class PasswordResetRequestResult(QueryResultImpl[records.PasswordResetRequest]):
     def with_email_address(self, email_address: str) -> Self:

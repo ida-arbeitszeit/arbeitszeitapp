@@ -415,6 +415,10 @@ class CompanyWorkInviteResult(QueryResult[records.CompanyWorkInvite], Protocol):
 
     def delete(self) -> None: ...
 
+    def joined_with_member(
+        self,
+    ) -> QueryResult[Tuple[records.CompanyWorkInvite, records.Member]]: ...
+
 
 class EmailAddressResult(QueryResult[records.EmailAddress], Protocol):
     def with_address(self, *addresses: str) -> Self: ...
