@@ -808,6 +808,28 @@ If you want to extend or override SVG attributes, do the following:
 More info, concerning the ``icon`` filter implementation, can be found in
 ``arbeitszeit_flask/filters.py:icon_filter``.
 
+
+Cooperations 
+-------------
+
+Companies that produce the same product can attach their plans to so-called "cooperations".
+Plans in a cooperation share a unified, averaged "cooperation price" for consumption. Apart 
+from that, they remain, technically speaking, independent plans of independent companies.
+
+**Coordinators of cooperations**
+
+"Empty" cooperations (without any plans attached) can be created by any company. The company
+that creates a cooperation automatically becomes the "coordinator" of that cooperation. A
+coordinator has several privileges and duties: They can accept or deny incoming cooperation requests,
+remove plans from the cooperation, or transfer the coordination role to another company. 
+The history of past coordinators is transparent to all users.
+
+While this implementation may seem undemocratic, it must be noted that the Arbeitszeitapp
+only provides the technical front-end to diverse democratic processes that must happen in "real life".
+The app does not prescribe the democratic procedures that companies and communities choose to 
+elect coordinators or to define cooperations. Because every company is able to create cooperations, 
+companies that are unhappy with a certain coordination can easily form a new cooperation. 
+
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
 .. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/
 .. _URI path pattern: https://flask.palletsprojects.com/en/latest/api/#url-route-registrations
