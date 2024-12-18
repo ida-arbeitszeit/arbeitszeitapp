@@ -17,21 +17,9 @@ class PresenterTests(BaseTestCase):
         view_model = self.presenter.show_workers_list(self.create_empty_response())
         self.assertFalse(view_model.workers)
 
-    def test_that_view_model_does_not_show_workers_list_if_response_contains_no_workers(
-        self,
-    ) -> None:
-        view_model = self.presenter.show_workers_list(self.create_empty_response())
-        self.assertFalse(view_model.is_show_workers)
-
     def test_that_view_model_contains_workers_if_response_also_does(self) -> None:
         view_model = self.presenter.show_workers_list(self.create_response(workers=1))
         self.assertTrue(view_model.workers)
-
-    def test_that_view_model_shows_workers_if_response_contains_one_worker(
-        self,
-    ) -> None:
-        view_model = self.presenter.show_workers_list(self.create_response(workers=1))
-        self.assertTrue(view_model.is_show_workers)
 
     def test_that_view_model_contains_3_workers_if_response_also_contains_3(
         self,
@@ -60,6 +48,13 @@ class PresenterTests(BaseTestCase):
         assert (
             view_model.url_to_remove_workers
             == self.url_index.get_remove_worker_from_company_url()
+        )
+
+    def test_that_url_to_pending_work_invites_is_shown(self) -> None:
+        view_model = self.presenter.show_workers_list(self.create_empty_response())
+        assert (
+            view_model.url_to_pending_work_invites
+            == self.url_index.get_pending_work_invites_url()
         )
 
     def create_empty_response(self) -> ListWorkersResponse:
