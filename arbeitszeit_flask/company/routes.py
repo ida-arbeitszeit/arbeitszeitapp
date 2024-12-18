@@ -45,6 +45,9 @@ from arbeitszeit_flask.views.create_draft_view import CreateDraftView
 from arbeitszeit_flask.views.deny_cooperation_view import DenyCooperationView
 from arbeitszeit_flask.views.draft_details_view import DraftDetailsView
 from arbeitszeit_flask.views.http_error_view import http_404
+from arbeitszeit_flask.views.list_pending_work_invites_view import (
+    ListPendingWorkInvitesView,
+)
 from arbeitszeit_flask.views.list_registered_hours_worked_view import (
     ListRegisteredHoursWorkedView,
 )
@@ -320,6 +323,11 @@ class invite_worker_to_company(InviteWorkerToCompanyView): ...
 @CompanyRoute("/remove_worker_from_company", methods=["GET", "POST"])
 @as_flask_view()
 class remove_worker_from_company(RemoveWorkerFromCompanyView): ...
+
+
+@CompanyRoute("/list_pending_work_invites")
+@as_flask_view()
+class list_pending_work_invites(ListPendingWorkInvitesView): ...
 
 
 @CompanyRoute("/end_cooperation", methods=["POST"])

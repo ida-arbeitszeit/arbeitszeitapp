@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+{% from 'macros/navbar.html' import navbar %}
+{{ navbar(view_model.navbar_items) }}
+{% endblock %}
+
+{% block content %}
+<div class="section is-medium has-text-centered">
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-5">
+            <h1 class="title">{{ gettext('Pending Work Invites') }}</h1>
+            {% if view_model.pending_invites|length == 0 %}
+            <p>{{ gettext('No pending work invites found.') }}</p>
+            {% else %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ gettext('Worker Id') }}</th>
+                        <th>{{ gettext('Worker Name') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pending_invite in view_model.pending_invites %}
+                    <tr>
+                        <td>{{ pending_invite.member_id }}</td>
+                        <td>{{ pending_invite.member_name }}</td>
+                    </tr>
+                    {% endfor %}
+            </table>
+            {% endif %}
+        </div>
+        <div class="column"></div>
+    </div>
+</div>
+{% endblock %}

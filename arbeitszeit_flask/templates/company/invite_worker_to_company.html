@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar_start %}
-<div class="navbar-item">{{ gettext("Invite worker") }}</div>
+<div class="navbar-item">{{ gettext("Workers") }}</div>
 {% endblock %}
 
 {% block content %}
@@ -10,6 +10,40 @@
   <div class="columns">
     <div class="column"></div>
     <div class="column is-5">
+
+      <div class="content">
+        <h1 class="title">{{ gettext("Workers of the company") }}</h1>
+        {% if view_model.workers|length == 0 %}
+        <p>{{ gettext("No workers found.") }}</p>
+        {% else %}
+        <div class="table-container">
+          <table class="table has-text-left mx-auto">
+            <thead>
+              <th>{{ gettext("Member ID")}}</th>
+              <th>{{ gettext("Name") }}</th>
+            </thead>
+            {% for worker in view_model.workers %}
+            <tr>
+              <td>{{ worker.id }}</td>
+              <td>{{ worker.name}}</td>                
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="content">
+        <h1 class="title">{{ gettext("Remove a worker") }}</h1>
+        {% if view_model.workers|length == 0 %}
+        <p>{{ gettext("No workers found.") }}</p>
+        {% else %}
+        <div>{{ gettext("Click here to remove a worker:") }}
+          <a href="{{ view_model.url_to_remove_workers }}">{{ gettext("Remove worker") }}</a>
+        </div>
+        {% endif %}
+      </div>
+      
       <div class="content">
         <h1 class="title">{{ gettext("Invite worker") }}</h1>
         <form method="post">
@@ -35,28 +69,12 @@
       </div>
 
       <div class="content">
-        {% if view_model.is_show_workers is defined and view_model.is_show_workers %}
-        <h1 class="title">{{ gettext("Workers of the company") }}</h1>
-        <div class="table-container">
-          <table class="table has-text-left mx-auto">
-            <thead>
-              <th>{{ gettext("Member ID")}}</th>
-              <th>{{ gettext("Name") }}</th>
-            </thead>
-            {% for worker in view_model.workers %}
-            <tr>
-              <td>{{ worker.id }}</td>
-              <td>{{ worker.name}}</td>                
-            </tr>
-            {% endfor %}
-          </table>
+        <h1 class="title">{{ gettext("Pending work invites") }}</h1>
+        <div>{{ gettext("Click here to check for pending work invites:") }}
+          <a href="{{ view_model.url_to_pending_work_invites }}">{{ gettext("Pending work invites") }}</a>
         </div>
-        <h1 class="title">{{ gettext("Remove a worker") }}</h1>
-        <div>{{ gettext("Click here to remove a worker:") }}
-          <a href="{{ view_model.url_to_remove_workers }}">{{ gettext("Remove worker") }}</a>
         </div>
-        {% endif %}
-      </div>
+
     </div>
     <div class="column"></div>
   </div>
