@@ -3,7 +3,6 @@ from uuid import uuid4
 from arbeitszeit_web.www.controllers.delete_draft_controller import (
     DeleteDraftController,
 )
-from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -11,7 +10,6 @@ class ControllerTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(DeleteDraftController)
-        self.request = FakeRequest()
 
     def test_that_deleter_is_current_user(self) -> None:
         expected_deleter = uuid4()
