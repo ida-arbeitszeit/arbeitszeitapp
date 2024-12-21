@@ -1633,6 +1633,27 @@ class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
         self.query.delete()
         self.db.session.flush()
 
+    def joined_with_member(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.CompanyWorkInvite, records.Member]]:
+        def mapper(orm) -> Tuple[records.CompanyWorkInvite, records.Member]:
+            invite_orm, member_orm = orm
+            return (
+                DatabaseGatewayImpl.company_work_invite_from_orm(invite_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+            )
+
+        member = aliased(models.Member)
+        query = self.query.join(
+            member, member.id == models.CompanyWorkInvite.member
+        ).with_entities(models.CompanyWorkInvite, member)
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
 
 class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
