@@ -2,11 +2,10 @@ import random
 from decimal import Decimal
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import get_statistics
-from arbeitszeit_flask.database.models import Base
+from arbeitszeit_flask.database.db import Base, Database
 from tests.data_generators import PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 
@@ -17,7 +16,7 @@ class GetStatisticsBenchmark:
         app = injector.get(Flask)
         self.app_context = app.app_context()
         self.app_context.push()
-        db = injector.get(SQLAlchemy)
+        db = injector.get(Database)
         Base.metadata.drop_all(db.engine)
         Base.metadata.create_all(db.engine)
         plan_generator = injector.get(PlanGenerator)
@@ -32,7 +31,6 @@ class GetStatisticsBenchmark:
                 is_public_service=False, costs=self.random_production_costs()
             )
         db.session.commit()
-        db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

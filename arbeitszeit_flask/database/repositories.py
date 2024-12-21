@@ -17,14 +17,16 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Delete, Insert, Update
 from sqlalchemy.dialects.postgresql import INTERVAL, insert
 from sqlalchemy.orm import aliased
+from sqlalchemy.orm.query import Query
 from sqlalchemy.sql.expression import and_, case, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
 from arbeitszeit_flask.database import models
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.models import (
     Account,
     Company,
@@ -38,7 +40,7 @@ T = TypeVar("T", covariant=True)
 
 
 class FlaskQueryResult(Generic[T]):
-    def __init__(self, query: Any, mapper: Callable[[Any], T], db: SQLAlchemy) -> None:
+    def __init__(self, query: Query, mapper: Callable[[Any], T], db: Database) -> None:
         self.query = query
         self.mapper = mapper
         self.db = db
@@ -55,7 +57,7 @@ class FlaskQueryResult(Generic[T]):
             return None
         return self.mapper(element)
 
-    def _with_modified_query(self, modification: Callable[[Any], Any]) -> Self:
+    def _with_modified_query(self, modification: Callable[[Query], Any]) -> Self:
         return type(self)(
             query=modification(self.query), mapper=self.mapper, db=self.db
         )
@@ -338,7 +340,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
                     ),
                 )
             )
-            .group_by(models.Plan, planner, cooperation)
+            .group_by(models.Plan.id, planner.id, cooperation.id)
             .with_entities(
                 models.Plan,
                 planner,
@@ -418,6 +420,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def delete(self) -> None:
         self.query.delete()
+        self.db.session.flush()
 
     def update(self) -> PlanUpdate:
         return PlanUpdate(
@@ -459,8 +462,8 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
 @dataclass
 class PlanUpdate:
-    query: Any
-    db: SQLAlchemy
+    query: Query
+    db: Database
     plan_update_values: Dict[str, Any] = field(default_factory=dict)
     review_update_values: Dict[str, Any] = field(default_factory=dict)
     cooperation_update: SetCooperation | None = None
@@ -470,7 +473,7 @@ class PlanUpdate:
         cooperation: Optional[UUID]
 
     def perform(self) -> int:
-        sql_statement: Any
+        sql_statement: Update | Delete | Insert
         row_count = 0
         if self.plan_update_values:
             sql_statement = (
@@ -484,7 +487,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount  # type: ignore
+            row_count = result.rowcount
         if self.review_update_values:
             sql_statement = (
                 update(models.PlanReview)
@@ -497,7 +500,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)  # type: ignore
+            row_count = max(row_count, result.rowcount)
         if self.cooperation_update:
             match self.cooperation_update:
                 case self.SetCooperation(cooperation=None):
@@ -520,7 +523,8 @@ class PlanUpdate:
                         )
                     )
             result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)  # type: ignore
+            row_count = max(row_count, result.rowcount)
+        self.db.session.flush()
         return row_count
 
     def set_cooperation(self, cooperation: Optional[UUID]) -> Self:
@@ -589,7 +593,9 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
         )
 
     def delete(self) -> int:
-        return self.query.delete()
+        row_count = self.query.delete()
+        self.db.session.flush()
+        return row_count
 
     def update(self) -> PlanDraftUpdate:
         return PlanDraftUpdate(db=self.db, query=self.query)
@@ -626,8 +632,8 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
 
 @dataclass
 class PlanDraftUpdate:
-    db: SQLAlchemy
-    query: Any
+    db: Database
+    query: Query
     changes: Dict[str, Any] = field(default_factory=dict)
 
     def set_product_name(self, name: str) -> Self:
@@ -673,7 +679,9 @@ class PlanDraftUpdate:
             .values(**self.changes)
             .execution_options(synchronize_session="fetch")
         )
-        return self.db.session.execute(sql_statement).rowcount  # type: ignore
+        rowcount = self.db.session.execute(sql_statement).rowcount
+        self.db.session.flush()
+        return rowcount
 
 
 class MemberQueryResult(FlaskQueryResult[records.Member]):
@@ -754,28 +762,30 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
 
     def add_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = (
+        member_orm = (
             self.db.session.query(models.Member)
             .filter(models.Member.id == str(member))
             .first()
         )
-        assert member
+        assert member_orm
         for company in self.query:
             companies_changed += 1
-            company.workers.append(member)
+            company.workers.append(member_orm)
+        self.db.session.flush()
         return companies_changed
 
     def remove_worker(self, member: UUID) -> int:
         companies_changed = 0
-        member = (
+        member_orm = (
             self.db.session.query(models.Member)
             .filter(models.Member.id == str(member))
             .first()
         )
-        assert member
+        assert member_orm
         for company in self.query:
             companies_changed += 1
-            company.workers.remove(member)
+            company.workers.remove(member_orm)
+        self.db.session.flush()
         return companies_changed
 
     def with_name_containing(self, query: str) -> Self:
@@ -1117,7 +1127,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
                 ),
                 isouter=True,
             )
-            .group_by(models.Account)
+            .group_by(models.Account.id)
             .with_entities(
                 models.Account,
                 func.sum(
@@ -1621,6 +1631,7 @@ class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
 
     def delete(self) -> None:
         self.query.delete()
+        self.db.session.flush()
 
 
 class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
@@ -1649,6 +1660,7 @@ class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
 
     def delete(self) -> None:
         self.query.delete()
+        self.db.session.flush()
 
     def update(self) -> EmailAddressUpdate:
         return EmailAddressUpdate(db=self.db, query=self.query)
@@ -1656,8 +1668,8 @@ class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
 
 @dataclass
 class EmailAddressUpdate:
-    db: SQLAlchemy
-    query: Any
+    db: Database
+    query: Query
     changes: Dict[str, Any] = field(default_factory=dict)
 
     def set_confirmation_timestamp(self, timestamp: Optional[datetime]) -> Self:
@@ -1676,7 +1688,9 @@ class EmailAddressUpdate:
             .values(**self.changes)
             .execution_options(synchronize_session="fetch")
         )
-        return self.db.session.execute(sql_statement).rowcount  # type: ignore
+        rowcount = self.db.session.execute(sql_statement).rowcount
+        self.db.session.flush()
+        return rowcount
 
 
 class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked]):
@@ -1914,8 +1928,8 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
 @dataclass
 class AccountCredentialsUpdate:
-    db: SQLAlchemy
-    query: Any
+    db: Database
+    query: Query
     new_address: Optional[str] = None
     password_hash: Optional[str] = None
 
@@ -1945,13 +1959,15 @@ class AccountCredentialsUpdate:
             .values(**new_values)
             .execution_options(synchronize_session="fetch")
         )
-        return self.db.session.execute(sql_statement).rowcount
+        rowcount = self.db.session.execute(sql_statement).rowcount
+        self.db.session.flush()
+        return rowcount
 
 
 @dataclass
 class AccountingRepository:
     database_gateway: DatabaseGatewayImpl
-    db: SQLAlchemy
+    db: Database
 
     @classmethod
     def social_accounting_from_orm(
@@ -1976,6 +1992,7 @@ class AccountingRepository:
             account = self.database_gateway.create_account()
             social_accounting.account = str(account.id)
             self.db.session.add(social_accounting)
+            self.db.session.flush()
         return social_accounting
 
     def get_by_id(self, id: UUID) -> Optional[records.SocialAccounting]:
@@ -2005,7 +2022,7 @@ class PasswordResetRequestResult(FlaskQueryResult[records.PasswordResetRequest])
 
 @dataclass
 class DatabaseGatewayImpl:
-    db: SQLAlchemy
+    db: Database
 
     def create_productive_consumption(
         self, transaction: UUID, amount: int, plan: UUID
@@ -2104,6 +2121,7 @@ class DatabaseGatewayImpl:
         review = models.PlanReview(approval_date=None, plan=plan, rejection_date=None)
         self.db.session.add(plan)
         self.db.session.add(review)
+        self.db.session.flush()
         return self.plan_from_orm(plan)
 
     @classmethod
@@ -2285,6 +2303,7 @@ class DatabaseGatewayImpl:
             member=str(member),
         )
         self.db.session.add(orm)
+        self.db.session.flush()
         return self.company_work_invite_from_orm(orm)
 
     @classmethod
@@ -2322,6 +2341,7 @@ class DatabaseGatewayImpl:
             registered_on=registered_on,
         )
         self.db.session.add(orm_member)
+        self.db.session.flush()
         return self.member_from_orm(orm_member)
 
     def get_members(self) -> MemberQueryResult:
@@ -2364,6 +2384,7 @@ class DatabaseGatewayImpl:
             prd_account=str(products_account.id),
         )
         self.db.session.add(company)
+        self.db.session.flush()
         return self.company_from_orm(company)
 
     def get_companies(self) -> CompanyQueryResult:
@@ -2382,6 +2403,7 @@ class DatabaseGatewayImpl:
             user_id=str(account_credentials),
         )
         self.db.session.add(accountant)
+        self.db.session.flush()
         return self.accountant_from_orm(accountant)
 
     def get_accountants(self) -> AccountantResult:
@@ -2424,7 +2446,6 @@ class DatabaseGatewayImpl:
         ):
             orm.address = already_existing.address
         self.db.session.flush()
-        # breakpoint()
         return self.email_address_from_orm(orm)
 
     def create_plan_draft(
@@ -2454,6 +2475,7 @@ class DatabaseGatewayImpl:
             is_public_service=is_public_service,
         )
         self.db.session.add(orm)
+        self.db.session.flush()
         return self.plan_draft_from_orm(orm)
 
     def get_plan_drafts(self) -> PlanDraftResult:
@@ -2491,6 +2513,7 @@ class DatabaseGatewayImpl:
     def create_account(self) -> records.Account:
         account = Account(id=str(uuid4()))
         self.db.session.add(account)
+        self.db.session.flush()
         return self.account_from_orm(account)
 
     def get_accounts(self) -> AccountQueryResult:

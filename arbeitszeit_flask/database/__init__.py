@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Any, Callable
 
 from arbeitszeit import records
-from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.database.db import Database
 
 from .repositories import AccountingRepository
 
@@ -24,7 +24,7 @@ def commit_changes(function: Callable) -> Callable:
     @wraps(function)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         result = function(*args, **kwargs)
-        db.session.commit()
+        Database().session.commit()
         return result
 
     return wrapper

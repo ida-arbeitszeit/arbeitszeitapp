@@ -1,7 +1,7 @@
+from __future__ import annotations
+
 from functools import wraps
 from typing import List, Optional
-
-from flask_sqlalchemy import SQLAlchemy
 
 from arbeitszeit import records
 from arbeitszeit import repositories as interfaces
@@ -18,10 +18,10 @@ from arbeitszeit.injector import (
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.email_configuration import FlaskEmailConfiguration
-from arbeitszeit_flask.extensions import db
 from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -67,8 +67,8 @@ class FlaskModule(Module):
             to=AliasProvider(RealtimeDatetimeService),
         )
         binder.bind(
-            SQLAlchemy,
-            to=CallableProvider(self.provide_sqlalchemy, is_singleton=True),
+            Database,
+            to=CallableProvider(self.provide_database, is_singleton=True),
         )
         binder[TextRenderer] = AliasProvider(TextRendererImpl)
         binder[Request] = AliasProvider(FlaskRequest)
@@ -106,8 +106,9 @@ class FlaskModule(Module):
         )
 
     @staticmethod
-    def provide_sqlalchemy() -> SQLAlchemy:
-        return db
+    def provide_database() -> Database:
+        #  db gets confiured in create_app
+        return Database()
 
 
 class with_injection:

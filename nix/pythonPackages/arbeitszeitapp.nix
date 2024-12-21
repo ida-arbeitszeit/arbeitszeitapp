@@ -11,7 +11,6 @@
   flask-babel,
   flask-profiler,
   flask-restx,
-  flask-sqlalchemy,
   flask-talisman,
   flask_login,
   flask_wtf,
@@ -46,7 +45,6 @@ buildPythonPackage {
     flask-talisman
     flask_login
     flask-restx
-    flask-sqlalchemy
     flask_wtf
     is_safe_url
     matplotlib
