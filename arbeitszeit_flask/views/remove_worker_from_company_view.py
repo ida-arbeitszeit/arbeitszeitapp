@@ -8,7 +8,7 @@ from arbeitszeit.use_cases.remove_worker_from_company import (
     RemoveWorkerFromCompanyUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
-from arbeitszeit_flask.extensions import db
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
@@ -42,7 +42,7 @@ class RemoveWorkerFromCompanyView:
     @commit_changes
     def POST(self) -> Response:
         web_request = FlaskRequest()
-        session = FlaskSession(db)
+        session = FlaskSession(Database())
         use_case_request = self.remove_worker_controller.create_use_case_request(
             web_request=web_request, session=session
         )

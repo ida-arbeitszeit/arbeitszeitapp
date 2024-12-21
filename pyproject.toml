@@ -75,7 +75,6 @@ module = [
     "flask_babel",
     "flask_login",
     "flask_restx.*",
-    "flask_sqlalchemy.*",
     "flask_wtf",
     "matplotlib.*",
     "parameterized.*",

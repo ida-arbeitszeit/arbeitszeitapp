@@ -41,7 +41,6 @@ class TableWidget:
 
 class Input:
     html_params: Incomplete
-    validation_attrs: Incomplete
     input_type: Incomplete
     def __init__(self, input_type: Incomplete | None = None) -> None: ...
     def __call__(self, field, **kwargs): ...
@@ -59,15 +58,18 @@ class PasswordInput(Input):
 
 class HiddenInput(Input):
     input_type: str
+    validation_attrs: Incomplete
     field_flags: Incomplete
     def __init__(self, *args, **kwargs) -> None: ...
 
 class CheckboxInput(Input):
     input_type: str
+    validation_attrs: Incomplete
     def __call__(self, field, **kwargs): ...
 
 class RadioInput(Input):
     input_type: str
+    validation_attrs: Incomplete
     def __call__(self, field, **kwargs): ...
 
 class FileInput(Input):
@@ -79,6 +81,7 @@ class FileInput(Input):
 
 class SubmitInput(Input):
     input_type: str
+    validation_attrs: Incomplete
     def __call__(self, field, **kwargs): ...
 
 class TextArea:
@@ -159,3 +162,4 @@ class RangeInput(Input):
 
 class ColorInput(Input):
     input_type: str
+    validation_attrs: Incomplete

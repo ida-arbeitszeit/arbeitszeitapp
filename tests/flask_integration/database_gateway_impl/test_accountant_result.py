@@ -61,7 +61,6 @@ class CreateAccountantWithExistingMemberEmailTests(AccountantResultTests):
             account_credentials=account_credentials.id,
             name="test name",
         )
-        self.db.session.flush()
 
 
 class GetAccountantsTests(AccountantResultTests):

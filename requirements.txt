@@ -5,7 +5,6 @@ Flask-Babel
 Flask-Login
 Flask-Mail
 flask-restx
-Flask-SQLAlchemy
 Flask-Talisman
 Flask-WTF
 is_safe_url
