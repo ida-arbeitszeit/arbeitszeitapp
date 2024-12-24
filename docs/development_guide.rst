@@ -812,23 +812,45 @@ More info, concerning the ``icon`` filter implementation, can be found in
 Cooperations 
 -------------
 
-Companies that produce the same product can attach their plans to so-called "cooperations".
-Plans in a cooperation share a unified, averaged "cooperation price" for consumption. Apart 
-from that, they remain, technically speaking, independent plans of independent companies.
+Companies that produce the same product can attach their plans to so-called 
+"cooperations". The purpose of a cooperation is to calculate the average 
+labor cost per product within a specific branch or industry. This 
+average labor cost, known as the cooperative price, is what customers will pay for a 
+product. It is displayed in several places in the application.
 
-**Coordinators of cooperations**
+**Cooperative Price**
 
-"Empty" cooperations (without any plans attached) can be created by any company. The company
-that creates a cooperation automatically becomes the "coordinator" of that cooperation. A
-coordinator has several privileges and duties: They can accept or deny incoming cooperation requests,
-remove plans from the cooperation, or transfer the coordination role to another company. 
-The history of past coordinators is transparent to all users.
+The logic for calculating the cooperative price is implemented in the module 
+``arbeitszeit/price_calculator.py``. The cooperative price is determined 
+as the average cost per product of all plans in the cooperation. 
+The formula for the cooperative price is:
 
-While this implementation may seem undemocratic, it must be noted that the Arbeitszeitapp
-only provides the technical front-end to diverse democratic processes that must happen in "real life".
-The app does not prescribe the democratic procedures that companies and communities choose to 
+.. math::
+
+  \text{cooperative price} = \frac{1}{n} \sum_{i=1}^{n} \frac{\text{cost}_i}{\text{pieces}_i}
+
+where :math:`\text{cost}_i` is the total cost of the :math:`i`-th plan in the
+cooperation and :math:`\text{pieces}_i` is the total amount of produced pieces
+of the :math:`i`-th plan. The sum runs over all :math:`n` plans in the cooperation.
+
+Note that the cooperative price is independent of the duration of the plans.
+Whether one working hour was applied in one year or in one day, 
+the price will be one hour.
+
+**Coordinators of Cooperations**
+
+"Empty" cooperations (without any plans attached) can be created by any 
+company. The company that creates a cooperation automatically becomes the 
+"coordinator" of that cooperation. A coordinator has several privileges and 
+duties: They can accept or deny incoming cooperation requests,
+remove plans from the cooperation, or transfer the coordination role to 
+another company. The history of past coordinator tenures is visible to all users.
+
+While this implementation may seem undemocratic at first glance, it must be noted that the Arbeitszeitapp
+only provides the technical front-end to diverse political processes that must happen in "real life".
+The app does not prescribe the political procedures that companies and communities choose to 
 elect coordinators or to define cooperations. Because every company is able to create cooperations, 
-companies that are unhappy with a certain coordination can easily form a new cooperation. 
+companies that are unhappy with a certain coordination can easily form a new cooperation.
 
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
 .. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/

@@ -109,9 +109,7 @@ class RegisterProductiveConsumption:
         plan: Plan,
     ) -> None:
         coop_price = amount * self.price_calculator.calculate_cooperative_price(plan)
-        individual_price = amount * self.price_calculator.calculate_individual_price(
-            plan
-        )
+        individual_price = amount * plan.price_per_unit()
         if consumption_type == ConsumptionType.means_of_prod:
             sending_account = consumer.means_account
         elif consumption_type == ConsumptionType.raw_materials:

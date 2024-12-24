@@ -284,14 +284,11 @@ class PlanResult(QueryResultImpl[Plan]):
     def that_are_not_hidden(self) -> Self:
         return self._filter_elements(lambda plan: not plan.hidden_by_user)
 
-    def joined_with_planner_and_cooperation_and_cooperating_plans(
-        self, timestamp: datetime
-    ) -> QueryResultImpl[
+    def joined_with_planner_and_cooperation(self) -> QueryResultImpl[
         Tuple[
             records.Plan,
             records.Company,
             Optional[records.Cooperation],
-            List[records.PlanSummary],
         ]
     ]:
         def items() -> Iterable[
@@ -299,31 +296,18 @@ class PlanResult(QueryResultImpl[Plan]):
                 records.Plan,
                 records.Company,
                 Optional[Cooperation],
-                List[records.PlanSummary],
             ]
         ]:
             for plan in self.items():
                 cooperation_id = (
                     self.database.relationships.cooperation_to_plan.get_one(plan.id)
                 )
-                if cooperation_id:
-                    cooperating_plans = [
-                        self.database.plans[p].to_summary()
-                        for p in self.database.relationships.cooperation_to_plan.get_many(
-                            cooperation_id
-                        )
-                        if self.database.plans[p].is_active_as_of(timestamp)
-                    ]
-                else:
-                    cooperating_plans = []
                 cooperation = (
                     self.database.cooperations[cooperation_id]
                     if cooperation_id
                     else None
                 )
-                yield plan, self.database.companies[
-                    plan.planner
-                ], cooperation, cooperating_plans
+                yield plan, self.database.companies[plan.planner], cooperation
 
         return QueryResultImpl(
             database=self.database,

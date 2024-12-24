@@ -2,17 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import (
-    Generic,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Protocol,
-    Self,
-    Tuple,
-    TypeVar,
-)
+from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple, TypeVar
 from uuid import UUID
 
 from arbeitszeit import records
@@ -85,10 +75,15 @@ class PlanResult(QueryResult[records.Plan], Protocol):
         self, *, cooperation: Optional[UUID] = ...
     ) -> Self: ...
 
-    def that_are_in_same_cooperation_as(self, plan: UUID) -> Self: ...
+    def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
+        """Returns all plans that are part of the same cooperation as
+        the plan specified by the UUID argument, including the plan
+        itself. If the plan is not part of any cooperation then the
+        result will be empty.
+        """
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
-        """If no cooperations are specified, then all the repository
+        """If no cooperations are specified, then the repository
         should return plans that are part of any cooperation.
         """
 
@@ -108,14 +103,11 @@ class PlanResult(QueryResult[records.Plan], Protocol):
         only contain plans that are not hidden.
         """
 
-    def joined_with_planner_and_cooperation_and_cooperating_plans(
-        self, timestamp: datetime
-    ) -> QueryResult[
+    def joined_with_planner_and_cooperation(self) -> QueryResult[
         Tuple[
             records.Plan,
             records.Company,
             Optional[records.Cooperation],
-            List[records.PlanSummary],
         ]
     ]: ...
 

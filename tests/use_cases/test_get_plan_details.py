@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import uuid4
 
+from parameterized import parameterized
 from pytest import approx
 
 from arbeitszeit.records import ProductionCosts
@@ -25,53 +26,48 @@ class UseCaseTests(BaseTestCase):
         request = GetPlanDetailsUseCase.Request(plan)
         self.assertTrue(self.use_case.get_plan_details(request))
 
-    def test_that_two_productive_plans_with_different_timeframes_return_correct_coop_price_1(
+    @parameterized.expand(
+        [
+            (Decimal(10), 10, 10, Decimal(20), 5, 1, Decimal(2.5)),  # avg(1, 4) = 2.5
+            (
+                Decimal(310),
+                20,
+                90,
+                Decimal(25),
+                5,
+                45,
+                Decimal(10.25),
+            ),  # avg(15.5, 5) = 10.25
+        ]
+    )
+    def test_that_two_productive_plans_with_different_timeframes_return_correct_coop_price(
         self,
+        costs_plan1: Decimal,
+        amount_plan1: int,
+        timeframe_plan1: int,
+        costs_plan2: Decimal,
+        amount_plan2: int,
+        timeframe_plan2: int,
+        expected_coop_price: Decimal,
     ) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(
             cooperation=cooperation,
-            costs=ProductionCosts(Decimal(10), Decimal(0), Decimal(0)),
-            amount=10,
-            timeframe=10,
-        )  # 1 piece/day, 1 costs/day
-        plan = self.plan_generator.create_plan(
-            cooperation=cooperation,
-            costs=ProductionCosts(Decimal(20), Decimal(0), Decimal(0)),
-            amount=5,
-            timeframe=1,
-        )  # 5 piece/day, 20 costs/day
-        response = self.use_case.get_plan_details(
-            GetPlanDetailsUseCase.Request(plan_id=plan)
-        )
-        assert response
-        self.assertEqual(
-            response.plan_details.price_per_unit, Decimal(3.5)
-        )  # coop price = 21 costs/day / 6 pieces/day = 3,5h/piece
-
-    def test_that_two_productive_plans_with_different_timeframes_return_correct_coop_price_2(
-        self,
-    ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(
-            cooperation=cooperation,
-            costs=ProductionCosts(Decimal(300), Decimal(10), Decimal(0)),
-            amount=20,
-            timeframe=90,
+            costs=ProductionCosts(costs_plan1, Decimal(0), Decimal(0)),
+            amount=amount_plan1,
+            timeframe=timeframe_plan1,
         )
         plan = self.plan_generator.create_plan(
             cooperation=cooperation,
-            costs=ProductionCosts(Decimal(25), Decimal(0), Decimal(0)),
-            amount=5,
-            timeframe=45,
+            costs=ProductionCosts(costs_plan2, Decimal(0), Decimal(0)),
+            amount=amount_plan2,
+            timeframe=timeframe_plan2,
         )
         response = self.use_case.get_plan_details(
             GetPlanDetailsUseCase.Request(plan_id=plan)
         )
         assert response
-        self.assertEqual(
-            response.plan_details.price_per_unit, Decimal(12)
-        )  # coop price = 4h/day / 0,3333 pieces/day = 12h/piece
+        self.assertEqual(response.plan_details.price_per_unit, expected_coop_price)
 
     def test_that_cooperative_prices_are_calculated_by_averaging_plan_prices(
         self,
