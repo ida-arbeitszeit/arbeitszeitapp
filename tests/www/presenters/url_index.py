@@ -74,6 +74,7 @@ class UrlIndexTestImpl:
     get_my_cooperations_url = UrlIndexMethod()
     get_my_plan_drafts_url = UrlIndexMethod()
     get_my_plans_url = UrlIndexMethod()
+    get_pending_work_invites_url = UrlIndexMethod()
     get_plan_details_url = UrlIndexMethod()
     get_query_companies_url = UrlIndexMethod()
     get_query_plans_url = UrlIndexMethod()
