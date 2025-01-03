@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import PriceCalculator, calculate_average_costs
+from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import Plan
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -81,8 +81,7 @@ class GetCoopSummary:
     def _get_cooperative_price(self, plans: list[Plan]) -> Optional[Decimal]:
         if not plans:
             return None
-        coop_price = calculate_average_costs(plans=[p.to_summary() for p in plans])
-        return coop_price
+        return self.price_calculator.calculate_cooperative_price(plans[0])
 
     def _get_associated_plans(
         self, plans: list[Plan], requester: UUID
@@ -91,9 +90,7 @@ class GetCoopSummary:
             AssociatedPlan(
                 plan_id=plan.id,
                 plan_name=plan.prd_name,
-                plan_individual_price=self.price_calculator.calculate_individual_price(
-                    plan
-                ),
+                plan_individual_price=plan.price_per_unit(),
                 planner_id=plan.planner,
                 planner_name=self._get_planner_name(plan.planner),
                 requester_is_planner=plan.planner == requester,

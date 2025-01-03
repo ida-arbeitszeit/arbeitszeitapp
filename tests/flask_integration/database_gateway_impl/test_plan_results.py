@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit import records
 from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
@@ -640,100 +639,90 @@ class ThatAreNotHiddenTests(FlaskTestCase):
         assert not self.database_gateway.get_plans().that_are_not_hidden()
 
 
-class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
-    def test_that_one_result_is_yieled_with_one_cooperating_plan_in_db(self) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(cooperation=cooperation)
+class JoinedWithPlannerAndCooperationTests(FlaskTestCase):
+    def test_that_one_result_is_yieled_when_one_plan_exists(self) -> None:
+        self.plan_generator.create_plan()
         assert (
-            len(
-                self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-                    self.datetime_service.now()
-                )
-            )
+            len(self.database_gateway.get_plans().joined_with_planner_and_cooperation())
             == 1
         )
 
-    def test_that_two_results_are_yieled_with_two_cooperating_plans_in_db(self) -> None:
+    def test_that_planner_id_is_returned_in_result(self) -> None:
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(planner=company)
+        result = self.database_gateway.get_plans().joined_with_planner_and_cooperation()
+        assert result
+        plan, planner, coop = list(result)[0]
+        assert planner.id == company
+
+    def test_that_no_cooperation_is_returned_when_plan_is_not_part_of_cooperation(
+        self,
+    ) -> None:
+        self.plan_generator.create_plan(cooperation=None)
+        result = self.database_gateway.get_plans().joined_with_planner_and_cooperation()
+        assert result
+        plan, planner, coop = list(result)[0]
+        assert not coop
+
+    def test_that_cooperation_is_returned_when_plan_is_part_of_cooperation(
+        self,
+    ) -> None:
+        cooperation = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation)
+        result = self.database_gateway.get_plans().joined_with_planner_and_cooperation()
+        assert result
+        plan, planner, coop = list(result)[0]
+        assert coop
+        assert coop.id == cooperation
+
+    def test_that_cooperation_name_is_returned_when_plan_is_part_of_cooperation(
+        self,
+    ) -> None:
+        NAME = f"coop {uuid4()}"
+        cooperation = self.cooperation_generator.create_cooperation(name=NAME)
+        self.plan_generator.create_plan(cooperation=cooperation)
+        result = self.database_gateway.get_plans().joined_with_planner_and_cooperation()
+        assert result
+        plan, planner, coop = list(result)[0]
+        assert coop
+        assert coop.name == NAME
+
+    def test_that_two_results_are_yieled_when_two_cooperating_plans_exist_in_same_cooperation(
+        self,
+    ) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation)
         self.plan_generator.create_plan(cooperation=cooperation)
         assert (
-            len(
-                self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-                    self.datetime_service.now()
-                )
-            )
+            len(self.database_gateway.get_plans().joined_with_planner_and_cooperation())
             == 2
         )
 
-    def test_that_with_3_plans_inside_a_cooperation_3_cooperating_plans_are_returned(
+    def test_that_two_results_are_yieled_when_two_cooperating_plans_exist_in_different_cooperations(
         self,
     ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(cooperation=cooperation)
-        self.plan_generator.create_plan(cooperation=cooperation)
-        self.plan_generator.create_plan(cooperation=cooperation)
-        results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-            self.datetime_service.now()
+        cooperation1 = self.cooperation_generator.create_cooperation()
+        cooperation2 = self.cooperation_generator.create_cooperation()
+        self.plan_generator.create_plan(cooperation=cooperation1)
+        self.plan_generator.create_plan(cooperation=cooperation2)
+        assert (
+            len(self.database_gateway.get_plans().joined_with_planner_and_cooperation())
+            == 2
         )
-        assert results
-        for v in results:
-            assert len(v[3]) == 3
 
-    def test_that_production_costs_for_cooperating_plans_are_as_they_were_created(
+    def test_that_correct_cooperation_names_are_yieled_of_two_different_cooperations(
         self,
     ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(
-            cooperation=cooperation,
-            costs=records.ProductionCosts(
-                means_cost=Decimal(1),
-                resource_cost=Decimal(2),
-                labour_cost=Decimal(3),
-            ),
+        cooperation1 = self.cooperation_generator.create_cooperation(name="coop1")
+        cooperation2 = self.cooperation_generator.create_cooperation(name="coop2")
+        self.plan_generator.create_plan(cooperation=cooperation1)
+        self.plan_generator.create_plan(cooperation=cooperation2)
+        results = list(
+            self.database_gateway.get_plans().joined_with_planner_and_cooperation()
         )
-        results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-            self.datetime_service.now()
-        )
-        assert results
-        for v in results:
-            assert v[3][0].production_costs == Decimal(6)
-
-    def test_that_amount_for_cooperating_plans_are_as_they_were_created(
-        self,
-    ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(cooperation=cooperation, amount=123)
-        results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-            self.datetime_service.now()
-        )
-        assert results
-        for v in results:
-            assert v[3][0].amount == 123
-
-    def test_that_duration_for_cooperating_plans_are_as_they_were_created(
-        self,
-    ) -> None:
-        cooperation = self.cooperation_generator.create_cooperation()
-        self.plan_generator.create_plan(cooperation=cooperation, timeframe=234)
-        results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-            self.datetime_service.now()
-        )
-        assert results
-        for v in results:
-            assert v[3][0].duration_in_days == 234
-
-    def test_that_no_plan_is_cooperating_with_two_plans_that_are_not_in_coop(
-        self,
-    ) -> None:
-        self.plan_generator.create_plan()
-        self.plan_generator.create_plan()
-        results = self.database_gateway.get_plans().joined_with_planner_and_cooperation_and_cooperating_plans(
-            self.datetime_service.now()
-        )
-        assert results
-        for v in results:
-            assert not v[2]
+        for plan, planner, coop in results:
+            assert coop
+            ["coop1", "coop2"].remove(coop.name)
 
     def test_that_it_is_possible_to_order_by_planner_name_and_join(self) -> None:
         self.plan_generator.create_plan()
@@ -741,9 +730,7 @@ class JoinedWithPlannerAndCooperationAndCooperatingPlansTests(FlaskTestCase):
         results = (
             self.database_gateway.get_plans()
             .ordered_by_planner_name()
-            .joined_with_planner_and_cooperation_and_cooperating_plans(
-                self.datetime_service.now()
-            )
+            .joined_with_planner_and_cooperation()
         )
         results.first()
 

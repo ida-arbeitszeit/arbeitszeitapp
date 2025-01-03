@@ -9,7 +9,6 @@ from typing import (
     Dict,
     Generic,
     Iterator,
-    List,
     Optional,
     Self,
     Tuple,
@@ -290,25 +289,27 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             lambda query: query.filter(models.Plan.hidden_by_user == False)
         )
 
-    def joined_with_planner_and_cooperation_and_cooperating_plans(
-        self, timestamp: datetime
-    ) -> FlaskQueryResult[
+    def joined_with_planner_and_cooperation(self) -> FlaskQueryResult[
         Tuple[
             records.Plan,
             records.Company,
             Optional[records.Cooperation],
-            List[records.PlanSummary],
         ]
     ]:
+        def mapper(orm: Any) -> Tuple[
+            records.Plan,
+            records.Company,
+            Optional[records.Cooperation],
+        ]:
+            return (
+                DatabaseGatewayImpl.plan_from_orm(orm[0]),
+                DatabaseGatewayImpl.company_from_orm(orm[1]),
+                DatabaseGatewayImpl.cooperation_from_orm(orm[2]) if orm[2] else None,
+            )
+
         planner = aliased(models.Company)
         cooperation = aliased(models.Cooperation)
         plan_cooperation = aliased(models.PlanCooperation)
-        other_plan_cooperation = aliased(models.PlanCooperation)
-        cooperating_plan = aliased(models.Plan)
-        expiration_date = (
-            func.cast(concat(cooperating_plan.timeframe, "days"), INTERVAL)
-            + cooperating_plan.activation_date
-        )
         query = (
             self.query.join(planner, planner.id == models.Plan.planner)
             .join(
@@ -321,42 +322,16 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
                 cooperation.id == plan_cooperation.cooperation,
                 isouter=True,
             )
-            .join(
-                other_plan_cooperation,
-                plan_cooperation.cooperation == other_plan_cooperation.cooperation,
-                isouter=True,
-            )
-            .join(
-                cooperating_plan,
-                cooperating_plan.id == other_plan_cooperation.plan,
-                isouter=True,
-            )
-            .filter(
-                or_(
-                    cooperating_plan.id == None,
-                    and_(
-                        expiration_date > timestamp,
-                        cooperating_plan.activation_date <= timestamp,
-                    ),
-                )
-            )
             .group_by(models.Plan.id, planner.id, cooperation.id)
             .with_entities(
                 models.Plan,
                 planner,
                 cooperation,
-                func.array_agg(cooperating_plan.timeframe),
-                func.array_agg(
-                    cooperating_plan.costs_p
-                    + cooperating_plan.costs_r
-                    + cooperating_plan.costs_a
-                ),
-                func.array_agg(cooperating_plan.prd_amount),
             )
         )
         return FlaskQueryResult(
             db=self.db,
-            mapper=self._map_result_with_plan_and_company_and_cooperation_and_cooperating_plans,
+            mapper=mapper,
             query=query,
         )
 
@@ -426,37 +401,6 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         return PlanUpdate(
             query=self.query,
             db=self.db,
-        )
-
-    @classmethod
-    def _map_result_with_plan_and_company_and_cooperation_and_cooperating_plans(
-        self, orm: Any
-    ) -> Tuple[
-        records.Plan,
-        records.Company,
-        Optional[records.Cooperation],
-        List[records.PlanSummary],
-    ]:
-        if any(orm[3]):
-            cooperating_plans = list(
-                records.PlanSummary(
-                    production_costs=cost,
-                    duration_in_days=duration,
-                    amount=amount,
-                )
-                for duration, cost, amount in zip(
-                    orm[3],
-                    orm[4],
-                    orm[5],
-                )
-            )
-        else:
-            cooperating_plans = []
-        return (
-            DatabaseGatewayImpl.plan_from_orm(orm[0]),
-            DatabaseGatewayImpl.company_from_orm(orm[1]),
-            DatabaseGatewayImpl.cooperation_from_orm(orm[2]) if orm[2] else None,
-            cooperating_plans,
         )
 
 

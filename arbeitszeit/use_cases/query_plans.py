@@ -9,11 +9,7 @@ from uuid import UUID
 
 from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import (
-    calculate_average_costs,
-    calculate_individual_price,
-    individual_labour_cost,
-)
+from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import DatabaseGateway, PlanResult
 
 
@@ -63,6 +59,7 @@ class QueryPlansRequest:
 class QueryPlans:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
+    price_calculator: PriceCalculator
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
@@ -72,16 +69,14 @@ class QueryPlans:
         plans = self._apply_filter(plans, request.query_string, request.filter_category)
         total_results = len(plans)
         plans = self._apply_sorting(plans, request.sorting_category)
-        planning_info = plans.joined_with_planner_and_cooperation_and_cooperating_plans(
-            now
-        )
+        planning_info = plans.joined_with_planner_and_cooperation()
         if request.offset is not None:
             planning_info = planning_info.offset(n=request.offset)
         if request.limit is not None:
             planning_info = planning_info.limit(n=request.limit)
         results = [
-            self._plan_to_response_model(plan, planner, cooperation, cooperating_plans)
-            for plan, planner, cooperation, cooperating_plans in planning_info
+            self._plan_to_response_model(plan, planner, cooperation)
+            for plan, planner, cooperation in planning_info
         ]
         return PlanQueryResponse(
             results=results, total_results=total_results, request=request
@@ -110,13 +105,8 @@ class QueryPlans:
         plan: records.Plan,
         planner: records.Company,
         cooperation: Optional[records.Cooperation],
-        cooperating_plans: List[records.PlanSummary],
     ) -> QueriedPlan:
-        labour_cost_per_unit = individual_labour_cost(plan)
-        if cooperating_plans:
-            price_per_unit = calculate_average_costs(cooperating_plans)
-        else:
-            price_per_unit = calculate_individual_price(plan)
+        price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         assert plan.activation_date
         return QueriedPlan(
             plan_id=plan.id,
@@ -125,7 +115,7 @@ class QueryPlans:
             product_name=plan.prd_name,
             description=plan.description,
             price_per_unit=price_per_unit,
-            labour_cost_per_unit=labour_cost_per_unit,
+            labour_cost_per_unit=plan.cost_per_unit(),
             is_public_service=plan.is_public_service,
             is_cooperating=bool(cooperation),
             activation_date=plan.activation_date,

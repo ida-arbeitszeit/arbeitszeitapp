@@ -65,15 +65,12 @@ class RegisterPrivateConsumption:
                 rejection_reason=RejectionReason.consumer_does_not_exist
             )
         coop_price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        individual_price_per_unit = self.price_calculator.calculate_individual_price(
-            plan
-        )
         transaction = self._transfer_certificates(
             request.amount,
             plan,
             consumer,
             coop_price_per_unit=coop_price_per_unit,
-            individual_price_per_unit=individual_price_per_unit,
+            individual_price_per_unit=plan.price_per_unit(),
         )
         self.database_gateway.create_private_consumption(
             amount=request.amount,
