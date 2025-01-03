@@ -4,7 +4,7 @@ from unittest import TestCase
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.edit_draft import EditDraftUseCase, Request
+from arbeitszeit.use_cases import edit_draft
 from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess, GetDraftDetails
 from tests.data_generators import CompanyGenerator, PlanGenerator
 
@@ -14,7 +14,7 @@ from .dependency_injection import get_dependency_injector
 class UseCaseTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.use_case = self.injector.get(EditDraftUseCase)
+        self.use_case = self.injector.get(edit_draft.EditDraftUseCase)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.get_draft_details_use_case = self.injector.get(GetDraftDetails)
@@ -22,21 +22,26 @@ class UseCaseTests(TestCase):
     def test_cannot_edit_successfully_non_existing_draft(self) -> None:
         request = self.create_request(draft=uuid4())
         response = self.use_case.edit_draft(request)
-        self.assertFalse(response.is_success)
+        assert (
+            response.rejection_reason == edit_draft.Response.RejectionReason.NOT_FOUND
+        )
 
     def test_planner_can_edit_successfully_an_existing_draft(self) -> None:
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
         request = self.create_request(draft=draft, editor=planner)
         response = self.use_case.edit_draft(request)
-        self.assertTrue(response.is_success)
+        assert not response.rejection_reason
 
     def test_non_planner_cannot_edit_draft_successfully(self) -> None:
         other_company = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan()
         request = self.create_request(draft=draft, editor=other_company)
         response = self.use_case.edit_draft(request)
-        self.assertFalse(response.is_success)
+        assert (
+            response.rejection_reason
+            == edit_draft.Response.RejectionReason.UNAUTHORIZED
+        )
 
     def test_can_change_product_name_in_draft(self) -> None:
         planner = self.company_generator.create_company()
@@ -186,10 +191,10 @@ class UseCaseTests(TestCase):
         is_public_service: Optional[bool] = None,
         timeframe: Optional[int] = None,
         unit_of_distribution: Optional[str] = None,
-    ) -> Request:
+    ) -> edit_draft.Request:
         if editor is None:
             editor = uuid4()
-        return Request(
+        return edit_draft.Request(
             draft=draft,
             editor=editor,
             product_name=product_name,

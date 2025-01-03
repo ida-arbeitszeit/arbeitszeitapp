@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional
@@ -23,19 +24,25 @@ class Request:
 
 @dataclass
 class Response:
-    is_success: bool
+    @dataclass
+    class RejectionReason(enum.Enum):
+        NOT_FOUND = enum.auto()
+        UNAUTHORIZED = enum.auto()
+
+    rejection_reason: RejectionReason | None
 
 
 @dataclass
 class EditDraftUseCase:
-
     database: DatabaseGateway
 
     def edit_draft(self, request: Request) -> Response:
-        if (
-            (draft := self.database.get_plan_drafts().with_id(request.draft).first())
-            is not None
-        ) and draft.planner == request.editor:
+        draft = self.database.get_plan_drafts().with_id(request.draft).first()
+        if draft is None:
+            return Response(rejection_reason=Response.RejectionReason.NOT_FOUND)
+        elif draft.planner != request.editor:
+            return Response(rejection_reason=Response.RejectionReason.UNAUTHORIZED)
+        else:
             update = self.database.get_plan_drafts().with_id(request.draft).update()
             if request.product_name is not None:
                 update = update.set_product_name(request.product_name)
@@ -56,9 +63,4 @@ class EditDraftUseCase:
             if request.unit_of_distribution is not None:
                 update = update.set_unit_of_distribution(request.unit_of_distribution)
             update.perform()
-            is_success = True
-        else:
-            is_success = False
-        return Response(
-            is_success=is_success,
-        )
+            return Response(rejection_reason=None)

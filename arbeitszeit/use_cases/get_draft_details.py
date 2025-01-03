@@ -9,7 +9,6 @@ from arbeitszeit.repositories import DatabaseGateway
 
 @dataclass
 class DraftDetailsSuccess:
-    draft_id: UUID
     planner_id: UUID
     product_name: str
     description: str
@@ -35,7 +34,6 @@ class GetDraftDetails:
         if draft is None:
             return None
         return DraftDetailsSuccess(
-            draft_id=draft.id,
             planner_id=draft.planner,
             product_name=draft.product_name,
             description=draft.description,
