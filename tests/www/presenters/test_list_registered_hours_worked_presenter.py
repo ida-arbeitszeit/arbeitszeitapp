@@ -103,12 +103,14 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
 
     def create_registered_hours_worked(
         self,
+        id_: UUID = uuid4(),
         hours: Decimal = Decimal("8.0"),
         worker_id: UUID = uuid4(),
         worker_name: str = "worker_name",
         registered_on: datetime = datetime(2021, 1, 1),
     ) -> list_registered_hours_worked.RegisteredHoursWorked:
         return list_registered_hours_worked.RegisteredHoursWorked(
+            id=id_,
             hours=hours,
             worker_id=worker_id,
             worker_name=worker_name,
