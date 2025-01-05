@@ -184,6 +184,28 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
         )
         assert result[1].id == worker
 
+    def test_that_we_can_filter_by_id(self) -> None:
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker])
+        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
+        self.register_hours_worked(company=company, worker=worker, hours=Decimal(5))
+        records = list(self.database_gateway.get_registered_hours_worked())
+        self.assertEqual(len(records), 2)
+        result = (
+            self.database_gateway.get_registered_hours_worked()
+            .with_id(records[0].id)
+            .first()
+        )
+        self.assertEqual(records[0], result)
+
+    def test_that_no_record_is_returned_when_filter_by_random_id(self) -> None:
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker])
+        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
+        self.assertIsNone(
+            self.database_gateway.get_registered_hours_worked().with_id(uuid4()).first()
+        )
+
     def register_hours_worked(
         self, company: UUID, worker: UUID, hours: Decimal = Decimal(1)
     ) -> None:
