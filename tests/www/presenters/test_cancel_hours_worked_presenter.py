@@ -1,6 +1,5 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.cancel_hours_worked import CancelHoursWorkedUseCase
 from arbeitszeit.use_cases.cancel_hours_worked import (
     Response as CancelHoursWorkedUseCaseResponse,
 )
