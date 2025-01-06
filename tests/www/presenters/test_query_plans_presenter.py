@@ -5,7 +5,6 @@ from parameterized import parameterized
 
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.query_plans_presenter import QueryPlansPresenter
-from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import QueriedPlanGenerator
 
@@ -16,7 +15,6 @@ class QueryPlansPresenterTests(BaseTestCase):
         self.presenter = self.injector.get(QueryPlansPresenter)
         self.queried_plan_generator = QueriedPlanGenerator()
         self.session.login_member(uuid4())
-        self.request = FakeRequest()
 
     def test_presenting_empty_response_leads_to_not_showing_results(self) -> None:
         response = self.queried_plan_generator.get_response([])
