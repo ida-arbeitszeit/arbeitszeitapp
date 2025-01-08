@@ -119,63 +119,33 @@ class PlanDetailsGenerator:
     def create_plan_details(
         self,
         plan_id: Optional[UUID] = None,
-        is_active: Optional[bool] = None,
+        is_active: bool = True,
         planner_id: Optional[UUID] = None,
-        planner_name: Optional[str] = None,
-        product_name: Optional[str] = None,
-        description: Optional[str] = None,
-        active_days: Optional[int] = None,
-        timeframe: Optional[int] = None,
-        production_unit: Optional[str] = None,
-        amount: Optional[int] = None,
-        means_cost: Optional[Decimal] = None,
-        resources_cost: Optional[Decimal] = None,
-        labour_cost: Optional[Decimal] = None,
-        is_public_service: Optional[bool] = None,
-        labour_cost_per_unit: Optional[Decimal] = None,
-        price_per_unit: Optional[Decimal] = None,
-        is_cooperating: Optional[bool] = None,
+        planner_name: str = "planner name",
+        product_name: str = "product name",
+        description: str = "test description",
+        active_days: int = 5,
+        timeframe: int = 7,
+        production_unit: str = "Piece",
+        amount: int = 100,
+        means_cost: Decimal = Decimal(1),
+        resources_cost: Decimal = Decimal(2),
+        labour_cost: Decimal = Decimal(3),
+        is_public_service: bool = False,
+        labour_cost_per_unit: Decimal = Decimal(0.875),
+        price_per_unit: Decimal = Decimal(0.061),
+        is_cooperating: bool = False,
         cooperation: Optional[UUID] = None,
-        creation_date: Optional[datetime] = None,
+        creation_date: datetime = datetime(2023, 5, 1),
         approval_date: Optional[datetime] = None,
         expiration_date: Optional[datetime] = None,
     ) -> PlanDetails:
         if plan_id is None:
             plan_id = uuid4()
-        if is_active is None:
-            is_active = True
         if planner_id is None:
             planner_id = uuid4()
-        if planner_name is None:
-            planner_name = "planner name"
-        if product_name is None:
-            product_name = "product name"
-        if description is None:
-            description = "test description"
-        if active_days is None:
-            active_days = 5
-        if timeframe is None:
-            timeframe = 7
-        if production_unit is None:
-            production_unit = "Piece"
-        if amount is None:
-            amount = 100
-        if means_cost is None:
-            means_cost = Decimal(1)
-        if resources_cost is None:
-            resources_cost = Decimal(2)
-        if labour_cost is None:
-            labour_cost = Decimal(3)
-        if is_public_service is None:
-            is_public_service = False
-        if labour_cost_per_unit is None:
-            labour_cost_per_unit = Decimal("0.875")
-        if price_per_unit is None:
-            price_per_unit = Decimal("0.061")
         if is_cooperating is None:
             is_cooperating = False
-        if creation_date is None:
-            creation_date = datetime(2023, 5, 1)
         assert isinstance(cooperation, UUID) or (cooperation is None)
         return PlanDetails(
             plan_id=plan_id,
