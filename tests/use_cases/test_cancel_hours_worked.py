@@ -8,12 +8,14 @@ from arbeitszeit.use_cases.cancel_hours_worked import (
 )
 
 from .base_test_case import BaseTestCase
+from .repositories import MockDatabase
 
 
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(CancelHoursWorkedUseCase)
+        self.mock_database = self.injector.get(MockDatabase)
         self.worker_id = self.member_generator.create_member()
         self.company_id = self.company_generator.create_company(
             workers=[self.worker_id]
@@ -70,17 +72,34 @@ class UseCaseTests(BaseTestCase):
     def test_deletion_of_hours_worked_entry_succeeds(
         self,
     ) -> None:
-        registered_hours_response = (
-            self.list_registered_hours_use_case.list_registered_hours_worked(
-                list_registered_hours_worked.Request(self.company_id)
-            )
+        entry_to_be_deleted = (
+            self.mock_database.get_registered_hours_worked()
+            .at_company(self.company_id)
+            .first()
         )
-        entry_to_be_deleted = registered_hours_response.registered_hours_worked[0]
+        assert entry_to_be_deleted
         use_case_request = self.create_request(
             requester=self.company_id, registration_id=entry_to_be_deleted.id
         )
+        transaction_to_be_cancelled = (
+            self.mock_database.get_transactions()
+            .with_id(entry_to_be_deleted.transaction)
+            .first()
+        )
+        assert transaction_to_be_cancelled
         use_case_response = self.use_case.cancel_hours_worked(use_case_request)
         assert use_case_response.delete_succeeded is True
+        latest_transaction = (
+            self.mock_database.get_transactions()
+            .ordered_by_transaction_date(descending=True)
+            .first()
+        )
+        assert latest_transaction
+        assert (
+            latest_transaction.amount_received
+            == -transaction_to_be_cancelled.amount_received
+        )
+        assert latest_transaction.purpose == "Storno"
         registered_hours_after_deletion = (
             self.list_registered_hours_use_case.list_registered_hours_worked(
                 list_registered_hours_worked.Request(self.company_id)

@@ -981,6 +981,11 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             receiver,
         )
 
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.Transaction.id == str(id_))
+        )
+
 
 class AccountQueryResult(FlaskQueryResult[records.Account]):
     def with_id(self, *id_: UUID) -> Self:

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -31,5 +32,23 @@ class CancelHoursWorkedUseCase:
             return Response(delete_succeeded=False)
         if requester.id != row_to_be_deleted.company:
             return Response(delete_succeeded=False)
-        query_result.delete()
+        nr_of_deleted_rows = query_result.delete()
+        assert nr_of_deleted_rows == 1
+
+        undone_transaction = (
+            self.database.get_transactions()
+            .with_id(row_to_be_deleted.transaction)
+            .first()
+        )
+        assert undone_transaction
+        now = self.datetime_service.now()
+        self.database.create_transaction(
+            date=now,
+            sending_account=undone_transaction.sending_account,
+            receiving_account=undone_transaction.receiving_account,
+            amount_sent=undone_transaction.amount_sent * Decimal(-1),
+            amount_received=undone_transaction.amount_received * Decimal(-1),
+            purpose="Storno",
+        )
+
         return Response(delete_succeeded=True)
