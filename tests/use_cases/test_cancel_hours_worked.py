@@ -38,15 +38,15 @@ class UseCaseTests(BaseTestCase):
             requester=uuid4(), registration_id=uuid4()
         )
         use_case_response = self.use_case.cancel_hours_worked(use_case_request)
-        self.assertFalse(use_case_response.delete_succeeded)
+        assert use_case_response.delete_succeeded is False
         registered_hours_response = (
             self.list_registered_hours_use_case.list_registered_hours_worked(
                 list_registered_hours_worked.Request(self.company_id)
             )
         )
-        self.assertEqual(
-            len(registered_hours_response.registered_hours_worked),
-            self.nr_of_registrations_in_db,
+        assert (
+            len(registered_hours_response.registered_hours_worked)
+            == self.nr_of_registrations_in_db
         )
 
     def test_that_delete_attempt_when_requester_is_not_equal_to_company_that_registered_hours_worked_is_noop(
@@ -56,15 +56,15 @@ class UseCaseTests(BaseTestCase):
             requester=self.company_id, registration_id=uuid4()
         )
         use_case_response = self.use_case.cancel_hours_worked(use_case_request)
-        self.assertFalse(use_case_response.delete_succeeded)
+        assert use_case_response.delete_succeeded is False
         registered_hours_response = (
             self.list_registered_hours_use_case.list_registered_hours_worked(
                 list_registered_hours_worked.Request(self.company_id)
             )
         )
-        self.assertEqual(
-            len(registered_hours_response.registered_hours_worked),
-            self.nr_of_registrations_in_db,
+        assert (
+            len(registered_hours_response.registered_hours_worked)
+            == self.nr_of_registrations_in_db
         )
 
     def test_deletion_of_hours_worked_entry_succeeds(
@@ -80,18 +80,19 @@ class UseCaseTests(BaseTestCase):
             requester=self.company_id, registration_id=entry_to_be_deleted.id
         )
         use_case_response = self.use_case.cancel_hours_worked(use_case_request)
-        self.assertTrue(use_case_response.delete_succeeded)
+        assert use_case_response.delete_succeeded is True
         registered_hours_after_deletion = (
             self.list_registered_hours_use_case.list_registered_hours_worked(
                 list_registered_hours_worked.Request(self.company_id)
             )
         )
-        self.assertEqual(
-            len(registered_hours_after_deletion.registered_hours_worked),
-            self.nr_of_registrations_in_db - 1,
+        assert (
+            len(registered_hours_after_deletion.registered_hours_worked)
+            == self.nr_of_registrations_in_db - 1
         )
-        self.assertNotIn(
-            entry_to_be_deleted, registered_hours_after_deletion.registered_hours_worked
+        assert (
+            entry_to_be_deleted
+            not in registered_hours_after_deletion.registered_hours_worked
         )
 
     def create_request(
