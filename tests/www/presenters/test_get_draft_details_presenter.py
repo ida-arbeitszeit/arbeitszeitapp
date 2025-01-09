@@ -11,7 +11,6 @@ from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
 TEST_DRAFT_SUMMARY_SUCCESS = DraftDetailsSuccess(
-    draft_id=uuid4(),
     planner_id=uuid4(),
     product_name="test draft",
     description="beschreibung draft",
@@ -58,10 +57,6 @@ class PlanDetailsPresenterTests(BaseTestCase):
         form = DraftForm()
         view_model = self.presenter.present_draft_details(self.plan_details, form=form)
         self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
-        self.assertEqual(
-            view_model.save_draft_url,
-            self.url_index.get_draft_details_url(self.plan_details.plan_id),
-        )
 
 
 class DraftDetailsPresenterTests(BaseTestCase):
@@ -113,7 +108,3 @@ class DraftDetailsPresenterTests(BaseTestCase):
             TEST_DRAFT_SUMMARY_SUCCESS, form=form
         )
         self.assertEqual(view_model.cancel_url, self.url_index.get_my_plans_url())
-        self.assertEqual(
-            view_model.save_draft_url,
-            self.url_index.get_draft_details_url(TEST_DRAFT_SUMMARY_SUCCESS.draft_id),
-        )

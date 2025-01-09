@@ -37,7 +37,6 @@ class DraftDetailsView:
             render_template(
                 "company/draft_details.html",
                 cancel_url=view_model.cancel_url,
-                save_draft_url=view_model.save_draft_url,
                 form=form,
             )
         )
@@ -66,7 +65,6 @@ class DraftDetailsView:
         return FlaskResponse(
             render_template(
                 "company/draft_details.html",
-                save_draft_url="",
                 cancel_url=self.url_index.get_my_plans_url(),
                 form=form,
             ),
