@@ -15,7 +15,7 @@ class ControllerTests(BaseTestCase):
         expected_requester = uuid4()
         self.session.login_company(expected_requester)
         use_case_request = self.controller.create_use_case_request(uuid4())
-        self.assertEqual(use_case_request.requester, expected_requester)
+        assert use_case_request.requester == expected_requester
 
     def test_that_registration_id_is_forwarded_to_use_case_request(self) -> None:
         company_id = uuid4()

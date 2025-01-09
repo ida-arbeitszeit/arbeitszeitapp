@@ -248,9 +248,7 @@ def cancel_hours_worked(
         registration_id=registration_id
     )
     use_case_respones = use_case.cancel_hours_worked(use_case_request)
-    view_model = presenter.render_response(
-        use_case_response=use_case_respones, request=FlaskRequest()
-    )
+    view_model = presenter.render_response(use_case_response=use_case_respones)
     return redirect(view_model.redirect_url)
 
 
