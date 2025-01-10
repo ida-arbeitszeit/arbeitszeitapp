@@ -1,9 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from arbeitszeit.records import SocialAccounting, Transaction
+from arbeitszeit_flask.database import models
 from tests.control_thresholds import ControlThresholdsTestImpl
 
 from ..flask import FlaskTestCase
@@ -186,6 +187,39 @@ class TransactionRepositoryTests(FlaskTestCase):
                 sender_account
             )
         ) == [transaction]
+
+    def test_transactions_can_be_filtered_by_id(self) -> None:
+        sender_account = self.create_account()
+        receiver_account = self.create_account()
+        expected_id = uuid4()
+        transaction_1 = models.Transaction(
+            id=expected_id,
+            date=self.datetime_service.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        transaction_2 = models.Transaction(
+            id=uuid4(),
+            date=self.datetime_service.now(),
+            sending_account=sender_account,
+            receiving_account=receiver_account,
+            amount_sent=Decimal(1),
+            amount_received=Decimal(1),
+            purpose="test purpose",
+        )
+        self.db.session.add(transaction_1)
+        self.db.session.add(transaction_2)
+        self.db.session.flush()
+        transaction_filtered_by_id = (
+            self.database_gateway.get_transactions()
+            .with_id(UUID(str(transaction_1.id)))
+            .first()
+        )
+        assert transaction_filtered_by_id
+        assert transaction_filtered_by_id.id == expected_id
 
     def create_account(self) -> UUID:
         return self.database_gateway.create_account().id
