@@ -4,6 +4,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
 from flask_login import current_user
 
+from arbeitszeit.use_cases.cancel_hours_worked import CancelHoursWorkedUseCase
 from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
@@ -67,6 +68,9 @@ from arbeitszeit_flask.views.review_registered_consumptions_view import (
 from arbeitszeit_flask.views.show_coordination_transfer_request_view import (
     ShowCoordinationTransferRequestView,
 )
+from arbeitszeit_web.www.controllers.cancel_hours_worked_controller import (
+    CancelHoursWorkedController,
+)
 from arbeitszeit_web.www.controllers.create_draft_from_plan_controller import (
     CreateDraftFromPlanController,
 )
@@ -78,6 +82,9 @@ from arbeitszeit_web.www.controllers.file_plan_with_accounting_controller import
 )
 from arbeitszeit_web.www.controllers.revoke_plan_filing_controller import (
     RevokePlanFilingController,
+)
+from arbeitszeit_web.www.presenters.cancel_hours_worked_presenter import (
+    CancelHoursWorkedPresenter,
 )
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
@@ -227,6 +234,22 @@ def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
 @CompanyRoute("/register_hours_worked", methods=["GET", "POST"])
 @as_flask_view()
 class register_hours_worked(RegisterHoursWorkedView): ...
+
+
+@CompanyRoute("/cancel_hours_worked/<uuid:registration_id>", methods=["POST"])
+@commit_changes
+def cancel_hours_worked(
+    registration_id: UUID,
+    controller: CancelHoursWorkedController,
+    use_case: CancelHoursWorkedUseCase,
+    presenter: CancelHoursWorkedPresenter,
+) -> Response:
+    use_case_request = controller.create_use_case_request(
+        registration_id=registration_id
+    )
+    use_case_respones = use_case.cancel_hours_worked(use_case_request)
+    view_model = presenter.render_response(use_case_response=use_case_respones)
+    return redirect(view_model.redirect_url)
 
 
 @CompanyRoute("/register_productive_consumption", methods=["GET", "POST"])

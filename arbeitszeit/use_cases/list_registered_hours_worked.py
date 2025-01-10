@@ -14,6 +14,7 @@ class Request:
 
 @dataclass
 class RegisteredHoursWorked:
+    id: UUID
     hours: Decimal
     worker_id: UUID
     worker_name: str
@@ -44,6 +45,7 @@ class ListRegisteredHoursWorkedUseCase:
         )
         registered_hours_worked = [
             RegisteredHoursWorked(
+                id=registered_hours.id,
                 hours=registered_hours.amount,
                 worker_id=registered_hours.member,
                 worker_name=worker.get_name(),

@@ -1700,6 +1700,16 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             mapper=mapper,
         )
 
+    def with_id(self, id_: UUID) -> Self:
+        return self._with_modified_query(
+            lambda query: query.filter(models.RegisteredHoursWorked.id == str(id_))
+        )
+
+    def delete(self) -> int:
+        row_count = self.query.delete()
+        self.db.session.flush()
+        return row_count
+
 
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
