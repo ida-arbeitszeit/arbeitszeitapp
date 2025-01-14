@@ -58,7 +58,7 @@
             required
             >
             {% if form.worker_id_errors %}
-            <ul class="has-text-danger has-text-left">
+            <ul class="has-text-danger has-text-left has-text-weight-bold">
               {% for error in form.worker_id_errors %}
               <li>{{ error }}</li>
               {% endfor %}

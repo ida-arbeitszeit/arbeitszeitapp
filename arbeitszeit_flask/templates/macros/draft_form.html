@@ -2,8 +2,18 @@
 form.  When you use this in templates, remember to include the csrf
 token field and buttons to submit. -->
 {% from 'macros/tooltips.html' import info_tooltip %}
+{% from 'macros/form_field_error.html' import display_form_field_errors %}
 
 {% macro draft_form(form) %}
+<div>
+  {% if form.general_errors %}
+  <ul class="has-text-danger has-text-weight-bold">
+    {% for error in form.general_errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
 <div class="box has-background-info-light">
   <div class="has-text-right has-text-info-dark">
     {{ info_tooltip(id="id_product_name_description", text=gettext("Specify product name and description."))}}
@@ -11,17 +21,21 @@ token field and buttons to submit. -->
   <div class="field">
     <label class="label">{{ gettext("Product name")}}</label>
     <div class="control">
-      {{ form.prd_name(class_="input is-large") }}
+      <input type="text" class="input is-large" name="prd_name" value="{{ form.product_name_value }}">
     </div>
+    {{ display_form_field_errors(form.product_name_errors) }}
   </div>
+
   <div class="block"></div>
   <div class="field">
     <label class="label">{{ gettext("Product description")}}</label>
     <div class="control">
-      {{ form.description(class_="textarea is-large") }}
+      <textarea class="textarea is-large" name="description">{{ form.description_value }}</textarea>
     </div>
   </div>
+  {{ display_form_field_errors(form.description_errors) }}
 </div>
+
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
   <div class="has-text-right has-text-info-dark">
@@ -30,10 +44,12 @@ token field and buttons to submit. -->
   <div class="field">
     <label class="label">{{ gettext("Planning timeframe")}}</label>
     <div class="control">
-      {{ form.timeframe(class_="input is-large") }}
+      <input type="number" class="input is-large" name="timeframe" placeholder="{{ gettext('Days') }}" value="{{ form.timeframe_value }}">
     </div>
   </div>
+  {{ display_form_field_errors(form.timeframe_errors) }}
 </div>
+
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
   <div class="field">
@@ -42,10 +58,12 @@ token field and buttons to submit. -->
     </div>
     <label class="label">{{ gettext("Smallest delivery unit")}}</label>
     <div class="control">
-      {{ form.prd_unit(class_="input is-large") }}
+      <input type="text" class="input is-large" name="prd_unit" value="{{ form.unit_of_distribution_value }}" >
       <p class="help">{{ gettext("E.g. 1 package, 1 kilogram, 20 bottles, 1 language lesson, etc.")}}</p>
+    {{ display_form_field_errors(form.unit_of_distribution_errors) }}
     </div>
   </div>
+
   <div class="block"></div>
   <div class="field">
     <div class="has-text-right has-text-info-dark">
@@ -53,10 +71,12 @@ token field and buttons to submit. -->
     </div>
     <label class="label">{{ gettext("Amount")}}</label>
     <div class="control">
-      {{ form.prd_amount(class_="input is-large") }}
+      <input type="number" class="input is-large" name="prd_amount" value="{{ form.amount_value }}" >
     </div>
   </div>
+  {{ display_form_field_errors(form.amount_errors) }}
 </div>
+
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
   <div class="field">
@@ -65,9 +85,11 @@ token field and buttons to submit. -->
     </div>
     <label class="label">{{ gettext("Costs for fixed means of production")}}</label>
     <div class="control">
-      {{ form.costs_p(class_="input is-large") }}
+      <input type="number" class="input is-large" name="costs_p" placeholder="{{ gettext('Hours') }}" value="{{ form.means_cost_value }}" >
     </div>
+    {{ display_form_field_errors(form.means_cost_errors) }}
   </div>
+  
   <div class="block"></div>
   <div class="field">
     <div class="has-text-right has-text-info-dark">
@@ -75,9 +97,11 @@ token field and buttons to submit. -->
     </div>
     <label class="label">{{ gettext("Costs for liquid means of production")}}</label>
     <div class="control">
-      {{ form.costs_r(class_="input is-large") }}
+      <input type="number" class="input is-large" name="costs_r" placeholder="{{ gettext('Hours') }}" value="{{ form.resource_cost_value }}" >
     </div>
+    {{ display_form_field_errors(form.resource_cost_errors) }}
   </div>
+  
   <div class="block"></div>
   <div class="field">
     <div class="has-text-right has-text-info-dark">
@@ -85,17 +109,21 @@ token field and buttons to submit. -->
     </div>
     <label class="label">{{ gettext("Costs for labour")}}</label>
     <div class="control">
-      {{ form.costs_a(class_="input is-large") }}
+      <input type="number" class="input is-large" name="costs_a" placeholder="{{ gettext('Hours') }}" value="{{ form.labour_cost_value }}" >
     </div>
+  {{ display_form_field_errors(form.labour_cost_errors) }}
   </div>
 </div>
+
 <div class="block py-2"></div>
 <div class="box has-background-info-light">
   <div class="has-text-right has-text-info-dark">
     {{ info_tooltip(id="id_type", text=gettext("Products and services within a supply chain should not be marked public. Only checkmark this box if your product will be generally and freely available."))}}
   </div>
   <div class="field">
-    {{ form.productive_or_public }} {{ form.productive_or_public.label }}
+    <input type="checkbox" name="is_public_plan" {% if form.is_public_plan_value %}checked{% endif %}>
+    <label for="is_public_plan">{{ gettext("This plan is a public service")}}</label>
+    {{ display_form_field_errors(form.is_public_plan_errors) }}
   </div>
 </div>
 

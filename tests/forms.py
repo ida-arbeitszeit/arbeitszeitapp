@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Generic, List, Optional, Self, TypeVar
 
 T = TypeVar("T")
@@ -34,57 +33,6 @@ class LoginForm:
             or self._password_field.errors
             or self._remember_field.errors
         )
-
-
-class DraftForm:
-    def __init__(
-        self,
-        prd_name: str = "product name",
-        description: str = "product description",
-        timeframe: int = 1,
-        prd_unit: str = "unit",
-        prd_amount: int = 1,
-        costs_p: Decimal = Decimal("1"),
-        costs_r: Decimal = Decimal("1"),
-        costs_a: Decimal = Decimal("1"),
-        is_public_service: bool = False,
-    ) -> None:
-        self._product_name_field = FormFieldImpl(value=prd_name)
-        self._description_field = FormFieldImpl(value=description)
-        self._timeframe_field = FormFieldImpl(value=timeframe)
-        self._unit_of_distribution_field = FormFieldImpl(value=prd_unit)
-        self._amount_field = FormFieldImpl(value=prd_amount)
-        self._means_cost_field = FormFieldImpl(value=costs_p)
-        self._resource_cost_field = FormFieldImpl(value=costs_r)
-        self._labour_cost_field = FormFieldImpl(value=costs_a)
-        self._is_public_service_field = FormFieldImpl(value=is_public_service)
-
-    def product_name_field(self) -> FormFieldImpl[str]:
-        return self._product_name_field
-
-    def description_field(self) -> FormFieldImpl[str]:
-        return self._description_field
-
-    def timeframe_field(self) -> FormFieldImpl[int]:
-        return self._timeframe_field
-
-    def unit_of_distribution_field(self) -> FormFieldImpl[str]:
-        return self._unit_of_distribution_field
-
-    def amount_field(self) -> FormFieldImpl[int]:
-        return self._amount_field
-
-    def means_cost_field(self) -> FormFieldImpl[Decimal]:
-        return self._means_cost_field
-
-    def resource_cost_field(self) -> FormFieldImpl[Decimal]:
-        return self._resource_cost_field
-
-    def labour_cost_field(self) -> FormFieldImpl[Decimal]:
-        return self._labour_cost_field
-
-    def is_public_service_field(self) -> FormFieldImpl[bool]:
-        return self._is_public_service_field
 
 
 class RegisterProductiveConsumptionFakeForm:

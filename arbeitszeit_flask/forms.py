@@ -1,11 +1,8 @@
-from decimal import Decimal
 from typing import Generic, TypeVar
 
 from wtforms import (
     BooleanField,
-    DecimalField,
     Form,
-    IntegerField,
     PasswordField,
     RadioField,
     SelectField,
@@ -235,66 +232,6 @@ class CompanySearchForm(Form):
 
     def get_category_string(self) -> str:
         return self.data["select"]
-
-
-class CreateDraftForm(Form):
-    prd_name = StringField(
-        validators=[
-            validators.InputRequired(),
-            validators.Length(max=100),
-        ]
-    )
-    description = TextAreaField(validators=[validators.InputRequired()])
-    timeframe = IntegerField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=1, max=365)],
-        render_kw={"placeholder": trans.lazy_gettext("Days")},
-    )
-    prd_unit = StringField(validators=[validators.InputRequired()])
-    prd_amount = IntegerField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=1)]
-    )
-    costs_p = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
-        render_kw={"placeholder": trans.lazy_gettext("Hours")},
-    )
-    costs_r = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
-        render_kw={"placeholder": trans.lazy_gettext("Hours")},
-    )
-    costs_a = DecimalField(
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
-        render_kw={"placeholder": trans.lazy_gettext("Hours")},
-    )
-    productive_or_public = BooleanField(
-        trans.lazy_gettext("This plan is a public service")
-    )
-
-    def product_name_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="prd_name")
-
-    def description_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="description")
-
-    def timeframe_field(self) -> WtFormField[int]:
-        return WtFormField(form=self, field_name="timeframe")
-
-    def unit_of_distribution_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="prd_unit")
-
-    def amount_field(self) -> WtFormField[int]:
-        return WtFormField(form=self, field_name="prd_amount")
-
-    def means_cost_field(self) -> WtFormField[Decimal]:
-        return WtFormField(form=self, field_name="costs_p")
-
-    def resource_cost_field(self) -> WtFormField[Decimal]:
-        return WtFormField(form=self, field_name="costs_r")
-
-    def labour_cost_field(self) -> WtFormField[Decimal]:
-        return WtFormField(form=self, field_name="costs_a")
-
-    def is_public_service_field(self) -> WtFormField[bool]:
-        return WtFormField(form=self, field_name="productive_or_public")
 
 
 class CreateCooperationForm(Form):

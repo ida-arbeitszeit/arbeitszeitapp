@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from decimal import Decimal
 from typing import Protocol
 
 from arbeitszeit_web.fields import FormField
@@ -37,24 +36,28 @@ class LogInAccountantForm(Protocol):
     def remember_field(self) -> FormField[bool]: ...
 
 
-class DraftForm(Protocol):
-    def product_name_field(self) -> FormField[str]: ...
+@dataclass(kw_only=True)
+class DraftForm:
+    product_name_value: str
+    description_value: str
+    timeframe_value: str
+    unit_of_distribution_value: str
+    amount_value: str
+    means_cost_value: str
+    resource_cost_value: str
+    labour_cost_value: str
+    is_public_plan_value: str
 
-    def description_field(self) -> FormField[str]: ...
-
-    def timeframe_field(self) -> FormField[int]: ...
-
-    def unit_of_distribution_field(self) -> FormField[str]: ...
-
-    def amount_field(self) -> FormField[int]: ...
-
-    def means_cost_field(self) -> FormField[Decimal]: ...
-
-    def resource_cost_field(self) -> FormField[Decimal]: ...
-
-    def labour_cost_field(self) -> FormField[Decimal]: ...
-
-    def is_public_service_field(self) -> FormField[bool]: ...
+    product_name_errors: list[str] = field(default_factory=list)
+    description_errors: list[str] = field(default_factory=list)
+    timeframe_errors: list[str] = field(default_factory=list)
+    unit_of_distribution_errors: list[str] = field(default_factory=list)
+    amount_errors: list[str] = field(default_factory=list)
+    means_cost_errors: list[str] = field(default_factory=list)
+    resource_cost_errors: list[str] = field(default_factory=list)
+    labour_cost_errors: list[str] = field(default_factory=list)
+    is_public_plan_errors: list[str] = field(default_factory=list)
+    general_errors: list[str] = field(default_factory=list)
 
 
 class RegisterProductiveConsumptionForm(Protocol):
