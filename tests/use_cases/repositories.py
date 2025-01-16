@@ -975,6 +975,11 @@ class TransactionResult(QueryResultImpl[Transaction]):
             database=self.database,
         )
 
+    def with_id(self, id_: UUID) -> Self:
+        return self._filter_elements(
+            lambda transaction: transaction.id == id_,
+        )
+
 
 class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
