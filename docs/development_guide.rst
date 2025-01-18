@@ -553,6 +553,12 @@ The configuration file must be a valid python script.  Configuration
 options are set as variables on the top level. The following
 configuration options are available
 
+.. py:data:: ALEMBIC_CONFIGURATION_FILE
+
+   Path to the alembic configuration. Alembic is used to manage
+   database migrations. See the `alembic documentation`_ for further
+   information.
+
 .. py:data:: AUTO_MIGRATE
    
    Upgrade the database schema if changes are detected.
@@ -855,3 +861,4 @@ companies that are unhappy with a certain coordination can easily form a new coo
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
 .. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/
 .. _URI path pattern: https://flask.palletsprojects.com/en/latest/api/#url-route-registrations
+.. _alembic documentation: https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file

@@ -31,3 +31,7 @@ SWAGGER_UI_OAUTH_CLIENT_ID = "placeholder"
 SWAGGER_VALIDATOR_URL = "placeholder"
 SWAGGER_UI_OAUTH_REALM = "placeholder"
 SWAGGER_UI_OAUTH_APP_NAME = "placeholder"
+
+# Path to the alembic configuration file relative to the working directory of
+# the flask process.
+ALEMBIC_CONFIGURATION_FILE = "alembic.ini"
