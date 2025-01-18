@@ -8,6 +8,7 @@ from .utility import Utility
 
 
 class CreateEmailAddressTests(FlaskTestCase):
+    @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
     def test_cannot_create_same_email_address_twice(self) -> None:
         address = "test@test.test"
         self.database_gateway.create_email_address(address=address, confirmed_on=None)
@@ -16,6 +17,7 @@ class CreateEmailAddressTests(FlaskTestCase):
                 address=address, confirmed_on=datetime.min
             )
 
+    @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
     def test_cannot_create_similar_email_address_case_insensitive(self) -> None:
         address = "test@test.test"
         self.database_gateway.create_email_address(address=address, confirmed_on=None)
