@@ -141,6 +141,17 @@ class AccountantAuthenticator:
 @dataclass
 class UserAuthenticator:
     session: Session
+    request: Request
+    url_index: UrlIndex
+    notifier: Notifier
+    translator: Translator
 
     def is_user_authenticated(self) -> bool:
         return bool(self.session.get_current_user())
+
+    def redirect_user_to_start_page(self) -> str:
+        self.session.set_next_url(self.request.get_request_target())
+        self.notifier.display_warning(
+            self.translator.gettext("Please log in to view this page.")
+        )
+        return self.url_index.get_start_page_url()
