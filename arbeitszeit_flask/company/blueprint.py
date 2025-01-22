@@ -11,12 +11,9 @@ main_company = Blueprint("main_company", __name__)
 
 
 class CompanyRoute:
-    def __init__(self, route_string: str, methods=None):
+    def __init__(self, route_string: str, methods: list[str] | None = None):
         self.route_string = route_string
-        if methods is None:
-            self.methods = ["GET"]
-        else:
-            self.methods = methods
+        self.methods = methods or ["GET"]
 
     def __call__(self, view_function: Callable[..., types.Response]):
         @wraps(view_function)

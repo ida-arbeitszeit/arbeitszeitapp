@@ -1,10 +1,12 @@
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, TypeVar
 
 from flask import Blueprint, redirect, session, url_for
 
 from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import create_dependency_injector
+
+ViewFunction = TypeVar("ViewFunction", bound=Callable)
 
 main_accountant = Blueprint(
     "main_accountant",
@@ -15,14 +17,11 @@ main_accountant = Blueprint(
 
 
 class AccountantRoute:
-    def __init__(self, route_string: str, methods: Optional[Iterable[str]] = None):
+    def __init__(self, route_string: str, methods: list[str] | None = None) -> None:
         self.route_string = route_string
-        if methods is None:
-            self.methods = ["GET"]
-        else:
-            self.methods = list(methods)
+        self.methods = methods or ["GET"]
 
-    def __call__(self, view_function: Callable[..., types.Response]):
+    def __call__(self, view_function: ViewFunction) -> ViewFunction:
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
             injector = create_dependency_injector()

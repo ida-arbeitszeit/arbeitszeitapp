@@ -9,6 +9,7 @@ from arbeitszeit.injector import Module
 from arbeitszeit_flask.database.db import Base, Database
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
+from arbeitszeit_flask.url_index import GeneralUrlIndex
 from tests.data_generators import (
     AccountantGenerator,
     CompanyGenerator,
@@ -104,6 +105,7 @@ class FlaskTestCase(TestCase):
     plan_generator = _lazy_property(PlanGenerator)
     token_service = _lazy_property(FlaskTokenService)
     transaction_generator = _lazy_property(TransactionGenerator)
+    url_index = _lazy_property(GeneralUrlIndex)
 
 
 class ViewTestCase(FlaskTestCase):

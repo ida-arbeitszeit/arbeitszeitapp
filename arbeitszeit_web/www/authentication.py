@@ -37,7 +37,7 @@ class MemberAuthenticator:
                 self.translator.gettext("Please log in to view this page.")
             )
             self.session.set_next_url(self.request.get_request_target())
-            return self._get_start_page_url()
+            return self.url_index.get_start_page_url()
         else:
             email = (
                 self.database.get_email_addresses()
@@ -52,10 +52,7 @@ class MemberAuthenticator:
             else:
                 self._notify_incorrect_account()
                 self.session.logout()
-                return self._get_start_page_url()
-
-    def _get_start_page_url(self) -> str:
-        return self.url_index.get_start_page_url()
+                return self.url_index.get_start_page_url()
 
     def _notify_incorrect_account(self) -> None:
         self.notifier.display_warning(
