@@ -4,7 +4,7 @@ from typing import Optional
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
-from arbeitszeit_web.session import Session
+from arbeitszeit_web.session import Session, UserRole
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -107,6 +107,34 @@ class CompanyAuthenticator:
                 self.translator.gettext("Please log in to view this page.")
             )
             self.session.set_next_url(self.request.get_request_target())
+            return self.url_index.get_start_page_url()
+
+
+@dataclass
+class AccountantAuthenticator:
+    session: Session
+    notifier: Notifier
+    request: Request
+    translator: Translator
+    url_index: UrlIndex
+
+    def redirect_unauthenticated_user_to_start_page(self) -> str | None:
+        user_role = self.session.get_user_role()
+        if not user_role:
+            self.session.set_next_url(self.request.get_request_target())
+            self.notifier.display_warning(
+                self.translator.gettext("Please log in to view this page.")
+            )
+            return self.url_index.get_start_page_url()
+        elif user_role == UserRole.accountant:
+            return None
+        else:
+            self.notifier.display_warning(
+                self.translator.gettext(
+                    "You are not logged in with the correct account."
+                )
+            )
+            self.session.logout()
             return self.url_index.get_start_page_url()
 
 

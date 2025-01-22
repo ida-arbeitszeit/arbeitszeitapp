@@ -1,10 +1,11 @@
 from functools import wraps
 from typing import Any, Callable, TypeVar
 
-from flask import Blueprint, redirect, session, url_for
+from flask import Blueprint, redirect
 
 from arbeitszeit_flask import types
 from arbeitszeit_flask.dependency_injection import create_dependency_injector
+from arbeitszeit_web.www.authentication import AccountantAuthenticator
 
 ViewFunction = TypeVar("ViewFunction", bound=Callable)
 
@@ -25,8 +26,11 @@ class AccountantRoute:
         @wraps(view_function)
         def _wrapper(*args: Any, **kwargs: Any) -> types.Response:
             injector = create_dependency_injector()
-            if not user_is_accountant():
-                return redirect(url_for("auth.zurueck"))
+            authenticator = injector.get(AccountantAuthenticator)
+            if (
+                redirect_url := authenticator.redirect_unauthenticated_user_to_start_page()
+            ):
+                return redirect(redirect_url)
             return injector.call_with_injection(
                 view_function,
                 args=args,
@@ -38,7 +42,3 @@ class AccountantRoute:
         # of flask itself in this regard. The flask @route decorator
         # also returns the original function that was passed into it.
         return view_function
-
-
-def user_is_accountant():
-    return session.get("user_type") == "accountant"
