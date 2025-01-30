@@ -40,11 +40,11 @@ class AnonymousUserTest(ViewTestCase):
         super().setUp()
         self.url = "/member/consumptions"
 
-    def test_anonymous_user_gets_redirected_to_start_with_next_url_set_correctly(
+    def test_anonymous_user_gets_redirected_to_start_page(
         self,
     ):
-        response = self.client.get(self.url)
-        self.assertEqual(response.location, "/")
+        response = self.client.get(self.url, follow_redirects=True)
+        assert response.request.url == self.url_index.get_start_page_url()
 
 
 class CompanyTest(ViewTestCase):
@@ -53,11 +53,11 @@ class CompanyTest(ViewTestCase):
         self.url = "/member/consumptions"
         self.login_company()
 
-    def test_company_gets_redirected_to_start_page_with_next_url_set_correctly(
+    def test_company_gets_redirected_to_start_page(
         self,
     ) -> None:
-        response = self.client.get(self.url)
-        self.assertEqual(response.location, "/")
+        response = self.client.get(self.url, follow_redirects=True)
+        assert response.request.url == self.url_index.get_start_page_url()
 
     def test_user_type_in_session_is_set_to_none_when_company_accesses_page(
         self,
@@ -80,5 +80,5 @@ class UnconfirmedMemberTests(ViewTestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_redirects_to_page_for_unconfirmed_members(self) -> None:
-        response = self.client.get(self.url)
-        assert response.location == "/unconfirmed-member"
+        response = self.client.get(self.url, follow_redirects=True)
+        assert response.request.url == self.url_index.get_unconfirmed_member_url()
