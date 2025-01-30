@@ -2,6 +2,5 @@ recursive-include arbeitszeit_flask/templates *.html
 recursive-include arbeitszeit_flask/migrations *.ini *.mako *.py
 recursive-include arbeitszeit_flask/static *.js *.css favicon.ico
 recursive-include arbeitszeit_flask/translations *.po *.mo *.pot
-include alembic.ini
 prune build/
 prune .git/
