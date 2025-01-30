@@ -49,6 +49,10 @@ def create_app(
     )
 
     load_configuration(app=app, configuration=config)
+
+    if app.config["AUTO_MIGRATE"]:
+        alembic_cfg = AlembicConfig(app.config["ALEMBIC_CONFIGURATION_FILE"])
+        alembic_command.upgrade(alembic_cfg, "head")
     init_db(uri=app.config["SQLALCHEMY_DATABASE_URI"])
     load_email_plugin(app)
 
@@ -73,10 +77,6 @@ def create_app(
     @app.teardown_appcontext
     def shutdown_session(exception: BaseException | None = None) -> None:
         Database().session.remove()
-
-    if app.config["AUTO_MIGRATE"]:
-        alembic_cfg = AlembicConfig(app.config["ALEMBIC_CONFIGURATION_FILE"])
-        alembic_command.upgrade(alembic_cfg, "head")
 
     # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
