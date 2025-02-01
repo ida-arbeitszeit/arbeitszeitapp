@@ -1,0 +1,11 @@
+{% macro display_form_field_errors(list_of_error_messages) %}
+
+{% if list_of_error_messages %}
+<ul class="has-text-danger has-text-weight-bold">
+  {% for error_message in list_of_error_messages %}
+  <li>{{ error_message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% endmacro %}

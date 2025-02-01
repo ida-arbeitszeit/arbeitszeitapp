@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import Any
 
 from alembic import command as alembic_command
@@ -76,7 +75,7 @@ def create_app(
         Database().session.remove()
 
     if app.config["AUTO_MIGRATE"]:
-        alembic_cfg = AlembicConfig(Path(__file__).parent.parent / "alembic.ini")
+        alembic_cfg = AlembicConfig(app.config["ALEMBIC_CONFIGURATION_FILE"])
         alembic_command.upgrade(alembic_cfg, "head")
 
     # Set up template filters

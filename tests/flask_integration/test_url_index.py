@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompany
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_web.session import UserRole
 
 from .flask import ViewTestCase
@@ -17,7 +16,6 @@ from .flask import ViewTestCase
 class PlotUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = GeneralUrlIndex()
         self.company = self.login_company()
 
     def test_url_for_barplot_for_certificates_returns_png(self) -> None:
@@ -76,7 +74,6 @@ class PlotUrlIndexTests(ViewTestCase):
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url_index = self.injector.get(GeneralUrlIndex)
         self.invite_worker_to_company_use_case = self.injector.get(
             InviteWorkerToCompanyUseCase
         )

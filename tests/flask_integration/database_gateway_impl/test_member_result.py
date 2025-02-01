@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
+import pytest
 from parameterized import parameterized
 from sqlalchemy.exc import IntegrityError
 
@@ -173,6 +174,7 @@ class CreateMemberTests(MemberResultTests):
         assert account_credentials
         self.create_member_from_credentials(credentials=account_credentials.id)
 
+    @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
     def test_cannot_create_member_with_same_email_twice(self) -> None:
         email = "test@test.test"
         self.create_member(email_address=email)
