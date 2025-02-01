@@ -662,3 +662,10 @@ class DatabaseGateway(Protocol):
     ) -> records.RegisteredHoursWorked: ...
 
     def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult: ...
+
+    def create_cancelled_hours_worked(
+        self,
+        registered_entry: UUID,
+        transaction: UUID,
+        cancelled_on: datetime,
+    ) -> records.CancelledHoursWorked: ...

@@ -32,8 +32,6 @@ class CancelHoursWorkedUseCase:
             return Response(delete_succeeded=False)
         if requester.id != row_to_be_deleted.company:
             return Response(delete_succeeded=False)
-        nr_of_deleted_rows = query_result.delete()
-        assert nr_of_deleted_rows == 1
 
         undone_transaction = (
             self.database.get_transactions()
@@ -42,6 +40,13 @@ class CancelHoursWorkedUseCase:
         )
         assert undone_transaction
         now = self.datetime_service.now()
+
+        self.database.create_cancelled_hours_worked(
+            registered_entry=request.registration_id,
+            transaction=row_to_be_deleted.transaction,
+            cancelled_on=now,
+        )
+
         self.database.create_transaction(
             date=now,
             sending_account=undone_transaction.sending_account,

@@ -370,3 +370,11 @@ class RegisteredHoursWorked:
     amount: Decimal
     transaction: UUID
     registered_on: datetime
+
+
+@dataclass
+class CancelledHoursWorked:
+    id: UUID
+    registered_entry: UUID
+    transaction: UUID
+    cancelled_on: datetime

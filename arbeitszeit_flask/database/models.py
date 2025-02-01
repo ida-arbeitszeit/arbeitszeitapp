@@ -242,11 +242,14 @@ class RegisteredHoursWorked(Base):
     transaction: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     registered_on: Mapped[datetime]
 
+
 class CancelledHoursWorked(Base):
     __tablename__ = "cancelled_hours_worked"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    registered_entry: Mapped[str] = mapped_column(ForeignKey("registered_hours_worked.id"))
+    registered_entry: Mapped[str] = mapped_column(
+        ForeignKey("registered_hours_worked.id")
+    )
     transaction: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     cancelled_on: Mapped[datetime]
 
