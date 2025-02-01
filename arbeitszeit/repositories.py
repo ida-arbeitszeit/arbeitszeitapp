@@ -512,8 +512,6 @@ class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Pr
 
     def with_id(self, id_: UUID) -> Self: ...
 
-    def delete(self) -> int: ...
-
 
 class DatabaseGateway(Protocol):
     def create_private_consumption(

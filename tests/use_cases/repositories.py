@@ -1407,21 +1407,6 @@ class RegisteredHoursWorkedResult(QueryResultImpl[records.RegisteredHoursWorked]
             lambda registered_hours_worked: registered_hours_worked.id == id_,
         )
 
-    def delete(self) -> int:
-        registered_hours_to_delete = {entry.id for entry in self.items()}
-        original_count = len(self.database.registered_hours_worked)
-
-        self.database.registered_hours_worked = [
-            entry
-            for entry in self.database.registered_hours_worked
-            if entry.id not in registered_hours_to_delete
-        ]
-
-        nr_of_entries_deleted = original_count - len(
-            self.database.registered_hours_worked
-        )
-        return nr_of_entries_deleted
-
 
 class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:

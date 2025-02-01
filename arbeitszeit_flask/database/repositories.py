@@ -1710,11 +1710,6 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             lambda query: query.filter(models.RegisteredHoursWorked.id == str(id_))
         )
 
-    def delete(self) -> int:
-        row_count = self.query.delete()
-        self.db.session.flush()
-        return row_count
-
 
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
