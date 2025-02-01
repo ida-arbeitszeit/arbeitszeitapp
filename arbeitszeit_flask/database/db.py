@@ -16,7 +16,13 @@ class Database:
         return cls._instance
 
     def configure(self, uri: str) -> None:
-        self._uri = uri
+        if self._uri == uri:
+            # URI is already set to the same value
+            pass
+        elif self._uri is None:
+            self._uri = uri
+        else:
+            raise ValueError("Database URI is already set to a different value.")
 
     @property
     def engine(self) -> Engine:
