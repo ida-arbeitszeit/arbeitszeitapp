@@ -72,14 +72,16 @@ class FlaskTestCase(TestCase):
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
-        self.db = Database()  # Database gets configured in create_app
-        Base.metadata.drop_all(self.db.engine)
-        Base.metadata.create_all(self.db.engine)
+        # At this point, the database has already been configured
+        # and its tables have been created via the `create_app` function in
+        # `arbeitszeit_flask/__init__.py`
+        self.db = Database()
 
     def tearDown(self) -> None:
         self._lazy_property_cache = dict()
         self.db.session.remove()
         self.app_context.pop()
+        Base.metadata.drop_all(self.db.engine)
         super().tearDown()
 
     def get_injection_modules(self) -> List[Module]:
