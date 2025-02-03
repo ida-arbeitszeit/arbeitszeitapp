@@ -38,6 +38,7 @@ class FlaskConfiguration(dict):
                 "MAIL_PLUGIN_CLASS": MockEmailService.__name__,
                 "LANGUAGES": {"en": "English", "de": "Deutsch", "es": "Español"},
                 "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",
+                "AUTO_MIGRATE": False,
             }
         )
 
