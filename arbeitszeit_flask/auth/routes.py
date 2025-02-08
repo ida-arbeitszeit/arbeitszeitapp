@@ -67,7 +67,6 @@ def set_language(language: str):
     return redirect(redirection_url)
 
 
-# Member
 @auth.route("/unconfirmed-member")
 @with_injection()
 @login_required
@@ -145,7 +144,6 @@ def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
     return redirect(url_for("auth.unconfirmed_member"))
 
 
-# Company
 @auth.route("/company/unconfirmed")
 @with_injection()
 @login_required
@@ -257,14 +255,6 @@ def login_accountant(
             render_template("auth/login_accountant.html", form=form), status=401
         )
     return render_template("auth/login_accountant.html", form=form)
-
-
-# logout
-@auth.route("/zurueck")
-@with_injection()
-def zurueck(flask_session: FlaskSession):
-    flask_session.logout()
-    return redirect(url_for("auth.start"))
 
 
 @auth.route("/logout")
