@@ -1407,6 +1407,15 @@ class RegisteredHoursWorkedResult(QueryResultImpl[records.RegisteredHoursWorked]
             lambda registered_hours_worked: registered_hours_worked.id == id_,
         )
 
+    def that_are_not_cancelled(self) -> Self:
+        return self._filter_elements(
+            lambda registered_hours_worked: registered_hours_worked.id
+            not in [
+                cancelled_hours_worked.registered_entry
+                for cancelled_hours_worked in self.database.cancelled_hours_worked
+            ]
+        )
+
 
 class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
@@ -1682,6 +1691,7 @@ class MockDatabase:
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.reset_password_requests: List[records.PasswordResetRequest] = list()
         self.registered_hours_worked: list[records.RegisteredHoursWorked] = list()
+        self.cancelled_hours_worked: list[records.CancelledHoursWorked] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -2093,6 +2103,18 @@ class MockDatabase:
             database=self,
             items=lambda: self.registered_hours_worked,
         )
+
+    def create_cancelled_hours_worked(
+        self, registered_entry: UUID, transaction: UUID, cancelled_on: datetime
+    ) -> records.CancelledHoursWorked:
+        record = records.CancelledHoursWorked(
+            id=uuid4(),
+            registered_entry=registered_entry,
+            transaction=transaction,
+            cancelled_on=cancelled_on,
+        )
+        self.cancelled_hours_worked.append(record)
+        return record
 
 
 class Index(Generic[Key, Value]):

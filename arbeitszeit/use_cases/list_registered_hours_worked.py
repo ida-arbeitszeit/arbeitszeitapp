@@ -41,6 +41,7 @@ class ListRegisteredHoursWorkedUseCase:
             self.database_gateway.get_registered_hours_worked()
             .at_company(request.company_id)
             .ordered_by_registration_time(is_ascending=False)
+            .that_are_not_cancelled()
             .joined_with_worker()
         )
         registered_hours_worked = [

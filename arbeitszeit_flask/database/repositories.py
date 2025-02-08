@@ -1705,6 +1705,16 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             mapper=mapper,
         )
 
+    def that_are_not_cancelled(self) -> Self:
+        cancelled_hours = aliased(models.CancelledHoursWorked)
+        return self._with_modified_query(
+            lambda query: query.join(
+                cancelled_hours,
+                cancelled_hours.registered_entry == models.RegisteredHoursWorked.id,
+                isouter=True,
+            )
+        )
+
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.RegisteredHoursWorked.id == str(id_))
@@ -2590,4 +2600,30 @@ class DatabaseGatewayImpl:
             registered_on=db_record.registered_on,
             amount=db_record.amount,
             transaction=UUID(db_record.transaction),
+        )
+
+    def create_cancelled_hours_worked(
+        self,
+        registered_entry: UUID,
+        transaction: UUID,
+        cancelled_on: datetime,
+    ) -> records.CancelledHoursWorked:
+        db_record = models.CancelledHoursWorked(
+            registered_entry=str(registered_entry),
+            transaction=str(transaction),
+            cancelled_on=cancelled_on,
+        )
+        self.db.session.add(db_record)
+        self.db.session.flush()
+        return self.cancelled_hours_worked_from_orm(db_record)
+
+    @classmethod
+    def cancelled_hours_worked_from_orm(
+        cls, db_record: models.CancelledHoursWorked
+    ) -> records.CancelledHoursWorked:
+        return records.CancelledHoursWorked(
+            id=UUID(db_record.id),
+            registered_entry=UUID(db_record.registered_entry),
+            transaction=UUID(db_record.transaction),
+            cancelled_on=db_record.cancelled_on,
         )

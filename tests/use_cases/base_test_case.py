@@ -11,6 +11,7 @@ from tests.data_generators import (
     CoordinationTransferRequestGenerator,
     MemberGenerator,
     PlanGenerator,
+    RegisteredHoursWorkedGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.email_notifications import EmailSenderTestImpl
@@ -77,3 +78,4 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
+    registered_hours_worked_generator = _lazy_property(RegisteredHoursWorkedGenerator)

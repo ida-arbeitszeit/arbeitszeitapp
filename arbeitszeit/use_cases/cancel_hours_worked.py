@@ -39,8 +39,8 @@ class CancelHoursWorkedUseCase:
             .first()
         )
         assert undone_transaction
-        now = self.datetime_service.now()
 
+        now = self.datetime_service.now()
         self.database.create_cancelled_hours_worked(
             registered_entry=request.registration_id,
             transaction=row_to_be_deleted.transaction,
@@ -53,7 +53,7 @@ class CancelHoursWorkedUseCase:
             receiving_account=undone_transaction.receiving_account,
             amount_sent=undone_transaction.amount_sent * Decimal(-1),
             amount_received=undone_transaction.amount_received * Decimal(-1),
-            purpose="Storno",
+            purpose="Cancellation of registered hours worked",
         )
 
         return Response(delete_succeeded=True)

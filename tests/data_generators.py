@@ -13,7 +13,11 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import confirm_member, get_coop_summary
+from arbeitszeit.use_cases import (
+    confirm_member,
+    get_coop_summary,
+    register_hours_worked,
+)
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
@@ -444,6 +448,43 @@ class TransactionGenerator:
             amount_sent=amount_sent,
             amount_received=amount_received,
             purpose=purpose,
+        )
+
+
+@dataclass
+class RegisteredHoursWorkedGenerator:
+    datetime_service: FakeDatetimeService
+    company_generator: CompanyGenerator
+    member_generator: MemberGenerator
+    database_gateway: DatabaseGateway
+    register_hours_worked_use_case: register_hours_worked.RegisterHoursWorked
+
+    def create_registered_hours_worked(
+        self,
+        company: Optional[UUID] = None,
+        member: Optional[UUID] = None,
+        amount=None,
+        registered_on=None,
+    ) -> records.RegisteredHoursWorked | None:
+        if registered_on is None:
+            registered_on = self.datetime_service.now_minus_one_day()
+        if company is None:
+            company = self.company_generator.create_company_record().id
+        if member is None:
+            member = self.member_generator.create_member()
+        if amount is None:
+            amount = Decimal(5)
+        request = register_hours_worked.RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=member,
+            hours_worked=amount,
+        )
+        response = self.register_hours_worked_use_case(use_case_request=request)
+        assert not response.is_rejected
+        return (
+            self.database_gateway.get_registered_hours_worked()
+            .at_company(company=company)
+            .first()
         )
 
 
