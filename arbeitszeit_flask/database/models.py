@@ -5,7 +5,6 @@ Definition of database tables.
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
 
 from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, Table
@@ -158,15 +157,6 @@ class PlanReview(Base):
 
     def __repr__(self) -> str:
         return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
-
-
-class AccountTypes(Enum):
-    p = "p"
-    r = "r"
-    a = "a"
-    prd = "prd"
-    member = "member"
-    accounting = "accounting"
 
 
 class Account(Base):

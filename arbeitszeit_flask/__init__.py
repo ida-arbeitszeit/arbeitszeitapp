@@ -1,8 +1,6 @@
 import os
 from typing import Any
 
-from alembic import command as alembic_command
-from alembic.config import Config as AlembicConfig
 from flask import Flask, session
 from flask_talisman import Talisman
 from jinja2 import StrictUndefined
@@ -13,6 +11,7 @@ from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.mail_service import load_email_plugin
+from arbeitszeit_flask.migrations.auto_migrate import migrate
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
@@ -51,6 +50,8 @@ def create_app(
     load_configuration(app=app, configuration=config)
     init_db(uri=app.config["SQLALCHEMY_DATABASE_URI"])
     load_email_plugin(app)
+    if app.config["AUTO_MIGRATE"]:
+        migrate(app.config, Database().engine)
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
@@ -73,10 +74,6 @@ def create_app(
     @app.teardown_appcontext
     def shutdown_session(exception: BaseException | None = None) -> None:
         Database().session.remove()
-
-    if app.config["AUTO_MIGRATE"]:
-        alembic_cfg = AlembicConfig(app.config["ALEMBIC_CONFIGURATION_FILE"])
-        alembic_command.upgrade(alembic_cfg, "head")
 
     # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
