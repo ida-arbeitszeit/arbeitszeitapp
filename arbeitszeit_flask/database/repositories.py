@@ -1710,8 +1710,7 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
         return self._with_modified_query(
             lambda query: query.join(
                 cancelled_hours,
-                cancelled_hours.registered_entry == models.RegisteredHoursWorked.id,
-                isouter=True,
+                cancelled_hours.registered_entry != models.RegisteredHoursWorked.id,
             )
         )
 

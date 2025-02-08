@@ -210,6 +210,30 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
             is None
         )
 
+    def test_that_records_included_in_cancelled_hours_table_can_be_filtered(
+        self,
+    ) -> None:
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker])
+        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
+        self.register_hours_worked(company=company, worker=worker, hours=Decimal(5))
+        records = list(
+            self.database_gateway.get_registered_hours_worked().ordered_by_registration_time(
+                is_ascending=False
+            )
+        )
+        assert len(records) == 2
+        self.cancel_hours_worked_use_case.cancel_hours_worked(
+            cancel_hours_worked.Request(
+                requester=company, registration_id=records[0].id
+            )
+        )
+        records_not_cancelled = list(
+            self.database_gateway.get_registered_hours_worked().that_are_not_cancelled()
+        )
+        assert len(records_not_cancelled) == 1
+        assert records_not_cancelled[0] == records[1]
+
     def register_hours_worked(
         self, company: UUID, worker: UUID, hours: Decimal = Decimal(1)
     ) -> None:
