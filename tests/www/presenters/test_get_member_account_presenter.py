@@ -138,12 +138,23 @@ class TestPresenter(BaseTestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].user_name)
 
-    def test_that_purpose_is_shown(
+    def test_that_purpose_is_shown_if_transaction_is_comsumption(
         self,
     ):
-        response = self.get_use_case_response([self.get_transaction()])
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransactionTypes.private_consumption)]
+        )
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].purpose)
+
+    def test_that_purpose_is_not_shown_if_transaction_is_wages(
+        self,
+    ):
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransactionTypes.incoming_wages)]
+        )
+        view_model = self.presenter.present_member_account(response)
+        self.assertFalse(view_model.transactions[0].purpose)
 
     def get_use_case_response(
         self, transactions: List[TransactionInfo], balance: Optional[Decimal] = None
