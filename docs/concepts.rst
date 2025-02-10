@@ -3,10 +3,24 @@ Concepts
 
 This document explains key concepts of the Arbeitszeitapp.
 
-Accounts
---------
 
-tbd.
+Accounts and Transactions  
+-------------------------
+
+The core principle of labor time accounting is to prevent the appropriation of others' work. Therefore, all 
+transactions of working hours must be recorded, and there must be clear rules regarding which transactions 
+are permitted. As proposed by the "Group of International Communists" (GIC), 
+this goal is achieved through bookkeeping of transactions between accounts.  
+
+According to the GIC, the following accounts are essential in labor time accounting:  
+
+- Each company must have one account for fixed means of production (P), one for liquid means of production 
+or raw materials (R), one for labor (A), and one for the total product (PRD).  
+- Each member must have an account for labor certificates.  
+
+Additionally, the following accounts are necessary to ensure consistent bookkeeping:  
+- Each cooperative must have a balancing account. 
+- Social accounting must have a Public Sector Fund (PSF).
 
 
 Plans
