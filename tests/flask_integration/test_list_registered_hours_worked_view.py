@@ -3,11 +3,6 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
-    RegisterHoursWorkedRequest,
-)
-
 from .flask import LogInUser, ViewTestCase
 
 
@@ -36,12 +31,12 @@ class CompanyTests(ViewTestCase):
             workers=[worker_id], email=company_email, password=company_password
         )
         self.login_company(email=company_email, password=company_password)
-        request = RegisterHoursWorkedRequest(
-            company_id=company, worker_id=worker_id, hours_worked=Decimal("10")
+        registered_entry = (
+            self.registered_hours_worked_generator.create_registered_hours_worked(
+                company=company, member=worker_id, amount=Decimal(10)
+            )
         )
-        use_case = self.injector.get(RegisterHoursWorked)
-        response = use_case(request)
-        assert not response.is_rejected
+        assert registered_entry
 
 
 class NonCompanyTests(ViewTestCase):
