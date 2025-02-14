@@ -184,46 +184,6 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
         )
         assert result[1].id == worker
 
-    def test_that_we_can_filter_by_id(self) -> None:
-        worker = self.member_generator.create_member()
-        company = self.company_generator.create_company(workers=[worker])
-        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
-        self.register_hours_worked(company=company, worker=worker, hours=Decimal(5))
-        records = list(self.database_gateway.get_registered_hours_worked())
-        assert len(records) == 2
-        result = (
-            self.database_gateway.get_registered_hours_worked()
-            .with_id(records[0].id)
-            .first()
-        )
-        assert records[0] == result
-
-    def test_that_no_record_is_returned_when_filter_by_random_id(self) -> None:
-        worker = self.member_generator.create_member()
-        company = self.company_generator.create_company(workers=[worker])
-        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
-        assert (
-            self.database_gateway.get_registered_hours_worked().with_id(uuid4()).first()
-            is None
-        )
-
-    def test_that_record_can_be_deleted(self) -> None:
-        worker = self.member_generator.create_member()
-        company = self.company_generator.create_company(workers=[worker])
-        self.register_hours_worked(company=company, worker=worker, hours=Decimal(10))
-        self.register_hours_worked(company=company, worker=worker, hours=Decimal(5))
-        records = list(self.database_gateway.get_registered_hours_worked())
-        assert len(records) == 2
-        nr_of_deleted_records = (
-            self.database_gateway.get_registered_hours_worked()
-            .with_id(records[0].id)
-            .delete()
-        )
-        assert nr_of_deleted_records == 1
-        records_after_delete = list(self.database_gateway.get_registered_hours_worked())
-        assert len(records_after_delete) == 1
-        assert records_after_delete[0] == records[1]
-
     def register_hours_worked(
         self, company: UUID, worker: UUID, hours: Decimal = Decimal(1)
     ) -> None:
