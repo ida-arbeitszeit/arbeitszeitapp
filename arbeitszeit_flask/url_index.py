@@ -252,6 +252,3 @@ class GeneralUrlIndex:
 
     def get_pending_work_invites_url(self) -> str:
         return url_for("main_company.list_pending_work_invites")
-
-    def get_registered_hours_worked_url(self) -> str:
-        return url_for("main_company.list_registered_hours_worked")
