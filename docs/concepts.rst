@@ -68,11 +68,10 @@ where :math:`L` is the sum of all working hours in productive plans,
 :math:`P_o` is the sum of all fixed means of production in public plans, and
 :math:`R_o` is the sum of all liquid means of production in public plans. 
 
-The FIC ranges from 0 to 1. It is 0 when all worked hours are registered in
-public plans and 1 when all worked hours are registered in productive plans.
-It ensures that the costs of public plans are covered by the labor of the
-members.
+The FIC ranges from −∞ to 1, but in practice, it should never be negative. A negative FIC indicates that available labor is insufficient to cover the costs of public plans, leading to the issuance of negative work certificates upon work registration.
 
+- If FIC = 0, all labor is allocated to public plans, making all goods and services freely available. When workers register hours worked, they do not receive any work certificates, since their work goes entirely to freely available public-sector goods and services and thus cannot be exchanged for private consumption.
+- If FIC = 1, all labor is dedicated to productive plans, meaning nothing is freely available. Work certificates are issued in full without deductions.
 
 Cooperations 
 -------------
