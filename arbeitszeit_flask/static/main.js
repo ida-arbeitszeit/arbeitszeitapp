@@ -47,3 +47,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   });
+
+// toggle password visibility
+document.addEventListener('DOMContentLoaded', () => {
+  $eye = document.getElementById("eye");
+  $eyeSlashed = document.getElementById("eye-slashed");
+  $pwInput = document.getElementById("password");
+  $eyeRepeat = document.getElementById("eye-repeat");
+  $eyeSlashedRepeat = document.getElementById("eye-slashed-repeat");
+  $pwInputRepeated = document.getElementById("repeat_password");
+    $eye.addEventListener('click', () => {
+      $eye.classList.add("is-hidden")
+      $eyeSlashed.classList.remove("is-hidden")
+      $pwInput.type = 'text'
+    });
+    $eyeSlashed.addEventListener('click', () => {
+      $eyeSlashed.classList.add("is-hidden")
+      $eye.classList.remove("is-hidden")
+      $pwInput.type = 'password'
+    });
+    $eyeRepeat.addEventListener('click', () => {
+      $eyeRepeat.classList.add("is-hidden")
+      $eyeSlashedRepeat.classList.remove("is-hidden")
+      $pwInputRepeated.type = 'text'
+    });
+    $eyeSlashedRepeat.addEventListener('click', () => {
+      $eyeSlashedRepeat.classList.add("is-hidden")
+      $eyeRepeat.classList.remove("is-hidden")
+      $pwInputRepeated.type = 'password'
+    });
+  });
