@@ -148,8 +148,6 @@ class UrlIndex(Protocol):
 
     def get_pending_work_invites_url(self) -> str: ...
 
-    def get_registered_hours_worked_url(self) -> str: ...
-
 
 @dataclass
 class UserUrlIndex:
