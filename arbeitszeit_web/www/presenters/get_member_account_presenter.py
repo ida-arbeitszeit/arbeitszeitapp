@@ -45,7 +45,11 @@ class GetMemberAccountPresenter:
                 user_name=t.peer_name,
                 volume=f"{round(t.transaction_volume, 2)}",
                 is_volume_positive=t.transaction_volume >= 0,
-                purpose=t.purpose,
+                purpose=(
+                    t.purpose
+                    if (t.type == TransactionTypes.private_consumption)
+                    else ""
+                ),
             )
             for t in use_case_response.transactions
         ]
