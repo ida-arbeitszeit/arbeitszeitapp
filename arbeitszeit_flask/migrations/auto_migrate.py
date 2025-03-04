@@ -9,5 +9,5 @@ def migrate(flask_config: Config, engine: Engine) -> None:
     alembic_cfg = AlembicConfig(flask_config["ALEMBIC_CONFIGURATION_FILE"])
     with engine.begin() as connection:
         alembic_cfg.attributes["connection"] = connection
-        alembic_command.stamp(alembic_cfg, "head")
+        alembic_command.ensure_version(alembic_cfg)
         alembic_command.upgrade(alembic_cfg, "head")
