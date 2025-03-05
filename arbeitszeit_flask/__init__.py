@@ -6,7 +6,8 @@ from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
 from arbeitszeit_flask.babel import initialize_babel
-from arbeitszeit_flask.database.db import Database, init_db
+from arbeitszeit_flask.database.db import Database
+from arbeitszeit_flask.database.models import Base
 from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
@@ -48,10 +49,19 @@ def create_app(
     )
 
     load_configuration(app=app, configuration=config)
-    init_db(uri=app.config["SQLALCHEMY_DATABASE_URI"])
-    load_email_plugin(app)
+
+    Database().configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
+
+    # Choose between auto-migration or direct table creation
     if app.config["AUTO_MIGRATE"]:
+        # Let Alembic handle table creation
         migrate(app.config, Database().engine)
+    else:
+        # Create tables directly with SQLAlchemy if they do not exist
+        Base.metadata.create_all(Database().engine, checkfirst=True)
+
+    # Where to redirect the user when he attempts to access a login_required
+    load_email_plugin(app)
 
     # Where to redirect the user when he attempts to access a login_required
     # view without being logged in.
