@@ -15,7 +15,6 @@ TARGET_PACKAGES = [
     "flask_talisman",
     "flask_wtf",
     "is_safe_url",
-    "matplotlib",
     "parameterized",
     "wtforms",
 ]

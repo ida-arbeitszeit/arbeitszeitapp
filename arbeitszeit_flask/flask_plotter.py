@@ -14,7 +14,7 @@ class FlaskPlotter:
         fig = Figure()
         ax = fig.subplots()
         ax.axhline(linestyle="--", color="black")
-        ax.plot(x, y)
+        ax.plot(x, y)  # type: ignore[arg-type]
         fig.set_size_inches(fig_size[0], fig_size[1])
         return self._figure_to_bytes(fig)
 
@@ -28,7 +28,7 @@ class FlaskPlotter:
     ) -> bytes:
         fig = Figure()
         ax = fig.subplots()
-        ax.bar(x_coordinates, height_of_bars, color=colors_of_bars)
+        ax.bar(x_coordinates, height_of_bars, color=colors_of_bars)  # type: ignore[arg-type]
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         if y_label:
