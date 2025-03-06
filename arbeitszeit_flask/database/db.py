@@ -45,11 +45,3 @@ class Database:
 
 class Base(DeclarativeBase):
     pass
-
-
-def init_db(uri: str) -> None:
-    from arbeitszeit_flask.database import models  # noqa: F401
-
-    Database().configure(uri=uri)
-    engine = Database().engine
-    Base.metadata.create_all(bind=engine)

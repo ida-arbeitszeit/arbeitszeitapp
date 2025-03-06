@@ -7,7 +7,6 @@ Create Date: 2023-02-12 14:50:13.203584
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import orm
 from datetime import datetime
 
@@ -28,7 +27,7 @@ def upgrade():
 
 
 def downgrade():
-    Base = declarative_base()
+    Base = orm.declarative_base()
     class Plan(Base):
         __tablename__ = "plan"
 

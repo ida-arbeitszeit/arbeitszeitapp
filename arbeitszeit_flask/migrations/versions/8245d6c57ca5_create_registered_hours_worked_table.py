@@ -11,7 +11,6 @@ from uuid import uuid4
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm
-from sqlalchemy.ext.declarative import declarative_base
 
 revision = "8245d6c57ca5"
 down_revision = "51b2f780aba4"
@@ -47,7 +46,7 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
     )
 
-    Base = declarative_base()
+    Base = orm.declarative_base()
 
     class RegisteredHoursWorked(Base):
         __tablename__ = "registered_hours_worked"
