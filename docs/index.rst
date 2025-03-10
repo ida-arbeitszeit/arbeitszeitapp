@@ -12,10 +12,11 @@ Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
    :maxdepth: 2
 
    introduction
-   development_setup
-   development_guide
+   how_to_contribute
    concepts
    datamodel
+   development_setup
+   development_guide
    license
 
 Indices and tables
