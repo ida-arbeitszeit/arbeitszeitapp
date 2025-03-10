@@ -53,6 +53,10 @@ There are three user roles:
   companies. They can approve company plans based on collectively
   agreed criteria.
 
+.. end-introduction-do-not-delete
+
+.. start-how-to-contribute-do-not-delete
+
 How to contribute
 =================
 
@@ -92,7 +96,7 @@ there's a `helpful guide
 in the GitHub documentation on how to do it. Feel free to refer to
 that!
 
-.. end-introduction-do-not-delete
+.. end-how-to-contribute-do-not-delete
 
 .. start-development-setup-do-not-delete
 
@@ -439,12 +443,17 @@ Run:
 
    .. code-block:: bash
 
+    make clean
     make html
 
 in the root folder of the project to generate developer documentation,
 including auto-generated API docs.  Open the documentation in your
 browser at ``build/html/index.html``. The HTML code is generated from
-the top-level file ``README.rst``, which serves as the source of truth.
+documentation files in the ``docs`` folder, using parts of the 
+top-level file ``README.rst``. 
+
+The docs are hosted on `Read the Docs <https://arbeitszeitapp.readthedocs.io/en/latest/>`_
+and are automatically updated when changes are pushed to the master branch. 
 
 Benchmarking
 ------------
