@@ -14,6 +14,7 @@
   {% if show_active_plans %}
   <div class="columns is-centered has-text-left">
     <div class="column is-one-third">
+      <div class="has-text-centered">{{ gettext("Your active plans.") }}</div>
       {% for plan in active_plans.rows %}
       <article class="media">
         <div class="media-content">
@@ -23,8 +24,8 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small>{{ "calendar"|icon }}&nbsp;{{ plan.activation_date }}</small>
-              <small>{{ "hourglass"|icon }}&nbsp;{{ plan.expiration_relative }}</small>
+              <small title="{{ gettext('Activation date') }}">{{ "calendar"|icon }}&nbsp;{{ plan.activation_date }}</small>
+              <small title="{{ gettext('Expiration date') }}">{{ "hourglass"|icon }}&nbsp;{{ plan.expiration_relative }}</small>
             </p>
           </div>
           <div>
@@ -55,6 +56,7 @@
   {% if show_rejected_plans %}
   <div class="columns is-centered has-text-left">
     <div class="column is-one-third">
+      <div class="has-text-centered">{{ gettext("Plans rejected by social accounting.") }}</div>
       {% for plan in rejected_plans.rows %}
       <article class="media">
         <div class="media-content">
@@ -64,7 +66,8 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small>{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}&nbsp;{{ "times"|icon }}&nbsp;{{ plan.rejection_date }}</small>
+              <small title="{{ gettext('Creation date') }}">{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}</small>
+              <small title="{{ gettext('Rejection date') }}">{{ "times"|icon }}&nbsp;{{ plan.rejection_date }}</small>
             </p>
           </div>
           <div>
@@ -91,6 +94,7 @@
   <h1 class="title is-4 has-text-centered">{{ gettext("Waiting")}}</h1>
   <div class="table-container">
     {% if show_non_active_plans %}
+    <div class="has-text-centered">{{ gettext("Plans waiting for approval by social accounting.") }}</div>
     <table class="table has-text-left mx-auto">
       <thead>
         <tr>
@@ -134,6 +138,7 @@
   {% if show_drafts %}
   <div class="columns is-centered has-text-left">
     <div class="column is-one-third">
+      <div class="has-text-centered">{{ gettext("Your drafts. Click the envelope button to submit a plan to social accounting.") }}</div>
       {% for draft in drafts.rows %}
       <article class="media">
         <div class="media-content">
@@ -143,7 +148,7 @@
                 <a href="{{ draft.draft_details_url }}">{{ draft.product_name }}</a>
               </strong>
               <br>
-              <small>{{ "calendar"|icon }}&nbsp;{{ draft.draft_creation_date }}</small>
+              <small title="{{ gettext('Creation date') }}">{{ "calendar"|icon }}&nbsp;{{ draft.draft_creation_date }}</small>
             </p>
           </div>
         </div>
@@ -194,7 +199,7 @@
                 <a href="{{ plan.plan_details_url }}">{{ plan.prd_name }}</a>
               </strong>
               <br>
-              <small>{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}</small>
+              <small title="{{ gettext('Creation date') }}">{{ "calendar"|icon }}&nbsp;{{ plan.plan_creation_date }}</small>
             </p>
           </div>
         </div>
