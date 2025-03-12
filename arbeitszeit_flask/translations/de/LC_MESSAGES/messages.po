@@ -68,7 +68,7 @@ msgstr "Name Betrieb"
 
 #: arbeitszeit_flask/forms.py:90
 msgid "Search also for expired plans"
-msgstr ""
+msgstr "Auch nach abgelaufenen Plänen suchen"
 
 #: arbeitszeit_flask/forms.py:108 arbeitszeit_flask/forms.py:152
 #: arbeitszeit_flask/forms.py:189 arbeitszeit_flask/forms.py:218
@@ -287,7 +287,7 @@ msgstr "Plan genehmigen"
 
 #: arbeitszeit_flask/templates/accountant/plans-to-review-list.html:33
 msgid "Reject plan"
-msgstr ""
+msgstr "Plan ablehnen"
 
 #: arbeitszeit_flask/templates/accountant/plans-to-review-list.html:43
 msgid "There are currently no plans waiting for review"
@@ -599,7 +599,7 @@ msgstr "Arbeiter*innen des Betriebs"
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:17
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:39
 msgid "No workers found."
-msgstr ""
+msgstr "Keine Arbeiter*innen gefunden."
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:22
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:56
@@ -608,18 +608,18 @@ msgstr "Mitglied ID"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:37
 msgid "Remove a worker"
-msgstr ""
+msgstr "Arbeiter*in entfernen"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:41
 msgid "Click here to remove a worker:"
-msgstr ""
+msgstr "Klicke hier, um eine*n Arbeiter*in zu entfernen:"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:42
 #: arbeitszeit_flask/templates/company/remove_worker_from_company.html:4
 #: arbeitszeit_flask/templates/company/remove_worker_from_company.html:14
 #: arbeitszeit_flask/templates/company/remove_worker_from_company.html:33
 msgid "Remove worker"
-msgstr ""
+msgstr "Arbeiter*in entfernen"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:48
 msgid "Invite worker"
@@ -633,32 +633,32 @@ msgstr "Einladen"
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:74
 #: arbeitszeit_web/www/presenters/list_pending_work_invites_presenter.py:42
 msgid "Pending work invites"
-msgstr ""
+msgstr "Ausstehende Arbeitsanfragen"
 
 #: arbeitszeit_flask/templates/company/invite_worker_to_company.html:73
 msgid "Click here to check for pending work invites:"
-msgstr ""
+msgstr "Klicke hier, um ausstehende Arbeitsanfragen zu überprüfen:"
 
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:13
 msgid "Pending Work Invites"
-msgstr ""
+msgstr "Ausstehende Arbeitsanfragen"
 
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:15
 msgid "No pending work invites found."
-msgstr ""
+msgstr "Keine ausstehenden Arbeitsanfragen gefunden."
 
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:20
 msgid "Worker Id"
-msgstr ""
+msgstr "Arbeiter*innen-ID"
 
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:21
 msgid "Worker Name"
-msgstr ""
+msgstr "Arbeiter*innen-Name"
 
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:22
 #: arbeitszeit_flask/templates/company/list_pending_work_invites.html:34
 msgid "Resend Invite"
-msgstr ""
+msgstr "Einladung erneut senden"
 
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:4
 #: arbeitszeit_flask/templates/company/list_registered_hours_worked.html:11
@@ -791,15 +791,15 @@ msgstr "Aktiv"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:17
 msgid "Your active plans."
-msgstr ""
+msgstr "Deine aktiven Pläne."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:27
 msgid "Activation date"
-msgstr ""
+msgstr "Aktivierungsdatum"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:28
 msgid "Expiration date"
-msgstr ""
+msgstr "Ablaufdatum"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:33
 #: arbeitszeit_flask/templates/user/query_plans.html:75
@@ -820,25 +820,25 @@ msgstr "Du hast keine aktiven Pläne."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:55
 msgid "Rejected"
-msgstr ""
+msgstr "Abgelehnt"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:59
 msgid "Plans rejected by social accounting."
-msgstr ""
+msgstr "Von der öffentlichen Buchhaltung abgelehnte Pläne."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:69
 #: arbeitszeit_flask/templates/company/my_plans.html:151
 #: arbeitszeit_flask/templates/company/my_plans.html:202
 msgid "Creation date"
-msgstr ""
+msgstr "Erstellungsdatum"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:70
 msgid "Rejection date"
-msgstr ""
+msgstr "Ablehnungsdatum"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:89
 msgid "You don't have rejected plans."
-msgstr ""
+msgstr "Du hast keine abgelehnten Pläne."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:94
 msgid "Waiting"
@@ -846,7 +846,7 @@ msgstr "Wartend"
 
 #: arbeitszeit_flask/templates/company/my_plans.html:97
 msgid "Plans waiting for approval by social accounting."
-msgstr ""
+msgstr "Pläne, die auf Genehmigung durch die öffentliche Buchhaltung warten."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:102
 msgid "Costs"
@@ -882,6 +882,8 @@ msgid ""
 "Your drafts. Click the envelope button to submit a plan to social "
 "accounting."
 msgstr ""
+"Deine Entwürfe. Klicke auf den Umschlag, um einen Plan bei der öffentlichen "
+"Buchhaltung einzureichen."
 
 #: arbeitszeit_flask/templates/company/my_plans.html:159
 msgid "File plan"
@@ -982,7 +984,7 @@ msgstr "Auswählen"
 #: arbeitszeit_flask/templates/company/rejected_plan_notification.html:2
 #, python-format
 msgid "Hello %(company_name)s,"
-msgstr ""
+msgstr "Hallo %(company_name)s,"
 
 #: arbeitszeit_flask/templates/company/rejected_plan_notification.html:7
 #, python-format
@@ -990,6 +992,8 @@ msgid ""
 "Your plan with id \"%(plan_id)s\" for product \"%(product_name)s\" was "
 "rejected by public accounting."
 msgstr ""
+"Dein Plan mit der ID \"%(plan_id)s\" für das Produkt \"%(product_name)s\" "
+"wurde von der öffentlichen Buchhaltung abgelehnt."
 
 #: arbeitszeit_flask/templates/company/request_cooperation.html:4
 #: arbeitszeit_flask/templates/company/request_cooperation.html:10
@@ -1596,7 +1600,7 @@ msgstr "Nach Plan-ID oder Produktname suchen"
 
 #: arbeitszeit_flask/templates/user/query_plans.html:30
 msgid "Sort by"
-msgstr ""
+msgstr "Sortieren nach"
 
 #: arbeitszeit_flask/templates/user/request_email_address_change.html:32
 msgid "Submit"
@@ -1721,7 +1725,7 @@ msgstr "Plan wurde eingereicht"
 
 #: arbeitszeit_web/email/notify_worker_about_removal_from_company_presenter.py:17
 msgid "You have been removed as worker from a company"
-msgstr ""
+msgstr "Du wurdest als Arbeiter*in von einem Betrieb entfernt"
 
 #: arbeitszeit_web/email/registration_email_presenter.py:41
 msgid "Account confirmation"
@@ -1814,7 +1818,7 @@ msgstr "E-Mail-Adresse bleibt unverändert."
 #: arbeitszeit_web/www/controllers/create_draft_controller.py:26
 #: arbeitszeit_web/www/controllers/edit_draft_controller.py:26
 msgid "Please correct the errors in the form."
-msgstr ""
+msgstr "Bitte korrigiere die Fehler im Formular."
 
 #: arbeitszeit_web/www/controllers/draft_form_validator.py:48
 msgid "At least one of the costs fields must be a positive number of hours."
@@ -1822,12 +1826,12 @@ msgstr "Mindestens eines der Kostenfelder muss eine positive Anzahl an Stunden s
 
 #: arbeitszeit_web/www/controllers/draft_form_validator.py:150
 msgid "This field must be an integer."
-msgstr ""
+msgstr "Dieses Feld muss eine ganze Zahl sein."
 
 #: arbeitszeit_web/www/controllers/draft_form_validator.py:185
 #: arbeitszeit_web/www/controllers/draft_form_validator.py:189
 msgid "This field must be zero or a positive number."
-msgstr ""
+msgstr "Dieses Feld muss Null oder eine positive Zahl sein."
 
 #: arbeitszeit_web/www/controllers/invite_worker_to_company_controller.py:44
 msgid "Invalid UUID"
@@ -1844,7 +1848,7 @@ msgstr "Du musst eine Menge angeben."
 
 #: arbeitszeit_web/www/controllers/remove_worker_from_company_controller.py:23
 msgid "Worker ID in request is invalid or missing."
-msgstr ""
+msgstr "Arbeiter*innen-ID in der Anfrage ist ungültig oder fehlt."
 
 #: arbeitszeit_web/www/controllers/request_cooperation_controller.py:32
 msgid "Invalid plan ID."
@@ -1986,11 +1990,11 @@ msgstr "Konnte Kooperation nicht ablehnen"
 
 #: arbeitszeit_web/www/presenters/edit_draft_presenter.py:24
 msgid "The draft you are trying to edit does not exist."
-msgstr ""
+msgstr "Der Entwurf, den du bearbeiten möchtest, existiert nicht."
 
 #: arbeitszeit_web/www/presenters/edit_draft_presenter.py:31
 msgid "You are not authorized to edit this draft."
-msgstr ""
+msgstr "Du bist nicht berechtigt, diesen Entwurf zu bearbeiten."
 
 #: arbeitszeit_web/www/presenters/end_cooperation_presenter.py:30
 msgid "Cooperation could not be terminated."
@@ -2254,15 +2258,15 @@ msgstr "Die angegebene Art des Konsums ist ungültig."
 
 #: arbeitszeit_web/www/presenters/reject_plan_presenter.py:24
 msgid "Plan was rejected successfully. An email was sent to the planning company."
-msgstr ""
+msgstr "Plan wurde erfolgreich abgelehnt. Eine E-Mail wurde an den planenden Betrieb gesendet."
 
 #: arbeitszeit_web/www/presenters/reject_plan_presenter.py:30
 msgid "Plan rejection failed. No email sent."
-msgstr ""
+msgstr "Planablehnung fehlgeschlagen. Keine E-Mail gesendet."
 
 #: arbeitszeit_web/www/presenters/remove_worker_from_company_presenter.py:27
 msgid "Worker successfully removed from company."
-msgstr ""
+msgstr "Arbeiter*in erfolgreich vom Betrieb entfernt."
 
 #: arbeitszeit_web/www/presenters/request_cooperation_presenter.py:30
 #: arbeitszeit_web/www/presenters/request_coordination_transfer_presenter.py:89
@@ -2336,11 +2340,11 @@ msgstr "Deine Anfrage, die E-Mail-Adresse zu ändern wurde abgelehnt."
 
 #: arbeitszeit_web/www/presenters/resend_work_invite_presenter.py:22
 msgid "Invite does not exist."
-msgstr ""
+msgstr "Einladung existiert nicht."
 
 #: arbeitszeit_web/www/presenters/resend_work_invite_presenter.py:27
 msgid "Invite has been resent successfully."
-msgstr ""
+msgstr "Einladung wurde erfolgreich erneut versendet."
 
 #: arbeitszeit_web/www/presenters/revoke_plan_filing_presenter.py:17
 msgid "Unexpected error: Not possible to revoke plan filing."
