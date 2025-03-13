@@ -8,7 +8,6 @@ Create Date: 2023-02-15 13:04:28.046515
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import orm
 from uuid import UUID
 
@@ -67,7 +66,7 @@ def downgrade():
     op.drop_table('labour_certificates_payout')
 
 
-Base = declarative_base()
+Base = orm.declarative_base()
 
 
 class Company(Base):

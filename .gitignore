@@ -141,3 +141,9 @@ cython_debug/
 # nix
 /result
 /result-*
+
+# eslint
+/node_modules
+eslint.config.mjs
+package-lock.json
+package.json
