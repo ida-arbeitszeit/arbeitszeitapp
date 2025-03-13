@@ -8,7 +8,6 @@ Create Date: 2023-08-13 12:36:09.404241
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import orm
-from sqlalchemy.ext.declarative import declarative_base
 from uuid import uuid4
 
 
@@ -21,7 +20,7 @@ depends_on = None
 
 def upgrade():
 
-    Base = declarative_base()
+    Base = orm.declarative_base()
 
     class Cooperation(Base):
         __tablename__ = "cooperation"
