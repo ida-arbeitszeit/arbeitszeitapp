@@ -14,16 +14,12 @@ from ..flask import FlaskTestCase
 class AccountResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.social_accounting = self.injector.get(SocialAccounting)
 
-    def test_that_a_priori_there_is_only_one_account_for_social_accounting(
+    def test_that_a_priori_there_are_two_accounts_for_social_accounting(
         self,
     ) -> None:
-        account = self.database_gateway.get_accounts().first()
-        assert len(self.database_gateway.get_accounts()) == 1
-        assert list(self.database_gateway.get_accounts().joined_with_owner()) == [
-            (account, self.social_accounting)
-        ]
+        self.injector.get(SocialAccounting)
+        assert len(self.database_gateway.get_accounts()) == 2
 
     def test_there_are_accounts_to_be_queried_when_one_was_created(self) -> None:
         self.database_gateway.create_account()
@@ -101,17 +97,33 @@ class AccountResultTests(FlaskTestCase):
         assert result
         assert company == result[1]
 
-    def test_account_from_social_accounting_joined_with_owner_yields_social_accounting_itself(
+    def test_account_from_social_accounting_joined_with_owner_yields_account_and_social_accounting_itself(
         self,
     ) -> None:
+        social_accounting = self.injector.get(SocialAccounting)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(self.social_accounting.account)
+            .with_id(social_accounting.account)
             .joined_with_owner()
             .first()
         )
         assert result
-        assert result[1] == self.social_accounting
+        assert result[0].id == social_accounting.account
+        assert result[1] == social_accounting
+
+    def test_psf_account_from_social_accounting_joined_with_owner_yields_pdf_account_and_social_accounting_itself(
+        self,
+    ) -> None:
+        social_accounting = self.injector.get(SocialAccounting)
+        result = (
+            self.database_gateway.get_accounts()
+            .with_id(social_accounting.account_psf)
+            .joined_with_owner()
+            .first()
+        )
+        assert result
+        assert result[0].id == social_accounting.account_psf
+        assert result[1] == social_accounting
 
     def test_with_no_members_have_no_member_accounts(self) -> None:
         assert not self.database_gateway.get_accounts().that_are_member_accounts()
