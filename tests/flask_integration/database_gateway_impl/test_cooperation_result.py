@@ -15,6 +15,7 @@ class CooperationResultTests(FlaskTestCase):
             name="",
             definition="",
             creation_timestamp=datetime(2000, 1, 1),
+            account=self.database_gateway.create_account().id,
         )
         cooperations = self.database_gateway.get_cooperations()
         assert cooperations
@@ -23,14 +24,17 @@ class CooperationResultTests(FlaskTestCase):
         expected_name = "expected_name"
         expected_definition = "expected definition"
         expected_creation_timestamp = datetime(2345, 1, 12)
+        expected_account = self.database_gateway.create_account().id
         cooperation = self.database_gateway.create_cooperation(
             name=expected_name,
             definition=expected_definition,
             creation_timestamp=expected_creation_timestamp,
+            account=expected_account,
         )
         assert cooperation.name == expected_name
         assert cooperation.definition == expected_definition
         assert cooperation.creation_date == expected_creation_timestamp
+        assert cooperation.account == expected_account
 
     def test_that_freshly_created_cooperation_can_be_queried_by_id(self) -> None:
         cooperation = self.create_cooperation()
@@ -74,6 +78,7 @@ class CooperationResultTests(FlaskTestCase):
             name=name,
             definition="",
             creation_timestamp=datetime(2000, 1, 1),
+            account=self.database_gateway.create_account().id,
         )
 
 

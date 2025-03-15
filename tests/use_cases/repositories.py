@@ -1659,6 +1659,7 @@ class MockDatabase:
         self.social_accounting = SocialAccounting(
             id=uuid4(),
             account=self.create_account().id,
+            account_psf=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.coordination_tenures: Dict[UUID, records.CoordinationTenure] = dict()
@@ -1773,6 +1774,7 @@ class MockDatabase:
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> Cooperation:
         cooperation_id = uuid4()
         cooperation = Cooperation(
@@ -1780,6 +1782,7 @@ class MockDatabase:
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
+            account=account,
         )
         self.cooperations[cooperation_id] = cooperation
         return cooperation

@@ -542,6 +542,7 @@ class DatabaseGateway(Protocol):
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> records.Cooperation: ...
 
     def get_cooperations(self) -> CooperationResult: ...

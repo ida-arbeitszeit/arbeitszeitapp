@@ -18,6 +18,7 @@ class EmailAddress:
 class SocialAccounting:
     id: UUID
     account: UUID
+    account_psf: UUID
 
     def get_name(self) -> str:
         return "Social Accounting"
@@ -25,6 +26,8 @@ class SocialAccounting:
     def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
         if account == self.account:
             return AccountTypes.accounting
+        if account == self.account_psf:
+            return AccountTypes.psf
         return None
 
     def is_member(self) -> bool:
@@ -106,6 +109,8 @@ class AccountTypes(Enum):
     prd = "prd"
     member = "member"
     accounting = "accounting"
+    psf = "psf"
+    cooperation = "cooperation"
 
 
 @dataclass(frozen=True)
@@ -119,6 +124,7 @@ class Cooperation:
     creation_date: datetime
     name: str
     definition: str
+    account: UUID
 
 
 @dataclass

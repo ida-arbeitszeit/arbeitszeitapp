@@ -41,10 +41,12 @@ class CreateCooperation:
             return CreateCooperationResponse(
                 rejection_reason=reason, cooperation_id=None
             )
+        account = self.database_gateway.create_account()
         cooperation = self.database_gateway.create_cooperation(
             self.datetime_service.now(),
             request.name,
             request.definition,
+            account.id,
         )
         self.database_gateway.create_coordination_tenure(
             company=coordinator.id,

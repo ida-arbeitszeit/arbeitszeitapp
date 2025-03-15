@@ -1049,7 +1049,10 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             )
             .join(
                 social_accounting,
-                models.Account.id == social_accounting.account,
+                or_(
+                    social_accounting.account == models.Account.id,
+                    social_accounting.account_psf == models.Account.id,
+                ),
                 isouter=True,
             )
             .with_entities(models.Account, member, company, social_accounting)
@@ -1939,8 +1942,9 @@ class AccountingRepository:
         cls, accounting_orm: SocialAccounting
     ) -> records.SocialAccounting:
         return records.SocialAccounting(
-            account=UUID(accounting_orm.account),
             id=UUID(accounting_orm.id),
+            account=UUID(accounting_orm.account),
+            account_psf=UUID(accounting_orm.account_psf),
         )
 
     def get_or_create_social_accounting(self) -> records.SocialAccounting:
@@ -1955,7 +1959,9 @@ class AccountingRepository:
                 id=str(uuid4()),
             )
             account = self.database_gateway.create_account()
+            account_psf = self.database_gateway.create_account()
             social_accounting.account = str(account.id)
+            social_accounting.account_psf = str(account_psf.id)
             self.db.session.add(social_accounting)
             self.db.session.flush()
         return social_accounting
@@ -2121,11 +2127,13 @@ class DatabaseGatewayImpl:
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> records.Cooperation:
         cooperation = models.Cooperation(
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
+            account=str(account),
         )
         self.db.session.add(cooperation)
         self.db.session.flush()
@@ -2145,6 +2153,7 @@ class DatabaseGatewayImpl:
             creation_date=orm.creation_date,
             name=orm.name,
             definition=orm.definition,
+            account=UUID(orm.account),
         )
 
     def create_coordination_tenure(

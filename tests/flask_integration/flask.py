@@ -4,6 +4,7 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
+from sqlalchemy import text
 
 from arbeitszeit.injector import Module
 from arbeitszeit_flask.database.db import Base, Database
@@ -82,6 +83,10 @@ class FlaskTestCase(TestCase):
         self.db.session.remove()
         self.app_context.pop()
         Base.metadata.drop_all(self.db.engine)
+        self.db.session.execute(text("DROP TABLE IF EXISTS alembic_version"))
+        self.db.session.execute(text("DROP TYPE IF EXISTS accounttypes"))
+        self.db.session.execute(text("DROP TYPE IF EXISTS useraction"))
+        self.db.session.commit()
         super().tearDown()
 
     def get_injection_modules(self) -> List[Module]:

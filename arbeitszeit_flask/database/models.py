@@ -40,6 +40,7 @@ class SocialAccounting(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    account_psf: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 
 # Association table Company - Member
@@ -248,6 +249,7 @@ class Cooperation(Base):
     creation_date: Mapped[datetime]
     name: Mapped[str] = mapped_column(String(100))
     definition: Mapped[str] = mapped_column(String(5000))
+    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 
 class CoordinationTenure(Base):
