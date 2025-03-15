@@ -12,20 +12,22 @@ transactions of working hours must be recorded, and there must be clear rules re
 are permitted. As proposed by the "Group of International Communists" (GIC), 
 this goal is achieved through bookkeeping of transactions between accounts.  
 
-According to the GIC, the following accounts are essential in labor time accounting:  
+The following accounts are necessary in labor time accounting:  
 
-- Each company must have four accounts:
+- Each company has four accounts:
 
   - Fixed means of production (P)
   - Liquid means of production, or raw materials (R)
   - Labor (A, "Arbeit")
   - The total product (PRD), debited at the start of each plan cycle by the sum of the P, R, and A values, and then increased back toward zero, item by item, as the finished product gets consumed.
 
-- Each member must have an account for labor certificates.
-
-Additionally, the following account is necessary to ensure consistent bookkeeping:
+- Each member has an account for labor certificates.
 
 - Social accounting has a Public Sector Fund (PSF).
+  
+  The PSF account is used to track hours allocated to the public sector. When a member works hours, a portion of those hours (determined by the FIC, see below) is allocated to the member's account, while the remainder goes to the PSF account.
+
+- Each cooperation has an account that tracks the differences between the cooperative price (see below) and the actual costs of the plans in the cooperation.
 
 
 Plans
