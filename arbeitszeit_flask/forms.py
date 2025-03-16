@@ -8,6 +8,7 @@ from wtforms import (
     SelectField,
     StringField,
     TextAreaField,
+    ValidationError,
     validators,
 )
 
@@ -148,6 +149,7 @@ class RegisterForm(Form):
 
 
 class RegisterAccountantForm(Form):
+    unpacked_token: str
     email = StringField(
         trans.lazy_gettext("Email"),
         validators=[
@@ -173,6 +175,14 @@ class RegisterAccountantForm(Form):
             )
         ],
     )
+
+    def validate_email(form, field) -> None:
+        if field.data != form.unpacked_token:
+            raise ValidationError(
+                message=trans.gettext(
+                    "The entered email is not the one the invitaion was sent to"
+                )
+            )
 
     def get_email_address(self) -> str:
         return self.data["email"]
