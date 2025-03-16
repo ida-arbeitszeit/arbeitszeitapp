@@ -31,9 +31,9 @@ class SignupAccountantView:
 
     @commit_changes
     def POST(self, token: str) -> types.Response:
+        form = RegisterAccountantForm(request.form)
         extracted_token = self.controller.extract_token(token=token)
         if extracted_token:
-            form = RegisterAccountantForm(request.form)
             form.extracted_token = extracted_token
             if form.validate():
                 use_case_request = self.controller.create_use_case_request(form=form)
