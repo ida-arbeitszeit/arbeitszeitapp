@@ -309,6 +309,23 @@ class Transaction:
 
 
 @dataclass
+class Transfer:
+    """
+    Represents a transfer of hours between accounts.
+    The value is always the same for both the debit and credit account.
+    """
+
+    id: UUID
+    date: datetime
+    debit_account: UUID
+    credit_account: UUID
+    value: Decimal
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+
+@dataclass
 class CompanyWorkInvite:
     id: UUID
     company: UUID
