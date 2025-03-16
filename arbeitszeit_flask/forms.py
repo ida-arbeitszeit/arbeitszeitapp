@@ -177,10 +177,12 @@ class RegisterAccountantForm(Form):
     )
 
     def validate_email(form, field) -> None:
-        if field.data != form.unpacked_token:
+        if field.data != form.extracted_token:
             raise ValidationError(
-                message=trans.gettext(
-                    "The entered email is not the one the invitaion was sent to"
+                message=str(
+                    trans.lazy_gettext(
+                        "The entered email is not the one the invitaion was sent to"
+                    )
                 )
             )
 
