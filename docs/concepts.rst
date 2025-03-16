@@ -23,7 +23,7 @@ The following accounts are necessary in labor time accounting:
 
 - Each member has an account for labor certificates.
 
-- Social accounting has a Public Sector Fund (PSF).
+- Social accounting has a Public Sector Fund (PSF) account.
   
   The PSF account is used to track hours allocated to the public sector. When a member works hours, a portion of those hours (determined by the FIC, see below) is allocated to the member's account, while the remainder goes to the PSF account.
 

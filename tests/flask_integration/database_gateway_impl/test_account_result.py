@@ -111,7 +111,7 @@ class AccountResultTests(FlaskTestCase):
         assert result[0].id == social_accounting.account
         assert result[1] == social_accounting
 
-    def test_psf_account_from_social_accounting_joined_with_owner_yields_pdf_account_and_social_accounting_itself(
+    def test_psf_account_from_social_accounting_joined_with_owner_yields_psf_account_and_social_accounting_itself(
         self,
     ) -> None:
         social_accounting = self.injector.get(SocialAccounting)
