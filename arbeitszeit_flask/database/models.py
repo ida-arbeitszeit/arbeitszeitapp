@@ -205,6 +205,39 @@ class Transaction(Base):
         return f"Transaction({fields})"
 
 
+class Transfer(Base):
+    __tablename__ = "transfer"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    date: Mapped[datetime] = mapped_column(index=True)
+    debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    value: Mapped[Decimal]
+
+    debit_account_rel = relationship(
+        "Account",
+        foreign_keys="Transfer.debit_account",
+        backref=backref("transfers_debited", lazy="dynamic"),
+    )
+    credit_account_rel = relationship(
+        "Account",
+        foreign_keys="Transfer.credit_account",
+        backref=backref("transfers_credited", lazy="dynamic"),
+    )
+
+    def __repr__(self) -> str:
+        fields = ", ".join(
+            [
+                f"id={self.id!r}",
+                f"date={self.date!r}",
+                f"debit_account={self.debit_account!r}",
+                f"credit_account={self.credit_account!r}",
+                f"value={self.value!r}",
+            ]
+        )
+        return f"Transfer({fields})"
+
+
 class PrivateConsumption(Base):
     __tablename__ = "private_consumption"
 

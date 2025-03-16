@@ -378,6 +378,9 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
     ]: ...
 
 
+class TransferResult(QueryResult[records.Transfer], Protocol): ...
+
+
 class AccountResult(QueryResult[records.Account], Protocol):
     def with_id(self, *id_: UUID) -> Self: ...
 
@@ -575,6 +578,16 @@ class DatabaseGateway(Protocol):
         amount_received: Decimal,
         purpose: str,
     ) -> records.Transaction: ...
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+    ) -> records.Transfer: ...
+
+    def get_transfers(self) -> TransferResult: ...
 
     def create_company_work_invite(
         self, company: UUID, member: UUID
