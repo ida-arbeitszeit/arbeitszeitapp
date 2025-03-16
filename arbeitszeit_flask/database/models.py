@@ -209,9 +209,9 @@ class Transfer(Base):
     __tablename__ = "transfer"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    date: Mapped[datetime]
-    debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
-    credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    date: Mapped[datetime] = mapped_column(index=True)
+    debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     value: Mapped[Decimal]
 
     debit_account_rel = relationship(
