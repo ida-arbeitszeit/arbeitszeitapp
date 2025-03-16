@@ -181,7 +181,7 @@ class RegisterAccountantForm(Form):
             raise ValidationError(
                 message=str(
                     trans.lazy_gettext(
-                        "The entered email is not the one the invitaion was sent to"
+                        "The entered email is not the one the invitation was sent to"
                     )
                 )
             )
