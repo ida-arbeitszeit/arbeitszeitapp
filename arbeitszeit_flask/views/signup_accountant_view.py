@@ -31,10 +31,10 @@ class SignupAccountantView:
 
     @commit_changes
     def POST(self, token: str) -> types.Response:
-        unpacked_token = self.controller.unpack_token(token=token)
-        assert unpacked_token
+        extracted_token = self.controller.extract_token(token=token)
+        assert extracted_token
         form = RegisterAccountantForm(request.form)
-        form.unpacked_token = unpacked_token
+        form.extracted_token = extracted_token
         if form.validate() and (
             use_case_request := self.controller.register_accountant(form, token)
         ):

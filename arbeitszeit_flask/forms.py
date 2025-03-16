@@ -149,7 +149,7 @@ class RegisterForm(Form):
 
 
 class RegisterAccountantForm(Form):
-    unpacked_token: str
+    extracted_token: str
     email = StringField(
         trans.lazy_gettext("Email"),
         validators=[

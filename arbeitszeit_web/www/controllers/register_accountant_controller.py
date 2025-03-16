@@ -21,15 +21,11 @@ class RegisterAccountantController:
     def register_accountant(
         self, form: RegisterAccountantForm, token: str
     ) -> Optional[RegisterAccountantUseCase.Request]:
-        # unpacked_token = self.token_service.confirm_token(token, timedelta(days=1))
-        # email_address = form.get_email_address()
-        # if unpacked_token != email_address:
-        #     return None
         return RegisterAccountantUseCase.Request(
             name=form.get_name(),
             email=form.get_email_address(),
             password=form.get_password(),
         )
 
-    def unpack_token(self, token: str) -> str | None:
+    def extract_token(self, token: str) -> str | None:
         return self.token_service.confirm_token(token, timedelta(days=1))
