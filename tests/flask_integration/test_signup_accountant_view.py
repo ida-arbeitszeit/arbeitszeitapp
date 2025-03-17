@@ -16,3 +16,8 @@ class ViewTests(ViewTestCase):
         token = self.token_service.generate_token("test@test.test")
         response = self.client.get(f"/accountant/signup/{token}")
         self.assertEqual(response.status_code, 200)
+
+    def test_post_proper_400_response_with_invalid_token(self) -> None:
+        token = "test token"
+        response = self.client.post(f"/accountant/signup/{token}")
+        assert response.status_code == 400
