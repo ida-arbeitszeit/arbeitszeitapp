@@ -18,7 +18,6 @@ class ViewModel:
     url_to_account_r: str
     url_to_account_a: str
     url_to_account_prd: str
-    url_to_all_transactions: str
 
 
 @dataclass
@@ -48,9 +47,6 @@ class ShowCompanyAccountsPresenter:
                 company_id=use_case_response.company
             ),
             url_to_account_prd=self.url_index.get_company_account_prd_url(
-                company_id=use_case_response.company
-            ),
-            url_to_all_transactions=self.url_index.get_company_transactions_url(
                 company_id=use_case_response.company
             ),
         )

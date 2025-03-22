@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Self
 
 from .get_company_summary_benchmark import GetCompanySummaryBenchmark
-from .get_company_transactions import GetCompanyTransactionsBenchmark
 from .get_statistics import GetStatisticsBenchmark
 from .query_plans_sorted_by_activation_date_benchmark import (
     QueryPlansSortedByActivationDateBenchmark,
@@ -21,9 +20,6 @@ def main() -> None:
     configuration = Configuration.from_arguments(arguments)
     results: Dict[str, BenchmarkResult] = dict()
     catalog = BenchmarkCatalog()
-    catalog.register_benchmark(
-        name="get_company_transactions", benchmark_class=GetCompanyTransactionsBenchmark
-    )
     catalog.register_benchmark(
         name="show_prd_account_details", benchmark_class=ShowPrdAccountDetailsBenchmark
     )
