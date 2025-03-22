@@ -316,17 +316,17 @@ msgstr "Start"
 
 #: arbeitszeit_flask/templates/auth/help.html:13
 msgid "User manual"
-msgstr ""
+msgstr "Nutzerhandbuch"
 
 #: arbeitszeit_flask/templates/auth/help.html:21
 #: arbeitszeit_flask/templates/auth/help.html:35
 msgid "User roles"
-msgstr ""
+msgstr "Nutzerrollen"
 
 #: arbeitszeit_flask/templates/auth/help.html:23
 #: arbeitszeit_flask/templates/auth/help.html:38
 msgid "Members"
-msgstr ""
+msgstr "Mitglieder"
 
 #: arbeitszeit_flask/templates/auth/help.html:24
 #: arbeitszeit_flask/templates/auth/help.html:63
@@ -337,60 +337,73 @@ msgstr "Betriebe"
 #: arbeitszeit_flask/templates/auth/help.html:26
 #: arbeitszeit_flask/templates/auth/help.html:78
 msgid "Accountants"
-msgstr ""
+msgstr "Buchhalter*innen"
 
 #: arbeitszeit_flask/templates/auth/help.html:40
 msgid ""
 "Members are employed in companies and receive work certificates for work "
 "done."
 msgstr ""
+"Mitglieder sind in Betrieben beschäftigt und erhalten Arbeitszertifikate für "
+"geleistete Arbeit."
+
 
 #: arbeitszeit_flask/templates/auth/help.html:43
 #: arbeitszeit_flask/templates/auth/help.html:70
 #: arbeitszeit_flask/templates/auth/help.html:85
 msgid "Registration and login"
-msgstr ""
+msgstr "Registrierung und Login"
 
 #: arbeitszeit_flask/templates/auth/help.html:45
 #: arbeitszeit_flask/templates/auth/help.html:73
 msgid "Registration and login are done on the start page."
-msgstr ""
+msgstr "Registrierung und Login erfolgen auf der Startseite."
 
 #: arbeitszeit_flask/templates/auth/help.html:47
 msgid "Company Affiliation"
-msgstr ""
+msgstr "Betriebszugehörigkeit"
 
 #: arbeitszeit_flask/templates/auth/help.html:50
 msgid ""
 "Companies send invitations to registered members. If the member confirms "
 "the invitation, they are considered employed by the inviting company."
 msgstr ""
+"Betriebe senden Einladungen an registrierte Mitglieder. Wenn das Mitglied "
+"die Einladung bestätigt, gilt es als bei dem einladenden Betrieb "
+"beschäftigt."
 
 #: arbeitszeit_flask/templates/auth/help.html:54
 msgid "Work certificates and consumption"
-msgstr ""
+msgstr "Arbeitszertifikate und Konsum"
 
 #: arbeitszeit_flask/templates/auth/help.html:57
 msgid ""
 "When a company registers that a member has worked, the member receives work"
 " certificates on their account."
 msgstr ""
+"Wenn ein Betrieb registriert, dass ein Mitglied gearbeitet hat, erhält das "
+"Mitglied Arbeitszertifikate auf seinem Konto."
 
 #: arbeitszeit_flask/templates/auth/help.html:66
 msgid ""
 "Companies use this application, among other things, for planning, viewing "
 "statistics, and passing on work certificates to workers."
 msgstr ""
+"Betriebe nutzen diese Anwendung unter anderem für Planungerstellung, "
+"Einsicht in Statistiken und Weitergabe von Arbeitszertifikaten an "
+"Arbeiter*innen."
 
 #: arbeitszeit_flask/templates/auth/help.html:81
 msgid "Accountants approve the plans of the companies on behalf of the society."
-msgstr ""
+msgstr "Buchhalter*innen genehmigen die Pläne der Betriebe im Auftrag der Gesellschaft."
 
 #: arbeitszeit_flask/templates/auth/help.html:88
 msgid ""
 "Accountants receive an invitation link from the system administrator, with "
 "which they can register and log in."
 msgstr ""
+"Buchhalter*innen erhalten einen Einladungslink vom Systemadministrator, mit "
+"dem sie sich registrieren und einloggen können."
 
 #: arbeitszeit_flask/templates/auth/login_accountant.html:8
 msgid "Login accountant"
