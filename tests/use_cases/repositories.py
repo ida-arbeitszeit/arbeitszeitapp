@@ -1299,16 +1299,28 @@ class AccountResult(QueryResultImpl[Account]):
     def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
         def items() -> Iterable[Tuple[Account, Decimal]]:
             for account in self.items():
+                # Calculate balance from transactions
                 transactions = self.database.get_transactions()
                 received_transactions = transactions.where_account_is_receiver(
                     account.id
                 )
                 sent_transactions = transactions.where_account_is_sender(account.id)
-                yield account, decimal_sum(
+                transaction_balance = decimal_sum(
                     transaction.amount_received for transaction in received_transactions
                 ) - decimal_sum(
                     transaction.amount_sent for transaction in sent_transactions
                 )
+
+                # Calculate balance from transfers
+                transfer_balance = Decimal(0)
+                for transfer in self.database.transfers.values():
+                    if transfer.credit_account == account.id:
+                        transfer_balance += transfer.value
+                    if transfer.debit_account == account.id:
+                        transfer_balance -= transfer.value
+
+                # Combine both balances
+                yield account, transaction_balance + transfer_balance
 
         return QueryResultImpl(items=items, database=self.database)
 
