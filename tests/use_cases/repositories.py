@@ -977,7 +977,55 @@ class TransactionResult(QueryResultImpl[Transaction]):
 
 
 class TransferResult(QueryResultImpl[records.Transfer]):
-    pass
+    def where_account_is_debtor(self, *account: UUID) -> Self:
+        return self._filter_elements(lambda transfer: transfer.debit_account in account)
+
+    def where_account_is_creditor(self, *account: UUID) -> Self:
+        return self._filter_elements(
+            lambda transfer: transfer.credit_account in account
+        )
+
+    def joined_with_debtor(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Transfer, records.AccountOwner]]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member_id,) = members
+                return self.database.members[member_id]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company_id,) = companies
+                return self.database.companies[company_id]
+            return self.database.social_accounting
+
+        def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
+            for transfer in self.items():
+                yield transfer, get_account_owner(transfer.debit_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_creditor(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Transfer, records.AccountOwner]]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member_id,) = members
+                return self.database.members[member_id]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company_id,) = companies
+                return self.database.companies[company_id]
+            return self.database.social_accounting
+
+        def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
+            for transfer in self.items():
+                yield transfer, get_account_owner(transfer.credit_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
 
 
 class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
