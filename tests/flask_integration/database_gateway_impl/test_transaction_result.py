@@ -3,7 +3,9 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.records import SocialAccounting, Transaction
+from parameterized import parameterized
+
+from arbeitszeit.records import AccountTypes, SocialAccounting, Transaction
 from tests.control_thresholds import ControlThresholdsTestImpl
 
 from ..flask import FlaskTestCase
@@ -284,6 +286,67 @@ class ThatWereASaleForPlanResultTests(FlaskTestCase):
         assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
             plan
         )
+
+
+class JoinedWithReceiverTests(FlaskTestCase):
+    def test_that_joined_with_receiver_yields_member(
+        self,
+    ) -> None:
+        member_id = self.member_generator.create_member()
+        member = self.database_gateway.get_members().with_id(member_id).first()
+        assert member
+        self.transaction_generator.create_transaction(receiving_account=member.account)
+        transaction_and_receiver = (
+            self.database_gateway.get_transactions()
+            .where_account_is_receiver(member.account)
+            .joined_with_receiver()
+            .first()
+        )
+        assert transaction_and_receiver
+        assert transaction_and_receiver[1] == member
+
+    @parameterized.expand(
+        [
+            (AccountTypes.p,),
+            (AccountTypes.r,),
+            (AccountTypes.a,),
+            (AccountTypes.prd,),
+        ]
+    )
+    def test_that_joined_with_receiver_yields_company(
+        self,
+        account_type: AccountTypes,
+    ) -> None:
+        company_id = self.company_generator.create_company()
+        company = self.database_gateway.get_companies().with_id(company_id).first()
+        assert company
+        account = company.get_account_by_type(account_type)
+        assert account
+        self.transaction_generator.create_transaction(receiving_account=account)
+        transaction_and_receiver = (
+            self.database_gateway.get_transactions()
+            .where_account_is_receiver(account)
+            .joined_with_receiver()
+            .first()
+        )
+        assert transaction_and_receiver
+        assert transaction_and_receiver[1] == company
+
+    def test_that_joined_with_receiver_yields_social_accounting(
+        self,
+    ) -> None:
+        social_accounting = self.injector.get(SocialAccounting)
+        self.transaction_generator.create_transaction(
+            receiving_account=social_accounting.account
+        )
+        transaction_and_receiver = (
+            self.database_gateway.get_transactions()
+            .where_account_is_receiver(social_accounting.account)
+            .joined_with_receiver()
+            .first()
+        )
+        assert transaction_and_receiver
+        assert transaction_and_receiver[1] == social_accounting
 
 
 class JoinedWithSenderAndReceiverTests(FlaskTestCase):

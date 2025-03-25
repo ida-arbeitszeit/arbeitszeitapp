@@ -20,7 +20,7 @@ from sqlalchemy import Delete, Insert, Update
 from sqlalchemy.dialects.postgresql import INTERVAL, insert
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.query import Query
-from sqlalchemy.sql.expression import and_, case, delete, func, or_, update
+from sqlalchemy.sql.expression import and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
@@ -877,6 +877,57 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             )
         )
 
+    def joined_with_receiver(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transaction, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member,
+                member.account == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .join(
+                company,
+                or_(
+                    company.r_account == models.Transaction.receiving_account,
+                    company.p_account == models.Transaction.receiving_account,
+                    company.a_account == models.Transaction.receiving_account,
+                    company.prd_account == models.Transaction.receiving_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                social_accounting.account == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .with_entities(models.Transaction, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transaction_and_receiver,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transaction_and_receiver(
+        cls, orm: Any
+    ) -> Tuple[records.Transaction, records.AccountOwner]:
+        transaction, member, company, social_accounting = orm
+        receiver: records.AccountOwner
+        if member:
+            receiver = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            receiver = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            receiver = AccountingRepository.social_accounting_from_orm(
+                social_accounting
+            )
+        return DatabaseGatewayImpl.transaction_from_orm(transaction), receiver
+
     def joined_with_sender_and_receiver(
         self,
     ) -> FlaskQueryResult[
@@ -982,7 +1033,114 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
         )
 
 
-class TransferQueryResult(FlaskQueryResult[records.Transfer]): ...
+class TransferQueryResult(FlaskQueryResult[records.Transfer]):
+    def where_account_is_debtor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(models.Transfer.debit_account.in_(accounts))
+        )
+
+    def where_account_is_creditor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(models.Transfer.credit_account.in_(accounts))
+        )
+
+    def joined_with_debtor(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member, member.account == models.Transfer.debit_account, isouter=True
+            )
+            .join(
+                company,
+                or_(
+                    company.p_account == models.Transfer.debit_account,
+                    company.r_account == models.Transfer.debit_account,
+                    company.a_account == models.Transfer.debit_account,
+                    company.prd_account == models.Transfer.debit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                social_accounting.account_psf == models.Transfer.debit_account,
+                isouter=True,
+            )
+            .with_entities(models.Transfer, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transfer_and_debtor,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transfer_and_debtor(
+        cls, orm: Any
+    ) -> Tuple[records.Transfer, records.AccountOwner]:
+        transfer, member, company, social_accounting = orm
+        debtor: records.AccountOwner
+        if member:
+            debtor = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            debtor = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            debtor = AccountingRepository.social_accounting_from_orm(social_accounting)
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), debtor
+
+    def joined_with_creditor(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member, member.account == models.Transfer.credit_account, isouter=True
+            )
+            .join(
+                company,
+                or_(
+                    company.p_account == models.Transfer.credit_account,
+                    company.r_account == models.Transfer.credit_account,
+                    company.a_account == models.Transfer.credit_account,
+                    company.prd_account == models.Transfer.credit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                social_accounting.account_psf == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .with_entities(models.Transfer, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transfer_and_creditor,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transfer_and_creditor(
+        cls, orm: Any
+    ) -> Tuple[records.Transfer, records.AccountOwner]:
+        transfer, member, company, social_accounting = orm
+        creditor: records.AccountOwner
+        if member:
+            creditor = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            creditor = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            creditor = AccountingRepository.social_accounting_from_orm(
+                social_accounting
+            )
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), creditor
 
 
 class AccountQueryResult(FlaskQueryResult[records.Account]):
@@ -1067,37 +1225,65 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         )
 
     def joined_with_balance(self) -> FlaskQueryResult[Tuple[records.Account, Decimal]]:
-        transaction = aliased(models.Transaction)
-        query = (
-            self.query.join(
-                transaction,
-                or_(
-                    transaction.sending_account == models.Account.id,
-                    transaction.receiving_account == models.Account.id,
-                ),
-                isouter=True,
+        """Calculate account balances considering both transactions and transfers."""
+        from sqlalchemy import func, select
+
+        # Create subqueries for each component of the balance
+        tx_received = (
+            select(
+                models.Transaction.receiving_account.label("account_id"),
+                func.sum(models.Transaction.amount_received).label("received"),
             )
-            .group_by(models.Account.id)
+            .group_by(models.Transaction.receiving_account)
+            .subquery()
+        )
+
+        tx_sent = (
+            select(
+                models.Transaction.sending_account.label("account_id"),
+                func.sum(models.Transaction.amount_sent).label("sent"),
+            )
+            .group_by(models.Transaction.sending_account)
+            .subquery()
+        )
+
+        tf_credited = (
+            select(
+                models.Transfer.credit_account.label("account_id"),
+                func.sum(models.Transfer.value).label("credited"),
+            )
+            .group_by(models.Transfer.credit_account)
+            .subquery()
+        )
+
+        tf_debited = (
+            select(
+                models.Transfer.debit_account.label("account_id"),
+                func.sum(models.Transfer.value).label("debited"),
+            )
+            .group_by(models.Transfer.debit_account)
+            .subquery()
+        )
+
+        # Join all components and calculate balance
+        query = (
+            self.query.outerjoin(
+                tx_received, models.Account.id == tx_received.c.account_id
+            )
+            .outerjoin(tx_sent, models.Account.id == tx_sent.c.account_id)
+            .outerjoin(tf_credited, models.Account.id == tf_credited.c.account_id)
+            .outerjoin(tf_debited, models.Account.id == tf_debited.c.account_id)
             .with_entities(
                 models.Account,
-                func.sum(
-                    case(
-                        (
-                            transaction.receiving_account == models.Account.id,
-                            transaction.amount_received,
-                        ),
-                        else_=Decimal(0),
-                    )
-                    - case(
-                        (
-                            transaction.sending_account == models.Account.id,
-                            transaction.amount_sent,
-                        ),
-                        else_=Decimal(0),
-                    )
-                ),
+                (
+                    func.coalesce(tx_received.c.received, 0)
+                    - func.coalesce(tx_sent.c.sent, 0)
+                    + func.coalesce(tf_credited.c.credited, 0)
+                    - func.coalesce(tf_debited.c.debited, 0)
+                ).label("balance"),
             )
         )
+
         return FlaskQueryResult(
             query=query,
             db=self.db,
