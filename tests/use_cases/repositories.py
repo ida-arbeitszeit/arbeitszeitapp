@@ -976,6 +976,10 @@ class TransactionResult(QueryResultImpl[Transaction]):
         )
 
 
+class TransferResult(QueryResultImpl[records.Transfer]):
+    pass
+
+
 class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
         def consumption_sorting_key(
@@ -1649,6 +1653,7 @@ class MockDatabase:
         self.companies: Dict[UUID, Company] = {}
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
+        self.transfers: Dict[UUID, records.Transfer] = dict()
         self.accounts: List[Account] = []
         self.p_accounts: Set[Account] = set()
         self.r_accounts: Set[Account] = set()
@@ -1859,6 +1864,29 @@ class MockDatabase:
     def get_transactions(self) -> TransactionResult:
         return TransactionResult(
             items=lambda: self.transactions.values(),
+            database=self,
+        )
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+    ) -> records.Transfer:
+        transfer = records.Transfer(
+            id=uuid4(),
+            date=date,
+            debit_account=debit_account,
+            credit_account=credit_account,
+            value=value,
+        )
+        self.transfers[transfer.id] = transfer
+        return transfer
+
+    def get_transfers(self) -> TransferResult:
+        return TransferResult(
+            items=lambda: self.transfers.values(),
             database=self,
         )
 

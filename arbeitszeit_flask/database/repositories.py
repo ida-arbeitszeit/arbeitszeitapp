@@ -982,6 +982,9 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
         )
 
 
+class TransferQueryResult(FlaskQueryResult[records.Transfer]): ...
+
+
 class AccountQueryResult(FlaskQueryResult[records.Account]):
     def with_id(self, *id_: UUID) -> Self:
         ids = list(map(str, id_))
@@ -2259,6 +2262,41 @@ class DatabaseGatewayImpl:
             query=self.db.session.query(models.Transaction),
             mapper=self.transaction_from_orm,
             db=self.db,
+        )
+
+    @classmethod
+    def transfer_from_orm(cls, transfer: models.Transfer) -> records.Transfer:
+        return records.Transfer(
+            id=UUID(transfer.id),
+            date=transfer.date,
+            debit_account=UUID(transfer.debit_account),
+            credit_account=UUID(transfer.credit_account),
+            value=Decimal(transfer.value),
+        )
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+    ) -> records.Transfer:
+        transfer = models.Transfer(
+            id=str(uuid4()),
+            date=date,
+            debit_account=str(debit_account),
+            credit_account=str(credit_account),
+            value=value,
+        )
+        self.db.session.add(transfer)
+        self.db.session.flush()
+        return self.transfer_from_orm(transfer)
+
+    def get_transfers(self) -> TransferQueryResult:
+        return TransferQueryResult(
+            query=self.db.session.query(models.Transfer),
+            db=self.db,
+            mapper=self.transfer_from_orm,
         )
 
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
