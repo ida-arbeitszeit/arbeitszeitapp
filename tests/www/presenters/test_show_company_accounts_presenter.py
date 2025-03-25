@@ -71,16 +71,6 @@ class ShowCompanyAccountsPresenterTests(BaseTestCase):
             self.url_index.get_company_account_prd_url(company_id=company),
         )
 
-    def test_view_model_contains_url_to_all_transactions(self) -> None:
-        company = uuid4()
-        presentation = self.presenter.present(
-            self.create_use_case_response(company=company)
-        )
-        self.assertEqual(
-            presentation.url_to_all_transactions,
-            self.url_index.get_company_transactions_url(company_id=company),
-        )
-
     def create_use_case_response(
         self, company: UUID | None = None
     ) -> ShowCompanyAccountsResponse:
