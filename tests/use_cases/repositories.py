@@ -1461,6 +1461,55 @@ class RegisteredHoursWorkedResult(QueryResultImpl[records.RegisteredHoursWorked]
             database=self.database,
         )
 
+    def joined_with_transfer_of_work_certificates(self) -> QueryResultImpl[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]:
+        def items() -> Iterable[
+            Tuple[
+                records.RegisteredHoursWorked,
+                records.Transfer,
+            ]
+        ]:
+            for registered_hours in self.items():
+                transfer = self.database.transfers[
+                    registered_hours.transfer_of_work_certificates
+                ]
+                yield registered_hours, transfer
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> QueryResultImpl[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]:
+        def items() -> Iterable[
+            Tuple[
+                records.RegisteredHoursWorked,
+                records.Member,
+                records.Transfer,
+            ]
+        ]:
+            for registered_hours in self.items():
+                worker = self.database.members[registered_hours.member]
+                transfer = self.database.transfers[
+                    registered_hours.transfer_of_work_certificates
+                ]
+                yield registered_hours, worker, transfer
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
 
 class AccountCredentialsResult(QueryResultImpl[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
@@ -2154,16 +2203,16 @@ class MockDatabase:
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked:
         record = records.RegisteredHoursWorked(
             id=uuid4(),
             company=company,
             member=member,
-            amount=amount,
-            transaction=transaction,
+            transfer_of_work_certificates=transfer_of_work_certificates,
+            transfer_of_taxes=transfer_of_taxes,
             registered_on=registered_on,
         )
         self.registered_hours_worked.append(record)

@@ -63,19 +63,6 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
 
     @parameterized.expand(
         [
-            Decimal(1),
-            Decimal(99),
-        ]
-    )
-    def test_that_record_has_specified_amount(self, expected_hours: Decimal) -> None:
-        worker = self.member_generator.create_member()
-        company = self.company_generator.create_company(workers=[worker])
-        self.register_hours_worked(company=company, worker=worker, hours=expected_hours)
-        assert (record := self.database_gateway.get_registered_hours_worked().first())
-        assert record.amount == expected_hours
-
-    @parameterized.expand(
-        [
             datetime(2000, 1, 1),
             datetime(2000, 1, 2),
             datetime(2012, 3, 21),
@@ -91,15 +78,26 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
         assert (record := self.database_gateway.get_registered_hours_worked().first())
         assert record.registered_on == expected_time
 
-    def test_that_transaction_id_exists_in_db(
+    def test_that_transfer_of_work_certificates_id_exists_in_db(
         self,
     ) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[worker])
         self.register_hours_worked(company=company, worker=worker)
         assert (record := self.database_gateway.get_registered_hours_worked().first())
-        assert record.transaction in (
-            record.id for record in self.database_gateway.get_transactions()
+        assert record.transfer_of_work_certificates in (
+            record.id for record in self.database_gateway.get_transfers()
+        )
+
+    def test_that_transfer_of_taxes_id_exists_in_db(
+        self,
+    ) -> None:
+        worker = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker])
+        self.register_hours_worked(company=company, worker=worker)
+        assert (record := self.database_gateway.get_registered_hours_worked().first())
+        assert record.transfer_of_taxes in (
+            record.id for record in self.database_gateway.get_transfers()
         )
 
     def test_that_we_find_a_record_if_we_filter_by_company_where_the_hours_were_worked(
@@ -183,6 +181,56 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
             .first()
         )
         assert result[1].id == worker
+
+    def test_that_result_joined_with_transfer_of_work_certificates_has_correct_debit_account_type(
+        self,
+    ) -> None:
+        worker_id = self.member_generator.create_member()
+        company = self.company_generator.create_company_record(workers=[worker_id])
+        self.register_hours_worked(company=company.id, worker=worker_id)
+        assert (
+            result := self.database_gateway.get_registered_hours_worked()
+            .joined_with_transfer_of_work_certificates()
+            .first()
+        )
+        assert result[1].debit_account == company.work_account
+
+    def test_that_result_joined_with_transfer_of_work_certificates_has_correct_credit_account_type(
+        self,
+    ) -> None:
+        worker_id = self.member_generator.create_member()
+        worker = self.database_gateway.get_members().with_id(worker_id).first()
+        assert worker
+        company = self.company_generator.create_company(workers=[worker_id])
+        self.register_hours_worked(company=company, worker=worker_id)
+        assert (
+            result := self.database_gateway.get_registered_hours_worked()
+            .joined_with_transfer_of_work_certificates()
+            .first()
+        )
+        assert result[1].credit_account == worker.account
+
+    @parameterized.expand(
+        [
+            (Decimal(12),),
+            (Decimal(123.1),),
+        ]
+    )
+    def test_that_result_joined_with_transfer_of_work_certificates_has_correct_value(
+        self,
+        expected_value: Decimal,
+    ) -> None:
+        worker_id = self.member_generator.create_member()
+        company = self.company_generator.create_company(workers=[worker_id])
+        self.register_hours_worked(
+            company=company, worker=worker_id, hours=expected_value
+        )
+        assert (
+            result := self.database_gateway.get_registered_hours_worked()
+            .joined_with_transfer_of_work_certificates()
+            .first()
+        )
+        assert result[1].value == expected_value
 
     def register_hours_worked(
         self, company: UUID, worker: UUID, hours: Decimal = Decimal(1)
