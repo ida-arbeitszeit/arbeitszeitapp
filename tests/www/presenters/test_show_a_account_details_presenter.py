@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List
 from uuid import UUID, uuid4
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -11,14 +11,14 @@ from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
 from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = show_a_account_details.TransactionInfo(
-    transaction_type=TransactionTypes.credit_for_wages,
+    transaction_type=TransferType.credit_a,
     date=datetime.now(),
     transaction_volume=Decimal(10.007),
     purpose="Test purpose",
 )
 
 DEFAULT_INFO2 = show_a_account_details.TransactionInfo(
-    transaction_type=TransactionTypes.payment_of_wages,
+    transaction_type=TransferType.work_certificates,
     date=datetime.now(),
     transaction_volume=Decimal(20),
     purpose="Test purpose",
