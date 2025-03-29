@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
+from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.use_cases import confirm_member, get_coop_summary
 from arbeitszeit.use_cases.accept_cooperation import (
@@ -163,6 +164,8 @@ class PlanGenerator:
     hide_plan: HidePlan
     get_coop_summary_use_case: get_coop_summary.GetCoopSummary
     reject_plan_use_case: RejectPlanUseCase
+    payout_factor_service: PayoutFactorService
+    datetime_service: FakeDatetimeService
 
     def create_plan(
         self,
@@ -277,7 +280,7 @@ class PlanGenerator:
                 planner=planner,
             )
         )
-        assert not response.is_rejected
+        assert not response.is_rejected, f"Could not create draft: {response}"
         assert response.draft_id
         return response.draft_id
 
@@ -323,6 +326,70 @@ class PlanGenerator:
         response = self.get_coop_summary_use_case(request)
         assert response
         return response.current_coordinator
+
+    def create_plans_that_lead_to_fic_of(self, fic: Decimal) -> None:
+        """
+        Parameters:
+            fic: The payout factor (FIC) to achieve. Must be between 0 and 1.
+
+        This function creates plans as a side effect.
+        """
+        if fic < 0 or fic > 1:
+            raise ValueError("FIC must be between 0 and 1")
+        elif fic == 1:
+            # For FIC = 1, we just need a productive plan with no public plans
+            self.create_plan(
+                is_public_service=False,
+                costs=records.ProductionCosts(
+                    labour_cost=Decimal(1000),
+                    means_cost=Decimal(0),
+                    resource_cost=Decimal(0),
+                ),
+            )
+            current_fic = self.payout_factor_service.calculate_payout_factor(
+                self.datetime_service.now()
+            )
+            assert round(current_fic, 4) == round(fic, 4)
+            return
+
+        # Choose reasonable default values for labor
+        productive_labor = Decimal(1000)
+        public_labor = Decimal(200)
+
+        # Calculate required sum of fixed means and resources in public plan
+        # Using the formula: fic = (L - (Po + Ro)) / (L + Lo)
+        # Rearranged to: (Po + Ro) = L - fic * (L + Lo)
+        required_public_means_and_resources = productive_labor - fic * (
+            productive_labor + public_labor
+        )
+
+        # Divide evenly between means and resources (for simplicity)
+        public_means = required_public_means_and_resources / 2
+        public_resources = required_public_means_and_resources / 2
+
+        # Create the productive plan
+        self.create_plan(
+            is_public_service=False,
+            costs=records.ProductionCosts(
+                labour_cost=productive_labor,
+                means_cost=Decimal(0),  # Not relevant for FIC calculation
+                resource_cost=Decimal(0),  # Not relevant for FIC calculation
+            ),
+        )
+
+        # Create the public plan
+        self.create_plan(
+            is_public_service=True,
+            costs=records.ProductionCosts(
+                labour_cost=public_labor,
+                means_cost=public_means,
+                resource_cost=public_resources,
+            ),
+        )
+        current_fic = self.payout_factor_service.calculate_payout_factor(
+            self.datetime_service.now()
+        )
+        assert round(current_fic, 4) == round(fic, 4)
 
 
 @dataclass
