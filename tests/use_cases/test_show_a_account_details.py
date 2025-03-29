@@ -5,7 +5,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
@@ -93,13 +93,9 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.payment_of_wages
+            response.transactions[0].transaction_type == TransferType.work_certificates
         )
-        assert (
-            response.transactions[1].transaction_type
-            == TransactionTypes.credit_for_wages
-        )
+        assert response.transactions[1].transaction_type == TransferType.credit_a
 
     def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
         self,
@@ -118,10 +114,7 @@ class UseCaseTester(BaseTestCase):
         assert response.transactions[0].transaction_volume == Decimal(8.5)
         assert response.transactions[0].purpose is not None
         assert isinstance(response.transactions[0].date, datetime)
-        assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.credit_for_wages
-        )
+        assert response.transactions[0].transaction_type == TransferType.credit_a
         assert response.account_balance == Decimal(8.5)
 
     def test_that_correct_info_is_generated_after_company_transfering_work_certificates(
@@ -139,8 +132,9 @@ class UseCaseTester(BaseTestCase):
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
         transaction = response.transactions[0]
-        assert transaction.transaction_type == TransactionTypes.payment_of_wages
+        assert transaction.transaction_type == TransferType.work_certificates
         assert transaction.transaction_volume == -hours_worked
+        assert transaction.purpose == "Lohn"
         assert response.account_balance == -hours_worked
 
     def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:

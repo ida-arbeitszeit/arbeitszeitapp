@@ -40,15 +40,15 @@ class ListRegisteredHoursWorkedUseCase:
             self.database_gateway.get_registered_hours_worked()
             .at_company(request.company_id)
             .ordered_by_registration_time(is_ascending=False)
-            .joined_with_worker()
+            .joined_with_worker_and_transfer_of_work_certificates()
         )
         registered_hours_worked = [
             RegisteredHoursWorked(
-                hours=registered_hours.amount,
+                hours=transfer.value,
                 worker_id=registered_hours.member,
                 worker_name=worker.get_name(),
                 registered_on=registered_hours.registered_on,
             )
-            for registered_hours, worker in records
+            for registered_hours, worker, transfer in records
         ]
         return Response(registered_hours_worked=registered_hours_worked)

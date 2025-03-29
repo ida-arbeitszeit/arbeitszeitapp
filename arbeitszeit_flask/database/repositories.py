@@ -1892,6 +1892,68 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             mapper=mapper,
         )
 
+    def joined_with_transfer_of_work_certificates(self) -> FlaskQueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.RegisteredHoursWorked, records.Transfer]:
+            hours_orm, transfer_orm = orm
+            return (
+                DatabaseGatewayImpl.registered_hours_worked_from_orm(hours_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
+            )
+
+        transfers = aliased(models.Transfer)
+        query = self.query.join(
+            transfers,
+            transfers.id == models.RegisteredHoursWorked.transfer_of_work_certificates,
+        ).with_entities(models.RegisteredHoursWorked, transfers)
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> FlaskQueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.RegisteredHoursWorked, records.Member, records.Transfer]:
+            hours_orm, member_orm, transfer_orm = orm
+            return (
+                DatabaseGatewayImpl.registered_hours_worked_from_orm(hours_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
+            )
+
+        members = aliased(models.Member)
+        transfers = aliased(models.Transfer)
+        query = (
+            self.query.join(members, members.id == models.RegisteredHoursWorked.worker)
+            .join(
+                transfers,
+                transfers.id
+                == models.RegisteredHoursWorked.transfer_of_work_certificates,
+            )
+            .with_entities(models.RegisteredHoursWorked, members, transfers)
+        )
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
 
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
@@ -2780,15 +2842,15 @@ class DatabaseGatewayImpl:
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked:
         db_record = models.RegisteredHoursWorked(
             company=str(company),
             worker=str(member),
-            amount=amount,
-            transaction=str(transaction),
+            transfer_of_work_certificates=str(transfer_of_work_certificates),
+            transfer_of_taxes=str(transfer_of_taxes),
             registered_on=registered_on,
         )
         self.db.session.add(db_record)
@@ -2810,7 +2872,7 @@ class DatabaseGatewayImpl:
             id=UUID(db_record.id),
             company=UUID(db_record.company),
             member=UUID(db_record.worker),
+            transfer_of_work_certificates=UUID(db_record.transfer_of_work_certificates),
+            transfer_of_taxes=UUID(db_record.transfer_of_taxes),
             registered_on=db_record.registered_on,
-            amount=db_record.amount,
-            transaction=UUID(db_record.transaction),
         )

@@ -8,7 +8,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transactions import TransactionTypes, UserAccountingService
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass
@@ -18,7 +18,7 @@ class Request:
 
 @dataclass
 class TransactionInfo:
-    transaction_type: TransactionTypes
+    transaction_type: TransferType
     date: datetime
     transaction_volume: Decimal
     purpose: str
@@ -40,23 +40,39 @@ class Response:
 
 @dataclass
 class ShowAAccountDetailsUseCase:
-    accounting_service: UserAccountingService
     database: DatabaseGateway
 
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company).first()
         assert company
-        transactions = [
-            TransactionInfo(
-                transaction_type=row.transaction_type,
-                date=row.transaction.date,
-                transaction_volume=row.volume,
-                purpose=row.transaction.purpose,
+        transactions: list[TransactionInfo] = []
+        transactions_of_credit_a = (
+            self.database.get_transactions().where_account_is_receiver(
+                company.work_account
             )
-            for row in self.accounting_service.get_statement_of_account(
-                company, [company.work_account]
+        )
+        transfers_of_work_certificates = (
+            self.database.get_transfers().where_account_is_debtor(company.work_account)
+        )
+        for tx in transactions_of_credit_a:
+            transactions.append(
+                TransactionInfo(
+                    transaction_type=TransferType.credit_a,  # in the new "transfer" system this can be also credit_public_a
+                    date=tx.date,
+                    transaction_volume=tx.amount_received,
+                    purpose=tx.purpose,
+                )
             )
-        ]
+        for tf in transfers_of_work_certificates:
+            transactions.append(
+                TransactionInfo(
+                    transaction_type=TransferType.work_certificates,
+                    date=tf.date,
+                    transaction_volume=-tf.value,  # negative value
+                    purpose="Lohn",
+                )
+            )
+        transactions.sort(key=lambda t: t.date, reverse=True)
         account_balance = self._get_account_balance(company.work_account)
         plot = PlotDetails(
             timestamps=self._get_plot_dates(transactions),
