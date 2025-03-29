@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-03-12 18:24+0100\n"
+"POT-Creation-Date: 2025-03-22 12:59+0100\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -304,8 +304,86 @@ msgid ""
 "your account:"
 msgstr ""
 
-#: arbeitszeit_flask/templates/auth/help.html:7
+#: arbeitszeit_flask/templates/auth/help.html:6
 msgid "Start"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:13
+msgid "User manual"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:21
+#: arbeitszeit_flask/templates/auth/help.html:35
+msgid "User roles"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:23
+#: arbeitszeit_flask/templates/auth/help.html:38
+msgid "Members"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:24
+#: arbeitszeit_flask/templates/auth/help.html:63
+#: arbeitszeit_flask/templates/user/statistics.html:18
+msgid "Companies"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:26
+#: arbeitszeit_flask/templates/auth/help.html:78
+msgid "Accountants"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:40
+msgid ""
+"Members are employed in companies and receive work certificates for work "
+"done."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:43
+#: arbeitszeit_flask/templates/auth/help.html:70
+#: arbeitszeit_flask/templates/auth/help.html:85
+msgid "Registration and login"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:45
+#: arbeitszeit_flask/templates/auth/help.html:73
+msgid "Registration and login are done on the start page."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:47
+msgid "Company Affiliation"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:50
+msgid ""
+"Companies send invitations to registered members. If the member confirms "
+"the invitation, they are considered employed by the inviting company."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:54
+msgid "Work certificates and consumption"
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:57
+msgid ""
+"When a company registers that a member has worked, the member receives work"
+" certificates on their account."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:66
+msgid ""
+"Companies use this application, among other things, for planning, viewing "
+"statistics, and passing on work certificates to workers."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:81
+msgid "Accountants approve the plans of the companies on behalf of the society."
+msgstr ""
+
+#: arbeitszeit_flask/templates/auth/help.html:88
+msgid ""
+"Accountants receive an invitation link from the system administrator, with "
+"which they can register and log in."
 msgstr ""
 
 #: arbeitszeit_flask/templates/auth/login_accountant.html:8
@@ -1561,10 +1639,6 @@ msgstr ""
 
 #: arbeitszeit_flask/templates/user/request_email_change_warning.html:5
 msgid "Admin email address:"
-msgstr ""
-
-#: arbeitszeit_flask/templates/user/statistics.html:18
-msgid "Companies"
 msgstr ""
 
 #: arbeitszeit_flask/templates/user/statistics.html:38
