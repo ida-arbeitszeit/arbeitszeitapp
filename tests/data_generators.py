@@ -277,7 +277,7 @@ class PlanGenerator:
                 planner=planner,
             )
         )
-        assert not response.is_rejected
+        assert not response.is_rejected, f"Could not create draft: {response}"
         assert response.draft_id
         return response.draft_id
 
