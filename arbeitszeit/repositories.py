@@ -378,7 +378,18 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
     ]: ...
 
 
-class TransferResult(QueryResult[records.Transfer], Protocol): ...
+class TransferResult(QueryResult[records.Transfer], Protocol):
+    def where_account_is_debtor(self, *account: UUID) -> Self: ...
+
+    def where_account_is_creditor(self, *account: UUID) -> Self: ...
+
+    def joined_with_debtor(
+        self,
+    ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
+
+    def joined_with_creditor(
+        self,
+    ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
 
 
 class AccountResult(QueryResult[records.Account], Protocol):
