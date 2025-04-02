@@ -13,6 +13,7 @@ from tests.data_generators import (
     PlanGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
+from tests.economic_scenarios import EconomicScenarios
 from tests.email_notifications import EmailSenderTestImpl
 
 from .balance_checker import BalanceChecker
@@ -73,6 +74,7 @@ class BaseTestCase(TestCase):
         CoordinationTransferRequestGenerator
     )
     datetime_service = _lazy_property(FakeDatetimeService)
+    economic_scenarios = _lazy_property(EconomicScenarios)
     email_sender = _lazy_property(EmailSenderTestImpl)
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
