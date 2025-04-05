@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from arbeitszeit import records
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases.get_member_account import GetMemberAccount
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
@@ -76,7 +76,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
     assert len(response.transactions) == 1
     assert response.transactions[0].peer_name == expected_company_name
     assert response.transactions[0].transaction_volume == Decimal(-10)
-    assert response.transactions[0].type == TransactionTypes.private_consumption
+    assert response.transactions[0].type == TransferType.private_consumption
     assert response.balance == Decimal(-10)
 
 
@@ -109,7 +109,81 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
 
 
 @injection_test
-def test_that_correct_info_is_generated_after_member_receives_wages(
+def test_that_after_member_has_worked_info_on_certificates_and_taxes_are_generated(
+    use_case: GetMemberAccount,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    register_hours_worked: RegisterHoursWorked,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company(
+        workers=[member],
+    )
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=member,
+            hours_worked=Decimal("8.5"),
+        )
+    )
+
+    response = use_case(member)
+    assert len(response.transactions) == 2
+    assert response.transactions[0].type == TransferType.taxes
+    assert response.transactions[1].type == TransferType.work_certificates
+
+
+@injection_test
+def test_that_balance_is_correct_after_member_has_worked(
+    use_case: GetMemberAccount,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    register_hours_worked: RegisterHoursWorked,
+):
+    member = member_generator.create_member()
+    company = company_generator.create_company(
+        workers=[member],
+    )
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=member,
+            hours_worked=Decimal("8.5"),
+        )
+    )
+    response = use_case(member)
+    assert response.balance == Decimal("8.5")
+
+
+@injection_test
+def test_that_correct_tax_info_is_generated(
+    use_case: GetMemberAccount,
+    member_generator: MemberGenerator,
+    company_generator: CompanyGenerator,
+    register_hours_worked: RegisterHoursWorked,
+    social_accounting: records.SocialAccounting,
+):
+    expected_company_name = "test company name"
+    member = member_generator.create_member()
+    company = company_generator.create_company(
+        workers=[member], name=expected_company_name
+    )
+    register_hours_worked(
+        use_case_request=RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=member,
+            hours_worked=Decimal("8.5"),
+        )
+    )
+    response = use_case(member)
+    transfer = response.transactions[0]
+    assert transfer.peer_name == social_accounting.get_name()
+    assert transfer.type == TransferType.taxes
+    assert transfer.transaction_volume == Decimal("0")
+
+
+@injection_test
+def test_that_correct_work_certificates_info_is_generated(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
@@ -127,23 +201,22 @@ def test_that_correct_info_is_generated_after_member_receives_wages(
             hours_worked=Decimal("8.5"),
         )
     )
-
     response = use_case(member)
-    assert len(response.transactions) == 1
-    assert response.transactions[0].peer_name == expected_company_name
-    assert response.transactions[0].transaction_volume == Decimal(8.5)
-    assert response.transactions[0].type == TransactionTypes.incoming_wages
-    assert response.balance == Decimal(8.5)
+    transfer = response.transactions[1]
+    assert transfer.peer_name == expected_company_name
+    assert transfer.transaction_volume == Decimal(8.5)
+    assert transfer.type == TransferType.work_certificates
 
 
 @injection_test
-def test_that_correct_info_for_company_is_generated_in_correct_order_after_several_transactions_of_different_kind(
+def test_that_correct_peer_name_info_is_generated_in_correct_order_after_several_transactions_of_different_kind(
     use_case: GetMemberAccount,
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,
     register_hours_worked: RegisterHoursWorked,
     consumption_generator: ConsumptionGenerator,
     plan_generator: PlanGenerator,
+    social_accounting: records.SocialAccounting,
 ):
     company1_name = "test company 1"
     company2_name = "test company 2"
@@ -157,6 +230,7 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         amount=1,
     )
     company2 = company_generator.create_company(workers=[member], name=company2_name)
+    # register hours
     register_hours_worked(
         use_case_request=RegisterHoursWorkedRequest(
             company_id=company1,
@@ -164,11 +238,13 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
             hours_worked=Decimal("12"),
         )
     )
+    # consume
     consumption_generator.create_private_consumption(
         consumer=member,
         plan=company1_plan,
         amount=1,
     )
+    # register hours
     register_hours_worked(
         use_case_request=RegisterHoursWorkedRequest(
             company_id=company2,
@@ -177,16 +253,19 @@ def test_that_correct_info_for_company_is_generated_in_correct_order_after_sever
         )
     )
     response = use_case(member)
-    assert len(response.transactions) == 3
+    assert len(response.transactions) == 5  # 1 consumption, 2 work certificates, 2 tax
 
     trans1 = response.transactions.pop()
     assert trans1.peer_name == company1_name
-    assert trans1.transaction_volume == Decimal(12)
 
     trans2 = response.transactions.pop()
-    assert trans2.peer_name == company1_name
-    assert trans2.transaction_volume == Decimal(-5)
+    assert trans2.peer_name == social_accounting.get_name()
 
     trans3 = response.transactions.pop()
-    assert trans3.peer_name == company2_name
-    assert trans3.transaction_volume == Decimal(2)
+    assert trans3.peer_name == company1_name
+
+    trans4 = response.transactions.pop()
+    assert trans4.peer_name == company2_name
+
+    trans5 = response.transactions.pop()
+    assert trans5.peer_name == social_accounting.get_name()

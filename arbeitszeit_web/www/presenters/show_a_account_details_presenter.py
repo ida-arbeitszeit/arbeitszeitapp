@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -56,16 +56,20 @@ class ShowAAccountDetailsPresenter:
     def _create_info(
         self, transaction: show_a_account_details.TransactionInfo
     ) -> TransactionInfo:
-        transaction_type = (
-            self.translator.gettext("Payment")
-            if transaction.transaction_type == TransactionTypes.payment_of_wages
-            else self.translator.gettext("Credit")
-        )
         return self.TransactionInfo(
-            transaction_type,
-            self.datetime_formatter.format_datetime(
+            transaction_type=self._get_transfer_type(transaction.transaction_type),
+            date=self.datetime_formatter.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            transaction_volume=str(round(transaction.transaction_volume, 2)),
+            purpose=self._get_purpose(transaction.purpose),
         )
+
+    def _get_transfer_type(self, transfer_type: TransferType) -> str:
+        if transfer_type == TransferType.credit_a:
+            return self.translator.gettext("Credit")
+        else:
+            return self.translator.gettext("Payment")
+
+    def _get_purpose(self, purpose: str) -> str:
+        return self.translator.gettext("Wages") if purpose == "Lohn" else purpose

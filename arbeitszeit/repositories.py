@@ -522,6 +522,21 @@ class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Pr
         ]
     ]: ...
 
+    def joined_with_transfer_of_work_certificates(self) -> QueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]: ...
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> QueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]: ...
+
 
 class DatabaseGateway(Protocol):
     def create_private_consumption(
@@ -677,8 +692,8 @@ class DatabaseGateway(Protocol):
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked: ...
 
