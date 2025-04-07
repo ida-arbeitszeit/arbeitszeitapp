@@ -32,13 +32,17 @@ class SignupAccountantView:
     @commit_changes
     def POST(self, token: str) -> types.Response:
         form = RegisterAccountantForm(request.form)
-        if form.validate() and (
-            use_case_request := self.controller.register_accountant(form, token)
-        ):
-            use_case_response = self.use_case.register_accountant(use_case_request)
-            view_model = self.presenter.present_registration_result(use_case_response)
-            if view_model.redirect_url:
-                return redirect(view_model.redirect_url)
+        extracted_token = self.controller.extract_token(token=token)
+        if extracted_token:
+            form.extracted_token = extracted_token
+            if form.validate():
+                use_case_request = self.controller.create_use_case_request(form=form)
+                use_case_response = self.use_case.register_accountant(use_case_request)
+                view_model = self.presenter.present_registration_result(
+                    use_case_response
+                )
+                if view_model.redirect_url:
+                    return redirect(view_model.redirect_url)
         return Response(
             response=render_template(
                 "auth/signup_accountant.html",
