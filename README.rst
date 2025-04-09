@@ -31,8 +31,14 @@ elaborated in the 1920s by members of a German working-class movement.
 How to contribute
 =================
 
-Please refer to the developer documentation at https://arbeitszeitapp.readthedocs.io/
-for information on how to contribute to the project.
+If you would like to contribute to the project, please refer to the 
+`developer documentation`_ for detailed guidelines and instructions.
+
+Hosting
+=======
+
+For information on how to host the project, please refer to the 
+`developer documentation`_.
 
 .. start-license-do-not-delete
 
@@ -44,3 +50,5 @@ the full license text, see the file ``LICENSE`` contained in this
 repository.
 
 .. end-license-do-not-delete
+
+.. _developer documentation: https://arbeitszeitapp.readthedocs.io/
