@@ -4,8 +4,7 @@ from typing import List
 from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.transactions.transaction_type import TransactionTypes
-from arbeitszeit.use_cases import get_company_transactions
+from arbeitszeit.use_cases import show_a_account_details, show_r_account_details
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.query_plans import (
@@ -19,6 +18,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
+from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 
 from .base_test_case import BaseTestCase
 
@@ -31,9 +31,6 @@ class UseCaseTests(BaseTestCase):
         self.query_plans = self.injector.get(QueryPlans)
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
-        )
-        self.get_company_transactions_use_case = self.injector.get(
-            get_company_transactions.GetCompanyTransactionsUseCase
         )
 
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
@@ -179,6 +176,20 @@ class UseCaseTests(BaseTestCase):
             Decimal("-6"),
         )
 
+    def test_that_transaction_for_fixed_means_is_created(self) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(0),
+                resource_cost=Decimal(0),
+                means_cost=Decimal(1),
+            ),
+        )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        assert self.get_company_fixed_means_transactions(planner)
+
     def test_that_no_transaction_for_fixed_means_is_created_when_no_fixed_means_were_planned(
         self,
     ) -> None:
@@ -188,15 +199,26 @@ class UseCaseTests(BaseTestCase):
             planner=planner,
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
-                resource_cost=Decimal(2),
+                resource_cost=Decimal(1),
                 means_cost=Decimal(0),
             ),
         )
         self.use_case.approve_plan(self.create_request(plan=plan))
-        assert not any(
-            transaction.transaction_type == TransactionTypes.credit_for_fixed_means
-            for transaction in self.get_company_transactions(planner)
+        assert not self.get_company_fixed_means_transactions(planner)
+
+    def test_that_transaction_for_liquid_means_is_created(self) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(0),
+                resource_cost=Decimal(1),
+                means_cost=Decimal(0),
+            ),
         )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        assert self.get_company_liquid_means_transactions(planner)
 
     def test_that_no_transaction_for_liquid_means_is_created_when_no_liquid_means_were_planned(
         self,
@@ -208,21 +230,70 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
                 resource_cost=Decimal(0),
-                means_cost=Decimal(2),
+                means_cost=Decimal(1),
             ),
         )
         self.use_case.approve_plan(self.create_request(plan=plan))
-        assert not any(
-            transaction.transaction_type == TransactionTypes.credit_for_liquid_means
-            for transaction in self.get_company_transactions(planner)
-        )
+        assert not self.get_company_liquid_means_transactions(planner)
 
-    def get_company_transactions(
+    def test_that_transaction_for_living_labour_is_created(self) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                resource_cost=Decimal(0),
+                means_cost=Decimal(0),
+            ),
+        )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        assert self.get_company_living_labour_transactions(planner)
+
+    def test_that_one_transaction_for_living_labour_is_created_with_value_zero_when_no_living_labour_was_planned(
+        self,
+    ) -> None:
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(0),
+                resource_cost=Decimal(1),
+                means_cost=Decimal(1),
+            ),
+        )
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        living_labour_transactions = self.get_company_living_labour_transactions(
+            planner
+        )
+        assert len(living_labour_transactions) == 1
+        assert living_labour_transactions[0].transaction_volume == Decimal(0)
+
+    def get_company_fixed_means_transactions(
         self, company: UUID
-    ) -> List[get_company_transactions.TransactionInfo]:
-        use_case_request = get_company_transactions.Request(company=company)
-        response = self.get_company_transactions_use_case.get_transactions(
-            request=use_case_request
+    ) -> List[ShowPAccountDetailsUseCase.TransactionInfo]:
+        use_case = self.injector.get(ShowPAccountDetailsUseCase)
+        response = use_case.show_details(
+            ShowPAccountDetailsUseCase.Request(company=company)
+        )
+        return response.transactions
+
+    def get_company_liquid_means_transactions(
+        self, company: UUID
+    ) -> List[show_r_account_details.TransactionInfo]:
+        use_case = self.injector.get(show_r_account_details.ShowRAccountDetailsUseCase)
+        response = use_case.show_details(
+            show_r_account_details.Request(company=company)
+        )
+        return response.transactions
+
+    def get_company_living_labour_transactions(
+        self, company: UUID
+    ) -> List[show_a_account_details.TransactionInfo]:
+        use_case = self.injector.get(show_a_account_details.ShowAAccountDetailsUseCase)
+        response = use_case.show_details(
+            show_a_account_details.Request(company=company)
         )
         return response.transactions
 

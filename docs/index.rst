@@ -13,10 +13,10 @@ Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
 
    introduction
    how_to_contribute
-   concepts
-   datamodel
    development_setup
+   concepts
    development_guide
+   hosting
    license
 
 Indices and tables
