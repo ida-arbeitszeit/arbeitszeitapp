@@ -33,7 +33,7 @@ class GetStatistics:
 
     def __call__(self) -> StatisticsResponse:
         fic = self.fic_service.get_current_payout_factor()
-        psf_balance = self.psf_service.get_current_psf_balance()
+        psf_balance = self.psf_service.calculate_psf_balance()
         certs_total = self._estimate_total_certificates(fic)
         available_product = self._estimate_available_product()
         now = self.datetime_service.now()
