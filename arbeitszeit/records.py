@@ -390,6 +390,6 @@ class RegisteredHoursWorked:
     id: UUID
     company: UUID
     member: UUID
-    amount: Decimal
-    transaction: UUID
+    transfer_of_work_certificates: UUID
+    transfer_of_taxes: UUID
     registered_on: datetime

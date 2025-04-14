@@ -262,9 +262,22 @@ class RegisteredHoursWorked(Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     company: Mapped[str] = mapped_column(ForeignKey("company.id"))
     worker: Mapped[str] = mapped_column(ForeignKey("member.id"))
-    amount: Mapped[Decimal]
-    transaction: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
+    transfer_of_work_certificates: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     registered_on: Mapped[datetime]
+
+    transfer_of_work_certificates_rel = relationship(
+        "Transfer",
+        foreign_keys=[transfer_of_work_certificates],
+        backref=backref("registered_hours_worked_certificates", uselist=False),
+    )
+    transfer_taxes_rel = relationship(
+        "Transfer",
+        foreign_keys=[transfer_of_taxes],
+        backref=backref("registered_hours_worked_taxes", uselist=False),
+    )
 
 
 class CompanyWorkInvite(Base):
