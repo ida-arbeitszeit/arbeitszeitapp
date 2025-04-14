@@ -13,12 +13,10 @@ class Request:
     request_args: Any
     request_kwargs: Any
     method: str
-    def __init__(self, request_args, request_kwargs, method) -> None: ...
 
 @dataclass
 class Response:
     request_handler_response: Any
-    def __init__(self, request_handler_response) -> None: ...
 
 @dataclass
 class ObserveRequestHandlingUseCase:
@@ -26,4 +24,3 @@ class ObserveRequestHandlingUseCase:
     clock: Clock
     request_handler: RequestHandler
     def record_measurement(self, request: Request) -> Response: ...
-    def __init__(self, archivist, clock, request_handler) -> None: ...
