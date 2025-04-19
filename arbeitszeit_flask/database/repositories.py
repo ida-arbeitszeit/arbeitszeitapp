@@ -275,12 +275,23 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             func.sum(models.Plan.costs_r).label("costs_r"),
             func.sum(models.Plan.costs_a).label("costs_a"),
         ).first()
+        if result is None:
+            return records.PlanningStatistics(
+                average_plan_duration_in_days=Decimal(0),
+                total_planned_costs=records.ProductionCosts(
+                    means_cost=Decimal(0),
+                    resource_cost=Decimal(0),
+                    labour_cost=Decimal(0),
+                ),
+            )
         return records.PlanningStatistics(
-            average_plan_duration_in_days=result.duration or Decimal(0),
+            average_plan_duration_in_days=(
+                Decimal(result.duration) if result.duration else Decimal(0)
+            ),
             total_planned_costs=records.ProductionCosts(
-                means_cost=result.costs_p or Decimal(0),
-                resource_cost=result.costs_r or Decimal(0),
-                labour_cost=result.costs_a or Decimal(0),
+                means_cost=Decimal(result.costs_p) if result.costs_p else Decimal(0),
+                resource_cost=Decimal(result.costs_r) if result.costs_r else Decimal(0),
+                labour_cost=Decimal(result.costs_a) if result.costs_a else Decimal(0),
             ),
         )
 
@@ -2298,7 +2309,7 @@ class DatabaseGatewayImpl:
 
     @classmethod
     def private_consumption_from_orm(
-        self, orm: models.PrivateConsumption
+        cls, orm: models.PrivateConsumption
     ) -> records.PrivateConsumption:
         return records.PrivateConsumption(
             id=UUID(orm.id),
@@ -2364,8 +2375,8 @@ class DatabaseGatewayImpl:
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approval_date=plan.review.approval_date,
-            rejection_date=plan.review.rejection_date,
+            approval_date=plan.review.approval_date if plan.review else None,
+            rejection_date=plan.review.rejection_date if plan.review else None,
             activation_date=plan.activation_date,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None
@@ -2398,7 +2409,7 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def cooperation_from_orm(self, orm: models.Cooperation) -> records.Cooperation:
+    def cooperation_from_orm(cls, orm: models.Cooperation) -> records.Cooperation:
         return records.Cooperation(
             id=UUID(orm.id),
             creation_date=orm.creation_date,
@@ -2426,7 +2437,7 @@ class DatabaseGatewayImpl:
 
     @classmethod
     def coordination_tenure_from_orm(
-        self, orm: models.CoordinationTenure
+        cls, orm: models.CoordinationTenure
     ) -> records.CoordinationTenure:
         return records.CoordinationTenure(
             id=UUID(orm.id),
@@ -2674,14 +2685,14 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def accountant_from_orm(self, orm: models.Accountant) -> records.Accountant:
+    def accountant_from_orm(cls, orm: models.Accountant) -> records.Accountant:
         return records.Accountant(
             name=orm.name,
             id=UUID(orm.id),
         )
 
     @classmethod
-    def email_address_from_orm(self, orm: models.Email) -> records.EmailAddress:
+    def email_address_from_orm(cls, orm: models.Email) -> records.EmailAddress:
         return records.EmailAddress(
             orm.address,
             confirmed_on=orm.confirmed_on,
@@ -2803,7 +2814,7 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def account_credentials_from_orm(self, orm: Any) -> records.AccountCredentials:
+    def account_credentials_from_orm(cls, orm: Any) -> records.AccountCredentials:
         return records.AccountCredentials(
             id=UUID(orm.id),
             email_address=orm.email_address,
