@@ -2372,8 +2372,8 @@ class DatabaseGatewayImpl:
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approval_date=plan.review.approval_date,
-            rejection_date=plan.review.rejection_date,
+            approval_date=plan.review.approval_date if plan.review else None,
+            rejection_date=plan.review.rejection_date if plan.review else None,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None
             ),
