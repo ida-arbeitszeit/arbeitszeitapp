@@ -136,7 +136,9 @@ class Plan(Base):
     )
     hidden_by_user: Mapped[bool] = mapped_column(default=False)
 
-    review = relationship("PlanReview", uselist=False, back_populates="plan")
+    review: Mapped["PlanReview"] = relationship(
+        "PlanReview", uselist=False, back_populates="plan"
+    )
 
 
 class PlanCooperation(Base):
@@ -154,7 +156,7 @@ class PlanReview(Base):
     rejection_date: Mapped[datetime | None]
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
 
-    plan = relationship("Plan", back_populates="review")
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
         return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
@@ -165,13 +167,13 @@ class Account(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
 
-    transactions_sent = relationship(
+    transactions_sent: Mapped[list["Transaction"]] = relationship(
         "Transaction",
         foreign_keys="Transaction.sending_account",
         lazy="dynamic",
         backref=backref("account_from"),
     )
-    transactions_received = relationship(
+    transactions_received: Mapped[list["Transaction"]] = relationship(
         "Transaction",
         foreign_keys="Transaction.receiving_account",
         lazy="dynamic",
@@ -214,12 +216,12 @@ class Transfer(Base):
     credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     value: Mapped[Decimal]
 
-    debit_account_rel = relationship(
+    debit_account_rel: Mapped["Account"] = relationship(
         "Account",
         foreign_keys="Transfer.debit_account",
         backref=backref("transfers_debited", lazy="dynamic"),
     )
-    credit_account_rel = relationship(
+    credit_account_rel: Mapped["Account"] = relationship(
         "Account",
         foreign_keys="Transfer.credit_account",
         backref=backref("transfers_credited", lazy="dynamic"),
@@ -268,12 +270,12 @@ class RegisteredHoursWorked(Base):
     transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     registered_on: Mapped[datetime]
 
-    transfer_of_work_certificates_rel = relationship(
+    transfer_of_work_certificates_rel: Mapped["Transfer"] = relationship(
         "Transfer",
         foreign_keys=[transfer_of_work_certificates],
         backref=backref("registered_hours_worked_certificates", uselist=False),
     )
-    transfer_taxes_rel = relationship(
+    transfer_taxes_rel: Mapped["Transfer"] = relationship(
         "Transfer",
         foreign_keys=[transfer_of_taxes],
         backref=backref("registered_hours_worked_taxes", uselist=False),
