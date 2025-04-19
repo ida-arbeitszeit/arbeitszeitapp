@@ -22,6 +22,7 @@ class EconomicScenarios:
             target_fic: The payout factor (FIC) to achieve. Must be between 0 and 1.
 
         We expect that there are no plans in the database and a FIC of 1 before this function is called.
+        Be aware that this function will create two plans as a side effect.
         """
         assert (
             not self.database_gateway.get_plans()
@@ -80,4 +81,4 @@ class EconomicScenarios:
         current_fic = self.payout_factor_service.calculate_payout_factor(
             self.datetime_service.now()
         )
-        assert round(current_fic, 4) == round(target_fic, 4)
+        assert round(current_fic, 7) == round(target_fic, 7)
