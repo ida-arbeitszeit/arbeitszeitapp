@@ -21,15 +21,6 @@ class Measurement:
     average_response_time_secs: float
     min_response_time_secs: float
     max_response_time_secs: float
-    def __init__(
-        self,
-        name,
-        method,
-        request_count,
-        average_response_time_secs,
-        min_response_time_secs,
-        max_response_time_secs,
-    ) -> None: ...
 
 @dataclass
 class Request:
@@ -41,27 +32,14 @@ class Request:
     name_filter: str | None = ...
     requested_after: datetime | None = ...
     requested_before: datetime | None = ...
-    def __init__(
-        self,
-        limit,
-        offset,
-        sorting_order,
-        sorting_field,
-        method=...,
-        name_filter=...,
-        requested_after=...,
-        requested_before=...,
-    ) -> None: ...
 
 @dataclass
 class Response:
     measurements: list[Measurement]
     total_results: int
     request: Request
-    def __init__(self, measurements, total_results, request) -> None: ...
 
 @dataclass
 class GetSummaryUseCase:
     archivist: measurement_archive.MeasurementArchivist
     def get_summary(self, request: Request) -> Response: ...
-    def __init__(self, archivist) -> None: ...

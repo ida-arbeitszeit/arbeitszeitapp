@@ -12,7 +12,6 @@ class Page:
     css_class: str
     @classmethod
     def is_page(self) -> bool: ...
-    def __init__(self, label, link_target, css_class) -> None: ...
 
 class Gap:
     @classmethod
