@@ -14,7 +14,7 @@ from arbeitszeit.repositories import DatabaseGateway
 class StartPageUseCase:
     @dataclass
     class PlanDetail:
-        activation_date: datetime
+        approval_date: datetime
         plan_id: UUID
         product_name: str
 
@@ -31,16 +31,16 @@ class StartPageUseCase:
             self._get_plan(plan)
             for plan in self.database_gateway.get_plans()
             .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_were_approved_before(now)
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         ]
         return self.Response(latest_plans=latest_plans)
 
     def _get_plan(self, plan: Plan) -> PlanDetail:
-        assert plan.activation_date
+        assert plan.approval_date
         return self.PlanDetail(
-            activation_date=plan.activation_date,
+            approval_date=plan.approval_date,
             plan_id=plan.id,
             product_name=plan.prd_name,
         )

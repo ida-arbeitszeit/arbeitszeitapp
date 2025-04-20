@@ -32,7 +32,7 @@ class CompanyDashboardBaseTestCase(BaseTestCase):
                 UseCase.Response.LatestPlansDetails(
                     plan_id=uuid4(),
                     prd_name="prd name test",
-                    activation_date=self.datetime_service.now(),
+                    approval_date=self.datetime_service.now(),
                 )
             ]
         return UseCase.Response(
@@ -93,19 +93,19 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
 
     def test_presenter_correctly_formats_date_of_latest_plans(self):
         self.datetime_service.freeze_time(datetime(2022, 1, 1))
-        activation_time = self.datetime_service.now()
+        approval_time = self.datetime_service.now()
         view_model = self.presenter.present(
             self.get_use_case_response(
                 latest_plans=[
                     UseCase.Response.LatestPlansDetails(
                         plan_id=uuid4(),
                         prd_name="prd name test",
-                        activation_date=activation_time,
+                        approval_date=approval_time,
                     )
                 ]
             )
         )
-        self.assertEqual(view_model.latest_plans[0].activation_date, "01.01.")
+        self.assertEqual(view_model.latest_plans[0].approval_date, "01.01.")
 
     def test_presenter_shows_correct_link_to_latest_plan(self):
         plan_id = uuid4()
@@ -115,7 +115,7 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
                     UseCase.Response.LatestPlansDetails(
                         plan_id=plan_id,
                         prd_name="prd name test",
-                        activation_date=self.datetime_service.now(),
+                        approval_date=self.datetime_service.now(),
                     )
                 ]
             )

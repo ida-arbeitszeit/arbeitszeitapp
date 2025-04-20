@@ -130,7 +130,6 @@ class Plan(Base):
     description: Mapped[str] = mapped_column(String(5000))
     timeframe: Mapped[Decimal]
     is_public_service: Mapped[bool] = mapped_column(default=False)
-    activation_date: Mapped[datetime | None]
     requested_cooperation: Mapped[str | None] = mapped_column(
         ForeignKey("cooperation.id")
     )

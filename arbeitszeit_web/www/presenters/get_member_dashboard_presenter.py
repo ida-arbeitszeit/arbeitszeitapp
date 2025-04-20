@@ -17,7 +17,7 @@ class Workplace:
 @dataclass
 class PlanDetailsWeb:
     prd_name: str
-    activation_date: str
+    approval_date: str
     plan_details_url: str
 
 
@@ -88,8 +88,8 @@ class GetMemberDashboardPresenter:
     ) -> PlanDetailsWeb:
         return PlanDetailsWeb(
             prd_name=plan_detail.prd_name,
-            activation_date=self.datetime_formatter.format_datetime(
-                date=plan_detail.activation_date,
+            approval_date=self.datetime_formatter.format_datetime(
+                date=plan_detail.approval_date,
                 zone="Europe/Berlin",
                 fmt="%d.%m.",
             ),

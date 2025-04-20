@@ -22,7 +22,7 @@ class PlanInfo:
     price_per_unit: Decimal
     is_public_service: bool
     plan_creation_date: datetime
-    activation_date: Optional[datetime]
+    approval_date: Optional[datetime]
     expiration_date: Optional[datetime]
     rejection_date: Optional[datetime]
     is_cooperating: bool
@@ -109,7 +109,7 @@ class ShowMyPlansUseCase:
             price_per_unit=self.price_calculator.calculate_cooperative_price(plan),
             is_public_service=plan.is_public_service,
             plan_creation_date=plan.plan_creation_date,
-            activation_date=plan.activation_date,
+            approval_date=plan.approval_date,
             expiration_date=plan.expiration_date,
             is_cooperating=bool(cooperation),
             cooperation=cooperation.id if cooperation else None,
@@ -123,7 +123,7 @@ class ShowMyPlansUseCase:
             price_per_unit=draft.production_costs.total_cost() / draft.amount_produced,
             is_public_service=draft.is_public_service,
             plan_creation_date=draft.creation_date,
-            activation_date=None,
+            approval_date=None,
             expiration_date=None,
             is_cooperating=False,
             cooperation=None,

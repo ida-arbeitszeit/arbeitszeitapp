@@ -40,7 +40,7 @@ class GetStatistics:
         active_plans = (
             self.database.get_plans()
             .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_were_approved_before(now)
         )
         planning_statistics = active_plans.get_statistics()
         return StatisticsResponse(

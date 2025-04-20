@@ -29,7 +29,7 @@ class ListActivePlansOfCompany:
             self._create_plan_response_model(plan)
             for plan in self.database_gateway.get_plans()
             .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_were_approved_before(now)
             .planned_by(company_id)
         ]
         if not plans:
