@@ -15,7 +15,7 @@ class GetStatisticsViewModel:
     registered_members_count: str
     cooperations_count: str
     certificates_count: str
-    available_product: str
+    available_product_in_productive_sector: str
     active_plans_count: str
     active_plans_public_count: str
     average_timeframe_days: str
@@ -62,8 +62,8 @@ class GetStatisticsPresenter:
             cooperations_count=str(use_case_response.cooperations_count),
             certificates_count="%(num).2f"
             % dict(num=use_case_response.certificates_count),
-            available_product="%(num).2f"
-            % dict(num=use_case_response.available_product),
+            available_product_in_productive_sector="%(num).2f"
+            % dict(num=use_case_response.available_product_in_productive_sector),
             active_plans_count=str(use_case_response.active_plans_count),
             active_plans_public_count=str(use_case_response.active_plans_public_count),
             average_timeframe_days=average_timeframe,
@@ -71,7 +71,7 @@ class GetStatisticsPresenter:
             psf_balance=self._format_psf_balance(use_case_response.psf_balance),
             barplot_for_certificates_url=self.url_index.get_global_barplot_for_certificates_url(
                 use_case_response.certificates_count,
-                use_case_response.available_product,
+                use_case_response.available_product_in_productive_sector,
             ),
             barplot_means_of_production_url=self.url_index.get_global_barplot_for_means_of_production_url(
                 use_case_response.planned_means,
