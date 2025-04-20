@@ -90,7 +90,7 @@
             {% for plan in view_model.three_latest_plans %}
             <li>
               <a class="panel-block" href="{{ plan.plan_details_url }}">
-                <span class="has-text-weight-semibold">{{ plan.activation_date }}
+                <span class="has-text-weight-semibold">{{ plan.approval_date }}
                 </span>&nbsp;{{ plan.prd_name }}
               </a>
             </li>

@@ -17,7 +17,7 @@ class PayoutFactorService:
         active_plans = (
             self.database_gateway.get_plans()
             .that_will_expire_after(timestamp)
-            .that_were_activated_before(timestamp)
+            .that_were_approved_before(timestamp)
         )
         return calculate_payout_factor(active_plans)
 

@@ -77,22 +77,23 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
+    def ordered_by_approval_date(self, ascending: bool = True) -> Self:
+        plan_review = aliased(models.PlanReview)
         ordering = (
-            models.Plan.activation_date.asc()
+            plan_review.approval_date.asc()
             if ascending
-            else models.Plan.activation_date.desc()
-        )
-        return self._with_modified_query(lambda query: query.order_by(ordering))
-
-    def ordered_by_planner_name(self, ascending: bool = True) -> Self:
-        ordering = (
-            models.Company.name.asc() if ascending else models.Company.name.desc()
+            else plan_review.approval_date.desc()
         )
         return self._with_modified_query(
-            lambda query: query.join(models.Company)
-            .order_by(ordering)
-            .group_by(models.Plan.id, models.Company.id)
+            lambda query: query.outerjoin(plan_review).order_by(ordering)
+        )
+
+    def ordered_by_planner_name(self, ascending: bool = True) -> Self:
+        company = aliased(models.Company)
+        join_condition = company.id == models.Plan.planner
+        order_criteria = company.name.asc() if ascending else company.name.desc()
+        return self._with_modified_query(
+            lambda q: q.join(company, join_condition).order_by(order_criteria)
         )
 
     def ordered_by_rejection_date(self, ascending: bool = True) -> Self:
@@ -118,40 +119,47 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def that_are_approved(self) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
-                models.PlanReview.approval_date != None
+            lambda query: query.join(plan_review).filter(
+                plan_review.approval_date != None
             )
         )
 
     def that_are_rejected(self) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
-                models.PlanReview.rejection_date != None
+            lambda query: query.join(plan_review).filter(
+                plan_review.rejection_date != None
             )
         )
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: query.filter(models.Plan.activation_date <= timestamp)
+            lambda query: query.join(plan_review).filter(
+                plan_review.approval_date <= timestamp
+            )
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
+        plan_review = aliased(models.PlanReview)
         expiration_date = (
             func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + models.Plan.activation_date
+            + plan_review.approval_date
         )
         return self._with_modified_query(
-            lambda query: query.filter(expiration_date > timestamp)
+            lambda query: query.join(plan_review).filter(expiration_date > timestamp)
         )
 
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
+        plan_review = aliased(models.PlanReview)
         expiration_date = (
             func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + models.Plan.activation_date
+            + plan_review.approval_date
         )
         return self._with_modified_query(
-            lambda query: query.filter(expiration_date <= timestamp)
+            lambda query: query.join(plan_review).filter(expiration_date <= timestamp)
         )
 
     def that_are_productive(self) -> Self:
@@ -185,11 +193,12 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def without_completed_review(self) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
+            lambda query: query.join(plan_review).filter(
                 and_(
-                    models.PlanReview.approval_date == None,
-                    models.PlanReview.rejection_date == None,
+                    plan_review.approval_date == None,
+                    plan_review.rejection_date == None,
                 )
             )
         )
@@ -321,25 +330,24 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         planner = aliased(models.Company)
         cooperation = aliased(models.Cooperation)
         plan_cooperation = aliased(models.PlanCooperation)
+
         query = (
             self.query.join(planner, planner.id == models.Plan.planner)
-            .join(
+            .outerjoin(
                 plan_cooperation,
                 plan_cooperation.plan == models.Plan.id,
-                isouter=True,
             )
-            .join(
+            .outerjoin(
                 cooperation,
                 cooperation.id == plan_cooperation.cooperation,
-                isouter=True,
             )
-            .group_by(models.Plan.id, planner.id, cooperation.id)
             .with_entities(
                 models.Plan,
                 planner,
                 cooperation,
             )
         )
+
         return FlaskQueryResult(
             db=self.db,
             mapper=mapper,
@@ -510,17 +518,6 @@ class PlanUpdate:
             self,
             review_update_values=dict(
                 self.review_update_values, rejection_date=rejection_date
-            ),
-        )
-
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                activation_date=activation_timestamp,
             ),
         )
 
@@ -848,11 +845,11 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             if descending
             else models.Transaction.date.asc()
         )
-        return self._with_modified_query(lambda query: self.query.order_by(ordering))
+        return self._with_modified_query(lambda query: query.order_by(ordering))
 
     def where_sender_is_social_accounting(self) -> Self:
         return self._with_modified_query(
-            lambda query: self.query.join(
+            lambda query: query.join(
                 models.SocialAccounting,
                 models.SocialAccounting.account == models.Transaction.sending_account,
             )
@@ -2377,7 +2374,6 @@ class DatabaseGatewayImpl:
             is_public_service=plan.is_public_service,
             approval_date=plan.review.approval_date if plan.review else None,
             rejection_date=plan.review.rejection_date if plan.review else None,
-            activation_date=plan.activation_date,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None
             ),

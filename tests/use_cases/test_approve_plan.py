@@ -50,15 +50,15 @@ class UseCaseTests(BaseTestCase):
         self.use_case.approve_plan(self.create_request(plan=plan))
         assert self.get_latest_activated_plan().plan_id == plan
 
-    def test_that_activation_date_is_set_correctly(self) -> None:
-        expected_activation_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
-        self.datetime_service.freeze_time(expected_activation_timestamp)
+    def test_that_approval_date_is_set_correctly(self) -> None:
+        expected_approval_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
+        self.datetime_service.freeze_time(expected_approval_timestamp)
         plan = self.plan_generator.create_plan(approved=False)
         response = self.use_case.approve_plan(self.create_request(plan=plan))
         assert response.is_plan_approved
         assert (
-            self.get_latest_activated_plan().activation_date
-            == expected_activation_timestamp
+            self.get_latest_activated_plan().approval_date
+            == expected_approval_timestamp
         )
 
     def test_that_other_company_can_register_consumption_for_approved_plan(

@@ -22,7 +22,7 @@ class GetCompanyDashboardPresenter:
     @dataclass
     class PlanDetailsWeb:
         prd_name: str
-        activation_date: str
+        approval_date: str
         plan_details_url: str
 
     @dataclass
@@ -61,8 +61,8 @@ class GetCompanyDashboardPresenter:
     ) -> PlanDetailsWeb:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
-            activation_date=self.datetime_formatter.format_datetime(
-                plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
+            approval_date=self.datetime_formatter.format_datetime(
+                plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
             ),
             plan_details_url=self.url_index.get_plan_details_url(
                 plan_id=plan.plan_id, user_role=UserRole.company
