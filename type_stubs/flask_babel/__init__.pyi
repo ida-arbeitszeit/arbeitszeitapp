@@ -19,17 +19,6 @@ class BabelConfiguration:
     instance: Babel
     locale_selector: Callable | None = ...
     timezone_selector: Callable | None = ...
-    def __init__(
-        self,
-        default_locale,
-        default_timezone,
-        default_domain,
-        default_directories,
-        translation_directories,
-        instance,
-        locale_selector=...,
-        timezone_selector=...,
-    ) -> None: ...
 
 def get_babel(app: Incomplete | None = None) -> BabelConfiguration: ...
 

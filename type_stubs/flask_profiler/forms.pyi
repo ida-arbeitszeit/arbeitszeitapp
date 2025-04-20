@@ -6,7 +6,7 @@ from _typeshed import Incomplete
 
 class OptionalStringField:
     name: Incomplete
-    value: Incomplete
+    value: str | None
     normalize: Incomplete
     def __init__(self, name: str, normalize: Callable[[str], str] = ...) -> None: ...
     def set_field_name(self, name: str) -> None: ...
@@ -15,7 +15,7 @@ class OptionalStringField:
 
 class OptionalDatetimeField:
     name: Incomplete
-    value: Incomplete
+    value: datetime | None
     def __init__(self, name: str) -> None: ...
     def set_field_name(self, name: str) -> None: ...
     def parse_value(self, form: dict[str, str]) -> None: ...
@@ -30,6 +30,3 @@ class FilterFormData:
     sorted_by: str | None
     @classmethod
     def parse_from_from(self, args: dict[str, str]) -> FilterFormData: ...
-    def __init__(
-        self, name, method, requested_after, requested_before, sorted_by
-    ) -> None: ...

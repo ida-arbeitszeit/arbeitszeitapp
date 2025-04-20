@@ -19,16 +19,6 @@ class ViewModel:
     requested_after_filter_text: str
     requested_before_filter_text: str
     submit_form_sorted_by: str
-    def __init__(
-        self,
-        table,
-        pagination,
-        method_filter_text,
-        name_filter_text,
-        requested_after_filter_text,
-        requested_before_filter_text,
-        submit_form_sorted_by,
-    ) -> None: ...
 
 @dataclass
 class GetSummaryPresenter:
@@ -40,4 +30,3 @@ class GetSummaryPresenter:
     def get_pagination_target_link(self) -> ParseResult: ...
     def is_currently_sorted_by(self, field: use_case.SortingField) -> bool: ...
     def alternate_sorting_order(self) -> str: ...
-    def __init__(self, http_request) -> None: ...

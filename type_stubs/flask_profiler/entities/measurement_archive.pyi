@@ -17,7 +17,6 @@ class Measurement:
     start_timestamp: datetime
     end_timestamp: datetime
     method: str
-    def __init__(self, route_name, start_timestamp, end_timestamp, method) -> None: ...
 
 class FiledData(Protocol, Generic[T]):
     def __iter__(self) -> Iterator[T]: ...
@@ -35,7 +34,6 @@ class Record:
     method: str
     @property
     def elapsed(self) -> float: ...
-    def __init__(self, id, name, start_timestamp, end_timestamp, method) -> None: ...
 
 class RecordedMeasurements(FiledData[Record], Protocol):
     def summarize(self) -> SummarizedMeasurements: ...
@@ -60,17 +58,6 @@ class Summary:
     avg_elapsed: float
     first_measurement: datetime
     last_measurement: datetime
-    def __init__(
-        self,
-        method,
-        name,
-        count,
-        min_elapsed,
-        max_elapsed,
-        avg_elapsed,
-        first_measurement,
-        last_measurement,
-    ) -> None: ...
 
 class SummarizedMeasurements(FiledData[Summary], Protocol):
     def sorted_by_avg_elapsed(self, ascending: bool = ...) -> Self: ...
