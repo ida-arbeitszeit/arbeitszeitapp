@@ -32,7 +32,7 @@ class DatabaseUpdate(Protocol):
 class PlanResult(QueryResult[records.Plan], Protocol):
     def ordered_by_creation_date(self, ascending: bool = ...) -> Self: ...
 
-    def ordered_by_activation_date(self, ascending: bool = ...) -> Self: ...
+    def ordered_by_approval_date(self, ascending: bool = ...) -> Self: ...
 
     def ordered_by_rejection_date(self, ascending: bool = ...) -> Self: ...
 
@@ -46,7 +46,7 @@ class PlanResult(QueryResult[records.Plan], Protocol):
 
     def that_are_rejected(self) -> Self: ...
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
         """Plans that were approved exactly at `timestamp` should also
         be included in the result.
         """
@@ -144,11 +144,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         cooperation. The return value counts all plans that were
         updated through this method.
         """
-
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        """Set the `activation_date` field of all selected plans."""
 
     def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
         """Set the approval date on all matching plans. The return

@@ -12,7 +12,7 @@ class StartPagePresenter:
     @dataclass
     class Plan:
         prd_name: str
-        activation_date: str
+        approval_date: str
 
     @dataclass
     class ViewModel:
@@ -29,8 +29,8 @@ class StartPagePresenter:
             plans=[
                 self.Plan(
                     prd_name=plan.product_name,
-                    activation_date=self.datetime_formatter.format_datetime(
-                        plan.activation_date, zone="Europe/Berlin", fmt="%d.%m."
+                    approval_date=self.datetime_formatter.format_datetime(
+                        plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
                     ),
                 )
                 for plan in response.latest_plans

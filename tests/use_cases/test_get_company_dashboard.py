@@ -92,7 +92,7 @@ class ThreeLatestPlansTests(TestCase):
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(response.three_latest_plans[0].prd_name, expected_name)
 
-    def test_that_activation_date_of_latest_plan_is_set_correctly(
+    def test_that_approval_date_of_latest_plan_is_set_correctly(
         self,
     ) -> None:
         expected_datetime = datetime(2020, 10, 10)
@@ -102,5 +102,5 @@ class ThreeLatestPlansTests(TestCase):
         company = self.company_generator.create_company_record()
         response = self.use_case.get_dashboard(company.id)
         self.assertEqual(
-            response.three_latest_plans[0].activation_date, expected_datetime
+            response.three_latest_plans[0].approval_date, expected_datetime
         )

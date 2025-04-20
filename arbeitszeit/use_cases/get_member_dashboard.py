@@ -31,7 +31,7 @@ class WorkInvitation:
 class PlanDetails:
     plan_id: UUID
     prd_name: str
-    activation_date: datetime
+    approval_date: datetime
 
 
 @dataclass
@@ -84,14 +84,14 @@ class GetMemberDashboardUseCase:
         latest_plans = (
             self.database_gateway.get_plans()
             .that_will_expire_after(now)
-            .that_were_activated_before(now)
+            .that_were_approved_before(now)
             .ordered_by_creation_date(ascending=False)
             .limit(3)
         )
         plans = []
         for plan in latest_plans:
-            assert plan.activation_date
-            plans.append(PlanDetails(plan.id, plan.prd_name, plan.activation_date))
+            assert plan.approval_date
+            plans.append(PlanDetails(plan.id, plan.prd_name, plan.approval_date))
         return plans
 
     def _get_workplaces(self, member: UUID) -> List[Workplace]:

@@ -26,7 +26,7 @@ class QueriedPlanGenerator:
         company_id: Optional[UUID] = None,
         is_cooperating: bool = False,
         description: str = "For eating\nNext paragraph\rThird one",
-        activation_date: Optional[datetime] = None,
+        approval_date: Optional[datetime] = None,
         rejection_date: Optional[datetime] = None,
         price_per_unit: Decimal = Decimal(5),
         labour_cost_per_unit: Decimal = Decimal(1),
@@ -36,8 +36,8 @@ class QueriedPlanGenerator:
             plan_id = uuid4()
         if company_id is None:
             company_id = uuid4()
-        if activation_date is None:
-            activation_date = datetime.now()
+        if approval_date is None:
+            approval_date = datetime.now()
         if rejection_date is None:
             rejection_date = datetime.now()
         return QueriedPlan(
@@ -50,7 +50,7 @@ class QueriedPlanGenerator:
             labour_cost_per_unit=labour_cost_per_unit,
             is_public_service=False,
             is_cooperating=is_cooperating,
-            activation_date=activation_date,
+            approval_date=approval_date,
             is_expired=is_expired,
         )
 

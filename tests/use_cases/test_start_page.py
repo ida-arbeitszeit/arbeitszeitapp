@@ -31,12 +31,12 @@ class UseCaseTester(TestCase):
         response = self.use_case.show_start_page()
         self.assertEqual(len(response.latest_plans), 3)
 
-    def test_that_correct_activation_date_of_plan_is_returned(self) -> None:
+    def test_that_correct_approval_date_of_plan_is_returned(self) -> None:
         expected_date = datetime(2022, 12, 1, 10)
         self.datetime_service.freeze_time(expected_date)
         self.plan_generator.create_plan()
         response = self.use_case.show_start_page()
-        self.assertEqual(response.latest_plans[0].activation_date, expected_date)
+        self.assertEqual(response.latest_plans[0].approval_date, expected_date)
 
     def test_that_correct_plan_id_is_returned(self) -> None:
         expected_plan_id = self.plan_generator.create_plan()

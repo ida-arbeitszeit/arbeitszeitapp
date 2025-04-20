@@ -114,27 +114,27 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name=expected_name,
-                    activation_date=datetime.now(),
+                    approval_date=datetime.now(),
                 )
             ]
         )
         presentation = self.presenter.present(response)
         self.assertEqual(presentation.three_latest_plans[0].prd_name, expected_name)
 
-    def test_activation_date_of_latest_plans_is_correctly_formatted(self):
+    def test_approval_date_of_latest_plans_is_correctly_formatted(self):
         now = datetime.now(tz=tz.gettz("Europe/Berlin"))
         response = self.get_response(
             three_latest_plans=[
                 get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name="test name",
-                    activation_date=now,
+                    approval_date=now,
                 )
             ]
         )
         presentation = self.presenter.present(response)
         self.assertEqual(
-            presentation.three_latest_plans[0].activation_date, now.strftime("%d.%m.")
+            presentation.three_latest_plans[0].approval_date, now.strftime("%d.%m.")
         )
 
     def test_plan_details_url_is_correctly_shown(self):
@@ -144,7 +144,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=plan_id,
                     prd_name="test name",
-                    activation_date=datetime.now(),
+                    approval_date=datetime.now(),
                 )
             ]
         )
