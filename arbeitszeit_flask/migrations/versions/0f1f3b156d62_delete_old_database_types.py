@@ -19,7 +19,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    pass
+    op.execute("DROP TYPE IF EXISTS accounttypes")
+    op.execute("DROP TYPE IF EXISTS useraction")
 
 
 def downgrade() -> None:
