@@ -14,6 +14,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import confirm_member, get_coop_summary
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
@@ -459,6 +460,7 @@ class TransferGenerator:
         debit_account: Optional[UUID] = None,
         credit_account: Optional[UUID] = None,
         value: Optional[Decimal] = None,
+        type: Optional[TransferType] = None,
     ) -> records.Transfer:
         if date is None:
             date = self.datetime_service.now()
@@ -468,11 +470,14 @@ class TransferGenerator:
             credit_account = self.database_gateway.create_account().id
         if value is None:
             value = Decimal(10)
+        if type is None:
+            type = TransferType.credit_p
         return self.database_gateway.create_transfer(
             date=date,
             debit_account=debit_account,
             credit_account=credit_account,
             value=value,
+            type=type,
         )
 
 
