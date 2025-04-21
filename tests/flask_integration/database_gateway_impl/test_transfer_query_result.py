@@ -1,8 +1,10 @@
 from uuid import uuid4
 
 from parameterized import parameterized
+from sqlalchemy import text
 
 from arbeitszeit.records import AccountTypes, SocialAccounting
+from arbeitszeit.transfers.transfer_type import TransferType
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -13,6 +15,30 @@ class TransferResultTests(FlaskTestCase):
     def test_there_is_one_transfer_in_db_after_adding_one(self) -> None:
         self.transfer_generator.create_transfer()
         assert len(self.database_gateway.get_transfers()) == 1
+
+    @parameterized.expand(
+        [
+            (TransferType.private_consumption,),
+            (TransferType.credit_r,),
+        ]
+    )
+    def test_that_transfer_with_type_is_created_with_correct_type(
+        self, type: TransferType
+    ) -> None:
+        self.transfer_generator.create_transfer(type=type)
+        transfer = self.database_gateway.get_transfers().first()
+        assert transfer
+        assert transfer.type == type
+
+    def test_that_transfer_type_enum_from_database_matches_enum_in_code(self) -> None:
+        db_values = [
+            row[0]
+            for row in self.db.session.execute(
+                text("SELECT unnest(enum_range(NULL::transfertype))")
+            )
+        ]
+        code_values = [member.value for member in TransferType]
+        assert set(db_values) == set(code_values)
 
 
 class WhereAccountIsDebtorTests(FlaskTestCase):

@@ -8,6 +8,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -69,12 +70,14 @@ class RegisterHoursWorked:
             debit_account=company.work_account,
             credit_account=worker.account,
             value=use_case_request.hours_worked,
+            type=TransferType.work_certificates,
         )
         transfer_of_taxes = self.database_gateway.create_transfer(
             date=self.datetime_service.now(),
             debit_account=worker.account,
             credit_account=self.social_accounting.account_psf,
             value=use_case_request.hours_worked * (1 - fic),
+            type=TransferType.taxes,
         )
         self.database_gateway.create_registered_hours_worked(
             company=company.id,

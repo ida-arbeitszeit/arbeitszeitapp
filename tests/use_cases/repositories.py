@@ -41,6 +41,7 @@ from arbeitszeit.records import (
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.transfers.transfer_type import TransferType
 
 Many = TypeVar("Many", bound=Hashable)
 One = TypeVar("One", bound=Hashable)
@@ -1973,6 +1974,7 @@ class MockDatabase:
         debit_account: UUID,
         credit_account: UUID,
         value: Decimal,
+        type: TransferType,
     ) -> records.Transfer:
         transfer = records.Transfer(
             id=uuid4(),
@@ -1980,6 +1982,7 @@ class MockDatabase:
             debit_account=debit_account,
             credit_account=credit_account,
             value=value,
+            type=type,
         )
         self.transfers[transfer.id] = transfer
         return transfer
