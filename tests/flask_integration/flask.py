@@ -85,8 +85,6 @@ class FlaskTestCase(TestCase):
         self.app_context.pop()
         Base.metadata.drop_all(self.db.engine)
         self.db.session.execute(text("DROP TABLE IF EXISTS alembic_version"))
-        self.db.session.execute(text("DROP TYPE IF EXISTS accounttypes"))
-        self.db.session.execute(text("DROP TYPE IF EXISTS useraction"))
         self.db.session.commit()
         super().tearDown()
 
