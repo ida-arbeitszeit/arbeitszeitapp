@@ -6,6 +6,7 @@ from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple,
 from uuid import UUID
 
 from arbeitszeit import records
+from arbeitszeit.transfers.transfer_type import TransferType
 
 T = TypeVar("T", covariant=True)
 
@@ -606,6 +607,7 @@ class DatabaseGateway(Protocol):
         debit_account: UUID,
         credit_account: UUID,
         value: Decimal,
+        type: TransferType,
     ) -> records.Transfer: ...
 
     def get_transfers(self) -> TransferResult: ...

@@ -7,6 +7,8 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
+from arbeitszeit.transfers.transfer_type import TransferType
+
 
 @dataclass
 class EmailAddress:
@@ -319,6 +321,7 @@ class Transfer:
     debit_account: UUID
     credit_account: UUID
     value: Decimal
+    type: TransferType
 
     def __hash__(self) -> int:
         return hash(self.id)

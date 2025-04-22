@@ -24,6 +24,7 @@ from sqlalchemy.sql.expression import and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.models import (
@@ -2527,6 +2528,7 @@ class DatabaseGatewayImpl:
             debit_account=UUID(transfer.debit_account),
             credit_account=UUID(transfer.credit_account),
             value=Decimal(transfer.value),
+            type=transfer.type,
         )
 
     def create_transfer(
@@ -2535,6 +2537,7 @@ class DatabaseGatewayImpl:
         debit_account: UUID,
         credit_account: UUID,
         value: Decimal,
+        type: TransferType,
     ) -> records.Transfer:
         transfer = models.Transfer(
             id=str(uuid4()),
@@ -2542,6 +2545,7 @@ class DatabaseGatewayImpl:
             debit_account=str(debit_account),
             credit_account=str(credit_account),
             value=value,
+            type=type,
         )
         self.db.session.add(transfer)
         self.db.session.flush()
