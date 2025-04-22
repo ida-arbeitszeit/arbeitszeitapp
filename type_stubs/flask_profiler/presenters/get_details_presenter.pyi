@@ -20,15 +20,6 @@ class ViewModel:
     name_filter_text: str
     requested_after_filter_text: str
     requested_before_filter_text: str
-    def __init__(
-        self,
-        table,
-        pagination,
-        method_filter_text,
-        name_filter_text,
-        requested_after_filter_text,
-        requested_before_filter_text,
-    ) -> None: ...
 
 @dataclass
 class GetDetailsPresenter:
@@ -36,4 +27,3 @@ class GetDetailsPresenter:
     def present_response(
         self, response: use_case.Response, pagination: PaginationContext
     ) -> ViewModel: ...
-    def __init__(self, http_request) -> None: ...
