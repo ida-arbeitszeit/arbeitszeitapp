@@ -385,30 +385,6 @@ this::
 		  ),
 	      )
 
-HTTP
-----
-
-When building web server logic, we use various HTTP methods to handle
-different user actions. In the "arbeitszeitapp" we've mainly used the
-`GET` and `POST` methods so far.
-
-GET
-...
-
-`GET` requests should not alter the application's state in any
-significant way. A good rule of thumb is to ask whether the action
-triggered by a successful request would change the database. If the
-answer is no, then it's likely appropriate to handle the request using
-`GET`.
-
-POST
-....
-
-A `POST` request should handle the submission of new user data.
-Examples for actions that warrant the `POST` method include the
-submission of login data, filing a new plan with public accounting or
-submitting a review for a plan.
-
 User identification
 -------------------
 
