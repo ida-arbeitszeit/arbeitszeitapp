@@ -122,10 +122,10 @@ class GetActivePlansTests(FlaskTestCase):
         assert retrieved_plans[1].id == plans[2]
         assert retrieved_plans[2].id == plans[4]
 
-    def test_plans_can_be_ordered_by_activation_date_in_descending_order(
+    def test_plans_can_be_ordered_by_approval_date_in_descending_order(
         self,
     ) -> None:
-        activation_dates = [
+        approval_dates = [
             self.datetime_service.now_minus_ten_days(),
             self.datetime_service.now(),
             self.datetime_service.now_minus_20_hours(),
@@ -133,13 +133,13 @@ class GetActivePlansTests(FlaskTestCase):
             self.datetime_service.now_minus_one_day(),
         ]
         plans: List[UUID] = list()
-        for timestamp in activation_dates:
+        for timestamp in approval_dates:
             self.datetime_service.freeze_time(timestamp)
             plans.append(self.plan_generator.create_plan())
         self.datetime_service.unfreeze_time()
         retrieved_plans = list(
             self.database_gateway.get_plans()
-            .ordered_by_activation_date(ascending=False)
+            .ordered_by_approval_date(ascending=False)
             .limit(3)
         )
         assert len(retrieved_plans) == 3
@@ -541,13 +541,13 @@ class GetStatisticsTests(FlaskTestCase):
         )
 
 
-class ThatWereActivatedBeforeTests(FlaskTestCase):
+class ThatWereApprovedBeforeTests(FlaskTestCase):
     def test_plan_activated_before_a_specified_timestamp_are_included_in_the_result(
         self,
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert self.database_gateway.get_plans().that_were_activated_before(
+        assert self.database_gateway.get_plans().that_were_approved_before(
             datetime(2000, 1, 2)
         )
 
@@ -556,7 +556,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert self.database_gateway.get_plans().that_were_activated_before(
+        assert self.database_gateway.get_plans().that_were_approved_before(
             datetime(2000, 1, 1)
         )
 
@@ -565,7 +565,7 @@ class ThatWereActivatedBeforeTests(FlaskTestCase):
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
         self.plan_generator.create_plan()
-        assert not self.database_gateway.get_plans().that_were_activated_before(
+        assert not self.database_gateway.get_plans().that_were_approved_before(
             datetime(1999, 12, 31)
         )
 

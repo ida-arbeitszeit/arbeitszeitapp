@@ -111,10 +111,10 @@ class PlanResult(QueryResultImpl[Plan]):
             key=lambda plan: plan.plan_creation_date, reverse=not ascending
         )
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
+    def ordered_by_approval_date(self, ascending: bool = True) -> Self:
         return self.sorted_by(
             key=lambda plan: (
-                plan.activation_date if plan.activation_date else datetime.min
+                plan.approval_date if plan.approval_date else datetime.min
             ),
             reverse=not ascending,
         )
@@ -157,10 +157,10 @@ class PlanResult(QueryResultImpl[Plan]):
             lambda plan: plan.rejection_date is not None and plan.approval_date is None
         )
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
         return self._filter_elements(
-            lambda plan: plan.activation_date is not None
-            and plan.activation_date <= timestamp
+            lambda plan: plan.approval_date is not None
+            and plan.approval_date <= timestamp
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
@@ -419,14 +419,6 @@ class PlanUpdate:
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         def update(plan: Plan) -> None:
             plan.rejection_date = rejection_date
-
-        return self._add_update(update)
-
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        def update(plan: Plan) -> None:
-            plan.activation_date = activation_timestamp
 
         return self._add_update(update)
 
@@ -1874,7 +1866,6 @@ class MockDatabase:
             description=product_description,
             timeframe=duration_in_days,
             is_public_service=is_public_service,
-            activation_date=None,
             approval_date=None,
             rejection_date=None,
             requested_cooperation=None,

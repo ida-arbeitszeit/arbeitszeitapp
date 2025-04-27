@@ -15,7 +15,7 @@ class ActivePlansRow:
     plan_details_url: str
     prd_name: str
     price_per_unit: str
-    activation_date: str
+    approval_date: str
     expiration_date: str
     expiration_relative: str
     is_cooperating: bool
@@ -139,7 +139,7 @@ class ShowMyPlansPresenter:
                     plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
                     prd_name=f"{plan.prd_name}",
                     price_per_unit=self.__format_price(plan.price_per_unit),
-                    activation_date=self.__format_date(plan.activation_date),
+                    approval_date=self.__format_date(plan.approval_date),
                     expiration_date=self.__format_date(plan.expiration_date),
                     expiration_relative=self._format_days_until_expiration(
                         plan.expiration_date

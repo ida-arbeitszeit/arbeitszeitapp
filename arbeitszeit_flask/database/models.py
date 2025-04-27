@@ -8,7 +8,7 @@ from decimal import Decimal
 
 from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, Table
-from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from arbeitszeit_flask.database.db import Base
 
@@ -130,13 +130,14 @@ class Plan(Base):
     description: Mapped[str] = mapped_column(String(5000))
     timeframe: Mapped[Decimal]
     is_public_service: Mapped[bool] = mapped_column(default=False)
-    activation_date: Mapped[datetime | None]
     requested_cooperation: Mapped[str | None] = mapped_column(
         ForeignKey("cooperation.id")
     )
     hidden_by_user: Mapped[bool] = mapped_column(default=False)
 
-    review = relationship("PlanReview", uselist=False, back_populates="plan")
+    review: Mapped["PlanReview  | None"] = relationship(
+        "PlanReview", uselist=False, back_populates="plan"
+    )
 
 
 class PlanCooperation(Base):
@@ -154,7 +155,7 @@ class PlanReview(Base):
     rejection_date: Mapped[datetime | None]
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
 
-    plan = relationship("Plan", back_populates="review")
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
         return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
@@ -164,19 +165,6 @@ class Account(Base):
     __tablename__ = "account"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-
-    transactions_sent = relationship(
-        "Transaction",
-        foreign_keys="Transaction.sending_account",
-        lazy="dynamic",
-        backref=backref("account_from"),
-    )
-    transactions_received = relationship(
-        "Transaction",
-        foreign_keys="Transaction.receiving_account",
-        lazy="dynamic",
-        backref=backref("account_to"),
-    )
 
 
 class Transaction(Base):
@@ -213,17 +201,6 @@ class Transfer(Base):
     debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     value: Mapped[Decimal]
-
-    debit_account_rel = relationship(
-        "Account",
-        foreign_keys="Transfer.debit_account",
-        backref=backref("transfers_debited", lazy="dynamic"),
-    )
-    credit_account_rel = relationship(
-        "Account",
-        foreign_keys="Transfer.credit_account",
-        backref=backref("transfers_credited", lazy="dynamic"),
-    )
 
     def __repr__(self) -> str:
         fields = ", ".join(
@@ -267,17 +244,6 @@ class RegisteredHoursWorked(Base):
     )
     transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     registered_on: Mapped[datetime]
-
-    transfer_of_work_certificates_rel = relationship(
-        "Transfer",
-        foreign_keys=[transfer_of_work_certificates],
-        backref=backref("registered_hours_worked_certificates", uselist=False),
-    )
-    transfer_taxes_rel = relationship(
-        "Transfer",
-        foreign_keys=[transfer_of_taxes],
-        backref=backref("registered_hours_worked_taxes", uselist=False),
-    )
 
 
 class CompanyWorkInvite(Base):

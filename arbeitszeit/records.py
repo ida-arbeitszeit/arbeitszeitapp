@@ -213,7 +213,6 @@ class Plan:
     is_public_service: bool
     approval_date: Optional[datetime]
     rejection_date: Optional[datetime]
-    activation_date: Optional[datetime]
     requested_cooperation: Optional[UUID]
     hidden_by_user: bool
 
@@ -240,9 +239,9 @@ class Plan:
 
     @property
     def expiration_date(self) -> Optional[datetime]:
-        if not self.activation_date:
+        if not self.approval_date:
             return None
-        exp_date = self.activation_date + timedelta(days=int(self.timeframe))
+        exp_date = self.approval_date + timedelta(days=int(self.timeframe))
         return exp_date
 
     def active_days(self, reference_timestamp: datetime) -> Optional[int]:
@@ -250,15 +249,15 @@ class Plan:
         specified timestamp, not considering days exceeding it's
         timeframe.
         """
-        if not self.activation_date:
+        if not self.approval_date:
             return None
-        days_passed_since_activation = (reference_timestamp - self.activation_date).days
+        days_passed_since_activation = (reference_timestamp - self.approval_date).days
         return min(self.timeframe, days_passed_since_activation)
 
     def is_active_as_of(self, timestamp: datetime) -> bool:
         return (
-            self.activation_date is not None
-            and self.activation_date <= timestamp
+            self.approval_date is not None
+            and self.approval_date <= timestamp
             and not self.is_expired_as_of(timestamp)
         )
 

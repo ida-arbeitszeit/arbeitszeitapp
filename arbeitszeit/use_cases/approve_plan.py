@@ -32,9 +32,7 @@ class ApprovePlanUseCase:
         assert planner
         if plan.is_approved:
             return self.Response(is_plan_approved=False)
-        matching_plans.update().set_approval_date(now).set_activation_timestamp(
-            now
-        ).perform()
+        matching_plans.update().set_approval_date(now).perform()
         if plan.production_costs.means_cost:
             self._create_transaction_from_social_accounting(
                 plan, planner.means_account, plan.production_costs.means_cost
