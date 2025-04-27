@@ -12,7 +12,7 @@ TESTING_RESPONSE_MODEL = StatisticsResponse(
     registered_members_count=30,
     cooperations_count=10,
     certificates_count=Decimal("50"),
-    available_product=Decimal("20.5"),
+    available_product_in_productive_sector=Decimal("20.5"),
     active_plans_count=6,
     active_plans_public_count=2,
     avg_timeframe=Decimal("30.5"),
@@ -111,11 +111,11 @@ class GetStatisticsPresenterTests(BaseTestCase):
     def test_available_prdocut_is_displayed_correctly_as_number(self) -> None:
         response = replace(
             TESTING_RESPONSE_MODEL,
-            available_product=Decimal(2.504),
+            available_product_in_productive_sector=Decimal(2.504),
         )
         view_model = self.presenter.present(response)
         self.assertEqual(
-            view_model.available_product,
+            view_model.available_product_in_productive_sector,
             "2.50",
         )
 
@@ -159,7 +159,7 @@ class GetStatisticsPresenterTests(BaseTestCase):
             view_model.barplot_for_certificates_url,
         )
         self.assertIn(
-            str(TESTING_RESPONSE_MODEL.available_product),
+            str(TESTING_RESPONSE_MODEL.available_product_in_productive_sector),
             view_model.barplot_for_certificates_url,
         )
 
