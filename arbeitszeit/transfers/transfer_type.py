@@ -1,17 +1,25 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class TransferType(Enum):
-    credit_p = auto()
-    credit_r = auto()
-    credit_a = auto()
-    credit_public_p = auto()
-    credit_public_r = auto()
-    credit_public_a = auto()
-    private_consumption = auto()
-    productive_consumption_p = auto()
-    productive_consumption_r = auto()
-    compensation_for_coop = auto()
-    compensation_for_company = auto()
-    work_certificates = auto()
-    taxes = auto()
+    """
+    Warning: These enum values map to database columns.
+    If you change them, you need to create a database migration.
+
+    See https://arbeitszeitapp.readthedocs.io/en/latest/concepts.html for
+    a documentation of the transfer types.
+    """
+
+    credit_p = "credit_p"
+    credit_r = "credit_r"
+    credit_a = "credit_a"
+    credit_public_p = "credit_public_p"
+    credit_public_r = "credit_public_r"
+    credit_public_a = "credit_public_a"
+    private_consumption = "private_consumption"
+    productive_consumption_p = "productive_consumption_p"
+    productive_consumption_r = "productive_consumption_r"
+    compensation_for_coop = "compensation_for_coop"
+    compensation_for_company = "compensation_for_company"
+    work_certificates = "work_certificates"
+    taxes = "taxes"

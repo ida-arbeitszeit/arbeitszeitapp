@@ -10,6 +10,7 @@ from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit_flask.database.db import Base
 
 
@@ -201,6 +202,7 @@ class Transfer(Base):
     debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     value: Mapped[Decimal]
+    type: Mapped[TransferType]
 
     def __repr__(self) -> str:
         fields = ", ".join(
@@ -210,6 +212,7 @@ class Transfer(Base):
                 f"debit_account={self.debit_account!r}",
                 f"credit_account={self.credit_account!r}",
                 f"value={self.value!r}",
+                f"type={self.type!r}",
             ]
         )
         return f"Transfer({fields})"
