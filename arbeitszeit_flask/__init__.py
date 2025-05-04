@@ -50,15 +50,19 @@ def create_app(
 
     load_configuration(app=app, configuration=config)
 
-    Database().configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
+    db = Database()
+    db.configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
 
-    # Choose between auto-migration or direct table creation
     if app.config["AUTO_MIGRATE"]:
         # Let Alembic handle table creation
-        migrate(app.config, Database().engine)
+        migrate(
+            app.config, db.session.connection()
+        )  # we use the connection that can be rolled back in tests
     else:
         # Create tables directly with SQLAlchemy if they do not exist
-        Base.metadata.create_all(Database().engine, checkfirst=True)
+        Base.metadata.create_all(
+            db.engine, checkfirst=True
+        )  # these table creations are not rolled back in tests for performance reasons
 
     # Where to redirect the user when he attempts to access a login_required
     load_email_plugin(app)
@@ -83,7 +87,7 @@ def create_app(
 
     @app.teardown_appcontext
     def shutdown_session(exception: BaseException | None = None) -> None:
-        Database().session.remove()
+        db.session.remove()
 
     # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
@@ -105,11 +109,11 @@ def create_app(
             if "user_type" in session:
                 user_type = session["user_type"]
                 if user_type == "member":
-                    return Database().session.query(Member).get(user_id)
+                    return db.session.query(Member).get(user_id)
                 elif user_type == "company":
-                    return Database().session.query(Company).get(user_id)
+                    return db.session.query(Company).get(user_id)
                 elif user_type == "accountant":
-                    return Database().session.query(Accountant).get(user_id)
+                    return db.session.query(Accountant).get(user_id)
 
         # register blueprints
         from . import accountant, company, member, user
