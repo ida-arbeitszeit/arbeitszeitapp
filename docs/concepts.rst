@@ -52,19 +52,25 @@ list of allowed transfers between them.
 Plans
 -----
 
-Companies file plans. In these, they define a product and the planned 
-production costs (in hours). 
+Companies define in plans, beside other things, the product to be produced, the planned timeframe and the planned production costs (in hours). Companies create either productive or public plans. The difference between them is that the products of productive plans are to be consumed in exchange for labor certificates, while the products of public plans are freely available.
 
-There are productive and public plans. The products of productive plans are 
-consumed in exchange for labor certificates, while the products of public 
-plans are consumed without compensation.
+In our app, we distinguish between plan drafts and plans: A company creates a plan draft first. From the moment it files the plan with Social Accounting, it becomes a proper plan. 
 
-When a plan gets approved, the planning company recieves the planned hours credited 
-to their P, R, and A accounts.
+From now on, the plan has the following attributes:
+    - approved: bool 
+    - rejected: bool
+    - expired: bool
+    
+When a plan gets approved, a couple of transfers of labour time are happening: The planning company receives the planned hours credited to their P, R, and A accounts. If the plan is a productive plan, the planned hours are debited from the company's own PRD account, otherwise they are debited from Social Accounting's PSF account.
 
-If the plan is a productive plan, the sum of the planned hours are debited from the PRD account of the
-company. If it's a public plan, the hours are debited from the PSF account.
+We consider a plan "active" when it has been approved and not yet expired. The expiration date is approval date plus planned timeframe. After expiration, consumption cannot be registered anymore on that plan.
 
+See the "PlanDraft" and "Plan" records in ``arbeitszeit.records.py`` for details and actual implementation. To dive deeper, you could also have a look at the following use cases in ``arbeitszeit/use_cases``:
+
+- CreatePlanDraft
+- FilePlanWithAccounting
+- ApprovePlanUseCase
+- RejectPlanUseCase
 
 Consumption
 -----------
