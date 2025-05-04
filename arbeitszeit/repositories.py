@@ -146,11 +146,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         updated through this method.
         """
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        """Set the approval date on all matching plans. The return
-        value counts all the plans that were changed by this method.
-        """
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         """Set the rejection date on all matching plans. The return
         value counts all the plans that were changed by this method.
@@ -193,6 +188,9 @@ class PlanDraftUpdate(DatabaseUpdate, Protocol):
     def set_timeframe(self, days: int) -> Self: ...
 
     def set_unit_of_distribution(self, unit: str) -> Self: ...
+
+
+class PlanApprovalResult(QueryResult[records.PlanApproval], Protocol): ...
 
 
 class CooperationResult(QueryResult[records.Cooperation], Protocol):
@@ -695,3 +693,14 @@ class DatabaseGateway(Protocol):
     ) -> records.RegisteredHoursWorked: ...
 
     def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult: ...
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval: ...
+
+    def get_plan_approvals(self) -> PlanApprovalResult: ...

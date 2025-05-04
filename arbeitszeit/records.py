@@ -282,6 +282,16 @@ class Plan:
         return Decimal(0) if self.is_public_service else self.cost_per_unit()
 
 
+@dataclass
+class PlanApproval:
+    id: UUID
+    plan_id: UUID
+    date: datetime
+    transfer_of_credit_p: UUID
+    transfer_of_credit_r: UUID
+    transfer_of_credit_a: UUID
+
+
 class ConsumptionType(Enum):
     means_of_prod = "means_of_prod"
     raw_materials = "raw_materials"
