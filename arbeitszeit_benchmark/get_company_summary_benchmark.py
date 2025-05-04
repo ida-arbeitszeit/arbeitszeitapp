@@ -40,7 +40,7 @@ class GetCompanySummaryBenchmark:
                 )
         for _ in range(1000):
             self.plan_generator.create_plan(planner=self.company)
-        self.db.session.commit()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

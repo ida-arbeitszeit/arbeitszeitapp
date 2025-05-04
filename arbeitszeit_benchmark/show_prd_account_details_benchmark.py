@@ -36,7 +36,7 @@ class ShowPrdAccountDetailsBenchmark:
         self.use_case = self.injector.get(
             show_prd_account_details.ShowPRDAccountDetailsUseCase
         )
-        self.db.session.commit()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()
