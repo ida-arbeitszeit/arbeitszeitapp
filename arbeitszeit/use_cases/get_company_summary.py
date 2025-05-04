@@ -9,6 +9,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.records import Company, Plan, SocialAccounting, Transaction
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -133,30 +134,43 @@ class GetCompanySummary:
         )
 
     def _get_expectations(self, company: Company) -> Expectations:
+        """
+        Companies are expected to spend as much for p, r and a as they plan.
+        They are expected to sell as much product as they plan productively.
+        """
         credits = [
             decimal_sum(
                 map(
-                    lambda t: t.amount_received,
-                    self.database_gateway.get_transactions()
-                    .where_account_is_sender_or_receiver(account)
-                    .where_sender_is_social_accounting(),
+                    lambda t: t.value,
+                    self.database_gateway.get_transfers().where_account_is_creditor(
+                        account
+                    ),
                 )
             )
             for account in company.accounts()[:3]
         ]
         expected_sales = decimal_sum(
             map(
-                lambda t: t.amount_received,
-                self.database_gateway.get_transactions()
-                .where_account_is_sender_or_receiver(company.product_account)
-                .where_sender_is_social_accounting(),
+                lambda t: (
+                    t.value
+                    if t.type
+                    in [
+                        TransferType.credit_p,
+                        TransferType.credit_r,
+                        TransferType.credit_a,
+                    ]
+                    else Decimal(0)
+                ),
+                self.database_gateway.get_transfers().where_account_is_debtor(
+                    company.product_account
+                ),
             )
         )
         return Expectations(
             means=credits[0],
             raw_material=credits[1],
             work=credits[2],
-            product=expected_sales,
+            product=-expected_sales,
         )
 
     def _get_account_balances(self, company: Company) -> AccountBalances:

@@ -74,6 +74,24 @@ class ExpectationsTestCase(BaseTestCase):
         assert response
         assert response.expectations.work == expected_a
 
+    def test_that_expectations_for_prd_are_exactly_planned_costs(
+        self,
+    ) -> None:
+        expected_prd = Decimal(12 * 3)
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                means_cost=expected_prd / 3,
+                resource_cost=expected_prd / 3,
+                labour_cost=expected_prd / 3,
+            ),
+            approved=True,
+            planner=company,
+        )
+        response = self.get_company_summary(company)
+        assert response
+        assert response.expectations.product == -expected_prd
+
     def test_that_expectations_for_prd_are_exactly_planned_costs_after_approved_plan_expired(
         self,
     ) -> None:
@@ -114,3 +132,21 @@ class ExpectationsTestCase(BaseTestCase):
             response_before_sale.expectations.product
             == response_after_sale.expectations.product
         )
+
+    def test_that_expectations_for_prd_are_zero_if_there_is_only_a_public_service_plan(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                means_cost=Decimal(3),
+                resource_cost=Decimal(3),
+                labour_cost=Decimal(3),
+            ),
+            approved=True,
+            planner=company,
+            is_public_service=True,
+        )
+        response = self.get_company_summary(company)
+        assert response
+        assert response.expectations.product == Decimal(0)
