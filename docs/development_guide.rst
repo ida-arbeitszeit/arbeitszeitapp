@@ -292,6 +292,55 @@ single UPDATE statement to the SQL database server since only the
 ``perform`` method at the end of the method chain will send commands
 to it.
 
+
+Handling transfers of labor time
+---------------------------------
+
+Transfers of labor time between accounts are at the core of the arbeitszeitapp. 
+A ``Transfer`` object follows roughly this structure::
+
+    class Transfer:
+        date: datetime
+        debit_account: UUID
+        credit_account: UUID
+        value: Decimal
+
+You will find the ``Transfer`` object in the business logic, in ``arbeitszeit/records.py``,
+as well as a database implementation in ``arbeitszeit_flask/database/models.py``.  
+
+Apart from these Transfer objects, we have other objects that may reference 
+one or more transfers. For example, there might be a ``Consumption`` object, 
+that stores the fact that a consumer has consumed a product from a plan. We can 
+use the ``Consumption.transfer`` field to access the amount of labor time that was 
+transfered as part of that consumption::
+
+    class Consumption:
+        consumer: UUID
+        plan: UUID
+        transfer: UUID  # Reference to a Transfer
+
+A common pattern in our code is to first create a Transfer object and then another object 
+that references it — all within a single use case. For instance, we might see 
+in a ``ConsumptionUseCase``::
+
+    # create the Transfer object
+    transfer = self.database_gateway.create_transfer(
+        date=now,
+        debit_account=consumer.account,
+        credit_account=company.account,
+        value=amount,
+    )
+    # create the Consumption object
+    self.database_gateway.create_consumption(
+        consumer=consumer,
+        plan=consumption.plan,
+        transfer=transfer,
+    )
+
+Following this pattern, we can be sure to have all transfers of labor time recorded in the system as
+``Transfer`` records, while we can query more detailed information through 
+``Consumption`` and similar objects.
+
 Presenters
 ----------
 
@@ -384,30 +433,6 @@ this::
 		      'Your plan was rejected by public accounting'
 		  ),
 	      )
-
-HTTP
-----
-
-When building web server logic, we use various HTTP methods to handle
-different user actions. In the "arbeitszeitapp" we've mainly used the
-`GET` and `POST` methods so far.
-
-GET
-...
-
-`GET` requests should not alter the application's state in any
-significant way. A good rule of thumb is to ask whether the action
-triggered by a successful request would change the database. If the
-answer is no, then it's likely appropriate to handle the request using
-`GET`.
-
-POST
-....
-
-A `POST` request should handle the submission of new user data.
-Examples for actions that warrant the `POST` method include the
-submission of login data, filing a new plan with public accounting or
-submitting a review for a plan.
 
 User identification
 -------------------
