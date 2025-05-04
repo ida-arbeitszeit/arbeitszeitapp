@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import List
 from uuid import UUID
 
-from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases import show_a_account_details, show_r_account_details
+from parameterized import parameterized
+
+from arbeitszeit.records import ConsumptionType, ProductionCosts, SocialAccounting
+from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
 from arbeitszeit.use_cases.query_plans import (
@@ -18,7 +20,6 @@ from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
-from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 
 from .base_test_case import BaseTestCase
 
@@ -32,6 +33,7 @@ class UseCaseTests(BaseTestCase):
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
         )
+        self.database_gateway = self.injector.get(DatabaseGateway)
 
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)
@@ -90,24 +92,6 @@ class UseCaseTests(BaseTestCase):
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.assertEqual(self.get_company_account_balances(planner).means, Decimal(5))
 
-    def test_that_means_of_production_costs_are_correctly_rounded_and_transfered(
-        self,
-    ) -> None:
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            approved=False,
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(0),
-                resource_cost=Decimal(0),
-                means_cost=Decimal("5.155"),
-            ),
-        )
-        self.use_case.approve_plan(self.create_request(plan=plan))
-        self.assertEqual(
-            self.get_company_account_balances(planner).means, Decimal("5.16")
-        )
-
     def test_that_costs_for_resources_are_transfered(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
@@ -120,23 +104,6 @@ class UseCaseTests(BaseTestCase):
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.assertEqual(
             self.get_company_account_balances(planner).raw_material, Decimal(5)
-        )
-
-    def test_that_resource_costs_are_correctly_rounded_and_transfered(self) -> None:
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            approved=False,
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(0),
-                resource_cost=Decimal("5.155"),
-                means_cost=Decimal(0),
-            ),
-        )
-        self.use_case.approve_plan(self.create_request(plan=plan))
-        self.assertEqual(
-            self.get_company_account_balances(planner).raw_material,
-            Decimal("5.16"),
         )
 
     def test_that_labour_account_of_company_is_increased_by_planned_amount(
@@ -176,126 +143,195 @@ class UseCaseTests(BaseTestCase):
             Decimal("-6"),
         )
 
-    def test_that_transaction_for_fixed_means_is_created(self) -> None:
-        planner = self.company_generator.create_company()
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def test_that_three_transfers_are_created_on_approval(
+        self,
+        is_public_service: bool,
+    ) -> None:
         plan = self.plan_generator.create_plan(
             approved=False,
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(0),
-                resource_cost=Decimal(0),
-                means_cost=Decimal(1),
-            ),
+            is_public_service=is_public_service,
         )
         self.use_case.approve_plan(self.create_request(plan=plan))
-        assert self.get_company_fixed_means_transactions(planner)
+        assert len(list(self.database_gateway.get_transfers())) == 3
 
-    def test_that_no_transaction_for_fixed_means_is_created_when_no_fixed_means_were_planned(
+    @parameterized.expand(
+        [
+            (Decimal(0), True),
+            (Decimal(1), True),
+            (Decimal(2.50001), True),
+            (Decimal(0), False),
+            (Decimal(1), False),
+            (Decimal(2.50001), False),
+        ]
+    )
+    def test_that_one_transfer_of_credit_p_is_created_on_plan_approval(
         self,
+        planned_p_amount: Decimal,
+        is_public_service: bool,
     ) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_record()
+        debit_account = (
+            self.injector.get(SocialAccounting).account_psf
+            if is_public_service
+            else planner.product_account
+        )
+        expected_transfer_type = (
+            TransferType.credit_public_p if is_public_service else TransferType.credit_p
+        )
         plan = self.plan_generator.create_plan(
             approved=False,
-            planner=planner,
+            planner=planner.id,
+            is_public_service=is_public_service,
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
                 resource_cost=Decimal(1),
-                means_cost=Decimal(0),
+                means_cost=planned_p_amount,
             ),
         )
+        approval_time = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
-        assert not self.get_company_fixed_means_transactions(planner)
-
-    def test_that_transaction_for_liquid_means_is_created(self) -> None:
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            approved=False,
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(0),
-                resource_cost=Decimal(1),
-                means_cost=Decimal(0),
-            ),
+        self.datetime_service.unfreeze_time()
+        transfers = list(self.database_gateway.get_transfers())
+        transfers_of_credit_p = list(
+            filter(lambda transfer: transfer.type == expected_transfer_type, transfers)
         )
-        self.use_case.approve_plan(self.create_request(plan=plan))
-        assert self.get_company_liquid_means_transactions(planner)
+        assert len(transfers_of_credit_p) == 1
+        transfer = transfers_of_credit_p[0]
+        assert transfer.debit_account == debit_account
+        assert transfer.credit_account == planner.means_account
+        assert transfer.value == planned_p_amount
+        assert transfer.type == expected_transfer_type
+        assert transfer.date == approval_time
 
-    def test_that_no_transaction_for_liquid_means_is_created_when_no_liquid_means_were_planned(
+    @parameterized.expand(
+        [
+            (Decimal(0), True),
+            (Decimal(1), True),
+            (Decimal(2.50001), True),
+            (Decimal(0), False),
+            (Decimal(1), False),
+            (Decimal(2.50001), False),
+        ]
+    )
+    def test_that_one_transfer_of_credit_r_is_created_on_plan_approval(
         self,
+        planned_r_amount: Decimal,
+        is_public_service: bool,
     ) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_record()
+        debit_account = (
+            self.injector.get(SocialAccounting).account_psf
+            if is_public_service
+            else planner.product_account
+        )
+        expected_transfer_type = (
+            TransferType.credit_public_r if is_public_service else TransferType.credit_r
+        )
         plan = self.plan_generator.create_plan(
             approved=False,
-            planner=planner,
+            planner=planner.id,
+            is_public_service=is_public_service,
             costs=ProductionCosts(
                 labour_cost=Decimal(1),
-                resource_cost=Decimal(0),
+                resource_cost=planned_r_amount,
                 means_cost=Decimal(1),
             ),
         )
+        approval_time = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
-        assert not self.get_company_liquid_means_transactions(planner)
-
-    def test_that_transaction_for_living_labour_is_created(self) -> None:
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            approved=False,
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(1),
-                resource_cost=Decimal(0),
-                means_cost=Decimal(0),
-            ),
+        self.datetime_service.unfreeze_time()
+        transfers = list(self.database_gateway.get_transfers())
+        transfers_of_credit_r = list(
+            filter(lambda transfer: transfer.type == expected_transfer_type, transfers)
         )
-        self.use_case.approve_plan(self.create_request(plan=plan))
-        assert self.get_company_living_labour_transactions(planner)
+        assert len(transfers_of_credit_r) == 1
+        transfer = transfers_of_credit_r[0]
+        assert transfer.debit_account == debit_account
+        assert transfer.credit_account == planner.raw_material_account
+        assert transfer.value == planned_r_amount
+        assert transfer.type == expected_transfer_type
+        assert transfer.date == approval_time
 
-    def test_that_one_transaction_for_living_labour_is_created_with_value_zero_when_no_living_labour_was_planned(
+    @parameterized.expand(
+        [
+            (Decimal(0), True),
+            (Decimal(1), True),
+            (Decimal(2.50001), True),
+            (Decimal(0), False),
+            (Decimal(1), False),
+            (Decimal(2.50001), False),
+        ]
+    )
+    def test_that_one_transfer_of_credit_a_is_created_on_plan_approval(
         self,
+        planned_a_amount: Decimal,
+        is_public_service: bool,
     ) -> None:
-        planner = self.company_generator.create_company()
+        planner = self.company_generator.create_company_record()
+        debit_account = (
+            self.injector.get(SocialAccounting).account_psf
+            if is_public_service
+            else planner.product_account
+        )
+        expected_transfer_type = (
+            TransferType.credit_public_a if is_public_service else TransferType.credit_a
+        )
         plan = self.plan_generator.create_plan(
             approved=False,
-            planner=planner,
+            planner=planner.id,
+            is_public_service=is_public_service,
             costs=ProductionCosts(
-                labour_cost=Decimal(0),
+                labour_cost=planned_a_amount,
                 resource_cost=Decimal(1),
                 means_cost=Decimal(1),
             ),
         )
+        approval_time = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
-        living_labour_transactions = self.get_company_living_labour_transactions(
-            planner
+        self.datetime_service.unfreeze_time()
+        transfers = list(self.database_gateway.get_transfers())
+        transfers_of_credit_a = list(
+            filter(lambda transfer: transfer.type == expected_transfer_type, transfers)
         )
-        assert len(living_labour_transactions) == 1
-        assert living_labour_transactions[0].transaction_volume == Decimal(0)
+        assert len(transfers_of_credit_a) == 1
+        transfer = transfers_of_credit_a[0]
+        assert transfer.debit_account == debit_account
+        assert transfer.credit_account == planner.work_account
+        assert transfer.value == planned_a_amount
+        assert transfer.type == expected_transfer_type
+        assert transfer.date == approval_time
 
-    def get_company_fixed_means_transactions(
-        self, company: UUID
-    ) -> List[ShowPAccountDetailsUseCase.TransactionInfo]:
-        use_case = self.injector.get(ShowPAccountDetailsUseCase)
-        response = use_case.show_details(
-            ShowPAccountDetailsUseCase.Request(company=company)
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def test_that_one_plan_approval_record_is_created(
+        self,
+        is_public_service: bool,
+    ) -> None:
+        plan = self.plan_generator.create_plan(
+            approved=False,
+            is_public_service=is_public_service,
         )
-        return response.transactions
-
-    def get_company_liquid_means_transactions(
-        self, company: UUID
-    ) -> List[show_r_account_details.TransactionInfo]:
-        use_case = self.injector.get(show_r_account_details.ShowRAccountDetailsUseCase)
-        response = use_case.show_details(
-            show_r_account_details.Request(company=company)
-        )
-        return response.transactions
-
-    def get_company_living_labour_transactions(
-        self, company: UUID
-    ) -> List[show_a_account_details.TransactionInfo]:
-        use_case = self.injector.get(show_a_account_details.ShowAAccountDetailsUseCase)
-        response = use_case.show_details(
-            show_a_account_details.Request(company=company)
-        )
-        return response.transactions
+        approval_time = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(approval_time)
+        self.use_case.approve_plan(self.create_request(plan=plan))
+        self.datetime_service.unfreeze_time()
+        assert len(list(self.database_gateway.get_plan_approvals())) == 1
+        plan_approval = list(self.database_gateway.get_plan_approvals())[0]
+        assert plan_approval.plan_id == plan
+        assert plan_approval.date == approval_time
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:
         response = self.get_company_summary(company_id=company)

@@ -46,16 +46,6 @@ class PlanResultTests(FlaskTestCase):
         assert plan.timeframe == expected_duration
         assert plan.is_public_service == expected_is_public_service
 
-    def test_that_created_plan_can_have_its_approval_date_changed(self) -> None:
-        plan = self.create_plan()
-        expected_approval_date = datetime(2000, 3, 2)
-        self.database_gateway.get_plans().with_id(plan.id).update().set_approval_date(
-            expected_approval_date
-        ).perform()
-        changed_plan = self.database_gateway.get_plans().with_id(plan.id).first()
-        assert changed_plan
-        assert changed_plan.approval_date == expected_approval_date
-
     def test_that_created_plan_can_have_its_rejection_date_changed(self) -> None:
         plan = self.create_plan()
         expected_rejection_date = datetime(2020, 1, 1)
@@ -266,6 +256,16 @@ class GetAllPlans(FlaskTestCase):
         self.plan_generator.create_plan(approved=False, rejected=True)
         assert not list(self.database_gateway.get_plans().that_are_approved())
 
+    def test_that_approved_plans_that_have_expired_are_included_in_results(
+        self,
+    ) -> None:
+        self.datetime_service.freeze_time()
+        plan_id = self.plan_generator.create_plan(timeframe=1)
+        self.datetime_service.advance_time(timedelta(days=2))
+        assert plan_id in [
+            p.id for p in self.database_gateway.get_plans().that_are_approved()
+        ]
+
     def test_that_can_filter_unrejected_plans_from_results(self) -> None:
         self.plan_generator.create_plan(approved=True, rejected=False)
         self.plan_generator.create_plan(approved=False, rejected=False)
@@ -341,10 +341,14 @@ class GetAllPlans(FlaskTestCase):
     def test_that_only_not_approved_and_not_rejected_plans_are_returned_when_filtering_for_unreviewed_plans(
         self,
     ) -> None:
-        self.plan_generator.create_plan(approved=False, rejected=False)
+        expected_plan = self.plan_generator.create_plan(approved=False, rejected=False)
         self.plan_generator.create_plan(approved=True)
         self.plan_generator.create_plan(approved=False, rejected=True)
         assert len(self.database_gateway.get_plans().without_completed_review()) == 1
+        assert expected_plan in [
+            plan.id
+            for plan in self.database_gateway.get_plans().without_completed_review()
+        ]
 
     def test_that_plans_with_open_cooperation_request_can_be_filtered(self) -> None:
         coop = self.cooperation_generator.create_cooperation()
@@ -466,13 +470,6 @@ class GetAllPlans(FlaskTestCase):
         assert result
         _, cooperation = result
         assert not cooperation
-
-    def test_can_set_approval_date(self) -> None:
-        plan = self.plan_generator.create_plan()
-        plans = self.database_gateway.get_plans().with_id(plan)
-        expected_approval_date = datetime(2000, 3, 2)
-        assert plans.update().set_approval_date(expected_approval_date).perform()
-        assert all(plan.approval_date == expected_approval_date for plan in plans)
 
     def test_can_set_rejection_date(self) -> None:
         plan = self.plan_generator.create_plan(approved=False, rejected=True)
@@ -596,6 +593,20 @@ class ThatWillExpireAfterTests(FlaskTestCase):
         self.plan_generator.create_plan(timeframe=1)
         assert not self.database_gateway.get_plans().that_will_expire_after(
             datetime(2000, 1, 3)
+        )
+
+    def test_that_a_plan_without_approval_is_not_included_in_results(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan(approved=False, timeframe=1)
+        assert not self.database_gateway.get_plans().that_will_expire_after(
+            datetime(2000, 1, 1)
+        )
+
+    def test_that_a_rejected_plan_is_not_included_in_results(self) -> None:
+        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.plan_generator.create_plan(approved=False, rejected=True, timeframe=1)
+        assert not self.database_gateway.get_plans().that_will_expire_after(
+            datetime(2000, 1, 1)
         )
 
 

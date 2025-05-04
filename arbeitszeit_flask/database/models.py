@@ -137,7 +137,10 @@ class Plan(Base):
     hidden_by_user: Mapped[bool] = mapped_column(default=False)
 
     review: Mapped["PlanReview  | None"] = relationship(
-        "PlanReview", uselist=False, back_populates="plan"
+        "PlanReview", back_populates="plan"
+    )
+    approval: Mapped["PlanApproval | None"] = relationship(
+        "PlanApproval", back_populates="plan"
     )
 
 
@@ -152,14 +155,26 @@ class PlanReview(Base):
     __tablename__ = "plan_review"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    approval_date: Mapped[datetime | None]
     rejection_date: Mapped[datetime | None]
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
 
     plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
-        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
+        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, rejection_date={self.rejection_date!r})"
+
+
+class PlanApproval(Base):
+    __tablename__ = "plan_approval"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
+    date: Mapped[datetime]
+    transfer_of_credit_p: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_r: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_a: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="approval")
 
 
 class Account(Base):
