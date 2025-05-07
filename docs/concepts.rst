@@ -18,20 +18,50 @@ There are three user roles:
 Accounts  
 ---------
 
-The following accounts exist in the Arbeitszeitapp. See below for a list of allowed transfers between them.
+Seven different account types exist in our app. See :ref:`transfers-of-labor-time` for a list of allowed transfers between the accounts.
 
-* Each company has four accounts:
+**p**
 
-   * **p**: Fixed means of production
-   * **r**: Liquid means of production
-   * **a**: Labor ("Arbeit")
-   * **prd**: The total product, debited at the start of each plan cycle by the sum of the P, R, and A values, and then increased back toward zero, item by item, as the finished product gets consumed.
+*owner*: Company
 
-* **member**: Each member has an account for labor certificates.
+Each company has a "p" account ("Produktionsmittel" - means of production) where transfers related to the consumption or provision of "fixed means of production" are recorded. Fixed means of production are, for example, machines or buildings that wear out gradually and do not transfer their value to the product in one planning cycle all at once.
 
-* **psf**: The PSF account is used to track hours credited to and debited from the public sector. It is used to cover the costs of public plans.
+**r**
 
-* **cooperation**: Companies can form cooperations. Each cooperation has an account that tracks the differences between the consumed cooperative (averaged) prices and the actual costs (see below).
+*owner*: Company
+
+Each company has a "r" account ("Rohstoffe" - raw materials) where transfers related to the consumption or provision of "liquid means of production" are recorded. Liquid means of production are, for example, raw materials that transfer their value to the product in one planning cycle all at once.
+
+**a**
+
+*owner*: Company
+
+Each company has an "a" account ("Arbeit" - work), where inflows and outflows of work certificates are recorded.
+
+**prd**
+
+*owner*: Company
+
+Each company has a "prd" account ("Produkt" - product), where quantities of planned and delivered products are recorded. When a productive plan gets approved, the total planned costs are debited from this account. As the finished product gets consumed and work certificates are spent for it, the account balance increases back toward zero, item by item.
+
+**member**
+
+*owner*: Member
+
+Each member has a "member" account where inflows and outflows of work certificates are recorded. Work certificates are credited when a company registers work and debited when the member consumes a product. 
+
+**psf**
+
+*owner*: Social Accounting
+
+The "psf" account (Public Sector Fund) is used to track hours credited to and debited from the public sector. In the current implementation of the app, there is one Social Accounting instance with one psf account.
+
+**cooperation**
+
+*owner*: Cooperation
+
+Each cooperation has an account that tracks the differences between the consumed cooperative prices (averaged) and the actual costs (see :ref:`cooperations` for details).
+
 
 Plans
 -----
@@ -89,6 +119,8 @@ The FIC ranges from −∞ to 1, but in practice, it should never be negative. A
 * If FIC = 0, all labor is allocated to public plans, making all goods and services freely available. When workers register hours worked, they do not receive any work certificates, since their work goes entirely to freely available public-sector goods and services and thus cannot be exchanged for private consumption.
 * If FIC = 1, all labor is dedicated to productive plans, meaning nothing is freely available. Work certificates are issued in full without deductions.
 
+.. _cooperations:
+
 Cooperations 
 -------------
 
@@ -112,6 +144,8 @@ Note that the cooperative price is independent of the duration of the plans. Whe
 
 While this implementation may seem undemocratic at first glance, it must be noted that the Arbeitszeitapp only provides the technical front-end to diverse political processes that must happen in "real life". The app does not prescribe the political procedures that companies and communities choose to elect coordinators or to define cooperations. Because every company is able to create cooperations, companies that are unhappy with a certain coordination can easily form a new cooperation.
 
+
+.. _transfers-of-labor-time:
 
 Transfers of labor time
 -----------------------
