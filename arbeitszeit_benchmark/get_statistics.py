@@ -30,7 +30,7 @@ class GetStatisticsBenchmark:
             plan_generator.create_plan(
                 is_public_service=False, costs=self.random_production_costs()
             )
-        db.session.commit()
+        db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()
