@@ -12,8 +12,10 @@
                 <strong class="is-size-5">
                     {{ type }}
                 </strong>
+                {% if purpose is defined and purpose %}
                 <br>
                 <small>{{ purpose }}</small>
+                {% endif %}
             </p>
         </div>
     </div>
