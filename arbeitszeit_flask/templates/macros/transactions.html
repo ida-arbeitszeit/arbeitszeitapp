@@ -28,7 +28,7 @@
 {% endmacro %}
 
 <!--Used in company's prd account-->
-{% macro transaction_with_peer(date, type, purpose, volume, peer_name, peer_type_icon) %}
+{% macro transaction_with_peer(date, type, volume, peer_name, peer_type_icon) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -41,8 +41,6 @@
                 <strong class="is-size-5">
                     {{ type }}
                 </strong><span class="icon">{{ peer_type_icon|icon }}</span>&nbsp;<span>{{ peer_name }}</span>
-                <br>
-                <small>{{ purpose }}</small>
             </p>
         </div>
     </div>
