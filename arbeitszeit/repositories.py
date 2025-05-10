@@ -336,30 +336,11 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
 
 
 class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self: ...
-
     def where_account_is_sender(self, *account: UUID) -> Self: ...
 
     def where_account_is_receiver(self, *account: UUID) -> Self: ...
 
     def ordered_by_transaction_date(self, descending: bool = ...) -> Self: ...
-
-    def where_sender_is_social_accounting(self) -> Self: ...
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        """Filter all transactions in the current result set such that
-        the new result set contains only those transactions that are
-        part of a "sale".
-
-        If no `plan` argument is specified then the result set will
-        contain all previously selected transactions that are part of
-        any consumption.
-
-        The `plan` argument can be specified multiple times. A
-        transaction will be part of the result set if it is the
-        consumption registration for any plan that was specified by its
-        UUID.
-        """
 
     def joined_with_receiver(
         self,

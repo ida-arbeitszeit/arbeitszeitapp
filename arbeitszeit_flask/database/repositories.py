@@ -802,17 +802,6 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
 
 
 class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        accounts = list(map(str, account))
-        return self._with_modified_query(
-            lambda query: query.filter(
-                or_(
-                    models.Transaction.receiving_account.in_(accounts),
-                    models.Transaction.sending_account.in_(accounts),
-                )
-            )
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         accounts = map(str, account)
         return self._with_modified_query(
@@ -836,44 +825,6 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             else models.Transaction.date.asc()
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
-
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._with_modified_query(
-            lambda query: query.join(
-                models.SocialAccounting,
-                models.SocialAccounting.account == models.Transaction.sending_account,
-            )
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plan_ids = [str(p) for p in plan]
-        private_consumption = aliased(models.PrivateConsumption)
-        productive_consumption = aliased(models.ProductiveConsumption)
-        valid_private_consumption = self.db.session.query(private_consumption)
-        valid_productive_consumption = self.db.session.query(productive_consumption)
-        if plan:
-            valid_productive_consumption = valid_productive_consumption.filter(
-                productive_consumption.plan_id.in_(plan_ids)
-            )
-            valid_private_consumption = valid_private_consumption.filter(
-                private_consumption.plan_id.in_(plan_ids)
-            )
-        return self._with_modified_query(
-            lambda query: query.filter(
-                or_(
-                    models.Transaction.id.in_(
-                        valid_private_consumption.with_entities(
-                            private_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                    models.Transaction.id.in_(
-                        valid_productive_consumption.with_entities(
-                            productive_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                )
-            )
-        )
 
     def joined_with_receiver(
         self,

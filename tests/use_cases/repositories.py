@@ -863,12 +863,6 @@ class AccountantResult(QueryResultImpl[Accountant]):
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account in account
-            or transaction.receiving_account in account
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         return self._filter_elements(
             lambda transaction: transaction.sending_account in account
@@ -884,37 +878,6 @@ class TransactionResult(QueryResultImpl[Transaction]):
             key=lambda transaction: transaction.date,
             reverse=descending,
         )
-
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account
-            == self.database.social_accounting.account
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plans = set(plan)
-
-        def transaction_filter(transaction: Transaction) -> bool:
-            private_consumptions = (
-                self.database.indices.private_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            productive_consumptions = (
-                self.database.indices.productive_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            transaction_plans = {
-                self.database.private_consumptions[i].plan_id
-                for i in private_consumptions
-            } | {
-                self.database.productive_consumptions[i].plan_id
-                for i in productive_consumptions
-            }
-            return bool(transaction_plans & plans)
-
-        return self._filter_elements(transaction_filter)
 
     def joined_with_receiver(
         self,

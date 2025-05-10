@@ -5,8 +5,7 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.records import AccountTypes, SocialAccounting, Transaction
-from tests.control_thresholds import ControlThresholdsTestImpl
+from arbeitszeit.records import AccountTypes, SocialAccounting
 
 from ..flask import FlaskTestCase
 
@@ -49,22 +48,6 @@ class TransactionRepositoryTests(FlaskTestCase):
             purpose="test purpose",
         )
         assert list(self.database_gateway.get_transactions()) == [transaction]
-
-    def test_transactions_from_social_accounting_can_be_filtered(
-        self,
-    ) -> None:
-        receiver_account = self.create_account()
-        transaction = self.database_gateway.create_transaction(
-            self.datetime_service.now(),
-            sending_account=self.social_accounting.account,
-            receiving_account=receiver_account,
-            amount_sent=Decimal(1),
-            amount_received=Decimal(1),
-            purpose="test purpose",
-        )
-        assert list(
-            self.database_gateway.get_transactions().where_sender_is_social_accounting()
-        ) == [transaction]
 
     def test_transactions_from_labour_accounts_can_be_filtered(
         self,
@@ -125,23 +108,6 @@ class TransactionRepositoryTests(FlaskTestCase):
             )
         ) == [transaction_one, transaction_two, transaction_three]
 
-    def test_transactions_not_from_social_accounting_dont_show_up_when_filtering_for_transactions_from_social_accounting(
-        self,
-    ) -> None:
-        sender_account = self.create_account()
-        receiver_account = self.create_account()
-        self.database_gateway.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender_account,
-            receiving_account=receiver_account,
-            amount_sent=Decimal(1),
-            amount_received=Decimal(1),
-            purpose="test purpose",
-        )
-        assert (
-            not self.database_gateway.get_transactions().where_sender_is_social_accounting()
-        )
-
     def test_that_transactions_can_be_ordered_by_transaction_date(
         self,
     ) -> None:
@@ -191,101 +157,6 @@ class TransactionRepositoryTests(FlaskTestCase):
 
     def create_account(self) -> UUID:
         return self.database_gateway.create_account().id
-
-
-class TestWhereAccountIsSenderOrReceiver(FlaskTestCase):
-    def test_transactions_are_presented_in_result_when_receiver_matches_account_id(
-        self,
-    ) -> None:
-        sender_account = self.create_account()
-        receiver_account = self.create_account()
-        transaction = self.create_transaction(
-            sender=sender_account, receiver=receiver_account
-        )
-        assert list(
-            self.database_gateway.get_transactions().where_account_is_sender_or_receiver(
-                receiver_account
-            )
-        ) == [transaction]
-
-    def test_transactions_are_presented_in_result_when_sender_matches_account_id(
-        self,
-    ) -> None:
-        sender_account = self.create_account()
-        receiver_account = self.create_account()
-        transaction = self.create_transaction(
-            sender=sender_account, receiver=receiver_account
-        )
-        assert list(
-            self.database_gateway.get_transactions().where_account_is_sender_or_receiver(
-                sender_account
-            )
-        ) == [transaction]
-
-    def create_transaction(self, *, sender: UUID, receiver: UUID) -> Transaction:
-        return self.database_gateway.create_transaction(
-            self.datetime_service.now(),
-            sending_account=sender,
-            receiving_account=receiver,
-            amount_sent=Decimal(1),
-            amount_received=Decimal(1),
-            purpose="test purpose",
-        )
-
-    def create_account(self) -> UUID:
-        return self.database_gateway.create_account().id
-
-
-class ThatWereASaleForPlanResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.control_thresholds.set_allowed_overdraw_of_member_account(1000000)
-
-    def test_that_without_any_transactions_in_db_nothing_is_returned(
-        self,
-    ) -> None:
-        assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan()
-
-    def test_with_approved_plan_but_without_any_sales_dont_return_any_transactions(
-        self,
-    ) -> None:
-        self.plan_generator.create_plan()
-        assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan()
-
-    def test_with_approved_plan_that_has_a_private_consumption_that_we_find_some_transactions(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        self.consumption_generator.create_private_consumption(plan=plan)
-        assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
-
-    def test_with_approved_plan_that_has_a_fixed_means_consumption_that_we_find_some_transactions(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        self.consumption_generator.create_fixed_means_consumption(plan=plan)
-        assert self.database_gateway.get_transactions().that_were_a_sale_for_plan()
-
-    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_productive_consumptions_for_other_plans(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        other_plan = self.plan_generator.create_plan()
-        self.consumption_generator.create_fixed_means_consumption(plan=other_plan)
-        assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
-            plan
-        )
-
-    def test_dont_show_find_transactions_for_newly_approved_plan_when_there_are_private_consumptions_for_other_plans(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan()
-        other_plan = self.plan_generator.create_plan()
-        self.consumption_generator.create_private_consumption(plan=other_plan)
-        assert not self.database_gateway.get_transactions().that_were_a_sale_for_plan(
-            plan
-        )
 
 
 class JoinedWithReceiverTests(FlaskTestCase):
