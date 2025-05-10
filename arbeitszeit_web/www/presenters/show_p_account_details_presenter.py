@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -18,7 +18,6 @@ class ShowPAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
 
     @dataclass
     class ViewModel:
@@ -36,7 +35,7 @@ class ShowPAccountDetailsPresenter:
     ) -> ViewModel:
         transactions = [
             self._create_info(transaction)
-            for transaction in use_case_response.transactions
+            for transaction in use_case_response.transfers
         ]
         return self.ViewModel(
             transactions=transactions,
@@ -56,19 +55,17 @@ class ShowPAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transaction: ShowPAccountDetailsUseCase.TransactionInfo
+        self, transfer: ShowPAccountDetailsUseCase.TransferInfo
     ) -> TransactionInfo:
         transaction_type = (
             self.translator.gettext("Consumption")
-            if transaction.transaction_type
-            == TransactionTypes.consumption_of_fixed_means
+            if transfer.type == TransferType.productive_consumption_p
             else self.translator.gettext("Credit")
         )
         return self.TransactionInfo(
             transaction_type,
             self.datetime_formatter.format_datetime(
-                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            str(round(transfer.volume, 2)),
         )
