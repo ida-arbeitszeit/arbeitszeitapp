@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_r_account_details
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -18,7 +18,6 @@ class ShowRAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
 
     @dataclass
     class ViewModel:
@@ -34,7 +33,7 @@ class ShowRAccountDetailsPresenter:
     def present(self, use_case_response: show_r_account_details.Response) -> ViewModel:
         transactions = [
             self._create_info(transaction)
-            for transaction in use_case_response.transactions
+            for transaction in use_case_response.transfers
         ]
         return self.ViewModel(
             transactions=transactions,
@@ -54,19 +53,17 @@ class ShowRAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transaction: show_r_account_details.TransactionInfo
+        self, transfer: show_r_account_details.TransferInfo
     ) -> TransactionInfo:
         transaction_type = (
             self.translator.gettext("Consumption")
-            if transaction.transaction_type
-            == TransactionTypes.consumption_of_liquid_means
+            if transfer.type == TransferType.productive_consumption_r
             else self.translator.gettext("Credit")
         )
         return self.TransactionInfo(
             transaction_type,
             self.datetime_formatter.format_datetime(
-                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transaction.transaction_volume, 2)),
-            transaction.purpose,
+            str(round(transfer.volume, 2)),
         )
