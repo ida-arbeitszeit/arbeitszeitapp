@@ -7,8 +7,9 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
+from arbeitszeit.records import Company
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transactions import TransactionTypes, UserAccountingService
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -17,11 +18,10 @@ class Request:
 
 
 @dataclass
-class TransactionInfo:
-    transaction_type: TransactionTypes
+class TransferInfo:
+    type: TransferType
     date: datetime
-    transaction_volume: Decimal
-    purpose: str
+    volume: Decimal
 
 
 @dataclass
@@ -33,41 +33,69 @@ class PlotDetails:
 @dataclass
 class Response:
     company_id: UUID
-    transactions: List[TransactionInfo]
+    transfers: List[TransferInfo]
     account_balance: Decimal
     plot: PlotDetails
 
 
 @dataclass
 class ShowRAccountDetailsUseCase:
-    accounting_service: UserAccountingService
     database: DatabaseGateway
 
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company).first()
         assert company
-        transactions = [
-            TransactionInfo(
-                transaction_type=row.transaction_type,
-                date=row.transaction.date,
-                transaction_volume=row.volume,
-                purpose=row.transaction.purpose,
-            )
-            for row in self.accounting_service.get_statement_of_account(
-                company, [company.raw_material_account]
-            )
-        ]
+        transfers: list[TransferInfo] = []
+        self._add_credit_transfers(company, transfers)
+        self._add_consumption_transfers(company, transfers)
+        transfers.sort(key=lambda t: t.date, reverse=True)
         account_balance = self._get_account_balance(company.raw_material_account)
         plot = PlotDetails(
-            timestamps=self._get_plot_dates(transactions),
-            accumulated_volumes=self._get_plot_volumes(transactions),
+            timestamps=self._get_plot_dates(transfers),
+            accumulated_volumes=self._get_plot_volumes(transfers),
         )
         return Response(
             company_id=request.company,
-            transactions=transactions,
+            transfers=transfers,
             account_balance=account_balance,
             plot=plot,
         )
+
+    def _add_credit_transfers(
+        self, company: Company, transfers: list[TransferInfo]
+    ) -> None:
+        credit_transfers_and_debtors = (
+            self.database.get_transfers()
+            .where_account_is_creditor(company.raw_material_account)
+            .joined_with_debtor()
+        )
+        for transfer, debtor in credit_transfers_and_debtors:
+            transfers.append(
+                TransferInfo(
+                    type=(
+                        TransferType.credit_r
+                        if isinstance(debtor, Company)
+                        else TransferType.credit_public_r
+                    ),
+                    date=transfer.date,
+                    volume=transfer.value,
+                )
+            )
+
+    def _add_consumption_transfers(
+        self, company: Company, transfers: list[TransferInfo]
+    ) -> None:
+        transactions = self.database.get_transactions().where_account_is_sender(
+            company.raw_material_account
+        )
+        for transaction in transactions:
+            transfers.append(
+                TransferInfo(
+                    type=TransferType.productive_consumption_r,
+                    date=transaction.date,
+                    volume=-transaction.amount_sent,
+                )
+            )
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (
@@ -76,13 +104,13 @@ class ShowRAccountDetailsUseCase:
         assert result
         return result[1]
 
-    def _get_plot_dates(self, transactions: List[TransactionInfo]) -> List[datetime]:
-        timestamps = [t.date for t in transactions]
+    def _get_plot_dates(self, transfers: List[TransferInfo]) -> List[datetime]:
+        timestamps = [t.date for t in transfers]
         timestamps.reverse()
         return timestamps
 
-    def _get_plot_volumes(self, transactions: List[TransactionInfo]) -> List[Decimal]:
-        volumes = [t.transaction_volume for t in transactions]
+    def _get_plot_volumes(self, transfers: List[TransferInfo]) -> List[Decimal]:
+        volumes = [t.volume for t in transfers]
         volumes.reverse()
         volumes_cumsum = list(accumulate(volumes))
         return volumes_cumsum
