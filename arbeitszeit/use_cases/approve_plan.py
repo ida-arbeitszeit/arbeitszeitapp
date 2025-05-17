@@ -32,12 +32,16 @@ class ApprovePlanUseCase:
         if plan.is_approved:
             return self.Response(is_plan_approved=False)
 
-        if plan.is_public_service:
+        self._create_transfers_for_plan(planner, plan, is_public=plan.is_public_service)
+        return self.Response()
+
+    def _create_transfers_for_plan(
+        self, planner: Company, plan: Plan, is_public: bool
+    ) -> None:
+        if is_public:
             self._create_transfers_for_public_plan(planner, plan)
         else:
             self._create_transfers_for_productive_plan(planner, plan)
-
-        return self.Response()
 
     def _create_transfers_for_public_plan(self, planner: Company, plan: Plan) -> None:
         # psf -> p

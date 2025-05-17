@@ -63,14 +63,6 @@ class ShowPRDAccountDetailsPresenter:
     def _create_info(
         self, transfer: show_prd_account_details.TransferInfo
     ) -> TransactionInfo:
-        assert transfer.type in [
-            TransferType.credit_p,
-            TransferType.credit_r,
-            TransferType.credit_a,
-            TransferType.private_consumption,
-            TransferType.productive_consumption_p,
-            TransferType.productive_consumption_r,
-        ]
         return self.TransactionInfo(
             transaction_type=self._get_transaction_type(transfer),
             date=self.datetime_formatter.format_datetime(

@@ -54,48 +54,49 @@ class ShowPRDAccountDetailsUseCase:
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company_id).first()
         assert company
-        transfers: list[TransferInfo] = []
-        self._add_credit_transfers(company, transfers)
-        self._add_consumption_transfers(company, transfers)
-        transfers.sort(key=lambda t: t.date, reverse=True)
-        transfers_ascending = transfers.copy()
-        transfers_ascending.reverse()
+        credit_transfers = self._get_credit_transfers(company)
+        consumption_transfers = self._get_consumption_transfers(company)
+        transfers = credit_transfers + consumption_transfers
+        transfers.sort(key=lambda t: t.date)
+        transfers_descending = transfers.copy()
+        transfers_descending.reverse()
         account_balance = self._get_account_balance(company.product_account)
         plot = PlotDetails(
-            timestamps=self._get_plot_dates(transfers_ascending),
-            accumulated_volumes=self._get_plot_volumes(transfers_ascending),
+            timestamps=self._get_plot_dates_in_ascending_order(transfers),
+            accumulated_volumes=self._get_accumulated_plot_volumes_in_ascending_order(
+                transfers
+            ),
         )
         return Response(
             company_id=request.company_id,
-            transfers=transfers,
+            transfers=transfers_descending,
             account_balance=account_balance,
             plot=plot,
         )
 
-    def _add_credit_transfers(
-        self, company: Company, transfers: list[TransferInfo]
-    ) -> None:
+    def _get_credit_transfers(self, company: Company) -> list[TransferInfo]:
         credit_transfers = self.database.get_transfers().where_account_is_debtor(
             company.product_account
         )
+        transfers: list[TransferInfo] = []
         for transfer in credit_transfers:
             transfers.append(
                 TransferInfo(
                     type=transfer.type,
                     date=transfer.date,
-                    volume=-transfer.value,
+                    volume=-transfer.value,  # negative because account is debit account
                     peer=None,
                 )
             )
+        return transfers
 
-    def _add_consumption_transfers(
-        self, company: Company, transfers: list[TransferInfo]
-    ) -> None:
+    def _get_consumption_transfers(self, company: Company) -> list[TransferInfo]:
         transactions_and_sender_and_receiver = (
             self.database.get_transactions()
             .where_account_is_receiver(company.product_account)
             .joined_with_sender_and_receiver()
         )
+        transfers: list[TransferInfo] = []
         for transaction, sender, _ in transactions_and_sender_and_receiver:
             transfers.append(
                 TransferInfo(
@@ -105,6 +106,7 @@ class ShowPRDAccountDetailsUseCase:
                     peer=self._create_peer_info(sender),
                 )
             )
+        return transfers
 
     def _is_social_accounting(self, account_owner: AccountOwner) -> bool:
         return not isinstance(account_owner, (Member, Company))
@@ -130,11 +132,15 @@ class ShowPRDAccountDetailsUseCase:
         assert result
         return result[1]
 
-    def _get_plot_dates(self, transfers: list[TransferInfo]) -> list[datetime]:
+    def _get_plot_dates_in_ascending_order(
+        self, transfers: list[TransferInfo]
+    ) -> list[datetime]:
         timestamps = [t.date for t in transfers]
         return timestamps
 
-    def _get_plot_volumes(self, transfers: list[TransferInfo]) -> list[Decimal]:
+    def _get_accumulated_plot_volumes_in_ascending_order(
+        self, transfers: list[TransferInfo]
+    ) -> list[Decimal]:
         volumes_cumsum = list(accumulate(t.volume for t in transfers))
         return volumes_cumsum
 

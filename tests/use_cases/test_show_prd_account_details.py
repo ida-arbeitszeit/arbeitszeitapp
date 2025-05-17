@@ -289,11 +289,11 @@ class UseCaseTester(BaseTestCase):
         assert transfer_1_timestamp in response.plot.timestamps
         assert transfer_2_timestamp in response.plot.timestamps
         assert response.plot.accumulated_volumes == [
-            Decimal(-1),  # a
-            Decimal(-1),  # r
-            Decimal(-1),  # p
-            Decimal(0),  # consumption
-            Decimal(2),  # consumption
+            Decimal(0),  # credit for p
+            Decimal(0),  # credit for r
+            Decimal(-1),  # credit for a (-1)
+            Decimal(0),  # consumption (+1)
+            Decimal(2),  # consumption (+2)
         ]
 
     def test_that_peer_type_for_credit_transfers_is_none(self) -> None:

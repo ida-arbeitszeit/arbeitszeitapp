@@ -45,9 +45,9 @@ class ShowAAccountDetailsUseCase:
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company).first()
         assert company
-        transfers: list[TransferInfo] = []
-        self._add_credit_transfers(company, transfers)
-        self._add_work_certificates_transfers(company, transfers)
+        credit_transfers = self._get_credit_transfers(company)
+        work_certificates_transfers = self._get_work_certificates_transfers(company)
+        transfers: list[TransferInfo] = credit_transfers + work_certificates_transfers
         transfers.sort(key=lambda t: t.date, reverse=True)
         account_balance = self._get_account_balance(company.work_account)
         plot = PlotDetails(
@@ -61,14 +61,13 @@ class ShowAAccountDetailsUseCase:
             plot=plot,
         )
 
-    def _add_credit_transfers(
-        self, company: Company, transfers: list[TransferInfo]
-    ) -> None:
+    def _get_credit_transfers(self, company: Company) -> list[TransferInfo]:
         credit_transfers_and_debtors = (
             self.database.get_transfers()
             .where_account_is_creditor(company.work_account)
             .joined_with_debtor()
         )
+        transfers: list[TransferInfo] = []
         for transfer, debtor in credit_transfers_and_debtors:
             transfers.append(
                 TransferInfo(
@@ -81,21 +80,22 @@ class ShowAAccountDetailsUseCase:
                     transfer_volume=transfer.value,
                 )
             )
+        return transfers
 
-    def _add_work_certificates_transfers(
-        self, company: Company, transfers: list[TransferInfo]
-    ) -> None:
+    def _get_work_certificates_transfers(self, company: Company) -> list[TransferInfo]:
         transfers_of_work_certificates = (
             self.database.get_transfers().where_account_is_debtor(company.work_account)
         )
+        transfers: list[TransferInfo] = []
         for tf in transfers_of_work_certificates:
             transfers.append(
                 TransferInfo(
                     transfer_type=TransferType.work_certificates,
                     date=tf.date,
-                    transfer_volume=-tf.value,  # negative value
+                    transfer_volume=-tf.value,  # negative value because work account is debit account
                 )
             )
+        return transfers
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (
