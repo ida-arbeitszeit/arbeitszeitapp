@@ -79,14 +79,10 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
     def ordered_by_approval_date(self, ascending: bool = True) -> Self:
-        plan_review = aliased(models.PlanReview)
-        ordering = (
-            plan_review.approval_date.asc()
-            if ascending
-            else plan_review.approval_date.desc()
-        )
+        plan_approval = aliased(models.PlanApproval)
+        ordering = plan_approval.date.asc() if ascending else plan_approval.date.desc()
         return self._with_modified_query(
-            lambda query: query.outerjoin(plan_review).order_by(ordering)
+            lambda query: query.outerjoin(plan_approval).order_by(ordering)
         )
 
     def ordered_by_planner_name(self, ascending: bool = True) -> Self:
@@ -120,11 +116,8 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def that_are_approved(self) -> Self:
-        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: query.join(plan_review).filter(
-                plan_review.approval_date != None
-            )
+            lambda query: query.filter(models.Plan.approval != None)
         )
 
     def that_are_rejected(self) -> Self:
@@ -136,31 +129,29 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def that_were_approved_before(self, timestamp: datetime) -> Self:
-        plan_review = aliased(models.PlanReview)
+        plan_approval = aliased(models.PlanApproval)
         return self._with_modified_query(
-            lambda query: query.join(plan_review).filter(
-                plan_review.approval_date <= timestamp
+            lambda query: query.join(plan_approval).filter(
+                plan_approval.date <= timestamp
             )
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
-        plan_review = aliased(models.PlanReview)
+        approval = aliased(models.PlanApproval)
         expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + plan_review.approval_date
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
         )
         return self._with_modified_query(
-            lambda query: query.join(plan_review).filter(expiration_date > timestamp)
+            lambda query: query.join(approval).filter(expiration_date > timestamp)
         )
 
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
-        plan_review = aliased(models.PlanReview)
+        approval = aliased(models.PlanApproval)
         expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + plan_review.approval_date
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
         )
         return self._with_modified_query(
-            lambda query: query.join(plan_review).filter(expiration_date <= timestamp)
+            lambda query: query.join(approval).filter(expiration_date <= timestamp)
         )
 
     def that_are_productive(self) -> Self:
@@ -196,9 +187,11 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
     def without_completed_review(self) -> Self:
         plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: query.join(plan_review).filter(
+            lambda query: query.join(
+                plan_review, plan_review.plan_id == models.Plan.id
+            ).filter(
                 and_(
-                    plan_review.approval_date == None,
+                    models.Plan.approval == None,
                     plan_review.rejection_date == None,
                 )
             )
@@ -506,14 +499,6 @@ class PlanUpdate:
             ),
         )
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        return replace(
-            self,
-            review_update_values=dict(
-                self.review_update_values, approval_date=approval_date
-            ),
-        )
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         return replace(
             self,
@@ -635,6 +620,10 @@ class PlanDraftUpdate:
         rowcount = self.db.session.execute(sql_statement).rowcount
         self.db.session.flush()
         return rowcount
+
+
+@dataclass
+class PlanApprovalResult(FlaskQueryResult[records.PlanApproval]): ...
 
 
 class MemberQueryResult(FlaskQueryResult[records.Member]):
@@ -813,17 +802,6 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
 
 
 class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        accounts = list(map(str, account))
-        return self._with_modified_query(
-            lambda query: query.filter(
-                or_(
-                    models.Transaction.receiving_account.in_(accounts),
-                    models.Transaction.sending_account.in_(accounts),
-                )
-            )
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         accounts = map(str, account)
         return self._with_modified_query(
@@ -847,44 +825,6 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             else models.Transaction.date.asc()
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
-
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._with_modified_query(
-            lambda query: query.join(
-                models.SocialAccounting,
-                models.SocialAccounting.account == models.Transaction.sending_account,
-            )
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plan_ids = [str(p) for p in plan]
-        private_consumption = aliased(models.PrivateConsumption)
-        productive_consumption = aliased(models.ProductiveConsumption)
-        valid_private_consumption = self.db.session.query(private_consumption)
-        valid_productive_consumption = self.db.session.query(productive_consumption)
-        if plan:
-            valid_productive_consumption = valid_productive_consumption.filter(
-                productive_consumption.plan_id.in_(plan_ids)
-            )
-            valid_private_consumption = valid_private_consumption.filter(
-                private_consumption.plan_id.in_(plan_ids)
-            )
-        return self._with_modified_query(
-            lambda query: query.filter(
-                or_(
-                    models.Transaction.id.in_(
-                        valid_private_consumption.with_entities(
-                            private_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                    models.Transaction.id.in_(
-                        valid_productive_consumption.with_entities(
-                            productive_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                )
-            )
-        )
 
     def joined_with_receiver(
         self,
@@ -2349,7 +2289,7 @@ class DatabaseGatewayImpl:
             timeframe=duration_in_days,
             is_public_service=is_public_service,
         )
-        review = models.PlanReview(approval_date=None, plan=plan, rejection_date=None)
+        review = models.PlanReview(plan=plan, rejection_date=None)
         self.db.session.add(plan)
         self.db.session.add(review)
         self.db.session.flush()
@@ -2373,7 +2313,7 @@ class DatabaseGatewayImpl:
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approval_date=plan.review.approval_date if plan.review else None,
+            approval_date=plan.approval.date if plan.approval else None,
             rejection_date=plan.review.rejection_date if plan.review else None,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None
@@ -2886,4 +2826,45 @@ class DatabaseGatewayImpl:
             transfer_of_work_certificates=UUID(db_record.transfer_of_work_certificates),
             transfer_of_taxes=UUID(db_record.transfer_of_taxes),
             registered_on=db_record.registered_on,
+        )
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval:
+        approval_orm = models.PlanApproval(
+            id=str(uuid4()),
+            plan_id=str(plan_id),
+            date=date,
+            transfer_of_credit_p=str(transfer_of_credit_p),
+            transfer_of_credit_r=str(transfer_of_credit_r),
+            transfer_of_credit_a=str(transfer_of_credit_a),
+        )
+        plan_orm = self.db.session.query(models.Plan).filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.approval = approval_orm
+        self.db.session.add(approval_orm)
+        self.db.session.flush()
+        return self.plan_approval_from_orm(approval_orm)
+
+    @classmethod
+    def plan_approval_from_orm(cls, orm: models.PlanApproval) -> records.PlanApproval:
+        return records.PlanApproval(
+            id=UUID(orm.id),
+            plan_id=UUID(orm.plan_id),
+            date=orm.date,
+            transfer_of_credit_p=UUID(orm.transfer_of_credit_p),
+            transfer_of_credit_r=UUID(orm.transfer_of_credit_r),
+            transfer_of_credit_a=UUID(orm.transfer_of_credit_a),
+        )
+
+    def get_plan_approvals(self) -> PlanApprovalResult:
+        return PlanApprovalResult(
+            db=self.db,
+            query=self.db.session.query(models.PlanApproval),
+            mapper=self.plan_approval_from_orm,
         )

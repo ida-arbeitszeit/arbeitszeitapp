@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -18,13 +17,12 @@ class ShowPRDAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
         peer_name: str
         peer_type_icon: str
 
     @dataclass
     class ViewModel:
-        transactions: List[ShowPRDAccountDetailsPresenter.TransactionInfo]
+        transactions: list[ShowPRDAccountDetailsPresenter.TransactionInfo]
         show_transactions: bool
         account_balance: str
         plot_url: str
@@ -39,7 +37,7 @@ class ShowPRDAccountDetailsPresenter:
     ) -> ViewModel:
         transactions = [
             self._create_info(transaction)
-            for transaction in use_case_response.transactions
+            for transaction in use_case_response.transfers
         ]
         return self.ViewModel(
             transactions=transactions,
@@ -63,36 +61,39 @@ class ShowPRDAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transaction: show_prd_account_details.TransactionInfo
+        self, transfer: show_prd_account_details.TransferInfo
     ) -> TransactionInfo:
-        assert transaction.transaction_type in [
-            TransactionTypes.sale_of_consumer_product,
-            TransactionTypes.sale_of_fixed_means,
-            TransactionTypes.sale_of_liquid_means,
-            TransactionTypes.expected_sales,
-        ]
-        transaction_type = (
-            self.translator.gettext("Debit expected sales")
-            if transaction.transaction_type == TransactionTypes.expected_sales
-            else self.translator.gettext("Sale")
-        )
         return self.TransactionInfo(
-            transaction_type=transaction_type,
+            transaction_type=self._get_transaction_type(transfer),
             date=self.datetime_formatter.format_datetime(
-                date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            transaction_volume=str(round(transaction.transaction_volume, 2)),
-            purpose=transaction.purpose,
-            peer_name=self._get_peer_name(transaction.peer),
-            peer_type_icon=self._get_peer_type_icon(transaction.peer),
+            transaction_volume=str(round(transfer.volume, 2)),
+            peer_name=self._get_peer_name(transfer.peer),
+            peer_type_icon=self._get_peer_type_icon(transfer.peer),
         )
+
+    def _get_transaction_type(
+        self, transfer: show_prd_account_details.TransferInfo
+    ) -> str:
+        match transfer.type:
+            case TransferType.credit_p | TransferType.credit_r | TransferType.credit_a:
+                return self.translator.gettext("Debit expected sales")
+            case (
+                TransferType.private_consumption
+                | TransferType.productive_consumption_p
+                | TransferType.productive_consumption_r
+            ):
+                return self.translator.gettext("Sale")
+            case _:
+                raise ValueError(f"Unknown transfer type: {transfer.type}")
 
     def _get_peer_type_icon(
         self,
         peer: (
             show_prd_account_details.MemberPeer
             | show_prd_account_details.CompanyPeer
-            | show_prd_account_details.SocialAccountingPeer
+            | None
         ),
     ) -> str:
         if isinstance(peer, show_prd_account_details.MemberPeer):
@@ -107,7 +108,7 @@ class ShowPRDAccountDetailsPresenter:
         peer: (
             show_prd_account_details.MemberPeer
             | show_prd_account_details.CompanyPeer
-            | show_prd_account_details.SocialAccountingPeer
+            | None
         ),
     ) -> str:
         if isinstance(peer, show_prd_account_details.MemberPeer):

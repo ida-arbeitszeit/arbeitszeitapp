@@ -36,6 +36,7 @@ from arbeitszeit.records import (
     CoordinationTransferRequest,
     Member,
     Plan,
+    PlanApproval,
     PlanDraft,
     ProductionCosts,
     SocialAccounting,
@@ -411,12 +412,6 @@ class PlanUpdate:
 
         return self._add_update(update)
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        def update(plan: Plan) -> None:
-            plan.approval_date = approval_date
-
-        return self._add_update(update)
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         def update(plan: Plan) -> None:
             plan.rejection_date = rejection_date
@@ -585,6 +580,9 @@ class PlanDraftUpdate:
             self.changes(item)
             items_affected += 1
         return items_affected
+
+
+class PlanApprovalResult(QueryResultImpl[PlanApproval]): ...
 
 
 class CooperationResult(QueryResultImpl[Cooperation]):
@@ -865,12 +863,6 @@ class AccountantResult(QueryResultImpl[Accountant]):
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account in account
-            or transaction.receiving_account in account
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         return self._filter_elements(
             lambda transaction: transaction.sending_account in account
@@ -886,37 +878,6 @@ class TransactionResult(QueryResultImpl[Transaction]):
             key=lambda transaction: transaction.date,
             reverse=descending,
         )
-
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account
-            == self.database.social_accounting.account
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plans = set(plan)
-
-        def transaction_filter(transaction: Transaction) -> bool:
-            private_consumptions = (
-                self.database.indices.private_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            productive_consumptions = (
-                self.database.indices.productive_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            transaction_plans = {
-                self.database.private_consumptions[i].plan_id
-                for i in private_consumptions
-            } | {
-                self.database.productive_consumptions[i].plan_id
-                for i in productive_consumptions
-            }
-            return bool(transaction_plans & plans)
-
-        return self._filter_elements(transaction_filter)
 
     def joined_with_receiver(
         self,
@@ -1780,6 +1741,7 @@ class MockDatabase:
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.reset_password_requests: List[records.PasswordResetRequest] = list()
         self.registered_hours_worked: list[records.RegisteredHoursWorked] = list()
+        self.plan_approvals: List[records.PlanApproval] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -2216,6 +2178,34 @@ class MockDatabase:
         return RegisteredHoursWorkedResult(
             database=self,
             items=lambda: self.registered_hours_worked,
+        )
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval:
+        record = records.PlanApproval(
+            id=uuid4(),
+            plan_id=plan_id,
+            date=date,
+            transfer_of_credit_p=transfer_of_credit_p,
+            transfer_of_credit_r=transfer_of_credit_r,
+            transfer_of_credit_a=transfer_of_credit_a,
+        )
+        self.plan_approvals.append(record)
+        plan = self.get_plans().with_id(plan_id).first()
+        assert plan
+        plan.approval_date = record.date
+        return record
+
+    def get_plan_approvals(self) -> PlanApprovalResult:
+        return PlanApprovalResult(
+            database=self,
+            items=lambda: self.plan_approvals,
         )
 
 

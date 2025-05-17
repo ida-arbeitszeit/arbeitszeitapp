@@ -370,15 +370,15 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         response = use_case.show_details(
             ShowPAccountDetailsUseCase.Request(company=company)
         )
-        return response.transactions
+        return response.transfers
 
     def get_company_prd_account_transactions(
         self, company: UUID
-    ) -> list[show_prd_account_details.TransactionInfo]:
+    ) -> list[show_prd_account_details.TransferInfo]:
         use_case = self.injector.get(
             show_prd_account_details.ShowPRDAccountDetailsUseCase
         )
         response = use_case.show_details(
             show_prd_account_details.Request(company_id=company)
         )
-        return response.transactions
+        return response.transfers

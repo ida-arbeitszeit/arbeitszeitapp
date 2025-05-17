@@ -146,11 +146,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         updated through this method.
         """
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        """Set the approval date on all matching plans. The return
-        value counts all the plans that were changed by this method.
-        """
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         """Set the rejection date on all matching plans. The return
         value counts all the plans that were changed by this method.
@@ -193,6 +188,9 @@ class PlanDraftUpdate(DatabaseUpdate, Protocol):
     def set_timeframe(self, days: int) -> Self: ...
 
     def set_unit_of_distribution(self, unit: str) -> Self: ...
+
+
+class PlanApprovalResult(QueryResult[records.PlanApproval], Protocol): ...
 
 
 class CooperationResult(QueryResult[records.Cooperation], Protocol):
@@ -338,30 +336,11 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
 
 
 class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self: ...
-
     def where_account_is_sender(self, *account: UUID) -> Self: ...
 
     def where_account_is_receiver(self, *account: UUID) -> Self: ...
 
     def ordered_by_transaction_date(self, descending: bool = ...) -> Self: ...
-
-    def where_sender_is_social_accounting(self) -> Self: ...
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        """Filter all transactions in the current result set such that
-        the new result set contains only those transactions that are
-        part of a "sale".
-
-        If no `plan` argument is specified then the result set will
-        contain all previously selected transactions that are part of
-        any consumption.
-
-        The `plan` argument can be specified multiple times. A
-        transaction will be part of the result set if it is the
-        consumption registration for any plan that was specified by its
-        UUID.
-        """
 
     def joined_with_receiver(
         self,
@@ -695,3 +674,14 @@ class DatabaseGateway(Protocol):
     ) -> records.RegisteredHoursWorked: ...
 
     def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult: ...
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval: ...
+
+    def get_plan_approvals(self) -> PlanApprovalResult: ...

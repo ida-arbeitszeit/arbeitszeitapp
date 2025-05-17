@@ -18,7 +18,6 @@ class ShowAAccountDetailsPresenter:
         transaction_type: str
         date: str
         transaction_volume: str
-        purpose: str
 
     @dataclass
     class ViewModel:
@@ -34,7 +33,7 @@ class ShowAAccountDetailsPresenter:
     def present(self, use_case_response: show_a_account_details.Response) -> ViewModel:
         transactions = [
             self._create_info(transaction)
-            for transaction in use_case_response.transactions
+            for transaction in use_case_response.transfers
         ]
         return self.ViewModel(
             transactions=transactions,
@@ -54,22 +53,21 @@ class ShowAAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transaction: show_a_account_details.TransactionInfo
+        self, transaction: show_a_account_details.TransferInfo
     ) -> TransactionInfo:
         return self.TransactionInfo(
-            transaction_type=self._get_transfer_type(transaction.transaction_type),
+            transaction_type=self._get_transfer_type(transaction.transfer_type),
             date=self.datetime_formatter.format_datetime(
                 date=transaction.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            transaction_volume=str(round(transaction.transaction_volume, 2)),
-            purpose=self._get_purpose(transaction.purpose),
+            transaction_volume=str(round(transaction.transfer_volume, 2)),
         )
 
     def _get_transfer_type(self, transfer_type: TransferType) -> str:
-        if transfer_type == TransferType.credit_a:
+        if (
+            transfer_type == TransferType.credit_a
+            or transfer_type == TransferType.credit_public_a
+        ):
             return self.translator.gettext("Credit")
         else:
             return self.translator.gettext("Payment")
-
-    def _get_purpose(self, purpose: str) -> str:
-        return self.translator.gettext("Wages") if purpose == "Lohn" else purpose

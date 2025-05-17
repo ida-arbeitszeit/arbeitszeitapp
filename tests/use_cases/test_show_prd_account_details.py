@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.records import ProductionCosts, SocialAccounting
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.records import ProductionCosts
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_prd_account_details
 
 from .base_test_case import BaseTestCase
@@ -15,31 +15,24 @@ class UseCaseTester(BaseTestCase):
         self.use_case = self.injector.get(
             show_prd_account_details.ShowPRDAccountDetailsUseCase
         )
-        self.social_accounting = self.injector.get(SocialAccounting)
         self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
 
-    def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
-        self.member_generator.create_member()
+    def test_no_transfers_returned_when_no_transfers_took_place(self) -> None:
         company = self.company_generator.create_company()
-
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
         )
-        assert not response.transactions
+        assert not response.transfers
 
-    def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
-        self.member_generator.create_member()
+    def test_balance_is_zero_when_no_transfers_took_place(self) -> None:
         company = self.company_generator.create_company()
-
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
         )
         assert response.account_balance == 0
 
     def test_company_id_is_returned(self) -> None:
-        self.member_generator.create_member()
         company = self.company_generator.create_company()
-
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
         )
@@ -51,7 +44,7 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=consumer)
         )
-        assert len(response.transactions) == 0
+        assert len(response.transfers) == 0
 
     def test_that_no_info_is_generated_after_company_consuming_r(self) -> None:
         consumer = self.company_generator.create_company()
@@ -61,20 +54,72 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=consumer)
         )
-        assert len(response.transactions) == 0
+        assert len(response.transfers) == 0
 
-    def test_that_one_transaction_is_shown_after_filed_plan_is_accepted(self) -> None:
+    def test_that_no_transfers_are_shown_after_public_plan_is_accepted(self) -> None:
         company = self.company_generator.create_company()
-        assert not self.use_case.show_details(
+        self.plan_generator.create_plan(planner=company, is_public_service=True)
+        response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
-        ).transactions
+        )
+        assert len(response.transfers) == 0
+
+    def test_that_three_transfers_are_shown_after_productive_plan_is_accepted(
+        self,
+    ) -> None:
+        company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
         )
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 3
 
-    def test_that_two_transactions_are_shown_after_filed_plan_is_accepted_and_product_is_sold(
+    def test_that_credit_transfers_have_correct_values(self) -> None:
+        EXPECTED_CREDIT_P = Decimal(2)
+        EXPECTED_CREDIT_R = Decimal(3)
+        EXPECTED_CREDIT_A = Decimal(4.5)
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                means_cost=EXPECTED_CREDIT_P,
+                resource_cost=EXPECTED_CREDIT_R,
+                labour_cost=EXPECTED_CREDIT_A,
+            ),
+            amount=1,
+        )
+        response = self.use_case.show_details(
+            self.create_use_case_request(company_id=company)
+        )
+        assert len(response.transfers) == 3
+        for transfer in response.transfers:
+            match transfer.type:
+                case TransferType.credit_p:
+                    assert transfer.volume == -EXPECTED_CREDIT_P
+                case TransferType.credit_r:
+                    assert transfer.volume == -EXPECTED_CREDIT_R
+                case TransferType.credit_a:
+                    assert transfer.volume == -EXPECTED_CREDIT_A
+                case _:
+                    raise ValueError(f"Unexpected transfer type: {transfer.type}")
+
+    def test_that_credit_transfers_are_negative(self) -> None:
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                means_cost=Decimal(1),
+                resource_cost=Decimal(1),
+                labour_cost=Decimal(1),
+            ),
+        )
+        response = self.use_case.show_details(
+            self.create_use_case_request(company_id=company)
+        )
+        for transfer in response.transfers:
+            assert transfer.volume < 0
+
+    def test_that_four_transfers_are_shown_after_productive_plan_is_accepted_and_product_is_sold(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
@@ -83,23 +128,38 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 2
+        assert len(response.transfers) == 4
 
-    def test_that_transactions_are_shown_in_correct_descending_order(self) -> None:
+    def test_that_transfers_are_shown_in_correct_descending_order(self) -> None:
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
         self.consumption_generator.create_private_consumption(plan=plan)
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
+        self.consumption_generator.create_resource_consumption_by_company(plan=plan)
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        transactions = response.transactions
-        assert (
-            transactions[0].transaction_type
-            == TransactionTypes.sale_of_consumer_product
-        )
-        assert transactions[1].transaction_type == TransactionTypes.expected_sales
+        transfers = response.transfers
+        assert transfers[0].type == TransferType.productive_consumption_r
+        assert transfers[1].type == TransferType.productive_consumption_p
+        assert transfers[2].type == TransferType.private_consumption
+        assert transfers[3].type in [
+            TransferType.credit_p,
+            TransferType.credit_r,
+            TransferType.credit_a,
+        ]
+        assert transfers[4].type in [
+            TransferType.credit_p,
+            TransferType.credit_r,
+            TransferType.credit_a,
+        ]
+        assert transfers[5].type in [
+            TransferType.credit_p,
+            TransferType.credit_r,
+            TransferType.credit_a,
+        ]
 
-    def test_that_correct_info_is_generated_after_selling_of_consumer_product(
+    def test_that_correct_info_is_generated_after_private_consumption(
         self,
     ) -> None:
         consumer = self.member_generator.create_member()
@@ -116,7 +176,7 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 3
         self.consumption_generator.create_private_consumption(
             plan=plan,
             consumer=consumer,
@@ -125,18 +185,13 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 2
-        transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.transaction_volume == Decimal(2)
-        assert transaction_of_sale.purpose is not None
-        assert isinstance(response.transactions[-1].date, datetime)
-        assert (
-            transaction_of_sale.transaction_type
-            == TransactionTypes.sale_of_consumer_product
-        )
+        assert len(response.transfers) == 4
+        transfer_of_sale = response.transfers[0]
+        assert transfer_of_sale.volume == Decimal(2)
+        assert transfer_of_sale.type == TransferType.private_consumption
         assert response.account_balance == Decimal(0)
 
-    def test_that_correct_info_is_generated_after_selling_of_means_of_production(
+    def test_that_correct_info_is_generated_after_fixed_means_consumption(
         self,
     ) -> None:
         consumer = self.company_generator.create_company()
@@ -151,24 +206,20 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 3
         self.consumption_generator.create_fixed_means_consumption(
             plan=plan, consumer=consumer
         )
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 2
-        transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.transaction_volume == Decimal(2)
-        assert transaction_of_sale.purpose is not None
-        assert isinstance(transaction_of_sale.date, datetime)
-        assert (
-            transaction_of_sale.transaction_type == TransactionTypes.sale_of_fixed_means
-        )
+        assert len(response.transfers) == 4
+        transfer_of_sale = response.transfers[0]
+        assert transfer_of_sale.volume == Decimal(2)
+        assert transfer_of_sale.type == TransferType.productive_consumption_p
         assert response.account_balance == Decimal(0)
 
-    def test_that_correct_info_is_generated_after_selling_of_raw_material(self) -> None:
+    def test_that_correct_info_is_generated_after_resource_consumption(self) -> None:
         consumer = self.company_generator.create_company()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
@@ -181,25 +232,20 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 3
         self.consumption_generator.create_resource_consumption_by_company(
             plan=plan, consumer=consumer
         )
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.transactions) == 2
-        transaction_of_sale = response.transactions[0]
-        assert transaction_of_sale.transaction_volume == Decimal(2)
-        assert transaction_of_sale.purpose is not None
-        assert isinstance(transaction_of_sale.date, datetime)
-        assert (
-            transaction_of_sale.transaction_type
-            == TransactionTypes.sale_of_liquid_means
-        )
+        assert len(response.transfers) == 4
+        transfer_of_sale = response.transfers[0]
+        assert transfer_of_sale.volume == Decimal(2)
+        assert transfer_of_sale.type == TransferType.productive_consumption_r
         assert response.account_balance == Decimal(0)
 
-    def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
+    def test_that_plotting_info_is_empty_when_no_transfers_occurred(self) -> None:
         company = self.company_generator.create_company()
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=company)
@@ -207,7 +253,7 @@ class UseCaseTester(BaseTestCase):
         assert not response.plot.timestamps
         assert not response.plot.accumulated_volumes
 
-    def test_that_plotting_info_is_generated_after_selling_of_consumer_product(
+    def test_that_plotting_info_is_generated_after_private_consumption(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
@@ -219,7 +265,7 @@ class UseCaseTester(BaseTestCase):
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
-    def test_that_correct_plotting_info_is_generated_after_selling_of_two_consumer_products(
+    def test_that_correct_plotting_info_is_generated_after_one_plan_approval_and_two_private_consumptions(
         self,
     ) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -231,124 +277,123 @@ class UseCaseTester(BaseTestCase):
             ),
             amount=1,
         )
-        transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        transfer_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
         self.consumption_generator.create_private_consumption(plan=plan, amount=1)
-        transaction_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
+        transfer_2_timestamp = self.datetime_service.advance_time(timedelta(days=1))
         self.consumption_generator.create_private_consumption(plan=plan, amount=2)
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert len(response.plot.timestamps) == 3
-        assert len(response.plot.accumulated_volumes) == 3
-        assert transaction_1_timestamp in response.plot.timestamps
-        assert transaction_2_timestamp in response.plot.timestamps
-        assert Decimal(0) in response.plot.accumulated_volumes
-        assert Decimal(2) in response.plot.accumulated_volumes
+        assert len(response.plot.timestamps) == 5
+        assert len(response.plot.accumulated_volumes) == 5
+        assert transfer_1_timestamp in response.plot.timestamps
+        assert transfer_2_timestamp in response.plot.timestamps
+        assert response.plot.accumulated_volumes == [
+            Decimal(0),  # credit for p
+            Decimal(0),  # credit for r
+            Decimal(-1),  # credit for a (-1)
+            Decimal(0),  # consumption (+1)
+            Decimal(2),  # consumption (+2)
+        ]
 
-    def test_that_plotting_info_is_generated_in_the_correct_order_after_selling_of_three_consumer_products(
-        self,
-    ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(
-            planner=planner,
-            costs=ProductionCosts(
-                labour_cost=Decimal(0), means_cost=Decimal(1), resource_cost=Decimal(0)
-            ),
-            amount=1,
-        )
-        transaction_1_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan, amount=1)
-        self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan, amount=2)
-        transaction_3_timestamp = self.datetime_service.advance_time(timedelta(days=1))
-        self.consumption_generator.create_private_consumption(plan=plan, amount=3)
-        response = self.use_case.show_details(
-            self.create_use_case_request(company_id=planner)
-        )
-        assert response.plot.timestamps[1] == transaction_1_timestamp
-        assert response.plot.timestamps[3] == transaction_3_timestamp
-        # production costs were one so we have to take this into
-        # consideration when checking for accumulated account volume.
-        assert response.plot.accumulated_volumes[1] == Decimal(0)
-        assert response.plot.accumulated_volumes[3] == Decimal(5)
-
-    def test_that_peer_type_is_accounting_when_transaction_is_debit_for_expected_sales(
-        self,
-    ) -> None:
+    def test_that_peer_type_for_credit_transfers_is_none(self) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        assert isinstance(
-            response.transactions[0].peer, show_prd_account_details.SocialAccountingPeer
-        )
+        for transfer in response.transfers:
+            assert transfer.peer is None
 
-    def test_that_correct_accounting_id_is_shown_when_transaction_is_debit_for_expected_sales(
-        self,
-    ) -> None:
-        planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(planner=planner)
-        response = self.use_case.show_details(
-            self.create_use_case_request(company_id=planner)
-        )
-        assert isinstance(
-            response.transactions[0].peer, show_prd_account_details.SocialAccountingPeer
-        )
-        assert response.transactions[0].peer.id == self.social_accounting.id
-
-    def test_that_peer_type_is_member_when_company_sold_to_member(
-        self,
-    ) -> None:
-        expected_consumer_name = "test 123 name"
+    def test_that_peer_type_for_private_consumption_is_member(self) -> None:
+        consumer = self.member_generator.create_member()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        consumer = self.member_generator.create_member(name=expected_consumer_name)
         self.consumption_generator.create_private_consumption(
             plan=plan, consumer=consumer
         )
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        transaction_of_sale = response.transactions[0]
-        assert isinstance(transaction_of_sale.peer, show_prd_account_details.MemberPeer)
+        assert response.transfers[0].peer is not None
+        assert isinstance(
+            response.transfers[0].peer, show_prd_account_details.MemberPeer
+        )
 
-    def test_that_correct_consumer_id_is_shown_when_company_sold_to_company(
-        self,
-    ) -> None:
+    def test_that_peer_type_for_fixed_means_consumption_is_company(self) -> None:
         consumer = self.company_generator.create_company()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
         self.consumption_generator.create_fixed_means_consumption(
-            consumer=consumer, plan=plan
+            plan=plan, consumer=consumer
         )
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        transaction_of_sale = response.transactions[0]
+        assert response.transfers[0].peer is not None
         assert isinstance(
-            transaction_of_sale.peer, show_prd_account_details.CompanyPeer
+            response.transfers[0].peer, show_prd_account_details.CompanyPeer
         )
-        assert transaction_of_sale.peer.id == consumer
+
+    def test_that_peer_type_for_resource_consumption_is_company(self) -> None:
+        consumer = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=plan, consumer=consumer
+        )
+        response = self.use_case.show_details(
+            self.create_use_case_request(company_id=planner)
+        )
+        assert response.transfers[0].peer is not None
+        assert isinstance(
+            response.transfers[0].peer, show_prd_account_details.CompanyPeer
+        )
+
+    def test_that_correct_consumer_id_is_shown_after_productive_consumption(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(2), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+            amount=1,
+        )
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=plan, consumer=consumer
+        )
+        response = self.use_case.show_details(
+            self.create_use_case_request(company_id=planner)
+        )
+        company_peer = response.transfers[0].peer
+        assert isinstance(company_peer, show_prd_account_details.CompanyPeer)
+        assert company_peer.id == consumer
 
     def test_that_correct_consumer_name_is_shown_when_company_sold_to_company(
         self,
     ) -> None:
-        consumer = self.company_generator.create_company_record()
+        EXPECTED_CONSUMER_NAME = "Consumer Company"
+        consumer = self.company_generator.create_company(name=EXPECTED_CONSUMER_NAME)
         planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(planner=planner)
+        plan = self.plan_generator.create_plan(
+            planner=planner,
+            costs=ProductionCosts(
+                labour_cost=Decimal(2), means_cost=Decimal(0), resource_cost=Decimal(0)
+            ),
+            amount=1,
+        )
         self.consumption_generator.create_fixed_means_consumption(
-            consumer=consumer.id, plan=plan
+            plan=plan, consumer=consumer
         )
         response = self.use_case.show_details(
             self.create_use_case_request(company_id=planner)
         )
-        transaction_of_sale = response.transactions[0]
-        assert isinstance(
-            transaction_of_sale.peer, show_prd_account_details.CompanyPeer
-        )
-        assert transaction_of_sale.peer.name == consumer.name
+        company_peer = response.transfers[0].peer
+        assert isinstance(company_peer, show_prd_account_details.CompanyPeer)
+        assert company_peer.name == EXPECTED_CONSUMER_NAME
 
     def create_use_case_request(
         self, company_id: UUID
