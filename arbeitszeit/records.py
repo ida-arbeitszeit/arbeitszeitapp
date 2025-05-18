@@ -128,6 +128,14 @@ class Cooperation:
     definition: str
     account: UUID
 
+    def get_name(self) -> str:
+        return self.name
+
+    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
+        if account == self.account:
+            return AccountTypes.cooperation
+        return None
+
 
 @dataclass
 class CoordinationTenure:
@@ -372,7 +380,7 @@ class ProductiveConsumption:
     amount: int
 
 
-AccountOwner = Union[Member, Company, SocialAccounting]
+AccountOwner = Union[Member, Company, SocialAccounting, Cooperation]
 
 
 @dataclass
