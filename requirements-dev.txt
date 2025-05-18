@@ -9,6 +9,7 @@ parameterized
 psycopg2
 pytest
 sphinx
+sphinx-rtd-theme
 types-python-dateutil
 types-pytz
 types-setuptools
