@@ -238,7 +238,7 @@ class PrivateConsumption(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
-    transaction_id: Mapped[str | None] = mapped_column(ForeignKey("transaction.id"))
+    transaction_id: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     amount: Mapped[int]
 
 
@@ -247,7 +247,7 @@ class ProductiveConsumption(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
-    transaction_id: Mapped[str | None] = mapped_column(ForeignKey("transaction.id"))
+    transaction_id: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     amount: Mapped[int]
 
 
