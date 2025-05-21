@@ -6,7 +6,14 @@ from decimal import Decimal
 from itertools import accumulate
 from uuid import UUID
 
-from arbeitszeit.records import AccountOwner, AccountTypes, Company, Member, Transaction
+from arbeitszeit.records import (
+    AccountOwner,
+    AccountTypes,
+    Company,
+    Cooperation,
+    Member,
+    Transaction,
+)
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 
@@ -26,11 +33,17 @@ class CompanyPeer:
 
 
 @dataclass
+class CooperationPeer:
+    name: str
+    id: UUID
+
+
+@dataclass
 class TransferInfo:
     type: TransferType
     date: datetime
     volume: Decimal
-    peer: MemberPeer | CompanyPeer | None
+    peer: MemberPeer | CompanyPeer | CooperationPeer | None
 
 
 @dataclass
@@ -54,9 +67,18 @@ class ShowPRDAccountDetailsUseCase:
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company_id).first()
         assert company
-        credit_transfers = self._get_credit_transfers(company)
+        credit_and_compensation_transfers = (
+            self._get_credit_and_compensation_for_coop_transfers(company)
+        )
+        compensation_for_company_transfers = (
+            self._get_compensation_for_company_transfers(company)
+        )
         consumption_transfers = self._get_consumption_transfers(company)
-        transfers = credit_transfers + consumption_transfers
+        transfers = (
+            credit_and_compensation_transfers
+            + consumption_transfers
+            + compensation_for_company_transfers
+        )
         transfers.sort(key=lambda t: t.date)
         transfers_descending = transfers.copy()
         transfers_descending.reverse()
@@ -74,20 +96,59 @@ class ShowPRDAccountDetailsUseCase:
             plot=plot,
         )
 
-    def _get_credit_transfers(self, company: Company) -> list[TransferInfo]:
-        credit_transfers = self.database.get_transfers().where_account_is_debtor(
-            company.product_account
+    def _get_credit_and_compensation_for_coop_transfers(
+        self, company: Company
+    ) -> list[TransferInfo]:
+        debit_transfers_and_creditor = (
+            self.database.get_transfers()
+            .where_account_is_debtor(company.product_account)
+            .joined_with_creditor()
         )
         transfers: list[TransferInfo] = []
-        for transfer in credit_transfers:
-            transfers.append(
-                TransferInfo(
-                    type=transfer.type,
-                    date=transfer.date,
-                    volume=-transfer.value,  # negative because account is debit account
-                    peer=None,
+        for transfer, creditor in debit_transfers_and_creditor:
+            if transfer.type in [
+                TransferType.credit_p,
+                TransferType.credit_r,
+                TransferType.credit_a,
+            ]:
+                transfers.append(
+                    TransferInfo(
+                        type=transfer.type,
+                        date=transfer.date,
+                        volume=-transfer.value,  # negative because account is debit account
+                        peer=None,
+                    )
                 )
-            )
+            elif transfer.type == TransferType.compensation_for_coop:
+                transfers.append(
+                    TransferInfo(
+                        type=TransferType.compensation_for_coop,
+                        date=transfer.date,
+                        volume=-transfer.value,  # negative because account is debit account
+                        peer=self._create_peer_info(creditor),
+                    )
+                )
+        return transfers
+
+    def _get_compensation_for_company_transfers(
+        self, company: Company
+    ) -> list[TransferInfo]:
+        credit_transfers_and_debtor = (
+            self.database.get_transfers()
+            .where_account_is_creditor(company.product_account)
+            .joined_with_debtor()
+        )
+        transfers: list[TransferInfo] = []
+        for transfer, debtor in credit_transfers_and_debtor:
+            if transfer.type == TransferType.compensation_for_company:
+                transfers.append(
+                    TransferInfo(
+                        type=TransferType.compensation_for_company,
+                        date=transfer.date,
+                        volume=transfer.value,
+                        peer=self._create_peer_info(debtor),
+                    )
+                )
         return transfers
 
     def _get_consumption_transfers(self, company: Company) -> list[TransferInfo]:
@@ -141,9 +202,16 @@ class ShowPRDAccountDetailsUseCase:
         volumes_cumsum = list(accumulate(t.volume for t in transfers))
         return volumes_cumsum
 
-    def _create_peer_info(self, peer: AccountOwner) -> MemberPeer | CompanyPeer:
+    def _create_peer_info(
+        self, peer: AccountOwner
+    ) -> MemberPeer | CompanyPeer | CooperationPeer:
         if isinstance(peer, Member):
             return MemberPeer()
+        elif isinstance(peer, Cooperation):
+            return CooperationPeer(
+                id=peer.id,
+                name=peer.get_name(),
+            )
         return CompanyPeer(
             id=peer.id,
             name=peer.get_name(),

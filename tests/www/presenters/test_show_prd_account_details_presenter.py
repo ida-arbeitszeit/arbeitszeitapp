@@ -92,6 +92,34 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         self.assertEqual(trans.transaction_volume, str(round(TRANSFER_VOLUME, 2)))
 
+    def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_coop_took_place(
+        self,
+    ) -> None:
+        transfer = self._get_transfer_info(
+            transfer_type=TransferType.compensation_for_coop,
+        )
+        response = self._use_case_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        self.assertTrue(len(view_model.transactions), 1)
+        trans = view_model.transactions[0]
+        self.assertEqual(
+            trans.transaction_type, self.translator.gettext("Cooperation compensation")
+        )
+
+    def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_company_took_place(
+        self,
+    ) -> None:
+        transfer = self._get_transfer_info(
+            transfer_type=TransferType.compensation_for_company,
+        )
+        response = self._use_case_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        self.assertTrue(len(view_model.transactions), 1)
+        trans = view_model.transactions[0]
+        self.assertEqual(
+            trans.transaction_type, self.translator.gettext("Cooperation compensation")
+        )
+
     def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
         response = self._use_case_response(
             transfers=[
@@ -140,6 +168,40 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         view_model = self.presenter.present(response)
         assert view_model.transactions[0].peer_name == expected_user_name
 
+    def test_name_of_peer_is_shown_if_transfer_is_compensation_for_coop(
+        self,
+    ) -> None:
+        expected_coop_name = "some coop name"
+        response = self._use_case_response(
+            transfers=[
+                self._get_transfer_info(
+                    transfer_type=TransferType.compensation_for_coop,
+                    peer=show_prd_account_details.CooperationPeer(
+                        id=uuid4(), name=expected_coop_name
+                    ),
+                )
+            ]
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.transactions[0].peer_name == expected_coop_name
+
+    def test_name_of_peer_is_shown_if_transfer_is_compensation_for_company(
+        self,
+    ) -> None:
+        expected_company_name = "some company name"
+        response = self._use_case_response(
+            transfers=[
+                self._get_transfer_info(
+                    transfer_type=TransferType.compensation_for_company,
+                    peer=show_prd_account_details.CompanyPeer(
+                        id=uuid4(), name=expected_company_name
+                    ),
+                )
+            ]
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.transactions[0].peer_name == expected_company_name
+
     def test_member_peer_icon_is_shown_if_transaction_was_with_member(
         self,
     ) -> None:
@@ -169,6 +231,29 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         assert view_model.transactions[0].peer_type_icon == "industry"
+
+    @parameterized.expand(
+        [
+            (TransferType.compensation_for_company),
+            (TransferType.compensation_for_coop),
+        ]
+    )
+    def test_peer_type_icon_is_hands_helping_if_transfer_was_with_cooperation(
+        self,
+        transfer_type: TransferType,
+    ) -> None:
+        response = self._use_case_response(
+            transfers=[
+                self._get_transfer_info(
+                    transfer_type=transfer_type,
+                    peer=show_prd_account_details.CooperationPeer(
+                        id=uuid4(), name="coop name"
+                    ),
+                )
+            ]
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.transactions[0].peer_type_icon == "hands-helping"
 
     def test_peer_type_icon_is_empty_string_if_peer_is_none(
         self,
@@ -238,6 +323,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         peer: (
             show_prd_account_details.MemberPeer
             | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.CooperationPeer
             | None
         ) = None,
         volume: Decimal = Decimal(10.007),
