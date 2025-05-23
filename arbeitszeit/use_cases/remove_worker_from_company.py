@@ -33,6 +33,9 @@ class RemoveWorkerFromCompanyUseCase:
     email_sender: EmailSender
 
     def remove_worker_from_company(self, request: Request) -> Response:
+        company_record = self.database_gateway.get_companies().with_id(request.company)
+        if not company_record:
+            return Response(Response.RejectionReason.company_not_found)
         worker_and_email = (
             self.database_gateway.get_members()
             .with_id(request.worker)
@@ -41,15 +44,11 @@ class RemoveWorkerFromCompanyUseCase:
         )
         if not worker_and_email:
             return Response(Response.RejectionReason.worker_not_found)
-        workplace_record = (
-            self.database_gateway.get_companies()
-            .with_id(request.company)
-            .that_are_workplace_of_member(worker_and_email[0].id)
-        )
-        if not workplace_record:
+        workplace = company_record.that_are_workplace_of_member(worker_and_email[0].id)
+        if not workplace:
             return Response(Response.RejectionReason.not_workplace_of_worker)
-        workplace_record.remove_worker(worker_and_email[0].id)
-        workplace_and_email = workplace_record.joined_with_email_address().first()
+        workplace.remove_worker(worker_and_email[0].id)
+        workplace_and_email = workplace.joined_with_email_address().first()
         assert workplace_and_email
         self._notify_worker_and_company(
             worker=worker_and_email[0],
