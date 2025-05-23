@@ -20,6 +20,7 @@
   pytest,
   setuptools,
   sphinx,
+  sphinx-rtd-theme,
 }:
 buildPythonPackage {
   pname = "arbeitszeitapp";
@@ -33,6 +34,7 @@ buildPythonPackage {
   format = "pyproject";
   buildInputs = [
     sphinx
+    sphinx-rtd-theme
     parameterized
     Babel
     setuptools
