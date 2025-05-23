@@ -41,7 +41,7 @@ class WorkerInvitation:
 class WorkerRemovalNotification:
     worker_email: str
     worker_name: str
-    worker_id: str
+    worker_id: UUID
     company_email: str
     company_name: str
 

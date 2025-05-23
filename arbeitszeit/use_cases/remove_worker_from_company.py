@@ -3,7 +3,7 @@ from enum import Enum, auto
 from uuid import UUID
 
 from arbeitszeit.email_notifications import EmailSender, WorkerRemovalNotification
-from arbeitszeit.records import Company, Member
+from arbeitszeit.records import Company, EmailAddress, Member
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -33,44 +33,45 @@ class RemoveWorkerFromCompanyUseCase:
     email_sender: EmailSender
 
     def remove_worker_from_company(self, request: Request) -> Response:
-        workplace_record = self.database_gateway.get_companies().with_id(
-            request.company
+        worker_and_email = (
+            self.database_gateway.get_members()
+            .with_id(request.worker)
+            .joined_with_email_address()
+            .first()
+        )
+        if not worker_and_email:
+            return Response(Response.RejectionReason.worker_not_found)
+        workplace_record = (
+            self.database_gateway.get_companies()
+            .with_id(request.company)
+            .that_are_workplace_of_member(worker_and_email[0].id)
         )
         if not workplace_record:
-            return Response(Response.RejectionReason.company_not_found)
-        worker = self.database_gateway.get_members().with_id(request.worker).first()
-        if not worker:
-            return Response(Response.RejectionReason.worker_not_found)
-        workplace_record = workplace_record.that_are_workplace_of_member(worker.id)
-        workplace = workplace_record.first()
-        if not workplace:
             return Response(Response.RejectionReason.not_workplace_of_worker)
-        workplace_record.remove_worker(worker.id)
-        self._notify_worker_and_company(worker, workplace)
+        workplace_record.remove_worker(worker_and_email[0].id)
+        workplace_and_email = workplace_record.joined_with_email_address().first()
+        assert workplace_and_email
+        self._notify_worker_and_company(
+            worker=worker_and_email[0],
+            worker_email=worker_and_email[1],
+            workplace=workplace_and_email[0],
+            company_email=workplace_and_email[1],
+        )
         return Response(None)
 
-    def _notify_worker_and_company(self, worker: Member, workplace: Company) -> None:
-        worker_record = (
-            self.database_gateway.get_members()
-            .with_id(worker.id)
-            .joined_with_email_address()
-            .first()
-        )
-        company_record = (
-            self.database_gateway.get_companies()
-            .with_id(workplace.id)
-            .joined_with_email_address()
-            .first()
-        )
-        if worker_record and company_record is not None:
-            _, worker_email = worker_record
-            _, company_email = company_record
-            self.email_sender.send_email(
-                WorkerRemovalNotification(
-                    worker_email=worker_email.address,
-                    worker_name=worker.get_name(),
-                    worker_id=str(worker.id),
-                    company_email=company_email.address,
-                    company_name=workplace.name,
-                )
+    def _notify_worker_and_company(
+        self,
+        worker: Member,
+        worker_email: EmailAddress,
+        workplace: Company,
+        company_email: EmailAddress,
+    ) -> None:
+        self.email_sender.send_email(
+            WorkerRemovalNotification(
+                worker_email=worker_email.address,
+                worker_name=worker.get_name(),
+                worker_id=worker.id,
+                company_email=company_email.address,
+                company_name=workplace.name,
             )
+        )
