@@ -6,6 +6,7 @@ rule though. Feel free to change them so that they comply.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from typing import Iterable, List, Optional, Union
 from uuid import UUID, uuid4
@@ -13,6 +14,7 @@ from uuid import UUID, uuid4
 from arbeitszeit import records
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import confirm_member, get_coop_summary
 from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
@@ -277,7 +279,7 @@ class PlanGenerator:
                 planner=planner,
             )
         )
-        assert not response.is_rejected
+        assert not response.is_rejected, f"Could not create draft: {response}"
         assert response.draft_id
         return response.draft_id
 
@@ -444,6 +446,38 @@ class TransactionGenerator:
             amount_sent=amount_sent,
             amount_received=amount_received,
             purpose=purpose,
+        )
+
+
+@dataclass
+class TransferGenerator:
+    datetime_service: FakeDatetimeService
+    database_gateway: DatabaseGateway
+
+    def create_transfer(
+        self,
+        date: Optional[datetime] = None,
+        debit_account: Optional[UUID] = None,
+        credit_account: Optional[UUID] = None,
+        value: Optional[Decimal] = None,
+        type: Optional[TransferType] = None,
+    ) -> records.Transfer:
+        if date is None:
+            date = self.datetime_service.now()
+        if debit_account is None:
+            debit_account = self.database_gateway.create_account().id
+        if credit_account is None:
+            credit_account = self.database_gateway.create_account().id
+        if value is None:
+            value = Decimal(10)
+        if type is None:
+            type = TransferType.credit_p
+        return self.database_gateway.create_transfer(
+            date=date,
+            debit_account=debit_account,
+            credit_account=credit_account,
+            value=value,
+            type=type,
         )
 
 

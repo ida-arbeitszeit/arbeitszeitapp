@@ -1,9 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
+from parameterized import parameterized
+
 from arbeitszeit.records import ProductionCosts, SocialAccounting
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from tests.data_generators import TransactionGenerator
 
@@ -17,19 +19,31 @@ class ShowPAccountDetailsTests(BaseTestCase):
         self.transaction_generator = self.injector.get(TransactionGenerator)
         self.social_accounting = self.injector.get(SocialAccounting)
 
-    def test_no_transactions_returned_when_company_has_neither_consumed_nor_planned_p(
+    def test_no_transfers_returned_when_company_has_not_consumed_or_planned(
         self,
     ) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
-
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert not response.transactions
+        assert not response.transfers
 
-    def test_balance_is_zero_when_company_has_neither_consumed_nor_planned_p(
+    def test_balance_is_zero_when_company_has_not_consumed_or_planned(
         self,
     ) -> None:
         company = self.company_generator.create_company()
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.account_balance == 0
+
+    def test_balance_is_zero_when_company_has_only_planned_r_and_a(self) -> None:
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                resource_cost=Decimal(1),
+                means_cost=Decimal(0),
+            ),
+        )
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.account_balance == 0
 
@@ -54,123 +68,111 @@ class ShowPAccountDetailsTests(BaseTestCase):
         response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.company_id == company
 
-    def test_that_no_transactions_are_generated_after_company_passed_on_a_consumer_product(
+    def test_that_no_transfers_are_generated_after_company_passed_on_a_consumer_product(
         self,
     ) -> None:
         producer = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=producer)
-        transactions_before_consumption = len(
-            self.use_case.show_details(
-                self.create_use_case_request(producer)
-            ).transactions
+        transfers_before_consumption = len(
+            self.use_case.show_details(self.create_use_case_request(producer)).transfers
         )
         self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.show_details(self.create_use_case_request(producer))
-        assert len(response.transactions) == transactions_before_consumption
+        assert len(response.transfers) == transfers_before_consumption
 
-    def test_that_no_transactions_are_generated_after_company_passed_on_a_means_of_production(
+    def test_that_no_transfers_are_generated_after_company_passed_on_a_means_of_production(
         self,
     ) -> None:
         producer = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=producer)
-        transactions_before_consumption = len(
-            self.use_case.show_details(
-                self.create_use_case_request(producer)
-            ).transactions
+        transfers_before_consumption = len(
+            self.use_case.show_details(self.create_use_case_request(producer)).transfers
         )
 
         self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.show_details(self.create_use_case_request(producer))
-        assert len(response.transactions) == transactions_before_consumption
+        assert len(response.transfers) == transfers_before_consumption
 
-    def test_that_no_transactions_are_generated_when_credit_for_r_is_granted(
-        self,
-    ) -> None:
-        company = self.company_generator.create_company_record()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.raw_material_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
-        )
-
-        response = self.use_case.show_details(self.create_use_case_request(company.id))
-        assert len(response.transactions) == 0
-
-    def test_that_one_transaction_is_shown_when_credit_for_p_is_granted(self) -> None:
+    def test_that_one_transfer_is_shown_when_company_has_a_plan_approved(self) -> None:
         planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(
-            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
-        )
+        self.plan_generator.create_plan(planner=planner)
         response = self.use_case.show_details(self.create_use_case_request(planner))
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 1
 
-    def test_that_two_transactions_are_shown_when_credit_for_p_is_granted_and_company_consumes_p(
+    def test_that_one_transfer_is_shown_when_company_consumes_p(self) -> None:
+        consumer = self.company_generator.create_company()
+        self.consumption_generator.create_fixed_means_consumption(consumer=consumer)
+        response = self.use_case.show_details(self.create_use_case_request(consumer))
+        assert len(response.transfers) == 1
+
+    def test_that_two_transfers_are_shown_when_company_has_plan_approved_and_consumes_p(
         self,
     ) -> None:
         planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(
-            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
-        )
-        self.consumption_generator.create_fixed_means_consumption(
-            consumer=planner, amount=2
-        )
+        self.plan_generator.create_plan(planner=planner)
+        self.consumption_generator.create_fixed_means_consumption(consumer=planner)
         response = self.use_case.show_details(self.create_use_case_request(planner))
-        assert len(response.transactions) == 2
+        assert len(response.transfers) == 2
 
-    def test_that_two_transactions_are_shown_in_descending_order(self) -> None:
+    def test_that_newest_transfers_are_shown_first(self) -> None:
+        self.datetime_service.freeze_time(datetime(2025, 1, 1))
         planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(
-            planner=planner, costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
-        )
-        self.consumption_generator.create_fixed_means_consumption(
-            consumer=planner, amount=2
-        )
+        self.plan_generator.create_plan(planner=planner)
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.plan_generator.create_plan(planner=planner, is_public_service=True)
+        self.datetime_service.advance_time(timedelta(days=1))
+        self.consumption_generator.create_fixed_means_consumption(consumer=planner)
         response = self.use_case.show_details(self.create_use_case_request(planner))
-        assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.consumption_of_fixed_means
-        )
-        assert (
-            response.transactions[1].transaction_type
-            == TransactionTypes.credit_for_fixed_means
-        )
+        assert len(response.transfers) == 3
+        assert response.transfers[0].type == TransferType.productive_consumption_p
+        assert response.transfers[1].type == TransferType.credit_public_p
+        assert response.transfers[2].type == TransferType.credit_p
 
-    def test_that_correct_info_is_generated_when_credit_for_p_is_granted(self) -> None:
-        company = self.company_generator.create_company_record()
-
-        self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.means_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def test_that_correct_transfer_info_for_credit_is_shown(
+        self,
+        is_public_service: bool,
+    ) -> None:
+        EXPECTED_VOLUME = Decimal(8.5)
+        EXPECTED_TIMESTAMP = datetime(2025, 1, 1)
+        EXPECTED_TRANSFER_TYPE = (
+            TransferType.credit_public_p if is_public_service else TransferType.credit_p
         )
-
-        response = self.use_case.show_details(self.create_use_case_request(company.id))
-        assert len(response.transactions) == 1
-        assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
-        assert isinstance(response.transactions[0].date, datetime)
-        assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.credit_for_fixed_means
+        company = self.company_generator.create_company()
+        self.datetime_service.freeze_time(EXPECTED_TIMESTAMP)
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                resource_cost=Decimal(1),
+                means_cost=EXPECTED_VOLUME,
+            ),
+            is_public_service=is_public_service,
         )
-        assert response.account_balance == Decimal(8.5)
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert len(response.transfers) == 1
+        assert response.transfers[0].volume == EXPECTED_VOLUME
+        assert response.transfers[0].date == EXPECTED_TIMESTAMP
+        assert response.transfers[0].type == EXPECTED_TRANSFER_TYPE
+        assert response.account_balance == EXPECTED_VOLUME
 
-    def test_that_after_consumption_of_means_of_production_a_transaction_of_that_type_is_shown(
+    def test_that_after_consumption_of_fixed_means_of_production_one_transfer_of_that_type_is_shown(
         self,
     ) -> None:
         consumer = self.company_generator.create_company()
         self.consumption_generator.create_fixed_means_consumption(consumer=consumer)
 
         response = self.use_case.show_details(self.create_use_case_request(consumer))
-        transaction = response.transactions[0]
-        assert (
-            transaction.transaction_type == TransactionTypes.consumption_of_fixed_means
-        )
+        assert len(response.transfers) == 1
+        transfer = response.transfers[0]
+        assert transfer.type == TransferType.productive_consumption_p
 
-    def test_that_after_consumption_of_fixed_means_a_transaction_with_volume_of_negated_costs_is_shown(
+    def test_that_after_consumption_of_fixed_means_one_transfer_with_volume_of_negated_costs_is_shown(
         self,
     ) -> None:
         consumer = self.company_generator.create_company()
@@ -182,8 +184,9 @@ class ShowPAccountDetailsTests(BaseTestCase):
         )
 
         response = self.use_case.show_details(self.create_use_case_request(consumer))
-        transaction = response.transactions[0]
-        assert transaction.transaction_volume == expected_volume
+        assert len(response.transfers) == 1
+        transfer = response.transfers[0]
+        assert transfer.volume == expected_volume
 
     def test_that_after_consumption_of_fixed_means_the_balance_equals_the_negated_costs(
         self,
@@ -218,7 +221,7 @@ class ShowPAccountDetailsTests(BaseTestCase):
         response = self.use_case.show_details(self.create_use_case_request(consumer))
         assert response.account_balance == expected_balance
 
-    def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
+    def test_that_plotting_info_is_empty_when_no_transfers_occurred(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
 
@@ -229,116 +232,168 @@ class ShowPAccountDetailsTests(BaseTestCase):
     def test_that_plotting_info_is_generated_after_consumption_of_fixed_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_record()
-        other_company = self.company_generator.create_company_record()
-
-        self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        own_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company()
+        other_companys_plan = self.plan_generator.create_plan(
+            planner=other_company,
         )
-
-        response = self.use_case.show_details(
-            self.create_use_case_request(own_company.id)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
         )
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
     def test_that_correct_plotting_info_is_generated_after_consumption_of_two_fixed_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_record()
-        other_company = self.company_generator.create_company_record()
+        AMOUNT_PRODUCED = 50
+        TOTAL_COSTS = Decimal(10)
+        COSTS_PER_CONSUMPTION = TOTAL_COSTS / AMOUNT_PRODUCED
+        CONSUMPTION_1 = 10
+        CONSUMPTION_2 = 20
+        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
+        CONSUMPTION_DATE_1 = datetime(2025, 1, 2)
+        CONSUMPTION_DATE_2 = datetime(2025, 1, 3)
 
-        trans1 = self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(5),
+        own_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company()
+        self.datetime_service.freeze_time(PLAN_APPROVED_DATE)
+        other_companys_plan = self.plan_generator.create_plan(
+            planner=other_company,
+            costs=ProductionCosts(
+                labour_cost=TOTAL_COSTS / 3,
+                resource_cost=TOTAL_COSTS / 3,
+                means_cost=TOTAL_COSTS / 3,
+            ),
+            amount=AMOUNT_PRODUCED,
         )
-
-        trans2 = self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(10),
+        self.datetime_service.freeze_time(CONSUMPTION_DATE_1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
+            amount=CONSUMPTION_1,
         )
-
-        response = self.use_case.show_details(
-            self.create_use_case_request(own_company.id)
+        self.datetime_service.freeze_time(CONSUMPTION_DATE_2)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
+            amount=CONSUMPTION_2,
         )
+        self.datetime_service.unfreeze_time()
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
         assert len(response.plot.timestamps) == 2
         assert len(response.plot.accumulated_volumes) == 2
 
-        assert trans1.date in response.plot.timestamps
-        assert trans2.date in response.plot.timestamps
+        assert CONSUMPTION_DATE_1 in response.plot.timestamps
+        assert CONSUMPTION_DATE_2 in response.plot.timestamps
 
-        assert trans1.amount_sent * (-1) in response.plot.accumulated_volumes
         assert (
-            trans1.amount_sent * (-1) + trans2.amount_sent * (-1)
+            CONSUMPTION_1 * COSTS_PER_CONSUMPTION * (-1)
+            in response.plot.accumulated_volumes
+        )
+        assert (
+            CONSUMPTION_1 * COSTS_PER_CONSUMPTION * (-1)
+            + CONSUMPTION_2 * COSTS_PER_CONSUMPTION * (-1)
         ) in response.plot.accumulated_volumes
 
     def test_that_plotting_info_is_generated_in_the_correct_order_after_consumption_of_three_fixed_means_of_production(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_record()
-        other_company = self.company_generator.create_company_record()
+        AMOUNT_PRODUCED = 50
+        TOTAL_COSTS = Decimal(10)
+        COSTS_PER_CONSUMPTION = TOTAL_COSTS / AMOUNT_PRODUCED
+        CONSUMPTION_1 = 10
+        CONSUMPTION_2 = 20
+        CONSUMPTION_3 = 30
+        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
+        CONSUMPTION_DATE_1 = datetime(2025, 1, 2)
+        CONSUMPTION_DATE_2 = datetime(2025, 1, 3)
+        CONSUMPTION_DATE_3 = datetime(2025, 1, 4)
 
-        trans1 = self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(1),
+        own_company = self.company_generator.create_company()
+        other_company = self.company_generator.create_company()
+        self.datetime_service.freeze_time(PLAN_APPROVED_DATE)
+        other_companys_plan = self.plan_generator.create_plan(
+            planner=other_company,
+            costs=ProductionCosts(
+                labour_cost=TOTAL_COSTS / 3,
+                resource_cost=TOTAL_COSTS / 3,
+                means_cost=TOTAL_COSTS / 3,
+            ),
+            amount=AMOUNT_PRODUCED,
         )
-
-        trans2 = self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(2),
+        self.datetime_service.freeze_time(CONSUMPTION_DATE_1)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
+            amount=CONSUMPTION_1,
         )
-
-        trans3 = self.transaction_generator.create_transaction(
-            sending_account=own_company.means_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(3),
+        self.datetime_service.freeze_time(CONSUMPTION_DATE_2)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
+            amount=CONSUMPTION_2,
         )
-
-        response = self.use_case.show_details(
-            self.create_use_case_request(own_company.id)
+        self.datetime_service.freeze_time(CONSUMPTION_DATE_3)
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=own_company,
+            plan=other_companys_plan,
+            amount=CONSUMPTION_3,
         )
-        assert response.plot.timestamps[0] == trans1.date
-        assert response.plot.timestamps[2] == trans3.date
+        self.datetime_service.unfreeze_time()
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
+        assert response.plot.timestamps[0] == CONSUMPTION_DATE_1
+        assert response.plot.timestamps[1] == CONSUMPTION_DATE_2
+        assert response.plot.timestamps[2] == CONSUMPTION_DATE_3
 
-        assert response.plot.accumulated_volumes[0] == trans1.amount_sent * (-1)
+        assert response.plot.accumulated_volumes[
+            0
+        ] == CONSUMPTION_1 * COSTS_PER_CONSUMPTION * (-1)
+        assert response.plot.accumulated_volumes[1] == (
+            CONSUMPTION_1 * COSTS_PER_CONSUMPTION * (-1)
+            + CONSUMPTION_2 * COSTS_PER_CONSUMPTION * (-1)
+        )
         assert response.plot.accumulated_volumes[2] == (
-            trans1.amount_sent * (-1)
-            + trans2.amount_sent * (-1)
-            + trans3.amount_sent * (-1)
+            CONSUMPTION_1 * COSTS_PER_CONSUMPTION * (-1)
+            + CONSUMPTION_2 * COSTS_PER_CONSUMPTION * (-1)
+            + CONSUMPTION_3 * COSTS_PER_CONSUMPTION * (-1)
         )
 
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
     def test_that_correct_plotting_info_is_generated_after_receiving_of_credit_for_fixed_means_of_production(
         self,
+        is_public_service: bool,
     ) -> None:
-        company = self.company_generator.create_company_record()
-        trans = self.transaction_generator.create_transaction(
-            sending_account=self.social_accounting.account,
-            receiving_account=company.means_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(8.5),
+        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
+        EXPECTED_VOLUME = Decimal(8.5)
+        company = self.company_generator.create_company()
+        self.datetime_service.freeze_time(PLAN_APPROVED_DATE)
+        self.plan_generator.create_plan(
+            planner=company,
+            costs=ProductionCosts(
+                labour_cost=Decimal(0),
+                resource_cost=Decimal(0),
+                means_cost=EXPECTED_VOLUME,
+            ),
+            is_public_service=is_public_service,
         )
-
-        response = self.use_case.show_details(self.create_use_case_request(company.id))
+        self.datetime_service.unfreeze_time()
+        response = self.use_case.show_details(self.create_use_case_request(company))
         assert response.plot.timestamps
         assert response.plot.accumulated_volumes
 
         assert len(response.plot.timestamps) == 1
         assert len(response.plot.accumulated_volumes) == 1
 
-        assert trans.date in response.plot.timestamps
-        assert trans.amount_received in response.plot.accumulated_volumes
+        assert PLAN_APPROVED_DATE in response.plot.timestamps
+        assert EXPECTED_VOLUME in response.plot.accumulated_volumes
 
     def create_use_case_request(
         self, company_id: UUID

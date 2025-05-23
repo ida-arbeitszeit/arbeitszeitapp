@@ -292,6 +292,55 @@ single UPDATE statement to the SQL database server since only the
 ``perform`` method at the end of the method chain will send commands
 to it.
 
+
+Handling transfers of labor time
+---------------------------------
+
+Transfers of labor time between accounts are at the core of the arbeitszeitapp. 
+A ``Transfer`` object follows roughly this structure::
+
+    class Transfer:
+        date: datetime
+        debit_account: UUID
+        credit_account: UUID
+        value: Decimal
+
+You will find the ``Transfer`` object in the business logic, in ``arbeitszeit/records.py``,
+as well as a database implementation in ``arbeitszeit_flask/database/models.py``.  
+
+Apart from these Transfer objects, we have other objects that may reference 
+one or more transfers. For example, there might be a ``Consumption`` object, 
+that stores the fact that a consumer has consumed a product from a plan. We can 
+use the ``Consumption.transfer`` field to access the amount of labor time that was 
+transfered as part of that consumption::
+
+    class Consumption:
+        consumer: UUID
+        plan: UUID
+        transfer: UUID  # Reference to a Transfer
+
+A common pattern in our code is to first create a Transfer object and then another object 
+that references it — all within a single use case. For instance, we might see 
+in a ``ConsumptionUseCase``::
+
+    # create the Transfer object
+    transfer = self.database_gateway.create_transfer(
+        date=now,
+        debit_account=consumer.account,
+        credit_account=company.account,
+        value=amount,
+    )
+    # create the Consumption object
+    self.database_gateway.create_consumption(
+        consumer=consumer,
+        plan=consumption.plan,
+        transfer=transfer,
+    )
+
+Following this pattern, we can be sure to have all transfers of labor time recorded in the system as
+``Transfer`` records, while we can query more detailed information through 
+``Consumption`` and similar objects.
+
 Presenters
 ----------
 
@@ -384,30 +433,6 @@ this::
 		      'Your plan was rejected by public accounting'
 		  ),
 	      )
-
-HTTP
-----
-
-When building web server logic, we use various HTTP methods to handle
-different user actions. In the "arbeitszeitapp" we've mainly used the
-`GET` and `POST` methods so far.
-
-GET
-...
-
-`GET` requests should not alter the application's state in any
-significant way. A good rule of thumb is to ask whether the action
-triggered by a successful request would change the database. If the
-answer is no, then it's likely appropriate to handle the request using
-`GET`.
-
-POST
-....
-
-A `POST` request should handle the submission of new user data.
-Examples for actions that warrant the `POST` method include the
-submission of login data, filing a new plan with public accounting or
-submitting a review for a plan.
 
 User identification
 -------------------
@@ -538,136 +563,6 @@ handler for this path must accept a ``member_id`` argument of type
         def DELETE(self, member_id: UUID) -> Response:
             return f"Deleting member account for member {member_id}"
 
-Configuration of the web server
---------------------------------
-
-The application needs to be configured to function properly. This is
-done via a configuration file. When starting ``arbeitszeitapp`` it
-looks for configuration files in the following locations from top to
-bottom. It loads the first configuration file it finds:
-
-* Path set in ``ARBEITSZEITAPP_CONFIGURATION_PATH`` environment variable
-* ``/etc/arbeitszeitapp/arbeitszeitapp.py``
-
-The configuration file must be a valid python script.  Configuration
-options are set as variables on the top level. The following
-configuration options are available
-
-.. py:data:: ALEMBIC_CONFIGURATION_FILE
-
-   Path to the alembic configuration. Alembic is used to manage
-   database migrations. See the `alembic documentation`_ for further
-   information.
-
-.. py:data:: AUTO_MIGRATE
-   
-   Upgrade the database schema if changes are detected.
-
-   Example: ``AUTO_MIGRATE = True``
-
-   Default: ``False``
-
-.. py:data:: FORCE_HTTPS
-
-   This option controls whether the application will allow unsecure
-   HTTP trafic or force a redirect to an HTTPS address.
-
-   Example: ``FORCE_HTTPS = False``
-
-   Default: ``True``
-
-.. py:data:: MAIL_PLUGIN_MODULE
-
-   This option must be a python module path to the email plugin to be
-   used.  By default a mock email service will be used that is
-   intended for development purposes.
-
-   The arbeitszeitapp provides a very basic mechanism for sending
-   emails synchronously via SMTP. This plugin is found in the
-   ``arbeitszeit_flask.mail_service.smtp_mail_service`` module.
-
-.. py:data:: MAIL_PLUGIN_CLASS
-
-   This option must be the class name of the email service found under
-   ``MAIL_PLUGIN_MODULE``.  By default a mock email service will be
-   used that is intended for development purposes.
-
-   The arbeitszeitapp provides a very basic mechanism for sending
-   emails synchronously via SMTP. The name of this class in
-   ``SmtpMailService``
-
-.. py:data:: MAIL_SERVER
-   
-   The hostname of the SMTP server used for sending emails.
-
-.. py:data:: MAIL_PORT
-   
-   Port of the SMTP server used to send emails.
-
-   Default: ``25``
-
-.. py:data:: MAIL_USERNAME
-   
-   The username required to log in to the ``SMTP`` server for sending emails.
-
-.. py:data:: MAIL_PASSWORD
-   
-   The password required to log in to the ``SMTP`` server for sending emails.
-
-.. py:data:: MAIL_DEFAULT_SENDER
-   
-   The sender address used for outgoing emails.
-
-.. py:data:: MAIL_ADMIN
-
-   The email address of the app administrator. Users may use this email 
-   address to contact the administrator.
-
-.. py:data:: SECRET_KEY
-   
-   A password used for protecting agains Cross-site request forgery
-   and more. Setting this option is obligatory for many security
-   measures.
-
-.. py:data:: SECURITY_PASSWORD_SALT
-   
-   This option is used when encrypting passwords. Don't lose it.
-
-.. py:data:: SERVER_NAME
-   
-   This variable tells the application how it is addressed. This is
-   important to generate links in emails it sends out.
-
-   Example: ``SERVER_NAME = "arbeitszeitapp.cp.org"``
-
-.. py:data:: SQLALCHEMY_DATABASE_URI
-   
-   The address of the database used for persistence.
-
-   Default: ``"sqlite:////tmp/arbeitszeitapp.db"``
-
-   Example: ``SQLALCHEMY_DATABASE_URI = "postgresql:///my_data"``
-
-.. py:data:: ALLOWED_OVERDRAW_MEMBER
-   
-   This integer defines how far members can overdraw their account.
-
-   Default: ``0``
-
-.. py:data:: ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION
-   
-   This integer defines the "relative deviation" from the ideal account balance of zero
-   that is still deemed acceptable, expressed in percent and calculated 
-   relative to the expected transaction value of this account.
-
-   Example: Company XY has an absolute deviation of minus 1000 hours on its account for means
-   of production (PRD account). Because it has filed plans with total costs for means of 
-   production of 10000 hours (=the sum of expected transaction value), 
-   its relative deviation is 10%.
-
-   Unacceptable high deviations might get labeled as such or highlighted by the application.
-
-   Default: ``33``
 
 Icon Templates: Integration and Usage
 -----------------------------------------
@@ -818,4 +713,3 @@ More info, concerning the ``icon`` filter implementation, can be found in
 .. _Liskov Substitution Principle: https://en.wikipedia.org/wiki/Liskov_substitution_principle
 .. _flask blueprints: https://flask.palletsprojects.com/en/latest/blueprints/
 .. _URI path pattern: https://flask.palletsprojects.com/en/latest/api/#url-route-registrations
-.. _alembic documentation: https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file

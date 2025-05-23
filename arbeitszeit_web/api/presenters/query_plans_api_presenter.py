@@ -37,7 +37,7 @@ class QueryPlansApiPresenter:
                             price_per_unit=JsonDecimal(),
                             is_public_service=JsonBoolean(),
                             is_cooperating=JsonBoolean(),
-                            activation_date=JsonDatetime(),
+                            approval_date=JsonDatetime(),
                         ),
                         name="Plan",
                     )

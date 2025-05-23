@@ -41,7 +41,7 @@ class QueriedPlan:
     labour_cost_per_unit: Decimal
     is_public_service: bool
     is_cooperating: bool
-    activation_date: datetime
+    approval_date: datetime
     is_expired: bool
 
 
@@ -63,7 +63,7 @@ class QueryPlans:
 
     def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
-        plans = self.database_gateway.get_plans().that_were_activated_before(now)
+        plans = self.database_gateway.get_plans().that_were_approved_before(now)
         if not request.include_expired_plans:
             plans = plans.that_will_expire_after(now)
         plans = self._apply_filter(plans, request.query_string, request.filter_category)
@@ -97,7 +97,7 @@ class QueryPlans:
         if sort_by == PlanSorting.by_company_name:
             plans = plans.ordered_by_planner_name()
         else:
-            plans = plans.ordered_by_activation_date(ascending=False)
+            plans = plans.ordered_by_approval_date(ascending=False)
         return plans
 
     def _plan_to_response_model(
@@ -107,7 +107,7 @@ class QueryPlans:
         cooperation: Optional[records.Cooperation],
     ) -> QueriedPlan:
         price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        assert plan.activation_date
+        assert plan.approval_date
         return QueriedPlan(
             plan_id=plan.id,
             company_name=planner.name,
@@ -118,6 +118,6 @@ class QueryPlans:
             labour_cost_per_unit=plan.cost_per_unit(),
             is_public_service=plan.is_public_service,
             is_cooperating=bool(cooperation),
-            activation_date=plan.activation_date,
+            approval_date=plan.approval_date,
             is_expired=plan.is_expired_as_of(self.datetime_service.now()),
         )

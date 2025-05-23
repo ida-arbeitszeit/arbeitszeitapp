@@ -3,12 +3,13 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases import get_company_transactions
+from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
+from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 
 from .base_test_case import BaseTestCase
 from .repositories import MockDatabase
@@ -328,18 +329,13 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         self.consumer = self.company_generator.create_company()
         self.planner = self.company_generator.create_company()
         self.plan = self.plan_generator.create_plan(planner=self.planner, timeframe=2)
-        self.register_productive_consumption = self.injector.get(
+        self.planner_prd_transactions_before_payment = len(
+            self.get_company_prd_account_transactions(self.planner)
+        )
+        self.register_productive_consumption_use_case = self.injector.get(
             RegisterProductiveConsumption
         )
-        self.get_company_transactions = self.injector.get(
-            get_company_transactions.GetCompanyTransactionsUseCase
-        )
-        self.planner_transactions_before_payment = len(
-            self.get_company_transactions.get_transactions(
-                get_company_transactions.Request(company=self.planner)
-            ).transactions
-        )
-        self.response = self.register_productive_consumption(
+        self.response = self.register_productive_consumption_use_case(
             RegisterProductiveConsumptionRequest(
                 consumer=self.consumer,
                 plan=self.plan,
@@ -350,28 +346,39 @@ class TestSuccessfulRegistrationTransactions(BaseTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
 
     def test_transaction_shows_up_in_transaction_listing_for_consumer(self) -> None:
-        transactions = self.get_transactions_of_company(self.consumer)
+        transactions = self.get_company_fixed_means_transactions(self.consumer)
         self.assertEqual(len(transactions), 1)
 
     def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transactions = self.get_transactions_of_company(self.planner)
+        transactions = self.get_company_prd_account_transactions(self.planner)
         self.assertEqual(
             len(transactions),
-            self.planner_transactions_before_payment + 1,
+            self.planner_prd_transactions_before_payment + 1,
         )
 
     def test_transaction_info_of_consumer_shows_transaction_timestamp(self) -> None:
-        transactions = self.get_transactions_of_company(self.consumer)
+        transactions = self.get_company_fixed_means_transactions(self.consumer)
         assert not self.response.is_rejected
         self.assertEqual(transactions[0].date, self.transaction_time)
 
     def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transactions = self.get_transactions_of_company(self.planner)
+        transactions = self.get_company_fixed_means_transactions(self.planner)
         self.assertEqual(transactions[-1].date, self.transaction_time)
 
-    def get_transactions_of_company(
+    def get_company_fixed_means_transactions(self, company: UUID) -> list:
+        use_case = self.injector.get(ShowPAccountDetailsUseCase)
+        response = use_case.show_details(
+            ShowPAccountDetailsUseCase.Request(company=company)
+        )
+        return response.transfers
+
+    def get_company_prd_account_transactions(
         self, company: UUID
-    ) -> list[get_company_transactions.TransactionInfo]:
-        return self.get_company_transactions.get_transactions(
-            get_company_transactions.Request(company=company)
-        ).transactions
+    ) -> list[show_prd_account_details.TransferInfo]:
+        use_case = self.injector.get(
+            show_prd_account_details.ShowPRDAccountDetailsUseCase
+        )
+        response = use_case.show_details(
+            show_prd_account_details.Request(company_id=company)
+        )
+        return response.transfers

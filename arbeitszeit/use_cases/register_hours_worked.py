@@ -6,7 +6,9 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.payout_factor import PayoutFactorService
+from arbeitszeit.records import SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -34,6 +36,7 @@ class RegisterHoursWorked:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     fic_service: PayoutFactorService
+    social_accounting: SocialAccounting
 
     def __call__(
         self, use_case_request: RegisterHoursWorkedRequest
@@ -62,20 +65,25 @@ class RegisterHoursWorked:
                 rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
             )
         fic = self.fic_service.get_current_payout_factor()
-        now = self.datetime_service.now()
-        transaction = self.database_gateway.create_transaction(
-            date=now,
-            sending_account=company.work_account,
-            receiving_account=worker.account,
-            amount_sent=use_case_request.hours_worked,
-            amount_received=use_case_request.hours_worked * fic,
-            purpose="Lohn",
+        transfer_of_work_certificates = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=company.work_account,
+            credit_account=worker.account,
+            value=use_case_request.hours_worked,
+            type=TransferType.work_certificates,
+        )
+        transfer_of_taxes = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=worker.account,
+            credit_account=self.social_accounting.account_psf,
+            value=use_case_request.hours_worked * (1 - fic),
+            type=TransferType.taxes,
         )
         self.database_gateway.create_registered_hours_worked(
             company=company.id,
             member=worker.id,
-            amount=use_case_request.hours_worked,
-            transaction=transaction.id,
-            registered_on=now,
+            transfer_of_work_certificates=transfer_of_work_certificates.id,
+            transfer_of_taxes=transfer_of_taxes.id,
+            registered_on=self.datetime_service.now(),
         )
         return RegisterHoursWorkedResponse(rejection_reason=None)

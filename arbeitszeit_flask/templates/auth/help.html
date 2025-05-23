@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from 'macros/help.html' import help %}
 
 {% block navigation_items %}
 <div class="navbar-item">
@@ -10,5 +9,88 @@
 {% endblock %}
 
 {% block content %}
-{{ help() }}
+<section class="section">
+  <h1 class="title is-1">{{ gettext("User manual") }}</h1>
+</section>
+<section class="section">
+    <div class="columns">
+      <div class="column is-3">
+        <aside class="menu">
+          <ul class="menu-list">
+            <li>
+              <a href="#users">{{ gettext("User roles") }}</a>
+              <ul>
+                <li><a href="#members">{{ gettext("Members") }}</a></li>
+                <li><a href="#companies">{{ gettext("Companies") }}</a></li>
+                <li class="is-active">
+                  <a href="#accountants">{{ gettext("Accountants") }}</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </aside>
+      </div>
+      <div class="column">  
+        <section class="section" id="users">
+          <h2 class="title is-2">{{ gettext("User roles") }}</h2>
+        </section>
+        <section class="section" id="members">
+          <h2 class="title is-3">{{ gettext("Members") }}</h2>
+          <div class="content has-text-justified">
+            <p>{{ gettext("Members are employed in companies and receive work \
+certificates for work done.") }}</p>
+          </div>
+          <h3 class="title is-4">{{ gettext("Registration and login") }}</h3>
+          <div class="content has-text-justified">
+            <p>{{ gettext("Registration and login are done on the start page.") }}</p>
+          </div>
+          <h3 class="title is-4">{{ gettext("Company Affiliation") }}</h3>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("Companies send invitations to registered members. If the member \
+confirms the invitation, they are considered employed by the inviting company.") }}
+            </p>
+          </div>
+          <h3 class="title is-4">{{ gettext("Work certificates and consumption") }}</h3>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("When a company registers that a member has worked, \
+the member receives work certificates on their account.") }}
+            </p>
+          </div>
+        </section>
+        <section class="section" id="companies">
+          <h2 class="title is-3">{{ gettext("Companies") }}</h2>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("Companies use this application, among other things, \
+for planning, viewing statistics, and passing on work certificates to workers.") }}
+            </p>
+          </div>
+          <h3 class="title is-4">{{ gettext("Registration and login") }}</h3>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("Registration and login are done on the start page.") }}  
+            </p>
+          </div>
+        </section>
+        <section class="section" id="accountants">
+          <h2 class="title is-3">{{ gettext("Accountants") }}</h2>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("Accountants approve the plans of the companies on \
+behalf of the society.") }}
+            </p>
+          </div>
+          <h3 class="title is-4">{{ gettext("Registration and login") }}</h3>
+          <div class="content has-text-justified">
+            <p>
+              {{ gettext("Accountants receive an invitation link from the system \
+administrator, with which they can register and log in.") }}
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+</section>
 {% endblock %}

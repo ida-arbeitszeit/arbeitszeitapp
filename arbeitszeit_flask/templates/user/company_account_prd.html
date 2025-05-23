@@ -31,7 +31,7 @@
         <div class="section has-text-left">
             {% if view_model.show_transactions %}
             {% for trans_info in view_model.transactions %}
-            {{ transaction_with_peer(trans_info.date, trans_info.transaction_type, trans_info.purpose, trans_info.transaction_volume, trans_info.peer_name, trans_info.peer_type_icon) }}
+            {{ transaction_with_peer(trans_info.date, trans_info.transaction_type, trans_info.transaction_volume, trans_info.peer_name, trans_info.peer_type_icon) }}
             {% endfor %}
             {% endif %}
         </div>

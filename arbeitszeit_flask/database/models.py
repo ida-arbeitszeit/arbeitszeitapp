@@ -8,8 +8,9 @@ from decimal import Decimal
 
 from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, Table
-from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit_flask.database.db import Base
 
 
@@ -40,6 +41,7 @@ class SocialAccounting(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    account_psf: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 
 # Association table Company - Member
@@ -129,13 +131,17 @@ class Plan(Base):
     description: Mapped[str] = mapped_column(String(5000))
     timeframe: Mapped[Decimal]
     is_public_service: Mapped[bool] = mapped_column(default=False)
-    activation_date: Mapped[datetime | None]
     requested_cooperation: Mapped[str | None] = mapped_column(
         ForeignKey("cooperation.id")
     )
     hidden_by_user: Mapped[bool] = mapped_column(default=False)
 
-    review = relationship("PlanReview", uselist=False, back_populates="plan")
+    review: Mapped["PlanReview  | None"] = relationship(
+        "PlanReview", back_populates="plan"
+    )
+    approval: Mapped["PlanApproval | None"] = relationship(
+        "PlanApproval", back_populates="plan"
+    )
 
 
 class PlanCooperation(Base):
@@ -149,33 +155,32 @@ class PlanReview(Base):
     __tablename__ = "plan_review"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    approval_date: Mapped[datetime | None]
     rejection_date: Mapped[datetime | None]
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
 
-    plan = relationship("Plan", back_populates="review")
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
 
     def __repr__(self) -> str:
-        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, approval_date={self.approval_date!r}, rejection_date={self.rejection_date!r})"
+        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, rejection_date={self.rejection_date!r})"
+
+
+class PlanApproval(Base):
+    __tablename__ = "plan_approval"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
+    date: Mapped[datetime]
+    transfer_of_credit_p: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_r: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_a: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="approval")
 
 
 class Account(Base):
     __tablename__ = "account"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-
-    transactions_sent = relationship(
-        "Transaction",
-        foreign_keys="Transaction.sending_account",
-        lazy="dynamic",
-        backref=backref("account_from"),
-    )
-    transactions_received = relationship(
-        "Transaction",
-        foreign_keys="Transaction.receiving_account",
-        lazy="dynamic",
-        backref=backref("account_to"),
-    )
 
 
 class Transaction(Base):
@@ -204,12 +209,36 @@ class Transaction(Base):
         return f"Transaction({fields})"
 
 
+class Transfer(Base):
+    __tablename__ = "transfer"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    date: Mapped[datetime] = mapped_column(index=True)
+    debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    value: Mapped[Decimal]
+    type: Mapped[TransferType]
+
+    def __repr__(self) -> str:
+        fields = ", ".join(
+            [
+                f"id={self.id!r}",
+                f"date={self.date!r}",
+                f"debit_account={self.debit_account!r}",
+                f"credit_account={self.credit_account!r}",
+                f"value={self.value!r}",
+                f"type={self.type!r}",
+            ]
+        )
+        return f"Transfer({fields})"
+
+
 class PrivateConsumption(Base):
     __tablename__ = "private_consumption"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
-    transaction_id: Mapped[str | None] = mapped_column(ForeignKey("transaction.id"))
+    transaction_id: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     amount: Mapped[int]
 
 
@@ -218,7 +247,7 @@ class ProductiveConsumption(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
-    transaction_id: Mapped[str | None] = mapped_column(ForeignKey("transaction.id"))
+    transaction_id: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
     amount: Mapped[int]
 
 
@@ -228,8 +257,10 @@ class RegisteredHoursWorked(Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     company: Mapped[str] = mapped_column(ForeignKey("company.id"))
     worker: Mapped[str] = mapped_column(ForeignKey("member.id"))
-    amount: Mapped[Decimal]
-    transaction: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
+    transfer_of_work_certificates: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     registered_on: Mapped[datetime]
 
 
@@ -248,6 +279,7 @@ class Cooperation(Base):
     creation_date: Mapped[datetime]
     name: Mapped[str] = mapped_column(String(100))
     definition: Mapped[str] = mapped_column(String(5000))
+    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 
 class CoordinationTenure(Base):

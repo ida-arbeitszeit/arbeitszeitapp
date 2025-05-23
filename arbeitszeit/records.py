@@ -7,6 +7,8 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
+from arbeitszeit.transfers.transfer_type import TransferType
+
 
 @dataclass
 class EmailAddress:
@@ -18,6 +20,7 @@ class EmailAddress:
 class SocialAccounting:
     id: UUID
     account: UUID
+    account_psf: UUID
 
     def get_name(self) -> str:
         return "Social Accounting"
@@ -25,6 +28,8 @@ class SocialAccounting:
     def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
         if account == self.account:
             return AccountTypes.accounting
+        if account == self.account_psf:
+            return AccountTypes.psf
         return None
 
     def is_member(self) -> bool:
@@ -106,6 +111,8 @@ class AccountTypes(Enum):
     prd = "prd"
     member = "member"
     accounting = "accounting"
+    psf = "psf"
+    cooperation = "cooperation"
 
 
 @dataclass(frozen=True)
@@ -119,6 +126,7 @@ class Cooperation:
     creation_date: datetime
     name: str
     definition: str
+    account: UUID
 
 
 @dataclass
@@ -207,7 +215,6 @@ class Plan:
     is_public_service: bool
     approval_date: Optional[datetime]
     rejection_date: Optional[datetime]
-    activation_date: Optional[datetime]
     requested_cooperation: Optional[UUID]
     hidden_by_user: bool
 
@@ -234,9 +241,9 @@ class Plan:
 
     @property
     def expiration_date(self) -> Optional[datetime]:
-        if not self.activation_date:
+        if not self.approval_date:
             return None
-        exp_date = self.activation_date + timedelta(days=int(self.timeframe))
+        exp_date = self.approval_date + timedelta(days=int(self.timeframe))
         return exp_date
 
     def active_days(self, reference_timestamp: datetime) -> Optional[int]:
@@ -244,15 +251,15 @@ class Plan:
         specified timestamp, not considering days exceeding it's
         timeframe.
         """
-        if not self.activation_date:
+        if not self.approval_date:
             return None
-        days_passed_since_activation = (reference_timestamp - self.activation_date).days
+        days_passed_since_activation = (reference_timestamp - self.approval_date).days
         return min(self.timeframe, days_passed_since_activation)
 
     def is_active_as_of(self, timestamp: datetime) -> bool:
         return (
-            self.activation_date is not None
-            and self.activation_date <= timestamp
+            self.approval_date is not None
+            and self.approval_date <= timestamp
             and not self.is_expired_as_of(timestamp)
         )
 
@@ -273,6 +280,16 @@ class Plan:
 
     def price_per_unit(self) -> Decimal:
         return Decimal(0) if self.is_public_service else self.cost_per_unit()
+
+
+@dataclass
+class PlanApproval:
+    id: UUID
+    plan_id: UUID
+    date: datetime
+    transfer_of_credit_p: UUID
+    transfer_of_credit_r: UUID
+    transfer_of_credit_a: UUID
 
 
 class ConsumptionType(Enum):
@@ -297,6 +314,24 @@ class Transaction:
     amount_sent: Decimal
     amount_received: Decimal
     purpose: str
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+
+@dataclass
+class Transfer:
+    """
+    Represents a transfer of hours between accounts.
+    The value is always the same for both the debit and credit account.
+    """
+
+    id: UUID
+    date: datetime
+    debit_account: UUID
+    credit_account: UUID
+    value: Decimal
+    type: TransferType
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -367,6 +402,6 @@ class RegisteredHoursWorked:
     id: UUID
     company: UUID
     member: UUID
-    amount: Decimal
-    transaction: UUID
+    transfer_of_work_certificates: UUID
+    transfer_of_taxes: UUID
     registered_on: datetime

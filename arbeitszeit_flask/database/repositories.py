@@ -20,10 +20,11 @@ from sqlalchemy import Delete, Insert, Update
 from sqlalchemy.dialects.postgresql import INTERVAL, insert
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.query import Query
-from sqlalchemy.sql.expression import and_, case, delete, func, or_, update
+from sqlalchemy.sql.expression import and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.models import (
@@ -77,22 +78,19 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
-        ordering = (
-            models.Plan.activation_date.asc()
-            if ascending
-            else models.Plan.activation_date.desc()
+    def ordered_by_approval_date(self, ascending: bool = True) -> Self:
+        plan_approval = aliased(models.PlanApproval)
+        ordering = plan_approval.date.asc() if ascending else plan_approval.date.desc()
+        return self._with_modified_query(
+            lambda query: query.outerjoin(plan_approval).order_by(ordering)
         )
-        return self._with_modified_query(lambda query: query.order_by(ordering))
 
     def ordered_by_planner_name(self, ascending: bool = True) -> Self:
-        ordering = (
-            models.Company.name.asc() if ascending else models.Company.name.desc()
-        )
+        company = aliased(models.Company)
+        join_condition = company.id == models.Plan.planner
+        order_criteria = company.name.asc() if ascending else company.name.desc()
         return self._with_modified_query(
-            lambda query: query.join(models.Company)
-            .order_by(ordering)
-            .group_by(models.Plan.id, models.Company.id)
+            lambda q: q.join(company, join_condition).order_by(order_criteria)
         )
 
     def ordered_by_rejection_date(self, ascending: bool = True) -> Self:
@@ -119,39 +117,41 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def that_are_approved(self) -> Self:
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
-                models.PlanReview.approval_date != None
-            )
+            lambda query: query.filter(models.Plan.approval != None)
         )
 
     def that_are_rejected(self) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
-                models.PlanReview.rejection_date != None
+            lambda query: query.join(plan_review).filter(
+                plan_review.rejection_date != None
             )
         )
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
+        plan_approval = aliased(models.PlanApproval)
         return self._with_modified_query(
-            lambda query: query.filter(models.Plan.activation_date <= timestamp)
+            lambda query: query.join(plan_approval).filter(
+                plan_approval.date <= timestamp
+            )
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
+        approval = aliased(models.PlanApproval)
         expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + models.Plan.activation_date
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
         )
         return self._with_modified_query(
-            lambda query: query.filter(expiration_date > timestamp)
+            lambda query: query.join(approval).filter(expiration_date > timestamp)
         )
 
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
+        approval = aliased(models.PlanApproval)
         expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL)
-            + models.Plan.activation_date
+            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
         )
         return self._with_modified_query(
-            lambda query: query.filter(expiration_date <= timestamp)
+            lambda query: query.join(approval).filter(expiration_date <= timestamp)
         )
 
     def that_are_productive(self) -> Self:
@@ -185,11 +185,14 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         )
 
     def without_completed_review(self) -> Self:
+        plan_review = aliased(models.PlanReview)
         return self._with_modified_query(
-            lambda query: self.query.join(models.PlanReview).filter(
+            lambda query: query.join(
+                plan_review, plan_review.plan_id == models.Plan.id
+            ).filter(
                 and_(
-                    models.PlanReview.approval_date == None,
-                    models.PlanReview.rejection_date == None,
+                    models.Plan.approval == None,
+                    plan_review.rejection_date == None,
                 )
             )
         )
@@ -275,12 +278,23 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             func.sum(models.Plan.costs_r).label("costs_r"),
             func.sum(models.Plan.costs_a).label("costs_a"),
         ).first()
+        if result is None:
+            return records.PlanningStatistics(
+                average_plan_duration_in_days=Decimal(0),
+                total_planned_costs=records.ProductionCosts(
+                    means_cost=Decimal(0),
+                    resource_cost=Decimal(0),
+                    labour_cost=Decimal(0),
+                ),
+            )
         return records.PlanningStatistics(
-            average_plan_duration_in_days=result.duration or Decimal(0),
+            average_plan_duration_in_days=(
+                Decimal(result.duration) if result.duration else Decimal(0)
+            ),
             total_planned_costs=records.ProductionCosts(
-                means_cost=result.costs_p or Decimal(0),
-                resource_cost=result.costs_r or Decimal(0),
-                labour_cost=result.costs_a or Decimal(0),
+                means_cost=Decimal(result.costs_p) if result.costs_p else Decimal(0),
+                resource_cost=Decimal(result.costs_r) if result.costs_r else Decimal(0),
+                labour_cost=Decimal(result.costs_a) if result.costs_a else Decimal(0),
             ),
         )
 
@@ -310,25 +324,24 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
         planner = aliased(models.Company)
         cooperation = aliased(models.Cooperation)
         plan_cooperation = aliased(models.PlanCooperation)
+
         query = (
             self.query.join(planner, planner.id == models.Plan.planner)
-            .join(
+            .outerjoin(
                 plan_cooperation,
                 plan_cooperation.plan == models.Plan.id,
-                isouter=True,
             )
-            .join(
+            .outerjoin(
                 cooperation,
                 cooperation.id == plan_cooperation.cooperation,
-                isouter=True,
             )
-            .group_by(models.Plan.id, planner.id, cooperation.id)
             .with_entities(
                 models.Plan,
                 planner,
                 cooperation,
             )
         )
+
         return FlaskQueryResult(
             db=self.db,
             mapper=mapper,
@@ -486,30 +499,11 @@ class PlanUpdate:
             ),
         )
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        return replace(
-            self,
-            review_update_values=dict(
-                self.review_update_values, approval_date=approval_date
-            ),
-        )
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         return replace(
             self,
             review_update_values=dict(
                 self.review_update_values, rejection_date=rejection_date
-            ),
-        )
-
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        return replace(
-            self,
-            plan_update_values=dict(
-                self.plan_update_values,
-                activation_date=activation_timestamp,
             ),
         )
 
@@ -626,6 +620,10 @@ class PlanDraftUpdate:
         rowcount = self.db.session.execute(sql_statement).rowcount
         self.db.session.flush()
         return rowcount
+
+
+@dataclass
+class PlanApprovalResult(FlaskQueryResult[records.PlanApproval]): ...
 
 
 class MemberQueryResult(FlaskQueryResult[records.Member]):
@@ -804,17 +802,6 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
 
 
 class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        accounts = list(map(str, account))
-        return self._with_modified_query(
-            lambda query: query.filter(
-                or_(
-                    models.Transaction.receiving_account.in_(accounts),
-                    models.Transaction.sending_account.in_(accounts),
-                )
-            )
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         accounts = map(str, account)
         return self._with_modified_query(
@@ -837,45 +824,58 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
             if descending
             else models.Transaction.date.asc()
         )
-        return self._with_modified_query(lambda query: self.query.order_by(ordering))
+        return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._with_modified_query(
-            lambda query: self.query.join(
-                models.SocialAccounting,
-                models.SocialAccounting.account == models.Transaction.sending_account,
+    def joined_with_receiver(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transaction, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member,
+                member.account == models.Transaction.receiving_account,
+                isouter=True,
             )
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plan_ids = [str(p) for p in plan]
-        private_consumption = aliased(models.PrivateConsumption)
-        productive_consumption = aliased(models.ProductiveConsumption)
-        valid_private_consumption = self.db.session.query(private_consumption)
-        valid_productive_consumption = self.db.session.query(productive_consumption)
-        if plan:
-            valid_productive_consumption = valid_productive_consumption.filter(
-                productive_consumption.plan_id.in_(plan_ids)
-            )
-            valid_private_consumption = valid_private_consumption.filter(
-                private_consumption.plan_id.in_(plan_ids)
-            )
-        return self._with_modified_query(
-            lambda query: query.filter(
+            .join(
+                company,
                 or_(
-                    models.Transaction.id.in_(
-                        valid_private_consumption.with_entities(
-                            private_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                    models.Transaction.id.in_(
-                        valid_productive_consumption.with_entities(
-                            productive_consumption.transaction_id
-                        ).scalar_subquery()
-                    ),
-                )
+                    company.r_account == models.Transaction.receiving_account,
+                    company.p_account == models.Transaction.receiving_account,
+                    company.a_account == models.Transaction.receiving_account,
+                    company.prd_account == models.Transaction.receiving_account,
+                ),
+                isouter=True,
             )
+            .join(
+                social_accounting,
+                social_accounting.account == models.Transaction.receiving_account,
+                isouter=True,
+            )
+            .with_entities(models.Transaction, member, company, social_accounting)
         )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transaction_and_receiver,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transaction_and_receiver(
+        cls, orm: Any
+    ) -> Tuple[records.Transaction, records.AccountOwner]:
+        transaction, member, company, social_accounting = orm
+        receiver: records.AccountOwner
+        if member:
+            receiver = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            receiver = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            receiver = AccountingRepository.social_accounting_from_orm(
+                social_accounting
+            )
+        return DatabaseGatewayImpl.transaction_from_orm(transaction), receiver
 
     def joined_with_sender_and_receiver(
         self,
@@ -982,6 +982,116 @@ class TransactionQueryResult(FlaskQueryResult[records.Transaction]):
         )
 
 
+class TransferQueryResult(FlaskQueryResult[records.Transfer]):
+    def where_account_is_debtor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(models.Transfer.debit_account.in_(accounts))
+        )
+
+    def where_account_is_creditor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(models.Transfer.credit_account.in_(accounts))
+        )
+
+    def joined_with_debtor(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member, member.account == models.Transfer.debit_account, isouter=True
+            )
+            .join(
+                company,
+                or_(
+                    company.p_account == models.Transfer.debit_account,
+                    company.r_account == models.Transfer.debit_account,
+                    company.a_account == models.Transfer.debit_account,
+                    company.prd_account == models.Transfer.debit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                social_accounting.account_psf == models.Transfer.debit_account,
+                isouter=True,
+            )
+            .with_entities(models.Transfer, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transfer_and_debtor,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transfer_and_debtor(
+        cls, orm: Any
+    ) -> Tuple[records.Transfer, records.AccountOwner]:
+        transfer, member, company, social_accounting = orm
+        debtor: records.AccountOwner
+        if member:
+            debtor = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            debtor = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            debtor = AccountingRepository.social_accounting_from_orm(social_accounting)
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), debtor
+
+    def joined_with_creditor(
+        self,
+    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+        member = aliased(models.Member)
+        company = aliased(models.Company)
+        social_accounting = aliased(models.SocialAccounting)
+        query = (
+            self.query.join(
+                member, member.account == models.Transfer.credit_account, isouter=True
+            )
+            .join(
+                company,
+                or_(
+                    company.p_account == models.Transfer.credit_account,
+                    company.r_account == models.Transfer.credit_account,
+                    company.a_account == models.Transfer.credit_account,
+                    company.prd_account == models.Transfer.credit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                social_accounting,
+                social_accounting.account_psf == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .with_entities(models.Transfer, member, company, social_accounting)
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transfer_and_creditor,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transfer_and_creditor(
+        cls, orm: Any
+    ) -> Tuple[records.Transfer, records.AccountOwner]:
+        transfer, member, company, social_accounting = orm
+        creditor: records.AccountOwner
+        if member:
+            creditor = DatabaseGatewayImpl.member_from_orm(member)
+        elif company:
+            creditor = DatabaseGatewayImpl.company_from_orm(company)
+        else:
+            creditor = AccountingRepository.social_accounting_from_orm(
+                social_accounting
+            )
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), creditor
+
+
 class AccountQueryResult(FlaskQueryResult[records.Account]):
     def with_id(self, *id_: UUID) -> Self:
         ids = list(map(str, id_))
@@ -1049,7 +1159,10 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             )
             .join(
                 social_accounting,
-                models.Account.id == social_accounting.account,
+                or_(
+                    social_accounting.account == models.Account.id,
+                    social_accounting.account_psf == models.Account.id,
+                ),
                 isouter=True,
             )
             .with_entities(models.Account, member, company, social_accounting)
@@ -1061,37 +1174,65 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         )
 
     def joined_with_balance(self) -> FlaskQueryResult[Tuple[records.Account, Decimal]]:
-        transaction = aliased(models.Transaction)
-        query = (
-            self.query.join(
-                transaction,
-                or_(
-                    transaction.sending_account == models.Account.id,
-                    transaction.receiving_account == models.Account.id,
-                ),
-                isouter=True,
+        """Calculate account balances considering both transactions and transfers."""
+        from sqlalchemy import func, select
+
+        # Create subqueries for each component of the balance
+        tx_received = (
+            select(
+                models.Transaction.receiving_account.label("account_id"),
+                func.sum(models.Transaction.amount_received).label("received"),
             )
-            .group_by(models.Account.id)
+            .group_by(models.Transaction.receiving_account)
+            .subquery()
+        )
+
+        tx_sent = (
+            select(
+                models.Transaction.sending_account.label("account_id"),
+                func.sum(models.Transaction.amount_sent).label("sent"),
+            )
+            .group_by(models.Transaction.sending_account)
+            .subquery()
+        )
+
+        tf_credited = (
+            select(
+                models.Transfer.credit_account.label("account_id"),
+                func.sum(models.Transfer.value).label("credited"),
+            )
+            .group_by(models.Transfer.credit_account)
+            .subquery()
+        )
+
+        tf_debited = (
+            select(
+                models.Transfer.debit_account.label("account_id"),
+                func.sum(models.Transfer.value).label("debited"),
+            )
+            .group_by(models.Transfer.debit_account)
+            .subquery()
+        )
+
+        # Join all components and calculate balance
+        query = (
+            self.query.outerjoin(
+                tx_received, models.Account.id == tx_received.c.account_id
+            )
+            .outerjoin(tx_sent, models.Account.id == tx_sent.c.account_id)
+            .outerjoin(tf_credited, models.Account.id == tf_credited.c.account_id)
+            .outerjoin(tf_debited, models.Account.id == tf_debited.c.account_id)
             .with_entities(
                 models.Account,
-                func.sum(
-                    case(
-                        (
-                            transaction.receiving_account == models.Account.id,
-                            transaction.amount_received,
-                        ),
-                        else_=Decimal(0),
-                    )
-                    - case(
-                        (
-                            transaction.sending_account == models.Account.id,
-                            transaction.amount_sent,
-                        ),
-                        else_=Decimal(0),
-                    )
-                ),
+                (
+                    func.coalesce(tx_received.c.received, 0)
+                    - func.coalesce(tx_sent.c.sent, 0)
+                    + func.coalesce(tf_credited.c.credited, 0)
+                    - func.coalesce(tf_debited.c.debited, 0)
+                ).label("balance"),
             )
         )
+
         return FlaskQueryResult(
             query=query,
             db=self.db,
@@ -1700,6 +1841,68 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             mapper=mapper,
         )
 
+    def joined_with_transfer_of_work_certificates(self) -> FlaskQueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.RegisteredHoursWorked, records.Transfer]:
+            hours_orm, transfer_orm = orm
+            return (
+                DatabaseGatewayImpl.registered_hours_worked_from_orm(hours_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
+            )
+
+        transfers = aliased(models.Transfer)
+        query = self.query.join(
+            transfers,
+            transfers.id == models.RegisteredHoursWorked.transfer_of_work_certificates,
+        ).with_entities(models.RegisteredHoursWorked, transfers)
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> FlaskQueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]:
+        def mapper(
+            orm,
+        ) -> Tuple[records.RegisteredHoursWorked, records.Member, records.Transfer]:
+            hours_orm, member_orm, transfer_orm = orm
+            return (
+                DatabaseGatewayImpl.registered_hours_worked_from_orm(hours_orm),
+                DatabaseGatewayImpl.member_from_orm(member_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
+            )
+
+        members = aliased(models.Member)
+        transfers = aliased(models.Transfer)
+        query = (
+            self.query.join(members, members.id == models.RegisteredHoursWorked.worker)
+            .join(
+                transfers,
+                transfers.id
+                == models.RegisteredHoursWorked.transfer_of_work_certificates,
+            )
+            .with_entities(models.RegisteredHoursWorked, members, transfers)
+        )
+
+        return FlaskQueryResult(
+            db=self.db,
+            query=query,
+            mapper=mapper,
+        )
+
 
 class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
@@ -1939,8 +2142,9 @@ class AccountingRepository:
         cls, accounting_orm: SocialAccounting
     ) -> records.SocialAccounting:
         return records.SocialAccounting(
-            account=UUID(accounting_orm.account),
             id=UUID(accounting_orm.id),
+            account=UUID(accounting_orm.account),
+            account_psf=UUID(accounting_orm.account_psf),
         )
 
     def get_or_create_social_accounting(self) -> records.SocialAccounting:
@@ -1955,7 +2159,9 @@ class AccountingRepository:
                 id=str(uuid4()),
             )
             account = self.database_gateway.create_account()
+            account_psf = self.database_gateway.create_account()
             social_accounting.account = str(account.id)
+            social_accounting.account_psf = str(account_psf.id)
             self.db.session.add(social_accounting)
             self.db.session.flush()
         return social_accounting
@@ -2041,7 +2247,7 @@ class DatabaseGatewayImpl:
 
     @classmethod
     def private_consumption_from_orm(
-        self, orm: models.PrivateConsumption
+        cls, orm: models.PrivateConsumption
     ) -> records.PrivateConsumption:
         return records.PrivateConsumption(
             id=UUID(orm.id),
@@ -2083,7 +2289,7 @@ class DatabaseGatewayImpl:
             timeframe=duration_in_days,
             is_public_service=is_public_service,
         )
-        review = models.PlanReview(approval_date=None, plan=plan, rejection_date=None)
+        review = models.PlanReview(plan=plan, rejection_date=None)
         self.db.session.add(plan)
         self.db.session.add(review)
         self.db.session.flush()
@@ -2107,9 +2313,8 @@ class DatabaseGatewayImpl:
             description=plan.description,
             timeframe=int(plan.timeframe),
             is_public_service=plan.is_public_service,
-            approval_date=plan.review.approval_date,
-            rejection_date=plan.review.rejection_date,
-            activation_date=plan.activation_date,
+            approval_date=plan.approval.date if plan.approval else None,
+            rejection_date=plan.review.rejection_date if plan.review else None,
             requested_cooperation=(
                 UUID(plan.requested_cooperation) if plan.requested_cooperation else None
             ),
@@ -2121,11 +2326,13 @@ class DatabaseGatewayImpl:
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> records.Cooperation:
         cooperation = models.Cooperation(
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
+            account=str(account),
         )
         self.db.session.add(cooperation)
         self.db.session.flush()
@@ -2139,12 +2346,13 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def cooperation_from_orm(self, orm: models.Cooperation) -> records.Cooperation:
+    def cooperation_from_orm(cls, orm: models.Cooperation) -> records.Cooperation:
         return records.Cooperation(
             id=UUID(orm.id),
             creation_date=orm.creation_date,
             name=orm.name,
             definition=orm.definition,
+            account=UUID(orm.account),
         )
 
     def create_coordination_tenure(
@@ -2166,7 +2374,7 @@ class DatabaseGatewayImpl:
 
     @classmethod
     def coordination_tenure_from_orm(
-        self, orm: models.CoordinationTenure
+        cls, orm: models.CoordinationTenure
     ) -> records.CoordinationTenure:
         return records.CoordinationTenure(
             id=UUID(orm.id),
@@ -2250,6 +2458,44 @@ class DatabaseGatewayImpl:
             query=self.db.session.query(models.Transaction),
             mapper=self.transaction_from_orm,
             db=self.db,
+        )
+
+    @classmethod
+    def transfer_from_orm(cls, transfer: models.Transfer) -> records.Transfer:
+        return records.Transfer(
+            id=UUID(transfer.id),
+            date=transfer.date,
+            debit_account=UUID(transfer.debit_account),
+            credit_account=UUID(transfer.credit_account),
+            value=Decimal(transfer.value),
+            type=transfer.type,
+        )
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+        type: TransferType,
+    ) -> records.Transfer:
+        transfer = models.Transfer(
+            id=str(uuid4()),
+            date=date,
+            debit_account=str(debit_account),
+            credit_account=str(credit_account),
+            value=value,
+            type=type,
+        )
+        self.db.session.add(transfer)
+        self.db.session.flush()
+        return self.transfer_from_orm(transfer)
+
+    def get_transfers(self) -> TransferQueryResult:
+        return TransferQueryResult(
+            query=self.db.session.query(models.Transfer),
+            db=self.db,
+            mapper=self.transfer_from_orm,
         )
 
     def get_company_work_invites(self) -> CompanyWorkInviteResult:
@@ -2379,14 +2625,14 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def accountant_from_orm(self, orm: models.Accountant) -> records.Accountant:
+    def accountant_from_orm(cls, orm: models.Accountant) -> records.Accountant:
         return records.Accountant(
             name=orm.name,
             id=UUID(orm.id),
         )
 
     @classmethod
-    def email_address_from_orm(self, orm: models.Email) -> records.EmailAddress:
+    def email_address_from_orm(cls, orm: models.Email) -> records.EmailAddress:
         return records.EmailAddress(
             orm.address,
             confirmed_on=orm.confirmed_on,
@@ -2508,7 +2754,7 @@ class DatabaseGatewayImpl:
         )
 
     @classmethod
-    def account_credentials_from_orm(self, orm: Any) -> records.AccountCredentials:
+    def account_credentials_from_orm(cls, orm: Any) -> records.AccountCredentials:
         return records.AccountCredentials(
             id=UUID(orm.id),
             email_address=orm.email_address,
@@ -2547,15 +2793,15 @@ class DatabaseGatewayImpl:
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked:
         db_record = models.RegisteredHoursWorked(
             company=str(company),
             worker=str(member),
-            amount=amount,
-            transaction=str(transaction),
+            transfer_of_work_certificates=str(transfer_of_work_certificates),
+            transfer_of_taxes=str(transfer_of_taxes),
             registered_on=registered_on,
         )
         self.db.session.add(db_record)
@@ -2577,7 +2823,48 @@ class DatabaseGatewayImpl:
             id=UUID(db_record.id),
             company=UUID(db_record.company),
             member=UUID(db_record.worker),
+            transfer_of_work_certificates=UUID(db_record.transfer_of_work_certificates),
+            transfer_of_taxes=UUID(db_record.transfer_of_taxes),
             registered_on=db_record.registered_on,
-            amount=db_record.amount,
-            transaction=UUID(db_record.transaction),
+        )
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval:
+        approval_orm = models.PlanApproval(
+            id=str(uuid4()),
+            plan_id=str(plan_id),
+            date=date,
+            transfer_of_credit_p=str(transfer_of_credit_p),
+            transfer_of_credit_r=str(transfer_of_credit_r),
+            transfer_of_credit_a=str(transfer_of_credit_a),
+        )
+        plan_orm = self.db.session.query(models.Plan).filter_by(id=str(plan_id)).first()
+        assert plan_orm
+        plan_orm.approval = approval_orm
+        self.db.session.add(approval_orm)
+        self.db.session.flush()
+        return self.plan_approval_from_orm(approval_orm)
+
+    @classmethod
+    def plan_approval_from_orm(cls, orm: models.PlanApproval) -> records.PlanApproval:
+        return records.PlanApproval(
+            id=UUID(orm.id),
+            plan_id=UUID(orm.plan_id),
+            date=orm.date,
+            transfer_of_credit_p=UUID(orm.transfer_of_credit_p),
+            transfer_of_credit_r=UUID(orm.transfer_of_credit_r),
+            transfer_of_credit_a=UUID(orm.transfer_of_credit_a),
+        )
+
+    def get_plan_approvals(self) -> PlanApprovalResult:
+        return PlanApprovalResult(
+            db=self.db,
+            query=self.db.session.query(models.PlanApproval),
+            mapper=self.plan_approval_from_orm,
         )

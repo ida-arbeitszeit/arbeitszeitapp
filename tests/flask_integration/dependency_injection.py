@@ -7,6 +7,7 @@ from flask import Flask
 
 from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
 from arbeitszeit_flask import create_app
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.dependency_injection import FlaskModule
 from tests.dependency_injection import TestingModule
 from tests.flask_integration.mail_service import MockEmailService
@@ -23,7 +24,7 @@ class FlaskConfiguration(dict):
     def default(cls) -> FlaskConfiguration:
         return cls(
             {
-                "SQLALCHEMY_DATABASE_URI": cls.get_database_uri(),
+                "SQLALCHEMY_DATABASE_URI": provide_test_database_uri(),
                 "SQLALCHEMY_TRACK_MODIFICATIONS": False,
                 "SECRET_KEY": "dev secret key",
                 "WTF_CSRF_ENABLED": False,
@@ -41,16 +42,6 @@ class FlaskConfiguration(dict):
                 "AUTO_MIGRATE": False,
             }
         )
-
-    @classmethod
-    def get_database_uri(cls) -> str:
-        db_uri_variable_name = "ARBEITSZEITAPP_TEST_DB"
-        db_uri = os.getenv(db_uri_variable_name)
-        if db_uri is None:
-            raise ValueError(
-                f"Environment variable {db_uri_variable_name} is unset. Set it to point to a postgres db"
-            )
-        return db_uri
 
     def _get_template_folder(self) -> Optional[str]:
         return self.get("template_folder")
@@ -72,15 +63,30 @@ class FlaskConfiguration(dict):
     template_folder = property(_get_template_folder, _set_template_folder)
 
 
+def provide_test_database_uri() -> str:
+    uri = os.getenv("ARBEITSZEITAPP_TEST_DB")
+    if uri is None:
+        raise ValueError(
+            "Environment variable ARBEITSZEITAPP_TEST_DB is unset. Set it to point to a postgres db"
+        )
+    return uri
+
+
 def provide_app(config: FlaskConfiguration) -> Flask:
     return create_app(config=config, template_folder=config.template_folder)
 
 
-class SqliteModule(Module):
+def provide_database() -> Database:
+    Database().configure(uri=provide_test_database_uri())
+    return Database()
+
+
+class DatabaseModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder[Flask] = CallableProvider(provide_app, is_singleton=True)
         binder[FlaskConfiguration] = CallableProvider(FlaskConfiguration.default)
+        binder[Database] = CallableProvider(provide_database, is_singleton=True)
 
 
 def get_dependency_injector(
@@ -93,7 +99,7 @@ def get_dependency_injector(
     modules: List[Module] = [
         FlaskModule(),
         TestingModule(),
-        SqliteModule(),
+        DatabaseModule(),
     ]
     if additional_modules is not None:
         modules.extend(additional_modules)

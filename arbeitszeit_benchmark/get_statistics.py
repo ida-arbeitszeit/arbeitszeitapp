@@ -20,7 +20,7 @@ class GetStatisticsBenchmark:
         Base.metadata.drop_all(db.engine)
         Base.metadata.create_all(db.engine)
         plan_generator = injector.get(PlanGenerator)
-        self.get_statistics = injector.get(get_statistics.GetStatistics)
+        self.get_statistics_use_case = injector.get(get_statistics.GetStatisticsUseCase)
         random.seed()
         for _ in range(500):
             plan_generator.create_plan(
@@ -30,13 +30,13 @@ class GetStatisticsBenchmark:
             plan_generator.create_plan(
                 is_public_service=False, costs=self.random_production_costs()
             )
-        db.session.commit()
+        db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()
 
     def run(self) -> None:
-        self.get_statistics()
+        self.get_statistics_use_case.get_statistics()
 
     def random_production_costs(self) -> ProductionCosts:
         return ProductionCosts(
