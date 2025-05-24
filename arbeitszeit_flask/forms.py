@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
 from wtforms import (
     BooleanField,
@@ -8,6 +8,7 @@ from wtforms import (
     SelectField,
     StringField,
     TextAreaField,
+    ValidationError,
     validators,
 )
 
@@ -148,6 +149,7 @@ class RegisterForm(Form):
 
 
 class RegisterAccountantForm(Form):
+    extracted_token: str
     email = StringField(
         trans.lazy_gettext("Email"),
         validators=[
@@ -173,6 +175,18 @@ class RegisterAccountantForm(Form):
             )
         ],
     )
+
+    def validate_email(form: Self, field: StringField) -> None:
+        input_email = field.data.casefold().strip() if field.data else ""
+        token_email = form.extracted_token.casefold().strip()
+        if input_email != token_email:
+            raise ValidationError(
+                message=str(
+                    trans.lazy_gettext(
+                        "The entered email is not the one the invitation was sent to"
+                    )
+                )
+            )
 
     def get_email_address(self) -> str:
         return self.data["email"]
