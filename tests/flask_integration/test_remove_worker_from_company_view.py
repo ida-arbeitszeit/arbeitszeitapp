@@ -36,7 +36,7 @@ class TestPost(ViewTestCase):
         response = self.client.post(self.url, data=dict(worker=f"{worker}"))
         assert response.status_code == 302
 
-    def test_email_is_sent_on_success(self) -> None:
+    def test_one_email_is_sent_on_success(self) -> None:
         worker = self.member_generator.create_member()
         password = f"{uuid4()}"
         email = self.email_generator.get_random_email()

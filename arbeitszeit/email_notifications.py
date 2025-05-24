@@ -40,6 +40,9 @@ class WorkerInvitation:
 @dataclass
 class WorkerRemovalNotification:
     worker_email: str
+    worker_name: str
+    worker_id: UUID
+    company_email: str
     company_name: str
 
 

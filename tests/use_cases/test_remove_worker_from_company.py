@@ -109,48 +109,60 @@ class RemoveWorkerTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            ("worker1@cp.org",),
-            ("worker2@cp.org",),
+            ("worker1@cp.org", "company1@cp.org"),
+            ("worker2@cp.org", "company2@cp.org"),
         ]
     )
-    def test_notification_sent_to_worker_email(self, email: str) -> None:
-        worker = self.member_generator.create_member(email=email)
-        company = self.company_generator.create_company(workers=[worker])
+    def test_notification_sent_to_worker_and_company_email(
+        self, worker_email: str, company_email: str
+    ) -> None:
+        worker = self.member_generator.create_member(email=worker_email)
+        company = self.company_generator.create_company(
+            workers=[worker], email=company_email
+        )
         request = remove_worker_from_company.Request(worker=worker, company=company)
         self.use_case.remove_worker_from_company(request)
         notifications = self.get_sent_notifications()
         assert len(notifications) == 1
         notification = notifications[0]
-        assert notification.worker_email == email
+        assert notification.worker_email == worker_email
+        assert notification.company_email == company_email
 
     @parameterized.expand(
         [
-            ("worker1@cp.org",),
-            ("worker2@cp.org",),
+            ("worker1@cp.org", "company1@cp.org"),
+            ("worker2@cp.org", "company2@cp.org"),
         ]
     )
-    def test_no_notification_to_other_worker_email(
+    def test_no_notification_to_other_worker_or_company_email(
         self,
         other_worker_email: str,
+        other_company_email: str,
     ) -> None:
         worker = self.member_generator.create_member()
         other_worker = self.member_generator.create_member(email=other_worker_email)
         company = self.company_generator.create_company(workers=[worker, other_worker])
+        self.company_generator.create_company(
+            workers=[worker, other_worker], email=other_company_email
+        )
         request = remove_worker_from_company.Request(worker=worker, company=company)
         self.use_case.remove_worker_from_company(request)
         notifications = self.get_sent_notifications()
         assert len(notifications) == 1
         notification = notifications[0]
         assert notification.worker_email != other_worker_email
+        assert notification.company_email != other_company_email
 
     @parameterized.expand(
         [
-            ("company1",),
-            ("company 2",),
+            ("company1", "worker1"),
+            ("company2", "worker1"),
         ]
     )
-    def test_notification_contains_company_name(self, company_name: str) -> None:
-        worker = self.member_generator.create_member()
+    def test_notification_contains_company_name_and_worker_name_and_worker_id(
+        self, company_name: str, worker_name: str
+    ) -> None:
+        worker = self.member_generator.create_member(name=worker_name)
         company = self.company_generator.create_company(
             name=company_name, workers=[worker]
         )
@@ -160,6 +172,8 @@ class RemoveWorkerTests(BaseTestCase):
         assert len(notifications) == 1
         notification = notifications[0]
         assert notification.company_name == company_name
+        assert notification.worker_name == worker_name
+        assert notification.worker_id == worker
 
     def get_sent_notifications(
         self,

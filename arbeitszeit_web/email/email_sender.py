@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from arbeitszeit import email_notifications as interface
 from arbeitszeit_web.email.email_change_warning_view import EmailChangeWarningView
-from arbeitszeit_web.email.notify_worker_about_removal_from_company_presenter import (
-    NotifyWorkerAboutRemovalPresenter,
+from arbeitszeit_web.email.notify_about_worker_removal_from_company_presenter import (
+    NotifyAboutWorkerRemovalPresenter,
 )
 from arbeitszeit_web.email.request_coordination_transfer_presenter import (
     RequestCoordinationTransferEmailPresenter,
@@ -26,7 +26,7 @@ class EmailSender:
     notify_accountants_about_new_plan: NotifyAccountantsAboutNewPlanPresenterImpl
     accountant_invitation_presenter: AccountantInvitationEmailPresenter
     invite_worker_presenter: InviteWorkerPresenterImpl
-    notify_worker_about_removal_presenter: NotifyWorkerAboutRemovalPresenter
+    notify_about_worker_removal_presenter: NotifyAboutWorkerRemovalPresenter
     request_cooperation_presenter: CooperationRequestEmailPresenter
     email_change_confirmation_presenter: EmailChangeConfirmationPresenter
     email_change_warning_view: EmailChangeWarningView
@@ -58,9 +58,7 @@ class EmailSender:
                 invite=message.invite,
             )
         elif isinstance(message, interface.WorkerRemovalNotification):
-            self.notify_worker_about_removal_presenter.notify(
-                message.worker_email, message.company_name
-            )
+            self.notify_about_worker_removal_presenter.notify(message_data=message)
         elif isinstance(message, interface.CooperationRequestEmail):
             self.request_cooperation_presenter.present(message)
         elif isinstance(message, interface.EmailChangeWarning):
