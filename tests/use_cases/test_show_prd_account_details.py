@@ -3,6 +3,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_prd_account_details
 
@@ -399,3 +400,134 @@ class UseCaseTester(BaseTestCase):
         self, company_id: UUID
     ) -> show_prd_account_details.Request:
         return show_prd_account_details.Request(company_id=company_id)
+
+
+class CompensationTests(BaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.use_case = self.injector.get(
+            show_prd_account_details.ShowPRDAccountDetailsUseCase
+        )
+
+    def _get_cooperation_account(self) -> UUID:
+        cooperation = self.cooperation_generator.create_cooperation()
+        db = self.injector.get(DatabaseGateway)
+        cooperation_record = db.get_cooperations().with_id(cooperation).first()
+        assert cooperation_record
+        return cooperation_record.account
+
+
+class CompensationForCompanyTests(CompensationTests):
+    def test_that_compensation_for_company_transfer_is_shown(self) -> None:
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            credit_account=planner.product_account,
+            type=TransferType.compensation_for_company,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert any(
+            t.type == TransferType.compensation_for_company for t in response.transfers
+        )
+
+    def test_that_same_value_as_in_transfer_is_shown(self) -> None:
+        EXPECTED_VALUE = Decimal(12.123)
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            credit_account=planner.product_account,
+            type=TransferType.compensation_for_company,
+            value=EXPECTED_VALUE,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert response.transfers[0].volume == EXPECTED_VALUE
+
+    def test_that_same_date_as_in_transfer_is_shown(self) -> None:
+        EXPECTED_DATE = datetime(2022, 11, 1)
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            credit_account=planner.product_account,
+            type=TransferType.compensation_for_company,
+            date=EXPECTED_DATE,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert response.transfers[0].date == EXPECTED_DATE
+
+    def test_that_peer_is_cooperation(self) -> None:
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            debit_account=self._get_cooperation_account(),
+            credit_account=planner.product_account,
+            type=TransferType.compensation_for_company,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert isinstance(
+            response.transfers[0].peer, show_prd_account_details.CooperationPeer
+        )
+
+
+class CompensationForCoopTests(CompensationTests):
+    def test_that_compensation_for_coop_transfer_is_shown(self) -> None:
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            debit_account=planner.product_account,
+            type=TransferType.compensation_for_coop,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert any(
+            t.type == TransferType.compensation_for_coop for t in response.transfers
+        )
+
+    def test_that_negative_value_from_transfer_is_shown(self) -> None:
+        TRANSFER_VALUE = Decimal(12.123)
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            debit_account=planner.product_account,
+            type=TransferType.compensation_for_coop,
+            value=TRANSFER_VALUE,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert response.transfers[0].volume == -TRANSFER_VALUE
+
+    def test_that_same_date_as_in_transfer_is_shown(self) -> None:
+        EXPECTED_DATE = datetime(2022, 11, 1)
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            debit_account=planner.product_account,
+            type=TransferType.compensation_for_coop,
+            date=EXPECTED_DATE,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert response.transfers[0].date == EXPECTED_DATE
+
+    def test_that_peer_is_cooperation(self) -> None:
+        planner = self.company_generator.create_company_record()
+        self.transfer_generator.create_transfer(
+            debit_account=planner.product_account,
+            credit_account=self._get_cooperation_account(),
+            type=TransferType.compensation_for_coop,
+        )
+        response = self.use_case.show_details(
+            show_prd_account_details.Request(company_id=planner.id)
+        )
+        assert len(response.transfers) == 1
+        assert isinstance(
+            response.transfers[0].peer, show_prd_account_details.CooperationPeer
+        )
