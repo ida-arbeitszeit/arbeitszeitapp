@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
 from wtforms import (
     BooleanField,
@@ -176,8 +176,10 @@ class RegisterAccountantForm(Form):
         ],
     )
 
-    def validate_email(form, field) -> None:
-        if field.data != form.extracted_token:
+    def validate_email(form: Self, field: StringField) -> None:
+        input_email = field.data.casefold().strip() if field.data else ""
+        token_email = form.extracted_token.casefold().strip()
+        if input_email != token_email:
             raise ValidationError(
                 message=str(
                     trans.lazy_gettext(
