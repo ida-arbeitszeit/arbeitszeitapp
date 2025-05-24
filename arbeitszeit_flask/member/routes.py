@@ -5,8 +5,8 @@ from flask import Response as FlaskResponse
 from flask import render_template
 from flask_login import current_user
 
-from arbeitszeit import use_cases
 from arbeitszeit.use_cases import get_member_dashboard
+from arbeitszeit.use_cases.get_member_account import GetMemberAccount
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
@@ -64,7 +64,7 @@ class dashboard:
 @as_flask_view()
 @dataclass
 class my_account:
-    get_member_account: use_cases.get_member_account.GetMemberAccount
+    get_member_account: GetMemberAccount
     presenter: GetMemberAccountPresenter
 
     def GET(self) -> Response:

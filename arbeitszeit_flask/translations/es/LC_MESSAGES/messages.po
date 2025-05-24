@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
-"POT-Creation-Date: 2025-03-12 18:24+0100\n"
+"POT-Creation-Date: 2025-03-22 12:59+0100\n"
 "PO-Revision-Date: 2024-05-11 13:29+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -287,7 +287,7 @@ msgstr "Aprobar plan"
 
 #: arbeitszeit_flask/templates/accountant/plans-to-review-list.html:33
 msgid "Reject plan"
-msgstr "Rechazar plan
+msgstr "Rechazar pla"
 
 #: arbeitszeit_flask/templates/accountant/plans-to-review-list.html:43
 msgid "There are currently no plans waiting for review"
@@ -310,9 +310,97 @@ msgstr ""
 "¡Bienvenido/a y gracias por registrarte! Por favor, sigue este enlace para "
 "activar tu cuenta:"
 
-#: arbeitszeit_flask/templates/auth/help.html:7
+#: arbeitszeit_flask/templates/auth/help.html:6
 msgid "Start"
 msgstr "Inicio"
+
+#: arbeitszeit_flask/templates/auth/help.html:13
+msgid "User manual"
+msgstr "Manual de usuario"
+
+#: arbeitszeit_flask/templates/auth/help.html:21
+#: arbeitszeit_flask/templates/auth/help.html:35
+msgid "User roles"
+msgstr "Roles de usuario"
+
+#: arbeitszeit_flask/templates/auth/help.html:23
+#: arbeitszeit_flask/templates/auth/help.html:38
+msgid "Members"
+msgstr "Miembros"
+
+#: arbeitszeit_flask/templates/auth/help.html:24
+#: arbeitszeit_flask/templates/auth/help.html:63
+#: arbeitszeit_flask/templates/user/statistics.html:18
+msgid "Companies"
+msgstr "Empresas"
+
+#: arbeitszeit_flask/templates/auth/help.html:26
+#: arbeitszeit_flask/templates/auth/help.html:78
+msgid "Accountants"
+msgstr "Contadores/as"
+
+#: arbeitszeit_flask/templates/auth/help.html:40
+msgid ""
+"Members are employed in companies and receive work certificates for work "
+"done."
+msgstr ""
+"Los miembros están empleados en empresas y reciben certificados de trabajo "
+"por el trabajo realizado."
+
+#: arbeitszeit_flask/templates/auth/help.html:43
+#: arbeitszeit_flask/templates/auth/help.html:70
+#: arbeitszeit_flask/templates/auth/help.html:85
+msgid "Registration and login"
+msgstr "Registro e inicio de sesión"
+
+#: arbeitszeit_flask/templates/auth/help.html:45
+#: arbeitszeit_flask/templates/auth/help.html:73
+msgid "Registration and login are done on the start page."
+msgstr "Registro e inicio de sesión se hacen en la página de inicio."
+
+#: arbeitszeit_flask/templates/auth/help.html:47
+msgid "Company Affiliation"
+msgstr "Afiliación a empresa"
+
+#: arbeitszeit_flask/templates/auth/help.html:50
+msgid ""
+"Companies send invitations to registered members. If the member confirms "
+"the invitation, they are considered employed by the inviting company."
+msgstr ""
+"Las empresas envían invitaciones a los miembros registrados. Si el miembro "
+"confirma la invitación, se considera empleado por la empresa que invita."
+
+#: arbeitszeit_flask/templates/auth/help.html:54
+msgid "Work certificates and consumption"
+msgstr "Certificados de trabajo y consumo"
+
+#: arbeitszeit_flask/templates/auth/help.html:57
+msgid ""
+"When a company registers that a member has worked, the member receives work"
+" certificates on their account."
+msgstr ""
+"Cuando una empresa registra que un miembro ha trabajado, el miembro recibe "
+"certificados de trabajo en su cuenta."
+
+#: arbeitszeit_flask/templates/auth/help.html:66
+msgid ""
+"Companies use this application, among other things, for planning, viewing "
+"statistics, and passing on work certificates to workers."
+msgstr ""
+"Las empresas utilizan esta aplicación, entre otras cosas, para planificar, "
+"ver estadísticas y pasar certificados de trabajo a los trabajadores."
+
+#: arbeitszeit_flask/templates/auth/help.html:81
+msgid "Accountants approve the plans of the companies on behalf of the society."
+msgstr "Los/las contadores/as aprueban los planes de las empresas en nombre de la sociedad."
+
+#: arbeitszeit_flask/templates/auth/help.html:88
+msgid ""
+"Accountants receive an invitation link from the system administrator, with "
+"which they can register and log in."
+msgstr ""
+"Los/las contadores/as reciben un enlace de invitación del/la administrador/a del "
+"sistema, con el que pueden registrarse e iniciar sesión."
 
 #: arbeitszeit_flask/templates/auth/login_accountant.html:8
 msgid "Login accountant"
@@ -1632,10 +1720,6 @@ msgstr ""
 msgid "Admin email address:"
 msgstr "Dirección de correo electrónico del/la administrador/a:"
 
-#: arbeitszeit_flask/templates/user/statistics.html:18
-msgid "Companies"
-msgstr "Empresas"
-
 #: arbeitszeit_flask/templates/user/statistics.html:38
 msgid "FIC (Payout factor)"
 msgstr "FCI (Factor de pago)"
@@ -2250,7 +2334,9 @@ msgstr "El tipo de consumo especificado no es válido."
 
 #: arbeitszeit_web/www/presenters/reject_plan_presenter.py:24
 msgid "Plan was rejected successfully. An email was sent to the planning company."
-msgstr "Plan rechazado con éxito. Se envió un correo electrónico a la empresa planificadora."
+msgstr ""
+"Plan rechazado con éxito. Se envió un correo electrónico a la empresa "
+"planificadora."
 
 #: arbeitszeit_web/www/presenters/reject_plan_presenter.py:30
 msgid "Plan rejection failed. No email sent."

@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases.get_member_account import (
     GetMemberAccountResponse,
     TransactionInfo,
@@ -113,22 +113,35 @@ class TestPresenter(BaseTestCase):
         self,
     ):
         response = self.get_use_case_response(
-            [self.get_transaction(type=TransactionTypes.incoming_wages)]
+            [self.get_transaction(type=TransferType.work_certificates)]
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
-            view_model.transactions[0].type, self.translator.gettext("Wages")
+            view_model.transactions[0].type,
+            self.translator.gettext("Work certificates"),
         )
 
     def test_that_transaction_type_is_shown_correctly_for_consumption_of_consumer_product(
         self,
     ):
         response = self.get_use_case_response(
-            [self.get_transaction(type=TransactionTypes.private_consumption)]
+            [self.get_transaction(type=TransferType.private_consumption)]
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
             view_model.transactions[0].type, self.translator.gettext("Consumption")
+        )
+
+    def test_that_transaction_type_is_shown_correctly_for_taxes(
+        self,
+    ):
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransferType.taxes)]
+        )
+        view_model = self.presenter.present_member_account(response)
+        self.assertEqual(
+            view_model.transactions[0].type,
+            self.translator.gettext("Contribution to public sector"),
         )
 
     def test_that_name_of_peer_is_shown(
@@ -142,7 +155,16 @@ class TestPresenter(BaseTestCase):
         self,
     ):
         response = self.get_use_case_response(
-            [self.get_transaction(type=TransactionTypes.private_consumption)]
+            [self.get_transaction(type=TransferType.private_consumption)]
+        )
+        view_model = self.presenter.present_member_account(response)
+        self.assertTrue(view_model.transactions[0].purpose)
+
+    def test_that_purpose_is_shown_if_transaction_is_taxes(
+        self,
+    ):
+        response = self.get_use_case_response(
+            [self.get_transaction(type=TransferType.taxes)]
         )
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].purpose)
@@ -151,7 +173,7 @@ class TestPresenter(BaseTestCase):
         self,
     ):
         response = self.get_use_case_response(
-            [self.get_transaction(type=TransactionTypes.incoming_wages)]
+            [self.get_transaction(type=TransferType.work_certificates)]
         )
         view_model = self.presenter.present_member_account(response)
         self.assertFalse(view_model.transactions[0].purpose)
@@ -167,14 +189,14 @@ class TestPresenter(BaseTestCase):
         self,
         date: Optional[datetime] = None,
         transaction_volume: Optional[Decimal] = None,
-        type: Optional[TransactionTypes] = None,
+        type: Optional[TransferType] = None,
     ) -> TransactionInfo:
         if date is None:
             date = self.datetime_service.now()
         if transaction_volume is None:
             transaction_volume = Decimal("20.006")
         if type is None:
-            type = TransactionTypes.incoming_wages
+            type = TransferType.work_certificates
         return TransactionInfo(
             date=date,
             peer_name="test company",

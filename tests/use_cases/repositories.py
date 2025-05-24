@@ -36,11 +36,13 @@ from arbeitszeit.records import (
     CoordinationTransferRequest,
     Member,
     Plan,
+    PlanApproval,
     PlanDraft,
     ProductionCosts,
     SocialAccounting,
     Transaction,
 )
+from arbeitszeit.transfers.transfer_type import TransferType
 
 Many = TypeVar("Many", bound=Hashable)
 One = TypeVar("One", bound=Hashable)
@@ -111,10 +113,10 @@ class PlanResult(QueryResultImpl[Plan]):
             key=lambda plan: plan.plan_creation_date, reverse=not ascending
         )
 
-    def ordered_by_activation_date(self, ascending: bool = True) -> Self:
+    def ordered_by_approval_date(self, ascending: bool = True) -> Self:
         return self.sorted_by(
             key=lambda plan: (
-                plan.activation_date if plan.activation_date else datetime.min
+                plan.approval_date if plan.approval_date else datetime.min
             ),
             reverse=not ascending,
         )
@@ -157,10 +159,10 @@ class PlanResult(QueryResultImpl[Plan]):
             lambda plan: plan.rejection_date is not None and plan.approval_date is None
         )
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
         return self._filter_elements(
-            lambda plan: plan.activation_date is not None
-            and plan.activation_date <= timestamp
+            lambda plan: plan.approval_date is not None
+            and plan.approval_date <= timestamp
         )
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
@@ -410,23 +412,9 @@ class PlanUpdate:
 
         return self._add_update(update)
 
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        def update(plan: Plan) -> None:
-            plan.approval_date = approval_date
-
-        return self._add_update(update)
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         def update(plan: Plan) -> None:
             plan.rejection_date = rejection_date
-
-        return self._add_update(update)
-
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        def update(plan: Plan) -> None:
-            plan.activation_date = activation_timestamp
 
         return self._add_update(update)
 
@@ -592,6 +580,9 @@ class PlanDraftUpdate:
             self.changes(item)
             items_affected += 1
         return items_affected
+
+
+class PlanApprovalResult(QueryResultImpl[PlanApproval]): ...
 
 
 class CooperationResult(QueryResultImpl[Cooperation]):
@@ -872,12 +863,6 @@ class AccountantResult(QueryResultImpl[Accountant]):
 
 
 class TransactionResult(QueryResultImpl[Transaction]):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account in account
-            or transaction.receiving_account in account
-        )
-
     def where_account_is_sender(self, *account: UUID) -> Self:
         return self._filter_elements(
             lambda transaction: transaction.sending_account in account
@@ -893,37 +878,6 @@ class TransactionResult(QueryResultImpl[Transaction]):
             key=lambda transaction: transaction.date,
             reverse=descending,
         )
-
-    def where_sender_is_social_accounting(self) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account
-            == self.database.social_accounting.account
-        )
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        plans = set(plan)
-
-        def transaction_filter(transaction: Transaction) -> bool:
-            private_consumptions = (
-                self.database.indices.private_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            productive_consumptions = (
-                self.database.indices.productive_consumption_by_transaction.get(
-                    transaction.id
-                )
-            )
-            transaction_plans = {
-                self.database.private_consumptions[i].plan_id
-                for i in private_consumptions
-            } | {
-                self.database.productive_consumptions[i].plan_id
-                for i in productive_consumptions
-            }
-            return bool(transaction_plans & plans)
-
-        return self._filter_elements(transaction_filter)
 
     def joined_with_receiver(
         self,
@@ -969,6 +923,58 @@ class TransactionResult(QueryResultImpl[Transaction]):
                 yield transaction, get_account_owner(
                     transaction.sending_account
                 ), get_account_owner(transaction.receiving_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+
+class TransferResult(QueryResultImpl[records.Transfer]):
+    def where_account_is_debtor(self, *account: UUID) -> Self:
+        return self._filter_elements(lambda transfer: transfer.debit_account in account)
+
+    def where_account_is_creditor(self, *account: UUID) -> Self:
+        return self._filter_elements(
+            lambda transfer: transfer.credit_account in account
+        )
+
+    def joined_with_debtor(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Transfer, records.AccountOwner]]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member_id,) = members
+                return self.database.members[member_id]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company_id,) = companies
+                return self.database.companies[company_id]
+            return self.database.social_accounting
+
+        def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
+            for transfer in self.items():
+                yield transfer, get_account_owner(transfer.debit_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_creditor(
+        self,
+    ) -> QueryResultImpl[Tuple[records.Transfer, records.AccountOwner]]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member_id,) = members
+                return self.database.members[member_id]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company_id,) = companies
+                return self.database.companies[company_id]
+            return self.database.social_accounting
+
+        def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
+            for transfer in self.items():
+                yield transfer, get_account_owner(transfer.credit_account)
 
         return QueryResultImpl(
             items=items,
@@ -1247,16 +1253,28 @@ class AccountResult(QueryResultImpl[Account]):
     def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
         def items() -> Iterable[Tuple[Account, Decimal]]:
             for account in self.items():
+                # Calculate balance from transactions
                 transactions = self.database.get_transactions()
                 received_transactions = transactions.where_account_is_receiver(
                     account.id
                 )
                 sent_transactions = transactions.where_account_is_sender(account.id)
-                yield account, decimal_sum(
+                transaction_balance = decimal_sum(
                     transaction.amount_received for transaction in received_transactions
                 ) - decimal_sum(
                     transaction.amount_sent for transaction in sent_transactions
                 )
+
+                # Calculate balance from transfers
+                transfer_balance = Decimal(0)
+                for transfer in self.database.transfers.values():
+                    if transfer.credit_account == account.id:
+                        transfer_balance += transfer.value
+                    if transfer.debit_account == account.id:
+                        transfer_balance -= transfer.value
+
+                # Combine both balances
+                yield account, transaction_balance + transfer_balance
 
         return QueryResultImpl(items=items, database=self.database)
 
@@ -1391,6 +1409,55 @@ class RegisteredHoursWorkedResult(QueryResultImpl[records.RegisteredHoursWorked]
             for registered_hours in self:
                 worker = self.database.members[registered_hours.member]
                 yield registered_hours, worker
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_transfer_of_work_certificates(self) -> QueryResultImpl[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]:
+        def items() -> Iterable[
+            Tuple[
+                records.RegisteredHoursWorked,
+                records.Transfer,
+            ]
+        ]:
+            for registered_hours in self.items():
+                transfer = self.database.transfers[
+                    registered_hours.transfer_of_work_certificates
+                ]
+                yield registered_hours, transfer
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> QueryResultImpl[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]:
+        def items() -> Iterable[
+            Tuple[
+                records.RegisteredHoursWorked,
+                records.Member,
+                records.Transfer,
+            ]
+        ]:
+            for registered_hours in self.items():
+                worker = self.database.members[registered_hours.member]
+                transfer = self.database.transfers[
+                    registered_hours.transfer_of_work_certificates
+                ]
+                yield registered_hours, worker, transfer
 
         return QueryResultImpl(
             items=items,
@@ -1649,6 +1716,7 @@ class MockDatabase:
         self.companies: Dict[UUID, Company] = {}
         self.plans: Dict[UUID, Plan] = {}
         self.transactions: Dict[UUID, Transaction] = dict()
+        self.transfers: Dict[UUID, records.Transfer] = dict()
         self.accounts: List[Account] = []
         self.p_accounts: Set[Account] = set()
         self.r_accounts: Set[Account] = set()
@@ -1659,6 +1727,7 @@ class MockDatabase:
         self.social_accounting = SocialAccounting(
             id=uuid4(),
             account=self.create_account().id,
+            account_psf=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
         self.coordination_tenures: Dict[UUID, records.CoordinationTenure] = dict()
@@ -1672,6 +1741,7 @@ class MockDatabase:
         self.drafts: Dict[UUID, PlanDraft] = dict()
         self.reset_password_requests: List[records.PasswordResetRequest] = list()
         self.registered_hours_worked: list[records.RegisteredHoursWorked] = list()
+        self.plan_approvals: List[records.PlanApproval] = list()
         self.indices = Indices()
         self.relationships = Relationships()
 
@@ -1759,7 +1829,6 @@ class MockDatabase:
             description=product_description,
             timeframe=duration_in_days,
             is_public_service=is_public_service,
-            activation_date=None,
             approval_date=None,
             rejection_date=None,
             requested_cooperation=None,
@@ -1773,6 +1842,7 @@ class MockDatabase:
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> Cooperation:
         cooperation_id = uuid4()
         cooperation = Cooperation(
@@ -1780,6 +1850,7 @@ class MockDatabase:
             creation_date=creation_timestamp,
             name=name,
             definition=definition,
+            account=account,
         )
         self.cooperations[cooperation_id] = cooperation
         return cooperation
@@ -1856,6 +1927,31 @@ class MockDatabase:
     def get_transactions(self) -> TransactionResult:
         return TransactionResult(
             items=lambda: self.transactions.values(),
+            database=self,
+        )
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+        type: TransferType,
+    ) -> records.Transfer:
+        transfer = records.Transfer(
+            id=uuid4(),
+            date=date,
+            debit_account=debit_account,
+            credit_account=credit_account,
+            value=value,
+            type=type,
+        )
+        self.transfers[transfer.id] = transfer
+        return transfer
+
+    def get_transfers(self) -> TransferResult:
+        return TransferResult(
+            items=lambda: self.transfers.values(),
             database=self,
         )
 
@@ -2063,16 +2159,16 @@ class MockDatabase:
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked:
         record = records.RegisteredHoursWorked(
             id=uuid4(),
             company=company,
             member=member,
-            amount=amount,
-            transaction=transaction,
+            transfer_of_work_certificates=transfer_of_work_certificates,
+            transfer_of_taxes=transfer_of_taxes,
             registered_on=registered_on,
         )
         self.registered_hours_worked.append(record)
@@ -2082,6 +2178,34 @@ class MockDatabase:
         return RegisteredHoursWorkedResult(
             database=self,
             items=lambda: self.registered_hours_worked,
+        )
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval:
+        record = records.PlanApproval(
+            id=uuid4(),
+            plan_id=plan_id,
+            date=date,
+            transfer_of_credit_p=transfer_of_credit_p,
+            transfer_of_credit_r=transfer_of_credit_r,
+            transfer_of_credit_a=transfer_of_credit_a,
+        )
+        self.plan_approvals.append(record)
+        plan = self.get_plans().with_id(plan_id).first()
+        assert plan
+        plan.approval_date = record.date
+        return record
+
+    def get_plan_approvals(self) -> PlanApprovalResult:
+        return PlanApprovalResult(
+            database=self,
+            items=lambda: self.plan_approvals,
         )
 
 

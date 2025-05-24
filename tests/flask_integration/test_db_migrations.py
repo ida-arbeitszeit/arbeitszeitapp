@@ -1,10 +1,14 @@
+from flask import Flask
+from sqlalchemy import inspect
+
 from arbeitszeit.injector import Binder, CallableProvider, Module
-from tests.flask_integration.flask import FlaskTestCase
+from arbeitszeit_flask.database.db import Base
+from tests.flask_integration.flask import DatabaseTestCase
 
 from .dependency_injection import FlaskConfiguration
 
 
-class AutoMigrationsTestCase(FlaskTestCase):
+class AutoMigrationsTestCase(DatabaseTestCase):
     @property
     def auto_migrate_setting(self) -> bool:
         raise NotImplementedError()
@@ -35,5 +39,26 @@ class AutoMigrationTests(AutoMigrationsTestCase):
     def auto_migrate_setting(self) -> bool:
         return True
 
-    def test_that_app_starts_successfully_with_auto_migrate(self) -> None:
-        assert self.app
+    def setUp(self) -> None:
+        super().setUp()
+        Base.metadata.drop_all(self.db.engine)
+
+    def test_that_app_starts_successfully_when_auto_migrate_is_enabled(self) -> None:
+        self.injector.get(Flask)
+
+    def test_that_tables_are_created_when_auto_migrate_is_enabled(self) -> None:
+        self.assertTableNotExists("alembic_version")
+        self.assertTableNotExists("plan")
+        self.injector.get(Flask)
+        self.assertTableExists("alembic_version")
+        self.assertTableExists("plan")
+
+    def assertTableNotExists(self, table_name: str) -> None:
+        inspector = inspect(self.db.session.connection())
+        tables = inspector.get_table_names()
+        assert table_name not in tables
+
+    def assertTableExists(self, table_name: str) -> None:
+        inspector = inspect(self.db.session.connection())
+        tables = inspector.get_table_names()
+        assert table_name in tables

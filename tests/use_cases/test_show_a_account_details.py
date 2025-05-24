@@ -4,8 +4,10 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
+from parameterized import parameterized
+
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
@@ -22,13 +24,13 @@ class UseCaseTester(BaseTestCase):
         )
         self.register_hours_worked = self.injector.get(RegisterHoursWorked)
 
-    def test_no_transactions_returned_when_no_transactions_took_place(self) -> None:
+    def test_no_transfers_returned_when_no_transfers_took_place(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert not response.transactions
+        assert not response.transfers
 
-    def test_balance_is_zero_when_no_transactions_took_place(self) -> None:
+    def test_balance_is_zero_when_no_transfers_took_place(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
         response = self.use_case.show_details(self.create_use_case_request(company))
@@ -44,27 +46,27 @@ class UseCaseTester(BaseTestCase):
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_details(self.create_use_case_request(company))
-        transactions_before_consumption = len(response.transactions)
+        transactions_before_consumption = len(response.transfers)
         self.consumption_generator.create_private_consumption(plan=plan)
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert len(response.transactions) == transactions_before_consumption
+        assert len(response.transfers) == transactions_before_consumption
 
     def test_that_no_info_is_generated_when_company_sells_p(self) -> None:
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_details(self.create_use_case_request(company))
-        transactions_before_consumption = len(response.transactions)
+        transactions_before_consumption = len(response.transfers)
         self.consumption_generator.create_fixed_means_consumption(plan=plan)
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert len(response.transactions) == transactions_before_consumption
+        assert len(response.transfers) == transactions_before_consumption
 
-    def test_after_approving_a_plan_one_transaction_is_recorded(self) -> None:
+    def test_after_approving_a_plan_one_transfer_is_recorded(self) -> None:
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert len(response.transactions) == 1
+        assert len(response.transfers) == 1
 
-    def test_after_approving_a_plan_and_registering_work_two_transactions_are_recorded(
+    def test_after_approving_a_plan_and_registering_work_two_transfers_are_recorded(
         self,
     ) -> None:
         member = self.member_generator.create_member()
@@ -78,9 +80,9 @@ class UseCaseTester(BaseTestCase):
             )
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert len(response.transactions) == 2
+        assert len(response.transfers) == 2
 
-    def test_two_transactions_are_recorded_in_descending_order(self) -> None:
+    def test_two_transfers_are_recorded_in_descending_order(self) -> None:
         member = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[member])
         self.plan_generator.create_plan(planner=company)
@@ -92,14 +94,27 @@ class UseCaseTester(BaseTestCase):
             )
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.payment_of_wages
+        assert response.transfers[0].transfer_type == TransferType.work_certificates
+        assert response.transfers[1].transfer_type == TransferType.credit_a
+
+    @parameterized.expand(
+        [
+            (True, TransferType.credit_public_a),
+            (False, TransferType.credit_a),
+        ]
+    )
+    def test_that_correct_transfer_type_is_generated_when_credit_for_wages_is_granted(
+        self,
+        is_public_service: bool,
+        expected_transfer_type: TransferType,
+    ) -> None:
+        company = self.company_generator.create_company()
+        self.plan_generator.create_plan(
+            planner=company,
+            is_public_service=is_public_service,
         )
-        assert (
-            response.transactions[1].transaction_type
-            == TransactionTypes.credit_for_wages
-        )
+        response = self.use_case.show_details(self.create_use_case_request(company))
+        assert response.transfers[0].transfer_type == expected_transfer_type
 
     def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
         self,
@@ -114,14 +129,9 @@ class UseCaseTester(BaseTestCase):
             ),
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
-        assert len(response.transactions) == 1
-        assert response.transactions[0].transaction_volume == Decimal(8.5)
-        assert response.transactions[0].purpose is not None
-        assert isinstance(response.transactions[0].date, datetime)
-        assert (
-            response.transactions[0].transaction_type
-            == TransactionTypes.credit_for_wages
-        )
+        assert len(response.transfers) == 1
+        assert response.transfers[0].transfer_volume == Decimal(8.5)
+        assert isinstance(response.transfers[0].date, datetime)
         assert response.account_balance == Decimal(8.5)
 
     def test_that_correct_info_is_generated_after_company_transfering_work_certificates(
@@ -138,12 +148,12 @@ class UseCaseTester(BaseTestCase):
             )
         )
         response = self.use_case.show_details(self.create_use_case_request(company))
-        transaction = response.transactions[0]
-        assert transaction.transaction_type == TransactionTypes.payment_of_wages
-        assert transaction.transaction_volume == -hours_worked
+        transfer = response.transfers[0]
+        assert transfer.transfer_type == TransferType.work_certificates
+        assert transfer.transfer_volume == -hours_worked
         assert response.account_balance == -hours_worked
 
-    def test_that_plotting_info_is_empty_when_no_transactions_occurred(self) -> None:
+    def test_that_plotting_info_is_empty_when_no_transfers_occurred(self) -> None:
         self.member_generator.create_member()
         company = self.company_generator.create_company()
         response = self.use_case.show_details(self.create_use_case_request(company))
@@ -174,8 +184,8 @@ class UseCaseTester(BaseTestCase):
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
         own_company = self.company_generator.create_company(workers=[worker1, worker2])
-        expected_transaction_1_timestamp = datetime(2000, 1, 2)
-        self.datetime_service.freeze_time(expected_transaction_1_timestamp)
+        expected_transfer_1_timestamp = datetime(2000, 1, 2)
+        self.datetime_service.freeze_time(expected_transfer_1_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
@@ -183,8 +193,8 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        expected_transaction_2_timestamp = datetime(2000, 1, 3)
-        self.datetime_service.freeze_time(expected_transaction_2_timestamp)
+        expected_transfer_2_timestamp = datetime(2000, 1, 3)
+        self.datetime_service.freeze_time(expected_transfer_2_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
@@ -196,8 +206,8 @@ class UseCaseTester(BaseTestCase):
         assert len(response.plot.timestamps) == 2
         assert len(response.plot.accumulated_volumes) == 2
 
-        assert expected_transaction_1_timestamp in response.plot.timestamps
-        assert expected_transaction_2_timestamp in response.plot.timestamps
+        assert expected_transfer_1_timestamp in response.plot.timestamps
+        assert expected_transfer_2_timestamp in response.plot.timestamps
 
         assert Decimal("-10") in response.plot.accumulated_volumes
         assert Decimal("-20") in response.plot.accumulated_volumes
@@ -212,8 +222,8 @@ class UseCaseTester(BaseTestCase):
             workers=[worker1, worker2, worker3]
         )
 
-        first_transaction_timestamp = datetime(2000, 1, 1)
-        self.datetime_service.freeze_time(first_transaction_timestamp)
+        first_transfer_timestamp = datetime(2000, 1, 1)
+        self.datetime_service.freeze_time(first_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
@@ -221,8 +231,8 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        seconds_transaction_timestamp = datetime(2000, 1, 2)
-        self.datetime_service.freeze_time(seconds_transaction_timestamp)
+        second_transfer_timestamp = datetime(2000, 1, 2)
+        self.datetime_service.freeze_time(second_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
@@ -230,8 +240,8 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        third_transaction_timestamp = datetime(2000, 1, 3)
-        self.datetime_service.freeze_time(third_transaction_timestamp)
+        third_transfer_timestamp = datetime(2000, 1, 3)
+        self.datetime_service.freeze_time(third_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
@@ -241,8 +251,8 @@ class UseCaseTester(BaseTestCase):
         )
 
         response = self.use_case.show_details(self.create_use_case_request(own_company))
-        assert response.plot.timestamps[0] == first_transaction_timestamp
-        assert response.plot.timestamps[2] == third_transaction_timestamp
+        assert response.plot.timestamps[0] == first_transfer_timestamp
+        assert response.plot.timestamps[2] == third_transfer_timestamp
 
         assert response.plot.accumulated_volumes[0] == Decimal(-10)
         assert response.plot.accumulated_volumes[2] == Decimal(-30)
@@ -250,9 +260,9 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_receiving_of_work_certificates_from_social_accounting(
         self,
     ) -> None:
-        transaction_timestamp = datetime(2030, 1, 1)
+        transfer_timestamp = datetime(2030, 1, 1)
         expected_labour_time = Decimal(123)
-        self.datetime_service.freeze_time(transaction_timestamp)
+        self.datetime_service.freeze_time(transfer_timestamp)
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(
             planner=company,
@@ -270,7 +280,7 @@ class UseCaseTester(BaseTestCase):
         assert len(response.plot.timestamps) == 1
         assert len(response.plot.accumulated_volumes) == 1
 
-        assert transaction_timestamp in response.plot.timestamps
+        assert transfer_timestamp in response.plot.timestamps
         assert expected_labour_time in response.plot.accumulated_volumes
 
     def create_use_case_request(

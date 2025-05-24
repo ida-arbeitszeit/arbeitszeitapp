@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.records import Plan, SocialAccounting
+from arbeitszeit.records import Company, Plan, SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -24,7 +24,6 @@ class ApprovePlanUseCase:
     social_accounting: SocialAccounting
 
     def approve_plan(self, request: Request) -> Response:
-        now = self.datetime_service.now()
         matching_plans = self.database_gateway.get_plans().with_id(request.plan)
         plan = matching_plans.first()
         assert plan
@@ -32,33 +31,82 @@ class ApprovePlanUseCase:
         assert planner
         if plan.is_approved:
             return self.Response(is_plan_approved=False)
-        matching_plans.update().set_approval_date(now).set_activation_timestamp(
-            now
-        ).perform()
-        if plan.production_costs.means_cost:
-            self._create_transaction_from_social_accounting(
-                plan, planner.means_account, plan.production_costs.means_cost
-            )
-        if plan.production_costs.resource_cost:
-            self._create_transaction_from_social_accounting(
-                plan, planner.raw_material_account, plan.production_costs.resource_cost
-            )
-        self._create_transaction_from_social_accounting(
-            plan, planner.product_account, -plan.expected_sales_value
-        )
-        self._create_transaction_from_social_accounting(
-            plan, planner.work_account, plan.production_costs.labour_cost
-        )
+
+        self._create_transfers_for_plan(planner, plan, is_public=plan.is_public_service)
         return self.Response()
 
-    def _create_transaction_from_social_accounting(
-        self, plan: Plan, account: UUID, amount: Decimal
+    def _create_transfers_for_plan(
+        self, planner: Company, plan: Plan, is_public: bool
     ) -> None:
-        self.database_gateway.create_transaction(
+        if is_public:
+            self._create_transfers_for_public_plan(planner, plan)
+        else:
+            self._create_transfers_for_productive_plan(planner, plan)
+
+    def _create_transfers_for_public_plan(self, planner: Company, plan: Plan) -> None:
+        # psf -> p
+        transfer_of_credit_p = self.database_gateway.create_transfer(
             date=self.datetime_service.now(),
-            sending_account=self.social_accounting.account,
-            receiving_account=account,
-            amount_sent=round(amount, 2),
-            amount_received=round(amount, 2),
-            purpose=f"Plan-Id: {plan.id}",
+            debit_account=self.social_accounting.account_psf,
+            credit_account=planner.means_account,
+            value=plan.production_costs.means_cost,
+            type=TransferType.credit_public_p,
+        )
+        # psf -> r
+        transfer_of_credit_r = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=self.social_accounting.account_psf,
+            credit_account=planner.raw_material_account,
+            value=plan.production_costs.resource_cost,
+            type=TransferType.credit_public_r,
+        )
+        # psf -> a
+        transfer_of_credit_a = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=self.social_accounting.account_psf,
+            credit_account=planner.work_account,
+            value=plan.production_costs.labour_cost,
+            type=TransferType.credit_public_a,
+        )
+        self.database_gateway.create_plan_approval(
+            plan_id=plan.id,
+            date=self.datetime_service.now(),
+            transfer_of_credit_p=transfer_of_credit_p.id,
+            transfer_of_credit_r=transfer_of_credit_r.id,
+            transfer_of_credit_a=transfer_of_credit_a.id,
+        )
+
+    def _create_transfers_for_productive_plan(
+        self, planner: Company, plan: Plan
+    ) -> None:
+        # prd -> p
+        transfer_of_credit_p = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=planner.product_account,
+            credit_account=planner.means_account,
+            value=plan.production_costs.means_cost,
+            type=TransferType.credit_p,
+        )
+        # prd -> r
+        transfer_of_credit_r = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=planner.product_account,
+            credit_account=planner.raw_material_account,
+            value=plan.production_costs.resource_cost,
+            type=TransferType.credit_r,
+        )
+        # prd -> a
+        transfer_of_credit_a = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=planner.product_account,
+            credit_account=planner.work_account,
+            value=plan.production_costs.labour_cost,
+            type=TransferType.credit_a,
+        )
+        self.database_gateway.create_plan_approval(
+            plan_id=plan.id,
+            date=self.datetime_service.now(),
+            transfer_of_credit_p=transfer_of_credit_p.id,
+            transfer_of_credit_r=transfer_of_credit_r.id,
+            transfer_of_credit_a=transfer_of_credit_a.id,
         )

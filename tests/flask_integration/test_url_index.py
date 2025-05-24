@@ -441,15 +441,6 @@ class GeneralUrlIndexTests(ViewTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_company_transactions_leads_to_functional_url(
-        self,
-    ) -> None:
-        self.login_company()
-        company = self.company_generator.create_company()
-        url = self.url_index.get_company_transactions_url(company_id=company)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
     def test_request_email_change_url_leads_to_functional_url(
         self,
     ) -> None:

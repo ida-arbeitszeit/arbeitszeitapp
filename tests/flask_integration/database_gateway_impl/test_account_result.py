@@ -12,18 +12,11 @@ from ..flask import FlaskTestCase
 
 
 class AccountResultTests(FlaskTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.social_accounting = self.injector.get(SocialAccounting)
-
-    def test_that_a_priori_there_is_only_one_account_for_social_accounting(
+    def test_that_a_priori_there_are_two_accounts_for_social_accounting(
         self,
     ) -> None:
-        account = self.database_gateway.get_accounts().first()
-        assert len(self.database_gateway.get_accounts()) == 1
-        assert list(self.database_gateway.get_accounts().joined_with_owner()) == [
-            (account, self.social_accounting)
-        ]
+        self.injector.get(SocialAccounting)
+        assert len(self.database_gateway.get_accounts()) == 2
 
     def test_there_are_accounts_to_be_queried_when_one_was_created(self) -> None:
         self.database_gateway.create_account()
@@ -101,17 +94,33 @@ class AccountResultTests(FlaskTestCase):
         assert result
         assert company == result[1]
 
-    def test_account_from_social_accounting_joined_with_owner_yields_social_accounting_itself(
+    def test_account_from_social_accounting_joined_with_owner_yields_account_and_social_accounting_itself(
         self,
     ) -> None:
+        social_accounting = self.injector.get(SocialAccounting)
         result = (
             self.database_gateway.get_accounts()
-            .with_id(self.social_accounting.account)
+            .with_id(social_accounting.account)
             .joined_with_owner()
             .first()
         )
         assert result
-        assert result[1] == self.social_accounting
+        assert result[0].id == social_accounting.account
+        assert result[1] == social_accounting
+
+    def test_psf_account_from_social_accounting_joined_with_owner_yields_psf_account_and_social_accounting_itself(
+        self,
+    ) -> None:
+        social_accounting = self.injector.get(SocialAccounting)
+        result = (
+            self.database_gateway.get_accounts()
+            .with_id(social_accounting.account_psf)
+            .joined_with_owner()
+            .first()
+        )
+        assert result
+        assert result[0].id == social_accounting.account_psf
+        assert result[1] == social_accounting
 
     def test_with_no_members_have_no_member_accounts(self) -> None:
         assert not self.database_gateway.get_accounts().that_are_member_accounts()
@@ -154,67 +163,6 @@ class AccountResultTests(FlaskTestCase):
         assert (
             expected_account
             in self.database_gateway.get_accounts().that_are_labour_accounts()
-        )
-
-    @parameterized.expand(
-        [
-            ([], 0),
-            ([1], 1),
-            ([2], 2),
-            ([1, 2, 3], 6),
-            ([-1], -1),
-            ([-1, 1], 0),
-            ([-10, 1, 1], -8),
-        ]
-    )
-    def test_when_joining_with_account_balance_the_proper_value_is_calculated(
-        self, transactions: List[float], expected_total: float
-    ) -> None:
-        account = self.database_gateway.create_account()
-        for amount in transactions:
-            if amount > 0:
-                self.transaction_generator.create_transaction(
-                    receiving_account=account.id, amount_received=amount
-                )
-            else:
-                self.transaction_generator.create_transaction(
-                    sending_account=account.id, amount_sent=abs(amount)
-                )
-
-        result = (
-            self.database_gateway.get_accounts()
-            .with_id(account.id)
-            .joined_with_balance()
-            .first()
-        )
-        assert result
-        assert result[1] == Decimal(expected_total)
-
-    def test_when_joining_with_balance_account_objects_are_deserialized_properly(
-        self,
-    ) -> None:
-        self.create_company()
-        accounts = set(self.database_gateway.get_accounts())
-        assert (
-            set(
-                a for a, _ in self.database_gateway.get_accounts().joined_with_balance()
-            )
-            == accounts
-        )
-
-    def test_when_joining_with_account_balance_and_having_multiple_transactions_we_get_one_result_for_one_account(
-        self,
-    ) -> None:
-        account = self.database_gateway.create_account()
-        self.transaction_generator.create_transaction(receiving_account=account.id)
-        self.transaction_generator.create_transaction(receiving_account=account.id)
-        assert (
-            len(
-                self.database_gateway.get_accounts()
-                .with_id(account.id)
-                .joined_with_balance()
-            )
-            == 1
         )
 
     def test_owned_by_member_yields_no_accounts_if_no_member_was_supplied(self) -> None:
@@ -263,4 +211,99 @@ class AccountResultTests(FlaskTestCase):
             resource_account=resource_account or self.database_gateway.create_account(),
             products_account=products_account or self.database_gateway.create_account(),
             registered_on=datetime(2000, 1, 1),
+        )
+
+
+class JoinedWithBalanceTests(FlaskTestCase):
+    @parameterized.expand(
+        [
+            ([], [], 0),
+            ([1], [], 1),
+            ([2], [], 2),
+            ([1, 2, 3], [], 6),
+            ([-1], [], -1),
+            ([-1, 1], [], 0),
+            ([-10, 1, 1], [], -8),
+            ([], [1], 1),
+            ([], [1, 2, 3], 6),
+            ([], [-1], -1),
+            ([], [-1, 1], 0),
+            ([], [-10, 1, 1], -8),
+            ([1], [1], 2),
+            ([1], [1, 2, 3], 7),
+            ([1], [-1], 0),
+        ]
+    )
+    def test_when_joining_with_account_balance_the_proper_value_is_calculated(
+        self, transactions: List[float], transfers: List[float], expected_total: float
+    ) -> None:
+        account = self.database_gateway.create_account()
+        for amount in transactions:
+            if amount > 0:
+                self.transaction_generator.create_transaction(
+                    receiving_account=account.id, amount_received=amount
+                )
+            else:
+                self.transaction_generator.create_transaction(
+                    sending_account=account.id, amount_sent=abs(amount)
+                )
+        for _amount in transfers:
+            if _amount > 0:
+                self.transfer_generator.create_transfer(
+                    credit_account=account.id, value=Decimal(_amount)
+                )
+            else:
+                self.transfer_generator.create_transfer(
+                    debit_account=account.id, value=Decimal(abs(_amount))
+                )
+        result = (
+            self.database_gateway.get_accounts()
+            .with_id(account.id)
+            .joined_with_balance()
+            .first()
+        )
+        assert result
+        assert result[1] == Decimal(expected_total)
+
+    def test_when_joining_with_balance_account_objects_are_deserialized_properly(
+        self,
+    ) -> None:
+        self.company_generator.create_company()
+        accounts = set(self.database_gateway.get_accounts())
+        assert accounts
+        assert (
+            set(
+                a for a, _ in self.database_gateway.get_accounts().joined_with_balance()
+            )
+            == accounts
+        )
+
+    def test_when_joining_with_account_balance_and_having_multiple_transactions_we_get_one_result_for_one_account(
+        self,
+    ) -> None:
+        account = self.database_gateway.create_account()
+        self.transaction_generator.create_transaction(receiving_account=account.id)
+        self.transaction_generator.create_transaction(receiving_account=account.id)
+        assert (
+            len(
+                self.database_gateway.get_accounts()
+                .with_id(account.id)
+                .joined_with_balance()
+            )
+            == 1
+        )
+
+    def test_when_joining_with_balance_and_having_multiple_transfers_we_get_one_result_for_one_account(
+        self,
+    ) -> None:
+        account = self.database_gateway.create_account()
+        self.transfer_generator.create_transfer(debit_account=account.id)
+        self.transfer_generator.create_transfer(debit_account=account.id)
+        assert (
+            len(
+                self.database_gateway.get_accounts()
+                .with_id(account.id)
+                .joined_with_balance()
+            )
+            == 1
         )

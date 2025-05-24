@@ -15,7 +15,6 @@ class GetRouteOverviewUseCase:
     archivist: MeasurementArchivist
     calendar: Calendar
     def get_route_overview(self, request: Request) -> Response: ...
-    def __init__(self, archivist, calendar) -> None: ...
 
 @dataclass
 class Request:
@@ -23,13 +22,11 @@ class Request:
     interval: Interval
     start_time: datetime | None
     end_time: datetime
-    def __init__(self, route_name, interval, start_time, end_time) -> None: ...
 
 @dataclass
 class Response:
     request: Request
     timeseries: dict[str, list[IntervalMeasurement]]
-    def __init__(self, request, timeseries) -> None: ...
 
 class Interval(enum.Enum):
     daily = ...
@@ -38,4 +35,3 @@ class Interval(enum.Enum):
 class IntervalMeasurement:
     timestamp: datetime
     value: float | None
-    def __init__(self, timestamp, value) -> None: ...

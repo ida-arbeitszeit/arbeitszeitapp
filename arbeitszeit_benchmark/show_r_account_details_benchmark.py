@@ -35,7 +35,7 @@ class ShowRAccountDetailsBenchmark:
         self.use_case = self.injector.get(
             show_r_account_details.ShowRAccountDetailsUseCase
         )
-        self.db.session.commit()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

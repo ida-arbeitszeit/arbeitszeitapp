@@ -12,7 +12,7 @@ from arbeitszeit_flask.datetime import RealtimeDatetimeService
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.mail_service import load_email_plugin
-from arbeitszeit_flask.migrations.auto_migrate import migrate
+from arbeitszeit_flask.migrations.auto_migrate import auto_migrate
 from arbeitszeit_flask.profiling import (  # type: ignore
     initialize_flask_profiler,
     show_profile_info,
@@ -50,15 +50,17 @@ def create_app(
 
     load_configuration(app=app, configuration=config)
 
-    Database().configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
+    db = Database()
+    db.configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
 
     # Choose between auto-migration or direct table creation
     if app.config["AUTO_MIGRATE"]:
         # Let Alembic handle table creation
-        migrate(app.config, Database().engine)
+        auto_migrate(app.config, db)
     else:
-        # Create tables directly with SQLAlchemy if they do not exist
-        Base.metadata.create_all(Database().engine, checkfirst=True)
+        # Create tables directly with SQLAlchemy if they do not exist.
+        # These table creations are NOT rolled back in tests for performance reasons
+        Base.metadata.create_all(db.engine, checkfirst=True)
 
     # Where to redirect the user when he attempts to access a login_required
     load_email_plugin(app)
@@ -83,7 +85,7 @@ def create_app(
 
     @app.teardown_appcontext
     def shutdown_session(exception: BaseException | None = None) -> None:
-        Database().session.remove()
+        db.session.remove()
 
     # Set up template filters
     app.template_filter()(RealtimeDatetimeService().format_datetime)
@@ -105,11 +107,11 @@ def create_app(
             if "user_type" in session:
                 user_type = session["user_type"]
                 if user_type == "member":
-                    return Database().session.query(Member).get(user_id)
+                    return db.session.query(Member).get(user_id)
                 elif user_type == "company":
-                    return Database().session.query(Company).get(user_id)
+                    return db.session.query(Company).get(user_id)
                 elif user_type == "accountant":
-                    return Database().session.query(Accountant).get(user_id)
+                    return db.session.query(Accountant).get(user_id)
 
         # register blueprints
         from . import accountant, company, member, user

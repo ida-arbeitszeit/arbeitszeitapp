@@ -1,9 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List
 from uuid import UUID, uuid4
 
-from arbeitszeit.transactions import TransactionTypes
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.show_p_account_details import (
     ShowPAccountDetailsUseCase as UseCase,
 )
@@ -12,72 +11,64 @@ from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-DEFAULT_INFO1 = UseCase.TransactionInfo(
-    transaction_type=TransactionTypes.credit_for_fixed_means,
-    date=datetime.now(),
-    transaction_volume=Decimal(10.002),
-    purpose="Test purpose",
-)
 
-DEFAULT_INFO2 = UseCase.TransactionInfo(
-    transaction_type=TransactionTypes.credit_for_wages,
-    date=datetime.now(),
-    transaction_volume=Decimal(20),
-    purpose="Test purpose",
-)
-
-
-class CompanyTransactionsPresenterTests(BaseTestCase):
+class ShowPAccountDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ShowPAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transactions_took_place(self) -> None:
-        response = self._use_case_response()
+        response = self.get_use_case_response()
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transactions, [])
 
     def test_return_correct_info_when_one_transaction_took_place(self) -> None:
-        ACCOUNT_BALANCE = Decimal(100.007)
-        response = self._use_case_response(
-            transactions=[DEFAULT_INFO1], account_balance=ACCOUNT_BALANCE
+        EXPECTED_ACCOUNT_BALANCE = Decimal(100.007)
+        transfer = self.get_transfer_info()
+        response = self.get_use_case_response(
+            transfers=[transfer], account_balance=EXPECTED_ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 1)
-        self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
-        trans = view_model.transactions[0]
-        self.assertEqual(trans.transaction_type, self.translator.gettext("Credit"))
         self.assertEqual(
-            trans.date,
+            view_model.account_balance, str(round(EXPECTED_ACCOUNT_BALANCE, 2))
+        )
+        assert len(view_model.transactions) == 1
+        view_model_transaction = view_model.transactions[0]
+        self.assertEqual(
+            view_model_transaction.transaction_type, self.translator.gettext("Credit")
+        )
+        self.assertEqual(
+            view_model_transaction.date,
             self.datetime_service.format_datetime(
-                date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
         )
         self.assertEqual(
-            trans.transaction_volume, str(round(DEFAULT_INFO1.transaction_volume, 2))
+            view_model_transaction.transaction_volume, str(round(transfer.volume, 2))
         )
-        self.assertIsInstance(trans.purpose, str)
 
     def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
-        response = self._use_case_response(
-            transactions=[DEFAULT_INFO1, DEFAULT_INFO2], account_balance=Decimal(100)
+        response = self.get_use_case_response(
+            transfers=[self.get_transfer_info(), self.get_transfer_info()],
+            account_balance=Decimal(100),
         )
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transactions), 2)
 
     def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self) -> None:
-        response = self._use_case_response()
+        response = self.get_use_case_response()
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
 
     def test_view_model_contains_two_navbar_items(self) -> None:
-        response = self._use_case_response()
+        response = self.get_use_case_response()
         view_model = self.presenter.present(response)
         assert len(view_model.navbar_items) == 2
 
     def test_first_navbar_item_has_text_accounts_and_url_to_my_accounts(self) -> None:
-        response = self._use_case_response()
+        response = self.get_use_case_response()
         view_model = self.presenter.present(response)
         navbar_item = view_model.navbar_items[0]
         assert navbar_item.text == self.translator.gettext("Accounts")
@@ -86,26 +77,34 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
 
     def test_second_navbar_item_has_text_account_p_and_no_url_set(self) -> None:
-        response = self._use_case_response()
+        response = self.get_use_case_response()
         view_model = self.presenter.present(response)
         navbar_item = view_model.navbar_items[1]
         assert navbar_item.text == self.translator.gettext("Account p")
         assert navbar_item.url is None
 
-    def _use_case_response(
+    def get_transfer_info(
+        self,
+        type: TransferType = TransferType.credit_p,
+        date: datetime = datetime.now(),
+        volume: Decimal = Decimal(10.002),
+    ) -> UseCase.TransferInfo:
+        return UseCase.TransferInfo(type=type, date=date, volume=volume)
+
+    def get_use_case_response(
         self,
         company_id: UUID = uuid4(),
-        transactions: List[UseCase.TransactionInfo] | None = None,
+        transfers: list[UseCase.TransferInfo] | None = None,
         account_balance: Decimal = Decimal(0),
         plot: UseCase.PlotDetails | None = None,
     ) -> UseCase.Response:
-        if transactions is None:
-            transactions = []
+        if transfers is None:
+            transfers = []
         if plot is None:
             plot = UseCase.PlotDetails([], [])
         return UseCase.Response(
             company_id=company_id,
-            transactions=transactions,
+            transfers=transfers,
             account_balance=account_balance,
             plot=plot,
         )

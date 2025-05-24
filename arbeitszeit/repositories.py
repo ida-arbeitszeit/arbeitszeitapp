@@ -6,6 +6,7 @@ from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple,
 from uuid import UUID
 
 from arbeitszeit import records
+from arbeitszeit.transfers.transfer_type import TransferType
 
 T = TypeVar("T", covariant=True)
 
@@ -32,7 +33,7 @@ class DatabaseUpdate(Protocol):
 class PlanResult(QueryResult[records.Plan], Protocol):
     def ordered_by_creation_date(self, ascending: bool = ...) -> Self: ...
 
-    def ordered_by_activation_date(self, ascending: bool = ...) -> Self: ...
+    def ordered_by_approval_date(self, ascending: bool = ...) -> Self: ...
 
     def ordered_by_rejection_date(self, ascending: bool = ...) -> Self: ...
 
@@ -46,7 +47,7 @@ class PlanResult(QueryResult[records.Plan], Protocol):
 
     def that_are_rejected(self) -> Self: ...
 
-    def that_were_activated_before(self, timestamp: datetime) -> Self:
+    def that_were_approved_before(self, timestamp: datetime) -> Self:
         """Plans that were approved exactly at `timestamp` should also
         be included in the result.
         """
@@ -145,16 +146,6 @@ class PlanUpdate(DatabaseUpdate, Protocol):
         updated through this method.
         """
 
-    def set_activation_timestamp(
-        self, activation_timestamp: Optional[datetime]
-    ) -> Self:
-        """Set the `activation_date` field of all selected plans."""
-
-    def set_approval_date(self, approval_date: Optional[datetime]) -> Self:
-        """Set the approval date on all matching plans. The return
-        value counts all the plans that were changed by this method.
-        """
-
     def set_rejection_date(self, rejection_date: Optional[datetime]) -> Self:
         """Set the rejection date on all matching plans. The return
         value counts all the plans that were changed by this method.
@@ -197,6 +188,9 @@ class PlanDraftUpdate(DatabaseUpdate, Protocol):
     def set_timeframe(self, days: int) -> Self: ...
 
     def set_unit_of_distribution(self, unit: str) -> Self: ...
+
+
+class PlanApprovalResult(QueryResult[records.PlanApproval], Protocol): ...
 
 
 class CooperationResult(QueryResult[records.Cooperation], Protocol):
@@ -342,30 +336,11 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
 
 
 class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender_or_receiver(self, *account: UUID) -> Self: ...
-
     def where_account_is_sender(self, *account: UUID) -> Self: ...
 
     def where_account_is_receiver(self, *account: UUID) -> Self: ...
 
     def ordered_by_transaction_date(self, descending: bool = ...) -> Self: ...
-
-    def where_sender_is_social_accounting(self) -> Self: ...
-
-    def that_were_a_sale_for_plan(self, *plan: UUID) -> Self:
-        """Filter all transactions in the current result set such that
-        the new result set contains only those transactions that are
-        part of a "sale".
-
-        If no `plan` argument is specified then the result set will
-        contain all previously selected transactions that are part of
-        any consumption.
-
-        The `plan` argument can be specified multiple times. A
-        transaction will be part of the result set if it is the
-        consumption registration for any plan that was specified by its
-        UUID.
-        """
 
     def joined_with_receiver(
         self,
@@ -376,6 +351,20 @@ class TransactionResult(QueryResult[records.Transaction], Protocol):
     ) -> QueryResult[
         Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
     ]: ...
+
+
+class TransferResult(QueryResult[records.Transfer], Protocol):
+    def where_account_is_debtor(self, *account: UUID) -> Self: ...
+
+    def where_account_is_creditor(self, *account: UUID) -> Self: ...
+
+    def joined_with_debtor(
+        self,
+    ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
+
+    def joined_with_creditor(
+        self,
+    ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
 
 
 class AccountResult(QueryResult[records.Account], Protocol):
@@ -508,6 +497,21 @@ class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Pr
         ]
     ]: ...
 
+    def joined_with_transfer_of_work_certificates(self) -> QueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Transfer,
+        ]
+    ]: ...
+
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> QueryResult[
+        Tuple[
+            records.RegisteredHoursWorked,
+            records.Member,
+            records.Transfer,
+        ]
+    ]: ...
+
 
 class DatabaseGateway(Protocol):
     def create_private_consumption(
@@ -542,6 +546,7 @@ class DatabaseGateway(Protocol):
         creation_timestamp: datetime,
         name: str,
         definition: str,
+        account: UUID,
     ) -> records.Cooperation: ...
 
     def get_cooperations(self) -> CooperationResult: ...
@@ -574,6 +579,17 @@ class DatabaseGateway(Protocol):
         amount_received: Decimal,
         purpose: str,
     ) -> records.Transaction: ...
+
+    def create_transfer(
+        self,
+        date: datetime,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+        type: TransferType,
+    ) -> records.Transfer: ...
+
+    def get_transfers(self) -> TransferResult: ...
 
     def create_company_work_invite(
         self, company: UUID, member: UUID
@@ -652,9 +668,20 @@ class DatabaseGateway(Protocol):
         self,
         company: UUID,
         member: UUID,
-        amount: Decimal,
-        transaction: UUID,
+        transfer_of_work_certificates: UUID,
+        transfer_of_taxes: UUID,
         registered_on: datetime,
     ) -> records.RegisteredHoursWorked: ...
 
     def get_registered_hours_worked(self) -> RegisteredHoursWorkedResult: ...
+
+    def create_plan_approval(
+        self,
+        plan_id: UUID,
+        date: datetime,
+        transfer_of_credit_p: UUID,
+        transfer_of_credit_r: UUID,
+        transfer_of_credit_a: UUID,
+    ) -> records.PlanApproval: ...
+
+    def get_plan_approvals(self) -> PlanApprovalResult: ...

@@ -4,9 +4,10 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
-from arbeitszeit_flask.database.db import Base, Database
+from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import GeneralUrlIndex
@@ -21,6 +22,7 @@ from tests.data_generators import (
     MemberGenerator,
     PlanGenerator,
     TransactionGenerator,
+    TransferGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.mail_service import MockEmailService
@@ -55,37 +57,48 @@ class _lazy_property(Generic[T]):
         raise Exception("This attribute is read-only")
 
 
-class LogInUser(Enum):
-    member = auto()
-    unconfirmed_member = auto()
-    company = auto()
-    unconfirmed_company = auto()
-    accountant = auto()
-
-
 @database_required
-class FlaskTestCase(TestCase):
+class DatabaseTestCase(TestCase):
     def setUp(self) -> None:
         super().setUp()
-        self._lazy_property_cache: dict[str, Any] = dict()
         self.injector = get_dependency_injector(self.get_injection_modules())
-        self.app = self.injector.get(Flask)
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        # At this point, the database has already been configured
-        # and its tables have been created via the `create_app` function in
-        # `arbeitszeit_flask/__init__.py`
-        self.db = Database()
+        self.db = self.injector.get(Database)
+        # Set up connection-level transaction for test isolation
+        self.connection = self.db.engine.connect()
+        self.transaction = self.connection.begin()
+        # Create test session
+        session_factory = sessionmaker(bind=self.connection)
+        self.test_session = scoped_session(session_factory)
+        # Use test session for all database operations
+        self.db._session = self.test_session
 
     def tearDown(self) -> None:
-        self._lazy_property_cache = dict()
-        self.db.session.remove()
-        self.app_context.pop()
-        Base.metadata.drop_all(self.db.engine)
+        # Clean up database resources
+        if hasattr(self, "test_session"):
+            self.test_session.close()
+        if hasattr(self, "transaction"):
+            self.transaction.rollback()
+        if hasattr(self, "connection"):
+            self.connection.close()
         super().tearDown()
 
     def get_injection_modules(self) -> List[Module]:
         return []
+
+
+class FlaskTestCase(DatabaseTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._lazy_property_cache: dict[str, Any] = dict()
+        self.app = self.injector.get(Flask)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+
+    def tearDown(self) -> None:
+        self._lazy_property_cache = dict()
+        if hasattr(self, "app_context"):
+            self.app_context.pop()
+        super().tearDown()
 
     def email_service(self) -> MockEmailService:
         return current_app.extensions["arbeitszeit_email_plugin"]
@@ -107,7 +120,16 @@ class FlaskTestCase(TestCase):
     plan_generator = _lazy_property(PlanGenerator)
     token_service = _lazy_property(FlaskTokenService)
     transaction_generator = _lazy_property(TransactionGenerator)
+    transfer_generator = _lazy_property(TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
+
+
+class LogInUser(Enum):
+    member = auto()
+    unconfirmed_member = auto()
+    company = auto()
+    unconfirmed_company = auto()
+    accountant = auto()
 
 
 class ViewTestCase(FlaskTestCase):
