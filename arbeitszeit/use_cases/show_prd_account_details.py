@@ -108,9 +108,6 @@ class ShowPRDAccountDetailsUseCase:
             )
         return transfers
 
-    def _is_social_accounting(self, account_owner: AccountOwner) -> bool:
-        return not isinstance(account_owner, (Member, Company))
-
     def _determine_sale_type(
         self, account_owner: AccountOwner, transaction: Transaction
     ) -> TransferType:

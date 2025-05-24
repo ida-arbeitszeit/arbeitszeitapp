@@ -1001,6 +1001,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
+        cooperation = aliased(models.Cooperation)
         query = (
             self.query.join(
                 member, member.account == models.Transfer.debit_account, isouter=True
@@ -1020,7 +1021,14 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
                 social_accounting.account_psf == models.Transfer.debit_account,
                 isouter=True,
             )
-            .with_entities(models.Transfer, member, company, social_accounting)
+            .join(
+                cooperation,
+                cooperation.account == models.Transfer.debit_account,
+                isouter=True,
+            )
+            .with_entities(
+                models.Transfer, member, company, social_accounting, cooperation
+            )
         )
         return FlaskQueryResult(
             query=query,
@@ -1032,14 +1040,16 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
     def map_transfer_and_debtor(
         cls, orm: Any
     ) -> Tuple[records.Transfer, records.AccountOwner]:
-        transfer, member, company, social_accounting = orm
+        transfer, member, company, social_accounting, cooperation = orm
         debtor: records.AccountOwner
         if member:
             debtor = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
             debtor = DatabaseGatewayImpl.company_from_orm(company)
-        else:
+        elif social_accounting:
             debtor = AccountingRepository.social_accounting_from_orm(social_accounting)
+        else:
+            debtor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
         return DatabaseGatewayImpl.transfer_from_orm(transfer), debtor
 
     def joined_with_creditor(
@@ -1048,6 +1058,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
+        cooperation = aliased(models.Cooperation)
         query = (
             self.query.join(
                 member, member.account == models.Transfer.credit_account, isouter=True
@@ -1067,7 +1078,14 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
                 social_accounting.account_psf == models.Transfer.credit_account,
                 isouter=True,
             )
-            .with_entities(models.Transfer, member, company, social_accounting)
+            .join(
+                cooperation,
+                cooperation.account == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .with_entities(
+                models.Transfer, member, company, social_accounting, cooperation
+            )
         )
         return FlaskQueryResult(
             query=query,
@@ -1079,16 +1097,18 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
     def map_transfer_and_creditor(
         cls, orm: Any
     ) -> Tuple[records.Transfer, records.AccountOwner]:
-        transfer, member, company, social_accounting = orm
+        transfer, member, company, social_accounting, cooperation = orm
         creditor: records.AccountOwner
         if member:
             creditor = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
             creditor = DatabaseGatewayImpl.company_from_orm(company)
-        else:
+        elif social_accounting:
             creditor = AccountingRepository.social_accounting_from_orm(
                 social_accounting
             )
+        else:
+            creditor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
         return DatabaseGatewayImpl.transfer_from_orm(transfer), creditor
 
 
@@ -1145,6 +1165,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
+        cooperation = aliased(models.Cooperation)
         query = (
             self.query.join(member, member.account == models.Account.id, isouter=True)
             .join(
@@ -1165,7 +1186,10 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
                 ),
                 isouter=True,
             )
-            .with_entities(models.Account, member, company, social_accounting)
+            .join(cooperation, cooperation.account == models.Account.id, isouter=True)
+            .with_entities(
+                models.Account, member, company, social_accounting, cooperation
+            )
         )
         return FlaskQueryResult(
             query=query,
@@ -1248,13 +1272,15 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         cls, orm: Any
     ) -> Tuple[records.Account, records.AccountOwner]:
         owner: records.AccountOwner
-        account, member, company, social_accounting = orm
+        account, member, company, social_accounting, cooperation = orm
         if member:
             owner = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
             owner = DatabaseGatewayImpl.company_from_orm(company)
-        else:
+        elif social_accounting:
             owner = AccountingRepository.social_accounting_from_orm(social_accounting)
+        else:
+            owner = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
         return (
             DatabaseGatewayImpl.account_from_orm(account),
             owner,

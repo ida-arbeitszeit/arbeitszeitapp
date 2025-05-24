@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
@@ -122,6 +122,18 @@ class AccountResultTests(FlaskTestCase):
         assert result[0].id == social_accounting.account_psf
         assert result[1] == social_accounting
 
+    def test_that_account_joined_with_owner_yields_original_cooperation(self) -> None:
+        account = self.database_gateway.create_account()
+        cooperation = self.create_cooperation(account=account.id)
+        result = (
+            self.database_gateway.get_accounts()
+            .with_id(account.id)
+            .joined_with_owner()
+            .first()
+        )
+        assert result
+        assert cooperation == result[1]
+
     def test_with_no_members_have_no_member_accounts(self) -> None:
         assert not self.database_gateway.get_accounts().that_are_member_accounts()
 
@@ -211,6 +223,17 @@ class AccountResultTests(FlaskTestCase):
             resource_account=resource_account or self.database_gateway.create_account(),
             products_account=products_account or self.database_gateway.create_account(),
             registered_on=datetime(2000, 1, 1),
+        )
+
+    def create_cooperation(
+        self,
+        account: UUID,
+    ) -> records.Cooperation:
+        return self.database_gateway.create_cooperation(
+            creation_timestamp=datetime(2000, 1, 1),
+            name="test cooperation",
+            definition="some product definition",
+            account=account,
         )
 
 

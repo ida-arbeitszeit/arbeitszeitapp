@@ -180,6 +180,22 @@ class JoinedWithDebtorTests(FlaskTestCase):
         assert transfer_with_debtor
         assert transfer_with_debtor[1] == social_accounting
 
+    def test_that_joined_with_debtor_yields_cooperation(
+        self,
+    ) -> None:
+        cooperation_id = self.cooperation_generator.create_cooperation()
+        cooperation = (
+            self.database_gateway.get_cooperations().with_id(cooperation_id).first()
+        )
+        assert cooperation
+        self.transfer_generator.create_transfer(debit_account=cooperation.account)
+        transfers = self.database_gateway.get_transfers().where_account_is_debtor(
+            cooperation.account
+        )
+        transfer_with_debtor = transfers.joined_with_debtor().first()
+        assert transfer_with_debtor
+        assert transfer_with_debtor[1] == cooperation
+
 
 class JoinedWithCreditorTests(FlaskTestCase):
     def test_that_joined_with_creditor_yields_member(
@@ -234,3 +250,19 @@ class JoinedWithCreditorTests(FlaskTestCase):
         transfer_with_creditor = transfers.joined_with_creditor().first()
         assert transfer_with_creditor
         assert transfer_with_creditor[1] == social_accounting
+
+    def test_that_joined_with_creditor_yields_cooperation(
+        self,
+    ) -> None:
+        cooperation_id = self.cooperation_generator.create_cooperation()
+        cooperation = (
+            self.database_gateway.get_cooperations().with_id(cooperation_id).first()
+        )
+        assert cooperation
+        self.transfer_generator.create_transfer(credit_account=cooperation.account)
+        transfers = self.database_gateway.get_transfers().where_account_is_creditor(
+            cooperation.account
+        )
+        transfer_with_creditor = transfers.joined_with_creditor().first()
+        assert transfer_with_creditor
+        assert transfer_with_creditor[1] == cooperation

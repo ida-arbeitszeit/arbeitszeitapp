@@ -949,6 +949,11 @@ class TransferResult(QueryResultImpl[records.Transfer]):
             if companies := self.database.indices.company_by_account.get(account_id):
                 (company_id,) = companies
                 return self.database.companies[company_id]
+            if cooperations := self.database.indices.cooperation_by_account.get(
+                account_id
+            ):
+                (cooperation_id,) = cooperations
+                return self.database.cooperations[cooperation_id]
             return self.database.social_accounting
 
         def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
@@ -970,6 +975,11 @@ class TransferResult(QueryResultImpl[records.Transfer]):
             if companies := self.database.indices.company_by_account.get(account_id):
                 (company_id,) = companies
                 return self.database.companies[company_id]
+            if cooperations := self.database.indices.cooperation_by_account.get(
+                account_id
+            ):
+                (cooperation_id,) = cooperations
+                return self.database.cooperations[cooperation_id]
             return self.database.social_accounting
 
         def items() -> Iterable[Tuple[records.Transfer, records.AccountOwner]]:
@@ -1236,6 +1246,9 @@ class AccountResult(QueryResultImpl[Account]):
                 for member in self.database.members.values():
                     if account.id == member.account:
                         yield account, member
+                for cooperation in self.database.cooperations.values():
+                    if account.id == cooperation.account:
+                        yield account, cooperation
                 for company in self.database.companies.values():
                     if account.id in [
                         company.means_account,
@@ -1853,6 +1866,7 @@ class MockDatabase:
             account=account,
         )
         self.cooperations[cooperation_id] = cooperation
+        self.indices.cooperation_by_account.add(cooperation.account, cooperation.id)
         return cooperation
 
     def get_cooperations(self) -> CooperationResult:
@@ -2307,6 +2321,7 @@ class Relationships:
 class Indices:
     member_by_account: Index[UUID, UUID] = field(default_factory=Index)
     company_by_account: Index[UUID, UUID] = field(default_factory=Index)
+    cooperation_by_account: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     productive_consumption_by_transaction: Index[UUID, UUID] = field(
