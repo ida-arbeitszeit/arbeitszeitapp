@@ -85,6 +85,11 @@ class ShowPRDAccountDetailsPresenter:
                 | TransferType.productive_consumption_r
             ):
                 return self.translator.gettext("Sale")
+            case (
+                TransferType.compensation_for_company
+                | TransferType.compensation_for_coop
+            ):
+                return self.translator.gettext("Cooperation compensation")
             case _:
                 raise ValueError(f"Unknown transfer type: {transfer.type}")
 
@@ -93,6 +98,7 @@ class ShowPRDAccountDetailsPresenter:
         peer: (
             show_prd_account_details.MemberPeer
             | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.CooperationPeer
             | None
         ),
     ) -> str:
@@ -100,6 +106,8 @@ class ShowPRDAccountDetailsPresenter:
             return "user"
         elif isinstance(peer, show_prd_account_details.CompanyPeer):
             return "industry"
+        elif isinstance(peer, show_prd_account_details.CooperationPeer):
+            return "hands-helping"
         else:
             return ""
 
@@ -108,12 +116,15 @@ class ShowPRDAccountDetailsPresenter:
         peer: (
             show_prd_account_details.MemberPeer
             | show_prd_account_details.CompanyPeer
+            | show_prd_account_details.CooperationPeer
             | None
         ),
     ) -> str:
         if isinstance(peer, show_prd_account_details.MemberPeer):
             return self.translator.gettext("Anonymous worker")
         elif isinstance(peer, show_prd_account_details.CompanyPeer):
+            return peer.name
+        elif isinstance(peer, show_prd_account_details.CooperationPeer):
             return peer.name
         else:
             return ""

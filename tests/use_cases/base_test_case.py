@@ -11,6 +11,7 @@ from tests.data_generators import (
     CoordinationTransferRequestGenerator,
     MemberGenerator,
     PlanGenerator,
+    TransferGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.economic_scenarios import EconomicScenarios
@@ -79,3 +80,4 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
+    transfer_generator = _lazy_property(TransferGenerator)
