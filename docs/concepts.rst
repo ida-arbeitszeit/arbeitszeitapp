@@ -60,7 +60,7 @@ The "psf" account (Public Sector Fund) is used to track hours credited to and de
 
 *owner*: Cooperation
 
-Each cooperation has an account that tracks the differences between the consumed cooperative prices (averaged) and the actual costs (see :ref:`cooperations` for details).
+Each cooperation has an account that tracks the differences between the cooperative prices and the actual costs of the products (see :ref:`cooperations` for details).
 
 
 Plans
@@ -124,11 +124,9 @@ The FIC ranges from −∞ to 1, but in practice, it should never be negative. A
 Cooperations 
 -------------
 
-Companies that produce the same product can attach their plans to so-called "cooperations". The purpose of a cooperation is to calculate the average labor cost per product within a specific branch or industry. This average labor cost, known as the cooperative price, is what customers will pay for a product.
+Companies that produce the same product can attach their plans to so-called "cooperations". These cooperations are the expression of the intention of companies of a specific industry to cooperate, to overcome competition and to align their production. Cooperations are a first step towards such alignment by calculating an average labor cost per product. This average labor cost is also known as the cooperative price, which is equal for all cooperating plans and which is what customers will pay for a product.
 
-**Cooperative Price**
-
-The logic for calculating the cooperative price is implemented in the module ``arbeitszeit/price_calculator.py``. The cooperative price is determined as the average cost per product of all plans in the cooperation. The formula for the cooperative price is:
+The cooperative price is determined as the average cost per product of all plans in the cooperation:
 
 .. math::
 
@@ -137,6 +135,10 @@ The logic for calculating the cooperative price is implemented in the module ``a
 where :math:`\text{cost}_i` is the total cost of the :math:`i`-th plan in the cooperation and :math:`\text{pieces}_i` is the total amount of produced pieces of the :math:`i`-th plan. The sum runs over all :math:`n` plans in the cooperation.
 
 Note that the cooperative price is independent of the duration of the plans. Whether one working hour was applied in one year or in one day, the price will be one hour.
+
+**Productivity and compensation transfers**
+
+A plan in a cooperation that is less productive than the average (needs more labour time per product), is called underproductive, else overproductive. When the product of an over- or underproductive plan is consumed, the consumer spends less or more labour certificates as required for the production of the individual product. In order to track such differences, certain "compensation" transfers between companies and cooperations are recorded on consumptions (see :ref:`transfers-of-labor-time`).
 
 **Coordinators of Cooperations**
 
@@ -199,11 +201,11 @@ Transfers occur between two accounts, where the debit account is charged, and th
    * - compensation_for_coop
      - prd
      - cooperation
-     - On private or productive consumption, if the selling company was more productive (produced in less time) than the average of the cooperation, the difference is subtracted from the PRD account of the selling company and added to the cooperation account.
+     - On private or productive consumption, if the consumed plan was overproductive, the delta between cooperative price and individual product cost is subtracted from the PRD account of the planning company and added to the cooperation account.
    * - compensation_for_company
      - cooperation
      - prd
-     - On private or productive consumption, if the selling company was less productive (produced in more time) than the average of the cooperation, the difference is subtracted from the cooperation account and added to the PRD account of the selling company.
+     - On private or productive consumption, if the consumed plan was underproductive, the delta between cooperative price and individual product cost is subtracted from the cooperation account and added to the PRD account of the planning company.
    * - work_certificates
      - a
      - member
