@@ -53,7 +53,7 @@
 {% endmacro %}
 
 <!--Used in member account-->
-{% macro member_transaction(date, type, purpose, user_name, volume, is_volume_positive) %}
+{% macro member_transaction(date, type, user_name, volume, is_volume_positive) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -67,10 +67,6 @@
                     {{ type }}
                 </strong>
                 <br>
-                {% if purpose %}
-                <small>{{ purpose }}</small>
-                <br>
-                {% endif %}
                 <small>{{ user_name }}</small>
             </p>
         </div>

@@ -238,7 +238,12 @@ class PrivateConsumption(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
-    transaction_id: Mapped[str] = mapped_column(ForeignKey("transaction.id"))
+    transfer_of_private_consumption: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_compensation: Mapped[str | None] = mapped_column(
+        ForeignKey("transfer.id")
+    )
     amount: Mapped[int]
 
 

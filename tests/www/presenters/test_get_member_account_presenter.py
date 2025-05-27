@@ -5,7 +5,7 @@ from typing import List, Optional
 from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases.get_member_account import (
     GetMemberAccountResponse,
-    TransactionInfo,
+    TransferInfo,
 )
 from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
@@ -151,56 +151,28 @@ class TestPresenter(BaseTestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.transactions[0].user_name)
 
-    def test_that_purpose_is_shown_if_transaction_is_comsumption(
-        self,
-    ):
-        response = self.get_use_case_response(
-            [self.get_transaction(type=TransferType.private_consumption)]
-        )
-        view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transactions[0].purpose)
-
-    def test_that_purpose_is_shown_if_transaction_is_taxes(
-        self,
-    ):
-        response = self.get_use_case_response(
-            [self.get_transaction(type=TransferType.taxes)]
-        )
-        view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transactions[0].purpose)
-
-    def test_that_purpose_is_not_shown_if_transaction_is_wages(
-        self,
-    ):
-        response = self.get_use_case_response(
-            [self.get_transaction(type=TransferType.work_certificates)]
-        )
-        view_model = self.presenter.present_member_account(response)
-        self.assertFalse(view_model.transactions[0].purpose)
-
     def get_use_case_response(
-        self, transactions: List[TransactionInfo], balance: Optional[Decimal] = None
+        self, transactions: List[TransferInfo], balance: Optional[Decimal] = None
     ) -> GetMemberAccountResponse:
         if balance is None:
             balance = Decimal("10")
-        return GetMemberAccountResponse(transactions=transactions, balance=balance)
+        return GetMemberAccountResponse(transfers=transactions, balance=balance)
 
     def get_transaction(
         self,
         date: Optional[datetime] = None,
         transaction_volume: Optional[Decimal] = None,
         type: Optional[TransferType] = None,
-    ) -> TransactionInfo:
+    ) -> TransferInfo:
         if date is None:
             date = self.datetime_service.now()
         if transaction_volume is None:
             transaction_volume = Decimal("20.006")
         if type is None:
             type = TransferType.work_certificates
-        return TransactionInfo(
+        return TransferInfo(
             date=date,
             peer_name="test company",
-            transaction_volume=transaction_volume,
-            purpose="test purpose",
+            transfer_value=transaction_volume,
             type=type,
         )

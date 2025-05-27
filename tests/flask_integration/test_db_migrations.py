@@ -47,18 +47,13 @@ class AutoMigrationTests(AutoMigrationsTestCase):
         self.injector.get(Flask)
 
     def test_that_tables_are_created_when_auto_migrate_is_enabled(self) -> None:
-        self.assertTableNotExists("alembic_version")
-        self.assertTableNotExists("plan")
+        assert not self.table_exists("alembic_version")
+        assert not self.table_exists("plan")
         self.injector.get(Flask)
-        self.assertTableExists("alembic_version")
-        self.assertTableExists("plan")
+        assert self.table_exists("alembic_version")
+        assert self.table_exists("plan")
 
-    def assertTableNotExists(self, table_name: str) -> None:
+    def table_exists(self, table_name: str) -> bool:
         inspector = inspect(self.db.session.connection())
         tables = inspector.get_table_names()
-        assert table_name not in tables
-
-    def assertTableExists(self, table_name: str) -> None:
-        inspector = inspect(self.db.session.connection())
-        tables = inspector.get_table_names()
-        assert table_name in tables
+        return table_name in tables
