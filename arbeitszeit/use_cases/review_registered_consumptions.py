@@ -45,17 +45,17 @@ class ReviewRegisteredConsumptionsUseCase:
     ) -> list[RegisteredConsumption]:
         return [
             RegisteredConsumption(
-                date=transaction.date,
+                date=transfer.date,
                 is_private_consumption=True,
                 consumer_name=member.name,
                 consumer_id=member.id,
                 product_name=plan.prd_name,
                 plan_id=plan.id,
-                labour_hours_consumed=transaction.amount_sent,
+                labour_hours_consumed=transfer.value,
             )
-            for _, transaction, plan, member in self.database.get_private_consumptions()
+            for _, transfer, plan, member in self.database.get_private_consumptions()
             .where_provider_is_company(request.providing_company)
-            .joined_with_transaction_and_plan_and_consumer()
+            .joined_with_transfer_and_plan_and_consumer()
         ]
 
     def _get_productive_consumptions(

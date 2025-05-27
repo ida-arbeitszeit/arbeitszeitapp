@@ -41,6 +41,7 @@ from arbeitszeit.records import (
     ProductionCosts,
     SocialAccounting,
     Transaction,
+    Transfer,
 )
 from arbeitszeit.transfers.transfer_type import TransferType
 
@@ -607,6 +608,15 @@ class CooperationResult(QueryResultImpl[Cooperation]):
 
         return self.from_iterable(items)
 
+    def of_plan(self, plan_id: UUID) -> Self:
+        def cooperation_of(plan_id: UUID) -> Optional[UUID]:
+            cooperation = self.database.relationships.cooperation_to_plan.get_one(
+                plan_id
+            )
+            return cooperation
+
+        return self._filter_elements(lambda coop: coop.id == cooperation_of(plan_id))
+
     def joined_with_current_coordinator(
         self,
     ) -> QueryResultImpl[Tuple[Cooperation, Company]]:
@@ -997,8 +1007,10 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
         def consumption_sorting_key(
             consumption: records.PrivateConsumption,
         ) -> datetime:
-            transaction = self.database.transactions[consumption.transaction_id]
-            return transaction.date
+            transfer = self.database.transfers[
+                consumption.transfer_of_private_consumption
+            ]
+            return transfer.date
 
         return self.sorted_by(key=consumption_sorting_key, reverse=not ascending)
 
@@ -1006,8 +1018,10 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
         def filtered_items() -> Iterator[records.PrivateConsumption]:
             member_account = self.database.members[member].account
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
-                if transaction.sending_account == member_account:
+                transfer = self.database.transfers[
+                    consumption.transfer_of_private_consumption
+                ]
+                if transfer.debit_account == member_account:
                     yield consumption
 
         return self.from_iterable(items=filtered_items)
@@ -1018,34 +1032,38 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
             if company_record is None:
                 return None
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
-                if transaction.receiving_account == company_record.product_account:
+                transfer = self.database.transfers[
+                    consumption.transfer_of_private_consumption
+                ]
+                if transfer.credit_account == company_record.product_account:
                     yield consumption
 
         return self.from_iterable(items=filtered_items)
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
-    ) -> QueryResultImpl[Tuple[records.PrivateConsumption, Transaction, Plan]]:
+    ) -> QueryResultImpl[Tuple[records.PrivateConsumption, Transfer, Plan]]:
         def joined_items() -> (
-            Iterator[Tuple[records.PrivateConsumption, Transaction, Plan]]
+            Iterator[Tuple[records.PrivateConsumption, Transfer, Plan]]
         ):
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_private_consumption
+                ]
                 plan = self.database.plans[consumption.plan_id]
-                yield consumption, transaction, plan
+                yield consumption, transfer, plan
 
         return QueryResultImpl(
             items=joined_items,
             database=self.database,
         )
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResultImpl[
         Tuple[
             records.PrivateConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Member,
         ]
@@ -1053,19 +1071,21 @@ class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
         def joined_items() -> Iterator[
             Tuple[
                 records.PrivateConsumption,
-                records.Transaction,
+                records.Transfer,
                 records.Plan,
                 records.Member,
             ]
         ]:
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_private_consumption
+                ]
                 plan = self.database.plans[consumption.plan_id]
-                sending_account = transaction.sending_account
-                members = self.database.indices.member_by_account.get(sending_account)
+                debit_account = transfer.debit_account
+                members = self.database.indices.member_by_account.get(debit_account)
                 (member_id,) = members
                 member = self.database.members[member_id]
-                yield consumption, transaction, plan, member
+                yield consumption, transfer, plan, member
 
         return QueryResultImpl(
             items=joined_items,
@@ -1773,16 +1793,23 @@ class MockDatabase:
         return self.companies.get(company)
 
     def create_private_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        transfer_of_private_consumption: UUID,
+        transfer_of_compensation: Optional[UUID],
+        amount: int,
+        plan: UUID,
     ) -> records.PrivateConsumption:
         consumption = records.PrivateConsumption(
             id=uuid4(),
             plan_id=plan,
-            transaction_id=transaction,
             amount=amount,
+            transfer_of_private_consumption=transfer_of_private_consumption,
+            transfer_of_compensation=transfer_of_compensation,
         )
         self.private_consumptions[consumption.id] = consumption
-        self.indices.private_consumption_by_transaction.add(transaction, consumption.id)
+        self.indices.private_consumption_by_transfer.add(
+            transfer_of_private_consumption, consumption.id
+        )
         self.indices.private_consumption_by_plan.add(plan, consumption.id)
         return consumption
 
@@ -2322,7 +2349,7 @@ class Indices:
     member_by_account: Index[UUID, UUID] = field(default_factory=Index)
     company_by_account: Index[UUID, UUID] = field(default_factory=Index)
     cooperation_by_account: Index[UUID, UUID] = field(default_factory=Index)
-    private_consumption_by_transaction: Index[UUID, UUID] = field(default_factory=Index)
+    private_consumption_by_transfer: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     productive_consumption_by_transaction: Index[UUID, UUID] = field(
         default_factory=Index

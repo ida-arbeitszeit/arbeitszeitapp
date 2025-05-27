@@ -34,7 +34,7 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
 ):
     member = member_generator.create_member()
     response = use_case(member)
-    assert not response.transactions
+    assert not response.transfers
 
 
 @injection_test
@@ -46,7 +46,7 @@ def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
     member_of_interest = member_generator.create_member()
     consumption_generator.create_private_consumption()
     response = use_case(member_of_interest)
-    assert not response.transactions
+    assert not response.transfers
 
 
 @injection_test
@@ -73,10 +73,10 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
         consumer=member, amount=1, plan=plan
     )
     response = use_case(member)
-    assert len(response.transactions) == 1
-    assert response.transactions[0].peer_name == expected_company_name
-    assert response.transactions[0].transaction_volume == Decimal(-10)
-    assert response.transactions[0].type == TransferType.private_consumption
+    assert len(response.transfers) == 1
+    assert response.transfers[0].peer_name == expected_company_name
+    assert response.transfers[0].transfer_value == Decimal(-10)
+    assert response.transfers[0].type == TransferType.private_consumption
     assert response.balance == Decimal(-10)
 
 
@@ -104,8 +104,8 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
         consumer=member, amount=1, plan=plan
     )
     response = use_case(member)
-    assert response.transactions[0].transaction_volume == Decimal("0")
-    assert str(response.transactions[0].transaction_volume) == "0"
+    assert response.transfers[0].transfer_value == Decimal("0")
+    assert str(response.transfers[0].transfer_value) == "0"
 
 
 @injection_test
@@ -128,9 +128,9 @@ def test_that_after_member_has_worked_info_on_certificates_and_taxes_are_generat
     )
 
     response = use_case(member)
-    assert len(response.transactions) == 2
-    assert response.transactions[0].type == TransferType.taxes
-    assert response.transactions[1].type == TransferType.work_certificates
+    assert len(response.transfers) == 2
+    assert response.transfers[0].type == TransferType.taxes
+    assert response.transfers[1].type == TransferType.work_certificates
 
 
 @injection_test
@@ -176,10 +176,10 @@ def test_that_correct_tax_info_is_generated(
         )
     )
     response = use_case(member)
-    transfer = response.transactions[0]
+    transfer = response.transfers[0]
     assert transfer.peer_name == social_accounting.get_name()
     assert transfer.type == TransferType.taxes
-    assert transfer.transaction_volume == Decimal("0")
+    assert transfer.transfer_value == Decimal("0")
 
 
 @injection_test
@@ -202,9 +202,9 @@ def test_that_correct_work_certificates_info_is_generated(
         )
     )
     response = use_case(member)
-    transfer = response.transactions[1]
+    transfer = response.transfers[1]
     assert transfer.peer_name == expected_company_name
-    assert transfer.transaction_volume == Decimal(8.5)
+    assert transfer.transfer_value == Decimal(8.5)
     assert transfer.type == TransferType.work_certificates
 
 
@@ -253,19 +253,19 @@ def test_that_correct_peer_name_info_is_generated_in_correct_order_after_several
         )
     )
     response = use_case(member)
-    assert len(response.transactions) == 5  # 1 consumption, 2 work certificates, 2 tax
+    assert len(response.transfers) == 5  # 1 consumption, 2 work certificates, 2 tax
 
-    trans1 = response.transactions.pop()
+    trans1 = response.transfers.pop()
     assert trans1.peer_name == company1_name
 
-    trans2 = response.transactions.pop()
+    trans2 = response.transfers.pop()
     assert trans2.peer_name == social_accounting.get_name()
 
-    trans3 = response.transactions.pop()
+    trans3 = response.transfers.pop()
     assert trans3.peer_name == company1_name
 
-    trans4 = response.transactions.pop()
+    trans4 = response.transfers.pop()
     assert trans4.peer_name == company2_name
 
-    trans5 = response.transactions.pop()
+    trans5 = response.transfers.pop()
     assert trans5.peer_name == social_accounting.get_name()
