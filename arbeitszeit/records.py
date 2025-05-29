@@ -368,8 +368,9 @@ class PlanningStatistics:
 class PrivateConsumption:
     id: UUID
     plan_id: UUID
-    transaction_id: UUID
     amount: int
+    transfer_of_private_consumption: UUID
+    transfer_of_compensation: UUID | None
 
 
 @dataclass(frozen=True)

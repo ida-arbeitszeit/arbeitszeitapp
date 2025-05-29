@@ -9,17 +9,16 @@ from arbeitszeit.transfers import TransferType
 
 
 @dataclass
-class TransactionInfo:
+class TransferInfo:
     date: datetime
     peer_name: str
-    transaction_volume: Decimal
-    purpose: str
+    transfer_value: Decimal
     type: TransferType
 
 
 @dataclass
 class GetMemberAccountResponse:
-    transactions: List[TransactionInfo]
+    transfers: List[TransferInfo]
     balance: Decimal
 
 
@@ -30,59 +29,53 @@ class GetMemberAccount:
     def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
         member = self.database.get_members().with_id(member_id).first()
         assert member
-        transaction_info: List[TransactionInfo] = []
-        transactions_of_consumption_and_receiver = (
-            self.database.get_transactions()
-            .where_account_is_sender(member.account)
-            .joined_with_receiver()
-        )
+        transfer_info: List[TransferInfo] = []
         transfers_of_work_certificates_and_debtor = (
             self.database.get_transfers()
             .where_account_is_creditor(member.account)
             .joined_with_debtor()
         )
-        transfers_of_taxes_and_creditor = (
+        transfers_of_consumptions_and_taxes_joined_with_creditor = (
             self.database.get_transfers()
             .where_account_is_debtor(member.account)
             .joined_with_creditor()
         )
-        for tx, receiver in transactions_of_consumption_and_receiver:
-            transaction_info.append(
-                TransactionInfo(
-                    date=tx.date,
-                    peer_name=receiver.get_name(),
-                    transaction_volume=-tx.amount_sent,  # negative value
-                    purpose=tx.purpose,
-                    type=TransferType.private_consumption,
-                )
-            )
         for tf, debtor in transfers_of_work_certificates_and_debtor:
-            transaction_info.append(
-                TransactionInfo(
+            transfer_info.append(
+                TransferInfo(
                     date=tf.date,
                     peer_name=debtor.get_name(),
-                    transaction_volume=tf.value,
-                    purpose="",
+                    transfer_value=tf.value,
                     type=TransferType.work_certificates,
                 )
             )
-        for tf, creditor in transfers_of_taxes_and_creditor:
-            transaction_info.append(
-                TransactionInfo(
-                    date=tf.date,
-                    peer_name=creditor.get_name(),
-                    transaction_volume=-tf.value,  # negative value
-                    purpose="",
-                    type=TransferType.taxes,
+        for tf, creditor in transfers_of_consumptions_and_taxes_joined_with_creditor:
+            if tf.type == TransferType.private_consumption:
+                transfer_info.append(
+                    TransferInfo(
+                        date=tf.date,
+                        peer_name=creditor.get_name(),
+                        transfer_value=-tf.value,  # negative value
+                        type=TransferType.private_consumption,
+                    )
                 )
-            )
-        transaction_info.sort(key=lambda t: t.date, reverse=True)
+            elif tf.type == TransferType.taxes:
+                transfer_info.append(
+                    TransferInfo(
+                        date=tf.date,
+                        peer_name=creditor.get_name(),
+                        transfer_value=-tf.value,  # negative value
+                        type=TransferType.taxes,
+                    )
+                )
+        transfer_info.sort(key=lambda t: t.date, reverse=True)
+        return GetMemberAccountResponse(
+            transfers=transfer_info, balance=self.get_account_balance(member.account)
+        )
+
+    def get_account_balance(self, account: UUID) -> Decimal:
         result = (
-            self.database.get_accounts()
-            .with_id(member.account)
-            .joined_with_balance()
-            .first()
+            self.database.get_accounts().with_id(account).joined_with_balance().first()
         )
         assert result
-        balance = result[1]
-        return GetMemberAccountResponse(transaction_info, balance)
+        return result[1]

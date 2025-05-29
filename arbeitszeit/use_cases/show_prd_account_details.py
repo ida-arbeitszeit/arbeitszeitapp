@@ -70,14 +70,18 @@ class ShowPRDAccountDetailsUseCase:
         credit_and_compensation_transfers = (
             self._get_credit_and_compensation_for_coop_transfers(company)
         )
-        compensation_for_company_transfers = (
-            self._get_compensation_for_company_transfers(company)
+        private_consumption_and_compensation_for_company_transfers = (
+            self._get_private_consumption_and_compensation_for_company_transfers(
+                company
+            )
         )
-        consumption_transfers = self._get_consumption_transfers(company)
+        productive_consumption_transfers = self._get_productive_consumption_transfers(
+            company
+        )
         transfers = (
             credit_and_compensation_transfers
-            + consumption_transfers
-            + compensation_for_company_transfers
+            + productive_consumption_transfers
+            + private_consumption_and_compensation_for_company_transfers
         )
         transfers.sort(key=lambda t: t.date)
         transfers_descending = transfers.copy()
@@ -130,16 +134,16 @@ class ShowPRDAccountDetailsUseCase:
                 )
         return transfers
 
-    def _get_compensation_for_company_transfers(
+    def _get_private_consumption_and_compensation_for_company_transfers(
         self, company: Company
     ) -> list[TransferInfo]:
-        credit_transfers_and_debtor = (
+        transfers_and_debtor = (
             self.database.get_transfers()
             .where_account_is_creditor(company.product_account)
             .joined_with_debtor()
         )
         transfers: list[TransferInfo] = []
-        for transfer, debtor in credit_transfers_and_debtor:
+        for transfer, debtor in transfers_and_debtor:
             if transfer.type == TransferType.compensation_for_company:
                 transfers.append(
                     TransferInfo(
@@ -149,9 +153,20 @@ class ShowPRDAccountDetailsUseCase:
                         peer=self._create_peer_info(debtor),
                     )
                 )
+            elif transfer.type == TransferType.private_consumption:
+                transfers.append(
+                    TransferInfo(
+                        type=TransferType.private_consumption,
+                        date=transfer.date,
+                        volume=transfer.value,
+                        peer=self._create_peer_info(debtor),
+                    )
+                )
         return transfers
 
-    def _get_consumption_transfers(self, company: Company) -> list[TransferInfo]:
+    def _get_productive_consumption_transfers(
+        self, company: Company
+    ) -> list[TransferInfo]:
         transactions_and_sender_and_receiver = (
             self.database.get_transactions()
             .where_account_is_receiver(company.product_account)
