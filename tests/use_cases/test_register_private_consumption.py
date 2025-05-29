@@ -430,6 +430,14 @@ class ConsumptionTransferTests(RegisterPrivateConsumptionBase):
 
 
 class CompensationTransferTests(RegisterPrivateConsumptionBase):
+    def test_no_compensation_transfer_created_when_consumed_plan_is_not_cooperating(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.consumption_generator.create_private_consumption(plan=plan)
+        transfers = self.get_compensation_transfers()
+        assert not transfers
+
     def test_no_compensation_transfer_created_after_consumption_of_cooperative_product_without_productivity_differences(
         self,
     ) -> None:
