@@ -78,9 +78,7 @@ def test_only_cooperations_are_listed_where_requester_is_coordinator(
     expected_cooperation = cooperation_generator.create_cooperation(
         plans=[p1, p2], coordinator=company
     )
-    cooperation_generator.create_cooperation(
-        plans=[p1, p2], coordinator=company_generator.create_company_record()
-    )
+    cooperation_generator.create_cooperation()
     response = use_case(ListCoordinationsOfCompanyRequest(company.id))
     assert len(response.coordinations) == 1
     assert response.coordinations[0].id == expected_cooperation
