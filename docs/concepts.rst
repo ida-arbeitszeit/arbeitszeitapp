@@ -60,7 +60,7 @@ The "psf" account (Public Sector Fund) is used to track hours credited to and de
 
 *owner*: Cooperation
 
-Each cooperation has an account that tracks the differences between the cooperative prices and the actual costs of the products (see :ref:`cooperations` for details).
+Each cooperation has an account that tracks the differences between the cooperative (averaged) prices and the actual costs of the products (see :ref:`cooperations` for details).
 
 
 Plans
@@ -124,7 +124,7 @@ The FIC ranges from −∞ to 1, but in practice, it should never be negative. A
 Cooperations 
 -------------
 
-Companies that produce the same product can attach their plans to so-called "cooperations". These cooperations are the expression of the intention of companies of a specific industry to cooperate, to overcome competition and to align their production. Cooperations are a first step towards such alignment by calculating an average labor cost per product. This average labor cost is also known as the cooperative price, which is equal for all cooperating plans and which is what customers will pay for a product.
+Companies that produce the same product can attach their plans to so-called "cooperations". These cooperations are the means whereby companies within a given industry may express their intention to cooperate, to overcome competition and to align their production. Cooperations are a first step towards such alignment by calculating an average labor cost per product. This average labor cost is also known as the cooperative price, which is equal for all cooperating plans and which is what customers will pay for a product.
 
 The cooperative price is determined as the average cost per product of all plans in the cooperation:
 
@@ -134,15 +134,15 @@ The cooperative price is determined as the average cost per product of all plans
 
 where :math:`\text{cost}_i` is the total cost of the :math:`i`-th plan in the cooperation and :math:`\text{pieces}_i` is the total amount of produced pieces of the :math:`i`-th plan. The sum runs over all :math:`n` plans in the cooperation.
 
-Note that the cooperative price is independent of the duration of the plans. Whether one working hour was applied in one year or in one day, the price will be one hour.
+The cooperative price thus approximates the average socially necessary cost of the product.
 
 **Productivity and compensation transfers**
 
-A plan in a cooperation that is less productive than the average (needs more labour time per product), is called underproductive, else overproductive. When the product of an over- or underproductive plan is consumed, the consumer spends less or more labour certificates as required for the production of the individual product. In order to track such differences, certain "compensation" transfers between companies and cooperations are recorded on consumptions (see :ref:`transfers-of-labor-time`).
+A plan in a cooperation that is less productive than the average (needs more labour time per product) is called *underproductive*; if more productive, *overproductive*. When the product of an over- or underproductive plan is consumed, the consumer spends less or more labour certificates as required for the production of the individual product. In order to track such differences, certain "compensation" transfers between companies and cooperations are recorded whenever consumption happens (see :ref:`transfers-of-labor-time`).
 
 **Coordinators of Cooperations**
 
-"Empty" cooperations (without any plans attached) can be created by any company. The company that creates a cooperation automatically becomes the "coordinator" of that cooperation. A coordinator has several privileges and duties: They can accept or deny incoming cooperation requests, remove plans from the cooperation, or transfer the coordination role to another company. The history of past coordinator tenures is visible to all users.
+A cooperation begins its life as empty, without any plans attached to it. Companies may then freely choose to join the new cooperation. An empty cooperation can be created by any company. The company that creates a cooperation automatically becomes the "coordinator" of that cooperation. A coordinator has several privileges and duties: They can accept or deny incoming cooperation requests, remove plans from the cooperation, or transfer the coordination role to another company. The history of past coordinator tenures is visible to all users.
 
 While this implementation may seem undemocratic at first glance, it must be noted that the Arbeitszeitapp only provides the technical front-end to diverse political processes that must happen in "real life". The app does not prescribe the political procedures that companies and communities choose to elect coordinators or to define cooperations. Because every company is able to create cooperations, companies that are unhappy with a certain coordination can easily form a new cooperation.
 
@@ -189,7 +189,7 @@ Transfers occur between two accounts, where the debit account is charged, and th
    * - private_consumption
      - member
      - prd
-     - On private consumption, the cost of the product (the cooperative price, if applicable) is subtracted from the member's account and added to the PRD account of the producing company.
+     - On private consumption, the cost of the product (the cooperative price, if applicable) is subtracted from the consuming member's account and added to the PRD account of the producing company.
    * - productive_consumption_p
      - p
      - prd
