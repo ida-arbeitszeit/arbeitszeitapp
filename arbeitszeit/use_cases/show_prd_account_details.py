@@ -6,14 +6,7 @@ from decimal import Decimal
 from itertools import accumulate
 from uuid import UUID
 
-from arbeitszeit.records import (
-    AccountOwner,
-    AccountTypes,
-    Company,
-    Cooperation,
-    Member,
-    Transaction,
-)
+from arbeitszeit.records import AccountOwner, Company, Cooperation, Member
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 
@@ -71,16 +64,10 @@ class ShowPRDAccountDetailsUseCase:
             self._get_credit_and_compensation_for_coop_transfers(company)
         )
         private_consumption_and_compensation_for_company_transfers = (
-            self._get_private_consumption_and_compensation_for_company_transfers(
-                company
-            )
-        )
-        productive_consumption_transfers = self._get_productive_consumption_transfers(
-            company
+            self._get_consumption_and_compensation_for_company_transfers(company)
         )
         transfers = (
             credit_and_compensation_transfers
-            + productive_consumption_transfers
             + private_consumption_and_compensation_for_company_transfers
         )
         transfers.sort(key=lambda t: t.date)
@@ -134,7 +121,7 @@ class ShowPRDAccountDetailsUseCase:
                 )
         return transfers
 
-    def _get_private_consumption_and_compensation_for_company_transfers(
+    def _get_consumption_and_compensation_for_company_transfers(
         self, company: Company
     ) -> list[TransferInfo]:
         transfers_and_debtor = (
@@ -153,40 +140,6 @@ class ShowPRDAccountDetailsUseCase:
                 )
             )
         return transfers
-
-    def _get_productive_consumption_transfers(
-        self, company: Company
-    ) -> list[TransferInfo]:
-        transactions_and_sender_and_receiver = (
-            self.database.get_transactions()
-            .where_account_is_receiver(company.product_account)
-            .joined_with_sender_and_receiver()
-        )
-        transfers: list[TransferInfo] = []
-        for transaction, sender, _ in transactions_and_sender_and_receiver:
-            transfers.append(
-                TransferInfo(
-                    type=self._determine_sale_type(sender, transaction),
-                    date=transaction.date,
-                    volume=transaction.amount_received,
-                    peer=self._create_peer_info(sender),
-                )
-            )
-        return transfers
-
-    def _determine_sale_type(
-        self, account_owner: AccountOwner, transaction: Transaction
-    ) -> TransferType:
-        if isinstance(account_owner, Member):
-            return TransferType.private_consumption
-        else:
-            sending_account_type = account_owner.get_account_type(
-                transaction.sending_account
-            )
-            if sending_account_type == AccountTypes.p:
-                return TransferType.productive_consumption_p
-            else:
-                return TransferType.productive_consumption_r
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (

@@ -2,27 +2,54 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases import show_prd_account_details
-from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
+from parameterized import parameterized
+
+from arbeitszeit.records import (
+    ConsumptionType,
+    ProductionCosts,
+    ProductiveConsumption,
+    Transfer,
+)
+from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
-from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 
 from .base_test_case import BaseTestCase
-from .repositories import MockDatabase
 
 
-class RegisterProductiveConsumptionTests(BaseTestCase):
+class UseCaseBase(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
         )
-        self.mock_database = self.injector.get(MockDatabase)
-        self.query_company_consumptions = self.injector.get(QueryCompanyConsumptions)
+        self.database_gateway = self.injector.get(DatabaseGateway)
+
+    def _get_transfers_of_type(self, transfer_type: TransferType) -> list[Transfer]:
+        return list(
+            filter(
+                lambda t: t.type == transfer_type,
+                self.database_gateway.get_transfers(),
+            )
+        )
+
+
+class TestRejection(UseCaseBase):
+    def test_reject_registration_if_plan_not_found(self) -> None:
+        consumer = self.company_generator.create_company()
+        response = self.register_productive_consumption(
+            RegisterProductiveConsumptionRequest(
+                consumer=consumer,
+                plan=uuid4(),
+                amount=1,
+                consumption_type=ConsumptionType.means_of_prod,
+            )
+        )
+        assert response.is_rejected
+        assert response.rejection_reason == response.RejectionReason.plan_not_found
 
     def test_reject_registration_if_plan_is_expired(self) -> None:
         self.datetime_service.freeze_time(datetime(2000, 1, 1))
@@ -40,11 +67,11 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
     def test_registration_is_rejected_when_consumption_type_is_private_consumption(
         self,
     ) -> None:
-        sender = self.company_generator.create_company_record()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
         consumption_type = ConsumptionType.consumption
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(sender.id, plan, 5, consumption_type)
+            RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
         assert (
@@ -53,11 +80,11 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         )
 
     def test_reject_registration_trying_to_consume_public_service(self) -> None:
-        sender = self.company_generator.create_company_record()
+        sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(is_public_service=True)
         consumption_type = ConsumptionType.means_of_prod
         response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(sender.id, plan, 5, consumption_type)
+            RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
         assert (
@@ -75,6 +102,8 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
         assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.consumer_is_planner
 
+
+class TestBalanceChanges(UseCaseBase):
     def test_balance_of_consumer_gets_reduced(self) -> None:
         sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
@@ -188,197 +217,413 @@ class RegisterProductiveConsumptionTests(BaseTestCase):
             sender
         ).r_account == balance_before_transaction - Decimal(1)
 
-    def test_correct_transaction_added_if_means_of_production_were_consumed(
+
+class TestConsumptionTransfers(UseCaseBase):
+    def test_correct_transfer_of_means_of_production_consumption_created(
         self,
     ) -> None:
-        sender = self.company_generator.create_company_record()
+        consumer = self.company_generator.create_company()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
-        consumption_type = ConsumptionType.means_of_prod
-        pieces = 5
-        transactions_before_payment = len(self.mock_database.get_transactions())
-        self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan, pieces, consumption_type
-            )
+        amount = 5
+        self.consumption_generator.create_fixed_means_consumption(
+            consumer=consumer,
+            plan=plan,
+            amount=amount,
         )
-        price_total = pieces * self.price_checker.get_unit_price(plan)
+        expected_value = amount * self.price_checker.get_unit_price(plan)
+        transfers_of_consumption_p = self._get_transfers_of_type(
+            TransferType.productive_consumption_p
+        )
+        assert len(transfers_of_consumption_p) == 1
+        assert transfers_of_consumption_p[
+            0
+        ].debit_account == self.get_means_of_production_account(consumer)
+        assert transfers_of_consumption_p[0].credit_account == self.get_product_account(
+            planner
+        )
+        assert transfers_of_consumption_p[0].value == expected_value
         assert (
-            len(self.mock_database.get_transactions())
-            == transactions_before_payment + 1
+            transfers_of_consumption_p[0].type == TransferType.productive_consumption_p
         )
-        latest_transaction = (
-            self.mock_database.get_transactions()
-            .ordered_by_transaction_date(descending=True)
-            .first()
-        )
-        assert latest_transaction
-        assert latest_transaction.sending_account == sender.means_account
-        assert latest_transaction.receiving_account == self.get_product_account(planner)
-        assert latest_transaction.amount_sent == price_total
-        assert latest_transaction.amount_received == price_total
 
-    def test_correct_transaction_added_if_raw_materials_were_consumed(self) -> None:
-        sender = self.company_generator.create_company_record()
-        planner = self.company_generator.create_company()
-        plan = self.plan_generator.create_plan(planner=planner)
-        consumption_type = ConsumptionType.raw_materials
-        pieces = 5
-        transactions_before_payment = len(self.mock_database.get_transactions())
-        self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan, pieces, consumption_type
-            )
-        )
-        price_total = pieces * self.price_checker.get_unit_price(plan)
-        assert (
-            len(self.mock_database.get_transactions())
-            == transactions_before_payment + 1
-        )
-        latest_transaction = (
-            self.mock_database.get_transactions()
-            .ordered_by_transaction_date(descending=True)
-            .first()
-        )
-        assert latest_transaction
-        assert latest_transaction.sending_account == sender.raw_material_account
-        assert latest_transaction.receiving_account == self.get_product_account(planner)
-        assert latest_transaction.amount_sent == price_total
-        assert latest_transaction.amount_received == price_total
-
-    def test_correct_consumption_added_if_means_of_production_were_consumed(
+    def test_correct_value_of_means_of_production_consumption_created_if_plan_is_cooperating(
         self,
     ) -> None:
-        sender = self.company_generator.create_company_record()
-        plan = self.plan_generator.create_plan()
-        consumption_type = ConsumptionType.means_of_prod
-        pieces = 5
-        self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan, pieces, consumption_type
+        AMOUNT = 5
+        plan_1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                means_cost=Decimal(1),
+                resource_cost=Decimal(1),
             )
         )
-        consumptions = list(self.query_company_consumptions(sender.id))
-        assert len(consumptions) == 1
-        latest_consumption = consumptions[0]
-        assert latest_consumption.plan_id == plan
-        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
-            plan
+        plan_2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(4),
+                means_cost=Decimal(4),
+                resource_cost=Decimal(4),
+            )
         )
-        assert latest_consumption.amount == pieces
-        assert latest_consumption.consumption_type == ConsumptionType.means_of_prod
+        self.cooperation_generator.create_cooperation(plans=[plan_1, plan_2])
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=plan_1,
+            amount=AMOUNT,
+        )
+        expected_value = AMOUNT * self.price_checker.get_unit_price(plan_1)
+        transfers_of_consumption_p = self._get_transfers_of_type(
+            TransferType.productive_consumption_p
+        )
+        assert len(transfers_of_consumption_p) == 1
+        assert transfers_of_consumption_p[0].value == expected_value
 
-    def test_correct_consumption_added_if_raw_materials_were_consumed(self) -> None:
-        sender = self.company_generator.create_company_record()
-        plan = self.plan_generator.create_plan()
-        consumption_type = ConsumptionType.raw_materials
-        pieces = 5
-        self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                sender.id, plan, pieces, consumption_type
-            )
+    def test_correct_transfer_of_raw_materials_consumption_created(
+        self,
+    ) -> None:
+        consumer = self.company_generator.create_company()
+        planner = self.company_generator.create_company()
+        plan = self.plan_generator.create_plan(planner=planner)
+        amount = 5
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=consumer,
+            plan=plan,
+            amount=amount,
         )
-        consumptions = list(self.query_company_consumptions(sender.id))
-        assert len(consumptions) == 1
-        latest_consumption = consumptions[0]
-        assert latest_consumption.plan_id == plan
-        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
-            plan
+        expected_value = amount * self.price_checker.get_unit_price(plan)
+        transfers_of_consumption_r = self._get_transfers_of_type(
+            TransferType.productive_consumption_r
         )
-        assert latest_consumption.amount == pieces
-        assert latest_consumption.consumption_type == ConsumptionType.raw_materials
+        assert len(transfers_of_consumption_r) == 1
+        assert transfers_of_consumption_r[
+            0
+        ].debit_account == self.get_raw_material_account(consumer)
+        assert transfers_of_consumption_r[0].credit_account == self.get_product_account(
+            planner
+        )
+        assert transfers_of_consumption_r[0].value == expected_value
+        assert (
+            transfers_of_consumption_r[0].type == TransferType.productive_consumption_r
+        )
 
-    def test_plan_not_found_rejects_registration(self) -> None:
-        consumer = self.company_generator.create_company_record()
-        response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                consumer=consumer.id,
-                plan=uuid4(),
-                amount=1,
-                consumption_type=ConsumptionType.means_of_prod,
+    def test_correct_value_of_raw_materials_consumption_created_if_plan_is_cooperating(
+        self,
+    ) -> None:
+        AMOUNT = 5
+        plan_1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                means_cost=Decimal(1),
+                resource_cost=Decimal(1),
             )
         )
-        assert response.is_rejected
-        assert response.rejection_reason == response.RejectionReason.plan_not_found
-
-    def test_plan_found_accepts_registration(self) -> None:
-        consumer = self.company_generator.create_company_record()
-        plan = self.plan_generator.create_plan()
-        response = self.register_productive_consumption(
-            RegisterProductiveConsumptionRequest(
-                consumer=consumer.id,
-                plan=plan,
-                amount=1,
-                consumption_type=ConsumptionType.means_of_prod,
+        plan_2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(4),
+                means_cost=Decimal(4),
+                resource_cost=Decimal(4),
             )
         )
-        assert not response.is_rejected
-        assert response.rejection_reason is None
+        self.cooperation_generator.create_cooperation(plans=[plan_1, plan_2])
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=plan_1, amount=AMOUNT
+        )
+        expected_value = self.price_checker.get_unit_price(plan_1) * AMOUNT
+        transfers_of_consumption_r = self._get_transfers_of_type(
+            TransferType.productive_consumption_r
+        )
+        assert len(transfers_of_consumption_r) == 1
+        assert transfers_of_consumption_r[0].value == expected_value
 
     def get_product_account(self, company: UUID) -> UUID:
-        company_model = self.mock_database.get_companies().with_id(company).first()
+        company_model = self.database_gateway.get_companies().with_id(company).first()
         assert company_model
         return company_model.product_account
 
+    def get_raw_material_account(self, company: UUID) -> UUID:
+        company_model = self.database_gateway.get_companies().with_id(company).first()
+        assert company_model
+        return company_model.raw_material_account
 
-class TestSuccessfulRegistrationTransactions(BaseTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.transaction_time = datetime(2020, 10, 1, 22, 30)
-        self.datetime_service.freeze_time(self.transaction_time)
-        self.consumer = self.company_generator.create_company()
-        self.planner = self.company_generator.create_company()
-        self.plan = self.plan_generator.create_plan(planner=self.planner, timeframe=2)
-        self.planner_prd_transactions_before_payment = len(
-            self.get_company_prd_account_transactions(self.planner)
+    def get_means_of_production_account(self, company: UUID) -> UUID:
+        company_model = self.database_gateway.get_companies().with_id(company).first()
+        assert company_model
+        return company_model.means_account
+
+
+class TestCompensationTransfers(UseCaseBase):
+    def test_no_compensation_transfer_created_when_consumed_plan_is_not_cooperating(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.consumption_generator.create_fixed_means_consumption(plan=plan)
+        transfers = self.get_compensation_transfers()
+        assert not transfers
+
+    def test_no_compensation_transfer_created_after_consumption_of_cooperative_product_without_productivity_differences(
+        self,
+    ) -> None:
+        COSTS_PER_UNIT = Decimal(3)
+        cooperating_plans = self.create_cooperating_plans_with(
+            costs_per_unit=[COSTS_PER_UNIT, COSTS_PER_UNIT]
         )
-        self.register_productive_consumption_use_case = self.injector.get(
-            RegisterProductiveConsumption
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=cooperating_plans[0],
         )
-        self.response = self.register_productive_consumption_use_case(
-            RegisterProductiveConsumptionRequest(
-                consumer=self.consumer,
-                plan=self.plan,
-                amount=1,
-                consumption_type=ConsumptionType.means_of_prod,
+        transfers = self.get_compensation_transfers()
+        assert not transfers
+
+    def test_no_compensation_transfer_created_when_consumed_plan_has_average_productivity(
+        self,
+    ) -> None:
+        cooperating_plans = self.create_cooperating_plans_with(
+            costs_per_unit=[Decimal(5), Decimal(10), Decimal(15)]
+        )
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=cooperating_plans[1],  # second plan has average productivity
+        )
+        transfers = self.get_compensation_transfers()
+        assert not transfers
+
+    @parameterized.expand(
+        [
+            (0,),
+            (1,),
+            (3,),
+        ]
+    )
+    def test_one_compensation_transfer_created_for_each_consumption_of_cooperative_product_with_productivity_differences(
+        self,
+        number_of_consumptions: int,
+    ) -> None:
+        cooperating_plans = self.create_cooperating_plans_with(
+            costs_per_unit=[Decimal(3), Decimal(10)]
+        )
+        for _ in range(number_of_consumptions):
+            self.consumption_generator.create_fixed_means_consumption(
+                plan=cooperating_plans[0],
+            )
+        transfers = self.get_compensation_transfers()
+        assert len(transfers) == number_of_consumptions
+
+    def test_that_compensation_for_cooperation_transfer_created_if_overproductive_plan_is_consumed(
+        self,
+    ) -> None:
+        cooperating_plans = self.create_cooperating_plans_with(
+            costs_per_unit=[Decimal(3), Decimal(10)]
+        )
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=cooperating_plans[0],  # first plan is overproductive
+        )
+        transfers = self.get_compensation_transfers()
+        assert len(transfers) == 1
+        assert transfers[0].type == TransferType.compensation_for_coop
+
+    def test_that_compensation_for_company_created_if_underproductive_plan_is_consumed(
+        self,
+    ) -> None:
+        cooperating_plans = self.create_cooperating_plans_with(
+            costs_per_unit=[Decimal(3), Decimal(10)]
+        )
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=cooperating_plans[1],  # second plan is underproductive
+        )
+        transfers = self.get_compensation_transfers()
+        assert len(transfers) == 1
+        assert transfers[0].type == TransferType.compensation_for_company
+
+    def create_cooperating_plans_with(
+        self, *, costs_per_unit: list[Decimal]
+    ) -> list[UUID]:
+        plans = [self.create_plan_with(cost_per_unit=cost) for cost in costs_per_unit]
+        self.cooperation_generator.create_cooperation(
+            plans=plans,
+        )
+        return plans
+
+    def create_plan_with(self, *, cost_per_unit: Decimal) -> UUID:
+        plan = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=cost_per_unit,
+                means_cost=Decimal(0),
+                resource_cost=Decimal(0),
+            ),
+            amount=1,
+        )
+        return plan
+
+    def get_compensation_transfers(self) -> list[Transfer]:
+        transfers = self.database_gateway.get_transfers()
+        return list(
+            filter(
+                lambda t: t.type == TransferType.compensation_for_coop
+                or t.type == TransferType.compensation_for_company,
+                transfers,
             )
         )
-        self.datetime_service.advance_time(timedelta(days=1))
 
-    def test_transaction_shows_up_in_transaction_listing_for_consumer(self) -> None:
-        transactions = self.get_company_fixed_means_transactions(self.consumer)
-        self.assertEqual(len(transactions), 1)
 
-    def test_transaction_shows_up_in_transaction_listing_for_planner(self) -> None:
-        transactions = self.get_company_prd_account_transactions(self.planner)
-        self.assertEqual(
-            len(transactions),
-            self.planner_prd_transactions_before_payment + 1,
+class TestConsumptionRecords(UseCaseBase):
+    @parameterized.expand(
+        [
+            (0),
+            (1),
+            (3),
+        ]
+    )
+    def test_that_one_consumption_record_is_created_for_each_consumption_of_fixed_means(
+        self, number_of_consumptions: int
+    ) -> None:
+        for _ in range(number_of_consumptions):
+            self.consumption_generator.create_fixed_means_consumption()
+        assert len(self.get_consumption_records()) == number_of_consumptions
+
+    @parameterized.expand(
+        [
+            (0),
+            (1),
+            (3),
+        ]
+    )
+    def test_that_one_consumption_record_is_created_for_each_consumption_of_resource_consumption(
+        self, number_of_consumptions: int
+    ) -> None:
+        for _ in range(number_of_consumptions):
+            self.consumption_generator.create_resource_consumption_by_company()
+        assert len(self.get_consumption_records()) == number_of_consumptions
+
+    def test_that_consumption_record_for_fixed_means_has_correct_amount_and_plan_id(
+        self,
+    ) -> None:
+        EXPECTED_PLAN = self.plan_generator.create_plan()
+        EXPECTED_AMOUNT = 5
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=EXPECTED_PLAN,
+            amount=EXPECTED_AMOUNT,
+        )
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].plan_id == EXPECTED_PLAN
+        assert consumptions[0].amount == EXPECTED_AMOUNT
+
+    def test_that_consumption_record_for_raw_materials_has_correct_amount_and_plan_id(
+        self,
+    ) -> None:
+        EXPECTED_PLAN = self.plan_generator.create_plan()
+        EXPECTED_AMOUNT = 5
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=EXPECTED_PLAN,
+            amount=EXPECTED_AMOUNT,
+        )
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].plan_id == EXPECTED_PLAN
+        assert consumptions[0].amount == EXPECTED_AMOUNT
+
+    def test_that_consumption_record_for_fixed_means_has_correct_transfer_of_consumption(
+        self,
+    ) -> None:
+        self.consumption_generator.create_fixed_means_consumption()
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        consumption_transfers = self._get_transfers_of_type(
+            TransferType.productive_consumption_p
+        )
+        assert len(consumption_transfers) == 1
+        assert (
+            consumptions[0].transfer_of_productive_consumption
+            == consumption_transfers[0].id
         )
 
-    def test_transaction_info_of_consumer_shows_transaction_timestamp(self) -> None:
-        transactions = self.get_company_fixed_means_transactions(self.consumer)
-        assert not self.response.is_rejected
-        self.assertEqual(transactions[0].date, self.transaction_time)
-
-    def test_transaction_info_of_planner_shows_transaction_timestamp(self) -> None:
-        transactions = self.get_company_fixed_means_transactions(self.planner)
-        self.assertEqual(transactions[-1].date, self.transaction_time)
-
-    def get_company_fixed_means_transactions(self, company: UUID) -> list:
-        use_case = self.injector.get(ShowPAccountDetailsUseCase)
-        response = use_case.show_details(
-            ShowPAccountDetailsUseCase.Request(company=company)
+    def test_that_consumption_record_for_raw_materials_has_correct_transfer_of_consumption(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        consumption_transfers = self._get_transfers_of_type(
+            TransferType.productive_consumption_r
         )
-        return response.transfers
+        assert len(consumption_transfers) == 1
+        assert (
+            consumptions[0].transfer_of_productive_consumption
+            == consumption_transfers[0].id
+        )
 
-    def get_company_prd_account_transactions(
-        self, company: UUID
-    ) -> list[show_prd_account_details.TransferInfo]:
-        use_case = self.injector.get(
-            show_prd_account_details.ShowPRDAccountDetailsUseCase
+    def test_that_consumption_record_for_fixed_means_has_no_transfer_of_compensation_if_plan_is_not_cooperating(
+        self,
+    ) -> None:
+        self.consumption_generator.create_fixed_means_consumption()
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].transfer_of_compensation is None
+
+    def test_that_consumption_record_for_raw_materials_has_no_transfer_of_compensation_if_plan_is_not_cooperating(
+        self,
+    ) -> None:
+        self.consumption_generator.create_resource_consumption_by_company()
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].transfer_of_compensation is None
+
+    def test_that_consumption_record_for_fixed_means_has_correct_transfer_of_compensation_if_plan_is_cooperating_and_underproductive(
+        self,
+    ) -> None:
+        plan_1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                means_cost=Decimal(1),
+                resource_cost=Decimal(1),
+            )
         )
-        response = use_case.show_details(
-            show_prd_account_details.Request(company_id=company)
+        plan_2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(4),
+                means_cost=Decimal(4),
+                resource_cost=Decimal(4),
+            )
         )
-        return response.transfers
+        self.cooperation_generator.create_cooperation(plans=[plan_1, plan_2])
+        self.consumption_generator.create_fixed_means_consumption(
+            plan=plan_2,  # plan_2 is underproductive
+        )
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].transfer_of_compensation is not None
+        compensation_transfers = self._get_transfers_of_type(
+            TransferType.compensation_for_company
+        )
+        assert len(compensation_transfers) == 1
+        assert consumptions[0].transfer_of_compensation == compensation_transfers[0].id
+
+    def test_that_consumption_record_for_raw_materials_has_correct_transfer_of_compensation_if_plan_is_cooperating_and_underproductive(
+        self,
+    ) -> None:
+        plan_1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(1),
+                means_cost=Decimal(1),
+                resource_cost=Decimal(1),
+            )
+        )
+        plan_2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=Decimal(4),
+                means_cost=Decimal(4),
+                resource_cost=Decimal(4),
+            )
+        )
+        self.cooperation_generator.create_cooperation(plans=[plan_1, plan_2])
+        self.consumption_generator.create_resource_consumption_by_company(
+            plan=plan_2,  # plan_2 is underproductive
+        )
+        consumptions = self.get_consumption_records()
+        assert len(consumptions) == 1
+        assert consumptions[0].transfer_of_compensation is not None
+        compensation_transfers = self._get_transfers_of_type(
+            TransferType.compensation_for_company
+        )
+        assert len(compensation_transfers) == 1
+        assert consumptions[0].transfer_of_compensation == compensation_transfers[0].id
+
+    def get_consumption_records(self) -> list[ProductiveConsumption]:
+        return list(self.database_gateway.get_productive_consumptions())
