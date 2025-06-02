@@ -277,28 +277,28 @@ class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Pr
 
     def where_provider_is_company(self, company: UUID) -> Self: ...
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
     ) -> QueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Plan]
     ]: ...
 
-    def joined_with_transaction_and_provider(
+    def joined_with_transfer_and_provider(
         self,
     ) -> QueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Company]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Company]
     ]: ...
 
-    def joined_with_transaction(
+    def joined_with_transfer(
         self,
-    ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]: ...
+    ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transfer]]: ...
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResult[
         Tuple[
-            records.PrivateConsumption,
-            records.Transaction,
+            records.ProductiveConsumption,
+            records.Transfer,
             records.Plan,
             records.Company,
         ]
@@ -527,7 +527,11 @@ class DatabaseGateway(Protocol):
     def get_private_consumptions(self) -> PrivateConsumptionResult: ...
 
     def create_productive_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        plan: UUID,
+        amount: int,
+        transfer_of_productive_consumption: UUID,
+        transfer_of_compensation: UUID | None,
     ) -> records.ProductiveConsumption: ...
 
     def get_productive_consumptions(self) -> ProductiveConsumptionResult: ...

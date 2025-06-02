@@ -280,44 +280,75 @@ class UseCaseTester(BaseTestCase):
             + CONSUMPTION_2 * COSTS_PER_CONSUMPTION * (-1)
         ) in response.plot.accumulated_volumes
 
-    def test_that_plotting_info_is_generated_in_the_correct_order_after_consumption_of_three_liquid_means_of_production(
+    def test_that_plotting_info_is_generated_in_the_correct_order_after_three_consumptions_of_raw_materials(
         self,
     ) -> None:
-        own_company = self.company_generator.create_company_record()
-        other_company = self.company_generator.create_company_record()
+        own_company = self.company_generator.create_company()
 
-        trans1 = self.transaction_generator.create_transaction(
-            sending_account=own_company.raw_material_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(1),
+        TIME_OF_FIRST_CONSUMPTION = datetime(2025, 1, 1)
+        TIME_OF_SECOND_CONSUMPTION = datetime(2025, 1, 3)
+        TIME_OF_THIRD_CONSUMPTION = datetime(2025, 1, 5)
+
+        VALUE_OF_FIRST_CONSUMPTION = Decimal(10)
+        VALUE_OF_SECOND_CONSUMPTION = Decimal(12.5)
+        VALUE_OF_THIRD_CONSUMPTION = Decimal(27.2)
+
+        self.datetime_service.freeze_time(TIME_OF_FIRST_CONSUMPTION)
+        plan_1 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=VALUE_OF_FIRST_CONSUMPTION,
+                resource_cost=Decimal(0),
+                means_cost=Decimal(0),
+            ),
+            amount=1,
+        )
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=own_company,
+            plan=plan_1,
+            amount=1,
+        )
+        self.datetime_service.freeze_time(TIME_OF_SECOND_CONSUMPTION)
+        plan_2 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=VALUE_OF_SECOND_CONSUMPTION,
+                resource_cost=Decimal(0),
+                means_cost=Decimal(0),
+            ),
+            amount=1,
+        )
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=own_company,
+            plan=plan_2,
+            amount=1,
+        )
+        self.datetime_service.freeze_time(TIME_OF_THIRD_CONSUMPTION)
+        plan_3 = self.plan_generator.create_plan(
+            costs=ProductionCosts(
+                labour_cost=VALUE_OF_THIRD_CONSUMPTION,
+                resource_cost=Decimal(0),
+                means_cost=Decimal(0),
+            ),
+            amount=1,
+        )
+        self.consumption_generator.create_resource_consumption_by_company(
+            consumer=own_company,
+            plan=plan_3,
+            amount=1,
         )
 
-        trans2 = self.transaction_generator.create_transaction(
-            sending_account=own_company.raw_material_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(2),
-        )
+        response = self.use_case.show_details(self.create_use_case_request(own_company))
+        assert response.plot.timestamps[0] == TIME_OF_FIRST_CONSUMPTION
+        assert response.plot.timestamps[1] == TIME_OF_SECOND_CONSUMPTION
+        assert response.plot.timestamps[2] == TIME_OF_THIRD_CONSUMPTION
 
-        trans3 = self.transaction_generator.create_transaction(
-            sending_account=own_company.raw_material_account,
-            receiving_account=other_company.product_account,
-            amount_sent=Decimal(10),
-            amount_received=Decimal(3),
+        assert response.plot.accumulated_volumes[0] == VALUE_OF_FIRST_CONSUMPTION * (-1)
+        assert response.plot.accumulated_volumes[1] == (
+            VALUE_OF_FIRST_CONSUMPTION * (-1) + VALUE_OF_SECOND_CONSUMPTION * (-1)
         )
-
-        response = self.use_case.show_details(
-            self.create_use_case_request(own_company.id)
-        )
-        assert response.plot.timestamps[0] == trans1.date
-        assert response.plot.timestamps[2] == trans3.date
-
-        assert response.plot.accumulated_volumes[0] == trans1.amount_sent * (-1)
         assert response.plot.accumulated_volumes[2] == (
-            trans1.amount_sent * (-1)
-            + trans2.amount_sent * (-1)
-            + trans3.amount_sent * (-1)
+            VALUE_OF_FIRST_CONSUMPTION * (-1)
+            + VALUE_OF_SECOND_CONSUMPTION * (-1)
+            + VALUE_OF_THIRD_CONSUMPTION * (-1)
         )
 
     def test_that_correct_plotting_info_is_generated_after_receiving_of_credit_for_liquid_means_of_production(

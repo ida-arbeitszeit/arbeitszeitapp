@@ -81,15 +81,15 @@ class ShowPAccountDetailsUseCase:
     def _add_consumption_transfers(
         self, company: Company, transfers: list[TransferInfo]
     ) -> None:
-        transactions = self.database.get_transactions().where_account_is_sender(
+        consumption_transfers = self.database.get_transfers().where_account_is_debtor(
             company.means_account
         )
-        for transaction in transactions:
+        for transfer in consumption_transfers:
             transfers.append(
                 self.TransferInfo(
                     type=TransferType.productive_consumption_p,
-                    date=transaction.date,
-                    volume=-transaction.amount_sent,
+                    date=transfer.date,
+                    volume=-transfer.value,  # negative because the company is the debtor
                 )
             )
 

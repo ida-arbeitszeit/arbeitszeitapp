@@ -1098,8 +1098,10 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
         def consumption_sorting_key(
             consumption: records.ProductiveConsumption,
         ) -> datetime:
-            transaction = self.database.transactions[consumption.transaction_id]
-            return transaction.date
+            transfer = self.database.transfers[
+                consumption.transfer_of_productive_consumption
+            ]
+            return transfer.date
 
         return self.sorted_by(key=consumption_sorting_key, reverse=not ascending)
 
@@ -1109,11 +1111,12 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
             if company_record is None:
                 return None
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
                 if (
-                    transaction.sending_account == company_record.means_account
-                    or transaction.sending_account
-                    == company_record.raw_material_account
+                    transfer.debit_account == company_record.means_account
+                    or transfer.debit_account == company_record.raw_material_account
                 ):
                     yield consumption
 
@@ -1125,66 +1128,74 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
             if company_record is None:
                 return None
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
-                if transaction.receiving_account == company_record.product_account:
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
+                if transfer.credit_account == company_record.product_account:
                     yield consumption
 
         return self.from_iterable(items=filtered_items)
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
-    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, Transaction, Plan]]:
+    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, Transfer, Plan]]:
         def joined_items() -> (
-            Iterator[Tuple[records.ProductiveConsumption, Transaction, Plan]]
+            Iterator[Tuple[records.ProductiveConsumption, Transfer, Plan]]
         ):
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
                 plan = self.database.plans[consumption.plan_id]
-                yield consumption, transaction, plan
+                yield consumption, transfer, plan
 
         return QueryResultImpl(
             items=joined_items,
             database=self.database,
         )
 
-    def joined_with_transaction(
+    def joined_with_transfer_and_provider(
         self,
-    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, records.Transaction]]:
+    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, Transfer, Company]]:
         def joined_items() -> (
-            Iterator[Tuple[records.ProductiveConsumption, records.Transaction]]
+            Iterator[Tuple[records.ProductiveConsumption, Transfer, Company]]
         ):
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
-                yield consumption, transaction
-
-        return QueryResultImpl(
-            items=joined_items,
-            database=self.database,
-        )
-
-    def joined_with_transaction_and_provider(
-        self,
-    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, Transaction, Company]]:
-        def joined_items() -> (
-            Iterator[Tuple[records.ProductiveConsumption, Transaction, Company]]
-        ):
-            for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
                 plan = self.database.plans[consumption.plan_id]
                 provider = self.database.companies[plan.planner]
-                yield consumption, transaction, provider
+                yield consumption, transfer, provider
 
         return QueryResultImpl(
             items=joined_items,
             database=self.database,
         )
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer(
+        self,
+    ) -> QueryResultImpl[Tuple[records.ProductiveConsumption, records.Transfer]]:
+        def joined_items() -> (
+            Iterator[Tuple[records.ProductiveConsumption, records.Transfer]]
+        ):
+            for consumption in self.items():
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
+                yield consumption, transfer
+
+        return QueryResultImpl(
+            items=joined_items,
+            database=self.database,
+        )
+
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResultImpl[
         Tuple[
             records.ProductiveConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Company,
         ]
@@ -1192,21 +1203,21 @@ class ProductiveConsumptionResult(QueryResultImpl[records.ProductiveConsumption]
         def joined_items() -> Iterator[
             Tuple[
                 records.ProductiveConsumption,
-                records.Transaction,
+                records.Transfer,
                 records.Plan,
                 records.Company,
             ]
         ]:
             for consumption in self.items():
-                transaction = self.database.transactions[consumption.transaction_id]
+                transfer = self.database.transfers[
+                    consumption.transfer_of_productive_consumption
+                ]
                 plan = self.database.plans[consumption.plan_id]
-                sending_account = transaction.sending_account
-                companies = self.database.indices.company_by_account.get(
-                    sending_account
-                )
+                debit_account = transfer.debit_account
+                companies = self.database.indices.company_by_account.get(debit_account)
                 (company_id,) = companies
                 company = self.database.companies[company_id]
-                yield consumption, transaction, plan, company
+                yield consumption, transfer, plan, company
 
         return QueryResultImpl(
             items=joined_items,
@@ -1820,17 +1831,22 @@ class MockDatabase:
         )
 
     def create_productive_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        plan: UUID,
+        amount: int,
+        transfer_of_productive_consumption: UUID,
+        transfer_of_compensation: UUID | None,
     ) -> records.ProductiveConsumption:
         consumption = records.ProductiveConsumption(
             id=uuid4(),
             amount=amount,
             plan_id=plan,
-            transaction_id=transaction,
+            transfer_of_productive_consumption=transfer_of_productive_consumption,
+            transfer_of_compensation=transfer_of_compensation,
         )
         self.productive_consumptions[consumption.id] = consumption
-        self.indices.productive_consumption_by_transaction.add(
-            transaction, consumption.id
+        self.indices.productive_consumption_by_transfer.add(
+            transfer_of_productive_consumption, consumption.id
         )
         self.indices.productive_consumption_by_plan.add(plan, consumption.id)
         return consumption
@@ -2351,9 +2367,7 @@ class Indices:
     cooperation_by_account: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_transfer: Index[UUID, UUID] = field(default_factory=Index)
     private_consumption_by_plan: Index[UUID, UUID] = field(default_factory=Index)
-    productive_consumption_by_transaction: Index[UUID, UUID] = field(
-        default_factory=Index
-    )
+    productive_consumption_by_transfer: Index[UUID, UUID] = field(default_factory=Index)
     productive_consumption_by_plan: Index[UUID, UUID] = field(default_factory=Index)
     coordination_tenure_by_cooperation: Index[UUID, UUID] = field(default_factory=Index)
     account_credentials_by_email_address_lowercased: Index[str, UUID] = field(

@@ -9,7 +9,7 @@ from arbeitszeit.records import (
     ConsumptionType,
     Plan,
     ProductiveConsumption,
-    Transaction,
+    Transfer,
 )
 from arbeitszeit.repositories import DatabaseGateway
 
@@ -39,30 +39,30 @@ class QueryCompanyConsumptions:
         assert company_record
         return (
             self._consumption_to_response_model(
-                consumption, transaction, plan, company_record
+                consumption, transfer, plan, company_record
             )
-            for consumption, transaction, plan in consumptions.ordered_by_creation_date(
+            for consumption, transfer, plan in consumptions.ordered_by_creation_date(
                 ascending=False
-            ).joined_with_transactions_and_plan()
+            ).joined_with_transfer_and_plan()
         )
 
     def _consumption_to_response_model(
         self,
         consumption: ProductiveConsumption,
-        transaction: Transaction,
+        transfer: Transfer,
         plan: Plan,
         company: Company,
     ) -> ConsumptionQueryResponse:
-        if transaction.sending_account == company.raw_material_account:
+        if transfer.debit_account == company.raw_material_account:
             consumption_type = ConsumptionType.raw_materials
         else:
             consumption_type = ConsumptionType.means_of_prod
         return ConsumptionQueryResponse(
-            consumption_date=transaction.date,
+            consumption_date=transfer.date,
             plan_id=plan.id,
             product_name=plan.prd_name,
             product_description=plan.description,
             consumption_type=consumption_type,
-            price_per_unit=transaction.amount_sent / consumption.amount,
+            price_per_unit=transfer.value / consumption.amount,
             amount=consumption.amount,
         )

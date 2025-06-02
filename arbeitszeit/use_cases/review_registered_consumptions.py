@@ -65,18 +65,18 @@ class ReviewRegisteredConsumptionsUseCase:
         productive_consumptions_result = (
             self.database.get_productive_consumptions()
             .where_provider_is_company(request.providing_company)
-            .joined_with_transaction_and_plan_and_consumer()
+            .joined_with_transfer_and_plan_and_consumer()
         )
-        for _, transaction, plan, company in productive_consumptions_result:
+        for _, transfer, plan, company in productive_consumptions_result:
             productive_consumptions.append(
                 RegisteredConsumption(
-                    date=transaction.date,
+                    date=transfer.date,
                     is_private_consumption=False,
                     consumer_name=company.name,
                     consumer_id=company.id,
                     product_name=plan.prd_name,
                     plan_id=plan.id,
-                    labour_hours_consumed=transaction.amount_sent,
+                    labour_hours_consumed=transfer.value,
                 )
             )
         return productive_consumptions

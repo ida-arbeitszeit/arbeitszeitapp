@@ -377,8 +377,9 @@ class PrivateConsumption:
 class ProductiveConsumption:
     id: UUID
     plan_id: UUID
-    transaction_id: UUID
     amount: int
+    transfer_of_productive_consumption: UUID
+    transfer_of_compensation: UUID | None
 
 
 AccountOwner = Union[Member, Company, SocialAccounting, Cooperation]
