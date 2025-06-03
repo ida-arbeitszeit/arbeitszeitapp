@@ -68,9 +68,7 @@ class TestEndCooperation(TestCase):
     def test_error_is_raised_when_requester_is_neither_coordinator_nor_planner(
         self,
     ) -> None:
-        plan = self.plan_generator.create_plan(
-            cooperation=self.coop_generator.create_cooperation()
-        )
+        plan = self.plan_generator.create_plan()
         cooperation = self.coop_generator.create_cooperation(plans=[plan])
 
         request = EndCooperationRequest(
