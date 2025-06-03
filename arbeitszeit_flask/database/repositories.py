@@ -1289,12 +1289,16 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
 
 class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption]):
     def where_consumer_is_company(self, company: UUID) -> Self:
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         account = aliased(models.Account)
         consuming_company = aliased(models.Company)
         return self._with_modified_query(
-            lambda query: query.join(transaction)
-            .join(account, transaction.sending_account == account.id)
+            lambda query: query.join(
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
+            )
+            .join(account, transfer.debit_account == account.id)
             .join(
                 consuming_company,
                 or_(
@@ -1306,12 +1310,16 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
         )
 
     def where_provider_is_company(self, company: UUID) -> Self:
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         account = aliased(models.Account)
         providing_company = aliased(models.Company)
         return self._with_modified_query(
-            lambda query: query.join(transaction)
-            .join(account, transaction.receiving_account == account.id)
+            lambda query: query.join(
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
+            )
+            .join(account, transfer.credit_account == account.id)
             .join(
                 providing_company,
                 account.id == providing_company.prd_account,
@@ -1320,101 +1328,105 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
         )
 
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
-        transaction = aliased(models.Transaction)
-        ordering = transaction.date.asc() if ascending else transaction.date.desc()
+        transfer = aliased(models.Transfer)
+        ordering = transfer.date.asc() if ascending else transfer.date.desc()
         return self._with_modified_query(
             lambda query: query.join(
-                transaction,
-                models.ProductiveConsumption.transaction_id == transaction.id,
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
             ).order_by(ordering)
         )
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
     ) -> FlaskQueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Plan]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]:
-            consumption_orm, transaction_orm, plan_orm = orm
+        ) -> Tuple[records.ProductiveConsumption, records.Transfer, records.Plan]:
+            consumption_orm, transfer_orm, plan_orm = orm
             return (
                 DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
-                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
             )
 
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         plan = aliased(models.Plan)
         return FlaskQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
-                transaction,
-                models.ProductiveConsumption.transaction_id == transaction.id,
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
             )
             .join(plan, models.ProductiveConsumption.plan_id == plan.id)
-            .with_entities(models.ProductiveConsumption, transaction, plan),
+            .with_entities(models.ProductiveConsumption, transfer, plan),
         )
 
-    def joined_with_transaction(
+    def joined_with_transfer(
         self,
-    ) -> FlaskQueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]:
+    ) -> FlaskQueryResult[Tuple[records.ProductiveConsumption, records.Transfer]]:
         def mapper(
             orm,
-        ) -> Tuple[records.ProductiveConsumption, records.Transaction]:
-            consumption_orm, transaction_orm = orm
+        ) -> Tuple[records.ProductiveConsumption, records.Transfer]:
+            consumption_orm, transfer_orm = orm
             return (
                 DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
-                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
             )
 
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         return FlaskQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
-                transaction,
-                models.ProductiveConsumption.transaction_id == transaction.id,
-            ).with_entities(models.ProductiveConsumption, transaction),
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
+            ).with_entities(models.ProductiveConsumption, transfer),
         )
 
-    def joined_with_transaction_and_provider(
+    def joined_with_transfer_and_provider(
         self,
     ) -> FlaskQueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Company]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Company]
     ]:
         def mapper(
             orm,
-        ) -> Tuple[records.ProductiveConsumption, records.Transaction, records.Company]:
-            consumption_orm, transaction_orm, provider_orm = orm
+        ) -> Tuple[records.ProductiveConsumption, records.Transfer, records.Company]:
+            consumption_orm, transfer_orm, provider_orm = orm
             return (
                 DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
-                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
                 DatabaseGatewayImpl.company_from_orm(provider_orm),
             )
 
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         provider = aliased(models.Company)
         plan = aliased(models.Plan)
         return FlaskQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
-                transaction,
-                models.ProductiveConsumption.transaction_id == transaction.id,
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
             )
             .join(plan, models.ProductiveConsumption.plan_id == plan.id)
             .join(provider, provider.id == plan.planner)
-            .with_entities(models.ProductiveConsumption, transaction, provider),
+            .with_entities(models.ProductiveConsumption, transfer, provider),
         )
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> FlaskQueryResult[
         Tuple[
             records.ProductiveConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Company,
         ]
@@ -1423,19 +1435,19 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             orm,
         ) -> Tuple[
             records.ProductiveConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Company,
         ]:
-            consumption_orm, transaction_orm, plan_orm, company_orm = orm
+            consumption_orm, transfer_orm, plan_orm, company_orm = orm
             return (
                 DatabaseGatewayImpl.productive_consumption_from_orm(consumption_orm),
-                DatabaseGatewayImpl.transaction_from_orm(transaction_orm),
+                DatabaseGatewayImpl.transfer_from_orm(transfer_orm),
                 DatabaseGatewayImpl.plan_from_orm(plan_orm),
                 DatabaseGatewayImpl.company_from_orm(company_orm),
             )
 
-        transaction = aliased(models.Transaction)
+        transfer = aliased(models.Transfer)
         account = aliased(models.Account)
         plan = aliased(models.Plan)
         company = aliased(models.Company)
@@ -1443,10 +1455,11 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             db=self.db,
             mapper=mapper,
             query=self.query.join(
-                transaction,
-                models.ProductiveConsumption.transaction_id == transaction.id,
+                transfer,
+                models.ProductiveConsumption.transfer_of_productive_consumption
+                == transfer.id,
             )
-            .join(account, transaction.sending_account == account.id)
+            .join(account, transfer.debit_account == account.id)
             .join(
                 company,
                 or_(
@@ -1455,7 +1468,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
                 ),
             )
             .join(plan, models.ProductiveConsumption.plan_id == plan.id)
-            .with_entities(models.ProductiveConsumption, transaction, plan, company),
+            .with_entities(models.ProductiveConsumption, transfer, plan, company),
         )
 
 
@@ -2245,11 +2258,18 @@ class DatabaseGatewayImpl:
     db: Database
 
     def create_productive_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        transfer_of_productive_consumption: UUID,
+        transfer_of_compensation: UUID | None,
+        amount: int,
+        plan: UUID,
     ) -> records.ProductiveConsumption:
         orm = models.ProductiveConsumption(
             plan_id=str(plan),
-            transaction_id=str(transaction),
+            transfer_of_productive_consumption=str(transfer_of_productive_consumption),
+            transfer_of_compensation=(
+                str(transfer_of_compensation) if transfer_of_compensation else None
+            ),
             amount=amount,
         )
         self.db.session.add(orm)
@@ -2270,7 +2290,14 @@ class DatabaseGatewayImpl:
         return records.ProductiveConsumption(
             id=UUID(orm.id),
             plan_id=UUID(orm.plan_id),
-            transaction_id=UUID(orm.transaction_id),
+            transfer_of_productive_consumption=UUID(
+                orm.transfer_of_productive_consumption
+            ),
+            transfer_of_compensation=(
+                UUID(orm.transfer_of_compensation)
+                if orm.transfer_of_compensation
+                else None
+            ),
             amount=orm.amount,
         )
 
