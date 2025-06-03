@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 from arbeitszeit.records import Cooperation
 
@@ -133,6 +134,29 @@ class CoordinatedByCompanyTests(FlaskTestCase):
         )
         cooperations = self.database_gateway.get_cooperations()
         assert not cooperations.coordinated_by_company(other_company)
+
+
+class OfPlanTests(FlaskTestCase):
+    def test_that_no_cooperations_are_yielded_if_plan_does_not_exist(self) -> None:
+        cooperations = self.database_gateway.get_cooperations()
+        assert not cooperations.of_plan(uuid4())
+
+    def test_that_no_cooperations_are_yielded_if_plan_is_not_part_of_cooperation(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan()
+        self.cooperation_generator.create_cooperation()
+        cooperations = self.database_gateway.get_cooperations()
+        assert not cooperations.of_plan(plan)
+
+    def test_that_cooperation_of_plan_is_yielded(self) -> None:
+        plan = self.plan_generator.create_plan()
+        cooperation = self.cooperation_generator.create_cooperation(plans=[plan])
+        self.cooperation_generator.create_cooperation()  # other cooperation
+        cooperations = self.database_gateway.get_cooperations()
+        result = cooperations.of_plan(plan).first()
+        assert result
+        assert result.id == cooperation
 
 
 class JoinedWithCurrentCoordinatorTests(FlaskTestCase):

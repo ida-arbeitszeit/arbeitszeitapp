@@ -407,9 +407,9 @@ class ConsumptionGenerator:
                 request
             )
         )
-        assert (
-            response.is_accepted
-        ), f"Could not create private consumption. Response was {response}"
+        if not response.is_accepted:
+            assert response.rejection_reason
+            raise response.rejection_reason
         return response
 
 

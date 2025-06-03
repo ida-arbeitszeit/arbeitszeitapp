@@ -200,6 +200,8 @@ class CooperationResult(QueryResult[records.Cooperation], Protocol):
 
     def coordinated_by_company(self, company_id: UUID) -> Self: ...
 
+    def of_plan(self, plan_id: UUID) -> Self: ...
+
     def joined_with_current_coordinator(
         self,
     ) -> QueryResult[Tuple[records.Cooperation, records.Company]]: ...
@@ -250,18 +252,18 @@ class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol
 
     def where_provider_is_company(self, company: UUID) -> Self: ...
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
     ) -> QueryResult[
-        Tuple[records.PrivateConsumption, records.Transaction, records.Plan]
+        Tuple[records.PrivateConsumption, records.Transfer, records.Plan]
     ]: ...
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResult[
         Tuple[
             records.PrivateConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Member,
         ]
@@ -515,7 +517,11 @@ class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Pr
 
 class DatabaseGateway(Protocol):
     def create_private_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        transfer_of_private_consumption: UUID,
+        transfer_of_compensation: UUID | None,
+        amount: int,
+        plan: UUID,
     ) -> records.PrivateConsumption: ...
 
     def get_private_consumptions(self) -> PrivateConsumptionResult: ...

@@ -6,11 +6,12 @@ from enum import Enum, auto
 from typing import Optional
 from uuid import UUID
 
+from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.giro_office import GiroOffice, Transaction, TransactionRejection
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.records import Member, Plan
+from arbeitszeit.records import Company, Member, Plan, Transfer
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 class RejectionReason(Exception, Enum):
@@ -38,7 +39,7 @@ class RegisterPrivateConsumptionResponse:
 
 @dataclass
 class RegisterPrivateConsumption:
-    giro_office: GiroOffice
+    control_thresholds: ControlThresholds
     datetime_service: DatetimeService
     price_calculator: PriceCalculator
     database_gateway: DatabaseGateway
@@ -50,34 +51,89 @@ class RegisterPrivateConsumption:
             return self._perform_registration_process(request)
         except RejectionReason as reason:
             return RegisterPrivateConsumptionResponse(rejection_reason=reason)
-        except TransactionRejection:
-            return RegisterPrivateConsumptionResponse(
-                rejection_reason=RejectionReason.insufficient_balance
-            )
 
     def _perform_registration_process(
         self, request: RegisterPrivateConsumptionRequest
     ) -> RegisterPrivateConsumptionResponse:
-        plan = self._get_active_plan(request)
-        consumer = self.database_gateway.get_members().with_id(request.consumer).first()
-        if consumer is None:
-            return RegisterPrivateConsumptionResponse(
-                rejection_reason=RejectionReason.consumer_does_not_exist
-            )
+        plan, planner = self._get_plan_and_planner(request)
+        consumer = self._get_consumer(request)
         coop_price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        transaction = self._transfer_certificates(
-            request.amount,
-            plan,
-            consumer,
+        consumption_transfer = self._create_private_consumption_transfer(
+            debit_account=consumer.account,
+            credit_account=planner.product_account,
+            value=coop_price_per_unit * request.amount,
+        )
+        compensation_transfer_id = self._create_compensation_transfer(
+            plan=plan,
+            planner_product_account=planner.product_account,
+            amount=request.amount,
             coop_price_per_unit=coop_price_per_unit,
-            individual_price_per_unit=plan.price_per_unit(),
         )
         self.database_gateway.create_private_consumption(
             amount=request.amount,
             plan=plan.id,
-            transaction=transaction.id,
+            transfer_of_private_consumption=consumption_transfer.id,
+            transfer_of_compensation=compensation_transfer_id,
         )
         return RegisterPrivateConsumptionResponse(rejection_reason=None)
+
+    def _get_plan_and_planner(
+        self, request: RegisterPrivateConsumptionRequest
+    ) -> tuple[Plan, Company]:
+        plan = self._get_active_plan(request)
+        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
+        assert planner  # Each plan has a planner.
+        return plan, planner
+
+    def _get_consumer(self, request: RegisterPrivateConsumptionRequest) -> Member:
+        consumer = self.database_gateway.get_members().with_id(request.consumer).first()
+        if consumer is None:
+            raise RejectionReason.consumer_does_not_exist
+        return consumer
+
+    def _create_private_consumption_transfer(
+        self,
+        debit_account: UUID,
+        credit_account: UUID,
+        value: Decimal,
+    ) -> Transfer:
+        if not self._is_account_balance_sufficient(value, debit_account):
+            raise RejectionReason.insufficient_balance
+        transfer = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=debit_account,
+            credit_account=credit_account,
+            value=value,
+            type=TransferType.private_consumption,
+        )
+        return transfer
+
+    def _is_account_balance_sufficient(
+        self, transfer_value: Decimal, account: UUID
+    ) -> bool:
+        if transfer_value <= 0:
+            return True
+        allowed_overdraw = (
+            self.control_thresholds.get_allowed_overdraw_of_member_account()
+        )
+        account_balance = self._get_account_balance(account)
+        if account_balance is None:
+            return False
+        elif transfer_value > account_balance + allowed_overdraw:
+            return False
+        return True
+
+    def _get_account_balance(self, account: UUID) -> Optional[Decimal]:
+        result = (
+            self.database_gateway.get_accounts()
+            .with_id(account)
+            .joined_with_balance()
+            .first()
+        )
+        if result:
+            return result[1]
+        else:
+            return None
 
     def _get_active_plan(self, request: RegisterPrivateConsumptionRequest) -> Plan:
         now = self.datetime_service.now()
@@ -88,20 +144,84 @@ class RegisterPrivateConsumption:
             raise RejectionReason.plan_inactive
         return plan
 
-    def _transfer_certificates(
+    def _create_compensation_transfer(
+        self,
+        plan: Plan,
+        planner_product_account: UUID,
+        amount: int,
+        coop_price_per_unit: Decimal,
+    ) -> UUID | None:
+        """
+        For background on compensation transfers see developer documentation.
+        """
+        cooperation = self.database_gateway.get_cooperations().of_plan(plan.id).first()
+        if not cooperation:
+            return None
+        difference = self._difference_between_coop_and_individual_price(
+            plan=plan,
+            coop_price_per_unit=coop_price_per_unit,
+        )
+        if difference == Decimal(0):
+            return None
+        elif difference < Decimal(0):
+            """Plan is underproductive."""
+            return self._compensate_company(
+                amount=amount,
+                difference=abs(difference),
+                cooperation_account=cooperation.account,
+                planner_product_account=planner_product_account,
+            )
+        else:
+            """Plan is overproductive."""
+            return self._compensate_cooperation(
+                amount=amount,
+                difference=abs(difference),
+                cooperation_account=cooperation.account,
+                planner_product_account=planner_product_account,
+            )
+
+    def _difference_between_coop_and_individual_price(
+        self,
+        plan: Plan,
+        coop_price_per_unit: Decimal,
+    ) -> Decimal:
+        """
+        Returns the difference between cooperative and individual price.
+        If difference is negative, the plan is underproductive.
+        If difference is positive, it is overproductive.
+        If difference is zero, there is no productivity difference.
+        """
+        individual_price_per_unit = plan.price_per_unit()
+        return coop_price_per_unit - individual_price_per_unit
+
+    def _compensate_cooperation(
         self,
         amount: int,
-        plan: Plan,
-        consumer: Member,
-        coop_price_per_unit: Decimal,
-        individual_price_per_unit: Decimal,
-    ) -> Transaction:
-        planner = self.database_gateway.get_companies().with_id(plan.planner).first()
-        assert planner
-        return self.giro_office.record_transaction_from_member(
-            sender=consumer,
-            receiving_account=planner.product_account,
-            amount_sent=coop_price_per_unit * amount,
-            amount_received=individual_price_per_unit * amount,
-            purpose=f"Plan-Id: {plan.id}",
+        difference: Decimal,
+        cooperation_account: UUID,
+        planner_product_account: UUID,
+    ) -> UUID:
+        transfer = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=planner_product_account,
+            credit_account=cooperation_account,
+            value=difference * amount,
+            type=TransferType.compensation_for_coop,
         )
+        return transfer.id
+
+    def _compensate_company(
+        self,
+        amount: int,
+        difference: Decimal,
+        cooperation_account: UUID,
+        planner_product_account: UUID,
+    ) -> UUID:
+        transfer = self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=cooperation_account,
+            credit_account=planner_product_account,
+            value=difference * amount,
+            type=TransferType.compensation_for_company,
+        )
+        return transfer.id

@@ -18,7 +18,6 @@ class GetMemberAccountPresenter:
         user_name: str
         volume: str
         is_volume_positive: bool
-        purpose: str
 
     @dataclass
     class ViewModel:
@@ -39,11 +38,10 @@ class GetMemberAccountPresenter:
                 ),
                 type=self._transfer_type_as_string(t.type),
                 user_name=t.peer_name,
-                volume=f"{round(t.transaction_volume, 2)}",
-                is_volume_positive=t.transaction_volume >= 0,
-                purpose="" if t.type == TransferType.work_certificates else t.purpose,
+                volume=f"{round(t.transfer_value, 2)}",
+                is_volume_positive=t.transfer_value >= 0,
             )
-            for t in use_case_response.transactions
+            for t in use_case_response.transfers
         ]
         return self.ViewModel(
             balance=f"{round(use_case_response.balance, 2)}",
