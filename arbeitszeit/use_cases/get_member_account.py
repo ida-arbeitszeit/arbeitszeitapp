@@ -30,17 +30,17 @@ class GetMemberAccount:
         member = self.database.get_members().with_id(member_id).first()
         assert member
         transfer_info: List[TransferInfo] = []
-        transfers_of_work_certificates_and_debtor = (
+        work_certificate_transfers = (
             self.database.get_transfers()
             .where_account_is_creditor(member.account)
             .joined_with_debtor()
         )
-        transfers_of_consumptions_and_taxes_joined_with_creditor = (
+        consumption_or_tax_transfers = (
             self.database.get_transfers()
             .where_account_is_debtor(member.account)
             .joined_with_creditor()
         )
-        for tf, debtor in transfers_of_work_certificates_and_debtor:
+        for tf, debtor in work_certificate_transfers:
             transfer_info.append(
                 TransferInfo(
                     date=tf.date,
@@ -49,25 +49,15 @@ class GetMemberAccount:
                     type=TransferType.work_certificates,
                 )
             )
-        for tf, creditor in transfers_of_consumptions_and_taxes_joined_with_creditor:
-            if tf.type == TransferType.private_consumption:
-                transfer_info.append(
-                    TransferInfo(
-                        date=tf.date,
-                        peer_name=creditor.get_name(),
-                        transfer_value=-tf.value,  # negative value
-                        type=TransferType.private_consumption,
-                    )
+        for tf, creditor in consumption_or_tax_transfers:
+            transfer_info.append(
+                TransferInfo(
+                    date=tf.date,
+                    peer_name=creditor.get_name(),
+                    transfer_value=-tf.value,  # negative value for consumption or tax
+                    type=tf.type,
                 )
-            elif tf.type == TransferType.taxes:
-                transfer_info.append(
-                    TransferInfo(
-                        date=tf.date,
-                        peer_name=creditor.get_name(),
-                        transfer_value=-tf.value,  # negative value
-                        type=TransferType.taxes,
-                    )
-                )
+            )
         transfer_info.sort(key=lambda t: t.date, reverse=True)
         return GetMemberAccountResponse(
             transfers=transfer_info, balance=self.get_account_balance(member.account)
