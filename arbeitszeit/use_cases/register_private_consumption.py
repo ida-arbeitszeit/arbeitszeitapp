@@ -116,10 +116,12 @@ class RegisterPrivateConsumption:
         allowed_overdraw = (
             self.control_thresholds.get_allowed_overdraw_of_member_account()
         )
+        if allowed_overdraw is None:
+            return True
         account_balance = self._get_account_balance(account)
         if account_balance is None:
             return False
-        elif transfer_value > account_balance + allowed_overdraw:
+        if transfer_value > account_balance + allowed_overdraw:
             return False
         return True
 

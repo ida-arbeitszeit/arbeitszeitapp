@@ -16,7 +16,7 @@ class UseCaseTester(BaseTestCase):
         self.use_case = self.injector.get(
             show_prd_account_details.ShowPRDAccountDetailsUseCase
         )
-        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(None)
 
     def test_no_transfers_returned_when_no_transfers_took_place(self) -> None:
         company = self.company_generator.create_company()
