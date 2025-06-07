@@ -101,26 +101,6 @@ When you have Direnv installed, this will automatically invoke Nix and install
 all dependencies in the virtual environment every time you enter the root code directory. 
 For the line ``use flake`` to have effect you might need to install nix-direnv. 
 
-    **A note for Mac users:**  You may find it convenient to place your clone
-    of the Arbeitszeit application code base in an iCloud directory, so that 
-    you can have access to the same files, in the same state, from various devices
-    logged into the same iCloud account.  In this case, however, the value of 
-    ``ARBEITSZEITAPP_CONFIGURATION_PATH`` as determined above using the ``PWD`` 
-    environment variable may be incorrect. Once you have stepped into the 
-    ``arbeitszeit`` directory and triggered Direnv to load the environment 
-    variables, check the value of ``ARBEITSZEITAPP_CONFIGURATION_PATH``:
-    
-        .. code-block:: bash
-    
-         echo $ARBEITSZEITAPP_CONFIGURATION_PATH
-    
-    If the value is incorrect, you can hard-code your iCloud-based path as a workaround:
-    
-        .. code-block:: bash
-    
-         DIR=<actual_present_working_directory>
-         export ARBEITSZEITAPP_CONFIGURATION_PATH="$DIR/arbeitszeit_flask/development_settings.py"
-
 
 Virtual Environment via Venv
 ----------------------------
