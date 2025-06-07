@@ -54,8 +54,8 @@ test suite. The names you choose for these two databases are arbitrary
 --- e.g., ``Arbeitszeitapp_dev`` and ``Arbeitszeitapp_test``, respectively.
 
 
-Virtual Environment Management via Nix or venv
------------------------------------------------
+Virtual Environment via Nix
+----------------------------
 
 Although it is not obligatory, we encourage 
 developers to use `Nix <https://nixos.org>`_, which sets up a virtual 
@@ -95,42 +95,9 @@ change anything else on your machine and the respective python
 interpreter will be garbage collected the next time you run
 ``nix-collect-garbage``.
 
-If you are using ``venv``
-instead, create a virtual environment with ``python -m venv venv``.
-Then, to execute the virtual environment ``source ./venv/bin/activate``.
-Within the venv environment, install all required packages: 
-``pip install -r requirements-dev.txt``. You can deactivate the
-virtual environment by typing ``deactivate`` at the command prompt.
-
-
-Environment Variables
----------------------
-
-Before you can start developing, you first have to define some
-environment variables:
-
-    .. code-block:: bash
-
-     export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
-     export FLASK_APP=arbeitszeit_flask
-     export FLASK_DEBUG=1
-     export DEV_SECRET_KEY=my_secret_key
-     export ARBEITSZEIT_APP_SERVER_NAME=127.0.0.1:5000
-     export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of dev database>"
-     export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
-
-
-You may find it useful to copy these shell commands into a configuration
-file called ``.envrc`` in the top-level directory of the repo. 
-Then, you can install and setup the `Direnv
-<https://direnv.net>`_
-utility program on your system --- outside of your virtual environment. 
-Now, whenever you step into the top-level
-directory of the repo (where ``.envrc`` resides), Direnv will automatically 
-set the environment variables for you.  
-
 When working with Nix, you may add the line ``use flake`` 
-at the top of your ``.envrc`` file. Direnv will first invoke Nix and install 
+at the top of an ``.envrc`` file in the top-level directory of the repo. 
+When you have Direnv installed, this will automatically invoke Nix and install 
 all dependencies in the virtual environment every time you enter the root code directory. 
 For the line ``use flake`` to have effect you might need to install nix-direnv. 
 
@@ -153,6 +120,31 @@ For the line ``use flake`` to have effect you might need to install nix-direnv.
     
          DIR=<actual_present_working_directory>
          export ARBEITSZEITAPP_CONFIGURATION_PATH="$DIR/arbeitszeit_flask/development_settings.py"
+
+
+Virtual Environment via Venv
+----------------------------
+
+If you decide to use ``venv`` instead of Nix, create a virtual environment 
+with ``python -m venv venv``.
+Then, to execute the virtual environment ``source ./venv/bin/activate``.
+Within the venv environment, install all required packages: 
+``pip install -r requirements-dev.txt``. You can deactivate the
+virtual environment by typing ``deactivate`` at the command prompt.
+
+
+Environment Variables
+---------------------
+
+Before you can start developing, you first have to define some
+environment variables in an .env file in the top-level directory of the
+repo:
+
+    .. code-block:: ini
+
+     DEV_SECRET_KEY=my_secret_key
+     DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of dev database>"
+     ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 
 Development server
