@@ -3,7 +3,9 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.review_registered_consumptions import RegisteredConsumption
+from arbeitszeit.use_cases.review_registered_consumptions import (
+    RegisteredConsumption,
+)
 from arbeitszeit.use_cases.review_registered_consumptions import (
     ReviewRegisteredConsumptionsUseCase as UseCase,
 )
