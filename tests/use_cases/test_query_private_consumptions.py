@@ -11,7 +11,7 @@ class TestQueryPrivateConsumptions(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.query_consumptions = self.injector.get(QueryPrivateConsumptions)
-        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(None)
 
     def test_that_no_consumption_is_returned_when_searching_an_empty_repo(self) -> None:
         member = self.member_generator.create_member()
