@@ -4,7 +4,7 @@ from arbeitszeit.injector import singleton
 @singleton
 class ControlThresholdsTestImpl:
     def __init__(self) -> None:
-        self.allowed_overdraw_of_member_account: int = 10000000
+        self.allowed_overdraw_of_member_account: int = -1
         self.acceptable_relative_account_deviation: int = 33
 
     def get_allowed_overdraw_of_member_account(self) -> int:

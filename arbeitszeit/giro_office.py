@@ -50,10 +50,12 @@ class GiroOffice:
         allowed_overdraw = (
             self.control_thresholds.get_allowed_overdraw_of_member_account()
         )
+        if allowed_overdraw == -1:
+            return True
         account_balance = self._get_account_balance(sending_account)
         if account_balance is None:
             return False
-        elif transaction_volume > account_balance + allowed_overdraw:
+        if transaction_volume > account_balance + allowed_overdraw:
             return False
         return True
 
