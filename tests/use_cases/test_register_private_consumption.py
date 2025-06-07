@@ -5,6 +5,8 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
+from parameterized import parameterized
+
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import query_private_consumptions
 from arbeitszeit.use_cases.register_hours_worked import (
@@ -128,20 +130,29 @@ class RegisterPrivateConsumptionTests(BaseTestCase):
             response.rejection_reason, RejectionReason.insufficient_balance
         )
 
-    def test_registration_is_successful_if_member_without_certs_consumes_value_of_10_and_has_account_limit_of_11(
+    @parameterized.expand(
+        [
+            (Decimal("2"), 2),
+            (Decimal("2"), 3),
+            (Decimal("2"), -1),
+        ]
+    )
+    def test_registration_is_successful_if_member_without_certs_has_account_limit_that_equals_or_exceeds_the_product_price(
         self,
+        price: Decimal,
+        allowed_overdraw: int,
     ) -> None:
         plan = self.plan_generator.create_plan(
             costs=ProductionCosts(
-                means_cost=Decimal("4"),
-                resource_cost=Decimal("4"),
-                labour_cost=Decimal("2"),
+                means_cost=Decimal(price),
+                resource_cost=Decimal(0),
+                labour_cost=Decimal(0),
             ),
             amount=1,
             cooperation=None,
         )
         assert self.balance_checker.get_member_account_balance(self.consumer) == 0
-        self.control_thresholds.set_allowed_overdraw_of_member_account(11)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(allowed_overdraw)
 
         response = self.register_private_consumption.register_private_consumption(
             self.make_request(plan, 1)

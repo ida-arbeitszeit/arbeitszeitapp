@@ -117,7 +117,8 @@ configuration options are available
 
 .. py:data:: ALLOWED_OVERDRAW_MEMBER
    
-   This integer defines how far members can overdraw their account.
+   This integer defines how far members can overdraw their account in hours.
+   ``-1`` means unlimited.
 
    Default: ``0``
 
