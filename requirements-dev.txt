@@ -8,6 +8,7 @@ mypy
 parameterized
 psycopg2
 pytest
+python-dotenv
 sphinx
 sphinx-rtd-theme
 types-python-dateutil

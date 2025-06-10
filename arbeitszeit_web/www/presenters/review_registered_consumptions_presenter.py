@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.review_registered_consumptions import RegisteredConsumption
+from arbeitszeit.use_cases.review_registered_consumptions import (
+    RegisteredConsumption,
+)
 from arbeitszeit.use_cases.review_registered_consumptions import (
     ReviewRegisteredConsumptionsUseCase as UseCase,
 )
