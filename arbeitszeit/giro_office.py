@@ -31,7 +31,7 @@ class GiroOffice:
         purpose: str,
     ) -> Transaction:
         sending_account = sender.account
-        if not self._is_account_balance_sufficient(amount_sent, sending_account):
+        if not self._is_transaction_allowed(sending_account, amount_sent):
             raise TransactionRejection.insufficient_account_balance
         return self.database_gateway.create_transaction(
             date=self.datetime_service.now(),
@@ -42,18 +42,20 @@ class GiroOffice:
             purpose=purpose,
         )
 
-    def _is_account_balance_sufficient(
-        self, transaction_volume: Decimal, sending_account: UUID
+    def _is_transaction_allowed(
+        self, sending_account: UUID, transaction_volume: Decimal
     ) -> bool:
         if transaction_volume <= 0:
             return True
         allowed_overdraw = (
             self.control_thresholds.get_allowed_overdraw_of_member_account()
         )
+        if allowed_overdraw is None:
+            return True
         account_balance = self._get_account_balance(sending_account)
         if account_balance is None:
             return False
-        elif transaction_volume > account_balance + allowed_overdraw:
+        if transaction_volume > account_balance + allowed_overdraw:
             return False
         return True
 
