@@ -183,6 +183,9 @@ class PlanGenerator:
         hidden_by_user: bool = False,
         rejected: bool = False,
     ) -> UUID:
+        assert not (
+            requested_cooperation and cooperation
+        ), "You cannot request a new cooperation for a plan that already belongs to one."
         if planner is None:
             planner = self.company_generator.create_company()
         draft = self.draft_plan(
@@ -216,29 +219,74 @@ class PlanGenerator:
             )
             assert rejected_response.is_plan_rejected
         if requested_cooperation:
-            request_cooperation_response = self.request_cooperation(
-                RequestCooperationRequest(
-                    planner, file_plan_response.plan_id, requested_cooperation
-                )
+            self._request_cooperation(
+                planner=planner,
+                plan=file_plan_response.plan_id,
+                cooperation=requested_cooperation,
             )
-            assert (
-                not request_cooperation_response.is_rejected
-            ), f"Cooperation request failed: {request_cooperation_response}"
         if cooperation:
-            coordinator = self._get_cooperation_coordinator(cooperation, planner)
-            self.request_cooperation(
-                RequestCooperationRequest(
-                    planner, file_plan_response.plan_id, cooperation
-                )
-            )
-            self.accept_cooperation(
-                AcceptCooperationRequest(
-                    coordinator, file_plan_response.plan_id, cooperation
-                )
+            self._add_plan_to_cooperation(
+                planner=planner,
+                plan_id=file_plan_response.plan_id,
+                cooperation=cooperation,
             )
         if hidden_by_user:
             self.hide_plan(plan_id=file_plan_response.plan_id)
         return file_plan_response.plan_id
+
+    def _add_plan_to_cooperation(
+        self,
+        planner: UUID,
+        plan_id: UUID,
+        cooperation: UUID,
+    ) -> None:
+        self._request_cooperation(
+            planner=planner,
+            plan=plan_id,
+            cooperation=cooperation,
+        )
+        coordinator = self._get_cooperation_coordinator(cooperation, planner)
+        self._accept_cooperation(
+            coordinator=coordinator,
+            plan=plan_id,
+            cooperation=cooperation,
+        )
+
+    def _request_cooperation(
+        self,
+        planner: UUID,
+        plan: UUID,
+        cooperation: UUID,
+    ) -> None:
+        request = RequestCooperationRequest(
+            requester_id=planner, plan_id=plan, cooperation_id=cooperation
+        )
+        response = self.request_cooperation(request)
+        if response.is_rejected:
+            assert response.rejection_reason
+            raise response.rejection_reason
+
+    def _accept_cooperation(
+        self,
+        coordinator: UUID,
+        plan: UUID,
+        cooperation: UUID,
+    ) -> None:
+        request = AcceptCooperationRequest(
+            requester_id=coordinator, plan_id=plan, cooperation_id=cooperation
+        )
+        response = self.accept_cooperation(request)
+        if response.is_rejected:
+            assert response.rejection_reason
+            raise response.rejection_reason
+
+    def _get_cooperation_coordinator(self, cooperation: UUID, planner: UUID) -> UUID:
+        request = get_coop_summary.GetCoopSummaryRequest(
+            requester_id=planner, coop_id=cooperation
+        )
+        response = self.get_coop_summary_use_case(request)
+        assert response
+        return response.current_coordinator
 
     def draft_plan(
         self,
@@ -317,14 +365,6 @@ class PlanGenerator:
         plan = self.database_gateway.get_plans().with_id(plan_id).first()
         assert plan
         return plan
-
-    def _get_cooperation_coordinator(self, cooperation: UUID, planner: UUID) -> UUID:
-        request = get_coop_summary.GetCoopSummaryRequest(
-            requester_id=planner, coop_id=cooperation
-        )
-        response = self.get_coop_summary_use_case(request)
-        assert response
-        return response.current_coordinator
 
 
 @dataclass
@@ -487,6 +527,8 @@ class CooperationGenerator:
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
     create_cooperation_use_case: CreateCooperation
+    request_cooperation_use_case: RequestCooperation
+    accept_cooperation_use_case: AcceptCooperation
 
     def create_cooperation(
         self,
@@ -508,18 +550,45 @@ class CooperationGenerator:
         cooperation_id = uc_response.cooperation_id
         assert cooperation_id
         if plans is not None:
-            assert (
-                self.database_gateway.get_plans()
-                .with_id(*plans)
-                .update()
-                .set_cooperation(cooperation_id)
-                .perform()
-            )
+            for plan in plans:
+                planner = self._get_planner(plan)
+                self._add_plan_to_cooperation(
+                    planner=planner,
+                    plan=plan,
+                    cooperation=cooperation_id,
+                    coordinator=coordinator,
+                )
         cooperation_record = (
             self.database_gateway.get_cooperations().with_id(cooperation_id).first()
         )
         assert cooperation_record
         return cooperation_record.id
+
+    def _get_planner(self, plan: UUID) -> UUID:
+        plan_record = self.database_gateway.get_plans().with_id(plan).first()
+        assert plan_record
+        return plan_record.planner
+
+    def _add_plan_to_cooperation(
+        self,
+        planner: UUID,
+        plan: UUID,
+        cooperation: UUID,
+        coordinator: UUID,
+    ) -> None:
+        request = RequestCooperationRequest(
+            requester_id=planner, plan_id=plan, cooperation_id=cooperation
+        )
+        request_response = self.request_cooperation_use_case(request)
+        if request_response.is_rejected:
+            assert request_response.rejection_reason
+            raise request_response.rejection_reason
+        accept_response = self.accept_cooperation_use_case(
+            AcceptCooperationRequest(coordinator, plan, cooperation)
+        )
+        if accept_response.is_rejected:
+            assert accept_response.rejection_reason
+            raise accept_response.rejection_reason
 
 
 @dataclass
