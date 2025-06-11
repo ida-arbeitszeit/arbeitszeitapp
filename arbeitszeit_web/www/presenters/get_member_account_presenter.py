@@ -38,8 +38,8 @@ class GetMemberAccountPresenter:
                 ),
                 type=self._transfer_type_as_string(t.type),
                 user_name=t.peer_name,
-                volume=f"{round(t.transfer_value, 2)}",
-                is_volume_positive=t.transfer_value >= 0,
+                volume=f"{round(t.transferred_value, 2)}",
+                is_volume_positive=t.transferred_value >= 0,
             )
             for t in use_case_response.transfers
         ]

@@ -173,6 +173,6 @@ class TestPresenter(BaseTestCase):
         return TransferInfo(
             date=date,
             peer_name="test company",
-            transfer_value=transaction_volume,
+            transferred_value=transaction_volume,
             type=type,
         )

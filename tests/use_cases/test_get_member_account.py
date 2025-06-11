@@ -75,7 +75,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
     response = use_case(member)
     assert len(response.transfers) == 1
     assert response.transfers[0].peer_name == expected_company_name
-    assert response.transfers[0].transfer_value == Decimal(-10)
+    assert response.transfers[0].transferred_value == Decimal(-10)
     assert response.transfers[0].type == TransferType.private_consumption
     assert response.balance == Decimal(-10)
 
@@ -104,8 +104,8 @@ def test_that_a_transaction_with_volume_zero_is_shown_correctly(
         consumer=member, amount=1, plan=plan
     )
     response = use_case(member)
-    assert response.transfers[0].transfer_value == Decimal("0")
-    assert str(response.transfers[0].transfer_value) == "0"
+    assert response.transfers[0].transferred_value == Decimal("0")
+    assert str(response.transfers[0].transferred_value) == "0"
 
 
 @injection_test
@@ -179,7 +179,7 @@ def test_that_correct_tax_info_is_generated(
     transfer = response.transfers[0]
     assert transfer.peer_name == social_accounting.get_name()
     assert transfer.type == TransferType.taxes
-    assert transfer.transfer_value == Decimal("0")
+    assert transfer.transferred_value == Decimal("0")
 
 
 @injection_test
@@ -204,7 +204,7 @@ def test_that_correct_work_certificates_info_is_generated(
     response = use_case(member)
     transfer = response.transfers[1]
     assert transfer.peer_name == expected_company_name
-    assert transfer.transfer_value == Decimal(8.5)
+    assert transfer.transferred_value == Decimal(8.5)
     assert transfer.type == TransferType.work_certificates
 
 

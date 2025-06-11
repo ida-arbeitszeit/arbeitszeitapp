@@ -12,7 +12,7 @@ from arbeitszeit.transfers import TransferType
 class TransferInfo:
     date: datetime
     peer_name: str
-    transfer_value: Decimal
+    transferred_value: Decimal
     type: TransferType
 
 
@@ -45,7 +45,7 @@ class GetMemberAccount:
                 TransferInfo(
                     date=tf.date,
                     peer_name=debtor.get_name(),
-                    transfer_value=tf.value,
+                    transferred_value=tf.value,
                     type=TransferType.work_certificates,
                 )
             )
@@ -54,7 +54,7 @@ class GetMemberAccount:
                 TransferInfo(
                     date=tf.date,
                     peer_name=creditor.get_name(),
-                    transfer_value=-tf.value,  # negative value for consumption or tax
+                    transferred_value=-tf.value,  # negative value for consumption or tax
                     type=tf.type,
                 )
             )

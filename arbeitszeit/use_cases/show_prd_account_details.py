@@ -144,24 +144,14 @@ class ShowPRDAccountDetailsUseCase:
         )
         transfers: list[TransferInfo] = []
         for transfer, debtor in transfers_and_debtor:
-            if transfer.type == TransferType.compensation_for_company:
-                transfers.append(
-                    TransferInfo(
-                        type=TransferType.compensation_for_company,
-                        date=transfer.date,
-                        volume=transfer.value,
-                        peer=self._create_peer_info(debtor),
-                    )
+            transfers.append(
+                TransferInfo(
+                    type=transfer.type,
+                    date=transfer.date,
+                    volume=transfer.value,
+                    peer=self._create_peer_info(debtor),
                 )
-            elif transfer.type == TransferType.private_consumption:
-                transfers.append(
-                    TransferInfo(
-                        type=TransferType.private_consumption,
-                        date=transfer.date,
-                        volume=transfer.value,
-                        peer=self._create_peer_info(debtor),
-                    )
-                )
+            )
         return transfers
 
     def _get_productive_consumption_transfers(
