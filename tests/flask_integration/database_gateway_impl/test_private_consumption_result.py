@@ -26,15 +26,18 @@ class PrivateConsumptionTests(FlaskTestCase):
         assert consumption
         assert consumption.plan_id == plan
 
-    def test_that_transaction_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
+    def test_that_transfer_id_retrieved_is_the_same_twice_in_a_row(self) -> None:
         self.consumption_generator.create_private_consumption()
         consumption_1 = self.database_gateway.get_private_consumptions().first()
         consumption_2 = self.database_gateway.get_private_consumptions().first()
         assert consumption_1
         assert consumption_2
-        assert consumption_1.transaction_id == consumption_2.transaction_id
+        assert (
+            consumption_1.transfer_of_private_consumption
+            == consumption_2.transfer_of_private_consumption
+        )
 
-    def test_that_transaction_id_for_two_different_consumptions_is_also_different(
+    def test_that_transfer_id_for_two_different_consumptions_is_also_different(
         self,
     ) -> None:
         self.consumption_generator.create_private_consumption()
@@ -42,7 +45,10 @@ class PrivateConsumptionTests(FlaskTestCase):
         consumption_1, consumption_2 = list(
             self.database_gateway.get_private_consumptions()
         )
-        assert consumption_1.transaction_id != consumption_2.transaction_id
+        assert (
+            consumption_1.transfer_of_private_consumption
+            != consumption_2.transfer_of_private_consumption
+        )
 
     def test_that_amount_is_retrieved_with_the_same_value_as_specified_when_creating_the_consumption(
         self,
@@ -83,19 +89,19 @@ class PrivateConsumptionTests(FlaskTestCase):
         assert consumption_1.plan_id == plan_1
         assert consumption_2.plan_id == plan_2
 
-    def test_can_retrieve_plan_and_transaction_with_consumption(self) -> None:
+    def test_can_retrieve_plan_and_transfer_with_consumption(self) -> None:
         self.consumption_generator.create_private_consumption()
         result = (
             self.database_gateway.get_private_consumptions()
-            .joined_with_transactions_and_plan()
+            .joined_with_transfer_and_plan()
             .first()
         )
         assert result
-        consumption, transaction, plan = result
-        assert consumption.transaction_id == transaction.id
+        consumption, transfer, plan = result
+        assert consumption.transfer_of_private_consumption == transfer.id
         assert consumption.plan_id == plan.id
 
-    def test_can_combine_filtering_and_joining_of_consumptions_with_transactions_and_plans(
+    def test_can_combine_filtering_and_joining_of_consumptions_with_transfer_and_plan(
         self,
     ) -> None:
         member = self.member_generator.create_member()
@@ -104,7 +110,7 @@ class PrivateConsumptionTests(FlaskTestCase):
             self.database_gateway.get_private_consumptions()
             .ordered_by_creation_date()
             .where_consumer_is_member(member)
-            .joined_with_transactions_and_plan()
+            .joined_with_transfer_and_plan()
         )
 
     def test_exclude_consumptions_of_products_from_other_providers_when_filtering_by_providing_company(
@@ -135,11 +141,11 @@ class PrivateConsumptionTests(FlaskTestCase):
         )
         result = (
             self.database_gateway.get_private_consumptions()
-            .joined_with_transaction_and_plan_and_consumer()
+            .joined_with_transfer_and_plan_and_consumer()
             .first()
         )
         assert result
-        consumption, transaction, plan, consumer = result
-        assert consumption.transaction_id == transaction.id
+        consumption, transfer, plan, consumer = result
+        assert consumption.transfer_of_private_consumption == transfer.id
         assert consumption.plan_id == plan.id
         assert consumer.id == expected_consumer
