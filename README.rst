@@ -3,7 +3,6 @@
 .. |Generic badge| image:: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml/badge.svg
    :target: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml
 
-.. start-introduction-do-not-delete
 
 Introduction
 ============
@@ -25,8 +24,6 @@ products published, and work or consumption recorded.
 This application implements a theory (`"Arbeitszeitrechnung"
 <https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_)
 elaborated in the 1920s by members of a German working-class movement.
-
-.. end-introduction-do-not-delete
 
 Note on Stability and Breaking Changes
 ======================================
