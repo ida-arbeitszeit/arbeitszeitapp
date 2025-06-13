@@ -6,7 +6,7 @@ gunicorn
 isort
 mypy
 parameterized
-psycopg2
+psycopg2-binary
 pytest
 sphinx
 sphinx-rtd-theme

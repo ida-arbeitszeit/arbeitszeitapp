@@ -1,0 +1,15 @@
+services:
+  python-app:
+    build:
+      context: .
+    container_name: python-app
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env  # Uncomment if .env file exists
+    ports:
+      - "5000:5000"  # Expose Flask default port as per Dockerfile
+    # If you add a database or other services, add depends_on here
+    # networks: [default]  # Default network is sufficient for a single service
+
+# No external services (database, cache, etc.) detected in the project documentation or codebase.
+# No volumes section needed as there are no persistent data requirements for this service.

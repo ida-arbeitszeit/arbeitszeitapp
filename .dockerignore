@@ -1,0 +1,85 @@
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# Test and development directories
+/tests/
+test*/
+
+# Build outputs
+build/
+dist/
+out/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+.svn/
+.hg/
+
+# Environment and secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Node.js (if any JS tooling is used)
+node_modules/
+npm-debug.log
+yarn-debug.log
+
+# Documentation and markdown
+/docs/
+*.md
+README*
+CONDUCT.rst
+
+# Docker files
+Dockerfile*
+docker-compose*
+
+# Temporary and local files
+tmp/
+temp/
+*.tmp
+.local/
+local/
+
+# Miscellaneous
+*.log
+*.bak
+*.orig
+
+# Sphinx build (if docs are built)
+*.doctree
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Nix and lock files
+flake.lock
+
+# Exclude type stubs and necessary source
+!type_stubs/
+!arbeitszeit/
+!arbeitszeit_flask/
+!arbeitszeit_web/
+!arbeitszeit_benchmark/
+!arbeitszeit_development/
+!build_support/
+!nix/
