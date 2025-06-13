@@ -28,6 +28,13 @@ elaborated in the 1920s by members of a German working-class movement.
 
 .. end-introduction-do-not-delete
 
+Note on Stability and Breaking Changes
+======================================
+
+This project is currently in an early development stage (version 0.0.0). At this point, we do not guarantee stability or backward compatibility. Breaking changes may occur at any time, and the API or behavior may change without notice.
+
+We are still actively developing the project, so please expect ongoing changes as things evolve.
+
 How to contribute
 =================
 
