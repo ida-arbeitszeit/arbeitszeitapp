@@ -1,27 +1,7 @@
 Development Setup
 =================
 
-The preferred development environment is Linux. In addition, we encourage 
-developers to use `Nix <https://nixos.org>`_, which sets up a virtual 
-environment within a directory subtree, as a more powerful alternative 
-to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
-A Nix flake is located in this repository.
-
-    **A note for Mac users:**
-    By default, during Nix installation, commands are added to configure path and environment
-    variables within scripts located in the global /etc directory. However, macOS updates can
-    overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
-    adding the following command to your ~/.zshrc file:
-
-        .. code-block:: bash
-
-         # Nix
-         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-           source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-         fi
-         # End Nix
-
-    see https://github.com/NixOs/nix/issues/3616 for more details.
+The recommended development environment is Linux. 
 
 
 Development Philosophy
@@ -68,120 +48,111 @@ In order to work on Arbeitszeitapp you need to have the `PostgreSQL
 <https://www.postgresql.org>`_ relational
 database management system set up on your machine.  Once you have
 PostgreSQL set up locally, you will need to create two databases.
-One is a development database that holds the data for your test 
-users.  You will use this database when running the
-development server as you test the application with newly developed
-features or bug fixes.  The other database is used for the automated
+One is a development database that you will use when running the
+development server. The other database is used for the automated
 test suite. The names you choose for these two databases are arbitrary 
 --- e.g., ``Arbeitszeitapp_dev`` and ``Arbeitszeitapp_test``, respectively.
 
 
-General Setup
--------------
+Virtual Environment via Nix
+----------------------------
+
+Although it is not obligatory, we encourage 
+developers to use `Nix <https://nixos.org>`_, which sets up a virtual 
+environment within a directory subtree, as a more powerful alternative 
+to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
+A Nix flake is located in this repository.
+
+    **A note for Mac users:**
+    By default, during Nix installation, commands are added to configure path and environment
+    variables within scripts located in the global /etc directory. However, macOS updates can
+    overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
+    adding the following command to your ~/.zshrc file:
+
+        .. code-block:: bash
+
+         # Nix
+         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+           source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+         fi
+         # End Nix
+
+    see https://github.com/NixOs/nix/issues/3616 for more details.
 
 If you are working with Nix, go to the top-level directory of the repo
 and enter ``nix develop`` at the command prompt.  This will cause Nix to 
 read the dependency description in ``nix.flake`` and fulfill those
-dependencies in a local virtual environment.  If you are using ``venv``
-instead, create a virtual environment with ``python -m venv venv``
+dependencies in a local virtual environment. You can quit the
+virtual environment by typing ``exit`` at the command prompt.
+
+Using Nix will give you the option to access a development environment with any of the supported
+python versions via ``nix develop``. Check `flake.nix` for the
+supported environments under the key ``devShells``. For example to
+enter a development shell with ``python3.11`` set as the default
+interpreter run ``nix develop .#python311``. This will drop you into a
+shell with python3.11 as the default python interpreter. This won't
+change anything else on your machine and the respective python
+interpreter will be garbage collected the next time you run
+``nix-collect-garbage``.
+
+When working with Nix, you may add the line ``use flake`` 
+at the top of an ``.envrc`` file in the top-level directory of the repo. 
+When you have Direnv installed, this will automatically invoke Nix and install 
+all dependencies in the virtual environment every time you enter the root code directory. 
+For the line ``use flake`` to have effect you might need to install nix-direnv. 
+
+
+Virtual Environment via Venv
+----------------------------
+
+If you decide to use ``venv`` instead of Nix, create a virtual environment 
+with ``python -m venv venv``.
 Then, to execute the virtual environment ``source ./venv/bin/activate``.
 Within the venv environment, install all required packages: 
-``pip install -r requirements-dev.txt``
+``pip install -r requirements-dev.txt``. You can deactivate the
+virtual environment by typing ``deactivate`` at the command prompt.
 
-In order to run the app in development mode, you first have to define some
-environment variables:
 
-    .. code-block:: bash
+Environment Variables
+---------------------
 
-     export ARBEITSZEITAPP_CONFIGURATION_PATH="$PWD/arbeitszeit_flask/development_settings.py"
-     export FLASK_APP=arbeitszeit_flask
-     export FLASK_DEBUG=1
-     export DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of database>"
-     export DEV_SECRET_KEY=my_secret_key
-     export ARBEITSZEIT_APP_SERVER_NAME=127.0.0.1:5000
-     export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
+Before you can start developing, you first have to define some
+environment variables in an .env file in the top-level directory of the
+repo:
 
-You may find it useful to copy these shell commands into a script file and 
-run it at the beginning of every development session.  (If you do this, be sure
-to list your script in ``.gitignore`` so that it does not get committed into 
-the repo.) A more pleasant alternative is to copy them into a configuration
-file called ``.envrc`` in the top-level directory of the repo.  (This file name
-is already included in ``.gitignore``.)  Then, you can install the `Direnv
-<https://direnv.net>`_
-utility program on your system --- outside of your virtual environment.  (If you
-are using ``venv``, you can step out of the virtual environment with the ``deactivate``
-command.  If you are using Nix and have issued the command ``nix develop``, you can
-end the Nix session simply with ``exit`` or Ctl-D.) If you choose this route, be 
-sure to follow the Direnv setup instructions for editing your shell configuration
-script.  Once you do this, in any new shell, when you step into the top-level
-directory of the repo (where ``.envrc`` resides), Direnv will automatically 
-set the environment variables for you.  If you then add the line ``use flake`` 
-at the top of your ``.envrc`` file, Direnv will first invoke Nix and install 
-all dependencies in the virtual environment ---
-automatically, every time you enter the root code directory (for the line ``use flake`` 
-to have effect you might need to install nix-direnv). Note that the
-first time you use Direnv, and any time you change ``.envrc``, you will need
-to run the command ``direnv allow`` to enable Direnv to proceed.
+    .. code-block:: ini
 
-    **A note for Mac users:**  You may find it convenient to place your clone
-    of the Arbeitszeit application code base in an iCloud directory, so that 
-    you can have access to the same files, in the same state, from various devices
-    logged into the same iCloud account.  In this case, however, the value of 
-    ``ARBEITSZEITAPP_CONFIGURATION_PATH`` as determined above using the ``PWD`` 
-    environment variable may be incorrect. Once you have stepped into the 
-    ``arbeitszeit`` directory and triggered Direnv to load the environment 
-    variables, check the value of ``ARBEITSZEITAPP_CONFIGURATION_PATH``:
-    
-        .. code-block:: bash
-    
-         echo $ARBEITSZEITAPP_CONFIGURATION_PATH
-    
-    If the value is incorrect, you can hard-code your iCloud-based path as a workaround:
-    
-        .. code-block:: bash
-    
-         DIR=<actual_present_working_directory>
-         export ARBEITSZEITAPP_CONFIGURATION_PATH="$DIR/arbeitszeit_flask/development_settings.py"
+     DEV_SECRET_KEY=my_secret_key
+     DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of dev database>"
+     ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
-The configuration file ``development_settings.py`` sets several variables, but you
-may find it convenient to get by with a smaller group of variables, whose values 
-you can set in a top-level file, ``custom_settings.py``, to which you should direct
-Flask by means of the value of ``ARBEITSZEITAPP_CONFIGURATION_PATH`` *instead*
-of the value given above:
 
-Here is a smaller ``.envrc`` that makes use of a ``custom_settings.py``:
+Development server
+------------------
 
-    .. code-block:: bash
-
-     use flake
-     export ARBEITSZEITAPP_CONFIGURATION_PATH=$PWD/custom_settings.py
-     export FLASK_APP=arbeitszeit_flask
-     export FLASK_DEBUG=1
-     export ARBEITSZEITAPP_TEST_DB="postgresql:///<name_of_your_test_DB>"
-
-Then, here is a sample ``custom_settings.py``:
-
-    .. code-block:: bash
-
-     from arbeitszeit_flask.development_settings import *
-     
-     SECRET_KEY = 'somesecretkey'
-     SQLALCHEMY_DATABASE_URI = 'postgresql:///<name_of_your_development_DB>'
-     SERVER_NAME = "127.0.0.1:5000"
-
-After configuring the database connection, you need to run the database
-migrations via ``alembic upgrade head``. It is mandatory to run this command 
-once before developing for the first time.
+When developing, you can run the development app to manually test your 
+latest changes from a user interface perspective.  The app will use the
+development database you set up above.  
+Before you start the development server for the first time, you need to run the
+database migrations via ``alembic upgrade head`` once.
 
 Afterwards, you can start the development server with ``flask
 run``.
 
-Create a user by signing up and providing the required fields.  You
-will be redirected to a site that asks to confirm your account
-creating with the link provided in your e-mail.  This link can be found
-in the command line starting with
-*<p><a href="* until the closing quotation marks. Visit this link in your
-browser, and your account will be activated.
+In the development app, you might want to sign up a company or a member. While doing this,
+you will be redirected to a site that asks to click a confirmation link provided in an e-mail. 
+You find this invitation mail printed to ``stdout``. In general, mails are printed to ``stdout``
+in the development environment. 
+
+Moreover, when manually filing plans in the development environment, you need 
+at least one accountant to approve these files. You can invite 
+accountants from the terminal, using the following command:
+
+  .. code-block:: bash
+
+   flask invite-accountant example@mail.de
+
+Again, an invitation mail with a confirmation link will be printed to ``stdout``.
 
 
 Code Formatting and Analysis
@@ -240,8 +211,9 @@ tests, you can do so by executing ``./run-checks``, which will run all
 tests that need to pass before your code reviewers can consider merging 
 your change into the main development branch.
 
-Development Dependencies
-------------------------
+
+Update Development Dependencies
+-------------------------------
 
 We use Nix to manage the development dependencies of
 ``arbeitszeitapp``. We try to leverage ``nixpkgs`` as a source for our
@@ -365,8 +337,8 @@ A contributor to the ``arbeitszeitapp`` might want to compare
 the results of those benchmarks from the master branch to the results
 from their changes. The output of this tool is in JSON.
 
-Using a Binary Cache
---------------------
+Using a Binary Cache for Nix
+----------------------------
 
 You can access the binary cache hosted on `cachix
 <https://www.cachix.org/>`_ in your development environment if you are
@@ -377,31 +349,6 @@ how to set this up locally.  The benefit of this for you is that you
 can avoid building dependencies that are already built once in the 
 continuous integration (CI) pipeline.
 
-Developing with different python versions
------------------------------------------
-
-You can access a development environment with any of the supported
-python versions via ``nix develop``. Check `flake.nix` for the
-supported environments under the key ``devShells``. For example to
-enter a development shell with ``python3.11`` set as the default
-interpreter run ``nix develop .#python311``. This will drop you into a
-shell with python3.11 as the default python interpreter. This won't
-change anything else on your machine and the respective python
-interpreter will be garbage collected the next time you run
-``nix-collect-garbage``.
-
-Invite Accountants
--------------------
-
-When manually filing plans in the development environment, you need 
-at least one accountant to approve these files. You can invite 
-accountants from the terminal, using the following command:
-
-  .. code-block:: bash
-
-   flask invite-accountant example@mail.de
-
-An invitation mail will be printed to ``stdout`` containing an invite link.
 
 Web API
 --------

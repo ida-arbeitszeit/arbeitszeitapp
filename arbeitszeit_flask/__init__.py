@@ -20,13 +20,15 @@ from arbeitszeit_flask.profiling import (  # type: ignore
 
 
 def load_configuration(app: Flask, configuration: Any = None) -> None:
-    """Load the right configuration files for the application.
+    """Load the right configuration for the application.
 
-    We will try to load the configuration from top to bottom and use
-    the first one that we can find:
-    - Load configuration passed into create_app
-    - Load from path ARBEITSZEITAPP_CONFIGURATION_PATH
-    - Load from path /etc/arbeitszeitapp/arbeitszeitapp.py
+    First we load the base configuration from arbeitszeit_flask.configuration_base.
+
+    Then, on top of this, we load the first configuration we can find from the following sources
+    from top to bottom:
+    - Configuration passed into create_app
+    - From path ARBEITSZEITAPP_CONFIGURATION_PATH
+    - From path /etc/arbeitszeitapp/arbeitszeitapp.py
     """
     app.config.from_object("arbeitszeit_flask.configuration_base")
     if configuration:

@@ -21,6 +21,7 @@ mkShell (
         mypy
         pip
         psycopg2
+        python-dotenv
         types-dateutil
         types-pytz
         types-setuptools
