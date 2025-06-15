@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.records import Plan, PrivateConsumption, Transaction
+from arbeitszeit.records import Plan, PrivateConsumption, Transfer
 from arbeitszeit.repositories import DatabaseGateway
 
 
@@ -37,23 +37,23 @@ class QueryPrivateConsumptions:
             self.database_gateway.get_private_consumptions()
             .where_consumer_is_member(member=request.member)
             .ordered_by_creation_date(ascending=False)
-            .joined_with_transactions_and_plan()
+            .joined_with_transfer_and_plan()
         )
         consumptions = [
-            self._consumption_to_response_model(consumption, transaction, plan)
-            for consumption, transaction, plan in records
+            self._consumption_to_response_model(consumption, transfer, plan)
+            for consumption, transfer, plan in records
         ]
         return Response(consumptions=consumptions)
 
     def _consumption_to_response_model(
-        self, consumption: PrivateConsumption, transaction: Transaction, plan: Plan
+        self, consumption: PrivateConsumption, transfer: Transfer, plan: Plan
     ) -> Consumption:
         return Consumption(
-            consumption_date=transaction.date,
+            consumption_date=transfer.date,
             plan_id=plan.id,
             product_name=plan.prd_name,
             product_description=plan.description,
-            price_per_unit=transaction.amount_sent / consumption.amount,
+            price_per_unit=transfer.value / consumption.amount,
             amount=consumption.amount,
-            price_total=transaction.amount_sent,
+            price_total=transfer.value,
         )
