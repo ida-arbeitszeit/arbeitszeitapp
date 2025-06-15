@@ -776,7 +776,7 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.control_thresholds.set_allowed_overdraw_of_member_account(10000)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(None)
 
     @parameterized.expand(
         [
