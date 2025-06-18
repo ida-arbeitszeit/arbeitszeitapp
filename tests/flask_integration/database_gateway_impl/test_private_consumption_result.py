@@ -8,7 +8,7 @@ class PrivateConsumptionTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
-        self.control_thresholds.set_allowed_overdraw_of_member_account(1000)
+        self.control_thresholds.set_allowed_overdraw_of_member_account(None)
 
     def test_that_by_default_no_private_consumptions_are_in_db(self) -> None:
         assert not self.database_gateway.get_private_consumptions()
