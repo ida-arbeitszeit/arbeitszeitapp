@@ -34,6 +34,10 @@ WORKDIR /arbeitszeitapp
 # Create non-root user
 RUN addgroup --system arbeitszeit && adduser --system --ingroup arbeitszeit arbeitszeit
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy from builder
 COPY --from=builder /arbeitszeitapp /arbeitszeitapp
 
@@ -58,6 +62,10 @@ RUN chown -R arbeitszeit:arbeitszeit /arbeitszeitapp && \
 # Expose the default Flask port
 ENV PORT=5000
 EXPOSE ${PORT}
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Use non-root user
 USER arbeitszeit

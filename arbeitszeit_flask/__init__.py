@@ -118,6 +118,7 @@ def create_app(
         from .api import blueprint as api_blueprint
         from .auth import routes as auth_routes
         from .context_processors import add_template_variables
+        from .healthcheck import blueprint as healthcheck_blueprint
         from .plots import routes as plots_routes
 
         app.register_blueprint(auth_routes.auth)
@@ -127,6 +128,7 @@ def create_app(
         app.register_blueprint(accountant.blueprint.main_accountant)
         app.register_blueprint(user.blueprint, url_prefix="/user")
         app.register_blueprint(api_blueprint)
+        app.register_blueprint(healthcheck_blueprint.healthcheck_blueprint)
         app.context_processor(add_template_variables)
 
         if app.config["DEBUG_DETAILS"] == True:
