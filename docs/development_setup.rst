@@ -154,6 +154,14 @@ accountants from the terminal, using the following command:
 
 Again, an invitation mail with a confirmation link will be printed to ``stdout``.
 
+Developers can populate the development database automatically with test data. Run
+
+    .. code-block:: bash
+
+     flask generate --help
+
+to see the available options.
+
 
 Code Formatting and Analysis
 -----------------------------
