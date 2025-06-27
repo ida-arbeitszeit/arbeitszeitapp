@@ -26,6 +26,6 @@ elaborated in the 1920s by members of a German working-class movement.
 The Arbeitszeitapp Collective
 -----------------------------
 
-We are a group of programmers closely associated with the `IDA association <arbeitszeit.noblogs.org>`_. To coordinate our work, we meet once a week for half an hour online. If needed, we can also meet in person at the IDA office in Berlin. Otherwise, we communicate via a mailing list and use the Github Issue tracker. 
+We are a group of programmers closely associated with the `IDA association <https://arbeitszeit.noblogs.org>`_. To coordinate our work, we meet once a week for half an hour online. If needed, we can also meet in person at the IDA office in Berlin. Otherwise, we communicate via a mailing list and use the Github Issue tracker. 
 
 We are always looking for people who want to help us improve the app. If you are interested in contributing, please proceed to the :doc:`how_to_contribute` page for more information on how to get involved.
