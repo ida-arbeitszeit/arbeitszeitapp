@@ -117,14 +117,22 @@ Environment Variables
 ---------------------
 
 Before you can start developing, you first have to define some
-environment variables in an .env file in the top-level directory of the
-repo:
+environment variables. We recommend that you define these
+in an `.envrc` file in the top-level directory of the repo, and install 
+`direnv <https://direnv.net/>`_ to automatically load these variables
+when you enter the top-level directory of the repo.
+
 
     .. code-block:: ini
 
-     DEV_SECRET_KEY=my_secret_key
-     DEV_DATABASE_URI="postgresql://postgres@localhost:5432/<name of dev database>"
-     ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
+    export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
+    export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
+    export FLASK_APP=tests.development_server:main
+    export FLASK_DEBUG=1
+    
+    export DEV_SECRET_KEY="my_secret_key"
+    export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
+    export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 
 Development server
