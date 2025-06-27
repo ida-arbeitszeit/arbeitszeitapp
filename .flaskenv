@@ -1,4 +1,0 @@
-ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
-FLASK_APP=tests.development_server:main
-FLASK_DEBUG=1
-ARBEITSZEIT_APP_SERVER_NAME=127.0.0.1:5000
