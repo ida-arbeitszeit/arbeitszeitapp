@@ -21,7 +21,6 @@ from tests.data_generators import (
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
-    TransactionGenerator,
     TransferGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
@@ -119,7 +118,6 @@ class FlaskTestCase(DatabaseTestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     token_service = _lazy_property(FlaskTokenService)
-    transaction_generator = _lazy_property(TransactionGenerator)
     transfer_generator = _lazy_property(TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
 

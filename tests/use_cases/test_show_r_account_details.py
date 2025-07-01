@@ -4,10 +4,9 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.records import ProductionCosts, SocialAccounting
+from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_r_account_details
-from tests.data_generators import TransactionGenerator
 
 from .base_test_case import BaseTestCase
 
@@ -18,8 +17,6 @@ class UseCaseTester(BaseTestCase):
         self.use_case = self.injector.get(
             show_r_account_details.ShowRAccountDetailsUseCase
         )
-        self.transaction_generator = self.injector.get(TransactionGenerator)
-        self.social_accounting = self.injector.get(SocialAccounting)
 
     def test_no_transfers_returned_when_company_has_neither_consumed_nor_planned_r(
         self,

@@ -8,7 +8,6 @@ from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
 )
-from tests.data_generators import TransactionGenerator
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -16,7 +15,6 @@ class PublicSectorFundServiceCalculationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.injector.get(PublicSectorFundService)
-        self.transaction_generator = self.injector.get(TransactionGenerator)
 
     def test_balance_is_zero_if_no_plans_are_approved(self) -> None:
         psf_balance = self.service.calculate_psf_balance()
