@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum, auto
 from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
-from arbeitszeit.records import Company, ConsumptionType, Plan
+from arbeitszeit.records import Company, ConsumptionType, Plan, Transfer
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.compensation import CompensationTransferService
+from arbeitszeit.transfers.transfer_type import TransferType
 
 
 @dataclass
@@ -41,19 +44,20 @@ class RegisterProductiveConsumption:
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
+    compensation_transfer_service: CompensationTransferService
 
     def __call__(
         self, request: RegisterProductiveConsumptionRequest
     ) -> RegisterProductiveConsumptionResponse:
         try:
-            plan, consumer, purpose = self._validate_request(request)
+            plan, consumer, consumption_type = self._validate_request(request)
         except RegisterProductiveConsumptionResponse.RejectionReason as reason:
             return RegisterProductiveConsumptionResponse(rejection_reason=reason)
-        self._create_transaction(
+        self._perform_registration_process(
             consumer=consumer,
             plan=plan,
-            amount=request.amount,
-            consumption_type=purpose,
+            consumed_amount=request.amount,
+            consumption_type=consumption_type,
         )
         return RegisterProductiveConsumptionResponse(rejection_reason=None)
 
@@ -64,7 +68,7 @@ class RegisterProductiveConsumption:
         return (
             plan,
             self._validate_consumer_is_not_planner(request, plan),
-            self._validate_purpose(request),
+            self._validate_consumption_type(request),
         )
 
     def _validate_plan(self, request: RegisterProductiveConsumptionRequest) -> Plan:
@@ -91,7 +95,7 @@ class RegisterProductiveConsumption:
         assert consumer is not None
         return consumer
 
-    def _validate_purpose(
+    def _validate_consumption_type(
         self, request: RegisterProductiveConsumptionRequest
     ) -> ConsumptionType:
         if request.consumption_type not in (
@@ -101,31 +105,72 @@ class RegisterProductiveConsumption:
             raise RegisterProductiveConsumptionResponse.RejectionReason.invalid_consumption_type
         return request.consumption_type
 
-    def _create_transaction(
+    def _perform_registration_process(
         self,
-        amount: int,
+        consumed_amount: int,
         consumption_type: ConsumptionType,
         consumer: Company,
         plan: Plan,
     ) -> None:
-        coop_price = amount * self.price_calculator.calculate_cooperative_price(plan)
-        individual_price = amount * plan.price_per_unit()
-        if consumption_type == ConsumptionType.means_of_prod:
-            sending_account = consumer.means_account
-        elif consumption_type == ConsumptionType.raw_materials:
-            sending_account = consumer.raw_material_account
+        coop_price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
-        transaction = self.database_gateway.create_transaction(
-            date=self.datetime_service.now(),
-            sending_account=sending_account,
-            receiving_account=planner.product_account,
-            amount_sent=coop_price,
-            amount_received=individual_price,
-            purpose=f"Plan-Id: {plan.id}",
+        consumption_transfer = self._create_productive_consumption_transfer(
+            consumption_type=consumption_type,
+            consumer=consumer,
+            planner_product_account=planner.product_account,
+            value=coop_price_per_unit * consumed_amount,
+        )
+        compensation_transfer = self._get_compensation_transfer_if_any(
+            plan_id=plan.id,
+            planner_product_account=planner.product_account,
+            plan_price_per_unit=plan.price_per_unit(),
+            coop_price_per_unit=coop_price_per_unit,
+            consumed_amount=consumed_amount,
         )
         self.database_gateway.create_productive_consumption(
-            amount=amount,
-            transaction=transaction.id,
             plan=plan.id,
+            amount=consumed_amount,
+            transfer_of_productive_consumption=consumption_transfer.id,
+            transfer_of_compensation=compensation_transfer,
+        )
+
+    def _create_productive_consumption_transfer(
+        self,
+        consumption_type: ConsumptionType,
+        consumer: Company,
+        planner_product_account: UUID,
+        value: Decimal,
+    ) -> Transfer:
+        if consumption_type == ConsumptionType.means_of_prod:
+            debit_account = consumer.means_account
+            transfer_type = TransferType.productive_consumption_p
+        else:
+            debit_account = consumer.raw_material_account
+            transfer_type = TransferType.productive_consumption_r
+        return self.database_gateway.create_transfer(
+            date=self.datetime_service.now(),
+            debit_account=debit_account,
+            credit_account=planner_product_account,
+            value=value,
+            type=transfer_type,
+        )
+
+    def _get_compensation_transfer_if_any(
+        self,
+        plan_id: UUID,
+        planner_product_account: UUID,
+        plan_price_per_unit: Decimal,
+        coop_price_per_unit: Decimal,
+        consumed_amount: int,
+    ) -> UUID | None:
+        cooperation = self.database_gateway.get_cooperations().of_plan(plan_id).first()
+        if not cooperation:
+            return None
+        return self.compensation_transfer_service.create_compensation_transfer(
+            coop_price_per_unit=coop_price_per_unit,
+            plan_price_per_unit=plan_price_per_unit,
+            consumed_amount=consumed_amount,
+            planner_product_account=planner_product_account,
+            cooperation_account=cooperation.account,
         )

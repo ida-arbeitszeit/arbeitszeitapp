@@ -7,7 +7,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.decimal import decimal_sum
-from arbeitszeit.records import Company, Plan, SocialAccounting, Transaction
+from arbeitszeit.records import Company, Plan, SocialAccounting, Transfer
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 
@@ -83,10 +83,10 @@ class GetCompanySummary:
             .ordered_by_creation_date(ascending=False)
         )
         supply = self._get_suppliers_and_supply_volume(
-            (transaction, company)
-            for _, transaction, company in self.database_gateway.get_productive_consumptions()
+            (transfer, company)
+            for _, transfer, company in self.database_gateway.get_productive_consumptions()
             .where_consumer_is_company(company=company_id)
-            .joined_with_transaction_and_provider()
+            .joined_with_transfer_and_provider()
         )
         expectations = self._get_expectations(company)
         account_balances = self._get_account_balances(company)
@@ -202,13 +202,13 @@ class GetCompanySummary:
             return abs(account_balance / expectation) * 100
 
     def _get_suppliers_and_supply_volume(
-        self, supply: Iterable[Tuple[Transaction, Company]]
+        self, supply: Iterable[Tuple[Transfer, Company]]
     ) -> Generator[Supplier, None, None]:
         volume_by_company_id: Dict[UUID, Decimal] = defaultdict(lambda: Decimal(0))
         suppliers_by_id: Dict[UUID, Company] = dict()
-        for transaction, company in supply:
+        for transfer, company in supply:
             suppliers_by_id[company.id] = company
-            volume_by_company_id[company.id] += transaction.amount_sent
+            volume_by_company_id[company.id] += transfer.value
         for company_id, volume in volume_by_company_id.items():
             yield Supplier(
                 company_id=company_id,

@@ -11,6 +11,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import Company, Member, Plan, Transfer
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.transfers.compensation import CompensationTransferService
 from arbeitszeit.transfers.transfer_type import TransferType
 
 
@@ -43,6 +44,7 @@ class RegisterPrivateConsumption:
     datetime_service: DatetimeService
     price_calculator: PriceCalculator
     database_gateway: DatabaseGateway
+    compensation_transfer_service: CompensationTransferService
 
     def register_private_consumption(
         self, request: RegisterPrivateConsumptionRequest
@@ -63,17 +65,18 @@ class RegisterPrivateConsumption:
             credit_account=planner.product_account,
             value=coop_price_per_unit * request.amount,
         )
-        compensation_transfer_id = self._create_compensation_transfer(
-            plan=plan,
+        compensation_transfer = self._get_compensation_transfer_if_any(
+            plan_id=plan.id,
             planner_product_account=planner.product_account,
-            amount=request.amount,
+            plan_price_per_unit=plan.price_per_unit(),
             coop_price_per_unit=coop_price_per_unit,
+            consumed_amount=request.amount,
         )
         self.database_gateway.create_private_consumption(
             amount=request.amount,
             plan=plan.id,
             transfer_of_private_consumption=consumption_transfer.id,
-            transfer_of_compensation=compensation_transfer_id,
+            transfer_of_compensation=compensation_transfer,
         )
         return RegisterPrivateConsumptionResponse(rejection_reason=None)
 
@@ -146,84 +149,21 @@ class RegisterPrivateConsumption:
             raise RejectionReason.plan_inactive
         return plan
 
-    def _create_compensation_transfer(
+    def _get_compensation_transfer_if_any(
         self,
-        plan: Plan,
+        plan_id: UUID,
         planner_product_account: UUID,
-        amount: int,
+        plan_price_per_unit: Decimal,
         coop_price_per_unit: Decimal,
+        consumed_amount: int,
     ) -> UUID | None:
-        """
-        For background on compensation transfers see developer documentation.
-        """
-        cooperation = self.database_gateway.get_cooperations().of_plan(plan.id).first()
+        cooperation = self.database_gateway.get_cooperations().of_plan(plan_id).first()
         if not cooperation:
             return None
-        difference = self._difference_between_coop_and_individual_price(
-            plan=plan,
+        return self.compensation_transfer_service.create_compensation_transfer(
             coop_price_per_unit=coop_price_per_unit,
+            plan_price_per_unit=plan_price_per_unit,
+            consumed_amount=consumed_amount,
+            planner_product_account=planner_product_account,
+            cooperation_account=cooperation.account,
         )
-        if difference == Decimal(0):
-            return None
-        elif difference < Decimal(0):
-            """Plan is underproductive."""
-            return self._compensate_company(
-                amount=amount,
-                difference=abs(difference),
-                cooperation_account=cooperation.account,
-                planner_product_account=planner_product_account,
-            )
-        else:
-            """Plan is overproductive."""
-            return self._compensate_cooperation(
-                amount=amount,
-                difference=abs(difference),
-                cooperation_account=cooperation.account,
-                planner_product_account=planner_product_account,
-            )
-
-    def _difference_between_coop_and_individual_price(
-        self,
-        plan: Plan,
-        coop_price_per_unit: Decimal,
-    ) -> Decimal:
-        """
-        Returns the difference between cooperative and individual price.
-        If difference is negative, the plan is underproductive.
-        If difference is positive, it is overproductive.
-        If difference is zero, there is no productivity difference.
-        """
-        individual_price_per_unit = plan.price_per_unit()
-        return coop_price_per_unit - individual_price_per_unit
-
-    def _compensate_cooperation(
-        self,
-        amount: int,
-        difference: Decimal,
-        cooperation_account: UUID,
-        planner_product_account: UUID,
-    ) -> UUID:
-        transfer = self.database_gateway.create_transfer(
-            date=self.datetime_service.now(),
-            debit_account=planner_product_account,
-            credit_account=cooperation_account,
-            value=difference * amount,
-            type=TransferType.compensation_for_coop,
-        )
-        return transfer.id
-
-    def _compensate_company(
-        self,
-        amount: int,
-        difference: Decimal,
-        cooperation_account: UUID,
-        planner_product_account: UUID,
-    ) -> UUID:
-        transfer = self.database_gateway.create_transfer(
-            date=self.datetime_service.now(),
-            debit_account=cooperation_account,
-            credit_account=planner_product_account,
-            value=difference * amount,
-            type=TransferType.compensation_for_company,
-        )
-        return transfer.id

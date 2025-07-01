@@ -422,9 +422,9 @@ class ConsumptionGenerator:
             consumption_type=consumption_type,
         )
         response = self.register_productive_consumption(request)
-        assert (
-            not response.is_rejected
-        ), f"Could not create productive consumption, response was {response}"
+        if response.is_rejected:
+            assert response.rejection_reason
+            raise response.rejection_reason
         return response
 
     def create_private_consumption(
