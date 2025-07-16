@@ -14,7 +14,6 @@ TARGET_PACKAGES = [
     "flask_restx",
     "flask_talisman",
     "flask_wtf",
-    "is_safe_url",
     "parameterized",
     "wtforms",
 ]

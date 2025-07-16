@@ -14,7 +14,6 @@
   flask-talisman,
   flask_login,
   flask_wtf,
-  is_safe_url,
   matplotlib,
   parameterized,
   pytest,
@@ -48,7 +47,6 @@ buildPythonPackage {
     flask_login
     flask-restx
     flask_wtf
-    is_safe_url
     matplotlib
   ];
   nativeBuildInputs = [
