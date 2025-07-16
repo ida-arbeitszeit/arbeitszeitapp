@@ -1,15 +1,22 @@
 from dataclasses import dataclass
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from uuid import UUID
 
 from flask import request, session
 from flask_login import current_user, login_user, logout_user
-from is_safe_url import is_safe_url
 
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_web.session import UserRole
+
+
+def is_safe_url(target: str, host_url: str) -> bool:
+    ref_url = urlparse(host_url)
+    test_url = urlparse(urljoin(host_url, target))
+    return test_url.scheme in ("http", "https") and (
+        test_url.netloc == "" or test_url.netloc == ref_url.netloc
+    )
 
 
 @dataclass
@@ -78,6 +85,5 @@ class FlaskSession:
         return session.pop("next", None)
 
     def set_next_url(self, next_url: str) -> None:
-        hostname = urlparse(request.base_url).netloc
-        if is_safe_url(next_url, {hostname}):
+        if is_safe_url(next_url, request.base_url):
             session["next"] = next_url
