@@ -42,8 +42,8 @@
               includeGlibcLocales = !isMacOs;
               nixfmt = pkgs.nixfmt-rfc-style;
             };
-            python311 = pkgs.callPackage nix/devShell.nix {
-              python3 = pkgs.python311;
+            python312 = pkgs.callPackage nix/devShell.nix {
+              python3 = pkgs.python312;
               includeGlibcLocales = !isMacOs;
             };
           };
@@ -58,9 +58,9 @@
             # python3 interpreter and also explicitly list all
             # versions we want to support.
             arbeitszeit-python3-nixpkgs-unstable = pkgs.python3.pkgs.arbeitszeitapp;
-            arbeitszeit-python311-nixpkgs-unstable = pkgs.python311.pkgs.arbeitszeitapp;
+            arbeitszeit-python312-nixpkgs-unstable = pkgs.python312.pkgs.arbeitszeitapp;
             arbeitszeit-python3-nixpkgs-stable = pkgs-24-11.python3.pkgs.arbeitszeitapp;
-            arbeitszeit-python311-nixpkgs-stable = pkgs-24-11.python311.pkgs.arbeitszeitapp;
+            arbeitszeit-python312-nixpkgs-stable = pkgs-24-11.python312.pkgs.arbeitszeitapp;
           };
         }
       );
