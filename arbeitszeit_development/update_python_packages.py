@@ -13,9 +13,6 @@ def main(subprocess_runner: SubprocessRunner) -> None:
     update_python_package(
         subprocess_runner, "nix/pythonPackages/flask-restx.json", "flask-restx"
     )
-    update_python_package(
-        subprocess_runner, "nix/pythonPackages/is-safe-url.json", "is_safe_url"
-    )
 
 
 def update_python_package(
