@@ -2,7 +2,7 @@
   description = "Arbeitszeitapp";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixos-24-11.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixos-25-05.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
     flask-profiler.url = "github:seppeljordan/flask-profiler";
   };
@@ -13,7 +13,7 @@
       nixpkgs,
       flake-utils,
       flask-profiler,
-      nixos-24-11,
+      nixos-25-05,
     }:
     let
       supportedSystems = [
@@ -29,7 +29,7 @@
             inherit system;
             overlays = [ self.overlays.default ];
           };
-          pkgs-24-11 = import nixos-24-11 {
+          pkgs-25-05 = import nixos-25-05 {
             inherit system;
             overlays = [ self.overlays.default ];
           };
@@ -37,7 +37,7 @@
         {
           devShells = rec {
             default = nixos-unstable;
-            nixos-24-11 = pkgs-24-11.callPackage nix/devShell.nix { includeGlibcLocales = !isMacOs; };
+            nixos-25-05 = pkgs-25-05.callPackage nix/devShell.nix { includeGlibcLocales = !isMacOs; };
             nixos-unstable = pkgs.callPackage nix/devShell.nix {
               includeGlibcLocales = !isMacOs;
               nixfmt = pkgs.nixfmt-rfc-style;
@@ -59,8 +59,8 @@
             # versions we want to support.
             arbeitszeit-python3-nixpkgs-unstable = pkgs.python3.pkgs.arbeitszeitapp;
             arbeitszeit-python312-nixpkgs-unstable = pkgs.python312.pkgs.arbeitszeitapp;
-            arbeitszeit-python3-nixpkgs-stable = pkgs-24-11.python3.pkgs.arbeitszeitapp;
-            arbeitszeit-python312-nixpkgs-stable = pkgs-24-11.python312.pkgs.arbeitszeitapp;
+            arbeitszeit-python3-nixpkgs-stable = pkgs-25-05.python3.pkgs.arbeitszeitapp;
+            arbeitszeit-python312-nixpkgs-stable = pkgs-25-05.python312.pkgs.arbeitszeitapp;
           };
         }
       );
