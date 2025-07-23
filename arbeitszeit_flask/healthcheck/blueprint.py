@@ -7,4 +7,6 @@ from arbeitszeit_flask.views.healthcheck_view import HealthcheckView
 healthcheck_blueprint = Blueprint("healthcheck", __name__)
 
 # Register the health check endpoint
-healthcheck_blueprint.route("/health", methods=["GET"])(as_flask_view()(HealthcheckView))
+healthcheck_blueprint.route("/health", methods=["GET"])(
+    as_flask_view()(HealthcheckView)
+)
