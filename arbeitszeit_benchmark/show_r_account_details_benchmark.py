@@ -4,9 +4,9 @@ from flask import Flask
 
 from arbeitszeit.use_cases import show_r_account_details
 from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.models import Base
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
+from tests.flask_integration.flask import drop_and_recreate_schema
 
 
 class ShowRAccountDetailsBenchmark:
@@ -15,11 +15,11 @@ class ShowRAccountDetailsBenchmark:
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
         self.db = self.injector.get(Database)
+        with self.db.engine.connect() as connection:
+            drop_and_recreate_schema(connection)
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
-        Base.metadata.drop_all(self.db.engine)
-        Base.metadata.create_all(self.db.engine)
         company_generator = self.injector.get(CompanyGenerator)
         plan_generator = self.injector.get(PlanGenerator)
         consumption_generator = self.injector.get(ConsumptionGenerator)

@@ -240,44 +240,28 @@ class AccountResultTests(FlaskTestCase):
 class JoinedWithBalanceTests(FlaskTestCase):
     @parameterized.expand(
         [
-            ([], [], 0),
-            ([1], [], 1),
-            ([2], [], 2),
-            ([1, 2, 3], [], 6),
-            ([-1], [], -1),
-            ([-1, 1], [], 0),
-            ([-10, 1, 1], [], -8),
-            ([], [1], 1),
-            ([], [1, 2, 3], 6),
-            ([], [-1], -1),
-            ([], [-1, 1], 0),
-            ([], [-10, 1, 1], -8),
-            ([1], [1], 2),
-            ([1], [1, 2, 3], 7),
-            ([1], [-1], 0),
+            ([], 0),
+            ([-1, 1], 0),
+            ([1], 1),
+            ([-1], -1),
+            ([1, 2, 3], 6),
+            ([-10, 1, 1], -8),
         ]
     )
     def test_when_joining_with_account_balance_the_proper_value_is_calculated(
-        self, transactions: List[float], transfers: List[float], expected_total: float
+        self, transfer_values: List[float], expected_total: float
     ) -> None:
         account = self.database_gateway.create_account()
-        for amount in transactions:
-            if amount > 0:
-                self.transaction_generator.create_transaction(
-                    receiving_account=account.id, amount_received=amount
+        for value in transfer_values:
+            if value > 0:
+                # credit
+                self.transfer_generator.create_transfer(
+                    credit_account=account.id, value=Decimal(value)
                 )
             else:
-                self.transaction_generator.create_transaction(
-                    sending_account=account.id, amount_sent=abs(amount)
-                )
-        for _amount in transfers:
-            if _amount > 0:
+                # debit
                 self.transfer_generator.create_transfer(
-                    credit_account=account.id, value=Decimal(_amount)
-                )
-            else:
-                self.transfer_generator.create_transfer(
-                    debit_account=account.id, value=Decimal(abs(_amount))
+                    debit_account=account.id, value=Decimal(abs(value))
                 )
         result = (
             self.database_gateway.get_accounts()
@@ -299,21 +283,6 @@ class JoinedWithBalanceTests(FlaskTestCase):
                 a for a, _ in self.database_gateway.get_accounts().joined_with_balance()
             )
             == accounts
-        )
-
-    def test_when_joining_with_account_balance_and_having_multiple_transactions_we_get_one_result_for_one_account(
-        self,
-    ) -> None:
-        account = self.database_gateway.create_account()
-        self.transaction_generator.create_transaction(receiving_account=account.id)
-        self.transaction_generator.create_transaction(receiving_account=account.id)
-        assert (
-            len(
-                self.database_gateway.get_accounts()
-                .with_id(account.id)
-                .joined_with_balance()
-            )
-            == 1
         )
 
     def test_when_joining_with_balance_and_having_multiple_transfers_we_get_one_result_for_one_account(

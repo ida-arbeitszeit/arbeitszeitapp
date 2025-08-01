@@ -2,8 +2,7 @@ from flask import Flask
 from sqlalchemy import inspect
 
 from arbeitszeit.injector import Binder, CallableProvider, Module
-from arbeitszeit_flask.database.db import Base
-from tests.flask_integration.flask import DatabaseTestCase
+from tests.flask_integration.flask import DatabaseTestCase, drop_and_recreate_schema
 
 from .dependency_injection import FlaskConfiguration
 
@@ -41,7 +40,7 @@ class AutoMigrationTests(AutoMigrationsTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        Base.metadata.drop_all(self.db.engine)
+        drop_and_recreate_schema(self.connection)
 
     def test_that_app_starts_successfully_when_auto_migrate_is_enabled(self) -> None:
         self.injector.get(Flask)

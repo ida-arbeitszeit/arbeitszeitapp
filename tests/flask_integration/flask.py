@@ -4,6 +4,7 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
+from sqlalchemy import Connection, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
@@ -21,7 +22,6 @@ from tests.data_generators import (
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
-    TransactionGenerator,
     TransferGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
@@ -119,7 +119,6 @@ class FlaskTestCase(DatabaseTestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     token_service = _lazy_property(FlaskTokenService)
-    transaction_generator = _lazy_property(TransactionGenerator)
     transfer_generator = _lazy_property(TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
 
@@ -296,3 +295,12 @@ class ViewTestCase(FlaskTestCase):
             return self.login_company(confirm_company=False)
         elif login == LogInUser.accountant:
             return self.login_accountant()
+
+
+def drop_and_recreate_schema(connection: Connection) -> None:
+    """
+    Drops and recreates the public schema to ensure a clean database state for tests.
+    Useful when Base.metadata.drop_all() fails due to foreign key constraints or orphaned tables.
+    """
+    connection.execute(text("DROP SCHEMA public CASCADE"))
+    connection.execute(text("CREATE SCHEMA public"))

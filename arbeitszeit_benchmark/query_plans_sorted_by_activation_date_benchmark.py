@@ -5,20 +5,21 @@ from flask import Flask
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases import query_plans
-from arbeitszeit_flask.database.db import Base, Database
+from arbeitszeit_flask.database.db import Database
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
+from tests.flask_integration.flask import drop_and_recreate_schema
 
 
 class QueryPlansSortedByActivationDateBenchmark:
     def __init__(self) -> None:
         injector = get_dependency_injector()
+        db = injector.get(Database)
+        with db.engine.connect() as connection:
+            drop_and_recreate_schema(connection)
         app = injector.get(Flask)
         self.app_context = app.app_context()
         self.app_context.push()
-        db = injector.get(Database)
-        Base.metadata.drop_all(db.engine)
-        Base.metadata.create_all(db.engine)
         plan_generator = injector.get(PlanGenerator)
         cooperation_generator = injector.get(CooperationGenerator)
         self.query_plans = injector.get(query_plans.QueryPlans)

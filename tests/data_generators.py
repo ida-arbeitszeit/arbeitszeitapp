@@ -454,42 +454,6 @@ class ConsumptionGenerator:
 
 
 @dataclass
-class TransactionGenerator:
-    datetime_service: FakeDatetimeService
-    database_gateway: DatabaseGateway
-
-    def create_transaction(
-        self,
-        sending_account: Optional[UUID] = None,
-        receiving_account: Optional[UUID] = None,
-        amount_sent=None,
-        amount_received=None,
-        purpose=None,
-        date=None,
-    ) -> records.Transaction:
-        if sending_account is None:
-            sending_account = self.database_gateway.create_account().id
-        if receiving_account is None:
-            receiving_account = self.database_gateway.create_account().id
-        if amount_sent is None:
-            amount_sent = Decimal(10)
-        if amount_received is None:
-            amount_received = Decimal(10)
-        if purpose is None:
-            purpose = "test purpose"
-        if date is None:
-            date = self.datetime_service.now_minus_one_day()
-        return self.database_gateway.create_transaction(
-            date=date,
-            sending_account=sending_account,
-            receiving_account=receiving_account,
-            amount_sent=amount_sent,
-            amount_received=amount_received,
-            purpose=purpose,
-        )
-
-
-@dataclass
 class TransferGenerator:
     datetime_service: FakeDatetimeService
     database_gateway: DatabaseGateway
