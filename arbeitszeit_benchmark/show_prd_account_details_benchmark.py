@@ -11,7 +11,7 @@ from tests.flask_integration.flask import drop_and_recreate_schema
 
 class ShowPrdAccountDetailsBenchmark:
     """This benchmark measures the execution time of the
-    GetCompanyTransactions use case where there are 1000 transactions
+    ShowPRDAccountDetailsUseCase use case where there are 1000 transactions
     in the database.
     """
 

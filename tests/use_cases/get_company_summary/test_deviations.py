@@ -11,7 +11,7 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
 
-    def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transactions_took_place(
+    def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()

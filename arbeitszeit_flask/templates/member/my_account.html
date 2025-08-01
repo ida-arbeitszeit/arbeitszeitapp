@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transactions.html' import member_transaction %}
+{% from 'macros/transfers.html' import member_transfer %}
 
 <div class="section has-text-centered">
     <h1 class="title">
@@ -22,9 +22,9 @@
 <div class="section">
     <div class="columns is-centered">
         <div class="column is-half">
-            {% if view_model.transactions is defined and view_model.transactions|length %}
-            {% for transaction in view_model.transactions %}
-            {{ member_transaction(transaction.date, transaction.type, transaction.user_name, transaction.volume, transaction.is_volume_positive) }}
+            {% if view_model.transfers is defined and view_model.transfers|length %}
+            {% for transfer in view_model.transfers %}
+            {{ member_transfer(transfer.date, transfer.type, transfer.user_name, transfer.volume, transfer.is_volume_positive) }}
             {% endfor %}
             {% endif %}
         </div>

@@ -132,7 +132,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         consumptions = self.database_gateway.get_private_consumptions()
         assert consumptions.where_provider_is_company(provider)
 
-    def test_can_retrieve_plan_and_transaction_and_consumer_with_consumption(
+    def test_can_retrieve_plan_and_transfer_and_consumer_with_consumption(
         self,
     ) -> None:
         expected_consumer = self.member_generator.create_member()

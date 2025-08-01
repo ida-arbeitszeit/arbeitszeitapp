@@ -17,44 +17,44 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         super().setUp()
         self.presenter = self.injector.get(ShowPAccountDetailsPresenter)
 
-    def test_return_empty_list_when_no_transactions_took_place(self) -> None:
+    def test_return_empty_list_when_no_transfers_took_place(self) -> None:
         response = self.get_use_case_response()
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions, [])
+        self.assertEqual(view_model.transfers, [])
 
-    def test_return_correct_info_when_one_transaction_took_place(self) -> None:
+    def test_return_correct_info_when_one_transfer_took_place(self) -> None:
         EXPECTED_ACCOUNT_BALANCE = Decimal(100.007)
         transfer = self.get_transfer_info()
         response = self.get_use_case_response(
             transfers=[transfer], account_balance=EXPECTED_ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
+        self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(
             view_model.account_balance, str(round(EXPECTED_ACCOUNT_BALANCE, 2))
         )
-        assert len(view_model.transactions) == 1
-        view_model_transaction = view_model.transactions[0]
+        assert len(view_model.transfers) == 1
+        view_model_transfer = view_model.transfers[0]
         self.assertEqual(
-            view_model_transaction.transaction_type, self.translator.gettext("Credit")
+            view_model_transfer.transfer_type, self.translator.gettext("Credit")
         )
         self.assertEqual(
-            view_model_transaction.date,
+            view_model_transfer.date,
             self.datetime_service.format_datetime(
                 date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
         )
         self.assertEqual(
-            view_model_transaction.transaction_volume, str(round(transfer.volume, 2))
+            view_model_transfer.transfer_volume, str(round(transfer.volume, 2))
         )
 
-    def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
+    def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self.get_use_case_response(
             transfers=[self.get_transfer_info(), self.get_transfer_info()],
             account_balance=Decimal(100),
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 2)
+        self.assertTrue(len(view_model.transfers), 2)
 
     def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self) -> None:
         response = self.get_use_case_response()

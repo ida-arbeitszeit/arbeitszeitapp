@@ -13,17 +13,17 @@ from arbeitszeit_web.www.navbar import NavbarItem
 @dataclass
 class ShowPRDAccountDetailsPresenter:
     @dataclass
-    class TransactionInfo:
-        transaction_type: str
+    class TransferInfo:
+        transfer_type: str
         date: str
-        transaction_volume: str
+        transfer_volume: str
         peer_name: str
         peer_type_icon: str
 
     @dataclass
     class ViewModel:
-        transactions: list[ShowPRDAccountDetailsPresenter.TransactionInfo]
-        show_transactions: bool
+        transfers: list[ShowPRDAccountDetailsPresenter.TransferInfo]
+        show_transfers: bool
         account_balance: str
         plot_url: str
         navbar_items: list[NavbarItem]
@@ -35,13 +35,12 @@ class ShowPRDAccountDetailsPresenter:
     def present(
         self, use_case_response: show_prd_account_details.Response
     ) -> ViewModel:
-        transactions = [
-            self._create_info(transaction)
-            for transaction in use_case_response.transfers
+        transfers = [
+            self._create_info(transfer) for transfer in use_case_response.transfers
         ]
         return self.ViewModel(
-            transactions=transactions,
-            show_transactions=bool(transactions),
+            transfers=transfers,
+            show_transfers=bool(transfers),
             account_balance=str(round(use_case_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_prd_account(
                 use_case_response.company_id
@@ -62,18 +61,18 @@ class ShowPRDAccountDetailsPresenter:
 
     def _create_info(
         self, transfer: show_prd_account_details.TransferInfo
-    ) -> TransactionInfo:
-        return self.TransactionInfo(
-            transaction_type=self._get_transaction_type(transfer),
+    ) -> TransferInfo:
+        return self.TransferInfo(
+            transfer_type=self._get_transfer_type(transfer),
             date=self.datetime_formatter.format_datetime(
                 date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
-            transaction_volume=str(round(transfer.volume, 2)),
+            transfer_volume=str(round(transfer.volume, 2)),
             peer_name=self._get_peer_name(transfer.peer),
             peer_type_icon=self._get_peer_type_icon(transfer.peer),
         )
 
-    def _get_transaction_type(
+    def _get_transfer_type(
         self, transfer: show_prd_account_details.TransferInfo
     ) -> str:
         match transfer.type:

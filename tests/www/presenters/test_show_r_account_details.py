@@ -24,41 +24,41 @@ DEFAULT_INFO2 = show_r_account_details.TransferInfo(
 )
 
 
-class CompanyTransactionsPresenterTests(BaseTestCase):
+class ShowRAccountDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.trans = self.injector.get(FakeTranslator)
         self.presenter = self.injector.get(ShowRAccountDetailsPresenter)
 
-    def test_return_empty_list_when_no_transactions_took_place(self) -> None:
+    def test_return_empty_list_when_no_transfers_took_place(self) -> None:
         response = self.get_use_case_response()
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions, [])
+        self.assertEqual(view_model.transfers, [])
 
-    def test_return_correct_info_when_one_transaction_took_place(self) -> None:
+    def test_return_correct_info_when_one_transfer_took_place(self) -> None:
         ACCOUNT_BALANCE = Decimal(100.007)
         response = self.get_use_case_response(
             transfers=[DEFAULT_INFO1], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
+        self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
-        trans = view_model.transactions[0]
-        self.assertEqual(trans.transaction_type, self.trans.gettext("Credit"))
+        trans = view_model.transfers[0]
+        self.assertEqual(trans.transfer_type, self.trans.gettext("Credit"))
         self.assertEqual(
             trans.date,
             self.datetime_service.format_datetime(
                 date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),
         )
-        self.assertEqual(trans.transaction_volume, str(round(DEFAULT_INFO1.volume, 2)))
+        self.assertEqual(trans.transfer_volume, str(round(DEFAULT_INFO1.volume, 2)))
 
-    def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
+    def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self.get_use_case_response(
             transfers=[DEFAULT_INFO1, DEFAULT_INFO2], account_balance=Decimal(100)
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 2)
+        self.assertTrue(len(view_model.transfers), 2)
 
     def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self) -> None:
         response = self.get_use_case_response()

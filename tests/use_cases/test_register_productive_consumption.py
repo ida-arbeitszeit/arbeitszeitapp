@@ -172,7 +172,7 @@ class TestBalanceChanges(UseCaseBase):
         self.plan_generator.create_plan(amount=200, cooperation=coop)
         consumption_type = ConsumptionType.raw_materials
         pieces = 5
-        balance_before_transaction = self.balance_checker.get_company_account_balances(
+        balance_before_transfer = self.balance_checker.get_company_account_balances(
             planner
         ).prd_account
         self.register_productive_consumption(
@@ -180,7 +180,7 @@ class TestBalanceChanges(UseCaseBase):
         )
         assert (
             self.balance_checker.get_company_account_balances(planner).prd_account
-            == balance_before_transaction + self.price_checker.get_unit_cost(plan) * 5
+            == balance_before_transfer + self.price_checker.get_unit_cost(plan) * 5
         )
 
     def test_that_unit_cost_for_cooperating_plans_only_considers_non_expired_plans(
@@ -207,7 +207,7 @@ class TestBalanceChanges(UseCaseBase):
         )
         self.datetime_service.advance_time(timedelta(days=2))
         consumption_type = ConsumptionType.raw_materials
-        balance_before_transaction = self.balance_checker.get_company_account_balances(
+        balance_before_transfer = self.balance_checker.get_company_account_balances(
             sender
         ).r_account
         self.register_productive_consumption(
@@ -215,7 +215,7 @@ class TestBalanceChanges(UseCaseBase):
         )
         assert self.balance_checker.get_company_account_balances(
             sender
-        ).r_account == balance_before_transaction - Decimal(1)
+        ).r_account == balance_before_transfer - Decimal(1)
 
 
 class TestConsumptionTransfers(UseCaseBase):

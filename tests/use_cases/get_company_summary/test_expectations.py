@@ -12,7 +12,7 @@ class ExpectationsTestCase(BaseTestCase):
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
 
-    def test_returns_expectations_of_zero_when_no_transactions_took_place(self) -> None:
+    def test_returns_expectations_of_zero_when_no_transfers_took_place(self) -> None:
         company = self.company_generator.create_company()
         response = self.get_company_summary(company)
         assert response
