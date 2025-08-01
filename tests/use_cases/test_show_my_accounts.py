@@ -29,14 +29,14 @@ class ShowCompanyAccountsTest(BaseTestCase):
         response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
         assert response.company == company
 
-    def test_that_list_of_balances_has_four_entries_when_no_transactions_took_place(
+    def test_that_list_of_balances_has_four_entries_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()
         response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
         assert len(response.balances) == 4
 
-    def test_that_all_balances_are_zero_when_no_transactions_took_place(
+    def test_that_all_balances_are_zero_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()

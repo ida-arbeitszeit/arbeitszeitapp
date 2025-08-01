@@ -78,7 +78,7 @@ class UseCaseTester(BaseTestCase):
         response = self.use_case.show_details(self.create_use_case_request(producer))
         assert len(response.transfers) == transfers_before_consumption
 
-    def test_that_one_transaction_is_shown_when_plan_gets_approved(self) -> None:
+    def test_that_one_transfer_is_shown_when_plan_gets_approved(self) -> None:
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         response = self.use_case.show_details(self.create_use_case_request(planner))
