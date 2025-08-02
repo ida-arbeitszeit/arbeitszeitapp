@@ -998,10 +998,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             )
             .join(
                 social_accounting,
-                or_(
-                    social_accounting.account == models.Account.id,
-                    social_accounting.account_psf == models.Account.id,
-                ),
+                social_accounting.account_psf == models.Account.id,
                 isouter=True,
             )
             .join(cooperation, cooperation.account == models.Account.id, isouter=True)
@@ -1998,7 +1995,6 @@ class AccountingRepository:
     ) -> records.SocialAccounting:
         return records.SocialAccounting(
             id=UUID(accounting_orm.id),
-            account=UUID(accounting_orm.account),
             account_psf=UUID(accounting_orm.account_psf),
         )
 
@@ -2013,9 +2009,7 @@ class AccountingRepository:
             social_accounting = SocialAccounting(
                 id=str(uuid4()),
             )
-            account = self.database_gateway.create_account()
             account_psf = self.database_gateway.create_account()
-            social_accounting.account = str(account.id)
             social_accounting.account_psf = str(account_psf.id)
             self.db.session.add(social_accounting)
             self.db.session.flush()

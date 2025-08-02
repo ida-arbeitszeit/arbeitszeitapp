@@ -1202,7 +1202,7 @@ class AccountResult(QueryResultImpl[Account]):
     ) -> QueryResultImpl[Tuple[Account, records.AccountOwner]]:
         def items() -> Iterable[Tuple[Account, records.AccountOwner]]:
             for account in self.items():
-                if account.id == self.database.social_accounting.account:
+                if account.id == self.database.social_accounting.account_psf:
                     yield account, self.database.social_accounting
                 for member in self.database.members.values():
                     if account.id == member.account:
@@ -1686,7 +1686,6 @@ class MockDatabase:
         self.accountants: Dict[UUID, Accountant] = dict()
         self.social_accounting = SocialAccounting(
             id=uuid4(),
-            account=self.create_account().id,
             account_psf=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()

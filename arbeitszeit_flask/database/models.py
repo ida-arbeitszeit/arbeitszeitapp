@@ -40,7 +40,6 @@ class SocialAccounting(Base):
     __tablename__ = "social_accounting"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
     account_psf: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 

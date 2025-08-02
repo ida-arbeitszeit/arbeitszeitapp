@@ -19,7 +19,6 @@ class EmailAddress:
 @dataclass
 class SocialAccounting:
     id: UUID
-    account: UUID
     account_psf: UUID
 
     def get_name(self) -> str:
