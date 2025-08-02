@@ -20,6 +20,10 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperation,
     AcceptCooperationRequest,
 )
+from arbeitszeit.use_cases.answer_company_work_invite import (
+    AnswerCompanyWorkInvite,
+    AnswerCompanyWorkInviteRequest,
+)
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.create_cooperation import (
@@ -29,6 +33,7 @@ from arbeitszeit.use_cases.create_cooperation import (
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft, Request
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.hide_plan import HidePlan
+from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
 from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
@@ -53,7 +58,6 @@ from arbeitszeit.use_cases.request_coordination_transfer import (
 from arbeitszeit.use_cases.send_accountant_registration_token import (
     SendAccountantRegistrationTokenUseCase,
 )
-from tests.company import CompanyManager
 from tests.datetime_service import FakeDatetimeService
 
 
@@ -93,7 +97,7 @@ class MemberGenerator:
 class CompanyGenerator:
     email_generator: EmailGenerator
     datetime_service: FakeDatetimeService
-    company_manager: CompanyManager
+    worker_affiliation_generator: WorkerAffiliationGenerator
     register_company_use_case: RegisterCompany
     confirm_company_use_case: ConfirmCompanyUseCase
     password_hasher: PasswordHasher
@@ -137,8 +141,7 @@ class CompanyGenerator:
         company = response.company_id
         assert company
         if workers:
-            for worker in workers:
-                self.company_manager.add_worker_to_company(company, worker)
+            self.worker_affiliation_generator.add_workers_to_company(company, workers)
         if not confirmed:
             return company
         confirm_response = self.confirm_company_use_case.confirm_company(
@@ -658,3 +661,34 @@ class AccountantGenerator:
         assert response.is_accepted
         assert response.user_id
         return response.user_id
+
+
+@dataclass
+class WorkerAffiliationGenerator:
+    invite_worker_use_case: InviteWorkerToCompanyUseCase
+    answer_invite_use_case: AnswerCompanyWorkInvite
+
+    def add_workers_to_company(self, company: UUID, workers=Iterable[UUID]) -> None:
+        for worker in workers:
+            self._add_worker_to_company(company, worker)
+
+    def _add_worker_to_company(self, company: UUID, worker: UUID) -> None:
+        response = self.invite_worker_use_case.invite_worker(
+            InviteWorkerToCompanyUseCase.Request(company=company, worker=worker)
+        )
+        if response.rejection_reason:
+            raise ValueError(
+                f"Could not invite worker {worker} to company {company}: {response.rejection_reason}"
+            )
+        if response.invite_id:
+            answer_response = self.answer_invite_use_case(
+                AnswerCompanyWorkInviteRequest(
+                    is_accepted=True,
+                    invite_id=response.invite_id,
+                    user=worker,
+                )
+            )
+            if answer_response.failure_reason:
+                raise ValueError(
+                    f"Could not accept invite for worker {worker}: {answer_response.failure_reason}"
+                )

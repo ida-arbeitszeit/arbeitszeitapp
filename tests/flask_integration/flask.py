@@ -23,6 +23,7 @@ from tests.data_generators import (
     MemberGenerator,
     PlanGenerator,
     TransferGenerator,
+    WorkerAffiliationGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.mail_service import MockEmailService
@@ -129,6 +130,7 @@ class FlaskTestCase(DatabaseTestCase):
     token_service = _lazy_property(FlaskTokenService)
     transfer_generator = _lazy_property(TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
+    worker_affiliation_generator = _lazy_property(WorkerAffiliationGenerator)
 
 
 class LogInUser(Enum):

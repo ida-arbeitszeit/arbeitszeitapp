@@ -12,7 +12,6 @@ from arbeitszeit.use_cases.show_company_accounts import (
     ShowCompanyAccounts,
     ShowCompanyAccountsRequest,
 )
-from tests.company import CompanyManager
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -20,7 +19,6 @@ class ShowCompanyAccountsTest(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(ShowCompanyAccounts)
-        self.company_manager = self.injector.get(CompanyManager)
 
     def test_that_response_returns_the_company_id_that_was_requested(
         self,
@@ -150,7 +148,9 @@ class ShowCompanyAccountsTest(BaseTestCase):
 
     def register_hours_worked(self, registering_company: UUID, hours: Decimal) -> None:
         member = self.member_generator.create_member()
-        self.company_manager.add_worker_to_company(registering_company, member)
+        self.worker_affiliation_generator.add_workers_to_company(
+            registering_company, [member]
+        )
         use_case = self.injector.get(RegisterHoursWorked)
         response = use_case(
             use_case_request=RegisterHoursWorkedRequest(
