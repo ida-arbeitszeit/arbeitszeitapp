@@ -25,16 +25,6 @@ class SocialAccounting:
     def get_name(self) -> str:
         return "Social Accounting"
 
-    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
-        if account == self.account:
-            return AccountTypes.accounting
-        if account == self.account_psf:
-            return AccountTypes.psf
-        return None
-
-    def is_member(self) -> bool:
-        return False
-
 
 @dataclass
 class Member:
@@ -43,25 +33,8 @@ class Member:
     account: UUID
     registered_on: datetime
 
-    def accounts(self) -> List[UUID]:
-        return [self.account]
-
     def get_name(self) -> str:
         return self.name
-
-    def get_account_by_type(self, account_type: AccountTypes) -> Optional[UUID]:
-        if account_type == AccountTypes.member:
-            return self.account
-        return None
-
-    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
-        if self.account == account:
-            return AccountTypes.member
-        else:
-            return None
-
-    def is_member(self) -> bool:
-        return True
 
 
 @dataclass
@@ -91,18 +64,6 @@ class Company:
     def get_account_by_type(self, account_type: AccountTypes) -> Optional[UUID]:
         return self._accounts_by_type().get(account_type)
 
-    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
-        account_types = {
-            self.means_account: AccountTypes.p,
-            self.raw_material_account: AccountTypes.r,
-            self.work_account: AccountTypes.a,
-            self.product_account: AccountTypes.prd,
-        }
-        return account_types.get(account)
-
-    def is_member(self) -> bool:
-        return False
-
 
 class AccountTypes(Enum):
     p = "p"
@@ -130,11 +91,6 @@ class Cooperation:
 
     def get_name(self) -> str:
         return self.name
-
-    def get_account_type(self, account: UUID) -> Optional[AccountTypes]:
-        if account == self.account:
-            return AccountTypes.cooperation
-        return None
 
 
 @dataclass
