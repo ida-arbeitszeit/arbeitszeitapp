@@ -59,10 +59,18 @@ class _lazy_property(Generic[T]):
 
 @database_required
 class DatabaseTestCase(TestCase):
+    _schema_initialized = False
+
     def setUp(self) -> None:
         super().setUp()
         self.injector = get_dependency_injector(self.get_injection_modules())
         self.db = self.injector.get(Database)
+
+        # Drop and recreate schema once per test run
+        if not DatabaseTestCase._schema_initialized:
+            drop_and_recreate_schema(self.db.engine.connect())
+            DatabaseTestCase._schema_initialized = True
+
         # Set up connection-level transaction for test isolation
         self.connection = self.db.engine.connect()
         self.transaction = self.connection.begin()
@@ -300,7 +308,7 @@ class ViewTestCase(FlaskTestCase):
 def drop_and_recreate_schema(connection: Connection) -> None:
     """
     Drops and recreates the public schema to ensure a clean database state for tests.
-    Useful when Base.metadata.drop_all() fails due to foreign key constraints or orphaned tables.
     """
     connection.execute(text("DROP SCHEMA public CASCADE"))
     connection.execute(text("CREATE SCHEMA public"))
+    connection.commit()
