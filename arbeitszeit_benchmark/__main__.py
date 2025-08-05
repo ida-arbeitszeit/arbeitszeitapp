@@ -15,30 +15,30 @@ from .show_prd_account_details_benchmark import ShowPrdAccountDetailsBenchmark
 from .show_r_account_details_benchmark import ShowRAccountDetailsBenchmark
 
 
+def build_benchmark_catalog() -> BenchmarkCatalog:
+    catalog = BenchmarkCatalog()
+    catalog.register_benchmark(
+        "show_prd_account_details", ShowPrdAccountDetailsBenchmark
+    )
+    catalog.register_benchmark("show_r_account_details", ShowRAccountDetailsBenchmark)
+    catalog.register_benchmark("get_statistics", GetStatisticsBenchmark)
+    catalog.register_benchmark("get_company_summary", GetCompanySummaryBenchmark)
+    catalog.register_benchmark(
+        "query_plans_sorted_by_activation_date",
+        QueryPlansSortedByActivationDateBenchmark,
+    )
+    return catalog
+
+
 def main() -> None:
     arguments = parse_arguments()
     configuration = Configuration.from_arguments(arguments)
     results: Dict[str, BenchmarkResult] = dict()
-    catalog = BenchmarkCatalog()
-    catalog.register_benchmark(
-        name="show_prd_account_details", benchmark_class=ShowPrdAccountDetailsBenchmark
-    )
-    catalog.register_benchmark(
-        name="show_r_account_details", benchmark_class=ShowRAccountDetailsBenchmark
-    )
-    catalog.register_benchmark(
-        name="get_statistics", benchmark_class=GetStatisticsBenchmark
-    )
-    catalog.register_benchmark(
-        name="get_company_summary", benchmark_class=GetCompanySummaryBenchmark
-    )
-    catalog.register_benchmark(
-        name="query_plans_sorted_by_activation_date",
-        benchmark_class=QueryPlansSortedByActivationDateBenchmark,
-    )
+    catalog = build_benchmark_catalog()
     for name, benchmark_class in catalog.get_all_benchmarks():
         if (configuration.include_filter or "") not in name:
             continue
+        print(f"Running benchmark: {name}")
         benchmark = benchmark_class()
         try:
             average_benchmark_time = (
@@ -67,9 +67,22 @@ class Configuration:
 
 
 def parse_arguments() -> argparse.Namespace:
+    catalog = build_benchmark_catalog()
+    available_benchmarks = ", ".join(name for name, _ in catalog.get_all_benchmarks())
     parser = argparse.ArgumentParser()
-    parser.add_argument("--include", "-i", default=None)
-    parser.add_argument("--repeats", "-n", type=int, default=5)
+    parser.add_argument(
+        "--include",
+        "-i",
+        default=None,
+        help=f"Filter benchmarks by name substring. Available: {available_benchmarks}",
+    )
+    parser.add_argument(
+        "--repeats",
+        "-n",
+        type=int,
+        default=5,
+        help="Number of times to repeat each benchmark",
+    )
     return parser.parse_args()
 
 
