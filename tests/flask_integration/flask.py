@@ -4,6 +4,7 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
+from sqlalchemy import Connection, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
@@ -21,8 +22,8 @@ from tests.data_generators import (
     EmailGenerator,
     MemberGenerator,
     PlanGenerator,
-    TransactionGenerator,
     TransferGenerator,
+    WorkerAffiliationGenerator,
 )
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.mail_service import MockEmailService
@@ -59,10 +60,18 @@ class _lazy_property(Generic[T]):
 
 @database_required
 class DatabaseTestCase(TestCase):
+    _schema_initialized = False
+
     def setUp(self) -> None:
         super().setUp()
         self.injector = get_dependency_injector(self.get_injection_modules())
         self.db = self.injector.get(Database)
+
+        # Drop and recreate schema once per test run
+        if not DatabaseTestCase._schema_initialized:
+            drop_and_recreate_schema(self.db.engine.connect())
+            DatabaseTestCase._schema_initialized = True
+
         # Set up connection-level transaction for test isolation
         self.connection = self.db.engine.connect()
         self.transaction = self.connection.begin()
@@ -119,9 +128,9 @@ class FlaskTestCase(DatabaseTestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     token_service = _lazy_property(FlaskTokenService)
-    transaction_generator = _lazy_property(TransactionGenerator)
     transfer_generator = _lazy_property(TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
+    worker_affiliation_generator = _lazy_property(WorkerAffiliationGenerator)
 
 
 class LogInUser(Enum):
@@ -296,3 +305,12 @@ class ViewTestCase(FlaskTestCase):
             return self.login_company(confirm_company=False)
         elif login == LogInUser.accountant:
             return self.login_accountant()
+
+
+def drop_and_recreate_schema(connection: Connection) -> None:
+    """
+    Drops and recreates the public schema to ensure a clean database state for tests.
+    """
+    connection.execute(text("DROP SCHEMA public CASCADE"))
+    connection.execute(text("CREATE SCHEMA public"))
+    connection.commit()

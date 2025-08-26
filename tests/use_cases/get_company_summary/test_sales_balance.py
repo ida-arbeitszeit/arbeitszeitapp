@@ -16,7 +16,7 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.get_company_summary = self.injector.get(GetCompanySummary)
 
-    def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transactions_took_place(
+    def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()

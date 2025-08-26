@@ -18,7 +18,7 @@ from .dependency_injection import injection_test
 
 
 @injection_test
-def test_that_balance_is_zero_when_no_transaction_took_place(
+def test_that_balance_is_zero_when_no_transfer_took_place(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
 ):
@@ -28,7 +28,7 @@ def test_that_balance_is_zero_when_no_transaction_took_place(
 
 
 @injection_test
-def test_that_transactions_is_empty_when_no_transaction_took_place(
+def test_that_transfers_is_empty_when_no_transfer_took_place(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
 ):
@@ -38,7 +38,7 @@ def test_that_transactions_is_empty_when_no_transaction_took_place(
 
 
 @injection_test
-def test_that_transactions_is_empty_when_member_is_not_involved_in_transaction(
+def test_that_transfers_is_empty_when_member_is_not_involved_in_transfer(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     consumption_generator: ConsumptionGenerator,
@@ -81,7 +81,7 @@ def test_that_correct_info_is_generated_after_member_consumes_product(
 
 
 @injection_test
-def test_that_a_transaction_with_volume_zero_is_shown_correctly(
+def test_that_a_transfer_with_volume_zero_is_shown_correctly(
     use_case: GetMemberAccount,
     member_generator: MemberGenerator,
     company_generator: CompanyGenerator,
@@ -209,7 +209,7 @@ def test_that_correct_work_certificates_info_is_generated(
 
 
 @injection_test
-def test_that_correct_peer_name_info_is_generated_in_correct_order_after_several_transactions_of_different_kind(
+def test_that_correct_peer_name_info_is_generated_in_correct_order_after_several_transfers_of_different_kind(
     use_case: GetMemberAccount,
     company_generator: CompanyGenerator,
     member_generator: MemberGenerator,

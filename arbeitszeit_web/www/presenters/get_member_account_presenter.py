@@ -12,7 +12,7 @@ from arbeitszeit_web.translator import Translator
 @dataclass
 class GetMemberAccountPresenter:
     @dataclass
-    class Transaction:
+    class Transfer:
         date: str
         type: str
         user_name: str
@@ -23,7 +23,7 @@ class GetMemberAccountPresenter:
     class ViewModel:
         balance: str
         is_balance_positive: bool
-        transactions: List[GetMemberAccountPresenter.Transaction]
+        transfers: List[GetMemberAccountPresenter.Transfer]
 
     datetime_formatter: DatetimeFormatter
     translator: Translator
@@ -31,8 +31,8 @@ class GetMemberAccountPresenter:
     def present_member_account(
         self, use_case_response: GetMemberAccountResponse
     ) -> ViewModel:
-        transactions = [
-            self.Transaction(
+        transfers = [
+            self.Transfer(
                 date=self.datetime_formatter.format_datetime(
                     t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
                 ),
@@ -46,7 +46,7 @@ class GetMemberAccountPresenter:
         return self.ViewModel(
             balance=f"{round(use_case_response.balance, 2)}",
             is_balance_positive=use_case_response.balance >= 0,
-            transactions=transactions,
+            transfers=transfers,
         )
 
     def _transfer_type_as_string(self, t: TransferType) -> str:

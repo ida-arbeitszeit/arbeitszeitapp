@@ -33,8 +33,9 @@ class AuthenticatedMemberTests(ViewTestCase):
             self.database_gateway.get_accounts().owned_by_member(self.member).first()
         )
         assert account
-        self.transaction_generator.create_transaction(
-            receiving_account=account.id, amount_received=Decimal(100)
+        self.transfer_generator.create_transfer(
+            credit_account=account.id,
+            value=Decimal(100),
         )
         plan = self.plan_generator.create_plan()
         response = self.client.post(

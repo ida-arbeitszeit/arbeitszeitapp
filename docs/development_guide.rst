@@ -440,7 +440,7 @@ User identification
 Arbeitszeitapp knows 3 different types of users: members, companies
 and accountants. Members represent individual workers, companies
 represent worker organized production units, e.g. workshops, factories
-or offices. Accountants keep track of all transactions and review
+or offices. Accountants keep track of all transfers and review
 plans. Each of these different user types is represented by a
 dedicated user account with a universally unique identifier (UUID).
 

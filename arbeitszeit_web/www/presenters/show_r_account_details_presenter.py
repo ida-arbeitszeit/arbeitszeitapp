@@ -14,14 +14,14 @@ from arbeitszeit_web.www.navbar import NavbarItem
 @dataclass
 class ShowRAccountDetailsPresenter:
     @dataclass
-    class TransactionInfo:
-        transaction_type: str
+    class TransferInfo:
+        transfer_type: str
         date: str
-        transaction_volume: str
+        transfer_volume: str
 
     @dataclass
     class ViewModel:
-        transactions: List[ShowRAccountDetailsPresenter.TransactionInfo]
+        transfers: List[ShowRAccountDetailsPresenter.TransferInfo]
         account_balance: str
         plot_url: str
         navbar_items: list[NavbarItem]
@@ -31,12 +31,11 @@ class ShowRAccountDetailsPresenter:
     datetime_formatter: DatetimeFormatter
 
     def present(self, use_case_response: show_r_account_details.Response) -> ViewModel:
-        transactions = [
-            self._create_info(transaction)
-            for transaction in use_case_response.transfers
+        transfers = [
+            self._create_info(transfer) for transfer in use_case_response.transfers
         ]
         return self.ViewModel(
-            transactions=transactions,
+            transfers=transfers,
             account_balance=str(round(use_case_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_r_account(
                 use_case_response.company_id
@@ -54,14 +53,14 @@ class ShowRAccountDetailsPresenter:
 
     def _create_info(
         self, transfer: show_r_account_details.TransferInfo
-    ) -> TransactionInfo:
-        transaction_type = (
+    ) -> TransferInfo:
+        transfer_type = (
             self.translator.gettext("Consumption")
             if transfer.type == TransferType.productive_consumption_r
             else self.translator.gettext("Credit")
         )
-        return self.TransactionInfo(
-            transaction_type,
+        return self.TransferInfo(
+            transfer_type,
             self.datetime_formatter.format_datetime(
                 date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
             ),

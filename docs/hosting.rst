@@ -126,11 +126,11 @@ configuration options are available
    
    This integer defines the "relative deviation" from the ideal account balance of zero
    that is still deemed acceptable, expressed in percent and calculated 
-   relative to the expected transaction value of this account.
+   relative to the expected transfer value of this account.
 
    Example: Company XY has an absolute deviation of minus 1000 hours on its account for means
    of production (PRD account). Because it has filed plans with total costs for means of 
-   production of 10000 hours (=the sum of expected transaction value), 
+   production of 10000 hours (=the sum of expected transfer value), 
    its relative deviation is 10%.
 
    Unacceptable high deviations might get labeled as such or highlighted by the application.

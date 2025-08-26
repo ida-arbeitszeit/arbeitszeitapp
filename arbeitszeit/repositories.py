@@ -337,24 +337,6 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
     ) -> QueryResult[Tuple[records.Accountant, records.EmailAddress]]: ...
 
 
-class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender(self, *account: UUID) -> Self: ...
-
-    def where_account_is_receiver(self, *account: UUID) -> Self: ...
-
-    def ordered_by_transaction_date(self, descending: bool = ...) -> Self: ...
-
-    def joined_with_receiver(
-        self,
-    ) -> QueryResult[Tuple[records.Transaction, records.AccountOwner]]: ...
-
-    def joined_with_sender_and_receiver(
-        self,
-    ) -> QueryResult[
-        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
-    ]: ...
-
-
 class TransferResult(QueryResult[records.Transfer], Protocol):
     def where_account_is_debtor(self, *account: UUID) -> Self: ...
 
@@ -577,18 +559,6 @@ class DatabaseGateway(Protocol):
     def get_coordination_transfer_requests(
         self,
     ) -> CoordinationTransferRequestResult: ...
-
-    def get_transactions(self) -> TransactionResult: ...
-
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> records.Transaction: ...
 
     def create_transfer(
         self,

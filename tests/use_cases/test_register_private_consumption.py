@@ -144,7 +144,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(is_public_service=True)
-        self.make_transaction_to_consumer_account(Decimal("-10"))
+        self.make_transfer_to_consumer_account(Decimal("-10"))
         assert self.balance_checker.get_member_account_balance(
             self.consumer
         ) == Decimal("-10")
@@ -218,7 +218,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
             planner=planner,
         )
         start_balance = Decimal(100)
-        self.make_transaction_to_consumer_account(start_balance)
+        self.make_transfer_to_consumer_account(start_balance)
         pieces_consumed = 2
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan, pieces_consumed)
@@ -250,7 +250,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
 
     def test_correct_consumption_is_added(self) -> None:
         plan = self.plan_generator.create_plan()
-        self.make_transaction_to_consumer_account(Decimal("100"))
+        self.make_transfer_to_consumer_account(Decimal("100"))
         pieces = 3
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan, pieces)
@@ -291,7 +291,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
             amount=amount,
         )
 
-    def make_transaction_to_consumer_account(self, amount: Decimal) -> None:
+    def make_transfer_to_consumer_account(self, amount: Decimal) -> None:
         if amount > 0:
             company = self.company_generator.create_company(workers=[self.consumer])
             self.register_hours_worked(

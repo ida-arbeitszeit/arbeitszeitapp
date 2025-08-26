@@ -40,7 +40,6 @@ class SocialAccounting(Base):
     __tablename__ = "social_accounting"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
     account_psf: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
 
@@ -181,32 +180,6 @@ class Account(Base):
     __tablename__ = "account"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-
-
-class Transaction(Base):
-    __tablename__ = "transaction"
-
-    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    date: Mapped[datetime]
-    sending_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
-    receiving_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
-    amount_sent: Mapped[Decimal]
-    amount_received: Mapped[Decimal]
-    purpose: Mapped[str] = mapped_column(String(1000), default="")  # Verwendungszweck
-
-    def __repr__(self) -> str:
-        fields = ", ".join(
-            [
-                f"id={self.id!r}",
-                f"date={self.date!r}",
-                f"sending_account={self.sending_account!r}",
-                f"receiving_account={self.receiving_account!r}",
-                f"amount_sent={self.amount_sent!r}",
-                f"amount_received={self.amount_received!r}",
-                f"purpose={self.purpose!r}",
-            ]
-        )
-        return f"Transaction({fields})"
 
 
 class Transfer(Base):

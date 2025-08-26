@@ -13,20 +13,20 @@ from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
 from tests.www.base_test_case import BaseTestCase
 
 
-class CompanyTransactionsPresenterTests(BaseTestCase):
+class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
-    def test_return_empty_list_when_no_transactions_took_place(self) -> None:
+    def test_return_empty_list_when_no_transfers_took_place(self) -> None:
         response = self._use_case_response()
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.transactions, [])
+        self.assertEqual(view_model.transfers, [])
 
-    def test_do_not_show_transactions_if_no_transactions_took_place(self) -> None:
+    def test_do_not_show_transfers_if_no_transfers_took_place(self) -> None:
         response = self._use_case_response()
         view_model = self.presenter.present(response)
-        self.assertFalse(view_model.show_transactions)
+        self.assertFalse(view_model.show_transfers)
 
     @parameterized.expand(
         [
@@ -35,7 +35,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             (TransferType.credit_a),
         ]
     )
-    def test_return_correct_info_when_one_transaction_of_granting_credit_took_place(
+    def test_return_correct_info_when_one_transfer_of_granting_credit_took_place(
         self,
         transfer_type: TransferType,
     ) -> None:
@@ -49,11 +49,11 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transfers=[transfer], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
+        self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
-        trans = view_model.transactions[0]
+        trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transaction_type, self.translator.gettext("Debit expected sales")
+            trans.transfer_type, self.translator.gettext("Debit expected sales")
         )
         self.assertEqual(
             trans.date,
@@ -63,7 +63,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                 fmt="%d.%m.%Y %H:%M",
             ),
         )
-        self.assertEqual(trans.transaction_volume, str(round(TRANSFER_VOLUME, 2)))
+        self.assertEqual(trans.transfer_volume, str(round(TRANSFER_VOLUME, 2)))
 
     def test_return_correct_info_when_one_private_consumption_took_place(
         self,
@@ -78,10 +78,10 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             transfers=[transfer], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
+        self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
-        trans = view_model.transactions[0]
-        self.assertEqual(trans.transaction_type, self.translator.gettext("Sale"))
+        trans = view_model.transfers[0]
+        self.assertEqual(trans.transfer_type, self.translator.gettext("Sale"))
         self.assertEqual(
             trans.date,
             self.datetime_service.format_datetime(
@@ -90,7 +90,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
                 fmt="%d.%m.%Y %H:%M",
             ),
         )
-        self.assertEqual(trans.transaction_volume, str(round(TRANSFER_VOLUME, 2)))
+        self.assertEqual(trans.transfer_volume, str(round(TRANSFER_VOLUME, 2)))
 
     def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_coop_took_place(
         self,
@@ -100,10 +100,10 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         response = self._use_case_response(transfers=[transfer])
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
-        trans = view_model.transactions[0]
+        self.assertTrue(len(view_model.transfers), 1)
+        trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transaction_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type, self.translator.gettext("Cooperation compensation")
         )
 
     def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_company_took_place(
@@ -114,13 +114,13 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         response = self._use_case_response(transfers=[transfer])
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 1)
-        trans = view_model.transactions[0]
+        self.assertTrue(len(view_model.transfers), 1)
+        trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transaction_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type, self.translator.gettext("Cooperation compensation")
         )
 
-    def test_return_two_transactions_when_two_transactions_took_place(self) -> None:
+    def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self._use_case_response(
             transfers=[
                 self._get_transfer_info(),
@@ -128,7 +128,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ],
         )
         view_model = self.presenter.present(response)
-        self.assertTrue(len(view_model.transactions), 2)
+        self.assertTrue(len(view_model.transfers), 2)
 
     def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self) -> None:
         response = self._use_case_response()
@@ -136,7 +136,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
 
-    def test_name_of_peer_is_shown_if_transaction_is_productive_consumption(
+    def test_name_of_peer_is_shown_if_transfer_is_productive_consumption(
         self,
     ) -> None:
         expected_user_name = "some user name"
@@ -151,9 +151,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name == expected_user_name
+        assert view_model.transfers[0].peer_name == expected_user_name
 
-    def test_name_of_peer_is_anonymized_if_transaction_is_private_consumption(
+    def test_name_of_peer_is_anonymized_if_transfer_is_private_consumption(
         self,
     ) -> None:
         expected_user_name = self.translator.gettext("Anonymous worker")
@@ -166,7 +166,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name == expected_user_name
+        assert view_model.transfers[0].peer_name == expected_user_name
 
     def test_name_of_peer_is_shown_if_transfer_is_compensation_for_coop(
         self,
@@ -183,7 +183,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name == expected_coop_name
+        assert view_model.transfers[0].peer_name == expected_coop_name
 
     def test_name_of_peer_is_shown_if_transfer_is_compensation_for_company(
         self,
@@ -200,9 +200,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name == expected_company_name
+        assert view_model.transfers[0].peer_name == expected_company_name
 
-    def test_member_peer_icon_is_shown_if_transaction_was_with_member(
+    def test_member_peer_icon_is_shown_if_transfer_was_with_member(
         self,
     ) -> None:
         response = self._use_case_response(
@@ -214,9 +214,9 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == "user"
+        assert view_model.transfers[0].peer_type_icon == "user"
 
-    def test_company_peer_icon_is_shown_if_transaction_was_with_company(
+    def test_company_peer_icon_is_shown_if_transfer_was_with_company(
         self,
     ) -> None:
         response = self._use_case_response(
@@ -230,7 +230,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == "industry"
+        assert view_model.transfers[0].peer_type_icon == "industry"
 
     @parameterized.expand(
         [
@@ -253,7 +253,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == "hands-helping"
+        assert view_model.transfers[0].peer_type_icon == "hands-helping"
 
     def test_peer_type_icon_is_empty_string_if_peer_is_none(
         self,
@@ -266,7 +266,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         response = self._use_case_response(transfers=[transfer])
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_type_icon == ""
+        assert view_model.transfers[0].peer_type_icon == ""
 
     def test_name_of_peer_is_empty_string_if_peer_is_none(
         self,
@@ -279,7 +279,7 @@ class CompanyTransactionsPresenterTests(BaseTestCase):
         )
         response = self._use_case_response(transfers=[transfer])
         view_model = self.presenter.present(response)
-        assert view_model.transactions[0].peer_name == ""
+        assert view_model.transfers[0].peer_name == ""
 
     def test_view_model_contains_two_navbar_items(self) -> None:
         response = self._use_case_response()

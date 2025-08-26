@@ -24,7 +24,6 @@ from typing import (
 from uuid import UUID, uuid4
 
 from arbeitszeit import records
-from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.injector import singleton
 from arbeitszeit.records import (
     Account,
@@ -40,7 +39,6 @@ from arbeitszeit.records import (
     PlanDraft,
     ProductionCosts,
     SocialAccounting,
-    Transaction,
     Transfer,
 )
 from arbeitszeit.transfers.transfer_type import TransferType
@@ -872,74 +870,6 @@ class AccountantResult(QueryResultImpl[Accountant]):
         )
 
 
-class TransactionResult(QueryResultImpl[Transaction]):
-    def where_account_is_sender(self, *account: UUID) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.sending_account in account
-        )
-
-    def where_account_is_receiver(self, *account: UUID) -> Self:
-        return self._filter_elements(
-            lambda transaction: transaction.receiving_account in account
-        )
-
-    def ordered_by_transaction_date(self, descending: bool = False) -> Self:
-        return self.sorted_by(
-            key=lambda transaction: transaction.date,
-            reverse=descending,
-        )
-
-    def joined_with_receiver(
-        self,
-    ) -> QueryResultImpl[Tuple[records.Transaction, records.AccountOwner]]:
-        def get_account_owner(account_id: UUID) -> records.AccountOwner:
-            if members := self.database.indices.member_by_account.get(account_id):
-                (member,) = members
-                return self.database.members[member]
-            if companies := self.database.indices.company_by_account.get(account_id):
-                (company,) = companies
-                return self.database.companies[company]
-            return self.database.social_accounting
-
-        def items() -> Iterable[Tuple[records.Transaction, records.AccountOwner]]:
-            for transaction in self.items():
-                yield transaction, get_account_owner(transaction.receiving_account)
-
-        return QueryResultImpl(
-            items=items,
-            database=self.database,
-        )
-
-    def joined_with_sender_and_receiver(
-        self,
-    ) -> QueryResultImpl[
-        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
-    ]:
-        def get_account_owner(account_id: UUID) -> records.AccountOwner:
-            if members := self.database.indices.member_by_account.get(account_id):
-                (member,) = members
-                return self.database.members[member]
-            if companies := self.database.indices.company_by_account.get(account_id):
-                (company,) = companies
-                return self.database.companies[company]
-            return self.database.social_accounting
-
-        def items() -> (
-            Iterable[
-                Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
-            ]
-        ):
-            for transaction in self.items():
-                yield transaction, get_account_owner(
-                    transaction.sending_account
-                ), get_account_owner(transaction.receiving_account)
-
-        return QueryResultImpl(
-            items=items,
-            database=self.database,
-        )
-
-
 class TransferResult(QueryResultImpl[records.Transfer]):
     def where_account_is_debtor(self, *account: UUID) -> Self:
         return self._filter_elements(lambda transfer: transfer.debit_account in account)
@@ -1272,7 +1202,7 @@ class AccountResult(QueryResultImpl[Account]):
     ) -> QueryResultImpl[Tuple[Account, records.AccountOwner]]:
         def items() -> Iterable[Tuple[Account, records.AccountOwner]]:
             for account in self.items():
-                if account.id == self.database.social_accounting.account:
+                if account.id == self.database.social_accounting.account_psf:
                     yield account, self.database.social_accounting
                 for member in self.database.members.values():
                     if account.id == member.account:
@@ -1297,28 +1227,15 @@ class AccountResult(QueryResultImpl[Account]):
     def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
         def items() -> Iterable[Tuple[Account, Decimal]]:
             for account in self.items():
-                # Calculate balance from transactions
-                transactions = self.database.get_transactions()
-                received_transactions = transactions.where_account_is_receiver(
-                    account.id
-                )
-                sent_transactions = transactions.where_account_is_sender(account.id)
-                transaction_balance = decimal_sum(
-                    transaction.amount_received for transaction in received_transactions
-                ) - decimal_sum(
-                    transaction.amount_sent for transaction in sent_transactions
-                )
-
-                # Calculate balance from transfers
-                transfer_balance = Decimal(0)
+                balance = Decimal(0)
                 for transfer in self.database.transfers.values():
                     if transfer.credit_account == account.id:
-                        transfer_balance += transfer.value
+                        balance += transfer.value
                     if transfer.debit_account == account.id:
-                        transfer_balance -= transfer.value
+                        balance -= transfer.value
 
                 # Combine both balances
-                yield account, transaction_balance + transfer_balance
+                yield account, balance
 
         return QueryResultImpl(items=items, database=self.database)
 
@@ -1759,7 +1676,6 @@ class MockDatabase:
         self.members: Dict[UUID, Member] = {}
         self.companies: Dict[UUID, Company] = {}
         self.plans: Dict[UUID, Plan] = {}
-        self.transactions: Dict[UUID, Transaction] = dict()
         self.transfers: Dict[UUID, records.Transfer] = dict()
         self.accounts: List[Account] = []
         self.p_accounts: Set[Account] = set()
@@ -1770,7 +1686,6 @@ class MockDatabase:
         self.accountants: Dict[UUID, Accountant] = dict()
         self.social_accounting = SocialAccounting(
             id=uuid4(),
-            account=self.create_account().id,
             account_psf=self.create_account().id,
         )
         self.cooperations: Dict[UUID, Cooperation] = dict()
@@ -1957,33 +1872,6 @@ class MockDatabase:
     def get_coordination_transfer_requests(self) -> CoordinationTransferRequestResult:
         return CoordinationTransferRequestResult(
             items=lambda: self.coordination_transfer_requests.values(),
-            database=self,
-        )
-
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> Transaction:
-        transaction = Transaction(
-            id=uuid4(),
-            date=date,
-            sending_account=sending_account,
-            receiving_account=receiving_account,
-            amount_sent=amount_sent,
-            amount_received=amount_received,
-            purpose=purpose,
-        )
-        self.transactions[transaction.id] = transaction
-        return transaction
-
-    def get_transactions(self) -> TransactionResult:
-        return TransactionResult(
-            items=lambda: self.transactions.values(),
             database=self,
         )
 
