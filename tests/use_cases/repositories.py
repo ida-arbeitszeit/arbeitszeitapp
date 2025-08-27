@@ -931,6 +931,46 @@ class TransferResult(QueryResultImpl[records.Transfer]):
             database=self.database,
         )
 
+    def joined_with_debtor_and_creditor(
+        self,
+    ) -> QueryResultImpl[
+        Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
+    ]:
+        def get_account_owner(account_id: UUID) -> records.AccountOwner:
+            if members := self.database.indices.member_by_account.get(account_id):
+                (member_id,) = members
+                return self.database.members[member_id]
+            if companies := self.database.indices.company_by_account.get(account_id):
+                (company_id,) = companies
+                return self.database.companies[company_id]
+            if cooperations := self.database.indices.cooperation_by_account.get(
+                account_id
+            ):
+                (cooperation_id,) = cooperations
+                return self.database.cooperations[cooperation_id]
+            return self.database.social_accounting
+
+        def items() -> (
+            Iterable[
+                Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
+            ]
+        ):
+            for transfer in self.items():
+                yield transfer, get_account_owner(
+                    transfer.debit_account
+                ), get_account_owner(transfer.credit_account)
+
+        return QueryResultImpl(
+            items=items,
+            database=self.database,
+        )
+
+    def ordered_by_date(self, *, ascending: bool = True) -> Self:
+        def transfer_sorting_key(transfer: records.Transfer) -> datetime:
+            return transfer.date
+
+        return self.sorted_by(key=transfer_sorting_key, reverse=not ascending)
+
 
 class PrivateConsumptionResult(QueryResultImpl[records.PrivateConsumption]):
     def ordered_by_creation_date(self, *, ascending: bool = True) -> Self:
