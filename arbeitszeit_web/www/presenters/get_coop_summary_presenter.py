@@ -1,6 +1,6 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
 
@@ -31,9 +31,6 @@ class GetCoopSummaryViewModel:
     coop_price: str
 
     plans: List[AssociatedPlan]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass

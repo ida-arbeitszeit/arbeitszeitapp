@@ -72,7 +72,7 @@ def company_summary(
         view_model = presenter.present(use_case_response)
         return render_template(
             "user/company_summary.html",
-            view_model=view_model.to_dict(),
+            view_model=view_model,
         )
     else:
         return http_404()

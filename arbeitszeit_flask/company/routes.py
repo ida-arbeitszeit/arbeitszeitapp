@@ -245,7 +245,7 @@ def plan_details(
     if not use_case_response:
         return http_404()
     view_model = presenter.present(use_case_response)
-    return render_template("company/plan_details.html", view_model=view_model.to_dict())
+    return render_template("company/plan_details.html", view_model=view_model)
 
 
 @CompanyRoute(

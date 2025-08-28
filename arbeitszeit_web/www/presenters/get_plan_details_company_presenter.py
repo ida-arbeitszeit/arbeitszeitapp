@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
@@ -27,9 +27,6 @@ class GetPlanDetailsCompanyViewModel:
     own_plan_action: OwnPlanAction
     show_productive_consumption_url: bool
     productive_consumption_url: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass

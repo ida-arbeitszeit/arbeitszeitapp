@@ -93,7 +93,7 @@ class plan_details:
             return FlaskResponse(
                 render_template(
                     "member/plan_details.html",
-                    view_model=view_model.to_dict(),
+                    view_model=view_model,
                 )
             )
         else:
