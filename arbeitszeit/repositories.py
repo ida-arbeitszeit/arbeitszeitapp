@@ -350,6 +350,14 @@ class TransferResult(QueryResult[records.Transfer], Protocol):
         self,
     ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
 
+    def joined_with_debtor_and_creditor(
+        self,
+    ) -> QueryResult[
+        Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
+    ]: ...
+
+    def ordered_by_date(self, *, ascending: bool = ...) -> Self: ...
+
 
 class AccountResult(QueryResult[records.Account], Protocol):
     def with_id(self, *id_: UUID) -> Self: ...

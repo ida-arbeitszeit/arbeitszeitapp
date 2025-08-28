@@ -850,25 +850,9 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         )
         return FlaskQueryResult(
             query=query,
-            mapper=self.map_transfer_and_debtor,
+            mapper=self.map_transfer_and_account_owner,
             db=self.db,
         )
-
-    @classmethod
-    def map_transfer_and_debtor(
-        cls, orm: Any
-    ) -> Tuple[records.Transfer, records.AccountOwner]:
-        transfer, member, company, social_accounting, cooperation = orm
-        debtor: records.AccountOwner
-        if member:
-            debtor = DatabaseGatewayImpl.member_from_orm(member)
-        elif company:
-            debtor = DatabaseGatewayImpl.company_from_orm(company)
-        elif social_accounting:
-            debtor = AccountingRepository.social_accounting_from_orm(social_accounting)
-        else:
-            debtor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
-        return DatabaseGatewayImpl.transfer_from_orm(transfer), debtor
 
     def joined_with_creditor(
         self,
@@ -907,27 +891,27 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         )
         return FlaskQueryResult(
             query=query,
-            mapper=self.map_transfer_and_creditor,
+            mapper=self.map_transfer_and_account_owner,
             db=self.db,
         )
 
     @classmethod
-    def map_transfer_and_creditor(
+    def map_transfer_and_account_owner(
         cls, orm: Any
     ) -> Tuple[records.Transfer, records.AccountOwner]:
         transfer, member, company, social_accounting, cooperation = orm
-        creditor: records.AccountOwner
+        account_owner: records.AccountOwner
         if member:
-            creditor = DatabaseGatewayImpl.member_from_orm(member)
+            account_owner = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
-            creditor = DatabaseGatewayImpl.company_from_orm(company)
+            account_owner = DatabaseGatewayImpl.company_from_orm(company)
         elif social_accounting:
-            creditor = AccountingRepository.social_accounting_from_orm(
+            account_owner = AccountingRepository.social_accounting_from_orm(
                 social_accounting
             )
         else:
-            creditor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
-        return DatabaseGatewayImpl.transfer_from_orm(transfer), creditor
+            account_owner = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), account_owner
 
 
 class AccountQueryResult(FlaskQueryResult[records.Account]):
