@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Dict, List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+from arbeitszeit_web.request import Request
+
 PAGE_PARAMETER_NAME = "page"
 """The name of the request query parameter used for pagination."""
 
@@ -60,3 +62,14 @@ class Paginator:
     @property
     def page_count(self) -> int:
         return 1 + (self.total_results - 1) // self.page_size
+
+
+def calculate_current_offset(request: Request, limit: int) -> int:
+    page_number_str = request.query_string().get_last_value(PAGE_PARAMETER_NAME)
+    if page_number_str is None:
+        return 0
+    try:
+        page_number = int(page_number_str)
+    except ValueError:
+        return 0
+    return (page_number - 1) * limit
