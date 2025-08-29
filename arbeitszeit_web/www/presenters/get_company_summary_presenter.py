@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, List
+from dataclasses import dataclass
+from typing import List
 
 from arbeitszeit.control_thresholds import ControlThresholds
 from arbeitszeit.use_cases.get_company_summary import (
@@ -52,9 +52,6 @@ class GetCompanySummaryViewModel:
     r_account_overview_url: str
     a_account_overview_url: str
     prd_account_overview_url: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass

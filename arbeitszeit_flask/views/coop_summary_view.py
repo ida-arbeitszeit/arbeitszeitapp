@@ -23,8 +23,6 @@ class CoopSummaryView:
         )
         if use_case_response:
             view_model = self.presenter.present(use_case_response)
-            return render_template(
-                "user/coop_summary.html", view_model=view_model.to_dict()
-            )
+            return render_template("user/coop_summary.html", view_model=view_model)
         else:
             return http_404()

@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, List
+from dataclasses import dataclass
+from typing import List
 
 from arbeitszeit.use_cases.query_companies import CompanyQueryResponse
 from arbeitszeit_web.notification import Notifier
@@ -28,9 +28,6 @@ class QueryCompaniesViewModel:
     results: ResultsTable
     show_results: bool
     pagination: Pagination
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass
