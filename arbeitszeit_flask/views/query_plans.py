@@ -43,7 +43,7 @@ class QueryPlansView:
         form: PlanSearchForm,
     ) -> Response:
         response = self.query_plans(use_case_request)
-        view_model = self.presenter.present(response, self.request)
+        view_model = self.presenter.present(response)
         return Response(self._render_response_content(view_model, form=form))
 
     def _render_response_content(
