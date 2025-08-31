@@ -1,6 +1,8 @@
 from uuid import uuid4
 
-from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
+from parameterized import parameterized
+
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, PAGE_PARAMETER_NAME
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
@@ -81,3 +83,23 @@ class PaginationTests(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         assert view_model.pagination.is_visible
+
+    @parameterized.expand(
+        [
+            (1,),
+            (2,),
+            (3,),
+        ]
+    )
+    def test_that_correct_pages_are_shown_as_currently_selected(
+        self,
+        page_number_in_query_string: int,
+    ) -> None:
+        self.request.set_arg(PAGE_PARAMETER_NAME, str(page_number_in_query_string))
+        response = self.queried_company_generator.get_response()
+        view_model = self.presenter.present(response)
+        for index, page in enumerate(view_model.pagination.pages):
+            if index == page_number_in_query_string - 1:
+                assert page.is_current
+            else:
+                assert not page.is_current
