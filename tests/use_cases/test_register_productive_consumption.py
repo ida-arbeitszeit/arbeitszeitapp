@@ -10,7 +10,6 @@ from arbeitszeit.records import (
     ProductiveConsumption,
     Transfer,
 )
-from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
@@ -26,7 +25,6 @@ class UseCaseBase(BaseTestCase):
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
         )
-        self.database_gateway = self.injector.get(DatabaseGateway)
 
     def _get_transfers_of_type(self, transfer_type: TransferType) -> list[Transfer]:
         return list(

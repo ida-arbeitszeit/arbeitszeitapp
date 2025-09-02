@@ -8,7 +8,6 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.records import PrivateConsumption, ProductionCosts, Transfer
-from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import query_private_consumptions
 from arbeitszeit.use_cases.register_hours_worked import (
@@ -30,7 +29,6 @@ class RegisterPrivateConsumptionBase(BaseTestCase):
         self.register_private_consumption = self.injector.get(
             RegisterPrivateConsumption
         )
-        self.database_gateway = self.injector.get(DatabaseGateway)
 
     def create_cooperating_plans_with(
         self, *, costs_per_unit: list[Decimal]

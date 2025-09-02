@@ -5,7 +5,6 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit.records import Transfer
-from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.compensation import CompensationTransferService
 from arbeitszeit.transfers.transfer_type import TransferType
 from tests.use_cases.base_test_case import BaseTestCase
@@ -15,7 +14,6 @@ class CompensationTransferServiceTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.injector.get(CompensationTransferService)
-        self.database_gateway = self.injector.get(DatabaseGateway)
 
     def test_no_compensation_transfer_created_when_coop_and_plan_price_per_unit_are_equal(
         self,
