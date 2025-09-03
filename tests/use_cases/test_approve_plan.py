@@ -5,7 +5,6 @@ from uuid import UUID
 from parameterized import parameterized
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts, SocialAccounting
-from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
@@ -33,7 +32,6 @@ class UseCaseTests(BaseTestCase):
         self.register_productive_consumption = self.injector.get(
             RegisterProductiveConsumption
         )
-        self.database_gateway = self.injector.get(DatabaseGateway)
 
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
         plan = self.plan_generator.create_plan(approved=False)

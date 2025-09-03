@@ -1,6 +1,7 @@
 from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
+from arbeitszeit.repositories import DatabaseGateway
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.data_generators import (
     AccountantGenerator,
@@ -75,6 +76,7 @@ class BaseTestCase(TestCase):
     coordination_transfer_request_generator = _lazy_property(
         CoordinationTransferRequestGenerator
     )
+    database_gateway = _lazy_property(DatabaseGateway)
     datetime_service = _lazy_property(FakeDatetimeService)
     economic_scenarios = _lazy_property(EconomicScenarios)
     email_sender = _lazy_property(EmailSenderTestImpl)
