@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-04 10:55+0200\n"
+"POT-Creation-Date: 2025-09-04 23:42+0200\n"
 "PO-Revision-Date: 2022-01-16 19:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -2038,6 +2038,7 @@ msgid "Closed"
 msgstr ""
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:56
+#: arbeitszeit_web/www/presenters/list_transfers_presenter.py:144
 msgid "Contribution to public sector"
 msgstr ""
 
@@ -2137,10 +2138,6 @@ msgstr ""
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:139
 msgid "Compensation for underproductive planning"
-msgstr ""
-
-#: arbeitszeit_web/www/presenters/list_transfers_presenter.py:144
-msgid "Contribution to public services"
 msgstr ""
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:157
@@ -2652,5 +2649,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Wages"
+#~ msgstr ""
+
+#~ msgid "Contribution to public services"
 #~ msgstr ""
 

@@ -141,7 +141,7 @@ class ListTransfersPresenter:
             case "work_certificates":
                 return self.translator.gettext("Work certificates")
             case "taxes":
-                return self.translator.gettext("Contribution to public services")
+                return self.translator.gettext("Contribution to public sector")
             case _:
                 raise ValueError(f"Unknown transfer type: {transfer_type}")
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Arbeitszeitapp\n"
 "Report-Msgid-Bugs-To: community-arbeitszeitapp@systemli.org\n"
-"POT-Creation-Date: 2025-09-04 10:55+0200\n"
+"POT-Creation-Date: 2025-09-04 23:42+0200\n"
 "PO-Revision-Date: 2024-03-11 22:27+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -135,6 +135,8 @@ msgstr "E-Mail-Adresse ist erforderlich"
 #: arbeitszeit_flask/forms.py:186
 msgid "The entered email is not the one the invitation was sent to"
 msgstr ""
+"Die eingegebene E-Mail-Adresse ist nicht die, an die die Einladung gesendet"
+" wurde"
 
 #: arbeitszeit_flask/forms.py:206
 msgid "Email address required"
@@ -680,7 +682,7 @@ msgstr "Alle Pläne"
 #: arbeitszeit_flask/templates/member/dashboard.html:123
 #: arbeitszeit_flask/templates/user/list_transfers.html:5
 msgid "All transfers"
-msgstr ""
+msgstr "Alle Transaktionen"
 
 #: arbeitszeit_flask/templates/company/dashboard.html:188
 #: arbeitszeit_flask/templates/user/list_all_cooperations.html:4
@@ -1665,7 +1667,7 @@ msgstr "Keine Koordinator*innen gefunden."
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:13
 msgid "Transfers"
-msgstr ""
+msgstr "Transaktionen"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:18
 #: arbeitszeit_flask/templates/user/query_companies.html:36
@@ -1675,24 +1677,24 @@ msgstr "Ergebnisse"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:36
 msgid "Hours:"
-msgstr ""
+msgstr "Stunden:"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:39
 msgid "Type:"
-msgstr ""
+msgstr "Typ:"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:42
 msgid "From:"
-msgstr ""
+msgstr "Von:"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:42
 #: arbeitszeit_flask/templates/user/list_transfers.html:50
 msgid "Account"
-msgstr ""
+msgstr "Konto"
 
 #: arbeitszeit_flask/templates/user/list_transfers.html:50
 msgid "To:"
-msgstr ""
+msgstr "An:"
 
 #: arbeitszeit_flask/templates/user/query_companies.html:11
 msgid "Search companies"
@@ -1830,7 +1832,7 @@ msgstr "Einladung von einem Betrieb in der Arbeitszeitapp"
 
 #: arbeitszeit_web/email/notify_about_worker_removal_from_company_presenter.py:18
 msgid "Worker removed from company"
-msgstr ""
+msgstr "Arbeiter*in aus Betrieb entfernt"
 
 #: arbeitszeit_web/email/notify_accountant_about_new_plan_presenter.py:20
 msgid "Plan was filed"
@@ -2134,8 +2136,9 @@ msgid "Closed"
 msgstr "Abgeschlossen"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:56
+#: arbeitszeit_web/www/presenters/list_transfers_presenter.py:144
 msgid "Contribution to public sector"
-msgstr ""
+msgstr "Beitrag für öffentlichen Sektor"
 
 #: arbeitszeit_web/www/presenters/get_member_account_presenter.py:58
 #: arbeitszeit_web/www/presenters/show_p_account_details_presenter.py:60
@@ -2205,43 +2208,39 @@ msgstr "Kredit für flüssige Produktionsmittel"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:112
 msgid "Credit for labour"
-msgstr ""
+msgstr "Kredit für Arbeit"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:115
 msgid "Credit for fixed means of production (public service)"
-msgstr ""
+msgstr "Kredit für feste Produktionsmittel (öffentliche Dienstleistung)"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:119
 msgid "Credit for liquid means of production (public service)"
-msgstr ""
+msgstr "Kredit für flüssige Produktionsmittel (öffentliche Dienstleistung)"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:122
 msgid "Credit for labour (public service)"
-msgstr ""
+msgstr "Kredit für Arbeit (öffentliche Dienstleistung)"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:127
 msgid "Productive consumption of fixed means of production"
-msgstr ""
+msgstr "Produktiver Konsum von festen Produktionsmitteln"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:131
 msgid "Productive consumption of liquid means of production"
-msgstr ""
+msgstr "Produktiver Konsum von flüssigen Produktionsmitteln"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:135
 msgid "Compensation for overproductive planning"
-msgstr ""
+msgstr "Ausgleich für überproduktive Planung"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:139
 msgid "Compensation for underproductive planning"
-msgstr ""
-
-#: arbeitszeit_web/www/presenters/list_transfers_presenter.py:144
-msgid "Contribution to public services"
-msgstr ""
+msgstr "Ausgleich für unterproduktive Planung"
 
 #: arbeitszeit_web/www/presenters/list_transfers_presenter.py:157
 msgid "Social Accounting"
-msgstr ""
+msgstr "Öffentliche Buchhaltung"
 
 #: arbeitszeit_web/www/presenters/log_in_accountant_presenter.py:27
 #: arbeitszeit_web/www/presenters/log_in_member_presenter.py:46
@@ -2505,7 +2504,7 @@ msgstr "Verkauf"
 
 #: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:91
 msgid "Cooperation compensation"
-msgstr ""
+msgstr "Kooperationsausgleich"
 
 #: arbeitszeit_web/www/presenters/show_prd_account_details_presenter.py:123
 msgid "Anonymous worker"
@@ -3122,4 +3121,7 @@ msgstr "Anonyme*r Arbeiter*in"
 
 #~ msgid "Wages"
 #~ msgstr "Löhne"
+
+#~ msgid "Contribution to public services"
+#~ msgstr "Beitrag für öffentliche Dienstleistungen"
 
