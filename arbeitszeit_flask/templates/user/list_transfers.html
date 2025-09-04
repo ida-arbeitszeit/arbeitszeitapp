@@ -1,0 +1,67 @@
+{% from 'macros/pagination.html' import render_pagination %}
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<div class="navbar-item">{{ gettext("All transfers") }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="section has-text-centered">
+    <div class="columns is-centered">
+        <div class="column is-one-third">
+            <h1 class="title">
+                {{ gettext("Transfers") }}
+            </h1>
+        </div>
+    </div>
+    <h1 class="title">
+        {{ gettext("Results") }} ({{ view_model.total_results}})
+    </h1>
+</div>
+
+{% if view_model.show_results %}
+<div class="section">
+    <div class="columns is-centered">
+        <div class="column is-four-fifths">
+            {{ render_pagination(view_model.pagination) }}
+            {% for column in view_model.results.rows %}
+            <article class="media">
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                {{ column.date }}
+                            </strong>
+                            <p>
+                                {{ gettext("Hours:") }} {{ column.value }}
+                            </p>
+                            <p>
+                                {{ gettext("Type:") }} {{ column.transfer_type }}
+                            </p>
+                            <p>
+                                {{ gettext("From:") }} {{ gettext("Account") }} {{ column.debit_account }} 
+                                {% if column.debtor_url is none -%}
+                                @{{ column.debtor_name }}
+                                {% else %}
+                                <a href="{{ column.debtor_url }}">@{{ column.debtor_name }}</a>
+                                {% endif %}
+                            </p>
+                            <p>
+                                {{ gettext("To:") }} {{ gettext("Account") }} {{ column.credit_account }} 
+                                {% if column.creditor_url is none -%}
+                                @{{ column.creditor_name }}
+                                {% else %}
+                                <a href="{{ column.creditor_url }}">@{{ column.creditor_name }}</a>
+                                {% endif %}
+                            </p>
+                        </p>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+            {{ render_pagination(view_model.pagination) }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
