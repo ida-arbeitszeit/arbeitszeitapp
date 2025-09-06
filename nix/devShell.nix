@@ -22,7 +22,6 @@ mkShell (
         pip
         psycopg2
         types-dateutil
-        types-pytz
         types-setuptools
       ])
       ++ [

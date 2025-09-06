@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-import pytz
 from dateutil import tz
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -38,7 +37,7 @@ class FakeDatetimeService(DatetimeService):
         fmt: Optional[str] = None,
     ) -> str:
         if date.tzinfo is None:
-            date = date.replace(tzinfo=pytz.UTC)
+            date = date.replace(tzinfo=timezone.utc)
         if zone is not None:
             date = date.astimezone(tz.gettz(zone))
         if fmt is None:

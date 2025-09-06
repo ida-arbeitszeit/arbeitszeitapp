@@ -5,7 +5,6 @@
   flask,
   aniso8601,
   jsonschema,
-  pytz,
   werkzeug,
   importlib-resources,
 }:
@@ -21,7 +20,6 @@ buildPythonPackage rec {
     flask
     aniso8601
     jsonschema
-    pytz
     werkzeug
     importlib-resources
   ];
