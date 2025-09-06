@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 
 from dateutil import tz
@@ -9,9 +9,6 @@ from arbeitszeit.datetime_service import DatetimeService
 class RealtimeDatetimeService(DatetimeService):
     def now(self) -> datetime:
         return datetime.now()
-
-    def today(self) -> date:
-        return datetime.today().date()
 
     def format_datetime(
         self,

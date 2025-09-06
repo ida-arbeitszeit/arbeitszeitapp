@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 
 import pytz
@@ -30,13 +30,6 @@ class FakeDatetimeService(DatetimeService):
 
     def now(self) -> datetime:
         return self.frozen_time if self.frozen_time else datetime.now()
-
-    def today(self) -> date:
-        return (
-            date(self.frozen_time.year, self.frozen_time.month, self.frozen_time.day)
-            if self.frozen_time
-            else date.today()
-        )
 
     def format_datetime(
         self,
