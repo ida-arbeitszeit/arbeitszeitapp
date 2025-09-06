@@ -45,20 +45,5 @@ class FakeDatetimeService(DatetimeService):
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)
 
-    def now_minus_one_day(self) -> datetime:
-        return self.now() - timedelta(days=1)
-
-    def now_minus_20_hours(self) -> datetime:
-        return self.now() - timedelta(hours=20)
-
-    def now_minus_25_hours(self) -> datetime:
-        return self.now() - timedelta(hours=25)
-
-    def now_minus_two_days(self) -> datetime:
-        return self.now() - timedelta(days=2)
-
-    def now_minus_ten_days(self) -> datetime:
-        return self.now() - timedelta(days=10)
-
-    def now_plus_one_day(self) -> datetime:
-        return self.now() + timedelta(days=1)
+    def now_minus(self, delta: timedelta) -> datetime:
+        return self.now() - delta

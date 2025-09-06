@@ -91,11 +91,11 @@ class GetActivePlansTests(FlaskTestCase):
         self,
     ) -> None:
         creation_dates = [
-            self.datetime_service.now_minus_ten_days(),
+            self.datetime_service.now_minus(timedelta(days=10)),
             self.datetime_service.now(),
-            self.datetime_service.now_minus_20_hours(),
-            self.datetime_service.now_minus_25_hours(),
-            self.datetime_service.now_minus_one_day(),
+            self.datetime_service.now_minus(timedelta(hours=20)),
+            self.datetime_service.now_minus(timedelta(hours=25)),
+            self.datetime_service.now_minus(timedelta(days=1)),
         ]
         plans: List[UUID] = list()
         for timestamp in creation_dates:
@@ -116,11 +116,11 @@ class GetActivePlansTests(FlaskTestCase):
         self,
     ) -> None:
         approval_dates = [
-            self.datetime_service.now_minus_ten_days(),
+            self.datetime_service.now_minus(timedelta(days=10)),
             self.datetime_service.now(),
-            self.datetime_service.now_minus_20_hours(),
-            self.datetime_service.now_minus_25_hours(),
-            self.datetime_service.now_minus_one_day(),
+            self.datetime_service.now_minus(timedelta(hours=20)),
+            self.datetime_service.now_minus(timedelta(hours=25)),
+            self.datetime_service.now_minus(timedelta(days=1)),
         ]
         plans: List[UUID] = list()
         for timestamp in approval_dates:
@@ -141,11 +141,11 @@ class GetActivePlansTests(FlaskTestCase):
         self,
     ) -> None:
         rejection_dates = [
-            self.datetime_service.now_minus_ten_days(),
+            self.datetime_service.now_minus(timedelta(days=10)),
             self.datetime_service.now(),
-            self.datetime_service.now_minus_20_hours(),
-            self.datetime_service.now_minus_25_hours(),
-            self.datetime_service.now_minus_one_day(),
+            self.datetime_service.now_minus(timedelta(hours=20)),
+            self.datetime_service.now_minus(timedelta(hours=25)),
+            self.datetime_service.now_minus(timedelta(days=1)),
         ]
         plans: List[UUID] = list()
         for timestamp in rejection_dates:

@@ -21,7 +21,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
         email_address = self.email_generator.get_random_email()
         self.database_gateway.create_email_address(
             address=email_address,
-            confirmed_on=self.datetime_service.now_minus_ten_days(),
+            confirmed_on=self.datetime_service.now_minus(timedelta(days=10)),
         )
         return email_address
 
