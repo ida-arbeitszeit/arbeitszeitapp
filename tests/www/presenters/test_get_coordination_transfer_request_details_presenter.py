@@ -19,9 +19,12 @@ class GetDetailsPresenterTests(BaseTestCase):
         self.session.login_company(company=self.company)
 
     def test_that_request_date_is_formatted_correctly_in_view_model(self):
-        response = self.get_use_case_response(request_date=datetime(2021, 1, 1))
+        date = datetime(2021, 1, 1)
+        response = self.get_use_case_response(request_date=date)
         view_model = self.presenter.present(response)
-        self.assertEqual(view_model.request_date, "01.01.2021 00:00")
+        assert view_model.request_date == self.datetime_service.format_datetime(
+            date=date, fmt="%d.%m.%Y %H:%M", zone="Europe/Berlin"
+        )
 
     def test_that_correct_cooperation_summary_url_is_displayed(
         self,
