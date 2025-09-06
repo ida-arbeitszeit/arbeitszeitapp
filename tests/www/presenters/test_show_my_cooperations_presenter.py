@@ -24,7 +24,7 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
     coordinations=[
         CooperationInfo(
             id=uuid4(),
-            creation_date=datetime.now(),
+            creation_date=datetime.min,
             name="coop name",
             definition="first paragraph\nsecond paragraph",
             count_plans_in_coop=3,

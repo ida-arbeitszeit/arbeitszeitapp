@@ -86,7 +86,7 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
     def get_transfer_info(
         self,
         type: TransferType = TransferType.credit_p,
-        date: datetime = datetime.now(),
+        date: datetime = datetime.min,
         volume: Decimal = Decimal(10.002),
     ) -> UseCase.TransferInfo:
         return UseCase.TransferInfo(type=type, date=date, volume=volume)

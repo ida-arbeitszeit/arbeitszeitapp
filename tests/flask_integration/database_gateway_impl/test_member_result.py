@@ -29,7 +29,7 @@ class MemberResultTests(FlaskTestCase):
         return self.database_gateway.create_member(
             name="karl",
             account=account,
-            registered_on=datetime.now(),
+            registered_on=self.datetime_service.now(),
             account_credentials=credentials,
         )
 

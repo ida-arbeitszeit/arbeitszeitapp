@@ -114,7 +114,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name=expected_name,
-                    approval_date=datetime.now(),
+                    approval_date=self.datetime_service.now(),
                 )
             ]
         )
@@ -144,7 +144,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=plan_id,
                     prd_name="test name",
-                    approval_date=datetime.now(),
+                    approval_date=self.datetime_service.now(),
                 )
             ]
         )

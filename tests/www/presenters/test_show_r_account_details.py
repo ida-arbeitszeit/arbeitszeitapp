@@ -13,13 +13,13 @@ from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = show_r_account_details.TransferInfo(
     type=TransferType.credit_r,
-    date=datetime.now(),
+    date=datetime.min,
     volume=Decimal(10.007),
 )
 
 DEFAULT_INFO2 = show_r_account_details.TransferInfo(
     type=TransferType.credit_r,
-    date=datetime.now(),
+    date=datetime.min,
     volume=Decimal(20.103),
 )
 

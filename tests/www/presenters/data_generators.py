@@ -37,9 +37,9 @@ class QueriedPlanGenerator:
         if company_id is None:
             company_id = uuid4()
         if approval_date is None:
-            approval_date = datetime.now()
+            approval_date = datetime.min
         if rejection_date is None:
-            rejection_date = datetime.now()
+            rejection_date = datetime.min
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",

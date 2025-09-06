@@ -260,7 +260,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     ) -> None:
         transfer = show_prd_account_details.TransferInfo(
             type=TransferType.credit_p,
-            date=datetime.now(),
+            date=datetime.min,
             volume=Decimal(10.007),
             peer=None,
         )
@@ -273,7 +273,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     ) -> None:
         transfer = show_prd_account_details.TransferInfo(
             type=TransferType.credit_p,
-            date=datetime.now(),
+            date=datetime.min,
             volume=Decimal(10.007),
             peer=None,
         )
@@ -334,7 +334,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             peer = show_prd_account_details.MemberPeer()
         return show_prd_account_details.TransferInfo(
             type=transfer_type,
-            date=datetime.now(),
+            date=datetime.min,
             volume=volume,
             peer=peer,
         )
