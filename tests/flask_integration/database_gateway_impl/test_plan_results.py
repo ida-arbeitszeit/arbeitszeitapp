@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from typing import List
 from uuid import UUID, uuid4
@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit_flask.database import models
 from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -24,7 +25,7 @@ class PlanResultTests(FlaskTestCase):
     def test_create_plan_propagates_specified_arguments_to_created_plan(self) -> None:
         expected_planner = self.company_generator.create_company()
         plan = self.database_gateway.create_plan(
-            creation_timestamp=(expected_timestamp := datetime(2000, 1, 1)),
+            creation_timestamp=(expected_timestamp := datetime_utc(2000, 1, 1)),
             planner=expected_planner,
             production_costs=(
                 expected_costs := ProductionCosts(Decimal(1), Decimal(2), Decimal(3))
@@ -48,7 +49,7 @@ class PlanResultTests(FlaskTestCase):
 
     def test_that_created_plan_can_have_its_rejection_date_changed(self) -> None:
         plan = self.create_plan()
-        expected_rejection_date = datetime(2020, 1, 1)
+        expected_rejection_date = datetime_utc(2020, 1, 1)
         self.database_gateway.get_plans().with_id(plan.id).update().set_rejection_date(
             expected_rejection_date
         ).perform()
@@ -69,7 +70,7 @@ class PlanResultTests(FlaskTestCase):
 
     def create_plan(self) -> Plan:
         return self.database_gateway.create_plan(
-            creation_timestamp=datetime(2000, 1, 1),
+            creation_timestamp=datetime_utc(2000, 1, 1),
             planner=self.company_generator.create_company(),
             production_costs=ProductionCosts(Decimal(1), Decimal(2), Decimal(3)),
             product_name="test product name",
@@ -217,17 +218,17 @@ class GetActivePlansTests(FlaskTestCase):
     def test_that_plans_that_ordering_by_creation_date_works_even_when_plan_activation_was_in_reverse_order(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         first_plan = self.plan_generator.create_plan(approved=False)
-        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 2))
         second_plan = self.plan_generator.create_plan(approved=False)
-        self.datetime_service.freeze_time(datetime(2000, 1, 3))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 3))
         self.approve_plan_use_case.approve_plan(
             request=ApprovePlanUseCase.Request(
                 plan=second_plan,
             )
         )
-        self.datetime_service.freeze_time(datetime(2000, 1, 4))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 4))
         self.approve_plan_use_case.approve_plan(
             request=ApprovePlanUseCase.Request(
                 plan=first_plan,
@@ -474,7 +475,7 @@ class GetAllPlans(FlaskTestCase):
     def test_can_set_rejection_date(self) -> None:
         plan = self.plan_generator.create_plan(approved=False, rejected=True)
         plans = self.database_gateway.get_plans().with_id(plan)
-        expected_rejection_date = datetime(2000, 3, 2)
+        expected_rejection_date = datetime_utc(2000, 3, 2)
         assert plans.update().set_rejection_date(expected_rejection_date).perform()
         assert all(plan.rejection_date == expected_rejection_date for plan in plans)
 
@@ -542,28 +543,28 @@ class ThatWereApprovedBeforeTests(FlaskTestCase):
     def test_plan_activated_before_a_specified_timestamp_are_included_in_the_result(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan()
         assert self.database_gateway.get_plans().that_were_approved_before(
-            datetime(2000, 1, 2)
+            datetime_utc(2000, 1, 2)
         )
 
     def test_plan_activated_exactly_at_a_specified_timestamp_are_included_in_the_result(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan()
         assert self.database_gateway.get_plans().that_were_approved_before(
-            datetime(2000, 1, 1)
+            datetime_utc(2000, 1, 1)
         )
 
     def test_plan_activated_after_a_specified_timestamp_are_excluded_from_result(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan()
         assert not self.database_gateway.get_plans().that_were_approved_before(
-            datetime(1999, 12, 31)
+            datetime_utc(1999, 12, 31)
         )
 
 
@@ -571,42 +572,42 @@ class ThatWillExpireAfterTests(FlaskTestCase):
     def test_that_plan_that_will_expire_after_specified_date_is_included_in_results(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert self.database_gateway.get_plans().that_will_expire_after(
-            datetime(2000, 1, 1)
+            datetime_utc(2000, 1, 1)
         )
 
     def test_that_plan_that_will_expire_exactly_at_specified_timestamp_is_not_included_in_results(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert not self.database_gateway.get_plans().that_will_expire_after(
-            datetime(2000, 1, 2)
+            datetime_utc(2000, 1, 2)
         )
 
     def test_plan_that_will_expire_before_specified_timestamp_is_not_included_in_result(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert not self.database_gateway.get_plans().that_will_expire_after(
-            datetime(2000, 1, 3)
+            datetime_utc(2000, 1, 3)
         )
 
     def test_that_a_plan_without_approval_is_not_included_in_results(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(approved=False, timeframe=1)
         assert not self.database_gateway.get_plans().that_will_expire_after(
-            datetime(2000, 1, 1)
+            datetime_utc(2000, 1, 1)
         )
 
     def test_that_a_rejected_plan_is_not_included_in_results(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(approved=False, rejected=True, timeframe=1)
         assert not self.database_gateway.get_plans().that_will_expire_after(
-            datetime(2000, 1, 1)
+            datetime_utc(2000, 1, 1)
         )
 
 
@@ -614,28 +615,28 @@ class ThatAreExpiredAsOfTests(FlaskTestCase):
     def test_that_plan_that_will_expire_after_specified_date_is_not_included_in_results(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert not self.database_gateway.get_plans().that_are_expired_as_of(
-            datetime(2000, 1, 1)
+            datetime_utc(2000, 1, 1)
         )
 
     def test_that_plan_that_will_expire_exactly_at_specified_timestamp_is_included_in_results(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert self.database_gateway.get_plans().that_are_expired_as_of(
-            datetime(2000, 1, 2)
+            datetime_utc(2000, 1, 2)
         )
 
     def test_plan_that_will_expire_before_specified_timestamp_is_included_in_result(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         assert self.database_gateway.get_plans().that_are_expired_as_of(
-            datetime(2000, 1, 3)
+            datetime_utc(2000, 1, 3)
         )
 
 
@@ -873,7 +874,7 @@ class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
         assert requesting_plan2 in map(lambda p: p.id, inbound_requests)
 
     def test_that_plans_where_coordination_was_passed_on_are_ignored(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         original_coordinator = self.company_generator.create_company()
         new_coordinator = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(

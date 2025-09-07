@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -51,7 +52,7 @@ class UseCaseTests(BaseTestCase):
         self.assertFalse(response.drafts)
 
     def test_that_drafts_are_returned_in_correct_order(self) -> None:
-        creation_time_1 = datetime(2020, 5, 1, 20)
+        creation_time_1 = datetime_utc(2020, 5, 1, 20)
         creation_time_2 = creation_time_1 - timedelta(hours=5)
         creation_time_3 = creation_time_1 + timedelta(days=2)
 

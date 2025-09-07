@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -7,6 +6,7 @@ from parameterized import parameterized
 from arbeitszeit.records import Transfer
 from arbeitszeit.transfers.compensation import CompensationTransferService
 from arbeitszeit.transfers.transfer_type import TransferType
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -42,7 +42,7 @@ class CompensationTransferServiceTests(BaseTestCase):
         consumed_amount: int,
     ) -> None:
         EXPECTED_TYPE = TransferType.compensation_for_coop
-        EXPECTED_TIME = datetime(2025, 1, 1, 10, 15)
+        EXPECTED_TIME = datetime_utc(2025, 1, 1, 10, 15)
         EXPECTED_DEBIT_ACCOUNT = self.database_gateway.create_account().id
         EXPECTED_CREDIT_ACCOUNT = self.database_gateway.create_account().id
         EXPECTED_VALUE = (
@@ -79,7 +79,7 @@ class CompensationTransferServiceTests(BaseTestCase):
         consumed_amount: int,
     ) -> None:
         EXPECTED_TYPE = TransferType.compensation_for_company
-        EXPECTED_TIME = datetime(2025, 1, 1, 10, 15)
+        EXPECTED_TIME = datetime_utc(2025, 1, 1, 10, 15)
         EXPECTED_DEBIT_ACCOUNT = self.database_gateway.create_account().id
         EXPECTED_CREDIT_ACCOUNT = self.database_gateway.create_account().id
         EXPECTED_VALUE = (

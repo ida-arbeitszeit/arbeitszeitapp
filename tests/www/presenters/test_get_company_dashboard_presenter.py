@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
@@ -9,6 +8,7 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -92,7 +92,7 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
         self.assertTrue(view_model.has_latest_plans)
 
     def test_presenter_correctly_formats_date_of_latest_plans(self):
-        self.datetime_service.freeze_time(datetime(2022, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2022, 1, 1))
         approval_time = self.datetime_service.now()
         view_model = self.presenter.present(
             self.get_use_case_response(

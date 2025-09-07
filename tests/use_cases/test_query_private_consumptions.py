@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from arbeitszeit.use_cases.query_private_consumptions import (
     QueryPrivateConsumptions,
     Request,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -33,7 +34,7 @@ class TestQueryPrivateConsumptions(BaseTestCase):
         assert response.consumptions[0].plan_id == expected_plan
 
     def test_that_consumptions_are_returned_in_correct_order(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         first_plan = self.plan_generator.create_plan()
         second_plan = self.plan_generator.create_plan()
         member = self.member_generator.create_member()

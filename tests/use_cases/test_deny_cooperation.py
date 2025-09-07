@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases.deny_cooperation import (
@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.request_cooperation import (
     RequestCooperation,
     RequestCooperationRequest,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -112,7 +113,7 @@ class UseCaseTests(BaseTestCase):
         self.request_cooperation(request_request)
 
     def test_that_cooperation_for_inactive_plans_cannot_be_denied(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         requester = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester

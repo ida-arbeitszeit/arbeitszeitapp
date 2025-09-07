@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from arbeitszeit_web.www.controllers.confirm_company_controller import (
     ConfirmCompanyController,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -29,14 +30,14 @@ class ConfirmCompanyControllerTests(BaseTestCase):
         assert request.email_address == expected_email_address
 
     def test_token_valid_after_23_hours_and_59_minutes(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token("bla")
         self.datetime_service.advance_time(timedelta(hours=23, minutes=59))
         request = self.controller.process_request(token=token)
         assert request
 
     def test_token_not_valid_after_1_day_and_1_minute(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token("bla")
         self.datetime_service.advance_time(timedelta(days=1, minutes=1))
         request = self.controller.process_request(token=token)

@@ -1,9 +1,7 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from dateutil import tz
 from parameterized import parameterized
 
 from arbeitszeit.use_cases import get_member_dashboard
@@ -122,7 +120,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         self.assertEqual(presentation.three_latest_plans[0].prd_name, expected_name)
 
     def test_approval_date_of_latest_plans_is_correctly_formatted(self):
-        now = datetime.now(tz=tz.gettz("Europe/Berlin"))
+        now = self.datetime_service.now()
         response = self.get_response(
             three_latest_plans=[
                 get_member_dashboard.PlanDetails(

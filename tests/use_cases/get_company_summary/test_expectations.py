@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from tests.datetime_service import datetime_utc
 
 from ..base_test_case import BaseTestCase
 
@@ -56,7 +57,7 @@ class ExpectationsTestCase(BaseTestCase):
     def test_that_expectations_for_a_are_exactly_planned_labour_after_approved_plan_expired(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         company = self.company_generator.create_company()
         expected_a = Decimal(1231)
         self.plan_generator.create_plan(
@@ -96,7 +97,7 @@ class ExpectationsTestCase(BaseTestCase):
         self,
     ) -> None:
         expected_prd = Decimal(12 * 3)
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(
             costs=ProductionCosts(

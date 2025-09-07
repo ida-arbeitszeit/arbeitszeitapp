@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -8,6 +7,7 @@ from arbeitszeit.use_cases.accept_coordination_transfer import (
 from arbeitszeit.use_cases.get_coordination_transfer_request_details import (
     GetCoordinationTransferRequestDetailsUseCase as UseCase,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -32,7 +32,7 @@ class GetTransferRequestDetailsTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=coordinator
         )
-        expected_date = datetime(2020, 1, 4)
+        expected_date = datetime_utc(2020, 1, 4)
         self.datetime_service.freeze_time(expected_date)
         response = self.use_case.get_details(
             self.use_case_request(requester=requester, cooperation=cooperation)

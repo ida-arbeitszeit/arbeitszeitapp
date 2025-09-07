@@ -17,6 +17,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueriedPlan,
     QueryPlansRequest,
 )
+from tests.datetime_service import datetime_utc
 
 
 class QueriedPlanGenerator:
@@ -136,7 +137,7 @@ class PlanDetailsGenerator:
         price_per_unit: Decimal = Decimal(0.061),
         is_cooperating: bool = False,
         cooperation: Optional[UUID] = None,
-        creation_date: datetime = datetime(2023, 5, 1),
+        creation_date: datetime = datetime_utc(2023, 5, 1),
         approval_date: Optional[datetime] = None,
         expiration_date: Optional[datetime] = None,
     ) -> PlanDetails:

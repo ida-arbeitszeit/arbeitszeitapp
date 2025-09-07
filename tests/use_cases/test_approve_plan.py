@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
@@ -19,6 +18,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -51,7 +51,7 @@ class UseCaseTests(BaseTestCase):
         assert self.get_latest_activated_plan().plan_id == plan
 
     def test_that_approval_date_is_set_correctly(self) -> None:
-        expected_approval_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
+        expected_approval_timestamp = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(expected_approval_timestamp)
         plan = self.plan_generator.create_plan(approved=False)
         response = self.use_case.approve_plan(self.create_request(plan=plan))
@@ -192,7 +192,7 @@ class UseCaseTests(BaseTestCase):
                 means_cost=planned_p_amount,
             ),
         )
-        approval_time = datetime(2000, 1, 1)
+        approval_time = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.datetime_service.unfreeze_time()
@@ -242,7 +242,7 @@ class UseCaseTests(BaseTestCase):
                 means_cost=Decimal(1),
             ),
         )
-        approval_time = datetime(2000, 1, 1)
+        approval_time = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.datetime_service.unfreeze_time()
@@ -292,7 +292,7 @@ class UseCaseTests(BaseTestCase):
                 means_cost=Decimal(1),
             ),
         )
-        approval_time = datetime(2000, 1, 1)
+        approval_time = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.datetime_service.unfreeze_time()
@@ -322,7 +322,7 @@ class UseCaseTests(BaseTestCase):
             approved=False,
             is_public_service=is_public_service,
         )
-        approval_time = datetime(2000, 1, 1)
+        approval_time = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(approval_time)
         self.use_case.approve_plan(self.create_request(plan=plan))
         self.datetime_service.unfreeze_time()

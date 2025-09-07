@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -98,7 +99,7 @@ class PayoutFactorServiceCalculationTests(BaseTestCase):
     def test_that_payout_factor_gets_calculated_based_on_supplied_timestamp(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(
             is_public_service=False,
             costs=ProductionCosts(
@@ -118,5 +119,9 @@ class PayoutFactorServiceCalculationTests(BaseTestCase):
             ),
             timeframe=10,
         )
-        assert self.service.calculate_payout_factor(datetime(2000, 1, 2)) == Decimal(1)
-        assert self.service.calculate_payout_factor(datetime(2000, 1, 6)) == Decimal(0)
+        assert self.service.calculate_payout_factor(
+            datetime_utc(2000, 1, 2)
+        ) == Decimal(1)
+        assert self.service.calculate_payout_factor(
+            datetime_utc(2000, 1, 6)
+        ) == Decimal(0)

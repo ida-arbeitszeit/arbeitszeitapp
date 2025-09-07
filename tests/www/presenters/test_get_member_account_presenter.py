@@ -10,6 +10,7 @@ from arbeitszeit.use_cases.get_member_account import (
 from arbeitszeit_web.www.presenters.get_member_account_presenter import (
     GetMemberAccountPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -72,7 +73,7 @@ class TestPresenter(BaseTestCase):
     def test_that_date_of_transfer_is_formatted_correctly_as_berlin_summertime(
         self,
     ):
-        test_date = datetime(2022, 8, 1, 10, 30)
+        test_date = datetime_utc(2022, 8, 1, 10, 30)
         response = self.get_use_case_response([self.get_transfer(date=test_date)])
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(view_model.transfers[0].date, "01.08.2022 12:30")

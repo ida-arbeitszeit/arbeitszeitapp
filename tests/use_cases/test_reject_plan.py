@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
@@ -15,6 +14,7 @@ from arbeitszeit.use_cases.show_my_plans import (
     ShowMyPlansRequest,
     ShowMyPlansUseCase,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -42,7 +42,7 @@ class UseCaseTests(BaseTestCase):
         assert not rejection_response.is_plan_rejected
 
     def test_that_rejection_date_is_set_correctly(self) -> None:
-        expected_rejection_timestamp = datetime(2000, 1, 1, tzinfo=timezone.utc)
+        expected_rejection_timestamp = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(expected_rejection_timestamp)
         planner = self.company_generator.create_company_record()
         plan = self.plan_generator.create_plan(

@@ -7,6 +7,12 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import singleton
 
 
+def datetime_utc(
+    year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0
+) -> datetime:
+    return datetime(year, month, day, hour, minute, second, tzinfo=UTC)
+
+
 @singleton
 class FakeDatetimeService(DatetimeService):
     def __init__(self) -> None:

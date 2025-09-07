@@ -13,6 +13,7 @@ from arbeitszeit.use_cases.register_hours_worked import (
     RegisterHoursWorked,
     RegisterHoursWorkedRequest,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -180,11 +181,11 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_transferring_of_work_certs_to_two_workers(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
         own_company = self.company_generator.create_company(workers=[worker1, worker2])
-        expected_transfer_1_timestamp = datetime(2000, 1, 2)
+        expected_transfer_1_timestamp = datetime_utc(2000, 1, 2)
         self.datetime_service.freeze_time(expected_transfer_1_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -193,7 +194,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        expected_transfer_2_timestamp = datetime(2000, 1, 3)
+        expected_transfer_2_timestamp = datetime_utc(2000, 1, 3)
         self.datetime_service.freeze_time(expected_transfer_2_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -222,7 +223,7 @@ class UseCaseTester(BaseTestCase):
             workers=[worker1, worker2, worker3]
         )
 
-        first_transfer_timestamp = datetime(2000, 1, 1)
+        first_transfer_timestamp = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(first_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -231,7 +232,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        second_transfer_timestamp = datetime(2000, 1, 2)
+        second_transfer_timestamp = datetime_utc(2000, 1, 2)
         self.datetime_service.freeze_time(second_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -240,7 +241,7 @@ class UseCaseTester(BaseTestCase):
                 hours_worked=Decimal("10"),
             )
         )
-        third_transfer_timestamp = datetime(2000, 1, 3)
+        third_transfer_timestamp = datetime_utc(2000, 1, 3)
         self.datetime_service.freeze_time(third_transfer_timestamp)
         self.register_hours_worked(
             RegisterHoursWorkedRequest(
@@ -260,7 +261,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_receiving_of_work_certificates_from_social_accounting(
         self,
     ) -> None:
-        transfer_timestamp = datetime(2030, 1, 1)
+        transfer_timestamp = datetime_utc(2030, 1, 1)
         expected_labour_time = Decimal(123)
         self.datetime_service.freeze_time(transfer_timestamp)
         company = self.company_generator.create_company()

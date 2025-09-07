@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases.list_coordinations_of_company import (
@@ -6,7 +6,7 @@ from arbeitszeit.use_cases.list_coordinations_of_company import (
     ListCoordinationsOfCompanyRequest,
 )
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from tests.datetime_service import FakeDatetimeService, datetime_utc
 
 from .dependency_injection import injection_test
 
@@ -92,7 +92,7 @@ def test_that_expired_plans_are_not_counted_in_cooperations(
     cooperation_generator: CooperationGenerator,
     datetime_service: FakeDatetimeService,
 ) -> None:
-    datetime_service.freeze_time(datetime(2000, 1, 1))
+    datetime_service.freeze_time(datetime_utc(2000, 1, 1))
     coordinator = company_generator.create_company_record()
     p1 = plan_generator.create_plan(timeframe=1)
     p2 = plan_generator.create_plan(timeframe=5)

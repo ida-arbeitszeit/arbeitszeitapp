@@ -10,6 +10,7 @@ from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
 from arbeitszeit_web.www.presenters.list_transfers_presenter import (
     ListTransfersPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -20,7 +21,7 @@ class ListTransfersPresenterBase(BaseTestCase):
 
     def create_transfer_entry(
         self,
-        date: datetime = datetime(2024, 1, 1, 12, 0),
+        date: datetime = datetime_utc(2024, 1, 1, 12, 0),
         debtor: UUID | None = UUID("00000000-0000-0000-0000-000000000000"),
         debit_account: UUID | None = UUID("00000000-0000-0000-0000-000000000000"),
         debtor_name: str | None = "Debtor",
@@ -137,7 +138,7 @@ class ResultsTests(ListTransfersPresenterBase):
         assert len(view_model.results.rows) == num_results
 
     def test_that_transfer_date_is_converted_to_correct_format(self) -> None:
-        date = datetime(2023, 1, 1, 10, 30)
+        date = datetime_utc(2023, 1, 1, 10, 30)
         uc_response = self.create_use_case_response(
             transfers=[self.create_transfer_entry(date=date)]
         )

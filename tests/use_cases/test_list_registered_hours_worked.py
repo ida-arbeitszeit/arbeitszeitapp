@@ -1,10 +1,10 @@
-from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
 from parameterized import parameterized
 
 from arbeitszeit.use_cases import list_registered_hours_worked, register_hours_worked
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -116,7 +116,7 @@ class ListRegisteredHoursWorkedTests(BaseTestCase):
         assert response.registered_hours_worked[0].worker_name == EXPECTED_WORKER_NAME
 
     def test_response_includes_registration_timestamp(self) -> None:
-        EXPECTED_DATE = datetime(2024, 5, 1)
+        EXPECTED_DATE = datetime_utc(2024, 5, 1)
         worker_id = self.member_generator.create_member()
         company_id = self.company_generator.create_company(workers=[worker_id])
         self.datetime_service.freeze_time(EXPECTED_DATE)

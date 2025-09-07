@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from arbeitszeit import email_notifications
 from arbeitszeit.use_cases import request_user_password_reset
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -39,7 +40,7 @@ class RequestUserPasswordResetTest(BaseTestCase):
         self,
     ):
         sent_to_email = "test@email.com"
-        self.datetime_service.freeze_time(datetime(2024, 2, 21, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2024, 2, 21, hour=10))
         for _ in range(request_user_password_reset.Config.max_reset_requests + 1):
             self.use_case.reset_user_password(
                 request_user_password_reset.Request(
@@ -55,7 +56,7 @@ class RequestUserPasswordResetTest(BaseTestCase):
 
     def test_all_reset_password_request_messages_are_sent_over_a_long_time_period(self):
         sent_to_email = "test@email.com"
-        self.datetime_service.freeze_time(datetime(2024, 2, 21, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2024, 2, 21, hour=10))
         total_number_sent_over_threshold = (
             request_user_password_reset.Config.max_reset_requests + 5
         )
@@ -78,7 +79,7 @@ class RequestUserPasswordResetTest(BaseTestCase):
         sent_to_email1 = "test1@email.com"
         sent_to_email2 = "test2@email.com"
         number_of_requests = 3
-        self.datetime_service.freeze_time(datetime(2024, 2, 21, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2024, 2, 21, hour=10))
         for _ in range(number_of_requests):
             self.use_case.reset_user_password(
                 request_user_password_reset.Request(

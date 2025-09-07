@@ -8,6 +8,7 @@ from arbeitszeit.use_cases import (
     confirm_member,
     get_user_account_details,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -80,8 +81,8 @@ class GetUserAccountDetailsTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            datetime(2000, 1, 1),
-            datetime(2000, 1, 2),
+            datetime_utc(2000, 1, 1),
+            datetime_utc(2000, 1, 2),
         ]
     )
     def test_that_confirmation_timestamp_for_member_is_the_time_when_their_account_was_confirmed(
@@ -105,8 +106,8 @@ class GetUserAccountDetailsTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            datetime(2000, 1, 1),
-            datetime(2000, 1, 2),
+            datetime_utc(2000, 1, 1),
+            datetime_utc(2000, 1, 2),
         ]
     )
     def test_that_confirmation_timestamp_for_company_is_the_time_when_their_account_was_confirmed(

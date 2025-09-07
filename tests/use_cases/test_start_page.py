@@ -1,9 +1,8 @@
-from datetime import datetime
 from unittest import TestCase
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from tests.data_generators import PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from tests.datetime_service import FakeDatetimeService, datetime_utc
 
 from .dependency_injection import get_dependency_injector
 
@@ -32,7 +31,7 @@ class UseCaseTester(TestCase):
         self.assertEqual(len(response.latest_plans), 3)
 
     def test_that_correct_approval_date_of_plan_is_returned(self) -> None:
-        expected_date = datetime(2022, 12, 1, 10)
+        expected_date = datetime_utc(2022, 12, 1, 10)
         self.datetime_service.freeze_time(expected_date)
         self.plan_generator.create_plan()
         response = self.use_case.show_start_page()

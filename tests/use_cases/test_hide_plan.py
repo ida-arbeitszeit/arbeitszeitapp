@@ -1,8 +1,8 @@
-from datetime import datetime
 from uuid import UUID
 
 from arbeitszeit.use_cases.hide_plan import HidePlan
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -12,7 +12,7 @@ class UseCaseTests(BaseTestCase):
         super().setUp()
         self.hide_plan = self.injector.get(HidePlan)
         self.show_my_plans_use_case = self.injector.get(ShowMyPlansUseCase)
-        self.now = datetime(2000, 1, 1)
+        self.now = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(self.now)
 
     def test_that_correct_plan_gets_hidden_attribute_set_to_true(self) -> None:
@@ -42,7 +42,7 @@ class UseCaseTests(BaseTestCase):
     def create_expired_plan(self, planner: UUID | None = None) -> UUID:
         if not planner:
             planner = self.company_generator.create_company()
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan(planner=planner, timeframe=1)
         self.datetime_service.unfreeze_time()
         return plan

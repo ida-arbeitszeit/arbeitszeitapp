@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.accept_cooperation import (
     AcceptCooperationRequest,
 )
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -202,7 +203,7 @@ class AcceptCooperationTests(BaseTestCase):
         assert response.is_rejected
 
     def test_that_cooperation_cannot_be_accepted_for_expired_plans(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         requester = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation(
             coordinator=requester

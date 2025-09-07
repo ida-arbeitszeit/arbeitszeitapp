@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from typing import Callable, Optional
 from uuid import uuid4
@@ -11,6 +11,7 @@ from arbeitszeit.use_cases.get_coop_summary import (
     GetCoopSummaryRequest,
     GetCoopSummaryResponse,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -87,7 +88,7 @@ class GetCoopSummaryTests(BaseTestCase):
 
     def test_that_inactive_plans_do_not_show_up_in_cooperation_summary(self) -> None:
         requester = self.company_generator.create_company()
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan(timeframe=1)
         coop = self.cooperation_generator.create_cooperation(plans=[plan])
         self.datetime_service.advance_time(timedelta(days=2))

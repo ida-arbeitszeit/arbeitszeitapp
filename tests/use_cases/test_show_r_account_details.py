@@ -7,6 +7,7 @@ from parameterized import parameterized
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_r_account_details
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -96,7 +97,7 @@ class UseCaseTester(BaseTestCase):
         assert len(response.transfers) == 2
 
     def test_that_newest_transfers_are_shown_first(self) -> None:
-        self.datetime_service.freeze_time(datetime(2025, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2025, 1, 1))
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         self.datetime_service.advance_time(timedelta(days=1))
@@ -120,7 +121,7 @@ class UseCaseTester(BaseTestCase):
         self, is_public_service: bool
     ) -> None:
         EXPECTED_VOLUME = Decimal(8.5)
-        EXPECTED_TIMESTAMP = datetime(2025, 1, 1)
+        EXPECTED_TIMESTAMP = datetime_utc(2025, 1, 1)
         EXPECTED_TRANSFER_TYPE = (
             TransferType.credit_public_r if is_public_service else TransferType.credit_r
         )
@@ -232,9 +233,9 @@ class UseCaseTester(BaseTestCase):
         COSTS_PER_CONSUMPTION = TOTAL_COSTS / AMOUNT_PRODUCED
         CONSUMPTION_1 = 10
         CONSUMPTION_2 = 20
-        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
-        CONSUMPTION_DATE_1 = datetime(2025, 1, 2)
-        CONSUMPTION_DATE_2 = datetime(2025, 1, 3)
+        PLAN_APPROVED_DATE = datetime_utc(2025, 1, 1)
+        CONSUMPTION_DATE_1 = datetime_utc(2025, 1, 2)
+        CONSUMPTION_DATE_2 = datetime_utc(2025, 1, 3)
 
         own_company = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
@@ -282,9 +283,9 @@ class UseCaseTester(BaseTestCase):
     ) -> None:
         own_company = self.company_generator.create_company()
 
-        TIME_OF_FIRST_CONSUMPTION = datetime(2025, 1, 1)
-        TIME_OF_SECOND_CONSUMPTION = datetime(2025, 1, 3)
-        TIME_OF_THIRD_CONSUMPTION = datetime(2025, 1, 5)
+        TIME_OF_FIRST_CONSUMPTION = datetime_utc(2025, 1, 1)
+        TIME_OF_SECOND_CONSUMPTION = datetime_utc(2025, 1, 3)
+        TIME_OF_THIRD_CONSUMPTION = datetime_utc(2025, 1, 5)
 
         VALUE_OF_FIRST_CONSUMPTION = Decimal(10)
         VALUE_OF_SECOND_CONSUMPTION = Decimal(12.5)
@@ -351,7 +352,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_receiving_of_credit_for_liquid_means_of_production(
         self,
     ) -> None:
-        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
+        PLAN_APPROVED_DATE = datetime_utc(2025, 1, 1)
         EXPECTED_VOLUME = Decimal(8.5)
         company = self.company_generator.create_company()
         self.datetime_service.freeze_time(PLAN_APPROVED_DATE)

@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -6,6 +5,7 @@ from sqlalchemy import text
 
 from arbeitszeit.records import AccountTypes, SocialAccounting
 from arbeitszeit.transfers.transfer_type import TransferType
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -271,8 +271,8 @@ class OrderedByDateTests(FlaskTestCase):
     def test_that_transfers_can_be_ordered_in_ascending_or_descending_order(
         self, ascending: bool
     ) -> None:
-        date1 = datetime(2021, 1, 1)
-        date2 = datetime(2021, 1, 2)
+        date1 = datetime_utc(2021, 1, 1)
+        date2 = datetime_utc(2021, 1, 2)
         self.datetime_service.freeze_time(date1)
         self.transfer_generator.create_transfer()
         self.datetime_service.freeze_time(date2)

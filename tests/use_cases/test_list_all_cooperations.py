@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
 from arbeitszeit.use_cases.list_all_cooperations import (
@@ -6,7 +6,7 @@ from arbeitszeit.use_cases.list_all_cooperations import (
     ListAllCooperationsResponse,
 )
 from tests.data_generators import CooperationGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from tests.datetime_service import FakeDatetimeService, datetime_utc
 
 from .dependency_injection import injection_test
 
@@ -74,7 +74,7 @@ def test_that_expired_plans_are_not_included_in_plan_count(
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
 ) -> None:
-    datetime_service.freeze_time(datetime(2000, 1, 1))
+    datetime_service.freeze_time(datetime_utc(2000, 1, 1))
     plan = plan_generator.create_plan(timeframe=1)
     cooperation_generator.create_cooperation(plans=[plan])
     datetime_service.advance_time(timedelta(days=2))
