@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Optional
 
 from dateutil import tz
@@ -13,7 +13,7 @@ class FakeDatetimeService(DatetimeService):
         self.frozen_time: Optional[datetime] = None
 
     def freeze_time(self, timestamp: Optional[datetime] = None) -> None:
-        self.frozen_time = timestamp if timestamp else datetime.min
+        self.frozen_time = timestamp if timestamp else datetime.min.replace(tzinfo=UTC)
 
     def unfreeze_time(self) -> None:
         self.frozen_time = None
@@ -28,7 +28,9 @@ class FakeDatetimeService(DatetimeService):
         return self.frozen_time
 
     def now(self) -> datetime:
-        return self.frozen_time if self.frozen_time else datetime.now()
+        if self.frozen_time:
+            return self.frozen_time
+        return datetime.now(UTC)
 
     def format_datetime(
         self,
@@ -37,7 +39,7 @@ class FakeDatetimeService(DatetimeService):
         fmt: Optional[str] = None,
     ) -> str:
         if date.tzinfo is None:
-            date = date.replace(tzinfo=timezone.utc)
+            date = date.replace(tzinfo=UTC)
         if zone is not None:
             date = date.astimezone(tz.gettz(zone))
         if fmt is None:
