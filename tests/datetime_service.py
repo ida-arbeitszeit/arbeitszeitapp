@@ -13,6 +13,10 @@ def datetime_utc(
     return datetime(year, month, day, hour, minute, second, tzinfo=UTC)
 
 
+def datetime_min_utc() -> datetime:
+    return datetime.min.replace(tzinfo=UTC)
+
+
 @singleton
 class FakeDatetimeService(DatetimeService):
     def __init__(self) -> None:

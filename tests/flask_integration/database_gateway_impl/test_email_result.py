@@ -1,7 +1,7 @@
-from datetime import datetime
-
 import pytest
 from sqlalchemy.exc import IntegrityError
+
+from tests.datetime_service import datetime_min_utc
 
 from ..flask import FlaskTestCase
 from .utility import Utility
@@ -14,7 +14,7 @@ class CreateEmailAddressTests(FlaskTestCase):
         self.database_gateway.create_email_address(address=address, confirmed_on=None)
         with pytest.raises(IntegrityError):
             self.database_gateway.create_email_address(
-                address=address, confirmed_on=datetime.min
+                address=address, confirmed_on=datetime_min_utc()
             )
 
     @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
@@ -24,7 +24,7 @@ class CreateEmailAddressTests(FlaskTestCase):
         altered_address = Utility.mangle_case(address)
         with pytest.raises(IntegrityError):
             self.database_gateway.create_email_address(
-                address=altered_address, confirmed_on=datetime.min
+                address=altered_address, confirmed_on=datetime_min_utc()
             )
 
 

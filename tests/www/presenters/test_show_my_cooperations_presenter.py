@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -18,13 +17,14 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
+from tests.datetime_service import datetime_min_utc
 from tests.www.base_test_case import BaseTestCase
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
     coordinations=[
         CooperationInfo(
             id=uuid4(),
-            creation_date=datetime.min,
+            creation_date=datetime_min_utc(),
             name="coop name",
             definition="first paragraph\nsecond paragraph",
             count_plans_in_coop=3,

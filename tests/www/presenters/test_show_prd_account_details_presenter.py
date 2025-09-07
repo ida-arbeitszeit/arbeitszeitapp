@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import List
 from uuid import UUID, uuid4
@@ -10,6 +9,7 @@ from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
+from tests.datetime_service import datetime_min_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -260,7 +260,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     ) -> None:
         transfer = show_prd_account_details.TransferInfo(
             type=TransferType.credit_p,
-            date=datetime.min,
+            date=datetime_min_utc(),
             volume=Decimal(10.007),
             peer=None,
         )
@@ -273,7 +273,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     ) -> None:
         transfer = show_prd_account_details.TransferInfo(
             type=TransferType.credit_p,
-            date=datetime.min,
+            date=datetime_min_utc(),
             volume=Decimal(10.007),
             peer=None,
         )
@@ -334,7 +334,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             peer = show_prd_account_details.MemberPeer()
         return show_prd_account_details.TransferInfo(
             type=transfer_type,
-            date=datetime.min,
+            date=datetime_min_utc(),
             volume=volume,
             peer=peer,
         )
