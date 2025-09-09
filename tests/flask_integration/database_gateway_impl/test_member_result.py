@@ -160,6 +160,7 @@ class ConfirmMemberTests(MemberResultTests):
         assert record
         _, email = record
         assert email.confirmed_on == expected_timestamp
+        assert email.confirmed_on.tzinfo is not None
 
 
 class CreateMemberTests(MemberResultTests):

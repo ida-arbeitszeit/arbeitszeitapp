@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import UTC, timedelta
 from decimal import Decimal
 from typing import List
 from uuid import UUID, uuid4
@@ -38,6 +38,7 @@ class PlanResultTests(FlaskTestCase):
             is_public_service=(expected_is_public_service := False),
         )
         assert plan.plan_creation_date == expected_timestamp
+        assert plan.plan_creation_date.tzinfo == UTC
         assert plan.planner == expected_planner
         assert plan.production_costs == expected_costs
         assert plan.prd_name == expected_product_name

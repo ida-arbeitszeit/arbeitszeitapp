@@ -564,6 +564,14 @@ handler for this path must accept a ``member_id`` argument of type
             return f"Deleting member account for member {member_id}"
 
 
+Date and Time Handling
+-----------------------
+
+We work internally with the UTC timezone. To this end we use timezone-aware python 
+datetime objects wherever possible. We convert datetime to the required timezone 
+only in the presenter layer.
+
+
 Icon Templates: Integration and Usage
 -----------------------------------------
 
