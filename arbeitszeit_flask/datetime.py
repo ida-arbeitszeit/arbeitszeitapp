@@ -1,7 +1,6 @@
 from datetime import UTC, datetime
 from typing import Optional
-
-from dateutil import tz
+from zoneinfo import ZoneInfo
 
 from arbeitszeit.datetime_service import DatetimeService
 
@@ -17,7 +16,7 @@ class RealtimeDatetimeService(DatetimeService):
         fmt: Optional[str] = None,
     ) -> str:
         if zone is not None:
-            date = date.astimezone(tz.gettz(zone))
+            date = date.astimezone(ZoneInfo(zone))
         if fmt is None:
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)

@@ -21,7 +21,6 @@ mkShell (
         mypy
         pip
         psycopg2
-        types-dateutil
         types-setuptools
       ])
       ++ [
