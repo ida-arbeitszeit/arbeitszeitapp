@@ -48,7 +48,7 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         self.assertEqual(
             trans.date,
             self.datetime_service.format_datetime(
-                date=DEFAULT_INFO1.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=DEFAULT_INFO1.date, fmt="%d.%m.%Y %H:%M"
             ),
         )
         self.assertEqual(trans.transfer_volume, str(round(DEFAULT_INFO1.volume, 2)))

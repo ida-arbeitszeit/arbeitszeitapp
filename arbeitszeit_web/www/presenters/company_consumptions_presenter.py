@@ -43,7 +43,6 @@ class CompanyConsumptionsPresenter:
         return ViewModel.Consumption(
             consumption_date=self.datetime_formatter.format_datetime(
                 date=consumption.consumption_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             product_name=consumption.product_name,

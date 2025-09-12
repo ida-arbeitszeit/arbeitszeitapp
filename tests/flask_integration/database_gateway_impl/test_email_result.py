@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 import pytest
-from dateutil import tz
 from sqlalchemy.exc import IntegrityError
 
 from tests.datetime_service import datetime_min_utc, datetime_utc
@@ -23,7 +23,7 @@ class CreateEmailAddressTests(FlaskTestCase):
         assert email_address.confirmed_on.tzinfo == UTC
 
     def test_returned_confirmation_date_gets_time_zone_changed_to_utc(self) -> None:
-        original_date = datetime(2023, 1, 2, 3, 4, 5).astimezone(tz.gettz("Asia/Tokyo"))
+        original_date = datetime(2023, 1, 2, 3, 4, 5).astimezone(ZoneInfo("Asia/Tokyo"))
         self.database_gateway.create_email_address(
             address="test@test.test",
             confirmed_on=original_date,

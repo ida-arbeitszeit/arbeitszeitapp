@@ -1,8 +1,6 @@
 from datetime import UTC, datetime, timedelta
 from typing import Optional
 
-from dateutil import tz
-
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import singleton
 
@@ -45,13 +43,11 @@ class FakeDatetimeService(DatetimeService):
     def format_datetime(
         self,
         date: datetime,
-        zone: Optional[str] = None,
         fmt: Optional[str] = None,
     ) -> str:
         if date.tzinfo is None:
             date = date.replace(tzinfo=UTC)
-        if zone is not None:
-            date = date.astimezone(tz.gettz(zone))
+        date = date.astimezone(UTC)
         if fmt is None:
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)

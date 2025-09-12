@@ -45,7 +45,6 @@ class ReviewRegisteredConsumptionsPresenter:
             date=self.datetime_formatter.format_datetime(
                 consumption.date,
                 fmt="%d.%m.%Y %H:%M",
-                zone="Europe/Berlin",
             ),
             consumer_name=consumption.consumer_name,
             consumer_url=self._get_consumer_url(consumption),

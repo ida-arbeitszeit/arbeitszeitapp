@@ -65,7 +65,7 @@ class ShowPRDAccountDetailsPresenter:
         return self.TransferInfo(
             transfer_type=self._get_transfer_type(transfer),
             date=self.datetime_formatter.format_datetime(
-                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
             transfer_volume=str(round(transfer.volume, 2)),
             peer_name=self._get_peer_name(transfer.peer),

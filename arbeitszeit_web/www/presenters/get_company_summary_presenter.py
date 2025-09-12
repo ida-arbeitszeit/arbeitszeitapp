@@ -73,7 +73,7 @@ class GetCompanySummarySuccessPresenter:
             name=use_case_response.name,
             email=use_case_response.email,
             registered_on=self.datetime_formatter.format_datetime(
-                use_case_response.registered_on, zone="Europe/Berlin", fmt="%d.%m.%Y"
+                use_case_response.registered_on, fmt="%d.%m.%Y"
             ),
             expectations=[
                 "%(num).2f" % dict(num=use_case_response.expectations.means),

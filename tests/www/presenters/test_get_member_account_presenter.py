@@ -70,13 +70,13 @@ class TestPresenter(BaseTestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertTrue(view_model.is_balance_positive)
 
-    def test_that_date_of_transfer_is_formatted_correctly_as_berlin_summertime(
+    def test_that_date_of_transfer_is_formatted_correctly(
         self,
     ):
         test_date = datetime_utc(2022, 8, 1, 10, 30)
         response = self.get_use_case_response([self.get_transfer(date=test_date)])
         view_model = self.presenter.present_member_account(response)
-        self.assertEqual(view_model.transfers[0].date, "01.08.2022 12:30")
+        self.assertEqual(view_model.transfers[0].date, "01.08.2022 10:30")
 
     def test_that_transfer_volume_is_formatted_correctly(self):
         response = self.get_use_case_response([self.get_transfer()])

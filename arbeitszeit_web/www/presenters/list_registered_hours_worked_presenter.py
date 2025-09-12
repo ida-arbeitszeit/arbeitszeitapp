@@ -29,7 +29,6 @@ class ListRegisteredHoursWorkedPresenter:
                 worker_id=str(record.worker_id),
                 registered_on=self.datetime_formatter.format_datetime(
                     date=record.registered_on,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 ),
             )

@@ -30,7 +30,7 @@ class StartPagePresenter:
                 self.Plan(
                     prd_name=plan.product_name,
                     approval_date=self.datetime_formatter.format_datetime(
-                        plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
+                        plan.approval_date, fmt="%d.%m."
                     ),
                 )
                 for plan in response.latest_plans

@@ -33,7 +33,6 @@ class GetCoordinationTransferRequestDetailsPresenter:
         return self.ViewModel(
             request_date=self.datetime_formatter.format_datetime(
                 response.request_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             cooperation_url=self.url_index.get_coop_summary_url(

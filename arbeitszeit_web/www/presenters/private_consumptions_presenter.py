@@ -31,7 +31,6 @@ class PrivateConsumptionsPresenter:
                     consumption_date=self.datetime_formatter.format_datetime(
                         date=consumption.consumption_date,
                         fmt="%d.%m.%Y",
-                        zone="Europe/Berlin",
                     ),
                     product_name=consumption.product_name,
                     product_description=consumption.product_description,

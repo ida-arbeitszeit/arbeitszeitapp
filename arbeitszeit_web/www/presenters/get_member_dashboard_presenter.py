@@ -90,7 +90,6 @@ class GetMemberDashboardPresenter:
             prd_name=plan_detail.prd_name,
             approval_date=self.datetime_formatter.format_datetime(
                 date=plan_detail.approval_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.",
             ),
             plan_details_url=self.url_index.get_plan_details_url(

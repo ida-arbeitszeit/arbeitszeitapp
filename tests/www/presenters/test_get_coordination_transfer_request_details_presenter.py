@@ -24,7 +24,7 @@ class GetDetailsPresenterTests(BaseTestCase):
         response = self.get_use_case_response(request_date=date)
         view_model = self.presenter.present(response)
         assert view_model.request_date == self.datetime_service.format_datetime(
-            date=date, fmt="%d.%m.%Y %H:%M", zone="Europe/Berlin"
+            date=date, fmt="%d.%m.%Y %H:%M"
         )
 
     def test_that_correct_cooperation_summary_url_is_displayed(

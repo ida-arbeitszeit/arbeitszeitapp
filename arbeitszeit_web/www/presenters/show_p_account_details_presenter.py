@@ -64,7 +64,7 @@ class ShowPAccountDetailsPresenter:
         return self.TransferInfo(
             transfer_type,
             self.datetime_formatter.format_datetime(
-                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
             str(round(transfer.volume, 2)),
         )

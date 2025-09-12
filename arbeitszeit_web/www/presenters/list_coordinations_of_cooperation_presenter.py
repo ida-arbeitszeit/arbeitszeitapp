@@ -49,7 +49,6 @@ class ListCoordinationsOfCooperationPresenter:
                     ),
                     start_time=self.datetime_formatter.format_datetime(
                         date=coordination.start_time,
-                        zone="Europe/Berlin",
                         fmt="%d.%m.%Y %H:%M",
                     ),
                     end_time=(
@@ -57,7 +56,6 @@ class ListCoordinationsOfCooperationPresenter:
                         if coordination.end_time is None
                         else self.datetime_formatter.format_datetime(
                             date=coordination.end_time,
-                            zone="Europe/Berlin",
                             fmt="%d.%m.%Y %H:%M",
                         )
                     ),
