@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.start_page import StartPageUseCase
 from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -25,7 +26,7 @@ class PresenterTester(BaseTestCase):
     def test_that_view_model_shows_plans_approval_date_correctly_formatted(
         self,
     ) -> None:
-        plan = self.get_latest_plan(approval_date=datetime(2022, 10, 1))
+        plan = self.get_latest_plan(approval_date=datetime_utc(2022, 10, 1))
         response = self.get_response([plan])
         view_model = self.presenter.show_start_page(response)
         self.assertEqual(view_model.plans[0].approval_date, "01.10.")
@@ -40,7 +41,7 @@ class PresenterTester(BaseTestCase):
         product_name: Optional[str] = None,
     ) -> StartPageUseCase.PlanDetail:
         if approval_date is None:
-            approval_date = datetime(2022, 5, 1)
+            approval_date = datetime_utc(2022, 5, 1)
         if plan_id is None:
             plan_id = uuid4()
         if product_name is None:

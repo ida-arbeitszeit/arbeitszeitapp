@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -68,7 +69,7 @@ class PrivateConsumptionTests(FlaskTestCase):
         assert not consumptions.where_consumer_is_member(other_member)
 
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
         self.consumption_generator.create_private_consumption(plan=plan_1)
         self.datetime_service.advance_time(timedelta(days=1))

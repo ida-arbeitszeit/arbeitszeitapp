@@ -42,7 +42,11 @@ class ReviewRegisteredConsumptionsPresenter:
 
     def _create_consumption(self, consumption: RegisteredConsumption) -> Consumption:
         return Consumption(
-            date=self.datetime_formatter.format_datetime(consumption.date),
+            date=self.datetime_formatter.format_datetime(
+                consumption.date,
+                fmt="%d.%m.%Y %H:%M",
+                zone="Europe/Berlin",
+            ),
             consumer_name=consumption.consumer_name,
             consumer_url=self._get_consumer_url(consumption),
             consumer_type_icon=self._get_consumer_type_icon(consumption),

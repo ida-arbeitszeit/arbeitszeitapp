@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.use_cases import register_hours_worked
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 
@@ -63,9 +64,9 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
 
     @parameterized.expand(
         [
-            datetime(2000, 1, 1),
-            datetime(2000, 1, 2),
-            datetime(2012, 3, 21),
+            datetime_utc(2000, 1, 1),
+            datetime_utc(2000, 1, 2),
+            datetime_utc(2012, 3, 21),
         ]
     )
     def test_that_record_has_specified_registration_time(

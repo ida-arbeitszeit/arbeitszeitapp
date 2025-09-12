@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.records import CoordinationTenure
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -17,7 +18,7 @@ class CoordinationTenureResultTests(FlaskTestCase):
         self.database_gateway.create_coordination_tenure(
             company=self.company_generator.create_company(),
             cooperation=self.cooperation_generator.create_cooperation(),
-            start_date=datetime(2000, 1, 1),
+            start_date=datetime_utc(2000, 1, 1),
         )
         coordination_tenures = self.database_gateway.get_coordination_tenures()
         assert coordination_tenures
@@ -27,7 +28,7 @@ class CoordinationTenureResultTests(FlaskTestCase):
     ) -> None:
         expected_company = self.company_generator.create_company()
         expected_cooperation = self.cooperation_generator.create_cooperation()
-        expected_start_date = datetime(2345, 1, 12)
+        expected_start_date = datetime_utc(2345, 1, 12)
         coordination_tenure = self.database_gateway.create_coordination_tenure(
             company=expected_company,
             cooperation=expected_cooperation,
@@ -57,7 +58,7 @@ class CoordinationTenureResultTests(FlaskTestCase):
     def test_coordinations_can_be_ordered_by_start_date_in_descending_order(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         first_coordination_tenure = self.create_coordination_tenure()
         self.datetime_service.advance_time(dt=timedelta(days=1))
         second_coordination_tenure = self.create_coordination_tenure()
@@ -101,7 +102,7 @@ class CoordinationsOfCooperationTests(FlaskTestCase):
         return self.database_gateway.create_coordination_tenure(
             company=self.company_generator.create_company(),
             cooperation=cooperation,
-            start_date=datetime(2000, 1, 1),
+            start_date=datetime_utc(2000, 1, 1),
         )
 
 
@@ -113,7 +114,7 @@ class JoinedWithCoordinatorTests(FlaskTestCase):
         coordination_tenure = self.database_gateway.create_coordination_tenure(
             company=expected_coordinator,
             cooperation=self.cooperation_generator.create_cooperation(),
-            start_date=datetime(2000, 1, 1),
+            start_date=datetime_utc(2000, 1, 1),
         )
         self.assertTrue(
             self.companyIsCoordinatorOfCoordination(

@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -32,7 +33,7 @@ class UseCaseTests(BaseTestCase):
     def test_latter_of_two_consumptions_is_returned_first_other_one_is_returned_second(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         first_plan = self.plan_generator.create_plan()
         second_plan = self.plan_generator.create_plan()
         company = self.company_generator.create_company()

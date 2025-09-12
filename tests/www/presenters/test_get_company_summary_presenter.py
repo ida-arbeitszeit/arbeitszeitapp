@@ -1,5 +1,4 @@
 from dataclasses import replace
-from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -16,13 +15,14 @@ from arbeitszeit_web.www.presenters.get_company_summary_presenter import (
     GetCompanySummarySuccessPresenter,
 )
 from tests.control_thresholds import ControlThresholdsTestImpl
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 RESPONSE_WITH_2_PLANS = GetCompanySummarySuccess(
     id=uuid4(),
     name="Company Name",
     email="comp_mail@cp.org",
-    registered_on=datetime(2022, 1, 2),
+    registered_on=datetime_utc(2022, 1, 2),
     expectations=Expectations(
         Decimal("1"), Decimal("2"), Decimal("3"), Decimal("-4.561")
     ),

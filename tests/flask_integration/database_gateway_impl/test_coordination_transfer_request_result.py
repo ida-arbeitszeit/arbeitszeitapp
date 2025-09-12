@@ -1,7 +1,7 @@
-from datetime import datetime
 from uuid import UUID
 
 from arbeitszeit.records import CoordinationTransferRequest
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -34,7 +34,7 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
             self.coordination_tenure_generator.create_coordination_tenure()
         )
         expected_candidate = self.company_generator.create_company()
-        expected_request_date = datetime(2020, 5, 1)
+        expected_request_date = datetime_utc(2020, 5, 1)
         result = self.database_gateway.create_coordination_transfer_request(
             requesting_coordination_tenure=expected_requesting_coordination_tenure,
             candidate=expected_candidate,

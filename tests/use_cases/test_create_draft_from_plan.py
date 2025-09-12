@@ -7,6 +7,7 @@ from parameterized import parameterized
 from arbeitszeit import records
 from arbeitszeit.use_cases import create_draft_from_plan as use_case
 from arbeitszeit.use_cases import get_draft_details, show_my_plans
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -186,7 +187,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
         summary = self.create_draft_and_get_details(plan)
         assert summary.is_public_service == expected_is_public
 
-    @parameterized.expand([(datetime(2000, 1, 1),), (datetime(2001, 2, 3),)])
+    @parameterized.expand([(datetime_utc(2000, 1, 1),), (datetime_utc(2001, 2, 3),)])
     def test_that_creating_timestamp_of_draft_is_the_time_of_request(
         self, expected_timestamp: datetime
     ) -> None:

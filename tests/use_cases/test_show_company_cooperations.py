@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from arbeitszeit.use_cases.show_company_cooperations import (
     Request,
     ShowCompanyCooperationsUseCase,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -45,7 +46,7 @@ class InboundCooperationRequestsTests(BaseTestCase):
     def test_that_requests_for_expired_plans_are_not_shown(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         coordinator = self.company_generator.create_company_record()
         coop = self.cooperation_generator.create_cooperation(coordinator=coordinator)
         self.plan_generator.create_plan(requested_cooperation=coop, timeframe=1)
@@ -90,7 +91,7 @@ class OutboundCoopRequestsTests(BaseTestCase):
         ]
 
     def test_that_requests_for_expired_plans_are_not_shown(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         requester = self.company_generator.create_company()
         coop = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(

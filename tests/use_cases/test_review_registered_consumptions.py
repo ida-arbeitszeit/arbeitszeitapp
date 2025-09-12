@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from math import isclose
 
@@ -6,6 +5,7 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.review_registered_consumptions import (
     ReviewRegisteredConsumptionsUseCase as UseCase,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -97,7 +97,7 @@ class PrivateConsumptionDetailsTests(BaseTestCase):
     def test_private_consumption_shows_date_of_when_consumption_was_registered(
         self,
     ) -> None:
-        expected_date = datetime(2019, 5, 1)
+        expected_date = datetime_utc(2019, 5, 1)
         self.datetime_service.freeze_time(expected_date)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_private_consumption(plan=plan)
@@ -217,7 +217,7 @@ class ProductiveConsumptionDetailsTests(BaseTestCase):
     def test_productive_consumption_shows_date_of_when_consumption_was_registered(
         self,
     ) -> None:
-        expected_date = datetime(2019, 5, 1)
+        expected_date = datetime_utc(2019, 5, 1)
         self.datetime_service.freeze_time(expected_date)
         plan = self.plan_generator.create_plan(planner=self.providing_company)
         self.consumption_generator.create_fixed_means_consumption(plan=plan)

@@ -11,7 +11,6 @@ pytest
 sphinx
 sphinx-rtd-theme
 types-python-dateutil
-types-pytz
 types-setuptools
 
 git+https://github.com/seppeljordan/flask-profiler.git#egg=flask-profiler

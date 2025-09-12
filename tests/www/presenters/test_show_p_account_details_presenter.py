@@ -9,6 +9,7 @@ from arbeitszeit.use_cases.show_p_account_details import (
 from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )
+from tests.datetime_service import datetime_min_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -86,7 +87,7 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
     def get_transfer_info(
         self,
         type: TransferType = TransferType.credit_p,
-        date: datetime = datetime.now(),
+        date: datetime = datetime_min_utc(),
         volume: Decimal = Decimal(10.002),
     ) -> UseCase.TransferInfo:
         return UseCase.TransferInfo(type=type, date=date, volume=volume)

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from enum import Enum, auto
 from uuid import UUID, uuid4
@@ -13,6 +13,7 @@ from arbeitszeit.use_cases.query_plans import (
     QueryPlans,
     QueryPlansRequest,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -73,7 +74,7 @@ class UseCaseTests(BaseTestCase):
         search_strategy: SearchStrategy,
     ) -> None:
         expected_number_of_plans = 0
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         for _ in range(3):
             self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
@@ -83,7 +84,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_only_active_plan_is_returned_when_expired_plans_are_excluded(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
         expected_plan = self.plan_generator.create_plan()
@@ -106,7 +107,7 @@ class UseCaseTests(BaseTestCase):
         search_strategy: SearchStrategy,
     ) -> None:
         expected_number_of_plans = 3
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         for _ in range(expected_number_of_plans):
             self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
@@ -116,7 +117,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_expired_plan_is_shown_as_expired(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
         response = self.query_plans(
@@ -207,7 +208,7 @@ class UseCaseTests(BaseTestCase):
         self,
         search_strategy: SearchStrategy,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         expected_third = self.plan_generator.create_plan()
         self.datetime_service.advance_time(timedelta(days=1))
         expected_second = self.plan_generator.create_plan()
@@ -250,7 +251,7 @@ class UseCaseTests(BaseTestCase):
         self,
         search_strategy: SearchStrategy,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 4))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 4))
         expected_second = self.plan_generator.create_plan(product_name="abcde")
         self.datetime_service.advance_time(timedelta(days=1))
         expected_first = self.plan_generator.create_plan(product_name="xyabc")

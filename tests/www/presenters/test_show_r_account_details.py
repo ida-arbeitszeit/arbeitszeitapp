@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import List
 from uuid import UUID, uuid4
@@ -8,18 +7,19 @@ from arbeitszeit.use_cases import show_r_account_details
 from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )
+from tests.datetime_service import datetime_min_utc
 from tests.translator import FakeTranslator
 from tests.www.base_test_case import BaseTestCase
 
 DEFAULT_INFO1 = show_r_account_details.TransferInfo(
     type=TransferType.credit_r,
-    date=datetime.now(),
+    date=datetime_min_utc(),
     volume=Decimal(10.007),
 )
 
 DEFAULT_INFO2 = show_r_account_details.TransferInfo(
     type=TransferType.credit_r,
-    date=datetime.now(),
+    date=datetime_min_utc(),
     volume=Decimal(20.103),
 )
 

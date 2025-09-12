@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -15,6 +15,7 @@ from arbeitszeit.use_cases.register_productive_consumption import (
     RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -50,10 +51,10 @@ class TestRejection(UseCaseBase):
         assert response.rejection_reason == response.RejectionReason.plan_not_found
 
     def test_reject_registration_if_plan_is_expired(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(timeframe=1)
-        self.datetime_service.freeze_time(datetime(2001, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2001, 1, 1))
         consumption_type = ConsumptionType.means_of_prod
         pieces = 5
         response = self.register_productive_consumption(
@@ -184,7 +185,7 @@ class TestBalanceChanges(UseCaseBase):
     def test_that_unit_cost_for_cooperating_plans_only_considers_non_expired_plans(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2010, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2010, 1, 1))
         coop = self.cooperation_generator.create_cooperation()
         sender = self.company_generator.create_company()
         self.plan_generator.create_plan(

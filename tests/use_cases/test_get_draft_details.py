@@ -12,6 +12,7 @@ from arbeitszeit.use_cases.get_draft_details import (
     GetDraftDetails,
 )
 from tests.data_generators import CompanyGenerator, PlanGenerator
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 from .dependency_injection import injection_test
@@ -118,8 +119,8 @@ class GetDraftDetailsTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            (datetime(2000, 1, 2),),
-            (datetime(2039, 1, 3),),
+            (datetime_utc(2000, 1, 2),),
+            (datetime_utc(2039, 1, 3),),
         ]
     )
     def test_that_creation_timestamp_is_time_of_request_1(

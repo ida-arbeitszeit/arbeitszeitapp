@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from arbeitszeit_web.www.controllers.confirm_member_controller import (
     ConfirmMemberController,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -31,7 +32,7 @@ class ConfirmMemberControllerTests(BaseTestCase):
     def test_that_no_request_is_yielded_if_token_is_1_day_and_one_minute_old(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token("test@test.test")
         self.datetime_service.advance_time(timedelta(days=1, minutes=1))
         request = self.controller.process_request(token=token)
@@ -40,7 +41,7 @@ class ConfirmMemberControllerTests(BaseTestCase):
     def test_that_a_proper_request_is_yielded_if_token_is_23_hours_and_59_minutes_old(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token("test@test.test")
         self.datetime_service.advance_time(timedelta(hours=23, minutes=59))
         request = self.controller.process_request(token=token)

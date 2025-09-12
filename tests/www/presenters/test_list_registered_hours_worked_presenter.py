@@ -6,6 +6,7 @@ from parameterized import parameterized
 
 from arbeitszeit.use_cases import list_registered_hours_worked
 from arbeitszeit_web.www.presenters import list_registered_hours_worked_presenter
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -85,7 +86,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         assert view_model.registered_hours_worked[0].worker_name == worker_name
 
     def test_registered_on_from_response_is_formatted_correctly(self) -> None:
-        registered_on = datetime(2021, 1, 1, 12, 0)
+        registered_on = datetime_utc(2021, 1, 1, 12, 0)
         expected_registered_on = self.datetime_service.format_datetime(
             date=registered_on, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
         )
@@ -106,7 +107,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         hours: Decimal = Decimal("8.0"),
         worker_id: UUID = uuid4(),
         worker_name: str = "worker_name",
-        registered_on: datetime = datetime(2021, 1, 1),
+        registered_on: datetime = datetime_utc(2021, 1, 1),
     ) -> list_registered_hours_worked.RegisteredHoursWorked:
         return list_registered_hours_worked.RegisteredHoursWorked(
             hours=hours,

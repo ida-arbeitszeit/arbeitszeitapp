@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from tests.datetime_service import datetime_utc
 
 from ..base_test_case import BaseTestCase
 
@@ -36,10 +37,10 @@ class UseCaseTests(BaseTestCase):
         assert response.email == "company@cp.org"
 
     def test_returns_register_date(self) -> None:
-        expected_registration_date = datetime(2022, 1, 25)
+        expected_registration_date = datetime_utc(2022, 1, 25)
         self.datetime_service.freeze_time(expected_registration_date)
         company = self.company_generator.create_company()
-        self.datetime_service.freeze_time(datetime(2022, 1, 26))
+        self.datetime_service.freeze_time(datetime_utc(2022, 1, 26))
         response = self.get_company_summary(company)
         assert response
         assert response.registered_on == expected_registration_date
@@ -58,7 +59,7 @@ class UseCaseTests(BaseTestCase):
     def test_labour_account_shows_planned_labour_certs_after_plan_expired_and_no_workers_were_paid(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 2, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 2, 1))
         expected_amount = Decimal(12)
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(
@@ -91,7 +92,7 @@ class UseCaseTests(BaseTestCase):
 
     def test_returns_list_of_companys_plans_in_descending_order(self) -> None:
         company = self.company_generator.create_company()
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         third = self.plan_generator.create_plan(planner=company)
         self.datetime_service.freeze_time(
             self.datetime_service.now() - timedelta(days=9)
@@ -101,7 +102,7 @@ class UseCaseTests(BaseTestCase):
             self.datetime_service.now() + timedelta(days=8)
         )
         second = self.plan_generator.create_plan(planner=company)
-        self.datetime_service.freeze_time(datetime(2000, 1, 2))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 2))
         response = self.get_company_summary(company)
         assert response
         assert response.plan_details[0].id == third

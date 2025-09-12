@@ -8,6 +8,7 @@ from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
 from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
     ListCoordinationsOfCooperationPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -76,7 +77,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         self.assertEqual(view_model.coordinations[0].coordinator_url, expected_url)
 
     def test_presenter_shows_correct_start_time(self) -> None:
-        expected_start_time = datetime(2020, 1, 1, 12, 0)
+        expected_start_time = datetime_utc(2020, 1, 1, 12, 0)
         expected_formatted_start_time = self.datetime_service.format_datetime(
             date=expected_start_time,
             zone="Europe/Berlin",
@@ -96,7 +97,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
                 CoordinationInfo(
                     coordinator_id=uuid4(),
                     coordinator_name="fake name",
-                    start_time=datetime(2020, 1, 1, 12, 0),
+                    start_time=datetime_utc(2020, 1, 1, 12, 0),
                     end_time=None,
                 )
             ],
@@ -107,7 +108,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         self.assertEqual(view_model.coordinations[0].end_time, "-")
 
     def test_presenter_shows_correct_end_time_if_coordination_has_some(self) -> None:
-        expected_end_time = datetime(2022, 3, 10, 13, 0)
+        expected_end_time = datetime_utc(2022, 3, 10, 13, 0)
         expected_formatted_end_time = self.datetime_service.format_datetime(
             date=expected_end_time,
             zone="Europe/Berlin",
@@ -160,8 +161,8 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         self,
         coordinator_id: UUID = uuid4(),
         coordinator_name: str = "fake coordinator name",
-        start_time: datetime = datetime(2020, 1, 1, 12, 0),
-        end_time: datetime = datetime(2022, 3, 10, 13, 0),
+        start_time: datetime = datetime_utc(2020, 1, 1, 12, 0),
+        end_time: datetime = datetime_utc(2022, 3, 10, 13, 0),
         cooperation_id: UUID = uuid4(),
         cooperation_name: str = "Some coop test name",
     ) -> ListCoordinationsOfCooperationUseCase.Response:

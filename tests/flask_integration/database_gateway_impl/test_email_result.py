@@ -1,20 +1,46 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
+from dateutil import tz
 from sqlalchemy.exc import IntegrityError
+
+from tests.datetime_service import datetime_min_utc, datetime_utc
 
 from ..flask import FlaskTestCase
 from .utility import Utility
 
 
 class CreateEmailAddressTests(FlaskTestCase):
+    def test_created_email_address_contains_utc_confirmation_date(self) -> None:
+        confirmation_date = datetime_utc(2023, 1, 2, 3, 4, 5)
+        self.database_gateway.create_email_address(
+            address="test@test.test",
+            confirmed_on=confirmation_date,
+        )
+        email_address = self.database_gateway.get_email_addresses().first()
+        assert email_address is not None
+        assert email_address.confirmed_on == confirmation_date
+        assert email_address.confirmed_on.tzinfo == UTC
+
+    def test_returned_confirmation_date_gets_time_zone_changed_to_utc(self) -> None:
+        original_date = datetime(2023, 1, 2, 3, 4, 5).astimezone(tz.gettz("Asia/Tokyo"))
+        self.database_gateway.create_email_address(
+            address="test@test.test",
+            confirmed_on=original_date,
+        )
+        email_address = self.database_gateway.get_email_addresses().first()
+        assert email_address is not None
+        assert email_address.confirmed_on == original_date
+        assert email_address.confirmed_on.tzinfo != original_date.tzinfo
+        assert email_address.confirmed_on.tzinfo == UTC
+
     @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
     def test_cannot_create_same_email_address_twice(self) -> None:
         address = "test@test.test"
         self.database_gateway.create_email_address(address=address, confirmed_on=None)
         with pytest.raises(IntegrityError):
             self.database_gateway.create_email_address(
-                address=address, confirmed_on=datetime.min
+                address=address, confirmed_on=datetime_min_utc()
             )
 
     @pytest.mark.filterwarnings("ignore::sqlalchemy.exc.SAWarning")
@@ -24,7 +50,7 @@ class CreateEmailAddressTests(FlaskTestCase):
         altered_address = Utility.mangle_case(address)
         with pytest.raises(IntegrityError):
             self.database_gateway.create_email_address(
-                address=altered_address, confirmed_on=datetime.min
+                address=altered_address, confirmed_on=datetime_min_utc()
             )
 
 

@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -7,6 +6,7 @@ from parameterized import parameterized
 
 from arbeitszeit import records
 from arbeitszeit.records import SocialAccounting
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 
@@ -35,7 +35,7 @@ class AccountResultTests(FlaskTestCase):
             account_credentials=credentials.id,
             name="test name",
             account=account,
-            registered_on=datetime(2000, 1, 1),
+            registered_on=datetime_utc(2000, 1, 1),
         )
         result = (
             self.database_gateway.get_accounts()
@@ -208,7 +208,7 @@ class AccountResultTests(FlaskTestCase):
             labour_account=labour_account or self.database_gateway.create_account(),
             resource_account=resource_account or self.database_gateway.create_account(),
             products_account=products_account or self.database_gateway.create_account(),
-            registered_on=datetime(2000, 1, 1),
+            registered_on=datetime_utc(2000, 1, 1),
         )
 
     def create_cooperation(
@@ -216,7 +216,7 @@ class AccountResultTests(FlaskTestCase):
         account: UUID,
     ) -> records.Cooperation:
         return self.database_gateway.create_cooperation(
-            creation_timestamp=datetime(2000, 1, 1),
+            creation_timestamp=datetime_utc(2000, 1, 1),
             name="test cooperation",
             definition="some product definition",
             account=account,

@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest import TestCase
 from uuid import uuid4
 
 from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
 from tests.data_generators import CompanyGenerator, MemberGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
+from tests.datetime_service import FakeDatetimeService, datetime_utc
 from tests.use_cases.dependency_injection import get_dependency_injector
 
 
@@ -95,7 +95,7 @@ class ThreeLatestPlansTests(TestCase):
     def test_that_approval_date_of_latest_plan_is_set_correctly(
         self,
     ) -> None:
-        expected_datetime = datetime(2020, 10, 10)
+        expected_datetime = datetime_utc(2020, 10, 10)
         self.datetime_service.freeze_time(expected_datetime)
         self.plan_generator.create_plan()
         self.datetime_service.advance_time(timedelta(hours=1))

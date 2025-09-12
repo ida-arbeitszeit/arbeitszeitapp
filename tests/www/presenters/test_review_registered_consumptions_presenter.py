@@ -13,6 +13,7 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.review_registered_consumptions_presenter import (
     ReviewRegisteredConsumptionsPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -59,10 +60,13 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
     def test_that_an_use_case_response_results_in_a_view_model_with_a_formatted_consumption_date(
         self,
     ) -> None:
-        consumption = self._create_consumption(date=datetime(2021, 1, 1, 22, 1))
+        date = datetime_utc(2021, 1, 1, 22, 1)
+        consumption = self._create_consumption(date=date)
         use_case_response = UseCase.Response(consumptions=[consumption])
         view_model = self.presenter.present(use_case_response)
-        assert view_model.consumptions[0].date == "01.01.2021 22:01"
+        assert view_model.consumptions[0].date == self.datetime_service.format_datetime(
+            date=date, fmt="%d.%m.%Y %H:%M", zone="Europe/Berlin"
+        )
 
     def test_that_an_use_case_response_results_in_a_view_model_with_the_consumer_name(
         self,
@@ -149,7 +153,7 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
 
     def _create_consumption(
         self,
-        date: datetime = datetime(2021, 1, 1),
+        date: datetime = datetime_utc(2021, 1, 1),
         is_private_consumption: Optional[bool] = None,
         consumer_name: str = "consumer_name",
         consumer_id: UUID = uuid4(),

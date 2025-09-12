@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.records import PlanDraft, ProductionCosts
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 
@@ -80,7 +81,7 @@ class PlanDraftRepositoryTests(PlanDraftRepositoryBaseTests):
     def test_that_created_draft_has_creation_timestamp_it_was_created_with(
         self,
     ) -> None:
-        expected_timestamp = datetime(2000, 1, 2)
+        expected_timestamp = datetime_utc(2000, 1, 2)
         draft = self.create_plan_draft(creation_timestamp=expected_timestamp)
         assert draft.creation_date == expected_timestamp
 

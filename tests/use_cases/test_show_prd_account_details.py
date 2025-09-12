@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID
 
@@ -6,6 +6,7 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import show_prd_account_details
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -269,7 +270,7 @@ class UseCaseTester(BaseTestCase):
     def test_that_correct_plotting_info_is_generated_after_one_plan_approval_and_two_private_consumptions(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(
             planner=planner,
@@ -446,7 +447,7 @@ class CompensationForCompanyTests(CompensationTests):
         assert response.transfers[0].volume == EXPECTED_VALUE
 
     def test_that_same_date_as_in_transfer_is_shown(self) -> None:
-        EXPECTED_DATE = datetime(2022, 11, 1)
+        EXPECTED_DATE = datetime_utc(2022, 11, 1)
         planner = self.company_generator.create_company_record()
         self.transfer_generator.create_transfer(
             credit_account=planner.product_account,
@@ -504,7 +505,7 @@ class CompensationForCoopTests(CompensationTests):
         assert response.transfers[0].volume == -TRANSFER_VALUE
 
     def test_that_same_date_as_in_transfer_is_shown(self) -> None:
-        EXPECTED_DATE = datetime(2022, 11, 1)
+        EXPECTED_DATE = datetime_utc(2022, 11, 1)
         planner = self.company_generator.create_company_record()
         self.transfer_generator.create_transfer(
             debit_account=planner.product_account,

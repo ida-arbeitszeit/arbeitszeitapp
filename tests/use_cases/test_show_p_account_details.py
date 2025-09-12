@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID
 
@@ -7,6 +7,7 @@ from parameterized import parameterized
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -112,7 +113,7 @@ class ShowPAccountDetailsTests(BaseTestCase):
         assert len(response.transfers) == 2
 
     def test_that_newest_transfers_are_shown_first(self) -> None:
-        self.datetime_service.freeze_time(datetime(2025, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2025, 1, 1))
         planner = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=planner)
         self.datetime_service.advance_time(timedelta(days=1))
@@ -136,7 +137,7 @@ class ShowPAccountDetailsTests(BaseTestCase):
         is_public_service: bool,
     ) -> None:
         EXPECTED_VOLUME = Decimal(8.5)
-        EXPECTED_TIMESTAMP = datetime(2025, 1, 1)
+        EXPECTED_TIMESTAMP = datetime_utc(2025, 1, 1)
         EXPECTED_TRANSFER_TYPE = (
             TransferType.credit_public_p if is_public_service else TransferType.credit_p
         )
@@ -250,9 +251,9 @@ class ShowPAccountDetailsTests(BaseTestCase):
         COSTS_PER_CONSUMPTION = TOTAL_COSTS / AMOUNT_PRODUCED
         CONSUMPTION_1 = 10
         CONSUMPTION_2 = 20
-        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
-        CONSUMPTION_DATE_1 = datetime(2025, 1, 2)
-        CONSUMPTION_DATE_2 = datetime(2025, 1, 3)
+        PLAN_APPROVED_DATE = datetime_utc(2025, 1, 1)
+        CONSUMPTION_DATE_1 = datetime_utc(2025, 1, 2)
+        CONSUMPTION_DATE_2 = datetime_utc(2025, 1, 3)
 
         own_company = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
@@ -304,10 +305,10 @@ class ShowPAccountDetailsTests(BaseTestCase):
         CONSUMPTION_1 = 10
         CONSUMPTION_2 = 20
         CONSUMPTION_3 = 30
-        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
-        CONSUMPTION_DATE_1 = datetime(2025, 1, 2)
-        CONSUMPTION_DATE_2 = datetime(2025, 1, 3)
-        CONSUMPTION_DATE_3 = datetime(2025, 1, 4)
+        PLAN_APPROVED_DATE = datetime_utc(2025, 1, 1)
+        CONSUMPTION_DATE_1 = datetime_utc(2025, 1, 2)
+        CONSUMPTION_DATE_2 = datetime_utc(2025, 1, 3)
+        CONSUMPTION_DATE_3 = datetime_utc(2025, 1, 4)
 
         own_company = self.company_generator.create_company()
         other_company = self.company_generator.create_company()
@@ -368,7 +369,7 @@ class ShowPAccountDetailsTests(BaseTestCase):
         self,
         is_public_service: bool,
     ) -> None:
-        PLAN_APPROVED_DATE = datetime(2025, 1, 1)
+        PLAN_APPROVED_DATE = datetime_utc(2025, 1, 1)
         EXPECTED_VOLUME = Decimal(8.5)
         company = self.company_generator.create_company()
         self.datetime_service.freeze_time(PLAN_APPROVED_DATE)

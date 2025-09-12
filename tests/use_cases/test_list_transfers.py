@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from enum import Enum, auto
 from typing import Optional
@@ -14,6 +13,7 @@ from arbeitszeit.use_cases.list_transfers import (
     Request,
     Response,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -150,7 +150,7 @@ class ListTransfersOfApprovedProductivePlanTests(TransferTestBase):
         assert response.total_results == 6
 
     def test_that_all_transfers_have_correct_date(self) -> None:
-        expected_date = datetime(2024, 1, 1, 12, 0)
+        expected_date = datetime_utc(2024, 1, 1, 12, 0)
         self.datetime_service.freeze_time(expected_date)
         self.plan_generator.create_plan()
         response = self.list_transfers()
@@ -280,11 +280,11 @@ class ListTransfersOfApprovedProductivePlanTests(TransferTestBase):
         )
 
     def test_that_newest_transfer_is_returned_first(self) -> None:
-        date1 = datetime(2024, 1, 1, 12, 0)
+        date1 = datetime_utc(2024, 1, 1, 12, 0)
         self.datetime_service.freeze_time(date1)
         self.plan_generator.create_plan()
 
-        date2 = datetime(2024, 1, 2, 12, 0)
+        date2 = datetime_utc(2024, 1, 2, 12, 0)
         self.datetime_service.freeze_time(date2)
         self.plan_generator.create_plan()
 

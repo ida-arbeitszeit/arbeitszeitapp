@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase,
 )
+from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
 
@@ -72,7 +73,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
     def test_that_coordination_info_shows_correct_start_time_of_coordination_tenure(
         self,
     ) -> None:
-        expected_time = datetime(2021, 10, 5, 10)
+        expected_time = datetime_utc(2021, 10, 5, 10)
         self.datetime_service.freeze_time(expected_time)
         coop = self.cooperation_generator.create_cooperation()
         self.datetime_service.advance_time(timedelta(days=2))
@@ -84,7 +85,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
     def test_that_coordination_has_no_end_time_when_there_is_only_one_coordination(
         self,
     ) -> None:
-        expected_time = datetime(2021, 10, 5, 10)
+        expected_time = datetime_utc(2021, 10, 5, 10)
         self.datetime_service.freeze_time(expected_time)
         coop = self.cooperation_generator.create_cooperation()
         self.datetime_service.advance_time(timedelta(days=2))
@@ -108,7 +109,7 @@ class ListCoordinationsOfCooperationTest(BaseTestCase):
     def test_that_second_coordination_of_two_in_response_has_correct_end_time(
         self,
     ) -> None:
-        first_timestamp = datetime(2021, 10, 5, 10)
+        first_timestamp = datetime_utc(2021, 10, 5, 10)
         self.datetime_service.freeze_time(first_timestamp)
         coop = self.cooperation_generator.create_cooperation()
         self.datetime_service.advance_time(timedelta(days=2))

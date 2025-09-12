@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
@@ -19,6 +18,7 @@ from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumptionRequest,
     RejectionReason,
 )
+from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase
 
@@ -97,11 +97,11 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         )
 
     def test_registration_is_unsuccessful_if_plan_is_expired(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan(
             timeframe=1,
         )
-        self.datetime_service.freeze_time(datetime(2001, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2001, 1, 1))
         response = self.register_private_consumption.register_private_consumption(
             self.make_request(plan, amount=3)
         )
@@ -348,7 +348,7 @@ class ConsumptionTransferTests(RegisterPrivateConsumptionBase):
         assert len(transfers) == number_of_consumptions
 
     def test_that_consumption_transfer_has_date_of_consumption(self) -> None:
-        EXPECTED_DATE = datetime(2023, 10, 1, 12, 0, 0)
+        EXPECTED_DATE = datetime_utc(2023, 10, 1, 12, 0, 0)
         self.datetime_service.freeze_time(EXPECTED_DATE)
         self.consumption_generator.create_private_consumption()
         transfers = self.get_private_consumption_transfers()
