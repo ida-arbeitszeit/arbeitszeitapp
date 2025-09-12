@@ -144,7 +144,7 @@ class ResultsTests(ListTransfersPresenterBase):
         )
         view_model = self.presenter.present(uc_response)
         assert view_model.results.rows[0].date == self.datetime_service.format_datetime(
-            date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+            date, fmt="%d.%m.%Y %H:%M"
         )
 
     def test_that_transfer_type_credit_p_is_transfered_to_correct_string(self) -> None:

@@ -98,7 +98,6 @@ class ListTransfersPresenter:
     def _format_date(self, date: datetime) -> str:
         return self.datetime_formatter.format_datetime(
             date,
-            zone="Europe/Berlin",
             fmt="%d.%m.%Y %H:%M",
         )
 

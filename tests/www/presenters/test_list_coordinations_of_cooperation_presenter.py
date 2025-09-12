@@ -80,7 +80,6 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         expected_start_time = datetime_utc(2020, 1, 1, 12, 0)
         expected_formatted_start_time = self.datetime_service.format_datetime(
             date=expected_start_time,
-            zone="Europe/Berlin",
             fmt="%d.%m.%Y %H:%M",
         )
         response = self.get_use_case_response_with_one_coordination(
@@ -111,7 +110,6 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         expected_end_time = datetime_utc(2022, 3, 10, 13, 0)
         expected_formatted_end_time = self.datetime_service.format_datetime(
             date=expected_end_time,
-            zone="Europe/Berlin",
             fmt="%d.%m.%Y %H:%M",
         )
         response = self.get_use_case_response_with_one_coordination(

@@ -52,9 +52,7 @@ class TestPresenter(BaseTestCase):
 
         assert presentation.consumptions[
             0
-        ].consumption_date == self.datetime_service.format_datetime(
-            now, zone="Europe/Berlin"
-        )
+        ].consumption_date == self.datetime_service.format_datetime(now)
         assert presentation.consumptions[0].product_name == "Produkt A"
         assert (
             presentation.consumptions[0].product_description
@@ -69,9 +67,7 @@ class TestPresenter(BaseTestCase):
 
         assert presentation.consumptions[
             1
-        ].consumption_date == self.datetime_service.format_datetime(
-            now, zone="Europe/Berlin"
-        )
+        ].consumption_date == self.datetime_service.format_datetime(now)
         assert presentation.consumptions[1].product_name == "Produkt A"
         assert (
             presentation.consumptions[1].product_description

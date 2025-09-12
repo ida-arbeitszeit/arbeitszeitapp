@@ -62,7 +62,7 @@ class GetCompanyDashboardPresenter:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
             approval_date=self.datetime_formatter.format_datetime(
-                plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
+                plan.approval_date, fmt="%d.%m."
             ),
             plan_details_url=self.url_index.get_plan_details_url(
                 plan_id=plan.plan_id, user_role=UserRole.company

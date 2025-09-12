@@ -34,7 +34,7 @@ class GetMemberAccountPresenter:
         transfers = [
             self.Transfer(
                 date=self.datetime_formatter.format_datetime(
-                    t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                    t.date, fmt="%d.%m.%Y %H:%M"
                 ),
                 type=self._transfer_type_as_string(t.type),
                 user_name=t.peer_name,

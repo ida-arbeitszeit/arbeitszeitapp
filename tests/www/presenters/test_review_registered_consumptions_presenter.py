@@ -65,7 +65,7 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
         use_case_response = UseCase.Response(consumptions=[consumption])
         view_model = self.presenter.present(use_case_response)
         assert view_model.consumptions[0].date == self.datetime_service.format_datetime(
-            date=date, fmt="%d.%m.%Y %H:%M", zone="Europe/Berlin"
+            date=date, fmt="%d.%m.%Y %H:%M"
         )
 
     def test_that_an_use_case_response_results_in_a_view_model_with_the_consumer_name(
