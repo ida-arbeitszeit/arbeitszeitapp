@@ -1,6 +1,7 @@
-from datetime import UTC, datetime
-from typing import Optional
-from zoneinfo import ZoneInfo
+from datetime import UTC, datetime, tzinfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+from flask import current_app
 
 from arbeitszeit.datetime_service import DatetimeService
 
@@ -12,11 +13,17 @@ class RealtimeDatetimeService(DatetimeService):
     def format_datetime(
         self,
         date: datetime,
-        zone: Optional[str] = None,
-        fmt: Optional[str] = None,
+        fmt: str | None = None,
     ) -> str:
-        if zone is not None:
-            date = date.astimezone(ZoneInfo(zone))
+        date = date.astimezone(self.get_timezone())
         if fmt is None:
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)
+
+    def get_timezone(self) -> tzinfo:
+        timezone = current_app.config.get("DEFAULT_USER_TIMEZONE", "UTC")
+        try:
+            zone_info = ZoneInfo(timezone)
+        except (ZoneInfoNotFoundError, TypeError):
+            return UTC
+        return zone_info

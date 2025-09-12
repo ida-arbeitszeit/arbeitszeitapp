@@ -6,6 +6,5 @@ class DatetimeFormatter(Protocol):
     def format_datetime(
         self,
         date: datetime,
-        zone: str | None = ...,
         fmt: str | None = ...,
     ) -> str: ...

@@ -40,6 +40,7 @@ class FlaskConfiguration(dict):
                 "LANGUAGES": {"en": "English", "de": "Deutsch", "es": "Español"},
                 "ARBEITSZEIT_PASSWORD_HASHER": "tests.password_hasher:PasswordHasherImpl",
                 "AUTO_MIGRATE": False,
+                "DEFAULT_USER_TIMEZONE": "UTC",
             }
         )
 

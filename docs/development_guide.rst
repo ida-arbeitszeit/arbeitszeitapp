@@ -571,6 +571,9 @@ We work internally with the UTC timezone. To this end we use timezone-aware pyth
 datetime objects wherever possible. We convert datetime to the required timezone 
 only in the presenter layer.
 
+Currently the user timezone can only set application-wide by the server admin.
+Per-user timezones are not implemented yet.  
+
 
 Icon Templates: Integration and Usage
 -----------------------------------------
