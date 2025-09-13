@@ -9,7 +9,6 @@ from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.url_index import UrlIndex
-from tests.datetime_service import FakeDatetimeFormatter
 from tests.dependency_injection import TestingModule
 from tests.email import FakeEmailConfiguration, FakeEmailService
 from tests.email_presenters.accountant_invitation_email_view import (
@@ -19,6 +18,7 @@ from tests.language_service import FakeLanguageService
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.use_cases.dependency_injection import InMemoryModule
+from tests.www.datetime_formatter import FakeDatetimeFormatter
 
 from .presenters.notifier import NotifierTestImpl
 from .presenters.url_index import UrlIndexTestImpl

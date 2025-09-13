@@ -2,12 +2,13 @@ from typing import Any, Dict, Generic, Type, TypeVar
 from unittest import TestCase
 
 from tests.data_generators import AccountantGenerator, CompanyGenerator, MemberGenerator
-from tests.datetime_service import FakeDatetimeFormatter, FakeDatetimeService
+from tests.datetime_service import FakeDatetimeService
 from tests.email import FakeEmailService
 from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
+from tests.www.datetime_formatter import FakeDatetimeFormatter
 from tests.www.presenters.notifier import NotifierTestImpl
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
