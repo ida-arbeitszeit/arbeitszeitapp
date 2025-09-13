@@ -22,7 +22,7 @@ class PresenterTests(BaseTestCase):
         view_model = self.presenter.present_private_consumptions(response)
         self.assertEqual(
             view_model.consumptions[0].consumption_date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 datetime_utc(2000, 1, 1),
                 fmt="%d.%m.%Y",
             ),

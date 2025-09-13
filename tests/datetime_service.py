@@ -3,6 +3,7 @@ from typing import Optional
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import singleton
+from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 
 def datetime_utc(
@@ -40,6 +41,11 @@ class FakeDatetimeService(DatetimeService):
             return self.frozen_time
         return datetime.now(UTC)
 
+    def now_minus(self, delta: timedelta) -> datetime:
+        return self.now() - delta
+
+
+class FakeDatetimeFormatter(DatetimeFormatter):
     def format_datetime(
         self,
         date: datetime,
@@ -51,6 +57,3 @@ class FakeDatetimeService(DatetimeService):
         if fmt is None:
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)
-
-    def now_minus(self, delta: timedelta) -> datetime:
-        return self.now() - delta

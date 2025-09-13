@@ -41,7 +41,7 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         )
         self.assertEqual(
             view_model_transfer.date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
         )

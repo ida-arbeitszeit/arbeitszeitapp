@@ -20,7 +20,7 @@ from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
 from arbeitszeit_flask.database import get_social_accounting
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
-from arbeitszeit_flask.datetime import RealtimeDatetimeService
+from arbeitszeit_flask.datetime import FlaskDatetimeFormatter, RealtimeDatetimeService
 from arbeitszeit_flask.email_configuration import FlaskEmailConfiguration
 from arbeitszeit_flask.flask_colors import FlaskColors
 from arbeitszeit_flask.flask_plotter import FlaskPlotter
@@ -87,7 +87,7 @@ class FlaskModule(Module):
         binder[Plotter] = AliasProvider(FlaskPlotter)
         binder[Colors] = AliasProvider(FlaskColors)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
-        binder[DatetimeFormatter] = AliasProvider(RealtimeDatetimeService)
+        binder[DatetimeFormatter] = AliasProvider(FlaskDatetimeFormatter)
         binder.bind(
             AccountantInvitationEmailView,
             to=AliasProvider(AccountantInvitationEmailViewImpl),

@@ -23,7 +23,7 @@ class GetDetailsPresenterTests(BaseTestCase):
         date = datetime_utc(2021, 1, 1)
         response = self.get_use_case_response(request_date=date)
         view_model = self.presenter.present(response)
-        assert view_model.request_date == self.datetime_service.format_datetime(
+        assert view_model.request_date == self.datetime_formatter.format_datetime(
             date=date, fmt="%d.%m.%Y %H:%M"
         )
 

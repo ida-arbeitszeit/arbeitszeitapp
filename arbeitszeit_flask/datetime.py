@@ -10,6 +10,8 @@ class RealtimeDatetimeService(DatetimeService):
     def now(self) -> datetime:
         return datetime.now(UTC)
 
+
+class FlaskDatetimeFormatter:
     def format_datetime(
         self,
         date: datetime,
