@@ -6,12 +6,14 @@ from typing import Optional, Tuple, Union
 from uuid import UUID
 
 from arbeitszeit import records
+from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass
 class GetUserAccountDetailsUseCase:
     database: DatabaseGateway
+    datetime_service: DatetimeService
 
     def get_user_account_details(self, request: Request) -> Response:
         record: Optional[
@@ -41,6 +43,7 @@ class GetUserAccountDetailsUseCase:
             user_info=UserInfo(
                 id=user_id,
                 email_address=email_address.address,
+                current_time=self.datetime_service.now(),
                 email_address_confirmation_timestamp=email_address.confirmed_on,
             )
         )
@@ -63,4 +66,5 @@ class Response:
 class UserInfo:
     id: UUID
     email_address: str
+    current_time: datetime
     email_address_confirmation_timestamp: Optional[datetime] = None

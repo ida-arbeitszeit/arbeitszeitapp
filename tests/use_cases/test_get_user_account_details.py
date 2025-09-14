@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from parameterized import parameterized
@@ -128,6 +128,16 @@ class GetUserAccountDetailsTests(BaseTestCase):
             response.user_info.email_address_confirmation_timestamp
             == expected_timestamp
         )
+
+    def test_that_current_time_is_returned(self) -> None:
+        expected_time = self.datetime_service.now()
+        self.datetime_service.freeze_time(expected_time)
+        member = self.member_generator.create_member()
+        request = get_user_account_details.Request(user_id=member)
+        response = self.use_case.get_user_account_details(request)
+        assert response.user_info
+        assert response.user_info.current_time == expected_time
+        assert response.user_info.current_time.tzinfo == UTC
 
     def _confirm_member(self, member_email: str) -> None:
         response = self.confirm_member_use_case.confirm_member(
