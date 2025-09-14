@@ -40,17 +40,5 @@ class FakeDatetimeService(DatetimeService):
             return self.frozen_time
         return datetime.now(UTC)
 
-    def format_datetime(
-        self,
-        date: datetime,
-        fmt: Optional[str] = None,
-    ) -> str:
-        if date.tzinfo is None:
-            date = date.replace(tzinfo=UTC)
-        date = date.astimezone(UTC)
-        if fmt is None:
-            fmt = "%d.%m.%Y %H:%M"
-        return date.strftime(fmt)
-
     def now_minus(self, delta: timedelta) -> datetime:
         return self.now() - delta

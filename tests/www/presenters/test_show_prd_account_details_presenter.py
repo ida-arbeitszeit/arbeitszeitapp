@@ -57,7 +57,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         )
         self.assertEqual(
             trans.date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=transfer.date,
                 fmt="%d.%m.%Y %H:%M",
             ),
@@ -83,7 +83,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertEqual(trans.transfer_type, self.translator.gettext("Sale"))
         self.assertEqual(
             trans.date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=transfer.date,
                 fmt="%d.%m.%Y %H:%M",
             ),

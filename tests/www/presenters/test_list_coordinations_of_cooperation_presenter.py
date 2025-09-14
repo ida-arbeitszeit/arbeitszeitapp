@@ -78,7 +78,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
 
     def test_presenter_shows_correct_start_time(self) -> None:
         expected_start_time = datetime_utc(2020, 1, 1, 12, 0)
-        expected_formatted_start_time = self.datetime_service.format_datetime(
+        expected_formatted_start_time = self.datetime_formatter.format_datetime(
             date=expected_start_time,
             fmt="%d.%m.%Y %H:%M",
         )
@@ -108,7 +108,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
 
     def test_presenter_shows_correct_end_time_if_coordination_has_some(self) -> None:
         expected_end_time = datetime_utc(2022, 3, 10, 13, 0)
-        expected_formatted_end_time = self.datetime_service.format_datetime(
+        expected_formatted_end_time = self.datetime_formatter.format_datetime(
             date=expected_end_time,
             fmt="%d.%m.%Y %H:%M",
         )

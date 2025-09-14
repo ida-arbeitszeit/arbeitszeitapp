@@ -8,6 +8,10 @@ from tests.request import FakeRequest
 from tests.session import FakeSession
 from tests.token import FakeTokenService
 from tests.translator import FakeTranslator
+from tests.www.datetime_formatter import (
+    FakeDatetimeFormatter,
+    FakeTimezoneConfiguration,
+)
 from tests.www.presenters.notifier import NotifierTestImpl
 from tests.www.presenters.url_index import UrlIndexTestImpl
 
@@ -59,6 +63,8 @@ class BaseTestCase(TestCase):
     accountant_generator = _lazy_property(AccountantGenerator)
     company_generator = _lazy_property(CompanyGenerator)
     datetime_service = _lazy_property(FakeDatetimeService)
+    datetime_formatter = _lazy_property(FakeDatetimeFormatter)
+    timezone_configuration = _lazy_property(FakeTimezoneConfiguration)
     email_service = _lazy_property(FakeEmailService)
     member_generator = _lazy_property(MemberGenerator)
     notifier = _lazy_property(NotifierTestImpl)

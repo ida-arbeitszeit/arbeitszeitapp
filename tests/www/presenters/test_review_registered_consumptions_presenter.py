@@ -64,7 +64,9 @@ class ReviewRegisteredConsumptionsPresenterTests(BaseTestCase):
         consumption = self._create_consumption(date=date)
         use_case_response = UseCase.Response(consumptions=[consumption])
         view_model = self.presenter.present(use_case_response)
-        assert view_model.consumptions[0].date == self.datetime_service.format_datetime(
+        assert view_model.consumptions[
+            0
+        ].date == self.datetime_formatter.format_datetime(
             date=date, fmt="%d.%m.%Y %H:%M"
         )
 

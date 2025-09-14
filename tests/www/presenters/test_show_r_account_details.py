@@ -47,7 +47,7 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         self.assertEqual(trans.transfer_type, self.trans.gettext("Credit"))
         self.assertEqual(
             trans.date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=DEFAULT_INFO1.date, fmt="%d.%m.%Y %H:%M"
             ),
         )

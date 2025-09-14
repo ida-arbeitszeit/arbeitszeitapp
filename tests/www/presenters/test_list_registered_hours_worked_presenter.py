@@ -87,7 +87,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
 
     def test_registered_on_from_response_is_formatted_correctly(self) -> None:
         registered_on = datetime_utc(2021, 1, 1, 12, 0)
-        expected_registered_on = self.datetime_service.format_datetime(
+        expected_registered_on = self.datetime_formatter.format_datetime(
             date=registered_on, fmt="%d.%m.%Y %H:%M"
         )
         registered_hours_worked = [

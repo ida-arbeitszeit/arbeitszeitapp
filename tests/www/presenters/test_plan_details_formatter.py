@@ -217,7 +217,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
         web_details = self.formatter.format_plan_details(plan_details)
         self.assertEqual(
             web_details.creation_date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=CREATION_DATE, fmt="%d.%m.%Y %H:%M"
             ),
         )
@@ -237,7 +237,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
         web_details = self.formatter.format_plan_details(plan_details)
         self.assertEqual(
             web_details.approval_date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=APPROVAL_DATE, fmt="%d.%m.%Y %H:%M"
             ),
         )
@@ -257,7 +257,7 @@ class PlanDetailsFormatterTests(BaseTestCase):
         web_details = self.formatter.format_plan_details(plan_details)
         self.assertEqual(
             web_details.expiration_date,
-            self.datetime_service.format_datetime(
+            self.datetime_formatter.format_datetime(
                 date=EXPIRATION_DATE,
                 fmt="%d.%m.%Y %H:%M",
             ),

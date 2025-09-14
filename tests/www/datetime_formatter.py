@@ -2,19 +2,12 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, tzinfo
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from flask import current_app
-
-from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import singleton
 from arbeitszeit_web.formatters.datetime_formatter import TimezoneConfiguration
 
 
-class RealtimeDatetimeService(DatetimeService):
-    def now(self) -> datetime:
-        return datetime.now(UTC)
-
-
 @dataclass
-class FlaskDatetimeFormatter:
+class FakeDatetimeFormatter:
     timezone_config: TimezoneConfiguration
 
     def format_datetime(
@@ -22,18 +15,27 @@ class FlaskDatetimeFormatter:
         date: datetime,
         fmt: str | None = None,
     ) -> str:
-        tz = self.timezone_config.get_timezone_of_current_user()
-        date = date.astimezone(tz)
+        user_timezone = self.timezone_config.get_timezone_of_current_user()
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=user_timezone)
+        date = date.astimezone(user_timezone)
         if fmt is None:
             fmt = "%d.%m.%Y %H:%M"
         return date.strftime(fmt)
 
 
-class FlaskTimezoneConfiguration:
+@singleton
+class FakeTimezoneConfiguration:
+    def __init__(self) -> None:
+        self._tz: tzinfo = UTC
+
     def get_timezone_of_current_user(self) -> tzinfo:
-        timezone = current_app.config.get("DEFAULT_USER_TIMEZONE", "UTC")
+        return self._tz
+
+    def set_timezone_of_current_user(self, tz: str) -> None:
         try:
-            zone_info = ZoneInfo(timezone)
+            zone_info = ZoneInfo(tz)
         except (ZoneInfoNotFoundError, TypeError):
-            return UTC
-        return zone_info
+            self._tz = UTC
+        else:
+            self._tz = zone_info
