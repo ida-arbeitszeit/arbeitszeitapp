@@ -5,7 +5,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.list_workers import ListWorkers, ListWorkersRequest
+from arbeitszeit.use_cases import list_workers
 from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -24,7 +24,7 @@ class RegisterHoursWorkedView:
     register_hours_worked: RegisterHoursWorked
     controller: RegisterHoursWorkedController
     presenter: RegisterHoursWorkedPresenter
-    list_workers: ListWorkers
+    list_workers: list_workers.ListWorkersUseCase
 
     def GET(self) -> Response:
         return self.create_response(status=200)
@@ -43,8 +43,8 @@ class RegisterHoursWorkedView:
             return self.create_response(status=status_code)
 
     def create_response(self, status: int) -> Response:
-        workers_list = self.list_workers(
-            ListWorkersRequest(company=UUID(current_user.id))
+        workers_list = self.list_workers.execute(
+            list_workers.Request(company=UUID(current_user.id))
         )
         return FlaskResponse(
             render_template(

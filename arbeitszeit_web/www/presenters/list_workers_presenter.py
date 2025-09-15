@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.list_workers import ListWorkersResponse
+from arbeitszeit.use_cases import list_workers
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -22,7 +22,7 @@ class ListWorkersPresenter:
         url_to_remove_workers: str
         url_to_pending_work_invites: str
 
-    def show_workers_list(self, use_case_response: ListWorkersResponse) -> ViewModel:
+    def show_workers_list(self, use_case_response: list_workers.Response) -> ViewModel:
         return self.ViewModel(
             workers=[
                 self.Worker(name=worker.name, id=str(worker.id))

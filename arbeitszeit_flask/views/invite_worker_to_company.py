@@ -6,7 +6,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
 
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.list_workers import ListWorkersUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -28,7 +28,7 @@ TEMPLATE_NAME = "company/invite_worker_to_company.html"
 @dataclass
 class InviteWorkerToCompanyView:
     list_workers_controller: ListWorkersController
-    list_workers_use_case: ListWorkers
+    list_workers_use_case: ListWorkersUseCase
     list_workers_presenter: ListWorkersPresenter
     invite_worker_controller: InviteWorkerToCompanyController
     invite_worker_use_case: InviteWorkerToCompanyUseCase
@@ -38,7 +38,7 @@ class InviteWorkerToCompanyView:
         list_workers_use_case_request = (
             self.list_workers_controller.create_use_case_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case(
+        list_workers_use_case_response = self.list_workers_use_case.execute(
             list_workers_use_case_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(
@@ -78,7 +78,7 @@ class InviteWorkerToCompanyView:
         list_workers_use_case_request = (
             self.list_workers_controller.create_use_case_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case(
+        list_workers_use_case_response = self.list_workers_use_case.execute(
             list_workers_use_case_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(
