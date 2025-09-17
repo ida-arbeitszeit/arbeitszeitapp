@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_workers import ListedWorker, ListWorkersResponse
+from arbeitszeit.use_cases import list_workers
 from arbeitszeit_web.www.presenters.list_workers_presenter import ListWorkersPresenter
 from tests.www.base_test_case import BaseTestCase
 
@@ -57,22 +57,26 @@ class PresenterTests(BaseTestCase):
             == self.url_index.get_pending_work_invites_url()
         )
 
-    def create_empty_response(self) -> ListWorkersResponse:
-        return ListWorkersResponse([])
+    def create_empty_response(self) -> list_workers.Response:
+        return list_workers.Response([])
 
-    def create_response(self, workers: int) -> ListWorkersResponse:
-        return ListWorkersResponse(
+    def create_response(self, workers: int) -> list_workers.Response:
+        return list_workers.Response(
             [
-                ListedWorker(id=uuid4(), name="test worker", email="test@mail.test")
+                list_workers.ListedWorker(
+                    id=uuid4(), name="test worker", email="test@mail.test"
+                )
                 for _ in range(workers)
             ]
         )
 
     def create_one_worker_response(
         self, name: str = "t", id: Optional[UUID] = None
-    ) -> ListWorkersResponse:
+    ) -> list_workers.Response:
         if id is None:
             id = uuid4()
-        return ListWorkersResponse(
-            workers=[ListedWorker(id=id, name=name, email="test@test.test")]
+        return list_workers.Response(
+            workers=[
+                list_workers.ListedWorker(id=id, name=name, email="test@test.test")
+            ]
         )

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
-from arbeitszeit.use_cases.list_workers import ListWorkers
+from arbeitszeit.use_cases.list_workers import ListWorkersUseCase
 from arbeitszeit.use_cases.remove_worker_from_company import (
     RemoveWorkerFromCompanyUseCase,
 )
@@ -30,7 +30,7 @@ TEMPLATE_NAME = "company/remove_worker_from_company.html"
 @dataclass
 class RemoveWorkerFromCompanyView:
     list_workers_controller: ListWorkersController
-    list_workers_use_case: ListWorkers
+    list_workers_use_case: ListWorkersUseCase
     list_workers_presenter: ListWorkersPresenter
     remove_worker_controller: RemoveWorkerFromCompanyController
     remove_worker_use_case: RemoveWorkerFromCompanyUseCase
@@ -60,7 +60,7 @@ class RemoveWorkerFromCompanyView:
         list_workers_use_case_request = (
             self.list_workers_controller.create_use_case_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case(
+        list_workers_use_case_response = self.list_workers_use_case.execute(
             list_workers_use_case_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(

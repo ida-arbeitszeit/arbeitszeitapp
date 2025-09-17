@@ -14,24 +14,24 @@ class ListedWorker:
 
 
 @dataclass
-class ListWorkersResponse:
+class Response:
     workers: List[ListedWorker]
 
 
 @dataclass
-class ListWorkersRequest:
+class Request:
     company: UUID
 
 
 @dataclass
-class ListWorkers:
+class ListWorkersUseCase:
     database: DatabaseGateway
 
-    def __call__(self, request: ListWorkersRequest) -> ListWorkersResponse:
+    def execute(self, request: Request) -> Response:
         if not self.database.get_companies().with_id(request.company):
-            return ListWorkersResponse(workers=[])
+            return Response(workers=[])
         members = self.database.get_members().working_at_company(request.company)
-        return ListWorkersResponse(
+        return Response(
             workers=[
                 self._create_worker_response_model(member, mail)
                 for member, mail in members.joined_with_email_address()
