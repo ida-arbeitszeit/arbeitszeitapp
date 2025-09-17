@@ -2,11 +2,14 @@ from decimal import Decimal
 from uuid import UUID
 
 from arbeitszeit.records import ConsumptionType, ProductionCosts
-from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import (
+    AccountBalances,
+    GetCompanySummaryUseCase,
+)
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
     RegisterProductiveConsumptionResponse,
+    RegisterProductiveConsumptionUseCase,
 )
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.show_my_plans import (
@@ -23,9 +26,9 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(RejectPlanUseCase)
-        self.get_company_summary = self.injector.get(GetCompanySummary)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
         self.register_productive_consumption = self.injector.get(
-            RegisterProductiveConsumption
+            RegisterProductiveConsumptionUseCase
         )
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
 
@@ -63,7 +66,7 @@ class UseCaseTests(BaseTestCase):
             planner=planner.id, approved=False, rejected=False
         )
         self.use_case.reject_plan(self.create_request(plan=plan))
-        consumption_response = self.register_productive_consumption(
+        consumption_response = self.register_productive_consumption.execute(
             RegisterProductiveConsumptionRequest(
                 consumer=planner.id,
                 plan=plan,
@@ -108,7 +111,7 @@ class UseCaseTests(BaseTestCase):
         )
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:
-        response = self.get_company_summary(company_id=company)
+        response = self.get_company_summary.execute(company_id=company)
         assert response
         return response.account_balances
 

@@ -27,11 +27,11 @@ class ListCoordinationsOfCompanyResponse:
 
 
 @dataclass
-class ListCoordinationsOfCompany:
+class ListCoordinationsOfCompanyUseCase:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def __call__(
+    def execute(
         self, request: ListCoordinationsOfCompanyRequest
     ) -> ListCoordinationsOfCompanyResponse:
         if not self.database_gateway.get_companies().with_id(request.company):

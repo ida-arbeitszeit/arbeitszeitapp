@@ -11,10 +11,10 @@ class CancelCooperationSolicitationRequest:
 
 
 @dataclass
-class CancelCooperationSolicitation:
+class CancelCooperationSolicitationUseCase:
     database_gateway: DatabaseGateway
 
-    def __call__(self, request: CancelCooperationSolicitationRequest) -> bool:
+    def execute(self, request: CancelCooperationSolicitationRequest) -> bool:
         plans_changed_count = (
             self.database_gateway.get_plans()
             .with_id(request.plan_id)

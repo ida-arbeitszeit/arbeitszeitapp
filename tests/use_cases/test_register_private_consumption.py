@@ -10,8 +10,8 @@ from arbeitszeit.records import PrivateConsumption, ProductionCosts, Transfer
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import query_private_consumptions
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
+    RegisterHoursWorkedUseCase,
 )
 from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumption,
@@ -77,7 +77,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         self.query_private_consumptions = self.injector.get(
             query_private_consumptions.QueryPrivateConsumptions
         )
-        self.register_hours_worked = self.injector.get(RegisterHoursWorked)
+        self.register_hours_worked = self.injector.get(RegisterHoursWorkedUseCase)
 
     def test_registration_fails_when_plan_does_not_exist(self) -> None:
         response = self.register_private_consumption.register_private_consumption(
@@ -292,7 +292,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
     def make_transfer_to_consumer_account(self, amount: Decimal) -> None:
         if amount > 0:
             company = self.company_generator.create_company(workers=[self.consumer])
-            self.register_hours_worked(
+            self.register_hours_worked.execute(
                 RegisterHoursWorkedRequest(
                     company_id=company,
                     worker_id=self.consumer,

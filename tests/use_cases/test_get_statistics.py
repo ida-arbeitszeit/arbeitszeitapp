@@ -11,8 +11,8 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.use_cases.get_statistics import GetStatisticsUseCase
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
+    RegisterHoursWorkedUseCase,
 )
 from tests.use_cases.base_test_case import BaseTestCase
 
@@ -231,8 +231,8 @@ class CountCertificatesTests(StatisticsBaseTestCase):
             company = self.company_generator.create_company(workers=[worker])
         else:
             company, worker = company_and_worker
-        register_hours_worked_use_case = self.injector.get(RegisterHoursWorked)
-        registered_hours_worked = register_hours_worked_use_case(
+        register_hours_worked_use_case = self.injector.get(RegisterHoursWorkedUseCase)
+        registered_hours_worked = register_hours_worked_use_case.execute(
             RegisterHoursWorkedRequest(
                 company_id=company,
                 worker_id=worker,

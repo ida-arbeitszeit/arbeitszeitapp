@@ -5,8 +5,8 @@ from uuid import UUID
 from flask import Response, redirect, render_template, request
 
 from arbeitszeit.use_cases.answer_company_work_invite import (
-    AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
+    AnswerCompanyWorkInviteUseCase,
 )
 from arbeitszeit.use_cases.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsUseCase,
@@ -37,7 +37,7 @@ class CompanyWorkInviteView:
     details_controller: ShowCompanyWorkInviteDetailsController
     answer_controller: AnswerCompanyWorkInviteController
     answer_presenter: AnswerCompanyWorkInvitePresenter
-    answer_use_case: AnswerCompanyWorkInvite
+    answer_use_case: AnswerCompanyWorkInviteUseCase
 
     def GET(self, invite_id: UUID) -> Response:
         use_case_request = self.details_controller.create_use_case_request(invite_id)
@@ -61,6 +61,6 @@ class CompanyWorkInviteView:
             form=form, invite_id=invite_id
         )
         assert isinstance(use_case_request, AnswerCompanyWorkInviteRequest)
-        use_case_response = self.answer_use_case(use_case_request)
+        use_case_response = self.answer_use_case.execute(use_case_request)
         view_model = self.answer_presenter.present(use_case_response)
         return cast(Response, redirect(view_model.redirect_url))

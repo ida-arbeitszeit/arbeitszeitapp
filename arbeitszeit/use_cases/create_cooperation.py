@@ -30,11 +30,11 @@ class CreateCooperationResponse:
 
 
 @dataclass
-class CreateCooperation:
+class CreateCooperationUseCase:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
 
-    def __call__(self, request: CreateCooperationRequest) -> CreateCooperationResponse:
+    def execute(self, request: CreateCooperationRequest) -> CreateCooperationResponse:
         try:
             coordinator = self._validate_request(request)
         except CreateCooperationResponse.RejectionReason as reason:

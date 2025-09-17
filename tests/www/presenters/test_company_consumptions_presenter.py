@@ -5,7 +5,7 @@ from uuid import uuid4
 from arbeitszeit.records import ConsumptionType
 from arbeitszeit.use_cases.query_company_consumptions import (
     ConsumptionQueryResponse,
-    QueryCompanyConsumptions,
+    QueryCompanyConsumptionsUseCase,
 )
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
@@ -18,7 +18,7 @@ from tests.www.base_test_case import BaseTestCase
 class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
+        self.query_consumptions = self.injector.get(QueryCompanyConsumptionsUseCase)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.presenter = self.injector.get(CompanyConsumptionsPresenter)
 
@@ -85,7 +85,7 @@ class TestPresenter(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consuming_company
         )
-        use_case_response = self.query_consumptions(company=consuming_company)
+        use_case_response = self.query_consumptions.execute(company=consuming_company)
         view_model = self.presenter.present(use_case_response)
         assert view_model.show_consumptions
 

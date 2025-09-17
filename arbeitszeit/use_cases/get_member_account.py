@@ -23,10 +23,10 @@ class GetMemberAccountResponse:
 
 
 @dataclass
-class GetMemberAccount:
+class GetMemberAccountUseCase:
     database: DatabaseGateway
 
-    def __call__(self, member_id: UUID) -> GetMemberAccountResponse:
+    def execute(self, member_id: UUID) -> GetMemberAccountResponse:
         member = self.database.get_members().with_id(member_id).first()
         assert member
         transfer_info: List[TransferInfo] = []

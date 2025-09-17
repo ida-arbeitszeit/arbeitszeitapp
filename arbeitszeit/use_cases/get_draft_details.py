@@ -26,10 +26,10 @@ DraftDetailsResponse = Optional[DraftDetailsSuccess]
 
 
 @dataclass
-class GetDraftDetails:
+class GetDraftDetailsUseCase:
     database: DatabaseGateway
 
-    def __call__(self, draft_id: UUID) -> DraftDetailsResponse:
+    def execute(self, draft_id: UUID) -> DraftDetailsResponse:
         draft = self.database.get_plan_drafts().with_id(draft_id).first()
         if draft is None:
             return None

@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionUseCase,
 )
 from arbeitszeit_flask.api.authentication import authentication_check
 from arbeitszeit_flask.api.input_documentation import with_input_documentation
@@ -55,10 +55,10 @@ class LiquidMeansOfProduction(Resource):
     def post(
         self,
         controller: LiquidMeansConsumptionController,
-        register_productive_consumption: RegisterProductiveConsumption,
+        register_productive_consumption: RegisterProductiveConsumptionUseCase,
         presenter: LiquidMeansConsumptionPresenter,
     ):
         "Register consumption of liquid means of production."
         use_case_request = controller.create_request(FlaskRequest())
-        use_case_response = register_productive_consumption(use_case_request)
+        use_case_response = register_productive_consumption.execute(use_case_request)
         return presenter.create_view_model(use_case_response)

@@ -6,7 +6,7 @@ from flask import redirect, render_template, url_for
 from flask_login import current_user
 
 from arbeitszeit.use_cases import list_workers
-from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorked
+from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -21,7 +21,7 @@ from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
 
 @dataclass
 class RegisterHoursWorkedView:
-    register_hours_worked: RegisterHoursWorked
+    register_hours_worked: RegisterHoursWorkedUseCase
     controller: RegisterHoursWorkedController
     presenter: RegisterHoursWorkedPresenter
     list_workers: list_workers.ListWorkersUseCase
@@ -36,7 +36,7 @@ class RegisterHoursWorkedView:
             self.presenter.present_controller_warnings(controller_response)
             return self.create_response(status=400)
         else:
-            use_case_response = self.register_hours_worked(controller_response)
+            use_case_response = self.register_hours_worked.execute(controller_response)
             status_code = self.presenter.present_use_case_response(use_case_response)
             if status_code == 302:
                 return redirect(url_for("main_company.register_hours_worked"))

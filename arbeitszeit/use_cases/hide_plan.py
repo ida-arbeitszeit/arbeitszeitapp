@@ -12,11 +12,11 @@ class HidePlanResponse:
 
 
 @dataclass
-class HidePlan:
+class HidePlanUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, plan_id: UUID) -> HidePlanResponse:
+    def execute(self, plan_id: UUID) -> HidePlanResponse:
         now = self.datetime_service.now()
         plan = self.database_gateway.get_plans().with_id(plan_id)
         if plan.that_will_expire_after(now):

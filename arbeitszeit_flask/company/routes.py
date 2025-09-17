@@ -8,15 +8,17 @@ from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseC
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.hide_plan import HidePlan
+from arbeitszeit.use_cases.hide_plan import HidePlanUseCase
 from arbeitszeit.use_cases.list_coordinations_of_company import (
-    ListCoordinationsOfCompany,
     ListCoordinationsOfCompanyRequest,
+    ListCoordinationsOfCompanyUseCase,
 )
 from arbeitszeit.use_cases.list_my_cooperating_plans import (
     ListMyCooperatingPlansUseCase,
 )
-from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
+from arbeitszeit.use_cases.query_company_consumptions import (
+    QueryCompanyConsumptionsUseCase,
+)
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
 from arbeitszeit.use_cases.show_company_cooperations import (
     Request,
@@ -111,10 +113,10 @@ class dashboard(CompanyDashboardView): ...
 
 @CompanyRoute("/consumptions")
 def my_consumptions(
-    query_consumptions: QueryCompanyConsumptions,
+    query_consumptions: QueryCompanyConsumptionsUseCase,
     presenter: CompanyConsumptionsPresenter,
 ):
-    response = query_consumptions(UUID(current_user.id))
+    response = query_consumptions.execute(UUID(current_user.id))
     view_model = presenter.present(response)
     return FlaskResponse(
         render_template(
@@ -218,8 +220,8 @@ def revoke_plan_filing(
 
 @CompanyRoute("/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-def hide_plan(plan_id: UUID, hide_plan: HidePlan, presenter: HidePlanPresenter):
-    response = hide_plan(plan_id)
+def hide_plan(plan_id: UUID, hide_plan: HidePlanUseCase, presenter: HidePlanPresenter):
+    response = hide_plan.execute(plan_id)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
 
@@ -276,12 +278,12 @@ class request_cooperation(RequestCooperationView): ...
 
 @CompanyRoute("/my_cooperations", methods=["GET"])
 def my_cooperations(
-    list_coordinations: ListCoordinationsOfCompany,
+    list_coordinations: ListCoordinationsOfCompanyUseCase,
     show_company_cooperations: ShowCompanyCooperationsUseCase,
     list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
     presenter: ShowMyCooperationsPresenter,
 ):
-    list_coord_response = list_coordinations(
+    list_coord_response = list_coordinations.execute(
         ListCoordinationsOfCompanyRequest(UUID(current_user.id))
     )
     show_company_cooperations_response = (

@@ -15,11 +15,11 @@ class AccountBalances:
 
 @dataclass
 class BalanceChecker:
-    get_company_summary: get_company_summary.GetCompanySummary
+    get_company_summary: get_company_summary.GetCompanySummaryUseCase
     get_member_dashboard_use_case: get_member_dashboard.GetMemberDashboardUseCase
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:
-        response = self.get_company_summary(company_id=company)
+        response = self.get_company_summary.execute(company_id=company)
         assert response
         return AccountBalances(
             p_account=response.account_balances.means,
