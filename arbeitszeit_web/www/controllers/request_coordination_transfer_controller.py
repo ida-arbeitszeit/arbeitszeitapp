@@ -6,10 +6,10 @@ from typing import Optional
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase as UseCase,
 )
-from arbeitszeit_web.fields import parse_formfield
 from arbeitszeit_web.forms import RequestCoordinationTransferForm
+from arbeitszeit_web.forms.fields import parse_formfield
+from arbeitszeit_web.forms.formfield_parsers import UuidParser
 from arbeitszeit_web.session import Session
-from arbeitszeit_web.www.formfield_parsers import UuidParser
 
 
 @dataclass
