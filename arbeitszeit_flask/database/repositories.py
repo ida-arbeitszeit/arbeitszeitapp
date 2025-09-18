@@ -813,6 +813,15 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
             lambda query: query.filter(models.Transfer.credit_account.in_(accounts))
         )
 
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Transfer.debit_account.in_(accounts)
+                | models.Transfer.credit_account.in_(accounts)
+            )
+        )
+
     def joined_with_debtor(
         self,
     ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:

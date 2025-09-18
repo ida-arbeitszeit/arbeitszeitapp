@@ -879,6 +879,12 @@ class TransferResult(QueryResultImpl[records.Transfer]):
             lambda transfer: transfer.credit_account in account
         )
 
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self:
+        return self._filter_elements(
+            lambda transfer: transfer.debit_account in account
+            or transfer.credit_account in account
+        )
+
     def joined_with_debtor(
         self,
     ) -> QueryResultImpl[Tuple[records.Transfer, records.AccountOwner]]:
