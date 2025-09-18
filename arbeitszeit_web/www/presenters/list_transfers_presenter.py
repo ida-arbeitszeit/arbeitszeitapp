@@ -3,9 +3,9 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
+from arbeitszeit.interactors.list_transfers import AccountOwnerType
+from arbeitszeit.interactors.list_transfers import Response as InteractorResponse
 from arbeitszeit.transfers.transfer_type import TransferType
-from arbeitszeit.use_cases.list_transfers import AccountOwnerType
-from arbeitszeit.use_cases.list_transfers import Response as UseCaseResponse
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.pagination import Pagination, Paginator
 from arbeitszeit_web.request import Request
@@ -46,7 +46,7 @@ class ListTransfersPresenter:
     url_index: UrlIndex
     datetime_formatter: DatetimeFormatter
 
-    def present(self, response: UseCaseResponse) -> ListTransfersViewModel:
+    def present(self, response: InteractorResponse) -> ListTransfersViewModel:
         pagination = self._create_pagination(response)
         return ListTransfersViewModel(
             pagination=pagination,
@@ -55,7 +55,7 @@ class ListTransfersPresenter:
             total_results=response.total_results,
         )
 
-    def _create_results_table(self, response: UseCaseResponse) -> ResultsTable:
+    def _create_results_table(self, response: InteractorResponse) -> ResultsTable:
         rows = [
             ResultTableRow(
                 date=self._format_date(transfer.date),
@@ -84,7 +84,7 @@ class ListTransfersPresenter:
         ]
         return ResultsTable(rows=rows)
 
-    def _create_pagination(self, response: UseCaseResponse) -> Pagination:
+    def _create_pagination(self, response: InteractorResponse) -> Pagination:
         paginator = Paginator(
             request=self.web_request,
             total_results=response.total_results,

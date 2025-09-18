@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.get_statistics import StatisticsResponse
+from arbeitszeit.interactors.get_statistics import StatisticsResponse
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
@@ -38,52 +38,56 @@ class GetStatisticsPresenter:
     url_index: UrlIndex
     datetime_service: DatetimeService
 
-    def present(self, use_case_response: StatisticsResponse) -> GetStatisticsViewModel:
+    def present(
+        self, interactor_response: StatisticsResponse
+    ) -> GetStatisticsViewModel:
         average_timeframe = self.translator.gettext("%(num).2f days") % dict(
-            num=use_case_response.avg_timeframe
+            num=interactor_response.avg_timeframe
         )
         planned_work = self.translator.gettext("%(num).2f hours") % dict(
-            num=use_case_response.planned_work
+            num=interactor_response.planned_work
         )
         planned_liquid_means = self.translator.gettext("%(num).2f hours") % dict(
-            num=use_case_response.planned_resources
+            num=interactor_response.planned_resources
         )
         planned_fixed_means = self.translator.gettext("%(num).2f hours") % dict(
-            num=use_case_response.planned_means
+            num=interactor_response.planned_means
         )
         return GetStatisticsViewModel(
             planned_resources_hours=planned_liquid_means,
             planned_work_hours=planned_work,
             planned_means_hours=planned_fixed_means,
             registered_companies_count=str(
-                use_case_response.registered_companies_count
+                interactor_response.registered_companies_count
             ),
-            registered_members_count=str(use_case_response.registered_members_count),
-            cooperations_count=str(use_case_response.cooperations_count),
+            registered_members_count=str(interactor_response.registered_members_count),
+            cooperations_count=str(interactor_response.cooperations_count),
             certificates_count="%(num).2f"
-            % dict(num=use_case_response.certificates_count),
+            % dict(num=interactor_response.certificates_count),
             available_product_in_productive_sector="%(num).2f"
-            % dict(num=use_case_response.available_product_in_productive_sector),
-            active_plans_count=str(use_case_response.active_plans_count),
-            active_plans_public_count=str(use_case_response.active_plans_public_count),
+            % dict(num=interactor_response.available_product_in_productive_sector),
+            active_plans_count=str(interactor_response.active_plans_count),
+            active_plans_public_count=str(
+                interactor_response.active_plans_public_count
+            ),
             average_timeframe_days=average_timeframe,
-            payout_factor=self._format_payout_factor(use_case_response.payout_factor),
-            psf_balance=self._format_psf_balance(use_case_response.psf_balance),
+            payout_factor=self._format_payout_factor(interactor_response.payout_factor),
+            psf_balance=self._format_psf_balance(interactor_response.psf_balance),
             barplot_for_certificates_url=self.url_index.get_global_barplot_for_certificates_url(
-                use_case_response.certificates_count,
-                use_case_response.available_product_in_productive_sector,
+                interactor_response.certificates_count,
+                interactor_response.available_product_in_productive_sector,
             ),
             barplot_means_of_production_url=self.url_index.get_global_barplot_for_means_of_production_url(
-                use_case_response.planned_means,
-                use_case_response.planned_resources,
-                use_case_response.planned_work,
+                interactor_response.planned_means,
+                interactor_response.planned_resources,
+                interactor_response.planned_work,
             ),
             barplot_plans_url=self.url_index.get_global_barplot_for_plans_url(
                 (
-                    use_case_response.active_plans_count
-                    - use_case_response.active_plans_public_count
+                    interactor_response.active_plans_count
+                    - interactor_response.active_plans_public_count
                 ),
-                use_case_response.active_plans_public_count,
+                interactor_response.active_plans_public_count,
             ),
         )
 

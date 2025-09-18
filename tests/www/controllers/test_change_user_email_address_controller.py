@@ -75,39 +75,39 @@ class ExtractEmailAddressesControllerTests(BaseTestCase):
         assert result == ("old@mail.org", "new@mail.org")
 
 
-class CreateUseCaseRequestTests(BaseTestCase):
+class CreateInteractorRequestTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.controller = self.injector.get(ChangeUserEmailAddressController)
 
     def test_when_no_user_is_logged_in_return_none(self) -> None:
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=True)
-        result = self.controller.create_use_case_request("new_email", form)
+        result = self.controller.create_interactor_request("new_email", form)
         assert result is None
 
     def test_when_form_is_not_accepted_return_none(self) -> None:
         self.session.login_company(uuid4())
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=False)
-        result = self.controller.create_use_case_request("new_email", form)
+        result = self.controller.create_interactor_request("new_email", form)
         assert result is None
 
     def test_when_form_is_not_accepted_notify_user(self) -> None:
         self.session.login_company(uuid4())
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=False)
         assert not self.notifier.infos
-        self.controller.create_use_case_request("new_email", form)
+        self.controller.create_interactor_request("new_email", form)
         assert self.notifier.infos
 
     def test_when_form_is_accepted_return_request(self) -> None:
         self.session.login_company(uuid4())
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=True)
-        result = self.controller.create_use_case_request("new_email", form)
+        result = self.controller.create_interactor_request("new_email", form)
         assert result
 
     def test_when_form_is_accepted_return_request_with_new_email(self) -> None:
         self.session.login_company(uuid4())
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=True)
-        result = self.controller.create_use_case_request("new_email", form)
+        result = self.controller.create_interactor_request("new_email", form)
         assert result
         assert result.new_email == "new_email"
 
@@ -115,6 +115,6 @@ class CreateUseCaseRequestTests(BaseTestCase):
         company_id = uuid4()
         self.session.login_company(company_id)
         form = ConfirmEmailAddressChangeFormImpl(is_accepted=True)
-        result = self.controller.create_use_case_request("new_email", form)
+        result = self.controller.create_interactor_request("new_email", form)
         assert result
         assert result.user == company_id

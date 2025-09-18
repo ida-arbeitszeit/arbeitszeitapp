@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.register_productive_consumption import (
+from arbeitszeit.interactors.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.fields import ParsingFailure, ParsingSuccess, parse_formfield
 from arbeitszeit_web.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_web.session import Session

@@ -1,14 +1,14 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_coordinations_of_company import (
+from arbeitszeit.interactors.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
 )
-from arbeitszeit.use_cases.list_my_cooperating_plans import (
-    ListMyCooperatingPlansUseCase,
+from arbeitszeit.interactors.list_my_cooperating_plans import (
+    ListMyCooperatingPlansInteractor,
 )
-from arbeitszeit.use_cases.show_company_cooperations import (
+from arbeitszeit.interactors.show_company_cooperations import (
     InboundCoopRequest,
     OutboundCoopRequest,
     Response,
@@ -35,14 +35,14 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
 
 def get_coop_plans_response_length_1(
     plan_id: Optional[UUID] = None, coop_id: Optional[UUID] = None
-) -> ListMyCooperatingPlansUseCase.Response:
+) -> ListMyCooperatingPlansInteractor.Response:
     if plan_id is None:
         plan_id = uuid4()
     if coop_id is None:
         coop_id = uuid4()
-    return ListMyCooperatingPlansUseCase.Response(
+    return ListMyCooperatingPlansInteractor.Response(
         cooperating_plans=[
-            ListMyCooperatingPlansUseCase.CooperatingPlan(
+            ListMyCooperatingPlansInteractor.CooperatingPlan(
                 plan_id=plan_id,
                 plan_name="test plan name",
                 coop_id=coop_id,

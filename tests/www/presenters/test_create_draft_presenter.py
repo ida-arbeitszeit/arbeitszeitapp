@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases.create_plan_draft import RejectionReason, Response
+from arbeitszeit.interactors.create_plan_draft import RejectionReason, Response
 from arbeitszeit_web.www.presenters.create_draft_presenter import CreateDraftPresenter
 from tests.www.base_test_case import BaseTestCase
 

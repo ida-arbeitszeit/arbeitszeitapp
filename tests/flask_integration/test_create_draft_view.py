@@ -3,7 +3,10 @@ from typing import Dict
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit.interactors.show_my_plans import (
+    ShowMyPlansInteractor,
+    ShowMyPlansRequest,
+)
 
 from .flask import ViewTestCase
 
@@ -25,7 +28,7 @@ class AuthenticatedCompanyTestsForPost(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.company = self.login_company()
-        self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
+        self.show_my_plans = self.injector.get(ShowMyPlansInteractor)
 
     def test_post_user_saving_draft_leads_to_302_and_draft_gets_created(self) -> None:
         self.assertFalse(self._count_drafts_of_company())

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases import show_prd_account_details
+from arbeitszeit.interactors import show_prd_account_details
 
 
 @dataclass

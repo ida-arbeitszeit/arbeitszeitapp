@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_coordination_transfer_request_details import (
-    GetCoordinationTransferRequestDetailsUseCase as UseCase,
+from arbeitszeit.interactors.get_coordination_transfer_request_details import (
+    GetCoordinationTransferRequestDetailsInteractor as Interactor,
 )
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import Session
@@ -27,7 +27,7 @@ class GetCoordinationTransferRequestDetailsPresenter:
     url_index: UrlIndex
     translator: Translator
 
-    def present(self, response: UseCase.Response) -> ViewModel:
+    def present(self, response: Interactor.Response) -> ViewModel:
         current_user = self.session.get_current_user()
         assert current_user
         return self.ViewModel(

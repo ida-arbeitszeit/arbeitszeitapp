@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.request_coordination_transfer import (
-    RequestCoordinationTransferUseCase as UseCase,
+from arbeitszeit.interactors.request_coordination_transfer import (
+    RequestCoordinationTransferInteractor as Interactor,
 )
 from arbeitszeit_web.fields import parse_formfield
 from arbeitszeit_web.forms import RequestCoordinationTransferForm
@@ -19,13 +19,13 @@ class RequestCoordinationTransferController:
 
     def import_form_data(
         self, form: RequestCoordinationTransferForm
-    ) -> Optional[UseCase.Request]:
+    ) -> Optional[Interactor.Request]:
         candidate = parse_formfield(form.candidate_field(), self.uuid_parser)
         cooperation = parse_formfield(form.cooperation_field(), self.uuid_parser)
         current_user = self.session.get_current_user()
         if not (candidate and cooperation and current_user):
             return None
-        return UseCase.Request(
+        return Interactor.Request(
             requester=current_user,
             cooperation=cooperation.value,
             candidate=candidate.value,

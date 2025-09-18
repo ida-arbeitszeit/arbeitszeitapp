@@ -13,19 +13,19 @@ class ControllerTests(BaseTestCase):
 
     def test_that_name_is_correctly_passed_to_request(self) -> None:
         form = FakeForm(name="test name")
-        request = self.controller.create_use_case_request(form)
+        request = self.controller.create_interactor_request(form)
         assert request
         self.assertEqual(request.name, "test name")
 
     def test_that_password_is_correctly_passed_to_request(self) -> None:
         form = FakeForm(password="test password")
-        request = self.controller.create_use_case_request(form)
+        request = self.controller.create_interactor_request(form)
         assert request
         self.assertEqual(request.password, "test password")
 
     def test_that_email_is_correctly_passed_to_request(self) -> None:
         form = FakeForm(email="test email")
-        request = self.controller.create_use_case_request(form)
+        request = self.controller.create_interactor_request(form)
         assert request
         self.assertEqual(request.email, "test email")
 

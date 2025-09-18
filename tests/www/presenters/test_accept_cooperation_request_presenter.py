@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.accept_cooperation import AcceptCooperationResponse
+from arbeitszeit.interactors.accept_cooperation import AcceptCooperationResponse
 from arbeitszeit_web.www.presenters.accept_cooperation_request_presenter import (
     AcceptCooperationRequestPresenter,
 )

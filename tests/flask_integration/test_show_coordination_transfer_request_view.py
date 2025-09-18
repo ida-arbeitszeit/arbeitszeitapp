@@ -3,8 +3,8 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.accept_coordination_transfer import (
-    AcceptCoordinationTransferUseCase,
+from arbeitszeit.interactors.accept_coordination_transfer import (
+    AcceptCoordinationTransferInteractor,
 )
 from tests.flask_integration.flask import LogInUser, ViewTestCase
 
@@ -12,8 +12,8 @@ from tests.flask_integration.flask import LogInUser, ViewTestCase
 class ShowTransferRequestBaseTest(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accept_coordination_transfer_use_case = self.injector.get(
-            AcceptCoordinationTransferUseCase
+        self.accept_coordination_transfer_interactor = self.injector.get(
+            AcceptCoordinationTransferInteractor
         )
 
     def create_url(self, transfer_request: UUID) -> str:
@@ -39,8 +39,8 @@ class ShowTransferRequestBaseTest(ViewTestCase):
         self, transfer_request: UUID, accepting_company: UUID
     ) -> None:
         response = (
-            self.accept_coordination_transfer_use_case.accept_coordination_transfer(
-                AcceptCoordinationTransferUseCase.Request(
+            self.accept_coordination_transfer_interactor.accept_coordination_transfer(
+                AcceptCoordinationTransferInteractor.Request(
                     transfer_request_id=transfer_request,
                     accepting_company=accepting_company,
                 )

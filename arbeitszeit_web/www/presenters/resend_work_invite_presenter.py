@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import resend_work_invite
+from arbeitszeit.interactors import resend_work_invite
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 

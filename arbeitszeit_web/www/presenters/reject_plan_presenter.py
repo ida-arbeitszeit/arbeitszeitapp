@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase as UseCase
+from arbeitszeit.interactors.reject_plan import RejectPlanInteractor as Interactor
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -18,7 +18,7 @@ class RejectPlanPresenter:
     notifier: Notifier
     translator: Translator
 
-    def reject_plan(self, response: UseCase.Response) -> ViewModel:
+    def reject_plan(self, response: Interactor.Response) -> ViewModel:
         if response.is_plan_rejected:
             self.notifier.display_info(
                 self.translator.gettext(

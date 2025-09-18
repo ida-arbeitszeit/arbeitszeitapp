@@ -3,20 +3,20 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.plan_details import PlanDetails
-from arbeitszeit.use_cases.query_companies import (
+from arbeitszeit.interactors.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
     QueriedCompany,
     QueryCompaniesRequest,
 )
-from arbeitszeit.use_cases.query_plans import (
+from arbeitszeit.interactors.query_plans import (
     PlanFilter,
     PlanQueryResponse,
     PlanSorting,
     QueriedPlan,
     QueryPlansRequest,
 )
+from arbeitszeit.plan_details import PlanDetails
 from tests.datetime_service import datetime_utc
 
 

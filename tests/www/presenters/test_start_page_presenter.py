@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.start_page import StartPageUseCase
+from arbeitszeit.interactors.start_page import StartPageInteractor
 from arbeitszeit_web.www.presenters.start_page_presenter import StartPagePresenter
 from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
@@ -31,26 +31,26 @@ class PresenterTester(BaseTestCase):
         view_model = self.presenter.show_start_page(response)
         self.assertEqual(view_model.plans[0].approval_date, "01.10.")
 
-    def get_empty_response(self) -> StartPageUseCase.Response:
-        return StartPageUseCase.Response([])
+    def get_empty_response(self) -> StartPageInteractor.Response:
+        return StartPageInteractor.Response([])
 
     def get_latest_plan(
         self,
         approval_date: Optional[datetime] = None,
         plan_id: Optional[UUID] = None,
         product_name: Optional[str] = None,
-    ) -> StartPageUseCase.PlanDetail:
+    ) -> StartPageInteractor.PlanDetail:
         if approval_date is None:
             approval_date = datetime_utc(2022, 5, 1)
         if plan_id is None:
             plan_id = uuid4()
         if product_name is None:
             product_name = "product name"
-        return StartPageUseCase.PlanDetail(
+        return StartPageInteractor.PlanDetail(
             approval_date=approval_date, plan_id=plan_id, product_name=product_name
         )
 
     def get_response(
-        self, plans: List[StartPageUseCase.PlanDetail]
-    ) -> StartPageUseCase.Response:
-        return StartPageUseCase.Response(latest_plans=plans)
+        self, plans: List[StartPageInteractor.PlanDetail]
+    ) -> StartPageInteractor.Response:
+        return StartPageInteractor.Response(latest_plans=plans)

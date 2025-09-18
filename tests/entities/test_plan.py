@@ -4,7 +4,7 @@ from unittest import TestCase
 from arbeitszeit.records import ProductionCosts
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService, datetime_utc
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.interactors.dependency_injection import get_dependency_injector
 
 
 class TestPlanSalesValue(TestCase):

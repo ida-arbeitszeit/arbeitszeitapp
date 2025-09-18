@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Protocol
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
+from arbeitszeit.interactors.query_plans import (
+    PlanFilter,
+    PlanSorting,
+    QueryPlansRequest,
+)
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, calculate_current_offset
 from arbeitszeit_web.request import Request
 

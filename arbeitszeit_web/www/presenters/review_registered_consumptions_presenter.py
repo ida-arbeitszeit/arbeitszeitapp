@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.review_registered_consumptions import (
+from arbeitszeit.interactors.review_registered_consumptions import (
     RegisteredConsumption,
 )
-from arbeitszeit.use_cases.review_registered_consumptions import (
-    ReviewRegisteredConsumptionsUseCase as UseCase,
+from arbeitszeit.interactors.review_registered_consumptions import (
+    ReviewRegisteredConsumptionsInteractor as Interactor,
 )
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import UserRole
@@ -33,10 +33,10 @@ class ReviewRegisteredConsumptionsPresenter:
     datetime_formatter: DatetimeFormatter
     url_index: UrlIndex
 
-    def present(self, use_case_response: UseCase.Response) -> ViewModel:
+    def present(self, interactor_response: Interactor.Response) -> ViewModel:
         consumptions = [
             self._create_consumption(consumption)
-            for consumption in use_case_response.consumptions
+            for consumption in interactor_response.consumptions
         ]
         return ViewModel(consumptions=consumptions)
 

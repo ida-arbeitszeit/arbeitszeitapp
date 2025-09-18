@@ -3,8 +3,8 @@ from uuid import UUID
 
 from flask import Response, render_template, request
 
-from arbeitszeit.use_cases.request_coordination_transfer import (
-    RequestCoordinationTransferUseCase,
+from arbeitszeit.interactors.request_coordination_transfer import (
+    RequestCoordinationTransferInteractor,
 )
 from arbeitszeit_flask import types
 from arbeitszeit_flask.database import commit_changes
@@ -22,7 +22,7 @@ from arbeitszeit_web.www.presenters.request_coordination_transfer_presenter impo
 class RequestCoordinationTransferView:
     presenter: RequestCoordinationTransferPresenter
     controller: RequestCoordinationTransferController
-    use_case: RequestCoordinationTransferUseCase
+    interactor: RequestCoordinationTransferInteractor
 
     def GET(self, coop_id: UUID) -> types.Response:
         form = RequestCoordinationTransferForm()
@@ -44,8 +44,8 @@ class RequestCoordinationTransferView:
                 navbar_items=navbar_items, form=form, status=400
             )
         else:
-            uc_response = self.use_case.request_transfer(uc_request)
-            view_model = self.presenter.present_use_case_response(uc_response)
+            uc_response = self.interactor.request_transfer(uc_request)
+            view_model = self.presenter.present_interactor_response(uc_response)
             return self._create_response(
                 navbar_items=navbar_items, form=form, status=view_model.status_code
             )

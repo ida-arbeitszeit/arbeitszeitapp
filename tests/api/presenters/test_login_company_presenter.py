@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
 from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject
 from arbeitszeit_web.api.presenters.login_company_api_presenter import (
     LoginCompanyApiPresenter,
@@ -20,7 +20,7 @@ class TestViewModelCreation(BaseTestCase):
 
     def test_unauthorized_raises_if_wrong_mail_adress_was_given(self) -> None:
         response = self.create_failure_response(
-            rejection_reason=LogInCompanyUseCase.RejectionReason.invalid_email_address,
+            rejection_reason=LogInCompanyInteractor.RejectionReason.invalid_email_address,
         )
         with self.assertRaises(Unauthorized) as err:
             self.presenter.create_view_model(response)
@@ -28,7 +28,7 @@ class TestViewModelCreation(BaseTestCase):
 
     def test_unauthorized_raises_if_wrong_password_was_given(self) -> None:
         response = self.create_failure_response(
-            rejection_reason=LogInCompanyUseCase.RejectionReason.invalid_password,
+            rejection_reason=LogInCompanyInteractor.RejectionReason.invalid_password,
         )
         with self.assertRaises(Unauthorized) as err:
             self.presenter.create_view_model(response)
@@ -79,11 +79,11 @@ class TestViewModelCreation(BaseTestCase):
         )
 
     def create_failure_response(
-        self, rejection_reason: Optional[LogInCompanyUseCase.RejectionReason] = None
-    ) -> LogInCompanyUseCase.Response:
+        self, rejection_reason: Optional[LogInCompanyInteractor.RejectionReason] = None
+    ) -> LogInCompanyInteractor.Response:
         if rejection_reason is None:
-            rejection_reason == LogInCompanyUseCase.RejectionReason.invalid_email_address
-        return LogInCompanyUseCase.Response(
+            rejection_reason == LogInCompanyInteractor.RejectionReason.invalid_email_address
+        return LogInCompanyInteractor.Response(
             is_logged_in=False,
             rejection_reason=rejection_reason,
             email_address="some@mail.org",
@@ -92,12 +92,12 @@ class TestViewModelCreation(BaseTestCase):
 
     def create_success_response(
         self, email: Optional[str] = None, user_id: Optional[UUID] = None
-    ) -> LogInCompanyUseCase.Response:
+    ) -> LogInCompanyInteractor.Response:
         if email is None:
             email = "test@test.test"
         if user_id is None:
             user_id = uuid4()
-        return LogInCompanyUseCase.Response(
+        return LogInCompanyInteractor.Response(
             is_logged_in=True,
             rejection_reason=None,
             email_address=email,

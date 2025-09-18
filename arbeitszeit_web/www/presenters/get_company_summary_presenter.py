@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.control_thresholds import ControlThresholds
-from arbeitszeit.use_cases.get_company_summary import (
+from arbeitszeit.interactors.get_company_summary import (
     GetCompanySummarySuccess,
     PlanDetails,
     Supplier,
@@ -63,55 +63,57 @@ class GetCompanySummarySuccessPresenter:
     datetime_formatter: DatetimeFormatter
 
     def present(
-        self, use_case_response: GetCompanySummarySuccess
+        self, interactor_response: GetCompanySummarySuccess
     ) -> GetCompanySummaryViewModel:
         suppliers_ordered_by_volume = self._get_suppliers(
-            use_case_response.suppliers_ordered_by_volume
+            interactor_response.suppliers_ordered_by_volume
         )
         return GetCompanySummaryViewModel(
-            id=str(use_case_response.id),
-            name=use_case_response.name,
-            email=use_case_response.email,
+            id=str(interactor_response.id),
+            name=interactor_response.name,
+            email=interactor_response.email,
             registered_on=self.datetime_formatter.format_datetime(
-                use_case_response.registered_on, fmt="%d.%m.%Y"
+                interactor_response.registered_on, fmt="%d.%m.%Y"
             ),
             expectations=[
-                "%(num).2f" % dict(num=use_case_response.expectations.means),
-                "%(num).2f" % dict(num=use_case_response.expectations.raw_material),
-                "%(num).2f" % dict(num=use_case_response.expectations.work),
-                "%(num).2f" % dict(num=use_case_response.expectations.product),
+                "%(num).2f" % dict(num=interactor_response.expectations.means),
+                "%(num).2f" % dict(num=interactor_response.expectations.raw_material),
+                "%(num).2f" % dict(num=interactor_response.expectations.work),
+                "%(num).2f" % dict(num=interactor_response.expectations.product),
             ],
             account_balances=[
-                "%(num).2f" % dict(num=use_case_response.account_balances.means),
-                "%(num).2f" % dict(num=use_case_response.account_balances.raw_material),
-                "%(num).2f" % dict(num=use_case_response.account_balances.work),
-                "%(num).2f" % dict(num=use_case_response.account_balances.product),
+                "%(num).2f" % dict(num=interactor_response.account_balances.means),
+                "%(num).2f"
+                % dict(num=interactor_response.account_balances.raw_material),
+                "%(num).2f" % dict(num=interactor_response.account_balances.work),
+                "%(num).2f" % dict(num=interactor_response.account_balances.product),
             ],
             deviations_relative=[
                 Deviation(
                     percentage="%(num).0f"
-                    % dict(num=use_case_response.deviations_relative[i]),
-                    is_critical=abs(use_case_response.deviations_relative[i])
+                    % dict(num=interactor_response.deviations_relative[i]),
+                    is_critical=abs(interactor_response.deviations_relative[i])
                     > self.control_thresholds.get_acceptable_relative_account_deviation(),
                 )
-                for i in range(len(use_case_response.deviations_relative))
+                for i in range(len(interactor_response.deviations_relative))
             ],
             plan_details=[
-                self._get_plan_details(plan) for plan in use_case_response.plan_details
+                self._get_plan_details(plan)
+                for plan in interactor_response.plan_details
             ],
             suppliers_ordered_by_volume=suppliers_ordered_by_volume,
             show_suppliers=bool(suppliers_ordered_by_volume),
             p_account_overview_url=self.url_index.get_company_account_p_url(
-                company_id=use_case_response.id
+                company_id=interactor_response.id
             ),
             r_account_overview_url=self.url_index.get_company_account_r_url(
-                company_id=use_case_response.id
+                company_id=interactor_response.id
             ),
             a_account_overview_url=self.url_index.get_company_account_a_url(
-                company_id=use_case_response.id
+                company_id=interactor_response.id
             ),
             prd_account_overview_url=self.url_index.get_company_account_prd_url(
-                company_id=use_case_response.id
+                company_id=interactor_response.id
             ),
         )
 

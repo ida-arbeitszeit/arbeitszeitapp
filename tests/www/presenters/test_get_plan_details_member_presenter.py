@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_web.www.presenters.get_plan_details_member_presenter import (
     GetPlanDetailsMemberMemberPresenter,
 )
@@ -20,12 +20,12 @@ class PresenterTests(BaseTestCase):
 
     def test_that_register_consumption_url_is_shown_correctly(self):
         PLAN_ID = uuid4()
-        use_case_response = GetPlanDetailsUseCase.Response(
+        interactor_response = GetPlanDetailsInteractor.Response(
             plan_details=self.plan_details_generator.create_plan_details(
                 plan_id=PLAN_ID
             )
         )
-        view_model = self.presenter.present(use_case_response)
+        view_model = self.presenter.present(interactor_response)
         self.assertEqual(
             view_model.register_private_consumption_url,
             self.url_index.get_register_private_consumption_url(

@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 
-from arbeitszeit.use_cases.query_companies import (
-    QueryCompaniesUseCase as QueryCompaniesUseCase,
+from arbeitszeit.interactors.query_companies import (
+    QueryCompaniesInteractor as QueryCompaniesInteractor,
 )
 from arbeitszeit_flask.api.authentication import authentication_check
 from arbeitszeit_flask.api.input_documentation import with_input_documentation
@@ -39,11 +39,11 @@ class QueryCompanies(Resource):
     def get(
         self,
         controller: QueryCompaniesApiController,
-        query_companies: QueryCompaniesUseCase,
+        query_companies: QueryCompaniesInteractor,
         presenter: QueryCompaniesApiPresenter,
     ):
         """Query companies."""
-        use_case_request = controller.create_request(FlaskRequest())
-        response = query_companies.execute(use_case_request)
+        interactor_request = controller.create_request(FlaskRequest())
+        response = query_companies.execute(interactor_request)
         view_model = presenter.create_view_model(response)
         return view_model

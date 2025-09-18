@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_company_presenter import (
     LogInCompanyPresenter,
@@ -60,7 +60,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_password
+            reason=LogInCompanyInteractor.RejectionReason.invalid_password
         )
         self.present_login_process(response)
         self.assertTrue(self.form.password_field().errors)
@@ -76,14 +76,14 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_email_address
+            reason=LogInCompanyInteractor.RejectionReason.invalid_email_address
         )
         self.present_login_process(response)
         self.assertFalse(self.form.password_field().errors)
 
     def test_correct_error_message_for_incorrect_password(self) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_password
+            reason=LogInCompanyInteractor.RejectionReason.invalid_password
         )
         self.present_login_process(response)
         self.assertEqual(
@@ -95,7 +95,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_email_address
+            reason=LogInCompanyInteractor.RejectionReason.invalid_email_address
         )
         self.present_login_process(response)
         self.assertTrue(self.form.email_field().errors)
@@ -111,14 +111,14 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_password
+            reason=LogInCompanyInteractor.RejectionReason.invalid_password
         )
         self.present_login_process(response)
         self.assertFalse(self.form.email_field().errors)
 
     def test_correct_error_message_for_incorrect_email_address(self) -> None:
         response = self.create_failure_response(
-            reason=LogInCompanyUseCase.RejectionReason.invalid_email_address
+            reason=LogInCompanyInteractor.RejectionReason.invalid_email_address
         )
         self.present_login_process(response)
         self.assertEqual(
@@ -151,16 +151,16 @@ class PresenterTests(BaseTestCase):
                 )
 
     def present_login_process(
-        self, response: LogInCompanyUseCase.Response
+        self, response: LogInCompanyInteractor.Response
     ) -> LogInCompanyPresenter.ViewModel:
         return self.presenter.present_login_process(response, form=self.form)
 
     def create_success_response(
         self, email: str = "test@test.test", user_id: Optional[UUID] = None
-    ) -> LogInCompanyUseCase.Response:
+    ) -> LogInCompanyInteractor.Response:
         if user_id is None:
             user_id = uuid4()
-        return LogInCompanyUseCase.Response(
+        return LogInCompanyInteractor.Response(
             is_logged_in=True,
             rejection_reason=None,
             email_address=email,
@@ -169,9 +169,9 @@ class PresenterTests(BaseTestCase):
 
     def create_failure_response(
         self,
-        reason: LogInCompanyUseCase.RejectionReason = LogInCompanyUseCase.RejectionReason.invalid_password,
-    ) -> LogInCompanyUseCase.Response:
-        return LogInCompanyUseCase.Response(
+        reason: LogInCompanyInteractor.RejectionReason = LogInCompanyInteractor.RejectionReason.invalid_password,
+    ) -> LogInCompanyInteractor.Response:
+        return LogInCompanyInteractor.Response(
             is_logged_in=False,
             rejection_reason=reason,
             email_address="test@test.test",

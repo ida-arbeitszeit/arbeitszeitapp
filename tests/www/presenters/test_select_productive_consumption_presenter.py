@@ -2,8 +2,8 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.interactors import select_productive_consumption
 from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases import select_productive_consumption
 from arbeitszeit_web.www.presenters.select_productive_consumption_presenter import (
     SelectProductiveConsumptionPresenter,
 )

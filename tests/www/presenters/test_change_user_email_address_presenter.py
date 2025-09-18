@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases import change_user_email_address
+from arbeitszeit.interactors import change_user_email_address
 from arbeitszeit_web.www.presenters.change_user_email_address_presenter import (
     ChangeUserEmailAddressPresenter,
 )

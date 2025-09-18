@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.use_cases.end_cooperation import EndCooperationRequest
+from arbeitszeit.interactors.end_cooperation import EndCooperationRequest
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 
@@ -27,7 +27,7 @@ class EndCooperationController:
         except ValueError:
             return None
 
-        use_case_request = EndCooperationRequest(
+        interactor_request = EndCooperationRequest(
             current_user, plan_uuid, cooperation_uuid
         )
-        return use_case_request
+        return interactor_request

@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.use_cases import query_private_consumptions as use_case
+from arbeitszeit.interactors import query_private_consumptions as interactor
 from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
     PrivateConsumptionsPresenter,
 )
@@ -30,10 +30,10 @@ class PresenterTests(BaseTestCase):
 
     def create_response_with_one_consumption(
         self, consumption_timestamp: datetime = datetime_utc(2020, 1, 1)
-    ) -> use_case.Response:
-        return use_case.Response(
+    ) -> interactor.Response:
+        return interactor.Response(
             consumptions=[
-                use_case.Consumption(
+                interactor.Consumption(
                     consumption_date=consumption_timestamp,
                     plan_id=uuid4(),
                     product_name="test product",

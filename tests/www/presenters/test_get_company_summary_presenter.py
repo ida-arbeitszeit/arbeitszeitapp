@@ -2,7 +2,7 @@ from dataclasses import replace
 from decimal import Decimal
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_company_summary import (
+from arbeitszeit.interactors.get_company_summary import (
     AccountBalances,
     Expectations,
     GetCompanySummarySuccess,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Flask
 
-from arbeitszeit.use_cases import show_r_account_details
+from arbeitszeit.interactors import show_r_account_details
 from arbeitszeit_flask.database.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
@@ -10,7 +10,7 @@ from tests.flask_integration.flask import drop_and_recreate_schema
 
 
 class ShowRAccountDetailsBenchmark:
-    """This measures the speed of the ShowRAccountDetailsUseCase."""
+    """This measures the speed of the ShowRAccountDetailsInteractor."""
 
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
@@ -32,8 +32,8 @@ class ShowRAccountDetailsBenchmark:
             consumption_generator.create_resource_consumption_by_company(
                 plan=supply_plan, consumer=self.company
             )
-        self.use_case = self.injector.get(
-            show_r_account_details.ShowRAccountDetailsUseCase
+        self.interactor = self.injector.get(
+            show_r_account_details.ShowRAccountDetailsInteractor
         )
         self.db.session.flush()
 
@@ -41,5 +41,5 @@ class ShowRAccountDetailsBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        use_case_request = show_r_account_details.Request(company=self.company)
-        self.use_case.show_details(use_case_request)
+        interactor_request = show_r_account_details.Request(company=self.company)
+        self.interactor.show_details(interactor_request)

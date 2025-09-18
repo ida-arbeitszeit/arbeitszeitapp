@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import edit_draft
+from arbeitszeit.interactors import edit_draft
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.www.controllers.edit_draft_controller import EditDraftController
 from tests.request import FakeRequest
@@ -57,11 +57,11 @@ class EditDraftControllerTests(BaseTestCase):
 
 
 class SuccessfulValidationTests(EditDraftControllerTests):
-    def test_that_valid_form_data_is_converted_to_use_case_request(self) -> None:
+    def test_that_valid_form_data_is_converted_to_interactor_request(self) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request)
-        use_case_request = self.controller.process_form(request, self.draft_id)
-        assert isinstance(use_case_request, edit_draft.Request)
+        interactor_request = self.controller.process_form(request, self.draft_id)
+        assert isinstance(interactor_request, edit_draft.Request)
 
     def test_that_no_warning_is_displayed_if_form_data_is_valid(self) -> None:
         request = FakeRequest()
@@ -80,26 +80,26 @@ class SuccessfulValidationTests(EditDraftControllerTests):
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, prd_name=expected_name)
-        use_case_request = self.controller.process_form(request, self.draft_id)
-        assert isinstance(use_case_request, edit_draft.Request)
-        assert use_case_request.product_name == expected_name
+        interactor_request = self.controller.process_form(request, self.draft_id)
+        assert isinstance(interactor_request, edit_draft.Request)
+        assert interactor_request.product_name == expected_name
 
     def test_that_user_id_from_session_is_used_for_editor_field(self) -> None:
         expected_id = uuid4()
         request = FakeRequest()
         self.session.login_company(expected_id)
         request = self.attach_form_data_to_request(FakeRequest())
-        use_case_request = self.controller.process_form(request, self.draft_id)
-        assert isinstance(use_case_request, edit_draft.Request)
-        assert use_case_request.editor == expected_id
+        interactor_request = self.controller.process_form(request, self.draft_id)
+        assert isinstance(interactor_request, edit_draft.Request)
+        assert interactor_request.editor == expected_id
 
     def test_that_draft_id_from_arguments_is_used_in_request(self) -> None:
         expected_draft_id = uuid4()
         request = FakeRequest()
         request = self.attach_form_data_to_request(request)
-        use_case_request = self.controller.process_form(request, expected_draft_id)
-        assert isinstance(use_case_request, edit_draft.Request)
-        assert use_case_request.draft == expected_draft_id
+        interactor_request = self.controller.process_form(request, expected_draft_id)
+        assert isinstance(interactor_request, edit_draft.Request)
+        assert interactor_request.draft == expected_draft_id
 
 
 class UnsuccessfulValidationTests(EditDraftControllerTests):

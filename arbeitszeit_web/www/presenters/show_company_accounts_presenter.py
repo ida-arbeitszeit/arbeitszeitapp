@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.show_company_accounts import ShowCompanyAccountsResponse
+from arbeitszeit.interactors.show_company_accounts import ShowCompanyAccountsResponse
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -24,9 +24,9 @@ class ViewModel:
 class ShowCompanyAccountsPresenter:
     url_index: UrlIndex
 
-    def present(self, use_case_response: ShowCompanyAccountsResponse) -> ViewModel:
-        balances = [str(round(balance, 2)) for balance in use_case_response.balances]
-        signs = [balance >= 0 for balance in use_case_response.balances]
+    def present(self, interactor_response: ShowCompanyAccountsResponse) -> ViewModel:
+        balances = [str(round(balance, 2)) for balance in interactor_response.balances]
+        signs = [balance >= 0 for balance in interactor_response.balances]
 
         return ViewModel(
             balance_fixed=balances[0],
@@ -38,15 +38,15 @@ class ShowCompanyAccountsPresenter:
             balance_product=balances[3],
             is_product_positive=signs[3],
             url_to_account_p=self.url_index.get_company_account_p_url(
-                company_id=use_case_response.company
+                company_id=interactor_response.company
             ),
             url_to_account_r=self.url_index.get_company_account_r_url(
-                company_id=use_case_response.company
+                company_id=interactor_response.company
             ),
             url_to_account_a=self.url_index.get_company_account_a_url(
-                company_id=use_case_response.company
+                company_id=interactor_response.company
             ),
             url_to_account_prd=self.url_index.get_company_account_prd_url(
-                company_id=use_case_response.company
+                company_id=interactor_response.company
             ),
         )

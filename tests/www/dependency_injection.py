@@ -17,10 +17,10 @@ from tests.email import FakeEmailConfiguration, FakeEmailService
 from tests.email_presenters.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
+from tests.interactors.dependency_injection import InMemoryModule
 from tests.language_service import FakeLanguageService
 from tests.request import FakeRequest
 from tests.session import FakeSession
-from tests.use_cases.dependency_injection import InMemoryModule
 from tests.www.datetime_formatter import (
     FakeDatetimeFormatter,
     FakeTimezoneConfiguration,

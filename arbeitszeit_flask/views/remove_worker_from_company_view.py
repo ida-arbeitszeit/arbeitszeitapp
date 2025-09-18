@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
-from arbeitszeit.use_cases.list_workers import ListWorkersUseCase
-from arbeitszeit.use_cases.remove_worker_from_company import (
-    RemoveWorkerFromCompanyUseCase,
+from arbeitszeit.interactors.list_workers import ListWorkersInteractor
+from arbeitszeit.interactors.remove_worker_from_company import (
+    RemoveWorkerFromCompanyInteractor,
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.database.db import Database
@@ -30,10 +30,10 @@ TEMPLATE_NAME = "company/remove_worker_from_company.html"
 @dataclass
 class RemoveWorkerFromCompanyView:
     list_workers_controller: ListWorkersController
-    list_workers_use_case: ListWorkersUseCase
+    list_workers_interactor: ListWorkersInteractor
     list_workers_presenter: ListWorkersPresenter
     remove_worker_controller: RemoveWorkerFromCompanyController
-    remove_worker_use_case: RemoveWorkerFromCompanyUseCase
+    remove_worker_interactor: RemoveWorkerFromCompanyInteractor
     remove_worker_presenter: RemoveWorkerFromCompanyPresenter
 
     def GET(self) -> Response:
@@ -43,28 +43,28 @@ class RemoveWorkerFromCompanyView:
     def POST(self) -> Response:
         web_request = FlaskRequest()
         session = FlaskSession(Database())
-        use_case_request = self.remove_worker_controller.create_use_case_request(
+        interactor_request = self.remove_worker_controller.create_interactor_request(
             web_request=web_request, session=session
         )
-        if not use_case_request:
+        if not interactor_request:
             return self.list_workers_response(400)
-        use_case_response = self.remove_worker_use_case.remove_worker_from_company(
-            use_case_request
+        interactor_response = self.remove_worker_interactor.remove_worker_from_company(
+            interactor_request
         )
-        view_model = self.remove_worker_presenter.present(use_case_response)
+        view_model = self.remove_worker_presenter.present(interactor_response)
         if isinstance(view_model, Redirect):
             return redirect(view_model.url)
         return self.list_workers_response(view_model.code)
 
     def list_workers_response(self, status_code: int) -> Response:
-        list_workers_use_case_request = (
-            self.list_workers_controller.create_use_case_request()
+        list_workers_interactor_request = (
+            self.list_workers_controller.create_interactor_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case.execute(
-            list_workers_use_case_request
+        list_workers_interactor_response = self.list_workers_interactor.execute(
+            list_workers_interactor_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(
-            list_workers_use_case_response
+            list_workers_interactor_response
         )
         return FlaskResponse(
             render_template(TEMPLATE_NAME, workers=list_workers_view_model.workers),

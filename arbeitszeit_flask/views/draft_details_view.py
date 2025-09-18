@@ -4,8 +4,8 @@ from uuid import UUID
 from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
-from arbeitszeit.use_cases import edit_draft
-from arbeitszeit.use_cases.get_draft_details import GetDraftDetailsUseCase
+from arbeitszeit.interactors import edit_draft
+from arbeitszeit.interactors.get_draft_details import GetDraftDetailsInteractor
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -21,18 +21,18 @@ from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
 
 @dataclass
 class DraftDetailsView:
-    use_case: GetDraftDetailsUseCase
+    interactor: GetDraftDetailsInteractor
     presenter: GetDraftDetailsPresenter
-    edit_draft_use_case: edit_draft.EditDraftUseCase
+    edit_draft_interactor: edit_draft.EditDraftInteractor
     edit_draft_controller: EditDraftController
     edit_draft_presenter: EditDraftPresenter
     url_index: GeneralUrlIndex
 
     def GET(self, draft_id: UUID) -> Response:
-        use_case_response = self.use_case.execute(draft_id)
-        if use_case_response is None:
+        interactor_response = self.interactor.execute(draft_id)
+        if interactor_response is None:
             return http_404()
-        view_model = self.presenter.present_draft_details(use_case_response)
+        view_model = self.presenter.present_draft_details(interactor_response)
         return FlaskResponse(
             render_template(
                 "company/draft_details.html",
@@ -47,12 +47,12 @@ class DraftDetailsView:
             request=FlaskRequest(),
             draft_id=draft_id,
         ):
-            case edit_draft.Request() as use_case_request:
+            case edit_draft.Request() as interactor_request:
                 pass
             case DraftForm() as form:
                 return self._handle_invalid_submission(form, status=400)
-        use_case_response = self.edit_draft_use_case.edit_draft(use_case_request)
-        view_model = self.edit_draft_presenter.render_response(use_case_response)
+        interactor_response = self.edit_draft_interactor.edit_draft(interactor_request)
+        view_model = self.edit_draft_presenter.render_response(interactor_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
         else:

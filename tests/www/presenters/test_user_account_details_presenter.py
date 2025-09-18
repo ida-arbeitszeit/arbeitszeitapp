@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import get_user_account_details as use_case
+from arbeitszeit.interactors import get_user_account_details as interactor
 from arbeitszeit_web.www.presenters import user_account_details_presenter as presenter
 from tests.datetime_service import datetime_min_utc, datetime_utc
 from tests.www.base_test_case import BaseTestCase
@@ -17,8 +17,8 @@ class UserAccountDetailsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         user_id = uuid4()
-        response = use_case.Response(
-            user_info=use_case.UserInfo(
+        response = interactor.Response(
+            user_info=interactor.UserInfo(
                 id=user_id,
                 current_time=datetime_min_utc(),
                 email_address="test@test.test",
@@ -29,8 +29,8 @@ class UserAccountDetailsPresenterTests(BaseTestCase):
 
     def test_that_user_email_address_is_rendered_as_is(self) -> None:
         expected_email_address = "test@test.test"
-        response = use_case.Response(
-            user_info=use_case.UserInfo(
+        response = interactor.Response(
+            user_info=interactor.UserInfo(
                 id=uuid4(),
                 current_time=datetime_min_utc(),
                 email_address=expected_email_address,
@@ -40,8 +40,8 @@ class UserAccountDetailsPresenterTests(BaseTestCase):
         assert view_model.email_address == expected_email_address
 
     def test_that_request_email_address_change_url_is_shown(self) -> None:
-        response = use_case.Response(
-            user_info=use_case.UserInfo(
+        response = interactor.Response(
+            user_info=interactor.UserInfo(
                 id=uuid4(),
                 current_time=datetime_min_utc(),
                 email_address="test@test.test",
@@ -62,8 +62,8 @@ class UserTimeTests(BaseTestCase):
     def test_that_date_and_time_is_formatted_correctly(self) -> None:
         expected_time = datetime_utc(2025, 1, 1, 10, 20, 10)
         self.datetime_service.freeze_time(expected_time)
-        response = use_case.Response(
-            user_info=use_case.UserInfo(
+        response = interactor.Response(
+            user_info=interactor.UserInfo(
                 id=uuid4(), current_time=expected_time, email_address="test@test.test"
             )
         )
@@ -86,8 +86,8 @@ class UserTimeTests(BaseTestCase):
         self.timezone_configuration.set_timezone_of_current_user(configured_user_tz)
         expected_time = datetime_utc(2025, 1, 1, 10, 20, 10)
         self.datetime_service.freeze_time(expected_time)
-        response = use_case.Response(
-            user_info=use_case.UserInfo(
+        response = interactor.Response(
+            user_info=interactor.UserInfo(
                 id=uuid4(), current_time=expected_time, email_address="test@test.test"
             )
         )

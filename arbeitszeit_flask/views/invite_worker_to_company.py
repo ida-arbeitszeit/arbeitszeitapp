@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
 
-from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from arbeitszeit.use_cases.list_workers import ListWorkersUseCase
+from arbeitszeit.interactors.invite_worker_to_company import (
+    InviteWorkerToCompanyInteractor,
+)
+from arbeitszeit.interactors.list_workers import ListWorkersInteractor
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -28,21 +30,21 @@ TEMPLATE_NAME = "company/invite_worker_to_company.html"
 @dataclass
 class InviteWorkerToCompanyView:
     list_workers_controller: ListWorkersController
-    list_workers_use_case: ListWorkersUseCase
+    list_workers_interactor: ListWorkersInteractor
     list_workers_presenter: ListWorkersPresenter
     invite_worker_controller: InviteWorkerToCompanyController
-    invite_worker_use_case: InviteWorkerToCompanyUseCase
+    invite_worker_interactor: InviteWorkerToCompanyInteractor
     invite_worker_presenter: InviteWorkerToCompanyPresenter
 
     def GET(self) -> Response:
-        list_workers_use_case_request = (
-            self.list_workers_controller.create_use_case_request()
+        list_workers_interactor_request = (
+            self.list_workers_controller.create_interactor_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case.execute(
-            list_workers_use_case_request
+        list_workers_interactor_response = self.list_workers_interactor.execute(
+            list_workers_interactor_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(
-            list_workers_use_case_response
+            list_workers_interactor_response
         )
         return FlaskResponse(
             render_template(
@@ -55,18 +57,18 @@ class InviteWorkerToCompanyView:
     @commit_changes
     def POST(self) -> Response:
         try:
-            invite_worker_use_case_request = (
+            invite_worker_interactor_request = (
                 self.invite_worker_controller.import_request_data(
                     request=FlaskRequest()
                 )
             )
         except self.invite_worker_controller.FormError as error:
             return self._handle_failed_invitation(error.form)
-        invite_worker_use_case_response = self.invite_worker_use_case.invite_worker(
-            invite_worker_use_case_request
+        invite_worker_interactor_response = self.invite_worker_interactor.invite_worker(
+            invite_worker_interactor_request
         )
         view_model = self.invite_worker_presenter.present(
-            invite_worker_use_case_response
+            invite_worker_interactor_response
         )
         if view_model.status_code == 302:
             return redirect(url_for("main_company.invite_worker_to_company"))
@@ -75,14 +77,14 @@ class InviteWorkerToCompanyView:
         )
 
     def _handle_failed_invitation(self, form: InviteWorkerToCompanyForm) -> Response:
-        list_workers_use_case_request = (
-            self.list_workers_controller.create_use_case_request()
+        list_workers_interactor_request = (
+            self.list_workers_controller.create_interactor_request()
         )
-        list_workers_use_case_response = self.list_workers_use_case.execute(
-            list_workers_use_case_request
+        list_workers_interactor_response = self.list_workers_interactor.execute(
+            list_workers_interactor_request
         )
         list_workers_view_model = self.list_workers_presenter.show_workers_list(
-            list_workers_use_case_response
+            list_workers_interactor_response
         )
         return FlaskResponse(
             render_template(

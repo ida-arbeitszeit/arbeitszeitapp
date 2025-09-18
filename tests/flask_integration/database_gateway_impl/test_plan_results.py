@@ -5,9 +5,9 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor
+from arbeitszeit.interactors.reject_plan import RejectPlanInteractor
 from arbeitszeit.records import Plan, ProductionCosts
-from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
-from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit_flask.database import models
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import datetime_utc
@@ -86,8 +86,8 @@ class PlanResultTests(FlaskTestCase):
 class GetActivePlansTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
-        self.reject_plan_use_case = self.injector.get(RejectPlanUseCase)
+        self.approve_plan_interactor = self.injector.get(ApprovePlanInteractor)
+        self.reject_plan_interactor = self.injector.get(RejectPlanInteractor)
 
     def test_plans_can_be_ordered_by_creation_date_in_descending_order(
         self,
@@ -224,14 +224,14 @@ class GetActivePlansTests(FlaskTestCase):
         self.datetime_service.freeze_time(datetime_utc(2000, 1, 2))
         second_plan = self.plan_generator.create_plan(approved=False)
         self.datetime_service.freeze_time(datetime_utc(2000, 1, 3))
-        self.approve_plan_use_case.approve_plan(
-            request=ApprovePlanUseCase.Request(
+        self.approve_plan_interactor.approve_plan(
+            request=ApprovePlanInteractor.Request(
                 plan=second_plan,
             )
         )
         self.datetime_service.freeze_time(datetime_utc(2000, 1, 4))
-        self.approve_plan_use_case.approve_plan(
-            request=ApprovePlanUseCase.Request(
+        self.approve_plan_interactor.approve_plan(
+            request=ApprovePlanInteractor.Request(
                 plan=first_plan,
             )
         )

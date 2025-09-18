@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
+from arbeitszeit.interactors.delete_draft import DeleteDraftInteractor
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -19,7 +19,7 @@ class DeleteDraftPresenter:
         redirect_target: str
 
     def present_draft_deletion(
-        self, response: DeleteDraftUseCase.Response
+        self, response: DeleteDraftInteractor.Response
     ) -> ViewModel:
         self.notifier.display_info(
             self.translator.gettext(

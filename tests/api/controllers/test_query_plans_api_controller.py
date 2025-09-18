@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
+from arbeitszeit.interactors.query_plans import PlanFilter, PlanSorting
 from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.api.controllers.query_plans_api_controller import (
     QueryPlansApiController,
@@ -18,34 +18,34 @@ class ControllerTests(BaseTestCase):
 
     def test_that_by_default_a_request_gets_returned_which_sorts_by_activation(self):
         request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.sorting_category, PlanSorting.by_activation)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.sorting_category, PlanSorting.by_activation)
 
     def test_that_by_default_a_request_gets_returned_which_filters_by_plan_id(self):
         request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.filter_category, PlanFilter.by_plan_id)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.filter_category, PlanFilter.by_plan_id)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self):
         request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertIsNone(use_case_request.query_string)
+        interactor_request = self.controller.create_request(request)
+        self.assertIsNone(interactor_request.query_string)
 
-    def test_that_by_default_a_use_case_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
+    def test_that_by_default_a_interactor_request_with_offset_0_gets_returned_if_offset_query_string_was_empty(
         self,
     ):
         request = FakeRequest()
         assert not request.query_string().get("offset")
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.offset, 0)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.offset, 0)
 
-    def test_that_by_default_a_use_case_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
+    def test_that_by_default_a_interactor_request_with_limit_30_gets_returned_if_limit_query_string_was_empty(
         self,
     ):
         request = FakeRequest()
         assert not request.query_string().get("limit")
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, 30)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.limit, 30)
 
     @parameterized.expand(
         [
@@ -59,8 +59,8 @@ class ControllerTests(BaseTestCase):
     ):
         request = FakeRequest()
         request.set_arg(arg="offset", value=str(expected_offset))
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.offset, expected_offset)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.offset, expected_offset)
 
     @parameterized.expand(
         [
@@ -74,8 +74,8 @@ class ControllerTests(BaseTestCase):
     ):
         request = FakeRequest()
         request.set_arg(arg="limit", value=expected_limit)
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, expected_limit)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.limit, expected_limit)
 
     @parameterized.expand(
         [
@@ -91,9 +91,9 @@ class ControllerTests(BaseTestCase):
         request = FakeRequest()
         request.set_arg(arg="limit", value=expected_limit)
         request.set_arg(arg="offset", value=expected_offset)
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.limit, expected_limit)
-        self.assertEqual(use_case_request.offset, expected_offset)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.limit, expected_limit)
+        self.assertEqual(interactor_request.offset, expected_offset)
 
     @parameterized.expand(
         [

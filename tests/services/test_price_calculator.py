@@ -4,7 +4,7 @@ from parameterized import parameterized
 
 from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import ProductionCosts
-from tests.use_cases.base_test_case import BaseTestCase
+from tests.interactors.base_test_case import BaseTestCase
 
 
 class PriceCalculatorTests(BaseTestCase):

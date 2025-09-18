@@ -4,27 +4,30 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.create_draft_from_plan import CreateDraftFromPlanUseCase
-from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
-from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.hide_plan import HidePlanUseCase
-from arbeitszeit.use_cases.list_coordinations_of_company import (
+from arbeitszeit.interactors.create_draft_from_plan import CreateDraftFromPlanInteractor
+from arbeitszeit.interactors.delete_draft import DeleteDraftInteractor
+from arbeitszeit.interactors.file_plan_with_accounting import FilePlanWithAccounting
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
+from arbeitszeit.interactors.hide_plan import HidePlanInteractor
+from arbeitszeit.interactors.list_coordinations_of_company import (
+    ListCoordinationsOfCompanyInteractor,
     ListCoordinationsOfCompanyRequest,
-    ListCoordinationsOfCompanyUseCase,
 )
-from arbeitszeit.use_cases.list_my_cooperating_plans import (
-    ListMyCooperatingPlansUseCase,
+from arbeitszeit.interactors.list_my_cooperating_plans import (
+    ListMyCooperatingPlansInteractor,
 )
-from arbeitszeit.use_cases.query_company_consumptions import (
-    QueryCompanyConsumptionsUseCase,
+from arbeitszeit.interactors.query_company_consumptions import (
+    QueryCompanyConsumptionsInteractor,
 )
-from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
-from arbeitszeit.use_cases.show_company_cooperations import (
+from arbeitszeit.interactors.revoke_plan_filing import RevokePlanFilingInteractor
+from arbeitszeit.interactors.show_company_cooperations import (
     Request,
-    ShowCompanyCooperationsUseCase,
+    ShowCompanyCooperationsInteractor,
 )
-from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
+from arbeitszeit.interactors.show_my_plans import (
+    ShowMyPlansInteractor,
+    ShowMyPlansRequest,
+)
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -113,7 +116,7 @@ class dashboard(CompanyDashboardView): ...
 
 @CompanyRoute("/consumptions")
 def my_consumptions(
-    query_consumptions: QueryCompanyConsumptionsUseCase,
+    query_consumptions: QueryCompanyConsumptionsInteractor,
     presenter: CompanyConsumptionsPresenter,
 ):
     response = query_consumptions.execute(UUID(current_user.id))
@@ -131,15 +134,15 @@ def my_consumptions(
 def delete_draft(
     draft_id: UUID,
     controller: DeleteDraftController,
-    use_case: DeleteDraftUseCase,
+    interactor: DeleteDraftInteractor,
     presenter: DeleteDraftPresenter,
 ) -> Response:
-    use_case_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
+    interactor_request = controller.get_request(request=FlaskRequest(), draft=draft_id)
     try:
-        use_case_response = use_case.delete_draft(use_case_request)
-    except use_case.Failure:
+        interactor_response = interactor.delete_draft(interactor_request)
+    except interactor.Failure:
         return http_404()
-    view_model = presenter.present_draft_deletion(use_case_response)
+    view_model = presenter.present_draft_deletion(interactor_response)
     return redirect(view_model.redirect_target)
 
 
@@ -147,14 +150,14 @@ def delete_draft(
 @commit_changes
 def create_draft_from_plan(
     plan_id: UUID,
-    use_case: CreateDraftFromPlanUseCase,
+    interactor: CreateDraftFromPlanInteractor,
     controller: CreateDraftFromPlanController,
     presenter: CreateDraftFromPlanPresenter,
 ) -> Response:
-    uc_request = controller.create_use_case_request(plan_id)
-    uc_response = use_case.create_draft_from_plan(uc_request)
+    uc_request = controller.create_interactor_request(plan_id)
+    uc_response = interactor.create_draft_from_plan(uc_request)
     view_model = presenter.render_response(
-        use_case_response=uc_response,
+        interactor_response=uc_response,
         request=FlaskRequest(),
     )
     return redirect(view_model.redirect_url)
@@ -171,7 +174,7 @@ def file_plan(
     draft_id: str,
     session: FlaskSession,
     controller: FilePlanWithAccountingController,
-    use_case: FilePlanWithAccounting,
+    interactor: FilePlanWithAccounting,
     presenter: FilePlanWithAccountingPresenter,
 ):
     try:
@@ -180,7 +183,7 @@ def file_plan(
         )
     except controller.InvalidRequest:
         return http_404()
-    response = use_case.file_plan_with_accounting(request)
+    response = interactor.file_plan_with_accounting(request)
     view_model = presenter.present_response(response)
     return redirect(view_model.redirect_url)
 
@@ -192,11 +195,11 @@ class get_draft_details(DraftDetailsView): ...
 
 @CompanyRoute("/my_plans", methods=["GET"])
 def my_plans(
-    show_my_plans_use_case: ShowMyPlansUseCase,
+    show_my_plans_interactor: ShowMyPlansInteractor,
     show_my_plans_presenter: ShowMyPlansPresenter,
 ):
     request = ShowMyPlansRequest(company_id=UUID(current_user.id))
-    response = show_my_plans_use_case.show_company_plans(request)
+    response = show_my_plans_interactor.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
     return render_template(
         "company/my_plans.html",
@@ -209,18 +212,20 @@ def my_plans(
 def revoke_plan_filing(
     plan_id: UUID,
     controller: RevokePlanFilingController,
-    use_case: RevokePlanFilingUseCase,
+    interactor: RevokePlanFilingInteractor,
     presenter: RevokePlanFilingPresenter,
 ):
     request = controller.create_request(plan_id=plan_id)
-    response = use_case.revoke_plan_filing(request=request)
+    response = interactor.revoke_plan_filing(request=request)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
 
 
 @CompanyRoute("/hide_plan/<uuid:plan_id>", methods=["GET", "POST"])
 @commit_changes
-def hide_plan(plan_id: UUID, hide_plan: HidePlanUseCase, presenter: HidePlanPresenter):
+def hide_plan(
+    plan_id: UUID, hide_plan: HidePlanInteractor, presenter: HidePlanPresenter
+):
     response = hide_plan.execute(plan_id)
     presenter.present(response)
     return redirect(url_for("main_company.my_plans"))
@@ -239,14 +244,14 @@ class register_productive_consumption(RegisterProductiveConsumptionView): ...
 @CompanyRoute("/plan_details/<uuid:plan_id>")
 def plan_details(
     plan_id: UUID,
-    use_case: GetPlanDetailsUseCase,
+    interactor: GetPlanDetailsInteractor,
     presenter: GetPlanDetailsCompanyPresenter,
 ):
-    use_case_request = GetPlanDetailsUseCase.Request(plan_id)
-    use_case_response = use_case.get_plan_details(use_case_request)
-    if not use_case_response:
+    interactor_request = GetPlanDetailsInteractor.Request(plan_id)
+    interactor_response = interactor.get_plan_details(interactor_request)
+    if not interactor_response:
         return http_404()
-    view_model = presenter.present(use_case_response)
+    view_model = presenter.present(interactor_response)
     return render_template("company/plan_details.html", view_model=view_model)
 
 
@@ -278,9 +283,9 @@ class request_cooperation(RequestCooperationView): ...
 
 @CompanyRoute("/my_cooperations", methods=["GET"])
 def my_cooperations(
-    list_coordinations: ListCoordinationsOfCompanyUseCase,
-    show_company_cooperations: ShowCompanyCooperationsUseCase,
-    list_my_cooperating_plans: ListMyCooperatingPlansUseCase,
+    list_coordinations: ListCoordinationsOfCompanyInteractor,
+    show_company_cooperations: ShowCompanyCooperationsInteractor,
+    list_my_cooperating_plans: ListMyCooperatingPlansInteractor,
     presenter: ShowMyCooperationsPresenter,
 ):
     list_coord_response = list_coordinations.execute(
@@ -292,7 +297,7 @@ def my_cooperations(
         )
     )
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
-        ListMyCooperatingPlansUseCase.Request(company=UUID(current_user.id))
+        ListMyCooperatingPlansInteractor.Request(company=UUID(current_user.id))
     )
     view_model = presenter.present(
         list_coord_response=list_coord_response,

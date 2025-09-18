@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
 from arbeitszeit_web.forms import LoginCompanyForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -21,7 +21,7 @@ class LogInCompanyPresenter:
     translator: Translator
 
     def present_login_process(
-        self, response: LogInCompanyUseCase.Response, form: LoginCompanyForm
+        self, response: LogInCompanyInteractor.Response, form: LoginCompanyForm
     ) -> ViewModel:
         if response.is_logged_in and response.email_address:
             assert response.user_id
@@ -35,7 +35,7 @@ class LogInCompanyPresenter:
         else:
             if (
                 response.rejection_reason
-                == LogInCompanyUseCase.RejectionReason.invalid_password
+                == LogInCompanyInteractor.RejectionReason.invalid_password
             ):
                 form.password_field().attach_error(
                     self.translator.gettext("Password is incorrect")

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.register_private_consumption import (
+from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumptionRequest,
 )
 from arbeitszeit_web.forms import RegisterPrivateConsumptionForm

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
 from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest
 from arbeitszeit_web.request import Request
@@ -25,7 +25,7 @@ login_member_expected_inputs = [
 
 @dataclass
 class LoginMemberApiController:
-    def create_request(self, request: Request) -> LogInMemberUseCase.Request:
+    def create_request(self, request: Request) -> LogInMemberInteractor.Request:
         json_body = request.get_json()
         if not isinstance(json_body, dict):
             raise BadRequest("Email missing.")
@@ -37,4 +37,4 @@ class LoginMemberApiController:
             raise BadRequest(message="Password missing.")
         assert isinstance(email, str)
         assert isinstance(password, str)
-        return LogInMemberUseCase.Request(email=email, password=password)
+        return LogInMemberInteractor.Request(email=email, password=password)

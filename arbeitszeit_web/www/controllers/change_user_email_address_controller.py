@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import timedelta
 
-from arbeitszeit.use_cases import change_user_email_address
+from arbeitszeit.interactors import change_user_email_address
 from arbeitszeit_web.forms import ConfirmEmailAddressChangeForm
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
@@ -16,7 +16,7 @@ class ChangeUserEmailAddressController:
     notifier: Notifier
     translator: Translator
 
-    def create_use_case_request(
+    def create_interactor_request(
         self, new_email_address: str, form: ConfirmEmailAddressChangeForm
     ) -> change_user_email_address.Request | None:
         current_user = self.session.get_current_user()

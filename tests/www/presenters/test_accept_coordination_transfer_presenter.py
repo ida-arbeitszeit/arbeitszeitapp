@@ -1,15 +1,15 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.accept_coordination_transfer import (
-    AcceptCoordinationTransferUseCase,
+from arbeitszeit.interactors.accept_coordination_transfer import (
+    AcceptCoordinationTransferInteractor,
 )
 from arbeitszeit_web.www.presenters.accept_coordination_transfer_presenter import (
     AcceptCoordinationTransferPresenter,
 )
 from tests.www.base_test_case import BaseTestCase
 
-rejection_reason = AcceptCoordinationTransferUseCase.Response.RejectionReason
+rejection_reason = AcceptCoordinationTransferInteractor.Response.RejectionReason
 
 
 class AcceptCoordinationTransferPresenterTests(BaseTestCase):
@@ -138,8 +138,8 @@ class AcceptCoordinationTransferPresenterTests(BaseTestCase):
         rejection_reason: Optional[rejection_reason] = None,
         cooperation_id: Optional[UUID] = None,
         transfer_request_id: UUID = uuid4(),
-    ) -> AcceptCoordinationTransferUseCase.Response:
-        return AcceptCoordinationTransferUseCase.Response(
+    ) -> AcceptCoordinationTransferInteractor.Response:
+        return AcceptCoordinationTransferInteractor.Response(
             rejection_reason=rejection_reason,
             cooperation_id=cooperation_id,
             transfer_request_id=transfer_request_id,

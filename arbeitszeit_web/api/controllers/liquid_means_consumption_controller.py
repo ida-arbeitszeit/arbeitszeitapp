@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumptionRequest as UseCaseRequest,
+from arbeitszeit.interactors.register_productive_consumption import (
+    RegisterProductiveConsumptionRequest as InteractorRequest,
 )
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest, Unauthorized
 from arbeitszeit_web.json import JsonValue
@@ -33,10 +33,10 @@ liquid_means_expected_inputs = [
 class LiquidMeansConsumptionController:
     session: Session
 
-    def create_request(self, request: Request) -> UseCaseRequest:
+    def create_request(self, request: Request) -> InteractorRequest:
         company = self._validate_current_user()
         json_body = request.get_json()
-        return UseCaseRequest(
+        return InteractorRequest(
             consumer=company,
             plan=self._parse_plan_id(json_body),
             amount=self._parse_amount(json_body),

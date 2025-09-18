@@ -1,7 +1,7 @@
 from typing import List
 from uuid import uuid4
 
-from arbeitszeit.use_cases.end_cooperation import EndCooperationResponse
+from arbeitszeit.interactors.end_cooperation import EndCooperationResponse
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.end_cooperation_presenter import (
     EndCooperationPresenter,
@@ -26,7 +26,7 @@ class PresenterTests(BaseTestCase):
         self.presenter = self.injector.get(EndCooperationPresenter)
         self.session.login_company(company=uuid4())
 
-    def test_404_and_empty_url_returned_when_use_case_response_returned_plan_not_found(
+    def test_404_and_empty_url_returned_when_interactor_response_returned_plan_not_found(
         self,
     ) -> None:
         request = FakeRequest()
@@ -53,7 +53,7 @@ class PresenterTests(BaseTestCase):
             self._get_warning_notifications(),
         )
 
-    def test_url_gets_returned_when_use_case_response_is_successfull(
+    def test_url_gets_returned_when_interactor_response_is_successfull(
         self,
     ) -> None:
         request = FakeRequest()

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting
+from arbeitszeit.interactors.query_plans import PlanFilter, PlanSorting
 from arbeitszeit_web.www.controllers.query_plans_controller import QueryPlansController
 from tests.request import FakeRequest
 from tests.www.base_test_case import BaseTestCase
@@ -98,35 +98,35 @@ class PaginationTests(BaseTestCase):
         self,
     ):
         request = FakeRequest()
-        use_case_request = self.controller.import_form_data(request=request)
-        assert use_case_request.offset == 0
+        interactor_request = self.controller.import_form_data(request=request)
+        assert interactor_request.offset == 0
 
     def test_that_without_request_specified_the_offset_is_set_to_0(self) -> None:
-        use_case_request = self.controller.import_form_data(request=None)
-        assert use_case_request.offset == 0
+        interactor_request = self.controller.import_form_data(request=None)
+        assert interactor_request.offset == 0
 
     def test_that_page_two_has_an_offset_of_15(self) -> None:
         request = FakeRequest()
         request.set_arg(arg="page", value="2")
-        use_case_request = self.controller.import_form_data(request=request)
-        assert use_case_request.offset == 15
+        interactor_request = self.controller.import_form_data(request=request)
+        assert interactor_request.offset == 15
 
     def test_that_offset_0_is_assumed_if_no_valid_integer_is_specified_as_page(self):
         request = FakeRequest()
         request.set_arg(arg="page", value="123abc")
-        use_case_request = self.controller.import_form_data(request=request)
-        assert use_case_request.offset == 0
+        interactor_request = self.controller.import_form_data(request=request)
+        assert interactor_request.offset == 0
 
     def test_that_offset_is_150_for_page_11(self) -> None:
         request = FakeRequest()
         request.set_arg(arg="page", value="11")
-        use_case_request = self.controller.import_form_data(request=request)
-        assert use_case_request.offset == 150
+        interactor_request = self.controller.import_form_data(request=request)
+        assert interactor_request.offset == 150
 
     def test_that_limit_is_15(self) -> None:
         request = FakeRequest()
-        use_case_request = self.controller.import_form_data(request=request)
-        assert use_case_request.limit == 15
+        interactor_request = self.controller.import_form_data(request=request)
+        assert interactor_request.limit == 15
 
 
 def make_fake_form(

@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
-from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumptionUseCase,
+from arbeitszeit.interactors.register_productive_consumption import (
+    RegisterProductiveConsumptionInteractor,
 )
-from arbeitszeit.use_cases.select_productive_consumption import (
-    SelectProductiveConsumptionUseCase,
+from arbeitszeit.interactors.select_productive_consumption import (
+    SelectProductiveConsumptionInteractor,
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
@@ -30,28 +30,28 @@ from arbeitszeit_web.www.presenters.select_productive_consumption_presenter impo
 @dataclass
 class RegisterProductiveConsumptionView:
     select_productive_consumption_controller: SelectProductiveConsumptionController
-    select_productive_consumption_use_case: SelectProductiveConsumptionUseCase
+    select_productive_consumption_interactor: SelectProductiveConsumptionInteractor
     select_productive_consumption_presenter: SelectProductiveConsumptionPresenter
     controller: RegisterProductiveConsumptionController
-    register_productive_consumption: RegisterProductiveConsumptionUseCase
+    register_productive_consumption: RegisterProductiveConsumptionInteractor
     presenter: RegisterProductiveConsumptionPresenter
 
     def GET(self) -> Response:
         try:
-            use_case_request = (
+            interactor_request = (
                 self.select_productive_consumption_controller.process_input_data(
                     FlaskRequest()
                 )
             )
         except self.select_productive_consumption_controller.InputDataError:
             return self._handle_invalid_form(RegisterProductiveConsumptionForm())
-        use_case_response = (
-            self.select_productive_consumption_use_case.select_productive_consumption(
-                use_case_request
+        interactor_response = (
+            self.select_productive_consumption_interactor.select_productive_consumption(
+                interactor_request
             )
         )
         view_model = self.select_productive_consumption_presenter.render_response(
-            use_case_response
+            interactor_response
         )
         form = RegisterProductiveConsumptionForm(
             plan_id=view_model.plan_id,
@@ -78,8 +78,8 @@ class RegisterProductiveConsumptionView:
             data = self.controller.process_input_data(form)
         except self.controller.FormError:
             return self._handle_invalid_form(form)
-        use_case_response = self.register_productive_consumption.execute(data)
-        view_model = self.presenter.present(use_case_response)
+        interactor_response = self.register_productive_consumption.execute(data)
+        view_model = self.presenter.present(interactor_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)
         return FlaskResponse(self._render_template(form), status=400)

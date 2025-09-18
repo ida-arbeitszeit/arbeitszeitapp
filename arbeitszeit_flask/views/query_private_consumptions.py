@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import flask
 
-from arbeitszeit.use_cases.query_private_consumptions import QueryPrivateConsumptions
+from arbeitszeit.interactors.query_private_consumptions import QueryPrivateConsumptions
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
     InvalidRequest,
@@ -16,7 +16,7 @@ from arbeitszeit_web.www.presenters.private_consumptions_presenter import (
 @dataclass
 class QueryPrivateConsumptionsView:
     controller: QueryPrivateConsumptionsController
-    use_case: QueryPrivateConsumptions
+    interactor: QueryPrivateConsumptions
     presenter: PrivateConsumptionsPresenter
 
     def GET(self) -> Response:
@@ -24,7 +24,7 @@ class QueryPrivateConsumptionsView:
         match uc_request:
             case InvalidRequest(status_code=status_code):
                 return flask.Response(status=status_code)
-        response = self.use_case.query_private_consumptions(uc_request)
+        response = self.interactor.query_private_consumptions(uc_request)
         view_model = self.presenter.present_private_consumptions(response)
         return flask.Response(
             flask.render_template(

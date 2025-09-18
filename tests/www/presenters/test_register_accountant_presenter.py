@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.interactors.register_accountant import RegisterAccountantInteractor
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.register_accountant_presenter import (
     RegisterAccountantPresenter,
@@ -89,10 +89,10 @@ class PresenterTests(BaseTestCase):
 
     def create_rejected_response(
         self, email: Optional[str] = None
-    ) -> RegisterAccountantUseCase.Response:
+    ) -> RegisterAccountantInteractor.Response:
         if email is None:
             email = "test@test.test"
-        return RegisterAccountantUseCase.Response(
+        return RegisterAccountantInteractor.Response(
             is_accepted=False,
             user_id=None,
             email_address=email,
@@ -100,12 +100,12 @@ class PresenterTests(BaseTestCase):
 
     def create_accepted_response(
         self, email: Optional[str] = None, user_id: Optional[UUID] = None
-    ) -> RegisterAccountantUseCase.Response:
+    ) -> RegisterAccountantInteractor.Response:
         if email is None:
             email = "a@b.c"
         if user_id is None:
             user_id = uuid4()
-        return RegisterAccountantUseCase.Response(
+        return RegisterAccountantInteractor.Response(
             is_accepted=True,
             user_id=user_id,
             email_address=email,

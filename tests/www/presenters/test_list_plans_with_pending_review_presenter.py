@@ -1,8 +1,8 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_plans_with_pending_review import (
-    ListPlansWithPendingReviewUseCase as UseCase,
+from arbeitszeit.interactors.list_plans_with_pending_review import (
+    ListPlansWithPendingReviewInteractor as Interactor,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.list_plans_with_pending_review_presenter import (
@@ -86,8 +86,8 @@ class PresenterTests(BaseTestCase):
             company_id=planner_id
         )
 
-    def _get_empty_response(self) -> UseCase.Response:
-        return UseCase.Response(plans=[])
+    def _get_empty_response(self) -> Interactor.Response:
+        return Interactor.Response(plans=[])
 
     def _get_response_with_one_plan(
         self,
@@ -96,14 +96,14 @@ class PresenterTests(BaseTestCase):
         planner_name: str = "example company",
         plan_id: Optional[UUID] = None,
         planner_id: Optional[UUID] = None,
-    ) -> UseCase.Response:
+    ) -> Interactor.Response:
         if plan_id is None:
             plan_id = uuid4()
         if planner_id is None:
             planner_id = uuid4()
-        return UseCase.Response(
+        return Interactor.Response(
             plans=[
-                UseCase.Plan(
+                Interactor.Plan(
                     id=plan_id,
                     product_name=product_name,
                     planner_name=planner_name,

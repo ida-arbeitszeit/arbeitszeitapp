@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases import list_workers
+from arbeitszeit.interactors import list_workers
 from arbeitszeit_web.www.presenters.list_workers_presenter import ListWorkersPresenter
 from tests.www.base_test_case import BaseTestCase
 

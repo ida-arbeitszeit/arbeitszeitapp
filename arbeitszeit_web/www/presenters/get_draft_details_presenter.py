@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
+from arbeitszeit.interactors.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.url_index import UrlIndex
 

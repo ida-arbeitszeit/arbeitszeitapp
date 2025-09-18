@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.register_private_consumption import (
+from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumptionResponse,
     RejectionReason,
 )

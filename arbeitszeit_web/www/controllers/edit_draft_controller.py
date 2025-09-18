@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.edit_draft import Request as UseCaseRequest
+from arbeitszeit.interactors.edit_draft import Request as InteractorRequest
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request as WebRequest
@@ -19,7 +19,7 @@ class EditDraftController:
 
     def process_form(
         self, request: WebRequest, draft_id: UUID
-    ) -> UseCaseRequest | DraftForm:
+    ) -> InteractorRequest | DraftForm:
         validation_result = self.form_validator.validate(request)
         if isinstance(validation_result, DraftForm):
             self.notifier.display_warning(
@@ -29,7 +29,7 @@ class EditDraftController:
 
         current_user = self.session.get_current_user()
         assert current_user
-        return UseCaseRequest(
+        return InteractorRequest(
             draft=draft_id,
             editor=current_user,
             product_name=validation_result.product_name,

@@ -25,7 +25,7 @@ class QueryCompaniesPresenterTests(BaseTestCase):
         presentation = self.presenter.get_empty_view_model()
         self.assertFalse(presentation.pagination.is_visible)
 
-    def test_non_empty_use_case_response_leads_to_showing_results(self):
+    def test_non_empty_interactor_response_leads_to_showing_results(self):
         response = self.queried_company_generator.get_response()
         presentation = self.presenter.present(response)
         self.assertTrue(presentation.show_results)

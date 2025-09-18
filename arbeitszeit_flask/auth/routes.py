@@ -5,13 +5,15 @@ from flask import Response as FlaskResponse
 from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
-from arbeitszeit.use_cases.confirm_member import ConfirmMemberUseCase
-from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
-from arbeitszeit.use_cases.resend_confirmation_mail import ResendConfirmationMailUseCase
-from arbeitszeit.use_cases.start_page import StartPageUseCase
+from arbeitszeit.interactors.confirm_company import ConfirmCompanyInteractor
+from arbeitszeit.interactors.confirm_member import ConfirmMemberInteractor
+from arbeitszeit.interactors.log_in_accountant import LogInAccountantInteractor
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
+from arbeitszeit.interactors.resend_confirmation_mail import (
+    ResendConfirmationMailInteractor,
+)
+from arbeitszeit.interactors.start_page import StartPageInteractor
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
@@ -46,7 +48,7 @@ auth = Blueprint("auth", __name__)
 @auth.route("/")
 @with_injection()
 def start(
-    start_page: StartPageUseCase,
+    start_page: StartPageInteractor,
     start_page_presenter: StartPagePresenter,
 ):
     response = start_page.show_start_page()
@@ -85,11 +87,11 @@ class signup_member(SignupMemberView): ...
 @commit_changes
 @with_injection()
 def confirm_email_member(
-    token: str, use_case: ConfirmMemberUseCase, controller: ConfirmMemberController
+    token: str, interactor: ConfirmMemberInteractor, controller: ConfirmMemberController
 ) -> Response:
-    use_case_request = controller.process_request(token)
-    if use_case_request is not None:
-        response = use_case.confirm_member(request=use_case_request)
+    interactor_request = controller.process_request(token)
+    if interactor_request is not None:
+        response = interactor.confirm_member(request=interactor_request)
         if response.is_confirmed:
             return redirect(url_for("auth.login_member"))
     flash("Der Bestätigungslink ist ungültig oder ist abgelaufen.")
@@ -102,14 +104,14 @@ def confirm_email_member(
 def login_member(
     flask_session: FlaskSession,
     presenter: LogInMemberPresenter,
-    use_case: LogInMemberUseCase,
+    interactor: LogInMemberInteractor,
 ):
     login_form = LoginForm(request.form)
     if request.method == "POST" and login_form.validate():
         email = login_form.data["email"]
         password = login_form.data["password"]
-        response = use_case.log_in_member(
-            LogInMemberUseCase.Request(
+        response = interactor.log_in_member(
+            LogInMemberInteractor.Request(
                 email=email,
                 password=password,
             )
@@ -134,9 +136,9 @@ def login_member(
 @auth.route("/member/resend")
 @with_injection()
 @login_required
-def resend_confirmation_member(use_case: ResendConfirmationMailUseCase):
-    request = use_case.Request(user=UUID(current_user.id))
-    response = use_case.resend_confirmation_mail(request)
+def resend_confirmation_member(interactor: ResendConfirmationMailInteractor):
+    request = interactor.Request(user=UUID(current_user.id))
+    response = interactor.resend_confirmation_mail(request)
     if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
     else:
@@ -158,7 +160,7 @@ def unconfirmed_company(authenticator: CompanyAuthenticator):
 @commit_changes
 def login_company(
     flask_session: FlaskSession,
-    log_in_use_case: LogInCompanyUseCase,
+    log_in_interactor: LogInCompanyInteractor,
     log_in_presenter: LogInCompanyPresenter,
 ):
     login_form = LoginForm(request.form)
@@ -166,13 +168,13 @@ def login_company(
         email = login_form.data["email"]
         password = login_form.data["password"]
 
-        use_case_request = LogInCompanyUseCase.Request(
+        interactor_request = LogInCompanyInteractor.Request(
             email_address=email,
             password=password,
         )
-        use_case_response = log_in_use_case.log_in_company(use_case_request)
+        interactor_response = log_in_interactor.log_in_company(interactor_request)
         view_model = log_in_presenter.present_login_process(
-            response=use_case_response,
+            response=interactor_response,
             form=login_form,
         )
         if view_model.redirect_url:
@@ -200,13 +202,15 @@ class signup_company(SignupCompanyView): ...
 @with_injection()
 def confirm_email_company(
     token,
-    confirm_company_use_case: ConfirmCompanyUseCase,
+    confirm_company_interactor: ConfirmCompanyInteractor,
     session: FlaskSession,
     controller: ConfirmCompanyController,
 ) -> Response:
-    use_case_request = controller.process_request(token=token)
-    if use_case_request:
-        response = confirm_company_use_case.confirm_company(request=use_case_request)
+    interactor_request = controller.process_request(token=token)
+    if interactor_request:
+        response = confirm_company_interactor.confirm_company(
+            request=interactor_request
+        )
         if response.is_confirmed:
             assert response.user_id
             session.login_company(response.user_id)
@@ -219,9 +223,9 @@ def confirm_email_company(
 @auth.route("/company/resend")
 @with_injection()
 @login_required
-def resend_confirmation_company(use_case: ResendConfirmationMailUseCase):
-    request = use_case.Request(user=UUID(current_user.id))
-    response = use_case.resend_confirmation_mail(request)
+def resend_confirmation_company(interactor: ResendConfirmationMailInteractor):
+    request = interactor.Request(user=UUID(current_user.id))
+    response = interactor.resend_confirmation_mail(request)
     if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
     else:
@@ -239,15 +243,15 @@ class signup_accountant(SignupAccountantView): ...
 @with_injection()
 def login_accountant(
     controller: LogInAccountantController,
-    use_case: LogInAccountantUseCase,
+    interactor: LogInAccountantInteractor,
     presenter: LogInAccountantPresenter,
 ):
     form = LoginForm(request.form)
     if request.method == "POST" and form.validate():
-        use_case_request = controller.process_login_form(form)
-        use_case_response = use_case.log_in_accountant(use_case_request)
+        interactor_request = controller.process_login_form(form)
+        interactor_response = interactor.log_in_accountant(interactor_request)
         view_model = presenter.present_login_process(
-            form=form, response=use_case_response
+            form=form, response=interactor_response
         )
         if view_model.redirect_url is not None:
             return redirect(view_model.redirect_url)

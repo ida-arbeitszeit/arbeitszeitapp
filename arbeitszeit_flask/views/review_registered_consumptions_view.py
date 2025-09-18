@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 import flask
 
-from arbeitszeit.use_cases.review_registered_consumptions import (
-    ReviewRegisteredConsumptionsUseCase,
+from arbeitszeit.interactors.review_registered_consumptions import (
+    ReviewRegisteredConsumptionsInteractor,
 )
 from arbeitszeit_flask import types
 from arbeitszeit_web.www.controllers.review_registered_consumptions_controller import (
@@ -18,18 +18,18 @@ from arbeitszeit_web.www.presenters.review_registered_consumptions_presenter imp
 @dataclass
 class ReviewRegisteredConsumptionsView:
     controller: ReviewRegisteredConsumptionsController
-    use_case: ReviewRegisteredConsumptionsUseCase
+    interactor: ReviewRegisteredConsumptionsInteractor
     presenter: ReviewRegisteredConsumptionsPresenter
 
     def GET(self) -> types.Response:
-        use_case_request = self.controller.create_use_case_request()
-        match use_case_request:
+        interactor_request = self.controller.create_interactor_request()
+        match interactor_request:
             case InvalidRequest(status_code=status_code):
                 return flask.Response(status=status_code)
-        use_case_response = self.use_case.review_registered_consumptions(
-            use_case_request
+        interactor_response = self.interactor.review_registered_consumptions(
+            interactor_request
         )
-        view_model = self.presenter.present(use_case_response)
+        view_model = self.presenter.present(interactor_response)
         return flask.Response(
             flask.render_template(
                 "company/review_registered_consumptions.html",
