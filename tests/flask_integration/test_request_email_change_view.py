@@ -55,6 +55,20 @@ class RequestEmailChangeViewTests(ViewTestCase):
         )
         assert response.status_code == 400
 
+    def test_that_member_gets_error_message_when_posting_with_wrong_password(
+        self,
+    ) -> None:
+        password = "123password"
+        self.login_member(password=password)
+        response = self.client.post(
+            URL,
+            data={
+                "new_email": "new_email@test.test",
+                "current_password": password + "wrong",
+            },
+        )
+        assert "The password is incorrect." in response.text
+
     def test_that_unauthenticated_users_get_redirect_response_on_post_without_data(
         self,
     ) -> None:
