@@ -1,6 +1,6 @@
 from typing import Optional, Protocol
 
-from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
+from arbeitszeit.interactors.query_companies import CompanyFilter, QueryCompaniesRequest
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, calculate_current_offset
 from arbeitszeit_web.request import Request
 

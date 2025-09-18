@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.list_available_languages import ListAvailableLanguagesUseCase
+from arbeitszeit.interactors.list_available_languages import (
+    ListAvailableLanguagesInteractor,
+)
 from arbeitszeit_web.language_service import LanguageService
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -24,7 +26,7 @@ class ListAvailableLanguagesPresenter:
     language_service: LanguageService
 
     def present_available_languages_list(
-        self, response: ListAvailableLanguagesUseCase.Response
+        self, response: ListAvailableLanguagesInteractor.Response
     ) -> ViewModel:
         return self.ViewModel(
             show_language_listing=bool(response.available_language_codes),

@@ -1,6 +1,8 @@
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
+from arbeitszeit.interactors.invite_worker_to_company import (
+    InviteWorkerToCompanyInteractor,
+)
 
 from .flask import ViewTestCase
 
@@ -9,7 +11,7 @@ class AuthenticatedTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.member = self.login_member()
-        self.use_case = self.injector.get(InviteWorkerToCompanyUseCase)
+        self.interactor = self.injector.get(InviteWorkerToCompanyInteractor)
 
     def test_get_request_for_existing_invite_yields_status_200(self) -> None:
         invite_id = self.invite_member()
@@ -33,8 +35,8 @@ class AuthenticatedTests(ViewTestCase):
 
     def invite_member(self) -> UUID:
         company = self.company_generator.create_company_record()
-        response = self.use_case.invite_worker(
-            InviteWorkerToCompanyUseCase.Request(
+        response = self.interactor.invite_worker(
+            InviteWorkerToCompanyInteractor.Request(
                 company.id,
                 self.member,
             )

@@ -7,7 +7,7 @@ from arbeitszeit.records import Transfer
 from arbeitszeit.transfers.compensation import CompensationTransferService
 from arbeitszeit.transfers.transfer_type import TransferType
 from tests.datetime_service import datetime_utc
-from tests.use_cases.base_test_case import BaseTestCase
+from tests.interactors.base_test_case import BaseTestCase
 
 
 class CompensationTransferServiceTests(BaseTestCase):

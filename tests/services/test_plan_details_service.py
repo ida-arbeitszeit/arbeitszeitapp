@@ -5,19 +5,19 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor
 from arbeitszeit.plan_details import PlanDetails, PlanDetailsService
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService, datetime_utc
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.interactors.dependency_injection import get_dependency_injector
 
 
 class PlanDetailsServiceTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.service = self.injector.get(PlanDetailsService)
-        self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
+        self.approve_plan_interactor = self.injector.get(ApprovePlanInteractor)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -263,6 +263,6 @@ class PlanDetailsServiceTests(TestCase):
         self.assertTrue(details.expiration_date)
 
     def approve_plan(self, plan: UUID) -> None:
-        request = ApprovePlanUseCase.Request(plan=plan)
-        response = self.approve_plan_use_case.approve_plan(request)
+        request = ApprovePlanInteractor.Request(plan=plan)
+        response = self.approve_plan_interactor.approve_plan(request)
         assert response.is_plan_approved

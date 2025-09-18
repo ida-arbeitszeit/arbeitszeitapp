@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_all_cooperations import (
+from arbeitszeit.interactors.list_all_cooperations import (
     ListAllCooperationsResponse,
     ListedCooperation,
 )

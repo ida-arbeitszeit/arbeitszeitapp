@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
-    ListCoordinationsOfCooperationUseCase as UseCase,
+from arbeitszeit.interactors.list_coordinations_of_cooperation import (
+    ListCoordinationsOfCooperationInteractor as Interactor,
 )
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -33,7 +33,7 @@ class ListCoordinationsOfCooperationPresenter:
     translator: Translator
 
     def list_coordinations_of_cooperation(
-        self, response: UseCase.Response
+        self, response: Interactor.Response
     ) -> ListCoordinationsOfCooperationPresenter.ViewModel:
         return self.ViewModel(
             cooperation_url=self.url_index.get_coop_summary_url(

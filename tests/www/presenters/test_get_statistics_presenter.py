@@ -1,7 +1,7 @@
 from dataclasses import replace
 from decimal import Decimal
 
-from arbeitszeit.use_cases.get_statistics import StatisticsResponse
+from arbeitszeit.interactors.get_statistics import StatisticsResponse
 from arbeitszeit_web.www.presenters.get_statistics_presenter import (
     GetStatisticsPresenter,
 )

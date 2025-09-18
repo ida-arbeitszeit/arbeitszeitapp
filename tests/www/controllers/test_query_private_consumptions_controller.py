@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases import query_private_consumptions as use_case
+from arbeitszeit.interactors import query_private_consumptions as interactor
 from arbeitszeit_web.www.controllers.query_private_consumptions_controller import (
     InvalidRequest,
     QueryPrivateConsumptionsController,
@@ -19,7 +19,7 @@ class QueryPrivateConsumptionsControllerTests(BaseTestCase):
         expected_member_id = uuid4()
         self.session.login_member(expected_member_id)
         request = self.controller.process_request()
-        assert isinstance(request, use_case.Request)
+        assert isinstance(request, interactor.Request)
         assert request.member == expected_member_id
 
     def test_that_companies_receive_403_forbidden(self) -> None:

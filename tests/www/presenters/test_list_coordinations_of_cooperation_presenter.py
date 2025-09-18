@@ -1,9 +1,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
+from arbeitszeit.interactors.list_coordinations_of_cooperation import (
     CoordinationInfo,
-    ListCoordinationsOfCooperationUseCase,
+    ListCoordinationsOfCooperationInteractor,
 )
 from arbeitszeit_web.www.presenters.list_coordinations_of_cooperation_presenter import (
     ListCoordinationsOfCooperationPresenter,
@@ -19,7 +19,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
 
     def test_presenter_shows_correct_cooperation_name(self) -> None:
         expected_cooperation_name = "Some coop test name"
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             cooperation_name=expected_cooperation_name
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
@@ -28,36 +28,36 @@ class ListCoordinationsPresenterTests(BaseTestCase):
     def test_presenter_shows_correct_cooperation_url(self) -> None:
         expected_cooperation = uuid4()
         expected_url = self.url_index.get_coop_summary_url(coop_id=expected_cooperation)
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             cooperation_id=expected_cooperation
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertEqual(view_model.cooperation_url, expected_url)
 
-    def test_presenter_shows_no_coordinations_when_use_case_response_has_none(
+    def test_presenter_shows_no_coordinations_when_interactor_response_has_none(
         self,
     ) -> None:
-        response = self.get_use_case_response_with_zero_coordinations()
+        response = self.get_interactor_response_with_zero_coordinations()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertFalse(view_model.has_coordinations)
 
-    def test_presenter_shows_coordinations_when_use_case_response_has_some(
+    def test_presenter_shows_coordinations_when_interactor_response_has_some(
         self,
     ) -> None:
-        response = self.get_use_case_response_with_one_coordination()
+        response = self.get_interactor_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertTrue(view_model.has_coordinations)
 
-    def test_presenter_shows_one_coordinations_when_use_case_response_has_one(
+    def test_presenter_shows_one_coordinations_when_interactor_response_has_one(
         self,
     ) -> None:
-        response = self.get_use_case_response_with_one_coordination()
+        response = self.get_interactor_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertTrue(view_model.has_coordinations)
         self.assertEqual(len(view_model.coordinations), 1)
 
     def test_presenter_shows_correct_coordinator_name(self) -> None:
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             coordinator_name="fake coordinator name"
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
@@ -70,7 +70,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         expected_url = self.url_index.get_company_summary_url(
             company_id=expected_coordinator
         )
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             coordinator_id=expected_coordinator
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
@@ -82,7 +82,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
             date=expected_start_time,
             fmt="%d.%m.%Y %H:%M",
         )
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             start_time=expected_start_time
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
@@ -91,7 +91,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         )
 
     def test_presenter_shows_correct_end_time_if_coordination_has_none(self) -> None:
-        response = ListCoordinationsOfCooperationUseCase.Response(
+        response = ListCoordinationsOfCooperationInteractor.Response(
             coordinations=[
                 CoordinationInfo(
                     coordinator_id=uuid4(),
@@ -112,7 +112,7 @@ class ListCoordinationsPresenterTests(BaseTestCase):
             date=expected_end_time,
             fmt="%d.%m.%Y %H:%M",
         )
-        response = self.get_use_case_response_with_one_coordination(
+        response = self.get_interactor_response_with_one_coordination(
             end_time=expected_end_time
         )
         view_model = self.presenter.list_coordinations_of_cooperation(response)
@@ -121,12 +121,12 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         )
 
     def test_presenter_shows_correct_amount_of_navbar_items(self) -> None:
-        response = self.get_use_case_response_with_one_coordination()
+        response = self.get_interactor_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertEqual(len(view_model.navbar_items), 2)
 
     def test_first_navbar_item_is_correct(self) -> None:
-        response = self.get_use_case_response_with_one_coordination()
+        response = self.get_interactor_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertEqual(
             view_model.navbar_items[0].url,
@@ -139,23 +139,23 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         )
 
     def test_second_navbar_item_is_correct(self) -> None:
-        response = self.get_use_case_response_with_one_coordination()
+        response = self.get_interactor_response_with_one_coordination()
         view_model = self.presenter.list_coordinations_of_cooperation(response)
         self.assertEqual(view_model.navbar_items[1].url, None)
         self.assertEqual(
             view_model.navbar_items[1].text, self.translator.gettext("Coordinators")
         )
 
-    def get_use_case_response_with_zero_coordinations(
+    def get_interactor_response_with_zero_coordinations(
         self,
-    ) -> ListCoordinationsOfCooperationUseCase.Response:
-        return ListCoordinationsOfCooperationUseCase.Response(
+    ) -> ListCoordinationsOfCooperationInteractor.Response:
+        return ListCoordinationsOfCooperationInteractor.Response(
             coordinations=[],
             cooperation_id=uuid4(),
             cooperation_name="Some coop test name",
         )
 
-    def get_use_case_response_with_one_coordination(
+    def get_interactor_response_with_one_coordination(
         self,
         coordinator_id: UUID = uuid4(),
         coordinator_name: str = "fake coordinator name",
@@ -163,8 +163,8 @@ class ListCoordinationsPresenterTests(BaseTestCase):
         end_time: datetime = datetime_utc(2022, 3, 10, 13, 0),
         cooperation_id: UUID = uuid4(),
         cooperation_name: str = "Some coop test name",
-    ) -> ListCoordinationsOfCooperationUseCase.Response:
-        return ListCoordinationsOfCooperationUseCase.Response(
+    ) -> ListCoordinationsOfCooperationInteractor.Response:
+        return ListCoordinationsOfCooperationInteractor.Response(
             coordinations=[
                 CoordinationInfo(
                     coordinator_id=coordinator_id,

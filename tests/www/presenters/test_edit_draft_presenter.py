@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.edit_draft import Response
+from arbeitszeit.interactors.edit_draft import Response
 from arbeitszeit_web.www.presenters.edit_draft_presenter import EditDraftPresenter
 from tests.www.base_test_case import BaseTestCase
 

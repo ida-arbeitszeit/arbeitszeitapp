@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import list_registered_hours_worked
+from arbeitszeit.interactors import list_registered_hours_worked
 from arbeitszeit_web.www.presenters import list_registered_hours_worked_presenter
 from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
@@ -32,7 +32,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         registered_hours_worked = [
             self.create_registered_hours_worked() for _ in range(number_of_records)
         ]
-        response = self.create_use_case_response(
+        response = self.create_interactor_response(
             registered_hours_worked=registered_hours_worked
         )
         view_model = self.presenter.present(response)
@@ -56,7 +56,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         registered_hours_worked = [
             self.create_registered_hours_worked(hours=hours_in_response)
         ]
-        response = self.create_use_case_response(
+        response = self.create_interactor_response(
             registered_hours_worked=registered_hours_worked
         )
         view_model = self.presenter.present(response)
@@ -68,7 +68,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         registered_hours_worked = [
             self.create_registered_hours_worked(worker_id=worker_id)
         ]
-        response = self.create_use_case_response(
+        response = self.create_interactor_response(
             registered_hours_worked=registered_hours_worked
         )
         view_model = self.presenter.present(response)
@@ -79,7 +79,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         registered_hours_worked = [
             self.create_registered_hours_worked(worker_name=worker_name)
         ]
-        response = self.create_use_case_response(
+        response = self.create_interactor_response(
             registered_hours_worked=registered_hours_worked
         )
         view_model = self.presenter.present(response)
@@ -93,7 +93,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
         registered_hours_worked = [
             self.create_registered_hours_worked(registered_on=registered_on)
         ]
-        response = self.create_use_case_response(
+        response = self.create_interactor_response(
             registered_hours_worked=registered_hours_worked
         )
         view_model = self.presenter.present(response)
@@ -116,7 +116,7 @@ class ListRegisteredHoursWorkedPresenterTests(BaseTestCase):
             registered_on=registered_on,
         )
 
-    def create_use_case_response(
+    def create_interactor_response(
         self,
         registered_hours_worked: list[
             list_registered_hours_worked.RegisteredHoursWorked

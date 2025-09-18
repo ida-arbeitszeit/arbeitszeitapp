@@ -1,7 +1,7 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases.request_coordination_transfer import (
-    RequestCoordinationTransferUseCase as UseCase,
+from arbeitszeit.interactors.request_coordination_transfer import (
+    RequestCoordinationTransferInteractor as Interactor,
 )
 from arbeitszeit_web.www.presenters.request_coordination_transfer_presenter import (
     RequestCoordinationTransferPresenter,
@@ -15,36 +15,42 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
         self.presenter = self.injector.get(RequestCoordinationTransferPresenter)
 
     def test_no_warning_gets_issued_if_transfer_request_was_successful(self):
-        self.presenter.present_use_case_response(self.get_successful_transfer_request())
+        self.presenter.present_interactor_response(
+            self.get_successful_transfer_request()
+        )
         self.assertFalse(self.notifier.warnings)
 
     def test_one_info_notification_gets_issued_if_transfer_request_was_successful(self):
-        self.presenter.present_use_case_response(self.get_successful_transfer_request())
+        self.presenter.present_interactor_response(
+            self.get_successful_transfer_request()
+        )
         self.assertEqual(len(self.notifier.infos), 1)
 
     def test_show_correct_notificiation_if_transfer_request_was_successful(self):
-        self.presenter.present_use_case_response(self.get_successful_transfer_request())
+        self.presenter.present_interactor_response(
+            self.get_successful_transfer_request()
+        )
         expected = self.translator.gettext("Request has been sent.")
         self.assertEqual(self.notifier.infos[0], expected)
 
     def test_correct_status_code_if_transfer_request_was_successful(self):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_successful_transfer_request()
         )
         self.assertEqual(response.status_code, 200)
 
     def test_no_info_notification_gets_issued_if_request_was_rejected(self):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_not_a_company
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_not_a_company
             )
         )
         self.assertFalse(self.notifier.infos)
 
     def test_one_warning_gets_issued_if_request_was_rejected(self):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_not_a_company
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_not_a_company
             )
         )
         self.assertEqual(len(self.notifier.warnings), 1)
@@ -52,9 +58,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_notification_when_rejected_because_candidate_is_not_a_company(
         self,
     ):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_not_a_company
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_not_a_company
             )
         )
         self.assertEqual(
@@ -65,17 +71,17 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_status_code_when_rejected_because_candidate_is_not_a_company(
         self,
     ):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_not_a_company
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_not_a_company
             )
         )
         self.assertEqual(response.status_code, 404)
 
     def test_correct_notification_when_rejected_because_cooperation_was_not_found(self):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.cooperation_not_found
+                rejection_reason=Interactor.Response.RejectionReason.cooperation_not_found
             )
         )
         self.assertEqual(
@@ -86,9 +92,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_status_code_when_rejected_because_cooperation_was_not_found(
         self,
     ):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.cooperation_not_found
+                rejection_reason=Interactor.Response.RejectionReason.cooperation_not_found
             )
         )
         self.assertEqual(response.status_code, 404)
@@ -96,9 +102,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_notification_when_rejected_because_requester_is_not_coordinator(
         self,
     ):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.requester_is_not_coordinator
+                rejection_reason=Interactor.Response.RejectionReason.requester_is_not_coordinator
             )
         )
         self.assertEqual(
@@ -109,9 +115,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_status_code_when_rejected_because_requester_is_not_coordinator(
         self,
     ):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.requester_is_not_coordinator
+                rejection_reason=Interactor.Response.RejectionReason.requester_is_not_coordinator
             )
         )
         self.assertEqual(response.status_code, 403)
@@ -119,9 +125,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_notification_when_rejected_because_candidate_is_current_coordinator(
         self,
     ):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_current_coordinator
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_current_coordinator
             )
         )
         self.assertEqual(
@@ -132,9 +138,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_status_code_when_rejected_because_candidate_is_current_coordinator(
         self,
     ):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.candidate_is_current_coordinator
+                rejection_reason=Interactor.Response.RejectionReason.candidate_is_current_coordinator
             )
         )
         self.assertEqual(response.status_code, 409)
@@ -142,9 +148,9 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_notification_when_rejected_because_coordination_has_pending_transfer_request(
         self,
     ):
-        self.presenter.present_use_case_response(
+        self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
+                rejection_reason=Interactor.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
             )
         )
         self.assertEqual(
@@ -157,23 +163,23 @@ class RequestCoordinationTransferPresenterTests(BaseTestCase):
     def test_correct_status_code_when_rejected_because_coordination_has_pending_transfer_request(
         self,
     ):
-        response = self.presenter.present_use_case_response(
+        response = self.presenter.present_interactor_response(
             self.get_rejected_transfer_request(
-                rejection_reason=UseCase.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
+                rejection_reason=Interactor.Response.RejectionReason.coordination_tenure_has_pending_transfer_request
             )
         )
         self.assertEqual(response.status_code, 409)
 
     def get_rejected_transfer_request(
-        self, rejection_reason: UseCase.Response.RejectionReason
-    ) -> UseCase.Response:
-        return UseCase.Response(
+        self, rejection_reason: Interactor.Response.RejectionReason
+    ) -> Interactor.Response:
+        return Interactor.Response(
             rejection_reason=rejection_reason,
             transfer_request=None,
         )
 
-    def get_successful_transfer_request(self) -> UseCase.Response:
-        return UseCase.Response(rejection_reason=None, transfer_request=uuid4())
+    def get_successful_transfer_request(self) -> Interactor.Response:
+        return Interactor.Response(rejection_reason=None, transfer_request=uuid4())
 
 
 class NavbarItemsTests(BaseTestCase):

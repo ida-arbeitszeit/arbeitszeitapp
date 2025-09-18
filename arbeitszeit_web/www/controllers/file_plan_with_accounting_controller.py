@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
+from arbeitszeit.interactors.file_plan_with_accounting import FilePlanWithAccounting
 from arbeitszeit_web.session import Session
 
 

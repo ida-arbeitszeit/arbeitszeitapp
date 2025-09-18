@@ -1,7 +1,7 @@
 from typing import List
 from uuid import uuid4
 
-from arbeitszeit.use_cases.create_cooperation import CreateCooperationResponse
+from arbeitszeit.interactors.create_cooperation import CreateCooperationResponse
 from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
     CreateCooperationPresenter,
 )

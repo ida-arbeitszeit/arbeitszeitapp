@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.answer_company_work_invite import (
+from arbeitszeit.interactors.answer_company_work_invite import (
     AnswerCompanyWorkInviteResponse,
 )
 from arbeitszeit_web.notification import Notifier

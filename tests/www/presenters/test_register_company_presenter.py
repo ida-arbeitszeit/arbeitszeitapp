@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.register_company import RegisterCompany
+from arbeitszeit.interactors.register_company import RegisterCompany
 from arbeitszeit_web.www.presenters.register_company_presenter import (
     RegisterCompanyPresenter,
 )

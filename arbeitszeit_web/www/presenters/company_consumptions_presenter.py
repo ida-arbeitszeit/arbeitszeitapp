@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Iterator, List
 
+from arbeitszeit.interactors.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 
@@ -29,10 +29,10 @@ class CompanyConsumptionsPresenter:
     translator: Translator
 
     def present(
-        self, use_case_response: Iterator[ConsumptionQueryResponse]
+        self, interactor_response: Iterator[ConsumptionQueryResponse]
     ) -> ViewModel:
         consumptions = [
-            self._format_consumption(consumption) for consumption in use_case_response
+            self._format_consumption(consumption) for consumption in interactor_response
         ]
         show_consumptions = True if (len(consumptions) > 0) else False
         return ViewModel(consumptions=consumptions, show_consumptions=show_consumptions)

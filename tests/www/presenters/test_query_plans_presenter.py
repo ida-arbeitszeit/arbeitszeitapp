@@ -26,7 +26,7 @@ class QueryPlansPresenterTests(BaseTestCase):
         presentation = self.presenter.get_empty_view_model()
         self.assertFalse(presentation.show_results)
 
-    def test_non_empty_use_case_response_leads_to_showing_results(self) -> None:
+    def test_non_empty_interactor_response_leads_to_showing_results(self) -> None:
         response = self.queried_plan_generator.get_response(
             [self.queried_plan_generator.get_plan()]
         )

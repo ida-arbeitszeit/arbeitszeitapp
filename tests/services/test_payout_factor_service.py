@@ -4,7 +4,7 @@ from decimal import Decimal
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
 from tests.datetime_service import datetime_utc
-from tests.use_cases.base_test_case import BaseTestCase
+from tests.interactors.base_test_case import BaseTestCase
 
 
 class PayoutFactorServiceCalculationTests(BaseTestCase):

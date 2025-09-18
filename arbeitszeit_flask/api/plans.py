@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.query_plans import QueryPlansUseCase
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
+from arbeitszeit.interactors.query_plans import QueryPlansInteractor
 from arbeitszeit_flask.api.authentication import authentication_check
 from arbeitszeit_flask.api.input_documentation import with_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
@@ -44,12 +44,12 @@ class ActivePlans(Resource):
     def get(
         self,
         controller: QueryPlansApiController,
-        query_plans: QueryPlansUseCase,
+        query_plans: QueryPlansInteractor,
         presenter: QueryPlansApiPresenter,
     ):
         "List active plans."
-        use_case_request = controller.create_request(FlaskRequest())
-        response = query_plans.execute(request=use_case_request)
+        interactor_request = controller.create_request(FlaskRequest())
+        response = query_plans.execute(request=interactor_request)
         view_model = presenter.create_view_model(response)
         return view_model
 
@@ -74,11 +74,11 @@ class Plan(Resource):
         self,
         plan_id: str,
         controller: GetPlanApiController,
-        use_case: GetPlanDetailsUseCase,
+        interactor: GetPlanDetailsInteractor,
         presenter: GetPlanApiPresenter,
     ):
         """Get plan details."""
-        use_case_request = controller.create_request(plan_id)
-        use_case_response = use_case.get_plan_details(use_case_request)
-        view_model = presenter.create_view_model(use_case_response)
+        interactor_request = controller.create_request(plan_id)
+        interactor_response = interactor.get_plan_details(interactor_request)
+        view_model = presenter.create_view_model(interactor_response)
         return view_model

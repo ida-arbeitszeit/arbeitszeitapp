@@ -35,15 +35,15 @@ class ControllerTests(BaseTestCase):
             self.controller.create_request(request)
         self.assertEqual(err.exception.message, "Email missing.")
 
-    def test_email_and_password_are_passed_to_use_case_request(self) -> None:
+    def test_email_and_password_are_passed_to_interactor_request(self) -> None:
         EXPECTED_MAIL = "test@test.org"
         EXPECTED_PASSWORD = "123safe"
         request = FakeRequest()
         request.set_json({"email": EXPECTED_MAIL, "password": EXPECTED_PASSWORD})
-        use_case_request = self.controller.create_request(request)
-        assert use_case_request
-        self.assertEqual(use_case_request.email, EXPECTED_MAIL)
-        self.assertEqual(use_case_request.password, EXPECTED_PASSWORD)
+        interactor_request = self.controller.create_request(request)
+        assert interactor_request
+        self.assertEqual(interactor_request.email, EXPECTED_MAIL)
+        self.assertEqual(interactor_request.password, EXPECTED_PASSWORD)
 
 
 class ExpectedInputsTests(BaseTestCase):

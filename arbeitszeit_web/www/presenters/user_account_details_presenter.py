@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import get_user_account_details as use_case
+from arbeitszeit.interactors import get_user_account_details as interactor
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -18,7 +18,7 @@ class UserAccountDetailsPresenter:
     url_index: UrlIndex
     datetime_formatter: DatetimeFormatter
 
-    def render_user_account_details(self, response: use_case.Response) -> ViewModel:
+    def render_user_account_details(self, response: interactor.Response) -> ViewModel:
         assert response.user_info
         return ViewModel(
             user_id=str(response.user_info.id),

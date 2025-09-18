@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
 from arbeitszeit_web.api.controllers.parameters import BodyParameter
 from arbeitszeit_web.api.response_errors import BadRequest
 from arbeitszeit_web.request import Request
@@ -22,7 +22,7 @@ login_company_expected_inputs = [
 
 
 class LoginCompanyApiController:
-    def create_request(self, request: Request) -> LogInCompanyUseCase.Request:
+    def create_request(self, request: Request) -> LogInCompanyInteractor.Request:
         json_body = request.get_json()
         if not isinstance(json_body, dict):
             raise BadRequest("Email missing.")
@@ -34,4 +34,4 @@ class LoginCompanyApiController:
             raise BadRequest(message="Password missing.")
         assert isinstance(email, str)
         assert isinstance(password, str)
-        return LogInCompanyUseCase.Request(email_address=email, password=password)
+        return LogInCompanyInteractor.Request(email_address=email, password=password)

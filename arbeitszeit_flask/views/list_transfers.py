@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import Response, render_template
 
-from arbeitszeit.use_cases.list_transfers import ListTransfersUseCase
+from arbeitszeit.interactors.list_transfers import ListTransfersInteractor
 from arbeitszeit_web.www.controllers.list_transfers_controller import (
     ListTransfersController,
 )
@@ -15,12 +15,12 @@ TEMPLATE_NAME = "user/list_transfers.html"
 
 @dataclass
 class ListTransfersView:
-    use_case: ListTransfersUseCase
+    interactor: ListTransfersInteractor
     presenter: ListTransfersPresenter
     controller: ListTransfersController
 
     def GET(self) -> Response:
-        uc_request = self.controller.create_use_case_request()
-        uc_response = self.use_case.list_transfers(uc_request)
+        uc_request = self.controller.create_interactor_request()
+        uc_response = self.interactor.list_transfers(uc_request)
         view_model = self.presenter.present(uc_response)
         return Response(render_template(TEMPLATE_NAME, view_model=view_model))

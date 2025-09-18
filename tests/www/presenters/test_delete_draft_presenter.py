@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
+from arbeitszeit.interactors.delete_draft import DeleteDraftInteractor
 from arbeitszeit_web.www.presenters.delete_draft_presenter import DeleteDraftPresenter
 from tests.www.base_test_case import BaseTestCase
 
@@ -37,5 +37,5 @@ class PresenterTests(BaseTestCase):
 
     def get_response(
         self, product_name: str = "test draft name"
-    ) -> DeleteDraftUseCase.Response:
-        return DeleteDraftUseCase.Response(product_name=product_name)
+    ) -> DeleteDraftInteractor.Response:
+        return DeleteDraftInteractor.Response(product_name=product_name)

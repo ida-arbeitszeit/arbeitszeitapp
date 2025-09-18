@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional
 
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummaryResponse
+from arbeitszeit.interactors.get_coop_summary import GetCoopSummaryResponse
 
 from ...url_index import UrlIndex, UserUrlIndex
 

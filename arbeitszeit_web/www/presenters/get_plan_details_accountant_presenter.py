@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_web.formatters.plan_details_formatter import (
     PlanDetailsFormatter,
     PlanDetailsWeb,
@@ -22,7 +22,7 @@ class GetPlanDetailsAccountantPresenter:
     url_index: UrlIndex
 
     def present(
-        self, response: GetPlanDetailsUseCase.Response
+        self, response: GetPlanDetailsInteractor.Response
     ) -> GetPlanDetailsAccountantViewModel:
         return GetPlanDetailsAccountantViewModel(
             details=self.plan_details_service.format_plan_details(

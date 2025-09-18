@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import list_registered_hours_worked
+from arbeitszeit.interactors import list_registered_hours_worked
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 

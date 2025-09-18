@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 
-from arbeitszeit.use_cases.log_in_company import LogInCompanyUseCase
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.interactors.log_in_company import LogInCompanyInteractor
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
 from arbeitszeit_flask.api.input_documentation import with_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
 from arbeitszeit_flask.api.schema_converter import SchemaConverter
@@ -48,12 +48,12 @@ class LoginMember(Resource):
     def post(
         self,
         controller: LoginMemberApiController,
-        login_member: LogInMemberUseCase,
+        login_member: LogInMemberInteractor,
         presenter: LoginMemberApiPresenter,
     ):
         "Login with a member account."
-        use_case_request = controller.create_request(FlaskRequest())
-        response = login_member.log_in_member(use_case_request)
+        interactor_request = controller.create_request(FlaskRequest())
+        response = login_member.log_in_member(interactor_request)
         view_model = presenter.create_view_model(response)
         return view_model
 
@@ -77,13 +77,13 @@ class LoginCompany(Resource):
     def post(
         self,
         controller: LoginCompanyApiController,
-        login_company: LogInCompanyUseCase,
+        login_company: LogInCompanyInteractor,
         presenter: LoginCompanyApiPresenter,
     ):
         """
         Login with a company account.
         """
-        use_case_request = controller.create_request(FlaskRequest())
-        response = login_company.log_in_company(use_case_request)
+        interactor_request = controller.create_request(FlaskRequest())
+        response = login_company.log_in_company(interactor_request)
         view_model = presenter.create_view_model(response)
         return view_model

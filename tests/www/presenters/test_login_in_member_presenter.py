@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_member_presenter import LogInMemberPresenter
 from tests.forms import LoginForm
@@ -28,7 +28,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInMemberUseCase.RejectionReason.unknown_email_address
+            reason=LogInMemberInteractor.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
         self.assertTrue(self.form.email_field().errors)
@@ -37,7 +37,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInMemberUseCase.RejectionReason.unknown_email_address
+            reason=LogInMemberInteractor.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
         self.assertIn(
@@ -51,7 +51,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInMemberUseCase.RejectionReason.unknown_email_address
+            reason=LogInMemberInteractor.RejectionReason.unknown_email_address
         )
         self.presenter.present_login_process(response, self.form)
         self.assertFalse(self.form.password_field().errors)
@@ -67,7 +67,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInMemberUseCase.RejectionReason.invalid_password
+            reason=LogInMemberInteractor.RejectionReason.invalid_password
         )
         self.presenter.present_login_process(response, self.form)
         self.assertIn(
@@ -79,7 +79,7 @@ class PresenterTests(BaseTestCase):
         self,
     ) -> None:
         response = self.create_failure_response(
-            reason=LogInMemberUseCase.RejectionReason.invalid_password
+            reason=LogInMemberInteractor.RejectionReason.invalid_password
         )
         self.presenter.present_login_process(response, self.form)
         self.assertFalse(
@@ -151,12 +151,12 @@ class PresenterTests(BaseTestCase):
 
     def create_success_response(
         self, email: Optional[str] = None, user_id: Optional[UUID] = None
-    ) -> LogInMemberUseCase.Response:
+    ) -> LogInMemberInteractor.Response:
         if email is None:
             email = "test@test.test"
         if user_id is None:
             user_id = uuid4()
-        return LogInMemberUseCase.Response(
+        return LogInMemberInteractor.Response(
             is_logged_in=True,
             rejection_reason=None,
             email=email,
@@ -164,11 +164,11 @@ class PresenterTests(BaseTestCase):
         )
 
     def create_failure_response(
-        self, reason: Optional[LogInMemberUseCase.RejectionReason] = None
-    ) -> LogInMemberUseCase.Response:
+        self, reason: Optional[LogInMemberInteractor.RejectionReason] = None
+    ) -> LogInMemberInteractor.Response:
         if reason is None:
-            reason = LogInMemberUseCase.RejectionReason.invalid_password
-        return LogInMemberUseCase.Response(
+            reason = LogInMemberInteractor.RejectionReason.invalid_password
+        return LogInMemberInteractor.Response(
             is_logged_in=False,
             rejection_reason=reason,
             email="test@test.test",

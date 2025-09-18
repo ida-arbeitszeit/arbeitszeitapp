@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.select_productive_consumption import (
+from arbeitszeit.interactors.select_productive_consumption import (
     InvalidPlanResponse,
     NoPlanResponse,
     ValidPlanResponse,
 )
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 

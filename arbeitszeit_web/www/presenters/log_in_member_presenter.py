@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
 from arbeitszeit_web.forms import LoginMemberForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -19,7 +19,7 @@ class LogInMemberPresenter:
     member_url_index: UrlIndex
 
     def present_login_process(
-        self, response: LogInMemberUseCase.Response, form: LoginMemberForm
+        self, response: LogInMemberInteractor.Response, form: LoginMemberForm
     ) -> ViewModel:
         if response.is_logged_in:
             assert response.user_id
@@ -34,7 +34,7 @@ class LogInMemberPresenter:
         else:
             if (
                 response.rejection_reason
-                == LogInMemberUseCase.RejectionReason.unknown_email_address
+                == LogInMemberInteractor.RejectionReason.unknown_email_address
             ):
                 form.email_field().attach_error(
                     self.translator.gettext(

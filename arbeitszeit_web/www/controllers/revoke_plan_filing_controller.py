@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
+from arbeitszeit.interactors.revoke_plan_filing import RevokePlanFilingInteractor
 from arbeitszeit_web.session import Session
 
 
@@ -9,7 +9,7 @@ from arbeitszeit_web.session import Session
 class RevokePlanFilingController:
     session: Session
 
-    def create_request(self, plan_id: UUID) -> RevokePlanFilingUseCase.Request:
+    def create_request(self, plan_id: UUID) -> RevokePlanFilingInteractor.Request:
         requester = self.session.get_current_user()
         assert requester
-        return RevokePlanFilingUseCase.Request(plan=plan_id, requester=requester)
+        return RevokePlanFilingInteractor.Request(plan=plan_id, requester=requester)

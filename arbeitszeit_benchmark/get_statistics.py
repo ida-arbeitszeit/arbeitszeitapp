@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from flask import Flask
 
+from arbeitszeit.interactors import get_statistics
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases import get_statistics
 from arbeitszeit_flask.database.db import Database
 from tests.data_generators import PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
@@ -21,7 +21,9 @@ class GetStatisticsBenchmark:
         self.app_context = app.app_context()
         self.app_context.push()
         plan_generator = injector.get(PlanGenerator)
-        self.get_statistics_use_case = injector.get(get_statistics.GetStatisticsUseCase)
+        self.get_statistics_interactor = injector.get(
+            get_statistics.GetStatisticsInteractor
+        )
         random.seed()
         for _ in range(500):
             plan_generator.create_plan(
@@ -37,7 +39,7 @@ class GetStatisticsBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        self.get_statistics_use_case.get_statistics()
+        self.get_statistics_interactor.get_statistics()
 
     def random_production_costs(self) -> ProductionCosts:
         return ProductionCosts(

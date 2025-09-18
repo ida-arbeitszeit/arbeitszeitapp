@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Flask
 
-from arbeitszeit.use_cases import get_company_summary
+from arbeitszeit.interactors import get_company_summary
 from arbeitszeit_flask.database.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
@@ -11,7 +11,7 @@ from tests.flask_integration.flask import drop_and_recreate_schema
 
 class GetCompanySummaryBenchmark:
     """This benchmark measures the performance of the
-    get_company_summary use case with a company that has made 1000
+    get_company_summary interactor with a company that has made 1000
     productive consumptions and created 1000 approved plans.
     """
 
@@ -27,7 +27,7 @@ class GetCompanySummaryBenchmark:
         self.plan_generator = self.injector.get(PlanGenerator)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.get_company_summary = self.injector.get(
-            get_company_summary.GetCompanySummaryUseCase
+            get_company_summary.GetCompanySummaryInteractor
         )
         self.company = self.company_generator.create_company()
         for _ in range(100):

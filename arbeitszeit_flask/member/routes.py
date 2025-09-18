@@ -5,9 +5,9 @@ from flask import Response as FlaskResponse
 from flask import render_template
 from flask_login import current_user
 
-from arbeitszeit.use_cases import get_member_dashboard
-from arbeitszeit.use_cases.get_member_account import GetMemberAccountUseCase
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit.interactors import get_member_dashboard
+from arbeitszeit.interactors.get_member_account import GetMemberAccountInteractor
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
@@ -45,12 +45,12 @@ class register_private_consumption(RegisterPrivateConsumptionView): ...
 @as_flask_view()
 @dataclass
 class dashboard:
-    use_case: get_member_dashboard.GetMemberDashboardUseCase
+    interactor: get_member_dashboard.GetMemberDashboardInteractor
     presenter: GetMemberDashboardPresenter
 
     def GET(self) -> Response:
         request = get_member_dashboard.Request(member=UUID(current_user.id))
-        response = self.use_case.get_member_dashboard(request)
+        response = self.interactor.get_member_dashboard(request)
         view_model = self.presenter.present(response)
         return FlaskResponse(
             render_template(
@@ -64,7 +64,7 @@ class dashboard:
 @as_flask_view()
 @dataclass
 class my_account:
-    get_member_account: GetMemberAccountUseCase
+    get_member_account: GetMemberAccountInteractor
     presenter: GetMemberAccountPresenter
 
     def GET(self) -> Response:
@@ -82,14 +82,14 @@ class my_account:
 @as_flask_view()
 @dataclass
 class plan_details:
-    use_case: GetPlanDetailsUseCase
+    interactor: GetPlanDetailsInteractor
     presenter: GetPlanDetailsMemberMemberPresenter
 
     def GET(self, plan_id: UUID) -> Response:
-        use_case_request = GetPlanDetailsUseCase.Request(plan_id)
-        use_case_response = self.use_case.get_plan_details(use_case_request)
-        if use_case_response:
-            view_model = self.presenter.present(use_case_response)
+        interactor_request = GetPlanDetailsInteractor.Request(plan_id)
+        interactor_response = self.interactor.get_plan_details(interactor_request)
+        if interactor_response:
+            view_model = self.presenter.present(interactor_response)
             return FlaskResponse(
                 render_template(
                     "member/plan_details.html",

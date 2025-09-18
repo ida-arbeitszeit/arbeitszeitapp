@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from arbeitszeit.interactors.show_p_account_details import ShowPAccountDetailsInteractor
 from arbeitszeit.transfers.transfer_type import TransferType
-from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -31,22 +31,22 @@ class ShowPAccountDetailsPresenter:
     datetime_formatter: DatetimeFormatter
 
     def present(
-        self, use_case_response: ShowPAccountDetailsUseCase.Response
+        self, interactor_response: ShowPAccountDetailsInteractor.Response
     ) -> ViewModel:
         transfers = [
-            self._create_info(transfer) for transfer in use_case_response.transfers
+            self._create_info(transfer) for transfer in interactor_response.transfers
         ]
         return self.ViewModel(
             transfers=transfers,
-            account_balance=str(round(use_case_response.account_balance, 2)),
+            account_balance=str(round(interactor_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_p_account(
-                use_case_response.company_id
+                interactor_response.company_id
             ),
             navbar_items=[
                 NavbarItem(
                     text=self.translator.gettext("Accounts"),
                     url=self.url_index.get_company_accounts_url(
-                        company_id=use_case_response.company_id
+                        company_id=interactor_response.company_id
                     ),
                 ),
                 NavbarItem(text=self.translator.gettext("Account p"), url=None),
@@ -54,7 +54,7 @@ class ShowPAccountDetailsPresenter:
         )
 
     def _create_info(
-        self, transfer: ShowPAccountDetailsUseCase.TransferInfo
+        self, transfer: ShowPAccountDetailsInteractor.TransferInfo
     ) -> TransferInfo:
         transfer_type = (
             self.translator.gettext("Consumption")

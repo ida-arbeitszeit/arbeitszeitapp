@@ -3,11 +3,13 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
-from arbeitszeit.use_cases.send_accountant_registration_token import (
-    SendAccountantRegistrationTokenUseCase,
+from arbeitszeit.interactors.invite_worker_to_company import (
+    InviteWorkerToCompanyInteractor,
 )
+from arbeitszeit.interactors.send_accountant_registration_token import (
+    SendAccountantRegistrationTokenInteractor,
+)
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.session import UserRole
 
 from .flask import ViewTestCase
@@ -74,11 +76,11 @@ class PlotUrlIndexTests(ViewTestCase):
 class GeneralUrlIndexTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.invite_worker_to_company_use_case = self.injector.get(
-            InviteWorkerToCompanyUseCase
+        self.invite_worker_to_company_interactor = self.injector.get(
+            InviteWorkerToCompanyInteractor
         )
-        self.invite_accountant_use_case = self.injector.get(
-            SendAccountantRegistrationTokenUseCase
+        self.invite_accountant_interactor = self.injector.get(
+            SendAccountantRegistrationTokenInteractor
         )
 
     def test_invite_url_for_existing_invite_leads_to_functional_url_for_member(
@@ -218,8 +220,8 @@ class GeneralUrlIndexTests(ViewTestCase):
 
     def _create_invite(self, member: UUID) -> UUID:
         company = self.company_generator.create_company_record()
-        response = self.invite_worker_to_company_use_case.invite_worker(
-            InviteWorkerToCompanyUseCase.Request(
+        response = self.invite_worker_to_company_interactor.invite_worker(
+            InviteWorkerToCompanyInteractor.Request(
                 company=company.id,
                 worker=member,
             )

@@ -1,4 +1,4 @@
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_web.api.presenters.get_plan_api_presenter import GetPlanApiPresenter
 from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
@@ -19,7 +19,7 @@ class TestViewModelCreation(BaseTestCase):
         self.presenter = self.injector.get(GetPlanApiPresenter)
         self.plan_details_generator = self.injector.get(PlanDetailsGenerator)
 
-    def test_not_found_is_raised_if_use_case_response_is_none(self) -> None:
+    def test_not_found_is_raised_if_interactor_response_is_none(self) -> None:
         with self.assertRaises(NotFound) as err:
             self.presenter.create_view_model(None)
         self.assertEqual(err.exception.message, "No plan with such ID.")
@@ -28,10 +28,10 @@ class TestViewModelCreation(BaseTestCase):
         self,
     ) -> None:
         expected_plan_details = self.plan_details_generator.create_plan_details()
-        use_case_response = GetPlanDetailsUseCase.Response(
+        interactor_response = GetPlanDetailsInteractor.Response(
             plan_details=expected_plan_details
         )
-        view_model = self.presenter.create_view_model(use_case_response)
+        view_model = self.presenter.create_view_model(interactor_response)
         self.assertEqual(view_model, expected_plan_details)
 
 

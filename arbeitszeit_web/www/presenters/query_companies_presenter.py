@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.query_companies import CompanyQueryResponse
+from arbeitszeit.interactors.query_companies import CompanyQueryResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.pagination import Pagination, Paginator
 from arbeitszeit_web.request import Request

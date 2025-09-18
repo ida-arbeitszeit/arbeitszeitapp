@@ -2,11 +2,11 @@ from decimal import Decimal
 from typing import Iterator
 from uuid import uuid4
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.query_company_consumptions import (
+from arbeitszeit.interactors.query_company_consumptions import (
     ConsumptionQueryResponse,
-    QueryCompanyConsumptionsUseCase,
+    QueryCompanyConsumptionsInteractor,
 )
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.www.presenters.company_consumptions_presenter import (
     CompanyConsumptionsPresenter,
     ViewModel,
@@ -18,7 +18,7 @@ from tests.www.base_test_case import BaseTestCase
 class TestPresenter(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.query_consumptions = self.injector.get(QueryCompanyConsumptionsUseCase)
+        self.query_consumptions = self.injector.get(QueryCompanyConsumptionsInteractor)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.presenter = self.injector.get(CompanyConsumptionsPresenter)
 
@@ -85,13 +85,13 @@ class TestPresenter(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consuming_company
         )
-        use_case_response = self.query_consumptions.execute(company=consuming_company)
-        view_model = self.presenter.present(use_case_response)
+        interactor_response = self.query_consumptions.execute(company=consuming_company)
+        view_model = self.presenter.present(interactor_response)
         assert view_model.show_consumptions
 
     def test_do_not_show_consumptions_if_there_is_no_consumption_of_querying_company(
         self,
     ) -> None:
-        use_case_response: Iterator[ConsumptionQueryResponse] = iter([])
-        view_model = self.presenter.present(use_case_response)
+        interactor_response: Iterator[ConsumptionQueryResponse] = iter([])
+        view_model = self.presenter.present(interactor_response)
         assert not view_model.show_consumptions

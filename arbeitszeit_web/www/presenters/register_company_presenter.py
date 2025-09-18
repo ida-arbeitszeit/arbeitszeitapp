@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.register_company import RegisterCompany
+from arbeitszeit.interactors.register_company import RegisterCompany
 from arbeitszeit_web.forms import RegisterForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator

@@ -12,7 +12,7 @@ class ConfirmMemberControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ConfirmMemberController)
 
-    def test_that_invalid_token_yields_no_use_case_request(self) -> None:
+    def test_that_invalid_token_yields_no_interactor_request(self) -> None:
         assert self.controller.process_request(token="testtoken 123") is None
 
     def test_supplying_proper_token_yields_a_proper_request(

@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.use_cases.show_my_plans import ShowMyPlansResponse
+from arbeitszeit.interactors.show_my_plans import ShowMyPlansResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex

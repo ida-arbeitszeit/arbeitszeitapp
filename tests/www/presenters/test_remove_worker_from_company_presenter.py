@@ -1,6 +1,8 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.remove_worker_from_company import Response as UseCaseResponse
+from arbeitszeit.interactors.remove_worker_from_company import (
+    Response as InteractorResponse,
+)
 from arbeitszeit_web.www.presenters import remove_worker_from_company_presenter
 from arbeitszeit_web.www.presenters.remove_worker_from_company_presenter import (
     RemoveWorkerFromCompanyPresenter as Presenter,
@@ -22,13 +24,13 @@ class TestRemoveWorkerFromCompanyPresenter(BaseTestCase):
 
     @parameterized.expand(
         [
-            (UseCaseResponse.RejectionReason.company_not_found, 404),
-            (UseCaseResponse.RejectionReason.not_workplace_of_worker, 400),
-            (UseCaseResponse.RejectionReason.worker_not_found, 404),
+            (InteractorResponse.RejectionReason.company_not_found, 404),
+            (InteractorResponse.RejectionReason.not_workplace_of_worker, 400),
+            (InteractorResponse.RejectionReason.worker_not_found, 404),
         ]
     )
     def test_correct_status_code_is_returned_on_rejection(
-        self, rejection_reason: UseCaseResponse.RejectionReason, expected_code: int
+        self, rejection_reason: InteractorResponse.RejectionReason, expected_code: int
     ) -> None:
         response = self.create_response(rejection_reason)
         view_model = self.presenter.present(response)
@@ -49,10 +51,10 @@ class TestRemoveWorkerFromCompanyPresenter(BaseTestCase):
         )
 
     @parameterized.expand(
-        [(rejection_reason,) for rejection_reason in UseCaseResponse.RejectionReason]
+        [(rejection_reason,) for rejection_reason in InteractorResponse.RejectionReason]
     )
     def test_no_info_is_displayed_on_rejection(
-        self, rejection_reason: UseCaseResponse.RejectionReason
+        self, rejection_reason: InteractorResponse.RejectionReason
     ) -> None:
         response = self.create_response(rejection_reason)
         self.presenter.present(response)
@@ -60,16 +62,19 @@ class TestRemoveWorkerFromCompanyPresenter(BaseTestCase):
 
     @parameterized.expand(
         [
-            (UseCaseResponse.RejectionReason.company_not_found, "Company not found."),
             (
-                UseCaseResponse.RejectionReason.not_workplace_of_worker,
+                InteractorResponse.RejectionReason.company_not_found,
+                "Company not found.",
+            ),
+            (
+                InteractorResponse.RejectionReason.not_workplace_of_worker,
                 "Worker is not a member of the company.",
             ),
-            (UseCaseResponse.RejectionReason.worker_not_found, "Worker not found."),
+            (InteractorResponse.RejectionReason.worker_not_found, "Worker not found."),
         ]
     )
     def test_correct_warning_is_displayed_on_rejection(
-        self, rejection_reason: UseCaseResponse.RejectionReason, message: str
+        self, rejection_reason: InteractorResponse.RejectionReason, message: str
     ) -> None:
         response = self.create_response(rejection_reason)
         self.presenter.present(response)
@@ -77,6 +82,6 @@ class TestRemoveWorkerFromCompanyPresenter(BaseTestCase):
         assert self.notifier.warnings[0] == self.translator.gettext(message)
 
     def create_response(
-        self, rejection_reason: UseCaseResponse.RejectionReason | None
-    ) -> UseCaseResponse:
-        return UseCaseResponse(rejection_reason)
+        self, rejection_reason: InteractorResponse.RejectionReason | None
+    ) -> InteractorResponse:
+        return InteractorResponse(rejection_reason)

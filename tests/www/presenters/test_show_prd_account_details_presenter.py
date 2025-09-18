@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit.transfers.transfer_type import TransferType
-from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
 )
@@ -19,12 +19,12 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.presenter = self.injector.get(ShowPRDAccountDetailsPresenter)
 
     def test_return_empty_list_when_no_transfers_took_place(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         self.assertEqual(view_model.transfers, [])
 
     def test_do_not_show_transfers_if_no_transfers_took_place(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_transfers)
 
@@ -45,7 +45,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             transfer_type=transfer_type,
             volume=TRANSFER_VOLUME,
         )
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[transfer], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
@@ -73,7 +73,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             transfer_type=TransferType.private_consumption,
             volume=TRANSFER_VOLUME,
         )
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[transfer], account_balance=ACCOUNT_BALANCE
         )
         view_model = self.presenter.present(response)
@@ -96,7 +96,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         transfer = self._get_transfer_info(
             transfer_type=TransferType.compensation_for_coop,
         )
-        response = self._use_case_response(transfers=[transfer])
+        response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
@@ -110,7 +110,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         transfer = self._get_transfer_info(
             transfer_type=TransferType.compensation_for_company,
         )
-        response = self._use_case_response(transfers=[transfer])
+        response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
@@ -119,7 +119,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         )
 
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(),
                 self._get_transfer_info(),
@@ -129,7 +129,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 2)
 
     def test_presenter_returns_a_plot_url_with_company_id_as_parameter(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
@@ -138,7 +138,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         expected_user_name = "some user name"
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.productive_consumption_p,
@@ -155,7 +155,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         expected_user_name = self.translator.gettext("Anonymous worker")
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.private_consumption,
@@ -170,7 +170,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         expected_coop_name = "some coop name"
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.compensation_for_coop,
@@ -187,7 +187,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self,
     ) -> None:
         expected_company_name = "some company name"
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.compensation_for_company,
@@ -203,7 +203,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     def test_member_peer_icon_is_shown_if_transfer_was_with_member(
         self,
     ) -> None:
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.private_consumption,
@@ -217,7 +217,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     def test_company_peer_icon_is_shown_if_transfer_was_with_company(
         self,
     ) -> None:
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=TransferType.productive_consumption_p,
@@ -240,7 +240,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self,
         transfer_type: TransferType,
     ) -> None:
-        response = self._use_case_response(
+        response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
                     transfer_type=transfer_type,
@@ -262,7 +262,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             volume=Decimal(10.007),
             peer=None,
         )
-        response = self._use_case_response(transfers=[transfer])
+        response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
         assert view_model.transfers[0].peer_type_icon == ""
 
@@ -275,17 +275,17 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             volume=Decimal(10.007),
             peer=None,
         )
-        response = self._use_case_response(transfers=[transfer])
+        response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
         assert view_model.transfers[0].peer_name == ""
 
     def test_view_model_contains_two_navbar_items(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         assert len(view_model.navbar_items) == 2
 
     def test_first_navbar_item_has_text_accounts_and_url_to_my_accounts(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         navbar_item = view_model.navbar_items[0]
         assert navbar_item.text == self.translator.gettext("Accounts")
@@ -294,13 +294,13 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         )
 
     def test_second_navbar_item_has_text_account_prd_and_no_url(self) -> None:
-        response = self._use_case_response()
+        response = self._interactor_response()
         view_model = self.presenter.present(response)
         navbar_item = view_model.navbar_items[1]
         assert navbar_item.text == self.translator.gettext("Account prd")
         assert navbar_item.url is None
 
-    def _use_case_response(
+    def _interactor_response(
         self,
         company_id: UUID = uuid4(),
         transfers: List[show_prd_account_details.TransferInfo] | None = None,

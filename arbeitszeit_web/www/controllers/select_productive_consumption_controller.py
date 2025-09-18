@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.select_productive_consumption import (
-    Request as UseCaseRequest,
+from arbeitszeit.interactors.select_productive_consumption import (
+    Request as InteractorRequest,
 )
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
@@ -18,11 +18,11 @@ class SelectProductiveConsumptionController:
     notifier: Notifier
     translator: Translator
 
-    def process_input_data(self, request: Request) -> UseCaseRequest:
+    def process_input_data(self, request: Request) -> InteractorRequest:
         plan_id = self._process_plan_id(request)
         amount = self._process_amount(request)
         consumption_type = self._process_consumption_type(request)
-        return UseCaseRequest(
+        return InteractorRequest(
             plan_id=plan_id, amount=amount, consumption_type=consumption_type
         )
 

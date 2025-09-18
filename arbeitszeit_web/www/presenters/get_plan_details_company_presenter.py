@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit.plan_details import PlanDetails
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_web.formatters.plan_details_formatter import (
     PlanDetailsFormatter,
     PlanDetailsWeb,
@@ -36,7 +36,7 @@ class GetPlanDetailsCompanyPresenter:
     session: Session
 
     def present(
-        self, response: GetPlanDetailsUseCase.Response
+        self, response: GetPlanDetailsInteractor.Response
     ) -> GetPlanDetailsCompanyViewModel:
         plan_details = response.plan_details
         current_user = self.session.get_current_user()

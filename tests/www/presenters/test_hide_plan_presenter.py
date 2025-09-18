@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases.hide_plan import HidePlanResponse
+from arbeitszeit.interactors.hide_plan import HidePlanResponse
 from arbeitszeit_web.www.presenters.hide_plan_presenter import HidePlanPresenter
 from tests.www.base_test_case import BaseTestCase
 

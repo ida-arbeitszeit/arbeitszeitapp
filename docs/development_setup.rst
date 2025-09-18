@@ -215,12 +215,12 @@ run via an environment variable:
 Since running tests against the database is generally very slow, we
 recommend that you run only the tests for the part of the application 
 on which you are working.  For example, if you are working on the business 
-logic, you can use the following command to quickly run all the use case 
+logic, you can use the following command to quickly run all the interactor 
 tests:
 
 .. code-block:: bash
 
-  pytest tests/use_cases
+  pytest tests/interactors
 
 When you feel confident about your changes, and you want to run all the
 tests, you can do so by executing ``./run-checks``, which will run all

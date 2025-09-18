@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.query_companies import CompanyFilter
+from arbeitszeit.interactors.query_companies import CompanyFilter
 from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.api.controllers.query_companies_api_controller import (
     QueryCompaniesApiController,
@@ -20,13 +20,13 @@ class ControllerTests(BaseTestCase):
         self,
     ) -> None:
         request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertEqual(use_case_request.filter_category, CompanyFilter.by_name)
+        interactor_request = self.controller.create_request(request)
+        self.assertEqual(interactor_request.filter_category, CompanyFilter.by_name)
 
     def test_that_by_default_a_request_gets_returned_without_query_string(self) -> None:
         request = FakeRequest()
-        use_case_request = self.controller.create_request(request)
-        self.assertIsNone(use_case_request.query_string)
+        interactor_request = self.controller.create_request(request)
+        self.assertIsNone(interactor_request.query_string)
 
     @parameterized.expand(
         [
@@ -43,9 +43,9 @@ class ControllerTests(BaseTestCase):
         expected_offset: int,
     ) -> None:
         request = FakeRequest(query_string=query_string)
-        use_case_request = self.controller.create_request(request)
-        assert use_case_request.limit == expected_limit
-        assert use_case_request.offset == expected_offset
+        interactor_request = self.controller.create_request(request)
+        assert interactor_request.limit == expected_limit
+        assert interactor_request.offset == expected_offset
 
     @parameterized.expand(
         [

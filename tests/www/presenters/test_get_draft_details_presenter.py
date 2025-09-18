@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
+from arbeitszeit.interactors.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
     GetDraftDetailsPresenter,
 )

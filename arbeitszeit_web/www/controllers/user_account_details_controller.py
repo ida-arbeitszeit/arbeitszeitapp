@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import get_user_account_details as use_case
+from arbeitszeit.interactors import get_user_account_details as interactor
 from arbeitszeit_web.session import Session
 
 
@@ -8,12 +8,12 @@ from arbeitszeit_web.session import Session
 class UserAccountDetailsController:
     session: Session
 
-    def parse_web_request(self) -> use_case.Request:
+    def parse_web_request(self) -> interactor.Request:
         role = self.session.get_user_role()
         if role:
             user_id = self.session.get_current_user()
             assert user_id
-            return use_case.Request(
+            return interactor.Request(
                 user_id=user_id,
             )
         else:
