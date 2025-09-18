@@ -2,8 +2,8 @@ from datetime import timedelta
 from uuid import UUID
 
 from arbeitszeit.use_cases.list_all_cooperations import (
-    ListAllCooperations,
     ListAllCooperationsResponse,
+    ListAllCooperationsUseCase,
 )
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService, datetime_utc
@@ -17,18 +17,18 @@ def coop_in_response(cooperation: UUID, response: ListAllCooperationsResponse) -
 
 @injection_test
 def test_empty_list_is_returned_when_there_are_no_cooperations(
-    use_case: ListAllCooperations,
+    use_case: ListAllCooperationsUseCase,
 ):
-    response = use_case()
+    response = use_case.execute()
     assert len(response.cooperations) == 0
 
 
 @injection_test
 def test_one_empty_cooperation_is_returned_if_there_is_one_coop_without_plans(
-    use_case: ListAllCooperations, cooperation_generator: CooperationGenerator
+    use_case: ListAllCooperationsUseCase, cooperation_generator: CooperationGenerator
 ):
     cooperation = cooperation_generator.create_cooperation()
-    response = use_case()
+    response = use_case.execute()
     assert len(response.cooperations) == 1
     assert response.cooperations[0].plan_count == 0
     assert coop_in_response(cooperation, response)
@@ -36,7 +36,7 @@ def test_one_empty_cooperation_is_returned_if_there_is_one_coop_without_plans(
 
 @injection_test
 def test_one_returned_cooperation_shows_correct_info(
-    use_case: ListAllCooperations,
+    use_case: ListAllCooperationsUseCase,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ):
@@ -45,7 +45,7 @@ def test_one_returned_cooperation_shows_correct_info(
     cooperation = cooperation_generator.create_cooperation(
         plans=[plan], name=expected_cooperation_name
     )
-    response = use_case()
+    response = use_case.execute()
     assert len(response.cooperations) == 1
     assert coop_in_response(cooperation, response)
     assert response.cooperations[0].plan_count == 1
@@ -55,21 +55,21 @@ def test_one_returned_cooperation_shows_correct_info(
 
 @injection_test
 def test_one_cooperation_with_correct_plan_count_is_returned_if_there_is_one_coop_with_2_plans(
-    use_case: ListAllCooperations,
+    use_case: ListAllCooperationsUseCase,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
 ) -> None:
     plan1 = plan_generator.create_plan()
     plan2 = plan_generator.create_plan()
     cooperation = cooperation_generator.create_cooperation(plans=[plan1, plan2])
-    response = use_case()
+    response = use_case.execute()
     assert response.cooperations[0].plan_count == 2
     assert coop_in_response(cooperation, response)
 
 
 @injection_test
 def test_that_expired_plans_are_not_included_in_plan_count(
-    use_case: ListAllCooperations,
+    use_case: ListAllCooperationsUseCase,
     cooperation_generator: CooperationGenerator,
     plan_generator: PlanGenerator,
     datetime_service: FakeDatetimeService,
@@ -78,5 +78,5 @@ def test_that_expired_plans_are_not_included_in_plan_count(
     plan = plan_generator.create_plan(timeframe=1)
     cooperation_generator.create_cooperation(plans=[plan])
     datetime_service.advance_time(timedelta(days=2))
-    response = use_case()
+    response = use_case.execute()
     assert response.cooperations[0].plan_count == 0

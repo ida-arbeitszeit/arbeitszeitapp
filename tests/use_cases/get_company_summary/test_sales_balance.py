@@ -3,8 +3,8 @@ from typing import Union
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.get_company_summary import (
-    GetCompanySummary,
     GetCompanySummarySuccess,
+    GetCompanySummaryUseCase,
     PlanDetails,
 )
 
@@ -14,7 +14,7 @@ from ..base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.get_company_summary = self.injector.get(GetCompanySummary)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
 
     def test_returns_correct_sales_balance_if_plan_is_productive_and_no_transfers_took_place(
         self,
@@ -23,7 +23,7 @@ class UseCaseTests(BaseTestCase):
         self.plan_generator.create_plan(
             planner=company, costs=self._create_planning_costs(3)
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].sales_balance == Decimal("-3")
 
@@ -38,7 +38,7 @@ class UseCaseTests(BaseTestCase):
             amount=2,
         )
         self.consumption_generator.create_fixed_means_consumption(plan=plan)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].sales_balance == -costs.total_cost() / 2
 
@@ -53,7 +53,7 @@ class UseCaseTests(BaseTestCase):
         )
         other_plan = self.plan_generator.create_plan(planner=planner)
         self.consumption_generator.create_fixed_means_consumption(plan=other_plan)
-        response = self.get_company_summary(planner)
+        response = self.get_company_summary.execute(planner)
         assert response
         plan_details = self._find_balance_for_named_product(
             expected_product_name, response

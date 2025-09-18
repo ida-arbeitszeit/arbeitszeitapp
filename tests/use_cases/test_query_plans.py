@@ -10,8 +10,8 @@ from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanQueryResponse,
     PlanSorting,
-    QueryPlans,
     QueryPlansRequest,
+    QueryPlansUseCase,
 )
 from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
@@ -31,14 +31,14 @@ class SearchStrategy(Enum):
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.query_plans = self.injector.get(QueryPlans)
+        self.use_case = self.injector.get(QueryPlansUseCase)
 
     @parameterized.expand([(strategy,) for strategy in SearchStrategy])
     def test_that_no_plan_is_returned_when_searching_an_empty_repository(
         self,
         search_strategy: SearchStrategy,
     ) -> None:
-        response = self.query_plans(self.make_request(search_strategy))
+        response = self.use_case.execute(self.make_request(search_strategy))
         assert not response.results
 
     @parameterized.expand([(strategy,) for strategy in SearchStrategy])
@@ -47,7 +47,7 @@ class UseCaseTests(BaseTestCase):
         strategy: SearchStrategy,
     ) -> None:
         self.plan_generator.create_plan(approved=False)
-        response = self.query_plans(self.make_request(strategy))
+        response = self.use_case.execute(self.make_request(strategy))
         assert not response.results
 
     @parameterized.expand([(strategy,) for strategy in SearchStrategy])
@@ -58,7 +58,7 @@ class UseCaseTests(BaseTestCase):
         expected_number_of_plans = 3
         for _ in range(expected_number_of_plans):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request(search_strategy))
+        response = self.use_case.execute(self.make_request(search_strategy))
         assert len(response.results) == expected_number_of_plans
 
     @parameterized.expand(
@@ -78,7 +78,7 @@ class UseCaseTests(BaseTestCase):
         for _ in range(3):
             self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.query_plans(self.make_request(search_strategy))
+        response = self.use_case.execute(self.make_request(search_strategy))
         assert len(response.results) == expected_number_of_plans
 
     def test_that_only_active_plan_is_returned_when_expired_plans_are_excluded(
@@ -88,7 +88,7 @@ class UseCaseTests(BaseTestCase):
         self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
         expected_plan = self.plan_generator.create_plan()
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(SearchStrategy.by_id_sort_by_date_exclude_expired)
         )
         assert len(response.results) == 1
@@ -111,7 +111,7 @@ class UseCaseTests(BaseTestCase):
         for _ in range(expected_number_of_plans):
             self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.query_plans(self.make_request(search_strategy))
+        response = self.use_case.execute(self.make_request(search_strategy))
         assert len(response.results) == expected_number_of_plans
 
     def test_that_expired_plan_is_shown_as_expired(
@@ -120,7 +120,7 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.plan_generator.create_plan(timeframe=1)
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(SearchStrategy.by_id_sort_by_date_include_expired)
         )
         assert response.results[0].is_expired
@@ -129,7 +129,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         assert not response.results[0].is_expired
 
     @parameterized.expand(
@@ -146,7 +146,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         self.plan_generator.create_plan()
         expected_plan = self.plan_generator.create_plan()
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(search_strategy=search_strategy, query=str(expected_plan))
         )
         assert len(response.results) == 1
@@ -155,7 +155,7 @@ class UseCaseTests(BaseTestCase):
     def test_query_with_substring_of_id_returns_correct_plan(self) -> None:
         expected_plan = self.plan_generator.create_plan()
         substring_query = str(expected_plan)[5:10]
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_id_sort_by_date_exclude_expired,
                 query=substring_query,
@@ -166,7 +166,7 @@ class UseCaseTests(BaseTestCase):
     def test_that_plans_where_product_name_is_exact_match_are_returned(self) -> None:
         expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "Name XYZ"
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_name_sort_by_date_exclude_expired,
                 query=query,
@@ -177,7 +177,7 @@ class UseCaseTests(BaseTestCase):
     def test_query_with_substring_of_product_name_returns_correct_result(self) -> None:
         expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "me X"
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_name_sort_by_date_exclude_expired,
                 query=query,
@@ -188,7 +188,7 @@ class UseCaseTests(BaseTestCase):
     def test_query_with_substring_of_product_is_case_insensitive(self) -> None:
         expected_plan = self.plan_generator.create_plan(product_name="Name XYZ")
         query = "xyz"
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_name_sort_by_date_exclude_expired,
                 query=query,
@@ -215,7 +215,9 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.advance_time(timedelta(days=1))
         expected_first = self.plan_generator.create_plan()
         self.datetime_service.advance_time(timedelta(days=1))
-        response = self.query_plans(self.make_request(search_strategy=search_strategy))
+        response = self.use_case.execute(
+            self.make_request(search_strategy=search_strategy)
+        )
         assert response.results[0].plan_id == expected_first
         assert response.results[1].plan_id == expected_second
         assert response.results[2].plan_id == expected_third
@@ -236,7 +238,9 @@ class UseCaseTests(BaseTestCase):
             self.plan_generator.create_plan(
                 planner=self.company_generator.create_company(name=name),
             )
-        response = self.query_plans(self.make_request(search_strategy=search_strategy))
+        response = self.use_case.execute(
+            self.make_request(search_strategy=search_strategy)
+        )
         assert response.results[0].company_name == "a_name"
         assert response.results[1].company_name == "B_name"
         assert response.results[2].company_name == "c_name"
@@ -260,7 +264,7 @@ class UseCaseTests(BaseTestCase):
         self.plan_generator.create_plan(
             product_name="cba",
         )
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=search_strategy,
                 query="abc",
@@ -274,7 +278,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan(is_public_service=True)
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         assert response.results[0].price_per_unit == 0
 
     def test_that_labour_per_unit_is_correctly_displayed(
@@ -287,7 +291,7 @@ class UseCaseTests(BaseTestCase):
                 means_cost=Decimal(50),
             )
         )
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         queried_plan = response.results[0]
         assert (
             queried_plan.labour_cost_per_unit
@@ -298,7 +302,7 @@ class UseCaseTests(BaseTestCase):
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation, amount=1000)
         self.plan_generator.create_plan(cooperation=cooperation, amount=1)
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         assert response.results[0].price_per_unit == response.results[1].price_per_unit
 
     def test_that_price_of_cooperating_plans_is_correct(
@@ -313,7 +317,7 @@ class UseCaseTests(BaseTestCase):
             cooperation=cooperation,
             amount=1,
         )
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         assert response.results[0].price_per_unit == self.price_checker.get_unit_price(
             plan1
         )
@@ -334,14 +338,14 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         for _ in range(number_of_plans):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request(query=""))
+        response = self.use_case.execute(self.make_request(query=""))
         assert response.total_results == number_of_plans
 
     def test_zero_total_results_when_single_plan_filtered_by_name(
         self,
     ) -> None:
         self.plan_generator.create_plan(product_name="abc")
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_name_sort_by_date_exclude_expired,
                 query="xyz",
@@ -353,7 +357,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         self.plan_generator.create_plan()
-        response = self.query_plans(
+        response = self.use_case.execute(
             self.make_request(
                 search_strategy=SearchStrategy.by_id_sort_by_date_exclude_expired,
                 query=f"{uuid4()}",
@@ -366,7 +370,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         for _ in range(20):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request(limit=10))
+        response = self.use_case.execute(self.make_request(limit=10))
         assert len(response.results) == 10
 
     def test_that_all_plans_are_returned_if_limit_is_0_and_there_are_20_plans(
@@ -374,7 +378,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         for _ in range(20):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request())
+        response = self.use_case.execute(self.make_request())
         assert len(response.results) == 20
 
     def test_that_5_plans_are_returned_on_second_page_if_20_plans_exist_and_offset_is_15(
@@ -382,7 +386,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         for _ in range(20):
             self.plan_generator.create_plan()
-        response = self.query_plans(self.make_request(offset=15))
+        response = self.use_case.execute(self.make_request(offset=15))
         assert len(response.results) == 5
 
     def make_request(

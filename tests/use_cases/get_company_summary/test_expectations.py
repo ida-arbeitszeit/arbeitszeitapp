@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummaryUseCase
 from tests.datetime_service import datetime_utc
 
 from ..base_test_case import BaseTestCase
@@ -11,11 +11,11 @@ from ..base_test_case import BaseTestCase
 class ExpectationsTestCase(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.get_company_summary = self.injector.get(GetCompanySummary)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
 
     def test_returns_expectations_of_zero_when_no_transfers_took_place(self) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.means == 0
         assert response.expectations.raw_material == 0
@@ -34,7 +34,7 @@ class ExpectationsTestCase(BaseTestCase):
             approved=True,
             planner=company,
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.means == expected_p
 
@@ -50,7 +50,7 @@ class ExpectationsTestCase(BaseTestCase):
             approved=True,
             planner=company,
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.raw_material == expected_r
 
@@ -71,7 +71,7 @@ class ExpectationsTestCase(BaseTestCase):
             planner=company,
         )
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.work == expected_a
 
@@ -89,7 +89,7 @@ class ExpectationsTestCase(BaseTestCase):
             approved=True,
             planner=company,
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.product == -expected_prd
 
@@ -110,7 +110,7 @@ class ExpectationsTestCase(BaseTestCase):
             planner=company,
         )
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.product == -expected_prd
 
@@ -120,14 +120,14 @@ class ExpectationsTestCase(BaseTestCase):
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
         consumer = self.company_generator.create_company()
-        response_before_sale = self.get_company_summary(planner)
+        response_before_sale = self.get_company_summary.execute(planner)
         assert response_before_sale
         self.consumption_generator.create_fixed_means_consumption(
             consumer=consumer,
             plan=plan,
             amount=1,
         )
-        response_after_sale = self.get_company_summary(planner)
+        response_after_sale = self.get_company_summary.execute(planner)
         assert response_after_sale
         assert (
             response_before_sale.expectations.product
@@ -148,6 +148,6 @@ class ExpectationsTestCase(BaseTestCase):
             planner=company,
             is_public_service=True,
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.expectations.product == Decimal(0)

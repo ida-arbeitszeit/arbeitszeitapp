@@ -26,10 +26,10 @@ class ConsumptionQueryResponse:
 
 
 @dataclass
-class QueryCompanyConsumptions:
+class QueryCompanyConsumptionsUseCase:
     database_gateway: DatabaseGateway
 
-    def __call__(
+    def execute(
         self,
         company: UUID,
     ) -> Iterator[ConsumptionQueryResponse]:

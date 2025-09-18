@@ -16,7 +16,7 @@ TEMPLATE_NAME = "user/query_plans.html"
 
 @dataclass
 class QueryPlansView:
-    query_plans: use_case.QueryPlans
+    query_plans: use_case.QueryPlansUseCase
     presenter: QueryPlansPresenter
     controller: QueryPlansController
     request: FlaskRequest
@@ -42,7 +42,7 @@ class QueryPlansView:
         use_case_request: use_case.QueryPlansRequest,
         form: PlanSearchForm,
     ) -> Response:
-        response = self.query_plans(use_case_request)
+        response = self.query_plans.execute(use_case_request)
         view_model = self.presenter.present(response)
         return Response(self._render_response_content(view_model, form=form))
 

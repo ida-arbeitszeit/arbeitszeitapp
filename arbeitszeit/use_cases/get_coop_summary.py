@@ -38,12 +38,12 @@ class GetCoopSummaryResponse:
 
 
 @dataclass
-class GetCoopSummary:
+class GetCoopSummaryUseCase:
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
 
-    def __call__(
+    def execute(
         self, request: GetCoopSummaryRequest
     ) -> Optional[GetCoopSummaryResponse]:
         coop_and_coordinator = (

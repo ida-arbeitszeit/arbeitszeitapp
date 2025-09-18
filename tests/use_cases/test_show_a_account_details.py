@@ -10,8 +10,8 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit.transfers import TransferType
 from arbeitszeit.use_cases import show_a_account_details
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
+    RegisterHoursWorkedUseCase,
 )
 from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
@@ -23,7 +23,7 @@ class UseCaseTester(BaseTestCase):
         self.use_case = self.injector.get(
             show_a_account_details.ShowAAccountDetailsUseCase
         )
-        self.register_hours_worked = self.injector.get(RegisterHoursWorked)
+        self.register_hours_worked = self.injector.get(RegisterHoursWorkedUseCase)
 
     def test_no_transfers_returned_when_no_transfers_took_place(self) -> None:
         self.member_generator.create_member()
@@ -73,7 +73,7 @@ class UseCaseTester(BaseTestCase):
         member = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[member])
         self.plan_generator.create_plan(planner=company)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=company,
                 worker_id=member,
@@ -87,7 +87,7 @@ class UseCaseTester(BaseTestCase):
         member = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[member])
         self.plan_generator.create_plan(planner=company)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=company,
                 worker_id=member,
@@ -141,7 +141,7 @@ class UseCaseTester(BaseTestCase):
         hours_worked = Decimal("8.5")
         member = self.member_generator.create_member()
         company = self.company_generator.create_company(workers=[member])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=company,
                 worker_id=member,
@@ -167,7 +167,7 @@ class UseCaseTester(BaseTestCase):
         hours_worked = Decimal("8.5")
         worker = self.member_generator.create_member()
         own_company = self.company_generator.create_company(workers=[worker])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker,
@@ -187,7 +187,7 @@ class UseCaseTester(BaseTestCase):
         own_company = self.company_generator.create_company(workers=[worker1, worker2])
         expected_transfer_1_timestamp = datetime_utc(2000, 1, 2)
         self.datetime_service.freeze_time(expected_transfer_1_timestamp)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker1,
@@ -196,7 +196,7 @@ class UseCaseTester(BaseTestCase):
         )
         expected_transfer_2_timestamp = datetime_utc(2000, 1, 3)
         self.datetime_service.freeze_time(expected_transfer_2_timestamp)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker2,
@@ -225,7 +225,7 @@ class UseCaseTester(BaseTestCase):
 
         first_transfer_timestamp = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(first_transfer_timestamp)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker1,
@@ -234,7 +234,7 @@ class UseCaseTester(BaseTestCase):
         )
         second_transfer_timestamp = datetime_utc(2000, 1, 2)
         self.datetime_service.freeze_time(second_transfer_timestamp)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker2,
@@ -243,7 +243,7 @@ class UseCaseTester(BaseTestCase):
         )
         third_transfer_timestamp = datetime_utc(2000, 1, 3)
         self.datetime_service.freeze_time(third_transfer_timestamp)
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company_id=own_company,
                 worker_id=worker3,

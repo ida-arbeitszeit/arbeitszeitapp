@@ -4,8 +4,8 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.get_company_summary import (
-    GetCompanySummary,
     GetCompanySummarySuccess,
+    GetCompanySummaryUseCase,
 )
 from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
 from arbeitszeit.use_cases.request_email_address_change import (
@@ -65,10 +65,10 @@ def account_details(
 @AuthenticatedUserRoute("/company_summary/<uuid:company_id>")
 def company_summary(
     company_id: UUID,
-    get_company_summary: GetCompanySummary,
+    get_company_summary: GetCompanySummaryUseCase,
     presenter: GetCompanySummarySuccessPresenter,
 ):
-    use_case_response = get_company_summary(company_id)
+    use_case_response = get_company_summary.execute(company_id)
     if isinstance(use_case_response, GetCompanySummarySuccess):
         view_model = presenter.present(use_case_response)
         return render_template(

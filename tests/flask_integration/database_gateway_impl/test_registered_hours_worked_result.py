@@ -14,7 +14,7 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.register_hours_worked_use_case = self.injector.get(
-            register_hours_worked.RegisterHoursWorked
+            register_hours_worked.RegisterHoursWorkedUseCase
         )
 
     def test_get_registered_hours_worked_yields_empty_result_before_any_records_were_created(
@@ -241,5 +241,5 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
             worker_id=worker,
             hours_worked=hours,
         )
-        response = self.register_hours_worked_use_case(use_case_request=request)
+        response = self.register_hours_worked_use_case.execute(use_case_request=request)
         assert not response.is_rejected

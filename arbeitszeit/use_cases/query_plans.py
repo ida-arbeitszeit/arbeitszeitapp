@@ -56,12 +56,12 @@ class QueryPlansRequest:
 
 
 @dataclass
-class QueryPlans:
+class QueryPlansUseCase:
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
     price_calculator: PriceCalculator
 
-    def __call__(self, request: QueryPlansRequest) -> PlanQueryResponse:
+    def execute(self, request: QueryPlansRequest) -> PlanQueryResponse:
         now = self.datetime_service.now()
         plans = self.database_gateway.get_plans().that_were_approved_before(now)
         if not request.include_expired_plans:

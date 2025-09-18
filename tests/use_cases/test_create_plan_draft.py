@@ -32,7 +32,9 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(CreatePlanDraft)
-        self.get_draft_details = self.injector.get(get_draft_details.GetDraftDetails)
+        self.get_draft_details = self.injector.get(
+            get_draft_details.GetDraftDetailsUseCase
+        )
 
     def test_that_plan_plan_details_can_be_accessed_after_draft_is_created(
         self,
@@ -42,7 +44,7 @@ class UseCaseTests(BaseTestCase):
         response = self.use_case.create_draft(request)
         assert not response.is_rejected
         assert response.draft_id
-        assert self.get_draft_details(response.draft_id)
+        assert self.get_draft_details.execute(response.draft_id)
 
     def test_that_create_plan_returns_a_draft_id(self) -> None:
         planner = self.company_generator.create_company()
@@ -95,6 +97,6 @@ class UseCaseTests(BaseTestCase):
         request = replace(REQUEST, planner=planner)
         response = self.use_case.create_draft(request)
         assert response.draft_id
-        details = self.get_draft_details(response.draft_id)
+        details = self.get_draft_details.execute(response.draft_id)
         assert details
         assert details.planner_id == planner

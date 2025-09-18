@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from arbeitszeit.use_cases.hide_plan import HidePlan
+from arbeitszeit.use_cases.hide_plan import HidePlanUseCase
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from tests.datetime_service import datetime_utc
 
@@ -10,7 +10,7 @@ from .base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.hide_plan = self.injector.get(HidePlan)
+        self.hide_plan = self.injector.get(HidePlanUseCase)
         self.show_my_plans_use_case = self.injector.get(ShowMyPlansUseCase)
         self.now = datetime_utc(2000, 1, 1)
         self.datetime_service.freeze_time(self.now)
@@ -20,14 +20,14 @@ class UseCaseTests(BaseTestCase):
         plan1 = self.create_expired_plan(planner)
         plan2 = self.create_expired_plan(planner)
         plan3 = self.create_expired_plan(planner)
-        self.hide_plan(plan2)
+        self.hide_plan.execute(plan2)
         assert not self.is_plan_hidden(plan=plan1, planner=planner)
         assert self.is_plan_hidden(plan=plan2, planner=planner)
         assert not self.is_plan_hidden(plan=plan3, planner=planner)
 
     def test_that_correct_response_gets_returned(self) -> None:
         plan = self.create_expired_plan()
-        response = self.hide_plan(plan)
+        response = self.hide_plan.execute(plan)
         self.assertEqual(response.plan_id, plan)
         self.assertEqual(response.is_success, True)
 
@@ -35,7 +35,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         plan = self.create_active_plan()
-        response = self.hide_plan(plan)
+        response = self.hide_plan.execute(plan)
         assert response.plan_id == plan
         assert response.is_success == False
 

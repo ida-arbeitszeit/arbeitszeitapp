@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummaryUseCase
 from tests.datetime_service import datetime_utc
 
 from ..base_test_case import BaseTestCase
@@ -12,27 +12,27 @@ from ..base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.get_company_summary = self.injector.get(GetCompanySummary)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
 
     def test_returns_none_when_company_does_not_exist(self) -> None:
-        response = self.get_company_summary(uuid4())
+        response = self.get_company_summary.execute(uuid4())
         assert response is None
 
     def test_returns_id(self) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.id == company
 
     def test_returns_name(self) -> None:
         company = self.company_generator.create_company(name="Company XYZ")
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.name == "Company XYZ"
 
     def test_returns_email(self) -> None:
         company = self.company_generator.create_company(email="company@cp.org")
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.email == "company@cp.org"
 
@@ -41,7 +41,7 @@ class UseCaseTests(BaseTestCase):
         self.datetime_service.freeze_time(expected_registration_date)
         company = self.company_generator.create_company()
         self.datetime_service.freeze_time(datetime_utc(2022, 1, 26))
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.registered_on == expected_registration_date
 
@@ -49,7 +49,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company_record()
-        response = self.get_company_summary(company.id)
+        response = self.get_company_summary.execute(company.id)
         assert response
         assert response.account_balances.means == 0
         assert response.account_balances.raw_material == 0
@@ -72,13 +72,13 @@ class UseCaseTests(BaseTestCase):
             planner=company,
         )
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.account_balances.work == expected_amount
 
     def test_returns_empty_list_of_companys_plans_when_there_are_none(self) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details == []
 
@@ -86,7 +86,7 @@ class UseCaseTests(BaseTestCase):
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
         self.plan_generator.create_plan(planner=company, approved=False)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert len(response.plan_details) == 2
 
@@ -103,7 +103,7 @@ class UseCaseTests(BaseTestCase):
         )
         second = self.plan_generator.create_plan(planner=company)
         self.datetime_service.freeze_time(datetime_utc(2000, 1, 2))
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].id == third
         assert response.plan_details[1].id == second
@@ -116,7 +116,7 @@ class UseCaseTests(BaseTestCase):
             is_public_service=True,
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].sales_volume == 0
 
@@ -126,7 +126,7 @@ class UseCaseTests(BaseTestCase):
             planner=company,
             costs=ProductionCosts(Decimal(2), Decimal(2), Decimal(2)),
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].sales_volume == Decimal(6)
 
@@ -134,7 +134,7 @@ class UseCaseTests(BaseTestCase):
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert not response.suppliers_ordered_by_volume
 
@@ -145,7 +145,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=company
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 1
 
@@ -162,7 +162,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan2
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 1
 
@@ -177,7 +177,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert len(response.suppliers_ordered_by_volume) == 2
 
@@ -188,7 +188,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=offered_plan
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].company_id == supplier.id
 
@@ -200,7 +200,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=offered_plan
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].company_name == supplier_name
 
@@ -219,7 +219,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=company.id, plan=plan, amount=1
         )
-        response = self.get_company_summary(company.id)
+        response = self.get_company_summary.execute(company.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("6")
 
@@ -244,7 +244,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, plan=plan2, amount=1
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("18")
 
@@ -267,7 +267,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=consumer.id, amount=10, plan=medium_supplier_plan
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].company_id == top_supplier
         assert response.suppliers_ordered_by_volume[1].company_id == medium_supplier
@@ -293,7 +293,7 @@ class UseCaseTests(BaseTestCase):
             plan=plan2,
             amount=1,
         )
-        response = self.get_company_summary(consumer.id)
+        response = self.get_company_summary.execute(consumer.id)
         assert response
         assert response.suppliers_ordered_by_volume[0].volume_of_sales == Decimal("15")
         assert response.suppliers_ordered_by_volume[1].volume_of_sales == Decimal("6")

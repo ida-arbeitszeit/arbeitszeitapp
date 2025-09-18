@@ -1,9 +1,9 @@
 from uuid import uuid4
 
 from arbeitszeit.use_cases.create_cooperation import (
-    CreateCooperation,
     CreateCooperationRequest,
     CreateCooperationResponse,
+    CreateCooperationUseCase,
 )
 
 from .base_test_case import BaseTestCase
@@ -12,13 +12,13 @@ from .base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.create_cooperation = self.injector.get(CreateCooperation)
+        self.create_cooperation = self.injector.get(CreateCooperationUseCase)
 
     def test_creation_rejected_when_coordinator_does_not_exist(self) -> None:
         request = CreateCooperationRequest(
             coordinator_id=uuid4(), name="test name", definition="some info"
         )
-        response = self.create_cooperation(request)
+        response = self.create_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -31,7 +31,7 @@ class UseCaseTests(BaseTestCase):
         request = CreateCooperationRequest(
             coordinator_id=coordinator, name="existing name", definition="some info"
         )
-        response = self.create_cooperation(request)
+        response = self.create_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -46,7 +46,7 @@ class UseCaseTests(BaseTestCase):
         request = CreateCooperationRequest(
             coordinator_id=coordinator, name="existing name", definition="some info"
         )
-        response = self.create_cooperation(request)
+        response = self.create_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -58,5 +58,5 @@ class UseCaseTests(BaseTestCase):
         request = CreateCooperationRequest(
             coordinator_id=coordinator, name="test name", definition="some info"
         )
-        response = self.create_cooperation(request)
+        response = self.create_cooperation.execute(request)
         assert response

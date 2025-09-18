@@ -5,7 +5,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
 from arbeitszeit.use_cases import edit_draft
-from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
+from arbeitszeit.use_cases.get_draft_details import GetDraftDetailsUseCase
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -21,7 +21,7 @@ from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
 
 @dataclass
 class DraftDetailsView:
-    use_case: GetDraftDetails
+    use_case: GetDraftDetailsUseCase
     presenter: GetDraftDetailsPresenter
     edit_draft_use_case: edit_draft.EditDraftUseCase
     edit_draft_controller: EditDraftController
@@ -29,7 +29,7 @@ class DraftDetailsView:
     url_index: GeneralUrlIndex
 
     def GET(self, draft_id: UUID) -> Response:
-        use_case_response = self.use_case(draft_id)
+        use_case_response = self.use_case.execute(draft_id)
         if use_case_response is None:
             return http_404()
         view_model = self.presenter.present_draft_details(use_case_response)

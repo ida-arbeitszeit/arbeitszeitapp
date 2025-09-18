@@ -1,6 +1,8 @@
 from datetime import timedelta
 
-from arbeitszeit.use_cases.query_company_consumptions import QueryCompanyConsumptions
+from arbeitszeit.use_cases.query_company_consumptions import (
+    QueryCompanyConsumptionsUseCase,
+)
 from tests.datetime_service import datetime_utc
 from tests.use_cases.base_test_case import BaseTestCase
 
@@ -8,13 +10,13 @@ from tests.use_cases.base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.query_consumptions = self.injector.get(QueryCompanyConsumptions)
+        self.use_case = self.injector.get(QueryCompanyConsumptionsUseCase)
 
     def test_that_no_consumption_is_returned_when_searching_an_empty_repo(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        results = list(self.query_consumptions(company))
+        results = list(self.use_case.execute(company))
         assert not results
 
     def test_that_consumption_with_specified_plan_is_queried_after_consumption_for_this_plan_was_done(
@@ -25,7 +27,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=plan
         )
-        results = list(self.query_consumptions(company))
+        results = list(self.use_case.execute(company))
         assert len(results) == 1
         latest_consumption = results[0]
         assert latest_consumption.plan_id == plan
@@ -44,6 +46,6 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_resource_consumption_by_company(
             consumer=company, plan=second_plan
         )
-        results = list(self.query_consumptions(company))
+        results = list(self.use_case.execute(company))
         assert results[0].plan_id == second_plan
         assert results[1].plan_id == first_plan

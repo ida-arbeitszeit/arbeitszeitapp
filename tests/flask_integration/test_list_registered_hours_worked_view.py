@@ -4,8 +4,8 @@ from uuid import UUID
 from parameterized import parameterized
 
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
+    RegisterHoursWorkedUseCase,
 )
 
 from .flask import LogInUser, ViewTestCase
@@ -39,8 +39,8 @@ class CompanyTests(ViewTestCase):
         request = RegisterHoursWorkedRequest(
             company_id=company, worker_id=worker_id, hours_worked=Decimal("10")
         )
-        use_case = self.injector.get(RegisterHoursWorked)
-        response = use_case(request)
+        use_case = self.injector.get(RegisterHoursWorkedUseCase)
+        response = use_case.execute(request)
         assert not response.is_rejected
 
 

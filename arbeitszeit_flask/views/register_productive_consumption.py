@@ -4,7 +4,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
+    RegisterProductiveConsumptionUseCase,
 )
 from arbeitszeit.use_cases.select_productive_consumption import (
     SelectProductiveConsumptionUseCase,
@@ -33,7 +33,7 @@ class RegisterProductiveConsumptionView:
     select_productive_consumption_use_case: SelectProductiveConsumptionUseCase
     select_productive_consumption_presenter: SelectProductiveConsumptionPresenter
     controller: RegisterProductiveConsumptionController
-    register_productive_consumption: RegisterProductiveConsumption
+    register_productive_consumption: RegisterProductiveConsumptionUseCase
     presenter: RegisterProductiveConsumptionPresenter
 
     def GET(self) -> Response:
@@ -78,7 +78,7 @@ class RegisterProductiveConsumptionView:
             data = self.controller.process_input_data(form)
         except self.controller.FormError:
             return self._handle_invalid_form(form)
-        use_case_response = self.register_productive_consumption(data)
+        use_case_response = self.register_productive_consumption.execute(data)
         view_model = self.presenter.present(use_case_response)
         if view_model.redirect_url:
             return redirect(view_model.redirect_url)

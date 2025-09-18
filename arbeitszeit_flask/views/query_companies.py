@@ -19,7 +19,7 @@ TEMPLATE_NAME = "user/query_companies.html"
 @dataclass
 class QueryCompaniesView:
     search_form: CompanySearchForm
-    query_companies: use_case.QueryCompanies
+    query_companies: use_case.QueryCompaniesUseCase
     presenter: QueryCompaniesPresenter
     controller: QueryCompaniesController
     template_name: str
@@ -50,7 +50,7 @@ class QueryCompaniesView:
         use_case_request: use_case.QueryCompaniesRequest,
         search_form: CompanySearchForm,
     ) -> Response:
-        response = self.query_companies(use_case_request)
+        response = self.query_companies.execute(use_case_request)
         view_model = self.presenter.present(response)
         return Response(
             self._render_response_content(view_model, search_form=search_form)

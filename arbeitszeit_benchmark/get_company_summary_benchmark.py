@@ -27,7 +27,7 @@ class GetCompanySummaryBenchmark:
         self.plan_generator = self.injector.get(PlanGenerator)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
         self.get_company_summary = self.injector.get(
-            get_company_summary.GetCompanySummary
+            get_company_summary.GetCompanySummaryUseCase
         )
         self.company = self.company_generator.create_company()
         for _ in range(100):
@@ -47,4 +47,4 @@ class GetCompanySummaryBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        self.get_company_summary(self.company)
+        self.get_company_summary.execute(self.company)

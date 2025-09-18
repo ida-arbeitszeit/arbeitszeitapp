@@ -37,8 +37,10 @@ class ResendInviteTestCase(BaseTestCase):
             invite_id=invite_id,
             user=worker_id,
         )
-        use_case = self.injector.get(answer_company_work_invite.AnswerCompanyWorkInvite)
-        response = use_case(request)
+        use_case = self.injector.get(
+            answer_company_work_invite.AnswerCompanyWorkInviteUseCase
+        )
+        response = use_case.execute(request)
         assert response.is_success
         assert response.is_accepted == is_accepted
 

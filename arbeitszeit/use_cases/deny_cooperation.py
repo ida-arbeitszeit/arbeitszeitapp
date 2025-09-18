@@ -31,11 +31,11 @@ class DenyCooperationResponse:
 
 
 @dataclass
-class DenyCooperation:
+class DenyCooperationUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, request: DenyCooperationRequest) -> DenyCooperationResponse:
+    def execute(self, request: DenyCooperationRequest) -> DenyCooperationResponse:
         try:
             self._validate_request(request)
         except DenyCooperationResponse.RejectionReason as reason:

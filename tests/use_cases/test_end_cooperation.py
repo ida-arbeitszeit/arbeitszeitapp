@@ -3,9 +3,9 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases import get_coop_summary
 from arbeitszeit.use_cases.end_cooperation import (
-    EndCooperation,
     EndCooperationRequest,
     EndCooperationResponse,
+    EndCooperationUseCase,
 )
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 
@@ -15,13 +15,13 @@ from .dependency_injection import get_dependency_injector
 class TestEndCooperation(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
-        self.end_cooperation = self.injector.get(EndCooperation)
+        self.end_cooperation = self.injector.get(EndCooperationUseCase)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
         self.requester = self.company_generator.create_company()
         self.get_coop_summary_use_case = self.injector.get(
-            get_coop_summary.GetCoopSummary
+            get_coop_summary.GetCoopSummaryUseCase
         )
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
@@ -31,7 +31,7 @@ class TestEndCooperation(TestCase):
             plan_id=uuid4(),
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -43,7 +43,7 @@ class TestEndCooperation(TestCase):
         request = EndCooperationRequest(
             requester_id=self.requester, plan_id=plan, cooperation_id=uuid4()
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -58,7 +58,7 @@ class TestEndCooperation(TestCase):
             plan_id=plan,
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -76,7 +76,7 @@ class TestEndCooperation(TestCase):
             plan_id=plan,
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -94,7 +94,7 @@ class TestEndCooperation(TestCase):
             plan_id=plan,
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert not response.is_rejected
 
     def test_ending_of_cooperation_is_successful_when_requester_is_coordinator(
@@ -110,7 +110,7 @@ class TestEndCooperation(TestCase):
             plan_id=plan,
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert not response.is_rejected
 
     def test_ending_of_cooperation_is_successful_and_plan_deleted_from_coop(
@@ -123,7 +123,7 @@ class TestEndCooperation(TestCase):
             plan_id=plan,
             cooperation_id=cooperation,
         )
-        response = self.end_cooperation(request)
+        response = self.end_cooperation.execute(request)
         assert not response.is_rejected
         assert not self.is_plan_in_cooperation(plan, cooperation)
 
@@ -133,6 +133,6 @@ class TestEndCooperation(TestCase):
             coop_id=cooperation,
             requester_id=requester,
         )
-        response = self.get_coop_summary_use_case(request)
+        response = self.get_coop_summary_use_case.execute(request)
         assert response
         return any([plan == p.plan_id for p in response.plans])

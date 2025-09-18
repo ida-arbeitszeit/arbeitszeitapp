@@ -18,7 +18,7 @@ class CreateDraftFromPlanTests(BaseTestCase):
         self.use_case = self.injector.get(use_case.CreateDraftFromPlanUseCase)
         self.my_plans_use_case = self.injector.get(show_my_plans.ShowMyPlansUseCase)
         self.get_draft_details_use_case = self.injector.get(
-            get_draft_details.GetDraftDetails
+            get_draft_details.GetDraftDetailsUseCase
         )
 
     def test_creating_draft_from_random_uuids_produces_rejection_response(self) -> None:
@@ -225,6 +225,6 @@ class CreateDraftFromPlanTests(BaseTestCase):
         return len(response.drafts)
 
     def get_draft_details(self, draft: UUID) -> get_draft_details.DraftDetailsSuccess:
-        response = self.get_draft_details_use_case(draft)
+        response = self.get_draft_details_use_case.execute(draft)
         assert response
         return response

@@ -22,7 +22,7 @@ class QueryPlansSortedByActivationDateBenchmark:
         self.app_context.push()
         plan_generator = injector.get(PlanGenerator)
         cooperation_generator = injector.get(CooperationGenerator)
-        self.query_plans = injector.get(query_plans.QueryPlans)
+        self.query_plans = injector.get(query_plans.QueryPlansUseCase)
         random.seed()
         for _ in range(500):
             plan_generator.create_plan(
@@ -52,7 +52,7 @@ class QueryPlansSortedByActivationDateBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        self.query_plans(self.request)
+        self.query_plans.execute(self.request)
 
     def random_production_costs(self) -> ProductionCosts:
         return ProductionCosts(

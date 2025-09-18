@@ -29,10 +29,10 @@ class EndCooperationResponse:
 
 
 @dataclass
-class EndCooperation:
+class EndCooperationUseCase:
     database_gateway: DatabaseGateway
 
-    def __call__(self, request: EndCooperationRequest) -> EndCooperationResponse:
+    def execute(self, request: EndCooperationRequest) -> EndCooperationResponse:
         try:
             self._validate_request(request)
         except EndCooperationResponse.RejectionReason as reason:

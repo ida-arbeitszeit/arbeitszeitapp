@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
-from arbeitszeit.use_cases.query_plans import QueryPlans
+from arbeitszeit.use_cases.query_plans import QueryPlansUseCase
 from arbeitszeit_flask.api.authentication import authentication_check
 from arbeitszeit_flask.api.input_documentation import with_input_documentation
 from arbeitszeit_flask.api.response_handling import error_response_handling
@@ -44,12 +44,12 @@ class ActivePlans(Resource):
     def get(
         self,
         controller: QueryPlansApiController,
-        query_plans: QueryPlans,
+        query_plans: QueryPlansUseCase,
         presenter: QueryPlansApiPresenter,
     ):
         "List active plans."
         use_case_request = controller.create_request(FlaskRequest())
-        response = query_plans(request=use_case_request)
+        response = query_plans.execute(request=use_case_request)
         view_model = presenter.create_view_model(response)
         return view_model
 

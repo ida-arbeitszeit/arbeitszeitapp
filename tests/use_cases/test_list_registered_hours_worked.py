@@ -15,7 +15,7 @@ class ListRegisteredHoursWorkedTests(BaseTestCase):
             list_registered_hours_worked.ListRegisteredHoursWorkedUseCase
         )
         self.register_hours_worked_use_case = self.injector.get(
-            register_hours_worked.RegisterHoursWorked
+            register_hours_worked.RegisterHoursWorkedUseCase
         )
 
     @parameterized.expand(
@@ -135,5 +135,5 @@ class ListRegisteredHoursWorkedTests(BaseTestCase):
             worker_id=worker,
             hours_worked=hours,
         )
-        response = self.register_hours_worked_use_case(use_case_request=request)
+        response = self.register_hours_worked_use_case.execute(use_case_request=request)
         assert not response.is_rejected
