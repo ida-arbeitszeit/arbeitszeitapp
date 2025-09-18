@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.get_company_summary import GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import GetCompanySummaryUseCase
 
 from ..base_test_case import BaseTestCase
 
@@ -9,13 +9,13 @@ from ..base_test_case import BaseTestCase
 class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.get_company_summary = self.injector.get(GetCompanySummary)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
 
     def test_show_relative_deviation_of_zero_for_all_accounts_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         for i in range(4):
             assert response.deviations_relative[i] == 0
@@ -30,7 +30,7 @@ class UseCaseTests(BaseTestCase):
         self.consumption_generator.create_fixed_means_consumption(
             consumer=company, amount=1, plan=plan
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.deviations_relative[0] == Decimal("Infinity")
         assert response.deviations_relative[1] == 0
@@ -47,7 +47,7 @@ class UseCaseTests(BaseTestCase):
                 labour_cost=Decimal(0),
             ),
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.deviations_relative[0] == Decimal(100)  # fixed means
         assert response.deviations_relative[1] == Decimal(0)  # liquid means
@@ -58,7 +58,7 @@ class UseCaseTests(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.plan_generator.create_plan(planner=company)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.deviations_relative[3] == Decimal(100)
 
@@ -68,7 +68,7 @@ class UseCaseTests(BaseTestCase):
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(amount=2, planner=company)
         self.consumption_generator.create_fixed_means_consumption(plan=plan, amount=1)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.deviations_relative[3] == Decimal(50)
 
@@ -82,7 +82,7 @@ class UseCaseTests(BaseTestCase):
             amount=1,
         )
         self.consumption_generator.create_fixed_means_consumption(plan=plan, amount=2)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal(100)
 
@@ -95,7 +95,7 @@ class UseCaseTests(BaseTestCase):
             costs=ProductionCosts(Decimal(5), Decimal(5), Decimal(0)),
             amount=1,
         )
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal(100)
 
@@ -105,7 +105,7 @@ class UseCaseTests(BaseTestCase):
         company = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=company, amount=12)
         self.consumption_generator.create_fixed_means_consumption(plan=plan, amount=12)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal(0)
 
@@ -118,6 +118,6 @@ class UseCaseTests(BaseTestCase):
             is_public_service=True,
         )
         self.consumption_generator.create_private_consumption(plan=plan)
-        response = self.get_company_summary(company)
+        response = self.get_company_summary.execute(company)
         assert response
         assert response.plan_details[0].deviation_relative == Decimal("0")

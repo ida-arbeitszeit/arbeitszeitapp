@@ -5,12 +5,12 @@ from parameterized import parameterized
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
+    RegisterHoursWorkedUseCase,
 )
 from arbeitszeit.use_cases.show_company_accounts import (
-    ShowCompanyAccounts,
     ShowCompanyAccountsRequest,
+    ShowCompanyAccountsUseCase,
 )
 from tests.use_cases.base_test_case import BaseTestCase
 
@@ -18,27 +18,33 @@ from tests.use_cases.base_test_case import BaseTestCase
 class ShowCompanyAccountsTest(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.use_case = self.injector.get(ShowCompanyAccounts)
+        self.use_case = self.injector.get(ShowCompanyAccountsUseCase)
 
     def test_that_response_returns_the_company_id_that_was_requested(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         assert response.company == company
 
     def test_that_list_of_balances_has_four_entries_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         assert len(response.balances) == 4
 
     def test_that_all_balances_are_zero_when_no_transfers_took_place(
         self,
     ) -> None:
         company = self.company_generator.create_company()
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         for balance in response.balances:
             assert balance == Decimal(0)
 
@@ -53,7 +59,9 @@ class ShowCompanyAccountsTest(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.consume_fixed_means(company, consumed_cost)
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         assert response.balances[0] == Decimal(-consumed_cost)
 
     @parameterized.expand(
@@ -67,7 +75,9 @@ class ShowCompanyAccountsTest(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.consume_liquid_means(company, consumed_cost)
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         assert response.balances[1] == Decimal(-consumed_cost)
 
     @parameterized.expand(
@@ -81,7 +91,9 @@ class ShowCompanyAccountsTest(BaseTestCase):
     ) -> None:
         company = self.company_generator.create_company()
         self.register_hours_worked(company, hours_worked)
-        response = self.use_case(request=ShowCompanyAccountsRequest(company=company))
+        response = self.use_case.execute(
+            request=ShowCompanyAccountsRequest(company=company)
+        )
         assert response.balances[2] == Decimal(-hours_worked)
 
     @parameterized.expand(
@@ -103,7 +115,7 @@ class ShowCompanyAccountsTest(BaseTestCase):
             amount=1,
             planner=company,
         )
-        balance_before_consumption = self.use_case(
+        balance_before_consumption = self.use_case.execute(
             request=ShowCompanyAccountsRequest(company=company)
         ).balances[3]
         self.consumption_generator.create_private_consumption(
@@ -111,7 +123,7 @@ class ShowCompanyAccountsTest(BaseTestCase):
             plan=plan,
             amount=1,
         )
-        balance_after_consumption = self.use_case(
+        balance_after_consumption = self.use_case.execute(
             request=ShowCompanyAccountsRequest(company=company)
         ).balances[3]
         assert balance_after_consumption == balance_before_consumption + price
@@ -151,8 +163,8 @@ class ShowCompanyAccountsTest(BaseTestCase):
         self.worker_affiliation_generator.add_workers_to_company(
             registering_company, [member]
         )
-        use_case = self.injector.get(RegisterHoursWorked)
-        response = use_case(
+        use_case = self.injector.get(RegisterHoursWorkedUseCase)
+        response = use_case.execute(
             use_case_request=RegisterHoursWorkedRequest(
                 company_id=registering_company,
                 worker_id=member,

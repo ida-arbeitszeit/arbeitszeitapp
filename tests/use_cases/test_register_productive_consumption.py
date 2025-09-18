@@ -12,8 +12,8 @@ from arbeitszeit.records import (
 )
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
+    RegisterProductiveConsumptionUseCase,
 )
 from tests.datetime_service import datetime_utc
 
@@ -23,9 +23,7 @@ from .base_test_case import BaseTestCase
 class UseCaseBase(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.register_productive_consumption = self.injector.get(
-            RegisterProductiveConsumption
-        )
+        self.use_case = self.injector.get(RegisterProductiveConsumptionUseCase)
 
     def _get_transfers_of_type(self, transfer_type: TransferType) -> list[Transfer]:
         return list(
@@ -39,7 +37,7 @@ class UseCaseBase(BaseTestCase):
 class TestRejection(UseCaseBase):
     def test_reject_registration_if_plan_not_found(self) -> None:
         consumer = self.company_generator.create_company()
-        response = self.register_productive_consumption(
+        response = self.use_case.execute(
             RegisterProductiveConsumptionRequest(
                 consumer=consumer,
                 plan=uuid4(),
@@ -57,7 +55,7 @@ class TestRejection(UseCaseBase):
         self.datetime_service.freeze_time(datetime_utc(2001, 1, 1))
         consumption_type = ConsumptionType.means_of_prod
         pieces = 5
-        response = self.register_productive_consumption(
+        response = self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert response.is_rejected
@@ -69,7 +67,7 @@ class TestRejection(UseCaseBase):
         sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan()
         consumption_type = ConsumptionType.consumption
-        response = self.register_productive_consumption(
+        response = self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
@@ -82,7 +80,7 @@ class TestRejection(UseCaseBase):
         sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(is_public_service=True)
         consumption_type = ConsumptionType.means_of_prod
-        response = self.register_productive_consumption(
+        response = self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
@@ -95,7 +93,7 @@ class TestRejection(UseCaseBase):
         sender = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=sender)
         consumption_type = ConsumptionType.means_of_prod
-        response = self.register_productive_consumption(
+        response = self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, 5, consumption_type)
         )
         assert response.is_rejected
@@ -109,7 +107,7 @@ class TestBalanceChanges(UseCaseBase):
         consumption_type = ConsumptionType.means_of_prod
         pieces = 5
 
-        self.register_productive_consumption(
+        self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
@@ -125,7 +123,7 @@ class TestBalanceChanges(UseCaseBase):
         consumption_type = ConsumptionType.raw_materials
         pieces = 5
 
-        self.register_productive_consumption(
+        self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
@@ -152,7 +150,7 @@ class TestBalanceChanges(UseCaseBase):
         assert self.balance_checker.get_company_account_balances(
             planner
         ).prd_account == Decimal("-3")
-        self.register_productive_consumption(
+        self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert self.balance_checker.get_company_account_balances(
@@ -174,7 +172,7 @@ class TestBalanceChanges(UseCaseBase):
         balance_before_transfer = self.balance_checker.get_company_account_balances(
             planner
         ).prd_account
-        self.register_productive_consumption(
+        self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
         assert (
@@ -209,7 +207,7 @@ class TestBalanceChanges(UseCaseBase):
         balance_before_transfer = self.balance_checker.get_company_account_balances(
             sender
         ).r_account
-        self.register_productive_consumption(
+        self.use_case.execute(
             RegisterProductiveConsumptionRequest(sender, plan, 1, consumption_type)
         )
         assert self.balance_checker.get_company_account_balances(

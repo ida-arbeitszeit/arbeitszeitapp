@@ -4,7 +4,10 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess, GetDraftDetails
+from arbeitszeit.use_cases.get_draft_details import (
+    DraftDetailsSuccess,
+    GetDraftDetailsUseCase,
+)
 from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
 from arbeitszeit.use_cases.show_my_plans import ShowMyPlansRequest, ShowMyPlansUseCase
 from tests.use_cases.base_test_case import BaseTestCase
@@ -124,7 +127,7 @@ class DraftGetsCreatedTests(BaseTestCase):
         super().setUp()
         self.use_case = self.injector.get(RevokePlanFilingUseCase)
         self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
-        self.get_draft_details = self.injector.get(GetDraftDetails)
+        self.get_draft_details = self.injector.get(GetDraftDetailsUseCase)
 
     def test_after_revoking_the_planner_has_one_draft(
         self,
@@ -218,6 +221,6 @@ class DraftGetsCreatedTests(BaseTestCase):
         return [draft.id for draft in response.drafts]
 
     def details_of_plan_draft(self, plan_draft: UUID) -> DraftDetailsSuccess:
-        draft_details = self.get_draft_details(draft_id=plan_draft)
+        draft_details = self.get_draft_details.execute(draft_id=plan_draft)
         assert isinstance(draft_details, DraftDetailsSuccess)
         return draft_details

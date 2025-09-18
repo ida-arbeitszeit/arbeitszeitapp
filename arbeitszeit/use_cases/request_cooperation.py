@@ -37,14 +37,12 @@ class RequestCooperationResponse:
 
 
 @dataclass
-class RequestCooperation:
+class RequestCooperationUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     email_sender: EmailSender
 
-    def __call__(
-        self, request: RequestCooperationRequest
-    ) -> RequestCooperationResponse:
+    def execute(self, request: RequestCooperationRequest) -> RequestCooperationResponse:
         try:
             coordinator, email = self._validate_request(request)
         except RequestCooperationResponse.RejectionReason as reason:

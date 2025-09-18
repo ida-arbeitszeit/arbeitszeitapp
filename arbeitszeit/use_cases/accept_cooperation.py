@@ -33,11 +33,11 @@ class AcceptCooperationResponse:
 
 
 @dataclass
-class AcceptCooperation:
+class AcceptCooperationUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:
+    def execute(self, request: AcceptCooperationRequest) -> AcceptCooperationResponse:
         try:
             self._validate_request(request)
         except AcceptCooperationResponse.RejectionReason as reason:

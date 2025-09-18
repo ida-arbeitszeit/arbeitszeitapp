@@ -18,10 +18,10 @@ class ShowCompanyAccountsResponse:
 
 
 @dataclass
-class ShowCompanyAccounts:
+class ShowCompanyAccountsUseCase:
     database: DatabaseGateway
 
-    def __call__(
+    def execute(
         self, request: ShowCompanyAccountsRequest
     ) -> ShowCompanyAccountsResponse:
         accounts = dict(

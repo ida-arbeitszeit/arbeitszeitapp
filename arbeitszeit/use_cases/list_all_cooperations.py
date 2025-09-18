@@ -20,11 +20,11 @@ class ListAllCooperationsResponse:
 
 
 @dataclass
-class ListAllCooperations:
+class ListAllCooperationsUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self) -> ListAllCooperationsResponse:
+    def execute(self) -> ListAllCooperationsResponse:
         all_cooperations = self.database_gateway.get_cooperations()
         if not all_cooperations:
             return ListAllCooperationsResponse(cooperations=[])

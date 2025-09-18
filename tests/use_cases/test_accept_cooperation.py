@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.accept_cooperation import (
-    AcceptCooperation,
     AcceptCooperationRequest,
+    AcceptCooperationUseCase,
 )
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from tests.datetime_service import datetime_utc
@@ -16,7 +16,7 @@ from .base_test_case import BaseTestCase
 class AcceptCooperationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.accept_cooperation = self.injector.get(AcceptCooperation)
+        self.accept_cooperation = self.injector.get(AcceptCooperationUseCase)
         self.get_plan_details_use_case = self.injector.get(GetPlanDetailsUseCase)
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
@@ -27,7 +27,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=uuid4(), cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert response.rejection_reason == response.RejectionReason.plan_not_found
 
@@ -37,7 +37,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=uuid4()
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason == response.RejectionReason.cooperation_not_found
@@ -53,7 +53,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation2
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason == response.RejectionReason.plan_has_cooperation
@@ -68,7 +68,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason == response.RejectionReason.plan_is_public_service
@@ -83,7 +83,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -102,7 +102,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -118,7 +118,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert not response.is_rejected
 
     def test_cooperation_is_added_to_plan(self) -> None:
@@ -130,7 +130,7 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert not response.is_rejected
         self.assert_plan_in_cooperation(plan, cooperation)
 
@@ -153,8 +153,8 @@ class AcceptCooperationTests(BaseTestCase):
         request2 = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan2, cooperation_id=cooperation
         )
-        self.accept_cooperation(request1)
-        self.accept_cooperation(request2)
+        self.accept_cooperation.execute(request1)
+        self.accept_cooperation.execute(request2)
         assert self.price_checker.get_unit_price(
             plan1
         ) == self.price_checker.get_unit_price(plan2)
@@ -180,8 +180,8 @@ class AcceptCooperationTests(BaseTestCase):
         request2 = AcceptCooperationRequest(
             requester_id=requester.id, plan_id=plan2, cooperation_id=cooperation
         )
-        self.accept_cooperation(request1)
-        self.accept_cooperation(request2)
+        self.accept_cooperation.execute(request1)
+        self.accept_cooperation.execute(request2)
         # In total costs of 30h and 20 units -> price should be 1.5h per unit
         assert (
             self.price_checker.get_unit_price(plan1)
@@ -198,8 +198,8 @@ class AcceptCooperationTests(BaseTestCase):
         request = AcceptCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        self.accept_cooperation(request)
-        response = self.accept_cooperation(request)
+        self.accept_cooperation.execute(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
 
     def test_that_cooperation_cannot_be_accepted_for_expired_plans(self) -> None:
@@ -215,7 +215,7 @@ class AcceptCooperationTests(BaseTestCase):
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         self.datetime_service.advance_time(timedelta(days=2))
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         assert response.is_rejected
 
     def assert_plan_in_cooperation(self, plan: UUID, cooperation: UUID) -> None:

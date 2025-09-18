@@ -4,8 +4,8 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template, request, url_for
 
 from arbeitszeit.use_cases.create_cooperation import (
-    CreateCooperation,
     CreateCooperationRequest,
+    CreateCooperationUseCase,
 )
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
@@ -18,7 +18,7 @@ from arbeitszeit_web.www.presenters.create_cooperation_presenter import (
 
 @dataclass
 class CreateCooperationView:
-    create_cooperation: CreateCooperation
+    use_case: CreateCooperationUseCase
     presenter: CreateCooperationPresenter
     session: FlaskSession
 
@@ -35,7 +35,7 @@ class CreateCooperationView:
         assert definition
         assert user
         use_case_request = CreateCooperationRequest(user, name, definition)
-        use_case_response = self.create_cooperation(use_case_request)
+        use_case_response = self.use_case.execute(use_case_request)
         self.presenter.present(use_case_response)
         if use_case_response.is_rejected:
             return FlaskResponse(self._render_template(form), status=400)

@@ -32,13 +32,13 @@ class RegisterHoursWorkedResponse:
 
 
 @dataclass
-class RegisterHoursWorked:
+class RegisterHoursWorkedUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
     fic_service: PayoutFactorService
     social_accounting: SocialAccounting
 
-    def __call__(
+    def execute(
         self, use_case_request: RegisterHoursWorkedRequest
     ) -> RegisterHoursWorkedResponse:
         if use_case_request.hours_worked <= Decimal(0):

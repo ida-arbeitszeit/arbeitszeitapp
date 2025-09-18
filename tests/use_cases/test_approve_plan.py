@@ -6,17 +6,20 @@ from parameterized import parameterized
 from arbeitszeit.records import ConsumptionType, ProductionCosts, SocialAccounting
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
-from arbeitszeit.use_cases.get_company_summary import AccountBalances, GetCompanySummary
+from arbeitszeit.use_cases.get_company_summary import (
+    AccountBalances,
+    GetCompanySummaryUseCase,
+)
 from arbeitszeit.use_cases.query_plans import (
     PlanFilter,
     PlanSorting,
     QueriedPlan,
-    QueryPlans,
     QueryPlansRequest,
+    QueryPlansUseCase,
 )
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
+    RegisterProductiveConsumptionUseCase,
 )
 from tests.datetime_service import datetime_utc
 
@@ -27,10 +30,10 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(ApprovePlanUseCase)
-        self.get_company_summary = self.injector.get(GetCompanySummary)
-        self.query_plans = self.injector.get(QueryPlans)
+        self.get_company_summary = self.injector.get(GetCompanySummaryUseCase)
+        self.query_plans_use_case = self.injector.get(QueryPlansUseCase)
         self.register_productive_consumption = self.injector.get(
-            RegisterProductiveConsumption
+            RegisterProductiveConsumptionUseCase
         )
 
     def test_that_an_unreviewed_plan_will_be_approved(self) -> None:
@@ -68,7 +71,7 @@ class UseCaseTests(BaseTestCase):
         self.use_case.approve_plan(self.create_request(plan=plan))
         plan_id = self.get_latest_activated_plan().plan_id
         other_company = self.company_generator.create_company_record()
-        consumption_response = self.register_productive_consumption(
+        consumption_response = self.register_productive_consumption.execute(
             RegisterProductiveConsumptionRequest(
                 consumer=other_company.id,
                 plan=plan_id,
@@ -332,12 +335,12 @@ class UseCaseTests(BaseTestCase):
         assert plan_approval.date == approval_time
 
     def get_company_account_balances(self, company: UUID) -> AccountBalances:
-        response = self.get_company_summary(company_id=company)
+        response = self.get_company_summary.execute(company_id=company)
         assert response
         return response.account_balances
 
     def get_latest_activated_plan(self) -> QueriedPlan:
-        response = self.query_plans(
+        response = self.query_plans_use_case.execute(
             QueryPlansRequest(
                 query_string=None,
                 filter_category=PlanFilter.by_plan_id,

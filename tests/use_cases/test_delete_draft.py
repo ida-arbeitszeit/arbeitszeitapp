@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 
 from arbeitszeit.use_cases.delete_draft import DeleteDraftUseCase
-from arbeitszeit.use_cases.get_draft_details import GetDraftDetails
+from arbeitszeit.use_cases.get_draft_details import GetDraftDetailsUseCase
 
 from .base_test_case import BaseTestCase
 
@@ -10,7 +10,7 @@ class UseCaseTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.use_case = self.injector.get(DeleteDraftUseCase)
-        self.get_draft_details = self.injector.get(GetDraftDetails)
+        self.get_draft_details = self.injector.get(GetDraftDetailsUseCase)
 
     def test_that_failure_is_raised_if_non_existing_plan_is_deleted_for_non_existing_company(
         self,
@@ -43,7 +43,7 @@ class UseCaseTests(BaseTestCase):
         planner = self.company_generator.create_company()
         draft = self.plan_generator.draft_plan(planner=planner)
         self.use_case.delete_draft(self.create_request(deleter=planner, draft=draft))
-        response = self.get_draft_details(draft_id=draft)
+        response = self.get_draft_details.execute(draft_id=draft)
         self.assertIsNone(response)
 
     def test_that_plan_is_not_deleted_if_deleter_is_not_planner(self) -> None:
@@ -53,7 +53,7 @@ class UseCaseTests(BaseTestCase):
             self.use_case.delete_draft(
                 self.create_request(deleter=company.id, draft=draft)
             )
-        response = self.get_draft_details(draft_id=draft)
+        response = self.get_draft_details.execute(draft_id=draft)
         self.assertIsNotNone(response)
 
     def test_failure_is_raised_if_deleter_is_not_planner(self) -> None:

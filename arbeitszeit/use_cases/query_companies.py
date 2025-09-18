@@ -39,10 +39,10 @@ class QueryCompaniesRequest:
 
 
 @dataclass
-class QueryCompanies:
+class QueryCompaniesUseCase:
     database: DatabaseGateway
 
-    def __call__(self, request: QueryCompaniesRequest) -> CompanyQueryResponse:
+    def execute(self, request: QueryCompaniesRequest) -> CompanyQueryResponse:
         companies: Iterable[Company]
         query = request.query_string
         filter_by = request.filter_category

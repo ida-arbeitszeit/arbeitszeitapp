@@ -40,13 +40,13 @@ class RegisterProductiveConsumptionResponse:
 
 
 @dataclass(frozen=True)
-class RegisterProductiveConsumption:
+class RegisterProductiveConsumptionUseCase:
     price_calculator: PriceCalculator
     datetime_service: DatetimeService
     database_gateway: DatabaseGateway
     compensation_transfer_service: CompensationTransferService
 
-    def __call__(
+    def execute(
         self, request: RegisterProductiveConsumptionRequest
     ) -> RegisterProductiveConsumptionResponse:
         try:

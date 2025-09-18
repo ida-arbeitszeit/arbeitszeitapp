@@ -6,7 +6,7 @@ from flask import render_template
 from flask_login import current_user
 
 from arbeitszeit.use_cases import get_member_dashboard
-from arbeitszeit.use_cases.get_member_account import GetMemberAccount
+from arbeitszeit.use_cases.get_member_account import GetMemberAccountUseCase
 from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.types import Response
@@ -64,11 +64,11 @@ class dashboard:
 @as_flask_view()
 @dataclass
 class my_account:
-    get_member_account: GetMemberAccount
+    get_member_account: GetMemberAccountUseCase
     presenter: GetMemberAccountPresenter
 
     def GET(self) -> Response:
-        response = self.get_member_account(UUID(current_user.id))
+        response = self.get_member_account.execute(UUID(current_user.id))
         view_model = self.presenter.present_member_account(response)
         return FlaskResponse(
             render_template(

@@ -5,9 +5,9 @@ from parameterized import parameterized
 from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
     RegisterHoursWorkedRequest,
     RegisterHoursWorkedResponse,
+    RegisterHoursWorkedUseCase,
 )
 
 from .base_test_case import BaseTestCase
@@ -16,7 +16,7 @@ from .base_test_case import BaseTestCase
 class RegisterHoursWorkedTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.register_hours_worked = self.injector.get(RegisterHoursWorked)
+        self.register_hours_worked = self.injector.get(RegisterHoursWorkedUseCase)
         self.fic_service = self.injector.get(PayoutFactorService)
 
     def test_that_request_is_rejected_if_worker_is_not_member_of_company(
@@ -25,7 +25,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         worker1 = self.member_generator.create_member()
         worker2 = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker1])
-        response = self.register_hours_worked(
+        response = self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker2, hours_worked=Decimal(50))
         )
         assert response.is_rejected
@@ -38,7 +38,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
         amount_to_transfer = Decimal(50)
-        response = self.register_hours_worked(
+        response = self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(
                 company.id, worker, hours_worked=amount_to_transfer
             )
@@ -48,7 +48,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
     def test_that_request_with_negative_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        response = self.register_hours_worked(
+        response = self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("-1"))
         )
         assert response.is_rejected
@@ -56,7 +56,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
     def test_that_request_with_zero_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        response = self.register_hours_worked(
+        response = self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("0"))
         )
         assert response.is_rejected
@@ -66,7 +66,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
     ) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        response = self.register_hours_worked(
+        response = self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal("0"))
         )
         assert (
@@ -86,7 +86,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
     ) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         self.assertAlmostEqual(
@@ -105,7 +105,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
     ) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (
@@ -133,7 +133,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
                 resource_cost=Decimal(10),
             ),
         )
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         self.assertAlmostEqual(
@@ -160,7 +160,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
                 resource_cost=Decimal(10),
             ),
         )
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (
@@ -181,7 +181,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         self.economic_scenarios.setup_environment_with_fic(Decimal(0.5))
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         self.assertAlmostEqual(
@@ -201,7 +201,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         self.economic_scenarios.setup_environment_with_fic(Decimal(0.5))
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (
@@ -213,7 +213,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
         self._make_fic_negative()
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal(10))
         )
         assert self.balance_checker.get_member_account_balance(worker) < Decimal("0")
@@ -231,7 +231,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
         self._make_fic_negative()
-        self.register_hours_worked(
+        self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
         assert (

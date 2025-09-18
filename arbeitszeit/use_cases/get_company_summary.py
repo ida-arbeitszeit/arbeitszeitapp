@@ -62,12 +62,12 @@ GetCompanySummaryResponse = Optional[GetCompanySummarySuccess]
 
 
 @dataclass
-class GetCompanySummary:
+class GetCompanySummaryUseCase:
     social_accounting: SocialAccounting
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, company_id: UUID) -> GetCompanySummaryResponse:
+    def execute(self, company_id: UUID) -> GetCompanySummaryResponse:
         record = (
             self.database_gateway.get_companies()
             .with_id(company_id)

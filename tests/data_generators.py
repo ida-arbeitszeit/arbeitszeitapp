@@ -17,22 +17,22 @@ from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 from arbeitszeit.use_cases import confirm_member, get_coop_summary
 from arbeitszeit.use_cases.accept_cooperation import (
-    AcceptCooperation,
     AcceptCooperationRequest,
+    AcceptCooperationUseCase,
 )
 from arbeitszeit.use_cases.answer_company_work_invite import (
-    AnswerCompanyWorkInvite,
     AnswerCompanyWorkInviteRequest,
+    AnswerCompanyWorkInviteUseCase,
 )
 from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from arbeitszeit.use_cases.confirm_company import ConfirmCompanyUseCase
 from arbeitszeit.use_cases.create_cooperation import (
-    CreateCooperation,
     CreateCooperationRequest,
+    CreateCooperationUseCase,
 )
 from arbeitszeit.use_cases.create_plan_draft import CreatePlanDraft, Request
 from arbeitszeit.use_cases.file_plan_with_accounting import FilePlanWithAccounting
-from arbeitszeit.use_cases.hide_plan import HidePlan
+from arbeitszeit.use_cases.hide_plan import HidePlanUseCase
 from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
 from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
 from arbeitszeit.use_cases.register_company import RegisterCompany
@@ -43,14 +43,14 @@ from arbeitszeit.use_cases.register_private_consumption import (
     RegisterPrivateConsumptionResponse,
 )
 from arbeitszeit.use_cases.register_productive_consumption import (
-    RegisterProductiveConsumption,
     RegisterProductiveConsumptionRequest,
     RegisterProductiveConsumptionResponse,
+    RegisterProductiveConsumptionUseCase,
 )
 from arbeitszeit.use_cases.reject_plan import RejectPlanUseCase
 from arbeitszeit.use_cases.request_cooperation import (
-    RequestCooperation,
     RequestCooperationRequest,
+    RequestCooperationUseCase,
 )
 from arbeitszeit.use_cases.request_coordination_transfer import (
     RequestCoordinationTransferUseCase,
@@ -160,13 +160,13 @@ class EmailGenerator:
 class PlanGenerator:
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
-    request_cooperation: RequestCooperation
-    accept_cooperation: AcceptCooperation
+    request_cooperation: RequestCooperationUseCase
+    accept_cooperation: AcceptCooperationUseCase
     create_plan_draft_use_case: CreatePlanDraft
     file_plan_with_accounting: FilePlanWithAccounting
     approve_plan_use_case: ApprovePlanUseCase
-    hide_plan: HidePlan
-    get_coop_summary_use_case: get_coop_summary.GetCoopSummary
+    hide_plan: HidePlanUseCase
+    get_coop_summary_use_case: get_coop_summary.GetCoopSummaryUseCase
     reject_plan_use_case: RejectPlanUseCase
 
     def create_plan(
@@ -234,7 +234,7 @@ class PlanGenerator:
                 cooperation=cooperation,
             )
         if hidden_by_user:
-            self.hide_plan(plan_id=file_plan_response.plan_id)
+            self.hide_plan.execute(plan_id=file_plan_response.plan_id)
         return file_plan_response.plan_id
 
     def _add_plan_to_cooperation(
@@ -264,7 +264,7 @@ class PlanGenerator:
         request = RequestCooperationRequest(
             requester_id=planner, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.request_cooperation.execute(request)
         if response.is_rejected:
             assert response.rejection_reason
             raise response.rejection_reason
@@ -278,7 +278,7 @@ class PlanGenerator:
         request = AcceptCooperationRequest(
             requester_id=coordinator, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.accept_cooperation(request)
+        response = self.accept_cooperation.execute(request)
         if response.is_rejected:
             assert response.rejection_reason
             raise response.rejection_reason
@@ -287,7 +287,7 @@ class PlanGenerator:
         request = get_coop_summary.GetCoopSummaryRequest(
             requester_id=planner, coop_id=cooperation
         )
-        response = self.get_coop_summary_use_case(request)
+        response = self.get_coop_summary_use_case.execute(request)
         assert response
         return response.current_coordinator
 
@@ -375,7 +375,7 @@ class ConsumptionGenerator:
     plan_generator: PlanGenerator
     company_generator: CompanyGenerator
     member_generator: MemberGenerator
-    register_productive_consumption: RegisterProductiveConsumption
+    register_productive_consumption: RegisterProductiveConsumptionUseCase
     register_private_consumption_use_case: RegisterPrivateConsumption
 
     def create_resource_consumption_by_company(
@@ -424,7 +424,7 @@ class ConsumptionGenerator:
             amount=amount,
             consumption_type=consumption_type,
         )
-        response = self.register_productive_consumption(request)
+        response = self.register_productive_consumption.execute(request)
         if response.is_rejected:
             assert response.rejection_reason
             raise response.rejection_reason
@@ -493,9 +493,9 @@ class CooperationGenerator:
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
-    create_cooperation_use_case: CreateCooperation
-    request_cooperation_use_case: RequestCooperation
-    accept_cooperation_use_case: AcceptCooperation
+    create_cooperation_use_case: CreateCooperationUseCase
+    request_cooperation_use_case: RequestCooperationUseCase
+    accept_cooperation_use_case: AcceptCooperationUseCase
 
     def create_cooperation(
         self,
@@ -512,7 +512,7 @@ class CooperationGenerator:
         uc_request = CreateCooperationRequest(
             coordinator_id=coordinator, name=name, definition="test info"
         )
-        uc_response = self.create_cooperation_use_case(uc_request)
+        uc_response = self.create_cooperation_use_case.execute(uc_request)
         assert not uc_response.is_rejected
         cooperation_id = uc_response.cooperation_id
         assert cooperation_id
@@ -546,11 +546,11 @@ class CooperationGenerator:
         request = RequestCooperationRequest(
             requester_id=planner, plan_id=plan, cooperation_id=cooperation
         )
-        request_response = self.request_cooperation_use_case(request)
+        request_response = self.request_cooperation_use_case.execute(request)
         if request_response.is_rejected:
             assert request_response.rejection_reason
             raise request_response.rejection_reason
-        accept_response = self.accept_cooperation_use_case(
+        accept_response = self.accept_cooperation_use_case.execute(
             AcceptCooperationRequest(coordinator, plan, cooperation)
         )
         if accept_response.is_rejected:
@@ -563,7 +563,7 @@ class CoordinationTenureGenerator:
     datetime_service: FakeDatetimeService
     company_generator: CompanyGenerator
     database_gateway: DatabaseGateway
-    create_cooperation_use_case: CreateCooperation
+    create_cooperation_use_case: CreateCooperationUseCase
 
     def create_coordination_tenure(
         self, cooperation: Optional[UUID] = None, coordinator: Optional[UUID] = None
@@ -579,7 +579,7 @@ class CoordinationTenureGenerator:
         uc_request = CreateCooperationRequest(
             coordinator_id=coordinator, name=f"name_{uuid4()}", definition="test info"
         )
-        uc_response = self.create_cooperation_use_case(uc_request)
+        uc_response = self.create_cooperation_use_case.execute(uc_request)
         assert uc_response.cooperation_id
         cooperation = (
             self.database_gateway.get_cooperations()
@@ -666,7 +666,7 @@ class AccountantGenerator:
 @dataclass
 class WorkerAffiliationGenerator:
     invite_worker_use_case: InviteWorkerToCompanyUseCase
-    answer_invite_use_case: AnswerCompanyWorkInvite
+    answer_invite_use_case: AnswerCompanyWorkInviteUseCase
 
     def add_workers_to_company(self, company: UUID, workers=Iterable[UUID]) -> None:
         for worker in workers:
@@ -681,7 +681,7 @@ class WorkerAffiliationGenerator:
                 f"Could not invite worker {worker} to company {company}: {response.rejection_reason}"
             )
         if response.invite_id:
-            answer_response = self.answer_invite_use_case(
+            answer_response = self.answer_invite_use_case.execute(
                 AnswerCompanyWorkInviteRequest(
                     is_accepted=True,
                     invite_id=response.invite_id,

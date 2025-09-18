@@ -4,7 +4,10 @@ from uuid import UUID, uuid4
 from arbeitszeit.use_cases.accept_coordination_transfer import (
     AcceptCoordinationTransferUseCase,
 )
-from arbeitszeit.use_cases.get_coop_summary import GetCoopSummary, GetCoopSummaryRequest
+from arbeitszeit.use_cases.get_coop_summary import (
+    GetCoopSummaryRequest,
+    GetCoopSummaryUseCase,
+)
 from arbeitszeit.use_cases.list_coordinations_of_cooperation import (
     ListCoordinationsOfCooperationUseCase,
 )
@@ -21,7 +24,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
         self.list_coordinations_use_case = self.injector.get(
             ListCoordinationsOfCooperationUseCase
         )
-        self.get_coop_summary_use_case = self.injector.get(GetCoopSummary)
+        self.get_coop_summary_use_case = self.injector.get(GetCoopSummaryUseCase)
         self.request_transfer_use_case = self.injector.get(
             RequestCoordinationTransferUseCase
         )
@@ -148,7 +151,7 @@ class TestAcceptCoordinationTransferUseCase(BaseTestCase):
     def assertCompanyIsCurrentCoordinatorOfCooperation(
         self, company: UUID, cooperation: UUID
     ) -> None:
-        get_coop_summary_response = self.get_coop_summary_use_case(
+        get_coop_summary_response = self.get_coop_summary_use_case.execute(
             GetCoopSummaryRequest(requester_id=uuid4(), coop_id=cooperation)
         )
         self.assertEqual(get_coop_summary_response.current_coordinator, company)

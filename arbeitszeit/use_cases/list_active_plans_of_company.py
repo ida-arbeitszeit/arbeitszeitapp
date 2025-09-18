@@ -19,11 +19,11 @@ class ListPlansResponse:
 
 
 @dataclass
-class ListActivePlansOfCompany:
+class ListActivePlansOfCompanyUseCase:
     database_gateway: DatabaseGateway
     datetime_service: DatetimeService
 
-    def __call__(self, company_id: UUID) -> ListPlansResponse:
+    def execute(self, company_id: UUID) -> ListPlansResponse:
         now = self.datetime_service.now()
         plans = [
             self._create_plan_response_model(plan)

@@ -26,10 +26,10 @@ class AnswerCompanyWorkInviteResponse:
 
 
 @dataclass
-class AnswerCompanyWorkInvite:
+class AnswerCompanyWorkInviteUseCase:
     database_gateway: DatabaseGateway
 
-    def __call__(
+    def execute(
         self, request: AnswerCompanyWorkInviteRequest
     ) -> AnswerCompanyWorkInviteResponse:
         invite = (

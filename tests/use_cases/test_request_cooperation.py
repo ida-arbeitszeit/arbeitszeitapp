@@ -4,13 +4,13 @@ from parameterized import parameterized
 
 from arbeitszeit import email_notifications
 from arbeitszeit.use_cases.accept_cooperation import (
-    AcceptCooperation,
     AcceptCooperationRequest,
+    AcceptCooperationUseCase,
 )
 from arbeitszeit.use_cases.request_cooperation import (
-    RequestCooperation,
     RequestCooperationRequest,
     RequestCooperationResponse,
+    RequestCooperationUseCase,
 )
 
 from .base_test_case import BaseTestCase
@@ -19,8 +19,8 @@ from .base_test_case import BaseTestCase
 class RequestCooperationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.request_cooperation = self.injector.get(RequestCooperation)
-        self.accept_cooperation = self.injector.get(AcceptCooperation)
+        self.use_case = self.injector.get(RequestCooperationUseCase)
+        self.accept_cooperation = self.injector.get(AcceptCooperationUseCase)
         self.requester = self.company_generator.create_company()
 
     def test_error_is_raised_when_plan_does_not_exist(self) -> None:
@@ -30,7 +30,7 @@ class RequestCooperationTests(BaseTestCase):
             plan_id=uuid4(),
             cooperation_id=cooperation,
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -42,7 +42,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=self.requester, plan_id=plan, cooperation_id=uuid4()
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -61,7 +61,7 @@ class RequestCooperationTests(BaseTestCase):
             cooperation_id=cooperation2,
         )
 
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -80,7 +80,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation2
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -96,7 +96,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason == response.RejectionReason.plan_is_public_service
@@ -111,7 +111,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.is_rejected
         assert (
             response.rejection_reason
@@ -127,7 +127,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert not response.is_rejected
 
     def test_successful_cooperation_request_returns_coordinator_data(self) -> None:
@@ -139,7 +139,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert response.coordinator_name
         assert response.coordinator_email
 
@@ -154,8 +154,8 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        self.request_cooperation(request)
-        accept_cooperation_response = self.accept_cooperation(
+        self.use_case.execute(request)
+        accept_cooperation_response = self.accept_cooperation.execute(
             AcceptCooperationRequest(requester, plan, cooperation)
         )
         assert not accept_cooperation_response.is_rejected
@@ -168,7 +168,7 @@ class RequestCooperationTests(BaseTestCase):
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         messages_before_request = len(self.email_sender.get_messages_sent())
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert not response.is_rejected
         assert len(self.email_sender.get_messages_sent()) == messages_before_request + 1
 
@@ -182,7 +182,7 @@ class RequestCooperationTests(BaseTestCase):
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
         messages_before_request = len(self.get_cooperation_request_emails())
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert not response.is_rejected
         assert len(self.get_cooperation_request_emails()) == messages_before_request + 1
 
@@ -206,7 +206,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert not response.is_rejected
         assert (
             self.get_latest_cooperation_request_email().coordinator_email_address
@@ -231,7 +231,7 @@ class RequestCooperationTests(BaseTestCase):
         request = RequestCooperationRequest(
             requester_id=requester, plan_id=plan, cooperation_id=cooperation
         )
-        response = self.request_cooperation(request)
+        response = self.use_case.execute(request)
         assert not response.is_rejected
         assert (
             self.get_latest_cooperation_request_email().coordinator_name
