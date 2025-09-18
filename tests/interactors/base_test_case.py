@@ -53,7 +53,7 @@ class _lazy_property(Generic[T]):
 
 
 class BaseTestCase(TestCase):
-    "Use case unit tests should inherit from this class."
+    "Interactor unit tests should inherit from this class."
 
     def setUp(self) -> None:
         super().setUp()

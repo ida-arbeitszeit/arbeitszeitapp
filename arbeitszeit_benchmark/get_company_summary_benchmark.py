@@ -11,7 +11,7 @@ from tests.flask_integration.flask import drop_and_recreate_schema
 
 class GetCompanySummaryBenchmark:
     """This benchmark measures the performance of the
-    get_company_summary use case with a company that has made 1000
+    get_company_summary interactor with a company that has made 1000
     productive consumptions and created 1000 approved plans.
     """
 

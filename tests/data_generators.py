@@ -1,5 +1,5 @@
 """Data generators defined in this module *should* only interact with
-use case objects.  Some of the classes in this module violate this
+interactor objects.  Some of the classes in this module violate this
 rule though. Feel free to change them so that they comply.
 """
 
