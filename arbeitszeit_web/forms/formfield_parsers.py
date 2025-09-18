@@ -2,7 +2,7 @@ from copy import copy
 from typing import Self
 from uuid import UUID
 
-from arbeitszeit_web.fields import ParsingFailure, ParsingSuccess
+from arbeitszeit_web.forms.fields import ParsingFailure, ParsingSuccess
 from arbeitszeit_web.translator import Translator
 
 

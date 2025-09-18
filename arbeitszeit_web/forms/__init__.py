@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from arbeitszeit_web.fields import FormField
+from arbeitszeit_web.forms.fields import FormField
 
 
 class RequestEmailAddressChangeForm(Protocol):
