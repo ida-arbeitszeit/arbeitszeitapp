@@ -1,7 +1,6 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict
+from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_plan_details import GetPlanDetailsUseCase
+from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_web.formatters.plan_details_formatter import (
     PlanDetailsFormatter,
     PlanDetailsWeb,
@@ -16,9 +15,6 @@ class GetPlanDetailsMemberViewModel:
     details: PlanDetailsWeb
     register_private_consumption_url: str
 
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
 
 @dataclass
 class GetPlanDetailsMemberMemberPresenter:
@@ -27,7 +23,7 @@ class GetPlanDetailsMemberMemberPresenter:
     url_index: UrlIndex
 
     def present(
-        self, response: GetPlanDetailsUseCase.Response
+        self, response: GetPlanDetailsInteractor.Response
     ) -> GetPlanDetailsMemberViewModel:
         return GetPlanDetailsMemberViewModel(
             details=self.plan_details_service.format_plan_details(

@@ -68,4 +68,7 @@ class FakeRequest:
         self._json = value
 
     def get_request_target(self) -> str:
-        return "/"
+        return self._environ.get("REQUEST_URI", "http://example.com/")
+
+    def set_request_target(self, url: str) -> None:
+        self._environ["REQUEST_URI"] = url

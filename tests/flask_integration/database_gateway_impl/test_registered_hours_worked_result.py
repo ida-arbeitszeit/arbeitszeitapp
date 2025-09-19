@@ -4,7 +4,8 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import register_hours_worked
+from arbeitszeit.interactors import register_hours_worked
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 
@@ -12,8 +13,8 @@ from ..flask import FlaskTestCase
 class RegisteredHoursWorkedResultTests(FlaskTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.register_hours_worked_use_case = self.injector.get(
-            register_hours_worked.RegisterHoursWorked
+        self.register_hours_worked_interactor = self.injector.get(
+            register_hours_worked.RegisterHoursWorkedInteractor
         )
 
     def test_get_registered_hours_worked_yields_empty_result_before_any_records_were_created(
@@ -63,9 +64,9 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
 
     @parameterized.expand(
         [
-            datetime(2000, 1, 1),
-            datetime(2000, 1, 2),
-            datetime(2012, 3, 21),
+            datetime_utc(2000, 1, 1),
+            datetime_utc(2000, 1, 2),
+            datetime_utc(2012, 3, 21),
         ]
     )
     def test_that_record_has_specified_registration_time(
@@ -240,5 +241,7 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
             worker_id=worker,
             hours_worked=hours,
         )
-        response = self.register_hours_worked_use_case(use_case_request=request)
+        response = self.register_hours_worked_interactor.execute(
+            interactor_request=request
+        )
         assert not response.is_rejected

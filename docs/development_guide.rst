@@ -4,23 +4,23 @@ Development guide
 Implementing Business Logic
 ----------------------------
 
-The code implementing the business logic is organized by use cases. We
-define a use case as an action that a user wants to perform via our
-app. Typically, a use case would still make sense even if our specific
-application didn't exist. For example, companies filing plans is a use
-case that would be necessary regardless of whether our application
+Central to our business logic code are interactors. These classes implement 
+actions that a user wants to perform via our app. Typically, an interactor 
+class would still make sense even if our specific
+application didn't exist. For example, companies filing plans is a user
+action that would be necessary regardless of whether our application
 existed.
 
-To keep our code organized, we place each use case in its own class
-within a file under the ``arbeitszeit/use_cases/`` directory. Each use
-case class should expose a single "public" method that adequately
-describes the use case in its name. For instance, in our example, we
+To keep our code organized, we place each interactor in its own class
+within a file under the ``arbeitszeit/interactors/`` directory. Each 
+interactor class should expose a single "public" method that adequately
+describes the interactor in its name. For instance, in our example, we
 might name this method ``file_plan``. This method should take exactly
 one argument, in addition to the implicit ``self`` argument, which we
-call the *use case request*. The return value of this method is called
-the *use case response*. Both the type (class) of the request and
-response are specific to the use case and should be declared in the
-same module as the use case.
+call the *interactor request*. The return value of this method is called
+the *interactor response*. Both the type (class) of the request and
+response are specific to the interactor and should be declared in the
+same module as the interactor.
 
 Here's an example for reference::
 
@@ -38,7 +38,7 @@ Here's an example for reference::
   class Response:
       is_granted: bool
 
-  class FilePlanUseCase:
+  class FilePlanInteractor:
       def file_plan(self, request: Request) -> Response:
           # Here, we'd implement our business logic
           # For now, let's just return a response
@@ -46,10 +46,10 @@ Here's an example for reference::
           return response
 
 In this example, we define two data classes, ``Request`` and
-``Response``, to hold the input and output data for our use
-case. Then, we create a class called ``FilePlanUseCase``, which
-contains a method called ``file_plan`` to handle the "file plan" use
-case. Inside this method, we'd implement the specific business logic
+``Response``, to hold the input and output data for our interactor. 
+Then, we create a class called ``FilePlanInteractor``, which
+contains a method called ``file_plan``. 
+Inside this method, we'd implement the specific business logic
 needed for filing plans. For now, we're just returning a simple
 response to demonstrate the structure.
 
@@ -62,7 +62,7 @@ they ensure the reliability of any changes made through thorough
 testing. Having tests in place safeguards us against unintentionally
 introducing bugs. Secondly, the tests act as a specification that
 other programmers can refer to in order to understand what a
-particular use case is expected to accomplish.
+particular interactor is expected to accomplish.
 
 To streamline the testing process, we've established a basic framework
 and provided some utility classes for setting up the application
@@ -71,16 +71,16 @@ testing setup offers::
 
   from decimal import Decimal
   from parameterized import parameterized
-  from arbeitszeit.use_cases import file_plan
-  from tests.use_cases.base_test_case import BaseTestCase
+  from arbeitszeit.interactors import file_plan
+  from tests.interactors.base_test_case import BaseTestCase
 
   class FilePlanTests(BaseTestCase):
       def setUp(self) -> None:
           # The BaseTestCase parent class handles setting up the
           # dependency injection logic.
           super().setUp()
-          # Here, we create an instance of the use case object that we want to test.
-          self.use_case = self.injector.get(file_plan.FilePlanUseCase)
+          # Here, we create an instance of the interactor object that we want to test.
+          self.interactor = self.injector.get(file_plan.FilePlanInteractor)
 
       # The next test case demonstrates a basic scenario where we use
       # a generator object to prepare the test's preconditions.
@@ -93,7 +93,7 @@ testing setup offers::
               planned_hours=Decimal(20),
               plan_duration_in_days=5,
           )
-          response = self.use_case.file_plan(request)
+          response = self.interactor.file_plan(request)
           # Finally, we verify that the plan was successfully filed
           # by examining the response.
           assert response.is_granted
@@ -109,7 +109,7 @@ testing setup offers::
               planned_hours=Decimal(20),
               plan_duration_in_days=duration,
           )
-          response = self.use_case.file_plan(request)
+          response = self.interactor.file_plan(request)
           assert not response.is_granted
 
 In this example, we define the ``FilePlanTests`` class, which inherits
@@ -320,8 +320,8 @@ transfered as part of that consumption::
         transfer: UUID  # Reference to a Transfer
 
 A common pattern in our code is to first create a Transfer object and then another object 
-that references it — all within a single use case. For instance, we might see 
-in a ``ConsumptionUseCase``::
+that references it — all within a single interactor. For instance, we might see 
+in a ``ConsumptionInteractor``::
 
     # create the Transfer object
     transfer = self.database_gateway.create_transfer(
@@ -346,21 +346,21 @@ Presenters
 
 One of the design approaches of the arbeitszeitapp is a separation of
 business logic and presentational logic. We have previously learned
-about use case classes. We have seen that the responses returned by
-calling to those use case objects are pretty abstract, hence we need a
-way to turn those abstract use case responses into something we can
+about interactor classes. We have seen that the responses returned by
+calling to those interactor objects are pretty abstract, hence we need a
+way to turn those abstract interactor responses into something we can
 present to the user. This presentation can take different forms,
 e.g. a http response, command line output or an email. This is the job
 of **presenters**.
 
 Presenters are classes that, when instantiated are responsible for
-rendering abstract use case responses into more concrete data. Each
-individual presenter class is specific to the use case response it
+rendering abstract interactor responses into more concrete data. Each
+individual presenter class is specific to the interactor response it
 handles and the output format that it produces. So if we need to
-render the same use case response into two diferent formats there
+render the same interactor response into two diferent formats there
 should be 2 different presenter classes respectivly.
 
-A presenter produces a view model object when handling use case
+A presenter produces a view model object when handling interactor
 responses. These view model objects are simple data types instead of
 proper objects. Their attributes are mostly booleans and strings which
 represent concrete output shown to the user, e.g. messages that should
@@ -378,12 +378,12 @@ function is then responsible for serializing the strings and booleans
 from the view model into the final output format, e.g. html, an email
 or text on the screen.
 
-Let us revisit the example from the use case chapter earlier where we
-looked at an example for a use case object. Our example use case
+Let us revisit the example from the interactor chapter earlier where we
+looked at an example for a interactor object. Our example interactor
 object returned a simple response object that was supposed to
 represent whether a filed plan was approved or rejected.::
 
-  class FilePlanUseCase:
+  class FilePlanInteractor:
       @dataclass
       class Request:
 	  company_id: UUID
@@ -398,7 +398,7 @@ represent whether a filed plan was approved or rejected.::
 	  response = business_logic(request)
 	  return response
 
-Let us imagine that the response objects returned by this use case are
+Let us imagine that the response objects returned by this interactor are
 supposed to be rendered into an http response containing html. If a
 plan is approved (denoted by `response.is_granted == True`) we want to
 show to the user an html document with white text on green
@@ -416,7 +416,7 @@ this::
 	  background_color: str
 	  message_text: str
 
-      def render_response(self, response: FilePlanUseCase.Response) -> ViewModel:
+      def render_response(self, response: FilePlanInteractor.Response) -> ViewModel:
 	  if response.is_granted:
 	      return self.ViewModel(
 		  text_color='#ffffff',
@@ -496,10 +496,10 @@ The ``arbeitszeitapp`` webserver processes incoming requests using
 specific functions designed for different types of requests. For
 example, there's a special handler for authentication requests when a
 member logs in, and another for viewing a company's accounts. Each of
-these request handlers corresponds to a specific use case in a
+these request handlers corresponds to a specific interactor in a
 one-to-one relationship. While there may be exceptions in our
 codebase, we consider them as legacy code that should be updated to
-align with a one-to-one relationship between use cases and request
+align with a one-to-one relationship between interactors and request
 handlers.
 
 We group these individual request handlers based on their
@@ -562,6 +562,17 @@ handler for this path must accept a ``member_id`` argument of type
 
         def DELETE(self, member_id: UUID) -> Response:
             return f"Deleting member account for member {member_id}"
+
+
+Date and Time Handling
+-----------------------
+
+We work internally with the UTC timezone. To this end we use timezone-aware python 
+datetime objects wherever possible. We convert datetime to the required timezone 
+only in the presenter layer.
+
+Currently the user timezone can only set application-wide by the server admin.
+Per-user timezones are not implemented yet.  
 
 
 Icon Templates: Integration and Usage

@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import uuid4
 
 from arbeitszeit import records
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 
@@ -21,7 +22,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
         email_address = self.email_generator.get_random_email()
         self.database_gateway.create_email_address(
             address=email_address,
-            confirmed_on=self.datetime_service.now_minus_ten_days(),
+            confirmed_on=self.datetime_service.now_minus(timedelta(days=10)),
         )
         return email_address
 
@@ -38,7 +39,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
     def test_querying_password_reset_request_by_email(self) -> None:
         email_address = self._generate_email_address()
         other_email_address = self._generate_email_address()
-        self.datetime_service.freeze_time(datetime(2021, 2, 13, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2021, 2, 13, hour=10))
 
         self._create_password_reset_request(email_address)
         self._create_password_reset_request(other_email_address)
@@ -53,7 +54,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
 
     def test_multiple_password_reset_requests_can_exist_for_given_email(self) -> None:
         email_address = self._generate_email_address()
-        self.datetime_service.freeze_time(datetime(2021, 2, 13, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2021, 2, 13, hour=10))
 
         self._create_password_reset_request(email_address)
         self._create_password_reset_request(email_address)
@@ -69,7 +70,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
 
     def test_querying_password_reset_requests_after_datetime_threshold(self) -> None:
         email_address = self._generate_email_address()
-        self.datetime_service.freeze_time(datetime(2021, 2, 13, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2021, 2, 13, hour=10))
 
         self._create_password_reset_request(email_address)
         self.datetime_service.advance_time(timedelta(hours=1))
@@ -93,7 +94,7 @@ class PasswordResetRequestResultTests(FlaskTestCase):
     def test_querying_interleaved_non_spammed_and_spammed_requests(self) -> None:
         spammed_email_address = self._generate_email_address()
         not_spammed_email_address = self._generate_email_address()
-        self.datetime_service.freeze_time(datetime(2021, 2, 13, hour=10))
+        self.datetime_service.freeze_time(datetime_utc(2021, 2, 13, hour=10))
 
         self._create_password_reset_request(not_spammed_email_address)
         self.datetime_service.advance_time(timedelta(hours=2))

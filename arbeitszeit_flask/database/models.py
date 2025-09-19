@@ -3,11 +3,19 @@ Definition of database tables.
 """
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from flask_login import UserMixin
-from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Dialect,
+    ForeignKey,
+    String,
+    Table,
+    TypeDecorator,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from arbeitszeit.transfers.transfer_type import TransferType
@@ -16,6 +24,33 @@ from arbeitszeit_flask.database.db import Base
 
 def generate_uuid() -> str:
     return str(uuid.uuid4())
+
+
+class TZDateTime(TypeDecorator):
+    """
+    We store all datetimes in UTC without timezone info, but require
+    that all datetimes passed in have tzinfo set.
+    Output datetimes have tzinfo set to UTC.
+    """
+
+    impl = DateTime
+    cache_ok = True
+
+    def process_bind_param(
+        self, value: datetime | None, dialect: Dialect
+    ) -> datetime | None:
+        if value is not None:
+            if not value.tzinfo or value.tzinfo.utcoffset(value) is None:
+                raise TypeError("tzinfo is required")
+            value = value.astimezone(UTC).replace(tzinfo=None)
+        return value
+
+    def process_result_value(
+        self, value: datetime | None, dialect: Dialect
+    ) -> datetime | None:
+        if value is not None:
+            value = value.replace(tzinfo=UTC)
+        return value
 
 
 class User(Base):
@@ -33,7 +68,7 @@ class Email(Base):
     __tablename__ = "email"
 
     address: Mapped[str] = mapped_column(primary_key=True)
-    confirmed_on: Mapped[datetime | None]
+    confirmed_on: Mapped[datetime | None] = mapped_column(TZDateTime)
 
 
 class SocialAccounting(Base):
@@ -58,7 +93,7 @@ class Member(UserMixin, Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     user_id: Mapped[str] = mapped_column(ForeignKey("user.id"), unique=True)
     name: Mapped[str] = mapped_column(String(1000))
-    registered_on: Mapped[datetime]
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
     account: Mapped[str] = mapped_column(ForeignKey("account.id"))
 
     workplaces = relationship(
@@ -74,7 +109,7 @@ class Company(UserMixin, Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     user_id: Mapped[str] = mapped_column(ForeignKey("user.id"), unique=True)
     name: Mapped[str] = mapped_column(String(1000))
-    registered_on: Mapped[datetime]
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
     p_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
     r_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
     a_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
@@ -102,7 +137,7 @@ class PlanDraft(Base):
     __tablename__ = "plan_draft"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    plan_creation_date: Mapped[datetime]
+    plan_creation_date: Mapped[datetime] = mapped_column(TZDateTime)
     planner: Mapped[str] = mapped_column(ForeignKey("company.id"))
     costs_p: Mapped[Decimal]
     costs_r: Mapped[Decimal]
@@ -119,7 +154,7 @@ class Plan(Base):
     __tablename__ = "plan"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    plan_creation_date: Mapped[datetime]
+    plan_creation_date: Mapped[datetime] = mapped_column(TZDateTime)
     planner: Mapped[str] = mapped_column(ForeignKey("company.id"))
     costs_p: Mapped[Decimal]
     costs_r: Mapped[Decimal]
@@ -154,7 +189,7 @@ class PlanReview(Base):
     __tablename__ = "plan_review"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    rejection_date: Mapped[datetime | None]
+    rejection_date: Mapped[datetime | None] = mapped_column(TZDateTime)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
 
     plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
@@ -168,7 +203,7 @@ class PlanApproval(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
-    date: Mapped[datetime]
+    date: Mapped[datetime] = mapped_column(TZDateTime)
     transfer_of_credit_p: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     transfer_of_credit_r: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
     transfer_of_credit_a: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
@@ -186,7 +221,7 @@ class Transfer(Base):
     __tablename__ = "transfer"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    date: Mapped[datetime] = mapped_column(index=True)
+    date: Mapped[datetime] = mapped_column(TZDateTime, index=True)
     debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
     value: Mapped[Decimal]
@@ -244,7 +279,7 @@ class RegisteredHoursWorked(Base):
         ForeignKey("transfer.id")
     )
     transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
-    registered_on: Mapped[datetime]
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
 
 
 class CompanyWorkInvite(Base):
@@ -259,7 +294,7 @@ class Cooperation(Base):
     __tablename__ = "cooperation"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
-    creation_date: Mapped[datetime]
+    creation_date: Mapped[datetime] = mapped_column(TZDateTime)
     name: Mapped[str] = mapped_column(String(100))
     definition: Mapped[str] = mapped_column(String(5000))
     account: Mapped[str] = mapped_column(ForeignKey("account.id"))
@@ -271,7 +306,7 @@ class CoordinationTenure(Base):
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
     company: Mapped[str] = mapped_column(ForeignKey("company.id"))
     cooperation: Mapped[str] = mapped_column(ForeignKey("cooperation.id"))
-    start_date: Mapped[datetime]
+    start_date: Mapped[datetime] = mapped_column(TZDateTime)
 
 
 class CoordinationTransferRequest(Base):
@@ -282,7 +317,7 @@ class CoordinationTransferRequest(Base):
         ForeignKey("coordination_tenure.id")
     )
     candidate: Mapped[str] = mapped_column(ForeignKey("company.id"))
-    request_date: Mapped[datetime]
+    request_date: Mapped[datetime] = mapped_column(TZDateTime)
 
 
 class PasswordResetRequest(Base):
@@ -293,4 +328,4 @@ class PasswordResetRequest(Base):
         ForeignKey("email.address"), unique=False
     )
     reset_token: Mapped[str] = mapped_column(String(300))
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(TZDateTime)

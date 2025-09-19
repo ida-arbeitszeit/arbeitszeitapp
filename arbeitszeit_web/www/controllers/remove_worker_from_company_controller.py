@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.remove_worker_from_company import Request as UseCaseRequest
+from arbeitszeit.interactors.remove_worker_from_company import (
+    Request as InteractorRequest,
+)
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session, UserRole
@@ -13,9 +15,9 @@ class RemoveWorkerFromCompanyController:
     notifier: Notifier
     translator: Translator
 
-    def create_use_case_request(
+    def create_interactor_request(
         self, *, web_request: Request, session: Session
-    ) -> UseCaseRequest | None:
+    ) -> InteractorRequest | None:
         company = self._extract_company_from_session(session)
         worker = self._extract_worker_from_request(web_request)
         if worker is None:
@@ -23,7 +25,7 @@ class RemoveWorkerFromCompanyController:
                 self.translator.gettext("Worker ID in request is invalid or missing.")
             )
             return None
-        return UseCaseRequest(company=company, worker=worker)
+        return InteractorRequest(company=company, worker=worker)
 
     def _extract_company_from_session(self, session: Session) -> UUID:
         user_role = session.get_user_role()

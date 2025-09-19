@@ -1,11 +1,10 @@
-from datetime import datetime
 from decimal import Decimal
 from unittest import TestCase
 
 from arbeitszeit.records import ProductionCosts
 from tests.data_generators import PlanGenerator
-from tests.datetime_service import FakeDatetimeService
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.datetime_service import FakeDatetimeService, datetime_utc
+from tests.interactors.dependency_injection import get_dependency_injector
 
 
 class TestPlanSalesValue(TestCase):
@@ -45,21 +44,21 @@ class TestPlanExpirationDate(TestCase):
     def test_that_expiration_date_is_correctly_calculated_if_plan_expires_now(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan_record(
             timeframe=1,
             approved=True,
         )
-        expected_expiration_time = datetime(2000, 1, 2)
+        expected_expiration_time = datetime_utc(2000, 1, 2)
         assert plan.expiration_date == expected_expiration_time
 
     def test_that_expiration_date_is_correctly_calculated_if_plan_expires_in_the_future(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan_record(
             timeframe=2,
             approved=True,
         )
-        expected_expiration_time = datetime(2000, 1, 3)
+        expected_expiration_time = datetime_utc(2000, 1, 3)
         assert plan.expiration_date == expected_expiration_time

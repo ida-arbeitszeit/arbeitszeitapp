@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.register_private_consumption import (
+from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumptionResponse,
     RejectionReason,
 )
@@ -29,30 +29,32 @@ class RegisterPrivateConsumptionPresenter:
 
     def present(
         self,
-        use_case_response: RegisterPrivateConsumptionResponse,
+        interactor_response: RegisterPrivateConsumptionResponse,
         request: Request,
     ) -> RegisterPrivateConsumptionViewModel:
-        if use_case_response.rejection_reason is None:
+        if interactor_response.rejection_reason is None:
             self.user_notifier.display_info(
                 self.translator.gettext("Consumption successfully registered.")
             )
             return Redirect(url=self.url_index.get_register_private_consumption_url())
         form = self._create_form(request)
         status_code = 400
-        if use_case_response.rejection_reason == RejectionReason.plan_inactive:
+        if interactor_response.rejection_reason == RejectionReason.plan_inactive:
             form.plan_id_errors.append(
                 self.translator.gettext(
                     "The specified plan has been expired. Please contact the selling company to provide you with an up-to-date plan ID."
                 )
             )
             status_code = 410
-        elif use_case_response.rejection_reason == RejectionReason.insufficient_balance:
+        elif (
+            interactor_response.rejection_reason == RejectionReason.insufficient_balance
+        ):
             form.general_errors.append(
                 self.translator.gettext("You do not have enough work certificates.")
             )
             status_code = 406
         elif (
-            use_case_response.rejection_reason
+            interactor_response.rejection_reason
             == RejectionReason.consumer_does_not_exist
         ):
             form.general_errors.append(

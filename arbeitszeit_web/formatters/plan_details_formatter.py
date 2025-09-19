@@ -112,13 +112,11 @@ class PlanDetailsFormatter:
             ),
             creation_date=self.datetime_formatter.format_datetime(
                 date=plan_details.creation_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             approval_date=(
                 self.datetime_formatter.format_datetime(
                     date=plan_details.approval_date,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 )
                 if plan_details.approval_date
@@ -127,7 +125,6 @@ class PlanDetailsFormatter:
             expiration_date=(
                 self.datetime_formatter.format_datetime(
                     date=plan_details.expiration_date,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 )
                 if plan_details.expiration_date

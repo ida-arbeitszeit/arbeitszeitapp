@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.list_plans_with_pending_review import (
-    ListPlansWithPendingReviewUseCase as UseCase,
+from arbeitszeit.interactors.list_plans_with_pending_review import (
+    ListPlansWithPendingReviewInteractor as Interactor,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.url_index import UrlIndex
@@ -28,7 +28,9 @@ class ListPlansWithPendingReviewPresenter:
 
     url_index: UrlIndex
 
-    def list_plans_with_pending_review(self, response: UseCase.Response) -> ViewModel:
+    def list_plans_with_pending_review(
+        self, response: Interactor.Response
+    ) -> ViewModel:
         return self.ViewModel(
             show_plan_list=bool(response.plans),
             plans=[

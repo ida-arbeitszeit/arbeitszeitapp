@@ -1,6 +1,8 @@
 from uuid import uuid4
 
-from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
+from parameterized import parameterized
+
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, PAGE_PARAMETER_NAME
 from arbeitszeit_web.www.presenters.query_companies_presenter import (
     QueryCompaniesPresenter,
 )
@@ -23,7 +25,7 @@ class QueryCompaniesPresenterTests(BaseTestCase):
         presentation = self.presenter.get_empty_view_model()
         self.assertFalse(presentation.pagination.is_visible)
 
-    def test_non_empty_use_case_response_leads_to_showing_results(self):
+    def test_non_empty_interactor_response_leads_to_showing_results(self):
         response = self.queried_company_generator.get_response()
         presentation = self.presenter.present(response)
         self.assertTrue(presentation.show_results)
@@ -81,3 +83,23 @@ class PaginationTests(BaseTestCase):
         )
         view_model = self.presenter.present(response)
         assert view_model.pagination.is_visible
+
+    @parameterized.expand(
+        [
+            (1,),
+            (2,),
+            (3,),
+        ]
+    )
+    def test_that_correct_pages_are_shown_as_currently_selected(
+        self,
+        page_number_in_query_string: int,
+    ) -> None:
+        self.request.set_arg(PAGE_PARAMETER_NAME, str(page_number_in_query_string))
+        response = self.queried_company_generator.get_response()
+        view_model = self.presenter.present(response)
+        for index, page in enumerate(view_model.pagination.pages):
+            if index == page_number_in_query_string - 1:
+                assert page.is_current
+            else:
+                assert not page.is_current

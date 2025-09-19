@@ -1,17 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from arbeitszeit.records import Plan, PlanDraft
-from arbeitszeit.use_cases.show_my_plans import (
+from arbeitszeit.interactors.show_my_plans import (
     PlanInfo,
+    ShowMyPlansInteractor,
     ShowMyPlansRequest,
     ShowMyPlansResponse,
-    ShowMyPlansUseCase,
 )
+from arbeitszeit.records import Plan, PlanDraft
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_plans_presenter import ShowMyPlansPresenter
 from tests.data_generators import CooperationGenerator, PlanGenerator
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -22,8 +23,8 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.session.login_company(uuid4())
-        self.show_my_plans = self.injector.get(ShowMyPlansUseCase)
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.show_my_plans = self.injector.get(ShowMyPlansInteractor)
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
 
     def test_show_correct_notification_when_user_has_no_plans(self) -> None:
         self.presenter.present(
@@ -84,7 +85,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
     def test_presenter_shows_correct_info_of_one_single_plan_that_is_cooperating(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         coop = self.coop_generator.create_cooperation()
         plan = self.plan_generator.create_plan_record(cooperation=coop)
         RESPONSE_WITH_COOPERATING_PLAN = self.response_with_one_active_plan(
@@ -145,8 +146,8 @@ class ShowMyPlansPresenterTests(BaseTestCase):
 
     def test_non_active_plan_has_correct_revocation_url(self) -> None:
         plan = self.plan_generator.create_plan_record(approved=False)
-        use_case_response = self.response_with_one_non_active_plan(plan)
-        view_model = self.presenter.present(use_case_response)
+        interactor_response = self.response_with_one_non_active_plan(plan)
+        view_model = self.presenter.present(interactor_response)
         row = view_model.non_active_plans.rows[0]
         self.assertEqual(
             row.revoke_plan_filing_url,
@@ -154,7 +155,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         )
 
     def test_that_relative_expiration_is_calculated_correctly(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self._create_active_plan(timeframe=5)
         view_model = self.presenter.present(self.response_with_one_active_plan(plan))
         self.assertEqual(
@@ -179,7 +180,7 @@ class ShowMyPlansPresenterTests(BaseTestCase):
         self.assertEqual(view_model.drafts.rows[0].product_name, expected_name)
 
     def test_that_draft_creation_date_is_filled_in_correctly(self) -> None:
-        expected_creation_time = datetime(2020, 5, 1)
+        expected_creation_time = datetime_utc(2020, 5, 1)
         self.datetime_service.freeze_time(expected_creation_time)
         response = self.response_with_one_draft()
         view_model = self.presenter.present(response)

@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional, Protocol
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
-from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, PAGE_PARAMETER_NAME
+from arbeitszeit.interactors.query_plans import (
+    PlanFilter,
+    PlanSorting,
+    QueryPlansRequest,
+)
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, calculate_current_offset
 from arbeitszeit_web.request import Request
 
 
@@ -33,7 +37,11 @@ class QueryPlansController:
             filter_category = self._import_filter_category(form)
             sorting_category = self._import_sorting_category(form)
             include_expired_plans = self._import_include_expired(form)
-        offset = self._get_pagination_offset(request) if request else 0
+        offset = (
+            calculate_current_offset(request=request, limit=DEFAULT_PAGE_SIZE)
+            if request
+            else 0
+        )
         return QueryPlansRequest(
             query_string=query,
             filter_category=filter_category,
@@ -42,16 +50,6 @@ class QueryPlansController:
             offset=offset,
             limit=DEFAULT_PAGE_SIZE,
         )
-
-    def _get_pagination_offset(self, request: Request) -> int:
-        page_str = request.query_string().get_last_value(PAGE_PARAMETER_NAME)
-        if page_str is None:
-            return 0
-        try:
-            page_number = int(page_str)
-        except ValueError:
-            return 0
-        return (page_number - 1) * DEFAULT_PAGE_SIZE
 
     def _import_filter_category(self, form: QueryPlansFormData) -> PlanFilter:
         if form.get_category_string() == "Plan-ID":

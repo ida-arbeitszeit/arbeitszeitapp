@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.show_company_work_invite_details import (
+from arbeitszeit.interactors.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsResponse,
 )
 from arbeitszeit_web.translator import Translator

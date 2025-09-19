@@ -11,9 +11,9 @@ class ControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ShowPRDAccountDetailsController)
 
-    def test_company_id_is_returned_unchanged_as_use_case_request(
+    def test_company_id_is_returned_unchanged_as_interactor_request(
         self,
     ) -> None:
         expected_company = uuid4()
-        use_case_request = self.controller.create_request(company=expected_company)
-        assert use_case_request.company_id == expected_company
+        interactor_request = self.controller.create_request(company=expected_company)
+        assert interactor_request.company_id == expected_company

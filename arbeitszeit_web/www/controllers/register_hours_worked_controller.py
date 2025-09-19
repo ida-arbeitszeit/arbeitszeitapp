@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import Union
 from uuid import UUID
 
-from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedRequest
+from arbeitszeit.interactors.register_hours_worked import RegisterHoursWorkedRequest
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
 
@@ -22,7 +22,7 @@ class ControllerRejection:
 class RegisterHoursWorkedController:
     session: Session
 
-    def create_use_case_request(
+    def create_interactor_request(
         self, request: Request
     ) -> Union[RegisterHoursWorkedRequest, ControllerRejection]:
         company_uuid = self.session.get_current_user()
@@ -49,5 +49,7 @@ class RegisterHoursWorkedController:
                 reason=ControllerRejection.RejectionReason.negative_amount
             )
 
-        use_case_request = RegisterHoursWorkedRequest(company_uuid, worker_uuid, amount)
-        return use_case_request
+        interactor_request = RegisterHoursWorkedRequest(
+            company_uuid, worker_uuid, amount
+        )
+        return interactor_request

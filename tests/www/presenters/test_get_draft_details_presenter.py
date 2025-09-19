@@ -4,10 +4,11 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
+from arbeitszeit.interactors.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
     GetDraftDetailsPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
@@ -154,7 +155,7 @@ class DraftDetailsPresenterTests(BaseTestCase):
         resources_cost: Decimal = Decimal(7),
         labour_cost: Decimal = Decimal(7),
         is_public_service: bool = False,
-        creation_timestamp: datetime = datetime(2000, 1, 1),
+        creation_timestamp: datetime = datetime_utc(2000, 1, 1),
     ) -> DraftDetailsSuccess:
         return DraftDetailsSuccess(
             planner_id=uuid4(),

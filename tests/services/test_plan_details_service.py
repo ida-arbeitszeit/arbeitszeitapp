@@ -5,19 +5,19 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor
 from arbeitszeit.plan_details import PlanDetails, PlanDetailsService
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
-from tests.datetime_service import FakeDatetimeService
-from tests.use_cases.dependency_injection import get_dependency_injector
+from tests.datetime_service import FakeDatetimeService, datetime_utc
+from tests.interactors.dependency_injection import get_dependency_injector
 
 
 class PlanDetailsServiceTests(TestCase):
     def setUp(self) -> None:
         self.injector = get_dependency_injector()
         self.service = self.injector.get(PlanDetailsService)
-        self.approve_plan_use_case = self.injector.get(ApprovePlanUseCase)
+        self.approve_plan_interactor = self.injector.get(ApprovePlanInteractor)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.coop_generator = self.injector.get(CooperationGenerator)
         self.company_generator = self.injector.get(CompanyGenerator)
@@ -197,9 +197,9 @@ class PlanDetailsServiceTests(TestCase):
     def test_that_one_active_days_is_shown_if_plan_is_active_since_25_hours(
         self,
     ) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan()
-        self.datetime_service.freeze_time(datetime(2000, 1, 2, hour=1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 2, hour=1))
         details = self.service.get_details_from_plan(plan)
         assert details
         self.assertEqual(details.active_days, 1)
@@ -208,19 +208,19 @@ class PlanDetailsServiceTests(TestCase):
         self,
     ) -> None:
         timeframe = 7
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan = self.plan_generator.create_plan(
             timeframe=timeframe,
         )
-        self.datetime_service.freeze_time(datetime(2000, 1, 11))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 11))
         details = self.service.get_details_from_plan(plan)
         assert details
         self.assertEqual(details.active_days, timeframe)
 
     @parameterized.expand(
         [
-            (datetime(2000, 1, 1), timedelta(days=1)),
-            (datetime(2001, 2, 2), timedelta(hours=1)),
+            (datetime_utc(2000, 1, 1), timedelta(days=1)),
+            (datetime_utc(2001, 2, 2), timedelta(hours=1)),
         ]
     )
     def test_that_creation_date_is_shown(
@@ -235,8 +235,8 @@ class PlanDetailsServiceTests(TestCase):
 
     @parameterized.expand(
         [
-            (datetime(2000, 1, 1), timedelta(days=1), timedelta(days=1)),
-            (datetime(2001, 2, 2), timedelta(hours=1), timedelta(days=2)),
+            (datetime_utc(2000, 1, 1), timedelta(days=1), timedelta(days=1)),
+            (datetime_utc(2001, 2, 2), timedelta(hours=1), timedelta(days=2)),
         ]
     )
     def test_that_approval_date_is_shown_if_it_exists(
@@ -263,6 +263,6 @@ class PlanDetailsServiceTests(TestCase):
         self.assertTrue(details.expiration_date)
 
     def approve_plan(self, plan: UUID) -> None:
-        request = ApprovePlanUseCase.Request(plan=plan)
-        response = self.approve_plan_use_case.approve_plan(request)
+        request = ApprovePlanInteractor.Request(plan=plan)
+        response = self.approve_plan_interactor.approve_plan(request)
         assert response.is_plan_approved

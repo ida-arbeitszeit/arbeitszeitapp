@@ -20,6 +20,15 @@ The configuration file must be a valid python script.  Configuration
 options are set as variables on the top level. The following
 configuration options are available
 
+.. py:data:: DEFAULT_USER_TIMEZONE
+
+   The default timezone for users. This must be a valid timezone
+   string as found in the `tz database`_.
+
+   Example: ``DEFAULT_USER_TIMEZONE = "Europe/Berlin"``
+
+   Default: ``"UTC"``
+
 .. py:data:: ALEMBIC_CONFIGURATION_FILE
 
    Path to the alembic configuration. Alembic is used to manage
@@ -139,3 +148,4 @@ configuration options are available
 
 
 .. _alembic documentation: https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
+.. _tz database: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones

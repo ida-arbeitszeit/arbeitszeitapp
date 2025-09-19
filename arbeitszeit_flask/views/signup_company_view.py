@@ -4,7 +4,7 @@ import flask
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user
 
-from arbeitszeit.use_cases.register_company import RegisterCompany
+from arbeitszeit.interactors.register_company import RegisterCompany
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm
@@ -48,8 +48,8 @@ class SignupCompanyView:
         )
 
     def _handle_successful_post_request(self, register_form: RegisterForm) -> Response:
-        use_case_request = self.controller.create_request(register_form)
-        response = self.register_company.register_company(use_case_request)
+        interactor_request = self.controller.create_request(register_form)
+        response = self.register_company.register_company(interactor_request)
         view_model = self.presenter.present_company_registration(
             response=response, form=register_form
         )

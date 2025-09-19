@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Flask
 
-from arbeitszeit.use_cases import show_prd_account_details
+from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit_flask.database.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
@@ -11,7 +11,7 @@ from tests.flask_integration.flask import drop_and_recreate_schema
 
 class ShowPrdAccountDetailsBenchmark:
     """This benchmark measures the execution time of the
-    ShowPRDAccountDetailsUseCase use case where there are 1000 transactions
+    ShowPRDAccountDetailsInteractor where there are 1000 transactions
     in the database.
     """
 
@@ -34,8 +34,8 @@ class ShowPrdAccountDetailsBenchmark:
         plan = self.plan_generator.create_plan(planner=self.seller)
         for _ in range(1000):
             self.consumption_generator.create_resource_consumption_by_company(plan=plan)
-        self.use_case = self.injector.get(
-            show_prd_account_details.ShowPRDAccountDetailsUseCase
+        self.interactor = self.injector.get(
+            show_prd_account_details.ShowPRDAccountDetailsInteractor
         )
         self.db.session.flush()
 
@@ -43,5 +43,5 @@ class ShowPrdAccountDetailsBenchmark:
         self.app_context.pop()
 
     def run(self) -> None:
-        use_case_request = show_prd_account_details.Request(company_id=self.seller)
-        self.use_case.show_details(use_case_request)
+        interactor_request = show_prd_account_details.Request(company_id=self.seller)
+        self.interactor.show_details(interactor_request)

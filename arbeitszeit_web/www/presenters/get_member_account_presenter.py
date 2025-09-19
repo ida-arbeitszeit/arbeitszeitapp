@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from arbeitszeit.interactors.get_member_account import GetMemberAccountResponse
 from arbeitszeit.transfers import TransferType
-from arbeitszeit.use_cases.get_member_account import GetMemberAccountResponse
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 
@@ -29,23 +29,23 @@ class GetMemberAccountPresenter:
     translator: Translator
 
     def present_member_account(
-        self, use_case_response: GetMemberAccountResponse
+        self, interactor_response: GetMemberAccountResponse
     ) -> ViewModel:
         transfers = [
             self.Transfer(
                 date=self.datetime_formatter.format_datetime(
-                    t.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                    t.date, fmt="%d.%m.%Y %H:%M"
                 ),
                 type=self._transfer_type_as_string(t.type),
                 user_name=t.peer_name,
                 volume=f"{round(t.transferred_value, 2)}",
                 is_volume_positive=t.transferred_value >= 0,
             )
-            for t in use_case_response.transfers
+            for t in interactor_response.transfers
         ]
         return self.ViewModel(
-            balance=f"{round(use_case_response.balance, 2)}",
-            is_balance_positive=use_case_response.balance >= 0,
+            balance=f"{round(interactor_response.balance, 2)}",
+            is_balance_positive=interactor_response.balance >= 0,
             transfers=transfers,
         )
 

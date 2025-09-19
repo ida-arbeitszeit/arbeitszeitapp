@@ -69,13 +69,13 @@ A Nix flake is located in this repository.
     overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
     adding the following command to your ~/.zshrc file:
 
-        .. code-block:: bash
+    .. code-block:: bash
 
-         # Nix
-         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-           source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-         fi
-         # End Nix
+      # Nix
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+      # End Nix
 
     see https://github.com/NixOs/nix/issues/3616 for more details.
 
@@ -123,16 +123,16 @@ in an `.envrc` file in the top-level directory of the repo, and install
 when you enter the top-level directory of the repo.
 
 
-    .. code-block:: ini
+.. code-block:: bash
 
-    export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
-    export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
-    export FLASK_APP=tests.development_server:main
-    export FLASK_DEBUG=1
-    
-    export DEV_SECRET_KEY="my_secret_key"
-    export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
-    export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
+  export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
+  export FLASK_APP=tests.development_server:main
+  export FLASK_DEBUG=1
+  
+  export DEV_SECRET_KEY="my_secret_key"
+  export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
+  export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
 
 Development server
@@ -156,17 +156,17 @@ Moreover, when manually filing plans in the development environment, you need
 at least one accountant to approve these files. You can invite 
 accountants from the terminal, using the following command:
 
-  .. code-block:: bash
+.. code-block:: bash
 
-   flask invite-accountant example@mail.de
+  flask invite-accountant example@mail.de
 
 Again, an invitation mail with a confirmation link will be printed to ``stdout``.
 
 Developers can populate the development database automatically with test data. Run
 
-    .. code-block:: bash
+.. code-block:: bash
 
-     flask generate --help
+  flask generate --help
 
 to see the available options.
 
@@ -215,12 +215,12 @@ run via an environment variable:
 Since running tests against the database is generally very slow, we
 recommend that you run only the tests for the part of the application 
 on which you are working.  For example, if you are working on the business 
-logic, you can use the following command to quickly run all the use case 
+logic, you can use the following command to quickly run all the interactor 
 tests:
 
 .. code-block:: bash
 
-  pytest tests/use_cases
+  pytest tests/interactors
 
 When you feel confident about your changes, and you want to run all the
 tests, you can do so by executing ``./run-checks``, which will run all
@@ -248,62 +248,62 @@ Translation
 We use `Flask-Babel <https://python-babel.github.io/flask-babel/>`_
 for translation.
 
-#. Add a new language:
+1. Add a new language:
 
-   .. code-block::  bash
+  .. code-block::  bash
 
     python -m build_support.translations initialize LOCALE
     # For example for adding french
     python -m build_support.translations initialize fr
 
 
-#. Add the new language to the LANGUAGES variable in
+2. Add the new language to the LANGUAGES variable in
    ``arbeitszeit_flask/configuration_base.py``.
 
-#. Mark translatable, user-facing strings in the code.
+3. Mark translatable, user-facing strings in the code.
 
-   In Python files, use the following code:
+  In Python files, use the following code:
 
-   .. code-block:: bash
+  .. code-block:: bash
 
     translator.gettext(message: str)
     translator.pgettext(comment: str, message: str)
     translator.ngettext(self, singular: str, plural: str, n: Number)
 
-   In Jinja templates, use the following code:
+  In Jinja templates, use the following code:
 
-   .. code-block:: bash
+  .. code-block:: bash
 
     gettext(message: str)
     ngettext(singular: str, plural: str, n)
 
 
-#. Parse code for translatable strings (update ``.pot`` file):
+4. Parse code for translatable strings (update ``.pot`` file):
 
-    .. code-block:: bash
+  .. code-block:: bash
 
-     python -m build_support.translations extract
-
-
-#. Update language-specific ``.po`` files:
-
-   .. code-block::  bash
-
-     python -m build_support.translations update
+    python -m build_support.translations extract
 
 
-#. Translate language-specific ``.po`` files. For translation
+5. Update language-specific ``.po`` files:
+
+  .. code-block::  bash
+
+    python -m build_support.translations update
+
+
+6. Translate language-specific ``.po`` files. For translation
    programs, see `this page
    <https://www.gnu.org/software/trans-coord/manual/web-trans/html_node/PO-Editors.html>`_. 
    There is also an extension for VS Code called "gettext".
 
 
-#. Compile translation files (.mo-files): This is necessary if you
+7. Compile translation files (.mo-files): This is necessary if you
    want to update the translations in your local development
    environment only. For creating build artifacts (binary and source
    distributions) this step is automatically done by the build system.
 
-   .. code-block::  bash
+  .. code-block::  bash
 
     python -m build_support.translations compile
 
@@ -317,9 +317,9 @@ information is printed to ``stdout`` (the terminal) when detailed
 debugging is enabled. Run the following in the same terminal as where you
 start the development server to enable detailed profiling:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    export DEBUG_DETAILS=true
+  export DEBUG_DETAILS=true
 
 
 Documentation
@@ -327,10 +327,10 @@ Documentation
 
 Run:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    make clean
-    make html
+  make clean
+  make html
 
 in the root folder of the project to generate developer documentation,
 including auto-generated API docs.  Open the documentation in your

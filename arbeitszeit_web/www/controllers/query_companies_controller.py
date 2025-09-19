@@ -1,7 +1,7 @@
 from typing import Optional, Protocol
 
-from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
-from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, PAGE_PARAMETER_NAME
+from arbeitszeit.interactors.query_companies import CompanyFilter, QueryCompaniesRequest
+from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, calculate_current_offset
 from arbeitszeit_web.request import Request
 
 
@@ -9,9 +9,6 @@ class QueryCompaniesFormData(Protocol):
     def get_query_string(self) -> str: ...
 
     def get_category_string(self) -> str: ...
-
-
-_page_size = DEFAULT_PAGE_SIZE
 
 
 class QueryCompaniesController:
@@ -30,20 +27,10 @@ class QueryCompaniesController:
                 filter_category = CompanyFilter.by_email
             else:
                 filter_category = CompanyFilter.by_name
-        offset = self._get_pagination_offset(request)
+        offset = calculate_current_offset(request=request, limit=DEFAULT_PAGE_SIZE)
         return QueryCompaniesRequest(
             query_string=query,
             filter_category=filter_category,
             offset=offset,
-            limit=_page_size,
+            limit=DEFAULT_PAGE_SIZE,
         )
-
-    def _get_pagination_offset(self, request: Request) -> int:
-        page_str = request.query_string().get_last_value(PAGE_PARAMETER_NAME)
-        if page_str is None:
-            return 0
-        try:
-            page_number = int(page_str)
-        except ValueError:
-            return 0
-        return (page_number - 1) * _page_size

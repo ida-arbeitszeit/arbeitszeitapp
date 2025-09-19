@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.query_plans import PlanFilter, PlanSorting, QueryPlansRequest
+from arbeitszeit.interactors.query_plans import (
+    PlanFilter,
+    PlanSorting,
+    QueryPlansRequest,
+)
 from arbeitszeit_web.api.controllers import query_parser
 from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.request import Request

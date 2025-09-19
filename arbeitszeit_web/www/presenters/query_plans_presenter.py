@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.query_plans import PlanQueryResponse
+from arbeitszeit.interactors.query_plans import PlanQueryResponse
 from arbeitszeit_web.notification import Notifier
-from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE, Pagination, Paginator
+from arbeitszeit_web.pagination import Pagination, Paginator
 from arbeitszeit_web.request import Request
-from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex, UserUrlIndex
 
@@ -40,19 +39,12 @@ class QueryPlansPresenter:
     user_url_index: UserUrlIndex
     url_index: UrlIndex
     user_notifier: Notifier
-    trans: Translator
-    session: Session
+    translator: Translator
+    request: Request
 
-    def present(
-        self, response: PlanQueryResponse, request: Request
-    ) -> QueryPlansViewModel:
+    def present(self, response: PlanQueryResponse) -> QueryPlansViewModel:
         if not response.results:
-            self.user_notifier.display_warning(self.trans.gettext("No results."))
-        paginator = self._create_paginator(
-            request,
-            total_results=response.total_results,
-            current_offset=response.request.offset or 0,
-        )
+            self.user_notifier.display_warning(self.translator.gettext("No results."))
         return QueryPlansViewModel(
             total_results=response.total_results,
             show_results=bool(response.results),
@@ -76,10 +68,7 @@ class QueryPlansPresenter:
                     for result in response.results
                 ],
             ),
-            pagination=Pagination(
-                is_visible=paginator.page_count > 1,
-                pages=paginator.get_pages(),
-            ),
+            pagination=self._create_pagination(response),
         )
 
     def get_empty_view_model(self) -> QueryPlansViewModel:
@@ -90,16 +79,12 @@ class QueryPlansPresenter:
             pagination=Pagination(is_visible=False, pages=[]),
         )
 
-    def _create_paginator(
-        self, request: Request, total_results: int, current_offset: int
-    ) -> Paginator:
-        return Paginator(
-            base_url=self._get_pagination_base_url(),
-            query_arguments=dict(request.query_string().items()),
-            page_size=DEFAULT_PAGE_SIZE,
-            total_results=total_results,
-            current_offset=current_offset,
+    def _create_pagination(self, response: PlanQueryResponse) -> Pagination:
+        paginator = Paginator(
+            request=self.request,
+            total_results=response.total_results,
         )
-
-    def _get_pagination_base_url(self) -> str:
-        return self.url_index.get_query_plans_url()
+        return Pagination(
+            is_visible=paginator.number_of_pages > 1,
+            pages=paginator.get_pages(),
+        )

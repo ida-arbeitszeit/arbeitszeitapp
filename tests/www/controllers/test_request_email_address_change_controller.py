@@ -28,10 +28,10 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password
 
     def test_that_for_authenticated_member_use_the_current_email_address_and_password_and_supplied_new_email_address_in_request_even_as_another_member_registered_before_them(
         self,
@@ -45,10 +45,10 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password
 
     @parameterized.expand(
         [
@@ -65,10 +65,10 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password
 
     def test_that_for_authenticated_company_use_the_current_email_address_and_password_and_supplied_new_email_address_in_request_even_as_another_company_registered_before_them(
         self,
@@ -82,10 +82,10 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password
 
     @parameterized.expand(
         [
@@ -104,10 +104,10 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password
 
     def test_that_for_authenticated_accountant_use_the_current_email_address_password_and_supplied_new_email_address_in_request_even_as_another_accountant_registered_before_them(
         self,
@@ -123,7 +123,7 @@ class RequestEmailAddressChangeControllerTests(BaseTestCase):
         form = Form.from_values(
             new_email_address=new_address, current_password=current_password
         )
-        use_case_request = self.controller.process_email_address_change_request(form)
-        assert use_case_request.current_email_address == current_address
-        assert use_case_request.new_email_address == new_address
-        assert use_case_request.current_password == current_password
+        interactor_request = self.controller.process_email_address_change_request(form)
+        assert interactor_request.current_email_address == current_address
+        assert interactor_request.new_email_address == new_address
+        assert interactor_request.current_password == current_password

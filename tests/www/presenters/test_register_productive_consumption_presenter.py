@@ -1,6 +1,6 @@
 from typing import Optional
 
-from arbeitszeit.use_cases.register_productive_consumption import (
+from arbeitszeit.interactors.register_productive_consumption import (
     RegisterProductiveConsumptionResponse,
 )
 from arbeitszeit_web.www.presenters.register_productive_consumption_presenter import (

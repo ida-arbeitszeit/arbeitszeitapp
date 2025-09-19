@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.query_private_consumptions import Response
+from arbeitszeit.interactors.query_private_consumptions import Response
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 

@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
+from arbeitszeit.interactors.deny_cooperation import DenyCooperationResponse
 from arbeitszeit_web.www.presenters.deny_cooperation_presenter import (
     DenyCooperationPresenter,
 )

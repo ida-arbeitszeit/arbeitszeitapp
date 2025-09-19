@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.use_cases.show_company_work_invite_details import (
+from arbeitszeit.interactors.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsRequest,
 )
 
@@ -13,7 +13,7 @@ from ...session import Session
 class ShowCompanyWorkInviteDetailsController:
     session: Session
 
-    def create_use_case_request(
+    def create_interactor_request(
         self, invite_id: UUID
     ) -> Optional[ShowCompanyWorkInviteDetailsRequest]:
         current_user = self.session.get_current_user()

@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.show_company_work_invite_details import (
+from arbeitszeit.interactors.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsResponse,
 )
 from arbeitszeit_web.www.presenters.show_company_work_invite_details_presenter import (
@@ -15,7 +15,7 @@ class PresenterTests(BaseTestCase):
         super().setUp()
         self.presenter = self.injector.get(ShowCompanyWorkInviteDetailsPresenter)
 
-    def test_use_case_response_without_details_doesnt_render_to_view_model(
+    def test_interactor_response_without_details_doesnt_render_to_view_model(
         self,
     ) -> None:
         view_model = self.presenter.render_response(self.make_error_response())

@@ -1,7 +1,9 @@
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase as UseCase
+from arbeitszeit.interactors.log_in_accountant import (
+    LogInAccountantInteractor as Interactor,
+)
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.log_in_accountant_presenter import (
     LogInAccountantPresenter,
@@ -114,7 +116,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.wrong_password
+            reason=Interactor.RejectionReason.wrong_password
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -124,7 +126,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.wrong_password
+            reason=Interactor.RejectionReason.wrong_password
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -134,7 +136,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.wrong_password
+            reason=Interactor.RejectionReason.wrong_password
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -147,7 +149,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.email_is_not_accountant
+            reason=Interactor.RejectionReason.email_is_not_accountant
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -157,7 +159,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.email_is_not_accountant
+            reason=Interactor.RejectionReason.email_is_not_accountant
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -167,7 +169,7 @@ class PresenterTester(BaseTestCase):
         self,
     ) -> None:
         response = self._create_failure_response(
-            reason=UseCase.RejectionReason.email_is_not_accountant
+            reason=Interactor.RejectionReason.email_is_not_accountant
         )
         form = self._create_form()
         self.presenter.present_login_process(response=response, form=form)
@@ -180,17 +182,17 @@ class PresenterTester(BaseTestCase):
 
     def _create_success_response(
         self, user_id: Optional[UUID] = None
-    ) -> UseCase.Response:
+    ) -> Interactor.Response:
         if user_id is None:
             user_id = uuid4()
-        return UseCase.Response(user_id=user_id)
+        return Interactor.Response(user_id=user_id)
 
     def _create_failure_response(
-        self, reason: Optional[UseCase.RejectionReason] = None
-    ) -> UseCase.Response:
+        self, reason: Optional[Interactor.RejectionReason] = None
+    ) -> Interactor.Response:
         if reason is None:
-            reason = UseCase.RejectionReason.wrong_password
-        return UseCase.Response(user_id=None, rejection_reason=reason)
+            reason = Interactor.RejectionReason.wrong_password
+        return Interactor.Response(user_id=None, rejection_reason=reason)
 
     def _create_form(self, remember: bool = False, email: str = "a@b.c") -> LoginForm:
         return LoginForm(remember_value=remember, email_value=email)

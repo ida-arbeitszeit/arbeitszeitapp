@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
-from arbeitszeit.use_cases import create_plan_draft
+from arbeitszeit.interactors import create_plan_draft
 from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
@@ -22,7 +22,7 @@ class CreateDraftView:
     notifier: Notifier
     translator: Translator
     controller: CreateDraftController
-    use_case: create_plan_draft.CreatePlanDraft
+    interactor: create_plan_draft.CreatePlanDraft
     url_index: GeneralUrlIndex
 
     def GET(self) -> Response:
@@ -42,11 +42,11 @@ class CreateDraftView:
     @commit_changes
     def POST(self) -> Response:
         match self.controller.import_form_data(FlaskRequest()):
-            case create_plan_draft.Request() as use_case_request:
+            case create_plan_draft.Request() as interactor_request:
                 pass
             case DraftForm() as form:
                 return self._render_form(form, status_code=400)
-        response = self.use_case.create_draft(use_case_request)
+        response = self.interactor.create_draft(interactor_request)
         if response.is_rejected:
             return http_403()
         self.notifier.display_info(self.translator.gettext("Draft successfully saved."))

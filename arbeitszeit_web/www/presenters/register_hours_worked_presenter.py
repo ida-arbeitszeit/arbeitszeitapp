@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.register_hours_worked import RegisterHoursWorkedResponse
+from arbeitszeit.interactors.register_hours_worked import RegisterHoursWorkedResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
@@ -14,7 +14,7 @@ class RegisterHoursWorkedPresenter:
     notifier: Notifier
     translator: Translator
 
-    def present_use_case_response(self, response: RegisterHoursWorkedResponse) -> int:
+    def present_interactor_response(self, response: RegisterHoursWorkedResponse) -> int:
         if response.is_rejected:
             if (
                 response.rejection_reason

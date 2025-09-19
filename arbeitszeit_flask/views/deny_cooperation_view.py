@@ -4,8 +4,8 @@ from uuid import UUID
 import flask
 from flask_login import current_user
 
-from arbeitszeit.use_cases.deny_cooperation import (
-    DenyCooperation,
+from arbeitszeit.interactors.deny_cooperation import (
+    DenyCooperationInteractor,
     DenyCooperationRequest,
 )
 from arbeitszeit_flask.database import commit_changes
@@ -17,7 +17,7 @@ from arbeitszeit_web.www.presenters.deny_cooperation_presenter import (
 
 @dataclass
 class DenyCooperationView:
-    deny_cooperation: DenyCooperation
+    interactor: DenyCooperationInteractor
     presenter: DenyCooperationPresenter
 
     @commit_changes
@@ -25,7 +25,7 @@ class DenyCooperationView:
         form = flask.request.form
         cooperation_id = UUID(form["cooperation_id"].strip())
         plan_id = UUID(form["plan_id"].strip())
-        deny_cooperation_response = self.deny_cooperation(
+        deny_cooperation_response = self.interactor.execute(
             DenyCooperationRequest(
                 UUID(current_user.id),
                 plan_id,

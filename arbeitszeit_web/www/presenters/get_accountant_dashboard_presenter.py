@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_accountant_dashboard import GetAccountantDashboardUseCase
+from arbeitszeit.interactors.get_accountant_dashboard import (
+    GetAccountantDashboardInteractor,
+)
 from arbeitszeit_web.url_index import UrlIndex
 
 
@@ -16,7 +18,7 @@ class GetAccountantDashboardPresenter:
     url_index: UrlIndex
 
     def create_dashboard_view_model(
-        self, response: GetAccountantDashboardUseCase.Response
+        self, response: GetAccountantDashboardInteractor.Response
     ) -> ViewModel:
         return self.ViewModel(
             unreviewed_plans_view_url=self.url_index.get_unreviewed_plans_list_view_url(),

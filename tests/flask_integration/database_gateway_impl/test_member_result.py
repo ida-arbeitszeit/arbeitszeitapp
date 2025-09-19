@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -7,6 +6,7 @@ from parameterized import parameterized
 from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit import records
+from tests.datetime_service import datetime_utc
 
 from ..flask import FlaskTestCase
 from .utility import Utility
@@ -29,7 +29,7 @@ class MemberResultTests(FlaskTestCase):
         return self.database_gateway.create_member(
             name="karl",
             account=account,
-            registered_on=datetime.now(),
+            registered_on=self.datetime_service.now(),
             account_credentials=credentials,
         )
 
@@ -142,10 +142,10 @@ class GetAllMembersTests(MemberResultTests):
 class ConfirmMemberTests(MemberResultTests):
     def setUp(self) -> None:
         super().setUp()
-        self.timestamp = datetime(2000, 1, 1)
+        self.timestamp = datetime_utc(2000, 1, 1)
 
     def test_that_confirmed_on_gets_updated_for_affected_user(self) -> None:
-        expected_timestamp = datetime(2000, 1, 2)
+        expected_timestamp = datetime_utc(2000, 1, 2)
         email_address = "test@test.test"
         member = self.create_member(email_address=email_address)
         self.database_gateway.get_email_addresses().with_address(
@@ -160,6 +160,7 @@ class ConfirmMemberTests(MemberResultTests):
         assert record
         _, email = record
         assert email.confirmed_on == expected_timestamp
+        assert email.confirmed_on.tzinfo is not None
 
 
 class CreateMemberTests(MemberResultTests):

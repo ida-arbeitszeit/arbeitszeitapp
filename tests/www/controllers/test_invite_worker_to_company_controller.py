@@ -31,18 +31,20 @@ class InviteWorkerToCompanyControllerTests(BaseTestCase):
         with self.assertRaises(InviteWorkerToCompanyController.FormError):
             self.controller.import_request_data(request)
 
-    def test_controller_returns_use_case_request_with_id_of_currently_logged_in_company(
+    def test_controller_returns_interactor_request_with_id_of_currently_logged_in_company(
         self,
     ) -> None:
         EXPECTED_COMPANY = self.company_id
         request = FakeRequest()
         request.set_form("worker_id", str(uuid4()))
-        use_case_request = self.controller.import_request_data(request)
-        assert use_case_request.company == EXPECTED_COMPANY
+        interactor_request = self.controller.import_request_data(request)
+        assert interactor_request.company == EXPECTED_COMPANY
 
-    def test_controller_returns_use_case_request_with_worker_id_from_form(self) -> None:
+    def test_controller_returns_interactor_request_with_worker_id_from_form(
+        self,
+    ) -> None:
         EXPECTED_WORKER = uuid4()
         request = FakeRequest()
         request.set_form("worker_id", str(EXPECTED_WORKER))
-        use_case_request = self.controller.import_request_data(request)
-        assert use_case_request.worker == EXPECTED_WORKER
+        interactor_request = self.controller.import_request_data(request)
+        assert interactor_request.worker == EXPECTED_WORKER

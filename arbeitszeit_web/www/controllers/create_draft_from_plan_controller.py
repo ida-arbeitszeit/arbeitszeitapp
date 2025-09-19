@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases import create_draft_from_plan as use_case
+from arbeitszeit.interactors import create_draft_from_plan as interactor
 from arbeitszeit_web.session import Session, UserRole
 
 
@@ -9,11 +9,11 @@ from arbeitszeit_web.session import Session, UserRole
 class CreateDraftFromPlanController:
     session: Session
 
-    def create_use_case_request(self, plan: UUID) -> use_case.Request:
+    def create_interactor_request(self, plan: UUID) -> interactor.Request:
         assert self.session.get_user_role() == UserRole.company
         user = self.session.get_current_user()
         assert user
-        return use_case.Request(
+        return interactor.Request(
             plan=plan,
             company=user,
         )

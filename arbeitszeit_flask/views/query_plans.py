@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import Response, render_template, request
 
-from arbeitszeit.use_cases import query_plans as use_case
+from arbeitszeit.interactors import query_plans as interactor
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import PlanSearchForm
 from arbeitszeit_web.www.controllers.query_plans_controller import QueryPlansController
@@ -16,7 +16,7 @@ TEMPLATE_NAME = "user/query_plans.html"
 
 @dataclass
 class QueryPlansView:
-    query_plans: use_case.QueryPlans
+    query_plans: interactor.QueryPlansInteractor
     presenter: QueryPlansPresenter
     controller: QueryPlansController
     request: FlaskRequest
@@ -25,8 +25,8 @@ class QueryPlansView:
         form = PlanSearchForm(request.args)
         if not form.validate():
             return self._get_invalid_form_response(form=form)
-        use_case_request = self.controller.import_form_data(form, self.request)
-        return self._handle_use_case_request(use_case_request, form=form)
+        interactor_request = self.controller.import_form_data(form, self.request)
+        return self._handle_interactor_request(interactor_request, form=form)
 
     def _get_invalid_form_response(self, form: PlanSearchForm) -> Response:
         return Response(
@@ -37,13 +37,13 @@ class QueryPlansView:
             status=400,
         )
 
-    def _handle_use_case_request(
+    def _handle_interactor_request(
         self,
-        use_case_request: use_case.QueryPlansRequest,
+        interactor_request: interactor.QueryPlansRequest,
         form: PlanSearchForm,
     ) -> Response:
-        response = self.query_plans(use_case_request)
-        view_model = self.presenter.present(response, self.request)
+        response = self.query_plans.execute(interactor_request)
+        view_model = self.presenter.present(response)
         return Response(self._render_response_content(view_model, form=form))
 
     def _render_response_content(

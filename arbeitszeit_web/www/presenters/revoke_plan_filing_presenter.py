@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.revoke_plan_filing import RevokePlanFilingUseCase
+from arbeitszeit.interactors.revoke_plan_filing import RevokePlanFilingInteractor
 from arbeitszeit_web.translator import Translator
 
 from ...notification import Notifier
@@ -11,8 +11,8 @@ class RevokePlanFilingPresenter:
     notifier: Notifier
     translator: Translator
 
-    def present(self, use_case_response: RevokePlanFilingUseCase.Response) -> None:
-        if use_case_response.is_rejected:
+    def present(self, interactor_response: RevokePlanFilingInteractor.Response) -> None:
+        if interactor_response.is_rejected:
             self.notifier.display_warning(
                 self.translator.gettext(
                     "Unexpected error: Not possible to revoke plan filing."

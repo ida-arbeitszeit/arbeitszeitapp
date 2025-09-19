@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import list_pending_work_invites
+from arbeitszeit.interactors import list_pending_work_invites
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
@@ -24,14 +24,14 @@ class ListPendingWorkInvitesPresenter:
     translator: Translator
 
     def present(
-        self, use_case_response: list_pending_work_invites.Response
+        self, interactor_response: list_pending_work_invites.Response
     ) -> ViewModel:
         return ViewModel(
             pending_invites=[
                 PendingInvite(
                     member_id=str(invite.member_id), member_name=invite.member_name
                 )
-                for invite in use_case_response.pending_invites
+                for invite in interactor_response.pending_invites
             ],
             navbar_items=[
                 NavbarItem(

@@ -850,25 +850,9 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         )
         return FlaskQueryResult(
             query=query,
-            mapper=self.map_transfer_and_debtor,
+            mapper=self.map_transfer_and_account_owner,
             db=self.db,
         )
-
-    @classmethod
-    def map_transfer_and_debtor(
-        cls, orm: Any
-    ) -> Tuple[records.Transfer, records.AccountOwner]:
-        transfer, member, company, social_accounting, cooperation = orm
-        debtor: records.AccountOwner
-        if member:
-            debtor = DatabaseGatewayImpl.member_from_orm(member)
-        elif company:
-            debtor = DatabaseGatewayImpl.company_from_orm(company)
-        elif social_accounting:
-            debtor = AccountingRepository.social_accounting_from_orm(social_accounting)
-        else:
-            debtor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
-        return DatabaseGatewayImpl.transfer_from_orm(transfer), debtor
 
     def joined_with_creditor(
         self,
@@ -907,27 +891,175 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         )
         return FlaskQueryResult(
             query=query,
-            mapper=self.map_transfer_and_creditor,
+            mapper=self.map_transfer_and_account_owner,
             db=self.db,
         )
 
     @classmethod
-    def map_transfer_and_creditor(
+    def map_transfer_and_account_owner(
         cls, orm: Any
     ) -> Tuple[records.Transfer, records.AccountOwner]:
         transfer, member, company, social_accounting, cooperation = orm
-        creditor: records.AccountOwner
+        account_owner: records.AccountOwner
         if member:
-            creditor = DatabaseGatewayImpl.member_from_orm(member)
+            account_owner = DatabaseGatewayImpl.member_from_orm(member)
         elif company:
-            creditor = DatabaseGatewayImpl.company_from_orm(company)
+            account_owner = DatabaseGatewayImpl.company_from_orm(company)
         elif social_accounting:
-            creditor = AccountingRepository.social_accounting_from_orm(
+            account_owner = AccountingRepository.social_accounting_from_orm(
                 social_accounting
             )
         else:
-            creditor = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
-        return DatabaseGatewayImpl.transfer_from_orm(transfer), creditor
+            account_owner = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
+        return DatabaseGatewayImpl.transfer_from_orm(transfer), account_owner
+
+    def joined_with_debtor_and_creditor(
+        self,
+    ) -> FlaskQueryResult[
+        Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
+    ]:
+        # Aliases for debtor side
+        debtor_member = aliased(models.Member)
+        debtor_company = aliased(models.Company)
+        debtor_social_accounting = aliased(models.SocialAccounting)
+        debtor_cooperation = aliased(models.Cooperation)
+
+        # Aliases for creditor side
+        creditor_member = aliased(models.Member)
+        creditor_company = aliased(models.Company)
+        creditor_social_accounting = aliased(models.SocialAccounting)
+        creditor_cooperation = aliased(models.Cooperation)
+
+        query = (
+            self.query
+            # Join debtor side
+            .join(
+                debtor_member,
+                debtor_member.account == models.Transfer.debit_account,
+                isouter=True,
+            )
+            .join(
+                debtor_company,
+                or_(
+                    debtor_company.p_account == models.Transfer.debit_account,
+                    debtor_company.r_account == models.Transfer.debit_account,
+                    debtor_company.a_account == models.Transfer.debit_account,
+                    debtor_company.prd_account == models.Transfer.debit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                debtor_social_accounting,
+                debtor_social_accounting.account_psf == models.Transfer.debit_account,
+                isouter=True,
+            )
+            .join(
+                debtor_cooperation,
+                debtor_cooperation.account == models.Transfer.debit_account,
+                isouter=True,
+            )
+            # Join creditor side
+            .join(
+                creditor_member,
+                creditor_member.account == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .join(
+                creditor_company,
+                or_(
+                    creditor_company.p_account == models.Transfer.credit_account,
+                    creditor_company.r_account == models.Transfer.credit_account,
+                    creditor_company.a_account == models.Transfer.credit_account,
+                    creditor_company.prd_account == models.Transfer.credit_account,
+                ),
+                isouter=True,
+            )
+            .join(
+                creditor_social_accounting,
+                creditor_social_accounting.account_psf
+                == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .join(
+                creditor_cooperation,
+                creditor_cooperation.account == models.Transfer.credit_account,
+                isouter=True,
+            )
+            .with_entities(
+                models.Transfer,
+                debtor_member,
+                debtor_company,
+                debtor_social_accounting,
+                debtor_cooperation,
+                creditor_member,
+                creditor_company,
+                creditor_social_accounting,
+                creditor_cooperation,
+            )
+        )
+        return FlaskQueryResult(
+            query=query,
+            mapper=self.map_transfer_and_debtor_and_creditor,
+            db=self.db,
+        )
+
+    @classmethod
+    def map_transfer_and_debtor_and_creditor(
+        cls, orm: Any
+    ) -> Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]:
+        (
+            transfer,
+            debtor_member,
+            debtor_company,
+            debtor_social_accounting,
+            debtor_cooperation,
+            creditor_member,
+            creditor_company,
+            creditor_social_accounting,
+            creditor_cooperation,
+        ) = orm
+
+        # Determine debtor account owner
+        debtor_owner: records.AccountOwner
+        if debtor_member:
+            debtor_owner = DatabaseGatewayImpl.member_from_orm(debtor_member)
+        elif debtor_company:
+            debtor_owner = DatabaseGatewayImpl.company_from_orm(debtor_company)
+        elif debtor_social_accounting:
+            debtor_owner = AccountingRepository.social_accounting_from_orm(
+                debtor_social_accounting
+            )
+        else:
+            debtor_owner = DatabaseGatewayImpl.cooperation_from_orm(debtor_cooperation)
+
+        # Determine creditor account owner
+        creditor_owner: records.AccountOwner
+        if creditor_member:
+            creditor_owner = DatabaseGatewayImpl.member_from_orm(creditor_member)
+        elif creditor_company:
+            creditor_owner = DatabaseGatewayImpl.company_from_orm(creditor_company)
+        elif creditor_social_accounting:
+            creditor_owner = AccountingRepository.social_accounting_from_orm(
+                creditor_social_accounting
+            )
+        else:
+            creditor_owner = DatabaseGatewayImpl.cooperation_from_orm(
+                creditor_cooperation
+            )
+
+        return (
+            DatabaseGatewayImpl.transfer_from_orm(transfer),
+            debtor_owner,
+            creditor_owner,
+        )
+
+    def ordered_by_date(
+        self, *, ascending: bool = True
+    ) -> FlaskQueryResult[records.Transfer]:
+        ordering = (
+            models.Transfer.date.asc() if ascending else models.Transfer.date.desc()
+        )
+        return self._with_modified_query(lambda query: query.order_by(ordering))
 
 
 class AccountQueryResult(FlaskQueryResult[records.Account]):

@@ -28,6 +28,7 @@ from tests.data_generators import (
 from tests.datetime_service import FakeDatetimeService
 from tests.flask_integration.mail_service import MockEmailService
 from tests.markers import database_required
+from tests.www.datetime_formatter import FakeTimezoneConfiguration
 
 from .dependency_injection import get_dependency_injector
 
@@ -124,6 +125,7 @@ class FlaskTestCase(DatabaseTestCase):
     )
     database_gateway = _lazy_property(DatabaseGatewayImpl)
     datetime_service = _lazy_property(FakeDatetimeService)
+    timezone_configuration = _lazy_property(FakeTimezoneConfiguration)
     email_generator = _lazy_property(EmailGenerator)
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)

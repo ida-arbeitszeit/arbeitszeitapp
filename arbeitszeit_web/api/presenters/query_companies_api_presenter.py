@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from arbeitszeit.use_cases.query_companies import CompanyQueryResponse, QueriedCompany
+from arbeitszeit.interactors.query_companies import CompanyQueryResponse, QueriedCompany
 from arbeitszeit_web.api.presenters.interfaces import (
     JsonInteger,
     JsonList,
@@ -40,10 +40,10 @@ class QueryCompaniesApiPresenter:
             name="CompanyList",
         )
 
-    def create_view_model(self, use_case_response: CompanyQueryResponse) -> ViewModel:
+    def create_view_model(self, interactor_response: CompanyQueryResponse) -> ViewModel:
         return self.ViewModel(
-            results=use_case_response.results,
-            total_results=use_case_response.total_results,
-            offset=use_case_response.request.offset,
-            limit=use_case_response.request.limit,
+            results=interactor_response.results,
+            total_results=interactor_response.total_results,
+            offset=interactor_response.request.offset,
+            limit=interactor_response.request.limit,
         )

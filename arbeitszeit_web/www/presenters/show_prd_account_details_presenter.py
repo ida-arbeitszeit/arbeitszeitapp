@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit.transfers.transfer_type import TransferType
-from arbeitszeit.use_cases import show_prd_account_details
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -33,23 +33,23 @@ class ShowPRDAccountDetailsPresenter:
     datetime_formatter: DatetimeFormatter
 
     def present(
-        self, use_case_response: show_prd_account_details.Response
+        self, interactor_response: show_prd_account_details.Response
     ) -> ViewModel:
         transfers = [
-            self._create_info(transfer) for transfer in use_case_response.transfers
+            self._create_info(transfer) for transfer in interactor_response.transfers
         ]
         return self.ViewModel(
             transfers=transfers,
             show_transfers=bool(transfers),
-            account_balance=str(round(use_case_response.account_balance, 2)),
+            account_balance=str(round(interactor_response.account_balance, 2)),
             plot_url=self.url_index.get_line_plot_of_company_prd_account(
-                use_case_response.company_id
+                interactor_response.company_id
             ),
             navbar_items=[
                 NavbarItem(
                     text=self.translator.gettext("Accounts"),
                     url=self.url_index.get_company_accounts_url(
-                        company_id=use_case_response.company_id
+                        company_id=interactor_response.company_id
                     ),
                 ),
                 NavbarItem(
@@ -65,7 +65,7 @@ class ShowPRDAccountDetailsPresenter:
         return self.TransferInfo(
             transfer_type=self._get_transfer_type(transfer),
             date=self.datetime_formatter.format_datetime(
-                date=transfer.date, zone="Europe/Berlin", fmt="%d.%m.%Y %H:%M"
+                date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
             transfer_volume=str(round(transfer.volume, 2)),
             peer_name=self._get_peer_name(transfer.peer),

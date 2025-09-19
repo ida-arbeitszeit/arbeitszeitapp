@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 
@@ -42,7 +41,7 @@ class CompanyResultTests(FlaskTestCase):
             labour_account=labour_account,
             resource_account=resource_account,
             products_account=products_account,
-            registered_on=datetime.now(),
+            registered_on=self.datetime_service.now(),
         )
 
 

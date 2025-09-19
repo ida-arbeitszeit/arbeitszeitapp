@@ -4,9 +4,11 @@ from uuid import UUID
 from flask import Blueprint, Response, request
 from flask_login import login_required
 
-from arbeitszeit.use_cases import show_a_account_details, show_r_account_details
-from arbeitszeit.use_cases.show_p_account_details import ShowPAccountDetailsUseCase
-from arbeitszeit.use_cases.show_prd_account_details import ShowPRDAccountDetailsUseCase
+from arbeitszeit.interactors import show_a_account_details, show_r_account_details
+from arbeitszeit.interactors.show_p_account_details import ShowPAccountDetailsInteractor
+from arbeitszeit.interactors.show_prd_account_details import (
+    ShowPRDAccountDetailsInteractor,
+)
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_web.colors import Colors
 from arbeitszeit_web.plotter import Plotter
@@ -101,14 +103,14 @@ def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: C
 def line_plot_of_company_prd_account(
     controller: ShowPRDAccountDetailsController,
     plotter: Plotter,
-    use_case: ShowPRDAccountDetailsUseCase,
+    interactor: ShowPRDAccountDetailsInteractor,
 ):
     company_id = UUID(request.args["company_id"])
-    use_case_request = controller.create_request(company_id)
-    use_case_response = use_case.show_details(use_case_request)
+    interactor_request = controller.create_request(company_id)
+    interactor_response = interactor.show_details(interactor_request)
     png = plotter.create_line_plot(
-        x=use_case_response.plot.timestamps,
-        y=use_case_response.plot.accumulated_volumes,
+        x=interactor_response.plot.timestamps,
+        y=interactor_response.plot.accumulated_volumes,
     )
     return Response(png, mimetype="image/png", direct_passthrough=True)
 
@@ -118,15 +120,15 @@ def line_plot_of_company_prd_account(
 @login_required
 def line_plot_of_company_r_account(
     plotter: Plotter,
-    use_case: show_r_account_details.ShowRAccountDetailsUseCase,
+    interactor: show_r_account_details.ShowRAccountDetailsInteractor,
 ):
-    use_case_request = show_r_account_details.Request(
+    interactor_request = show_r_account_details.Request(
         company=UUID(request.args["company_id"])
     )
-    use_case_response = use_case.show_details(request=use_case_request)
+    interactor_response = interactor.show_details(request=interactor_request)
     png = plotter.create_line_plot(
-        x=use_case_response.plot.timestamps,
-        y=use_case_response.plot.accumulated_volumes,
+        x=interactor_response.plot.timestamps,
+        y=interactor_response.plot.accumulated_volumes,
     )
     return Response(png, mimetype="image/png", direct_passthrough=True)
 
@@ -136,15 +138,15 @@ def line_plot_of_company_r_account(
 @login_required
 def line_plot_of_company_p_account(
     plotter: Plotter,
-    use_case: ShowPAccountDetailsUseCase,
+    interactor: ShowPAccountDetailsInteractor,
 ):
-    use_case_request = ShowPAccountDetailsUseCase.Request(
+    interactor_request = ShowPAccountDetailsInteractor.Request(
         company=UUID(request.args["company_id"])
     )
-    use_case_response = use_case.show_details(request=use_case_request)
+    interactor_response = interactor.show_details(request=interactor_request)
     png = plotter.create_line_plot(
-        x=use_case_response.plot.timestamps,
-        y=use_case_response.plot.accumulated_volumes,
+        x=interactor_response.plot.timestamps,
+        y=interactor_response.plot.accumulated_volumes,
     )
     return Response(png, mimetype="image/png", direct_passthrough=True)
 
@@ -155,13 +157,13 @@ def line_plot_of_company_p_account(
 def line_plot_of_company_a_account(
     plotter: Plotter,
     controller: ShowAAccountDetailsController,
-    use_case: show_a_account_details.ShowAAccountDetailsUseCase,
+    interactor: show_a_account_details.ShowAAccountDetailsInteractor,
 ):
     company_id = UUID(request.args["company_id"])
-    use_case_request = controller.create_request(company_id)
-    use_case_response = use_case.show_details(request=use_case_request)
+    interactor_request = controller.create_request(company_id)
+    interactor_response = interactor.show_details(request=interactor_request)
     png = plotter.create_line_plot(
-        x=use_case_response.plot.timestamps,
-        y=use_case_response.plot.accumulated_volumes,
+        x=interactor_response.plot.timestamps,
+        y=interactor_response.plot.accumulated_volumes,
     )
     return Response(png, mimetype="image/png", direct_passthrough=True)

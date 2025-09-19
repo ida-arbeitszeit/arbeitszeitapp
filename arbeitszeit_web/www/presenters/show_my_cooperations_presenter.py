@@ -1,14 +1,14 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
-from arbeitszeit.use_cases.list_coordinations_of_company import (
+from arbeitszeit.interactors.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
 )
-from arbeitszeit.use_cases.list_my_cooperating_plans import (
-    ListMyCooperatingPlansUseCase,
+from arbeitszeit.interactors.list_my_cooperating_plans import (
+    ListMyCooperatingPlansInteractor,
 )
-from arbeitszeit.use_cases.show_company_cooperations import (
+from arbeitszeit.interactors.show_company_cooperations import (
     InboundCoopRequest,
     OutboundCoopRequest,
     Response,
@@ -95,7 +95,7 @@ class ShowMyCooperationsPresenter:
         *,
         list_coord_response: ListCoordinationsOfCompanyResponse,
         show_company_cooperations_response: Response,
-        list_my_cooperating_plans_response: ListMyCooperatingPlansUseCase.Response,
+        list_my_cooperating_plans_response: ListMyCooperatingPlansInteractor.Response,
     ) -> ShowMyCooperationsViewModel:
         list_of_coordinations = ListOfCoordinationsTable(
             rows=[
@@ -172,7 +172,7 @@ class ShowMyCooperationsPresenter:
         )
 
     def _display_my_cooperating_plans(
-        self, plan: ListMyCooperatingPlansUseCase.CooperatingPlan
+        self, plan: ListMyCooperatingPlansInteractor.CooperatingPlan
     ) -> CooperatingPlan:
         return CooperatingPlan(
             plan_name=plan.plan_name,

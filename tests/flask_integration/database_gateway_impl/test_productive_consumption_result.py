@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
+from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
 
@@ -82,7 +83,7 @@ class ProductiveConsumptionResultTests(FlaskTestCase):
         assert not consumptions.where_consumer_is_company(other_company)
 
     def test_that_plans_can_be_ordered_by_creation_date(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         plan_1 = self.plan_generator.create_plan()
         self.consumption_generator.create_resource_consumption_by_company(plan=plan_1)
         self.datetime_service.advance_time(timedelta(days=1))

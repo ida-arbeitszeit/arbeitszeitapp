@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.remove_worker_from_company import Response as UseCaseResponse
+from arbeitszeit.interactors.remove_worker_from_company import (
+    Response as InteractorResponse,
+)
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -21,23 +23,23 @@ class RemoveWorkerFromCompanyPresenter:
     translator: Translator
     url_index: UrlIndex
 
-    def present(self, use_case_response: UseCaseResponse) -> ViewModel:
-        if not use_case_response.is_rejected:
+    def present(self, interactor_response: InteractorResponse) -> ViewModel:
+        if not interactor_response.is_rejected:
             self.notifier.display_info(
                 self.translator.gettext("Worker successfully removed from company.")
             )
             return Redirect(url=self.url_index.get_invite_worker_to_company_url())
 
-        assert use_case_response.rejection_reason is not None
+        assert interactor_response.rejection_reason is not None
 
-        match use_case_response.rejection_reason:
-            case UseCaseResponse.RejectionReason.company_not_found:
+        match interactor_response.rejection_reason:
+            case InteractorResponse.RejectionReason.company_not_found:
                 message = "Company not found."
                 code = 404
-            case UseCaseResponse.RejectionReason.not_workplace_of_worker:
+            case InteractorResponse.RejectionReason.not_workplace_of_worker:
                 message = "Worker is not a member of the company."
                 code = 400
-            case UseCaseResponse.RejectionReason.worker_not_found:
+            case InteractorResponse.RejectionReason.worker_not_found:
                 message = "Worker not found."
                 code = 404
             case _:

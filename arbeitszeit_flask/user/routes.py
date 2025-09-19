@@ -3,13 +3,15 @@ from uuid import UUID
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
-from arbeitszeit.use_cases.get_company_summary import (
-    GetCompanySummary,
+from arbeitszeit.interactors.get_company_summary import (
+    GetCompanySummaryInteractor,
     GetCompanySummarySuccess,
 )
-from arbeitszeit.use_cases.get_user_account_details import GetUserAccountDetailsUseCase
-from arbeitszeit.use_cases.request_email_address_change import (
-    RequestEmailAddressChangeUseCase,
+from arbeitszeit.interactors.get_user_account_details import (
+    GetUserAccountDetailsInteractor,
+)
+from arbeitszeit.interactors.request_email_address_change import (
+    RequestEmailAddressChangeInteractor,
 )
 from arbeitszeit_flask.class_based_view import as_flask_view
 from arbeitszeit_flask.forms import RequestEmailAddressChangeForm
@@ -23,6 +25,7 @@ from arbeitszeit_flask.views.list_all_cooperations_view import ListAllCooperatio
 from arbeitszeit_flask.views.list_coordinators_of_cooperation_view import (
     ListCoordinationsOfCooperationView,
 )
+from arbeitszeit_flask.views.list_transfers import ListTransfersView
 from arbeitszeit_flask.views.show_a_account_details_view import ShowAAccountDetailsView
 from arbeitszeit_flask.views.show_company_accounts_view import CompanyAccountsView
 from arbeitszeit_flask.views.show_p_account_details_view import ShowPAccountDetailsView
@@ -52,11 +55,11 @@ from .blueprint import AuthenticatedUserRoute
 @AuthenticatedUserRoute("/account")
 def account_details(
     controller: UserAccountDetailsController,
-    use_case: GetUserAccountDetailsUseCase,
+    interactor: GetUserAccountDetailsInteractor,
     presenter: UserAccountDetailsPresenter,
 ) -> Response:
     uc_request = controller.parse_web_request()
-    uc_response = use_case.get_user_account_details(uc_request)
+    uc_response = interactor.get_user_account_details(uc_request)
     view_model = presenter.render_user_account_details(uc_response)
     return render_template("user/account_details.html", view_model=view_model)
 
@@ -64,15 +67,15 @@ def account_details(
 @AuthenticatedUserRoute("/company_summary/<uuid:company_id>")
 def company_summary(
     company_id: UUID,
-    get_company_summary: GetCompanySummary,
+    get_company_summary: GetCompanySummaryInteractor,
     presenter: GetCompanySummarySuccessPresenter,
 ):
-    use_case_response = get_company_summary(company_id)
-    if isinstance(use_case_response, GetCompanySummarySuccess):
-        view_model = presenter.present(use_case_response)
+    interactor_response = get_company_summary.execute(company_id)
+    if isinstance(interactor_response, GetCompanySummarySuccess):
+        view_model = presenter.present(interactor_response)
         return render_template(
             "user/company_summary.html",
-            view_model=view_model.to_dict(),
+            view_model=view_model,
         )
     else:
         return http_404()
@@ -82,7 +85,7 @@ def company_summary(
 def request_email_change(
     controller: RequestEmailAddressChangeController,
     presenter: RequestEmailAddressChangePresenter,
-    use_case: RequestEmailAddressChangeUseCase,
+    interactor: RequestEmailAddressChangeInteractor,
 ) -> Response:
     template_name = "user/request_email_address_change.html"
     form = RequestEmailAddressChangeForm(request.form)
@@ -93,7 +96,7 @@ def request_email_change(
                     render_template(template_name, form=form), status=400
                 )
             uc_request = controller.process_email_address_change_request(form)
-            uc_response = use_case.request_email_address_change(uc_request)
+            uc_response = interactor.request_email_address_change(uc_request)
             view_model = presenter.render_response(uc_response, form)
             if view_model.redirect_url:
                 return redirect(view_model.redirect_url)
@@ -165,3 +168,8 @@ class company_account_a(ShowAAccountDetailsView): ...
 @AuthenticatedUserRoute("/company/<uuid:company_id>/account_prd")
 @as_flask_view()
 class company_account_prd(ShowPRDAccountDetailsView): ...
+
+
+@AuthenticatedUserRoute("/transfers")
+@as_flask_view()
+class list_transfers(ListTransfersView): ...
