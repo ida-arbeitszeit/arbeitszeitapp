@@ -95,8 +95,8 @@ class InteractorTester(BaseTestCase):
             )
         )
         response = self.interactor.show_details(self.create_interactor_request(company))
-        assert response.transfers[0].transfer_type == TransferType.work_certificates
-        assert response.transfers[1].transfer_type == TransferType.credit_a
+        assert response.transfers[0].type == TransferType.work_certificates
+        assert response.transfers[1].type == TransferType.credit_a
 
     @parameterized.expand(
         [
@@ -115,7 +115,7 @@ class InteractorTester(BaseTestCase):
             is_public_service=is_public_service,
         )
         response = self.interactor.show_details(self.create_interactor_request(company))
-        assert response.transfers[0].transfer_type == expected_transfer_type
+        assert response.transfers[0].type == expected_transfer_type
 
     def test_that_correct_info_is_generated_when_credit_for_wages_is_granted(
         self,
@@ -131,7 +131,7 @@ class InteractorTester(BaseTestCase):
         )
         response = self.interactor.show_details(self.create_interactor_request(company))
         assert len(response.transfers) == 1
-        assert response.transfers[0].transfer_volume == Decimal(8.5)
+        assert response.transfers[0].volume == Decimal(8.5)
         assert isinstance(response.transfers[0].date, datetime)
         assert response.account_balance == Decimal(8.5)
 
@@ -150,8 +150,8 @@ class InteractorTester(BaseTestCase):
         )
         response = self.interactor.show_details(self.create_interactor_request(company))
         transfer = response.transfers[0]
-        assert transfer.transfer_type == TransferType.work_certificates
-        assert transfer.transfer_volume == -hours_worked
+        assert transfer.type == TransferType.work_certificates
+        assert transfer.volume == -hours_worked
         assert response.account_balance == -hours_worked
 
     def test_that_plotting_info_is_empty_when_no_transfers_occurred(self) -> None:

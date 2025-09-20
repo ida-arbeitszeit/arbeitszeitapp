@@ -57,11 +57,11 @@ class ShowAAccountDetailsPresenter:
         self, transfer: show_a_account_details.TransferInfo
     ) -> TransferInfo:
         return self.TransferInfo(
-            transfer_type=self._get_transfer_type(transfer.transfer_type),
+            transfer_type=self._get_transfer_type(transfer.type),
             date=self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
-            transfer_volume=str(round(transfer.transfer_volume, 2)),
+            transfer_volume=str(round(transfer.volume, 2)),
         )
 
     def _get_transfer_type(self, transfer_type: TransferType) -> str:

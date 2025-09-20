@@ -39,7 +39,7 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
         )
-        self.assertEqual(trans.transfer_volume, str(round(transfer.transfer_volume, 2)))
+        self.assertEqual(trans.transfer_volume, str(round(transfer.volume, 2)))
 
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self._interactor_response(

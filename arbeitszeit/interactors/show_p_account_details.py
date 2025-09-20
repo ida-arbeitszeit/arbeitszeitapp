@@ -7,7 +7,6 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.records import Company
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers.transfer_type import TransferType
 
@@ -41,9 +40,8 @@ class ShowPAccountDetailsInteractor:
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company).first()
         assert company
-        transfers: list[ShowPAccountDetailsInteractor.TransferInfo] = []
-        self._add_credit_transfers(company, transfers)
-        self._add_consumption_transfers(company, transfers)
+        transfers = self._get_transfers_of_account(company.means_account)
+        self._invert_sign_of_consumption_transfers(transfers)
         transfers.sort(key=lambda t: t.date, reverse=True)
         account_balance = self._get_account_balance(company.means_account)
         plot = self.PlotDetails(
@@ -57,41 +55,25 @@ class ShowPAccountDetailsInteractor:
             plot=plot,
         )
 
-    def _add_credit_transfers(
-        self, company: Company, transfers: list[TransferInfo]
-    ) -> None:
-        credit_transfers_and_debtors = (
-            self.database.get_transfers()
-            .where_account_is_creditor(company.means_account)
-            .joined_with_debtor()
-        )
-        for transfer, debtor in credit_transfers_and_debtors:
-            transfers.append(
-                self.TransferInfo(
-                    type=(
-                        TransferType.credit_p
-                        if isinstance(debtor, Company)
-                        else TransferType.credit_public_p
-                    ),
-                    date=transfer.date,
-                    volume=transfer.value,
-                )
+    def _get_transfers_of_account(self, account: UUID) -> list[TransferInfo]:
+        transfers = [
+            ShowPAccountDetailsInteractor.TransferInfo(
+                type=t.type,
+                date=t.date,
+                volume=t.value,
             )
+            for t in self.database.get_transfers().where_account_is_debtor_or_creditor(
+                account
+            )
+        ]
+        return transfers
 
-    def _add_consumption_transfers(
-        self, company: Company, transfers: list[TransferInfo]
+    def _invert_sign_of_consumption_transfers(
+        self, transfers: list[TransferInfo]
     ) -> None:
-        consumption_transfers = self.database.get_transfers().where_account_is_debtor(
-            company.means_account
-        )
-        for transfer in consumption_transfers:
-            transfers.append(
-                self.TransferInfo(
-                    type=TransferType.productive_consumption_p,
-                    date=transfer.date,
-                    volume=-transfer.value,  # negative because the company is the debtor
-                )
-            )
+        for t in transfers:
+            if t.type == TransferType.productive_consumption_p:
+                t.volume = -t.volume
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (

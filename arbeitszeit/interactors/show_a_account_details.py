@@ -7,7 +7,6 @@ from itertools import accumulate
 from typing import List
 from uuid import UUID
 
-from arbeitszeit.records import Company
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers import TransferType
 
@@ -19,9 +18,9 @@ class Request:
 
 @dataclass
 class TransferInfo:
-    transfer_type: TransferType
+    type: TransferType
     date: datetime
-    transfer_volume: Decimal
+    volume: Decimal
 
 
 @dataclass
@@ -45,9 +44,8 @@ class ShowAAccountDetailsInteractor:
     def show_details(self, request: Request) -> Response:
         company = self.database.get_companies().with_id(request.company).first()
         assert company
-        credit_transfers = self._get_credit_transfers(company)
-        work_certificates_transfers = self._get_work_certificates_transfers(company)
-        transfers: list[TransferInfo] = credit_transfers + work_certificates_transfers
+        transfers = self._get_transfers_of_account(company.work_account)
+        self._invert_sign_of_debit_transfers(transfers)
         transfers.sort(key=lambda t: t.date, reverse=True)
         account_balance = self._get_account_balance(company.work_account)
         plot = PlotDetails(
@@ -61,41 +59,23 @@ class ShowAAccountDetailsInteractor:
             plot=plot,
         )
 
-    def _get_credit_transfers(self, company: Company) -> list[TransferInfo]:
-        credit_transfers_and_debtors = (
-            self.database.get_transfers()
-            .where_account_is_creditor(company.work_account)
-            .joined_with_debtor()
-        )
-        transfers: list[TransferInfo] = []
-        for transfer, debtor in credit_transfers_and_debtors:
-            transfers.append(
-                TransferInfo(
-                    transfer_type=(
-                        TransferType.credit_a
-                        if isinstance(debtor, Company)
-                        else TransferType.credit_public_a
-                    ),
-                    date=transfer.date,
-                    transfer_volume=transfer.value,
-                )
+    def _get_transfers_of_account(self, account: UUID) -> list[TransferInfo]:
+        transfers = [
+            TransferInfo(
+                type=t.type,
+                date=t.date,
+                volume=t.value,
             )
+            for t in self.database.get_transfers().where_account_is_debtor_or_creditor(
+                account
+            )
+        ]
         return transfers
 
-    def _get_work_certificates_transfers(self, company: Company) -> list[TransferInfo]:
-        transfers_of_work_certificates = (
-            self.database.get_transfers().where_account_is_debtor(company.work_account)
-        )
-        transfers: list[TransferInfo] = []
-        for tf in transfers_of_work_certificates:
-            transfers.append(
-                TransferInfo(
-                    transfer_type=TransferType.work_certificates,
-                    date=tf.date,
-                    transfer_volume=-tf.value,  # negative value because work account is debit account
-                )
-            )
-        return transfers
+    def _invert_sign_of_debit_transfers(self, transfers: list[TransferInfo]) -> None:
+        for t in transfers:
+            if t.type == TransferType.work_certificates:
+                t.volume = -t.volume
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (
@@ -110,7 +90,7 @@ class ShowAAccountDetailsInteractor:
         return timestamps
 
     def _get_plot_volumes(self, transfers: List[TransferInfo]) -> List[Decimal]:
-        volumes = [t.transfer_volume for t in transfers]
+        volumes = [t.volume for t in transfers]
         volumes.reverse()
         volumes_cumsum = list(accumulate(volumes))
         return volumes_cumsum
