@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.account_details import AccountTransfer, PlotDetails
 from arbeitszeit.interactors import show_a_account_details
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
@@ -24,7 +25,7 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
 
     def test_return_correct_info_when_one_transfer_took_place(self) -> None:
         ACCOUNT_BALANCE = Decimal("100.007")
-        transfer = self._get_interactor_transfer_info()
+        transfer = self._get_transfer_info()
         response = self._interactor_response(
             transfers=[transfer], account_balance=ACCOUNT_BALANCE
         )
@@ -39,13 +40,24 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
         )
-        self.assertEqual(trans.transfer_volume, str(round(transfer.transfer_volume, 2)))
+        self.assertEqual(trans.transfer_volume, str(round(transfer.volume, 2)))
+
+    @parameterized.expand([(True,), (False,)])
+    def test_that_debit_transfer_are_shown_as_such(
+        self,
+        is_debit: bool,
+    ) -> None:
+        response = self._interactor_response(
+            transfers=[self._get_transfer_info(is_debit_transfer=is_debit)]
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.transfers[0].is_debit_transfer == is_debit
 
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self._interactor_response(
             transfers=[
-                self._get_interactor_transfer_info(),
-                self._get_interactor_transfer_info(),
+                self._get_transfer_info(),
+                self._get_transfer_info(),
             ],
             account_balance=Decimal(100),
         )
@@ -64,7 +76,7 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
         transfer_type: TransferType,
         expected_transfer_type: str,
     ) -> None:
-        transfer = self._get_interactor_transfer_info(transfer_type=transfer_type)
+        transfer = self._get_transfer_info(transfer_type=transfer_type)
         response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
         self.assertEqual(
@@ -101,27 +113,28 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
         assert navbar_item.text == self.translator.gettext("Account a")
         assert navbar_item.url is None
 
-    def _get_interactor_transfer_info(
+    def _get_transfer_info(
         self,
         transfer_type: TransferType = TransferType.credit_a,
         date: datetime | None = None,
         transfer_volume: Decimal = Decimal(10),
-    ) -> show_a_account_details.TransferInfo:
+        is_debit_transfer: bool = False,
+    ) -> AccountTransfer:
         if date is None:
             date = self.datetime_service.now()
-        return show_a_account_details.TransferInfo(transfer_type, date, transfer_volume)
+        return AccountTransfer(transfer_type, date, transfer_volume, is_debit_transfer)
 
     def _interactor_response(
         self,
         company_id: UUID = uuid4(),
-        transfers: list[show_a_account_details.TransferInfo] | None = None,
+        transfers: list[AccountTransfer] | None = None,
         account_balance: Decimal = Decimal(0),
-        plot: show_a_account_details.PlotDetails | None = None,
+        plot: PlotDetails | None = None,
     ) -> show_a_account_details.Response:
         if transfers is None:
             transfers = []
         if plot is None:
-            plot = show_a_account_details.PlotDetails([], [])
+            plot = PlotDetails([], [])
         return show_a_account_details.Response(
             company_id, transfers, account_balance, plot
         )
