@@ -2,6 +2,9 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
+from parameterized import parameterized
+
+from arbeitszeit.account_details import AccountTransfer, PlotDetails
 from arbeitszeit.interactors.show_p_account_details import (
     ShowPAccountDetailsInteractor as Interactor,
 )
@@ -49,6 +52,17 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
             view_model_transfer.transfer_volume, str(round(transfer.volume, 2))
         )
 
+    @parameterized.expand([(True,), (False,)])
+    def test_that_debit_transfer_are_shown_as_such(
+        self,
+        is_debit: bool,
+    ) -> None:
+        response = self.get_interactor_response(
+            transfers=[self.get_transfer_info(is_debit_transfer=is_debit)]
+        )
+        view_model = self.presenter.present(response)
+        assert view_model.transfers[0].is_debit_transfer == is_debit
+
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
         response = self.get_interactor_response(
             transfers=[self.get_transfer_info(), self.get_transfer_info()],
@@ -89,20 +103,23 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         type: TransferType = TransferType.credit_p,
         date: datetime = datetime_min_utc(),
         volume: Decimal = Decimal(10.002),
-    ) -> Interactor.TransferInfo:
-        return Interactor.TransferInfo(type=type, date=date, volume=volume)
+        is_debit_transfer: bool = False,
+    ) -> AccountTransfer:
+        return AccountTransfer(
+            type=type, date=date, volume=volume, is_debit_transfer=is_debit_transfer
+        )
 
     def get_interactor_response(
         self,
         company_id: UUID = uuid4(),
-        transfers: list[Interactor.TransferInfo] | None = None,
+        transfers: list[AccountTransfer] | None = None,
         account_balance: Decimal = Decimal(0),
-        plot: Interactor.PlotDetails | None = None,
+        plot: PlotDetails | None = None,
     ) -> Interactor.Response:
         if transfers is None:
             transfers = []
         if plot is None:
-            plot = Interactor.PlotDetails([], [])
+            plot = PlotDetails([], [])
         return Interactor.Response(
             company_id=company_id,
             transfers=transfers,
