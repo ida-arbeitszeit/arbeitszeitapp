@@ -8,7 +8,7 @@ from uuid import UUID
 
 from arbeitszeit.records import AccountOwner, Company, Cooperation, Member
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

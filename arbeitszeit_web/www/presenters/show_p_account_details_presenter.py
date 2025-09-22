@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.account_details import AccountTransfer
 from arbeitszeit.interactors.show_p_account_details import ShowPAccountDetailsInteractor
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.account_details import AccountTransfer
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex

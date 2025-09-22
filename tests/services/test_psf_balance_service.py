@@ -7,7 +7,7 @@ from arbeitszeit.interactors.register_hours_worked import (
     RegisterHoursWorkedInteractor,
     RegisterHoursWorkedRequest,
 )
-from arbeitszeit.psf_balance import PublicSectorFundService
+from arbeitszeit.services.psf_balance import PublicSectorFundService
 from tests.interactors.base_test_case import BaseTestCase
 
 

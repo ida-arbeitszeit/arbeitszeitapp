@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.account_details import AccountTransfer
 from arbeitszeit.interactors import show_a_account_details
+from arbeitszeit.services.account_details import AccountTransfer
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator

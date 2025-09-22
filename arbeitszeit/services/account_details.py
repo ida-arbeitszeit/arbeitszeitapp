@@ -5,7 +5,7 @@ from itertools import accumulate
 from uuid import UUID
 
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

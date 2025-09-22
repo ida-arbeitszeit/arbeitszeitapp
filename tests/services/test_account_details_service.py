@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.account_details import (
+from arbeitszeit.services.account_details import (
     AccountDetailsService,
     AccountTransfer,
     construct_plot_data,

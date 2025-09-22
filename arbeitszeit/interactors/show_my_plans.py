@@ -6,8 +6,8 @@ from uuid import UUID
 
 from arbeitszeit import records
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.price_calculator import PriceCalculator
 
 
 @dataclass

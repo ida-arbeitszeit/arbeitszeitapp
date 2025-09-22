@@ -4,11 +4,11 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.account_details import AccountTransfer, PlotDetails
 from arbeitszeit.interactors.show_p_account_details import (
     ShowPAccountDetailsInteractor as Interactor,
 )
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
 )

@@ -7,8 +7,8 @@ from arbeitszeit.interactors.register_hours_worked import (
     RegisterHoursWorkedRequest,
     RegisterHoursWorkedResponse,
 )
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.services.payout_factor import PayoutFactorService
 
 from .base_test_case import BaseTestCase
 

@@ -5,10 +5,10 @@ from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import SocialAccounting
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.payout_factor import PayoutFactorService
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

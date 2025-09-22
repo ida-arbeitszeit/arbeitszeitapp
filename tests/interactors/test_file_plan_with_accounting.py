@@ -9,8 +9,8 @@ from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit.interactors.list_plans_with_pending_review import (
     ListPlansWithPendingReviewInteractor,
 )
-from arbeitszeit.plan_details import PlanDetails
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.services.plan_details import PlanDetails
 
 from .base_test_case import BaseTestCase
 

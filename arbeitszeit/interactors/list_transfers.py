@@ -12,7 +12,7 @@ from arbeitszeit.records import (
     SocialAccounting,
 )
 from arbeitszeit.repositories import DatabaseGateway, QueryResult
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 QueryT = TypeVar("QueryT", bound=QueryResult)
 

@@ -6,8 +6,8 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor
-from arbeitszeit.plan_details import PlanDetails, PlanDetailsService
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.services.plan_details import PlanDetails, PlanDetailsService
 from tests.data_generators import CompanyGenerator, CooperationGenerator, PlanGenerator
 from tests.datetime_service import FakeDatetimeService, datetime_utc
 from tests.interactors.dependency_injection import get_dependency_injector

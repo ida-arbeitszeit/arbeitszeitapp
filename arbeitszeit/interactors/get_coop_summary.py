@@ -4,9 +4,9 @@ from typing import List, Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import Plan
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.price_calculator import PriceCalculator
 
 
 @dataclass
