@@ -16,7 +16,7 @@ from arbeitszeit.interactors.query_plans import (
     QueriedPlan,
     QueryPlansRequest,
 )
-from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.services.plan_details import PlanDetails
 from tests.datetime_service import datetime_utc
 
 

@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from decimal import Decimal
 from uuid import UUID
 
-from arbeitszeit.account_details import (
+from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.account_details import (
     AccountDetailsService,
     AccountTransfer,
     PlotDetails,
     construct_plot_data,
 )
-from arbeitszeit.repositories import DatabaseGateway
 
 
 @dataclass

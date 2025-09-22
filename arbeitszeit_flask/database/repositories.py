@@ -24,7 +24,7 @@ from sqlalchemy.sql.expression import and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.models import (

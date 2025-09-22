@@ -7,11 +7,11 @@ from typing import Optional, Tuple
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
-from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import Company, ConsumptionType, Plan, Transfer
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.compensation import CompensationTransferService
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.compensation_transfers import CompensationTransferService
+from arbeitszeit.services.price_calculator import PriceCalculator
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

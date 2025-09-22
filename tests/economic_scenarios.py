@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from arbeitszeit import records
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.payout_factor import PayoutFactorService
 from tests.data_generators import PlanGenerator
 from tests.datetime_service import FakeDatetimeService
 

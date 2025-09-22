@@ -4,7 +4,7 @@ from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

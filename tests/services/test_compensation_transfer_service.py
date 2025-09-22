@@ -4,8 +4,8 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit.records import Transfer
-from arbeitszeit.transfers.compensation import CompensationTransferService
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.compensation_transfers import CompensationTransferService
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 from tests.interactors.base_test_case import BaseTestCase
 

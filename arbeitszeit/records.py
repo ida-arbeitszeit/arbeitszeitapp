@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 
 @dataclass

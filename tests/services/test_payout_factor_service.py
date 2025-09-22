@@ -1,8 +1,8 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.services.payout_factor import PayoutFactorService
 from tests.datetime_service import datetime_utc
 from tests.interactors.base_test_case import BaseTestCase
 

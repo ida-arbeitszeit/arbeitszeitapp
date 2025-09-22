@@ -5,9 +5,9 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.account_details import PlotDetails
 from arbeitszeit.interactors import show_r_account_details
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services.account_details import PlotDetails
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
 )

@@ -4,7 +4,7 @@ from parameterized import parameterized
 from sqlalchemy import text
 
 from arbeitszeit.records import AccountTypes, SocialAccounting
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 

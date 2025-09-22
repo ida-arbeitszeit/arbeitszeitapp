@@ -41,7 +41,7 @@ from arbeitszeit.records import (
     SocialAccounting,
     Transfer,
 )
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 Many = TypeVar("Many", bound=Hashable)
 One = TypeVar("One", bound=Hashable)

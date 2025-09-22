@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.account_details import AccountTransfer, PlotDetails
 from arbeitszeit.interactors import show_a_account_details
+from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,

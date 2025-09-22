@@ -6,7 +6,7 @@ from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple,
 from uuid import UUID
 
 from arbeitszeit import records
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 T = TypeVar("T", covariant=True)
 
