@@ -59,17 +59,19 @@ class RegisterPrivateConsumption:
     ) -> RegisterPrivateConsumptionResponse:
         plan, planner = self._get_plan_and_planner(request)
         consumer = self._get_consumer(request)
-        coop_price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
+        coop_price = self.price_calculator.calculate_cooperative_price(plan.id)
+        if coop_price is None:
+            coop_price = plan.price_per_unit()
         consumption_transfer = self._create_private_consumption_transfer(
             debit_account=consumer.account,
             credit_account=planner.product_account,
-            value=coop_price_per_unit * request.amount,
+            value=coop_price * request.amount,
         )
         compensation_transfer = self._get_compensation_transfer_if_any(
             plan_id=plan.id,
             planner_product_account=planner.product_account,
             plan_price_per_unit=plan.price_per_unit(),
-            coop_price_per_unit=coop_price_per_unit,
+            coop_price_per_unit=coop_price,
             consumed_amount=request.amount,
         )
         self.database_gateway.create_private_consumption(

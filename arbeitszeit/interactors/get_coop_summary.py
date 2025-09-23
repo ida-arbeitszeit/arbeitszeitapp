@@ -81,7 +81,7 @@ class GetCoopSummaryInteractor:
     def _get_cooperative_price(self, plans: list[Plan]) -> Optional[Decimal]:
         if not plans:
             return None
-        return self.price_calculator.calculate_cooperative_price(plans[0])
+        return self.price_calculator.calculate_cooperative_price(plans[0].id)
 
     def _get_associated_plans(
         self, plans: list[Plan], requester: UUID

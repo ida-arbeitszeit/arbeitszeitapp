@@ -12,52 +12,33 @@ class PriceCalculatorTests(BaseTestCase):
         super().setUp()
         self.calculator = self.injector.get(PriceCalculator)
 
-    def test_that_price_of_one_public_plan_is_zero(self) -> None:
-        public_plan = self.plan_generator.create_plan_record(is_public_service=True)
-        price = self.calculator.calculate_cooperative_price(public_plan)
-        assert price == Decimal(0)
-
-    def test_that_price_of_one_plan_that_produces_zero_units_is_zero(self) -> None:
-        plan = self.plan_generator.create_plan_record(
-            costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
-            amount=0,
-        )
+    def test_that_service_returns_none_for_noncooperating_public_plan(self) -> None:
+        plan = self.plan_generator.create_plan(is_public_service=True)
         price = self.calculator.calculate_cooperative_price(plan)
-        assert price == Decimal(0)
+        assert price is None
+
+    def test_that_service_returns_none_for_noncooperating_productive_plan(self) -> None:
+        plan = self.plan_generator.create_plan(is_public_service=False)
+        price = self.calculator.calculate_cooperative_price(plan)
+        assert price is None
 
     def test_that_price_is_zero_when_all_plans_in_cooperation_produce_zero_units(
         self,
     ) -> None:
-        plan_1 = self.plan_generator.create_plan_record(
+        plan_1 = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
             amount=0,
         )
-        plan_2 = self.plan_generator.create_plan_record(
+        plan_2 = self.plan_generator.create_plan(
             costs=ProductionCosts(Decimal(1), Decimal(1), Decimal(1)),
             amount=0,
         )
         self.cooperation_generator.create_cooperation(
-            plans=[plan_1.id, plan_2.id],
+            plans=[plan_1, plan_2],
         )
         price = self.calculator.calculate_cooperative_price(plan_1)
+        assert price is not None
         assert price == Decimal(0)
-
-    @parameterized.expand(
-        [
-            (Decimal(10),),
-            (Decimal(20),),
-        ]
-    )
-    def test_that_price_of_plan_without_cooperation_is_its_own_costs(
-        self,
-        costs: Decimal,
-    ) -> None:
-        plan = self.plan_generator.create_plan_record(
-            costs=ProductionCosts(costs, Decimal(0), Decimal(0)),
-            amount=1,
-        )
-        price = self.calculator.calculate_cooperative_price(plan)
-        self.assertAlmostEqual(price, costs)
 
     @parameterized.expand(
         [
@@ -69,12 +50,13 @@ class PriceCalculatorTests(BaseTestCase):
         self,
         costs: Decimal,
     ) -> None:
-        plan = self.plan_generator.create_plan_record(
+        plan = self.plan_generator.create_plan(
             costs=ProductionCosts(costs, Decimal(0), Decimal(0)),
             amount=1,
         )
-        self.cooperation_generator.create_cooperation(plans=[plan.id])
+        self.cooperation_generator.create_cooperation(plans=[plan])
         price = self.calculator.calculate_cooperative_price(plan)
+        assert price is not None
         self.assertAlmostEqual(price, costs)
 
     @parameterized.expand(
@@ -89,18 +71,19 @@ class PriceCalculatorTests(BaseTestCase):
         costs_2: Decimal,
         expected_price: Decimal,
     ) -> None:
-        plan_1 = self.plan_generator.create_plan_record(
+        plan_1 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_1, Decimal(0), Decimal(0)),
             amount=1,
         )
-        plan_2 = self.plan_generator.create_plan_record(
+        plan_2 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_2, Decimal(0), Decimal(0)),
             amount=1,
         )
         self.cooperation_generator.create_cooperation(
-            plans=[plan_1.id, plan_2.id],
+            plans=[plan_1, plan_2],
         )
         price = self.calculator.calculate_cooperative_price(plan_1)
+        assert price is not None
         self.assertAlmostEqual(price, expected_price)
 
     @parameterized.expand(
@@ -116,22 +99,23 @@ class PriceCalculatorTests(BaseTestCase):
         costs_3: Decimal,
         expected_price: Decimal,
     ) -> None:
-        plan_1 = self.plan_generator.create_plan_record(
+        plan_1 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_1, Decimal(0), Decimal(0)),
             amount=1,
         )
-        plan_2 = self.plan_generator.create_plan_record(
+        plan_2 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_2, Decimal(0), Decimal(0)),
             amount=1,
         )
-        plan_3 = self.plan_generator.create_plan_record(
+        plan_3 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_3, Decimal(0), Decimal(0)),
             amount=1,
         )
         self.cooperation_generator.create_cooperation(
-            plans=[plan_1.id, plan_2.id, plan_3.id],
+            plans=[plan_1, plan_2, plan_3],
         )
         price = self.calculator.calculate_cooperative_price(plan_1)
+        assert price is not None
         self.assertAlmostEqual(price, expected_price)
 
     @parameterized.expand(
@@ -149,18 +133,19 @@ class PriceCalculatorTests(BaseTestCase):
         duration_2: int,
         expected_price: Decimal,
     ) -> None:
-        plan_1 = self.plan_generator.create_plan_record(
+        plan_1 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_1, Decimal(0), Decimal(0)),
             amount=1,
             timeframe=duration_1,
         )
-        plan_2 = self.plan_generator.create_plan_record(
+        plan_2 = self.plan_generator.create_plan(
             costs=ProductionCosts(costs_2, Decimal(0), Decimal(0)),
             amount=1,
             timeframe=duration_2,
         )
         self.cooperation_generator.create_cooperation(
-            plans=[plan_1.id, plan_2.id],
+            plans=[plan_1, plan_2],
         )
         price = self.calculator.calculate_cooperative_price(plan_1)
+        assert price is not None
         self.assertAlmostEqual(price, expected_price)
