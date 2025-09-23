@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from arbeitszeit.plan_details import PlanDetails, PlanDetailsService
+from arbeitszeit.services.plan_details import PlanDetails, PlanDetailsService
 
 
 @dataclass

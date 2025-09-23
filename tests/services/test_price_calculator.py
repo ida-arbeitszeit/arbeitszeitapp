@@ -2,8 +2,8 @@ from decimal import Decimal
 
 from parameterized import parameterized
 
-from arbeitszeit.price_calculator import PriceCalculator
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.services.price_calculator import PriceCalculator
 from tests.interactors.base_test_case import BaseTestCase
 
 

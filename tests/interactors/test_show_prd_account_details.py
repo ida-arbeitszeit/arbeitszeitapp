@@ -5,7 +5,7 @@ from uuid import UUID
 from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase

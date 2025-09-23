@@ -4,7 +4,7 @@ from parameterized import parameterized
 from sqlalchemy import text
 
 from arbeitszeit.records import AccountTypes, SocialAccounting
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
 
@@ -125,6 +125,46 @@ class WhereAccountIsCreditorTests(FlaskTestCase):
         )
         assert unexpected_transfer not in retrieved_transfers
         assert expected_transfer in retrieved_transfers
+
+
+class WhereAccountIsDebtorOrCreditorTests(FlaskTestCase):
+    def test_that_transfer_of_debit_account_is_retrieved(self) -> None:
+        debit_account = self.database_gateway.create_account()
+        transfer = self.transfer_generator.create_transfer(
+            debit_account=debit_account.id
+        )
+        retrieved_transfers = (
+            self.database_gateway.get_transfers().where_account_is_debtor_or_creditor(
+                debit_account.id
+            )
+        )
+        assert transfer in retrieved_transfers
+
+    def test_that_transfer_of_credit_account_is_retrieved(self) -> None:
+        credit_account = self.database_gateway.create_account()
+        transfer = self.transfer_generator.create_transfer(
+            credit_account=credit_account.id
+        )
+        retrieved_transfers = (
+            self.database_gateway.get_transfers().where_account_is_debtor_or_creditor(
+                credit_account.id
+            )
+        )
+        assert transfer in retrieved_transfers
+
+    def test_that_transfer_is_retrieved_where_debit_and_credit_account_is_same_account(
+        self,
+    ) -> None:
+        credit_account = debit_account = self.database_gateway.create_account()
+        transfer = self.transfer_generator.create_transfer(
+            debit_account=debit_account.id, credit_account=credit_account.id
+        )
+        retrieved_transfers = (
+            self.database_gateway.get_transfers().where_account_is_debtor_or_creditor(
+                credit_account.id
+            )
+        )
+        assert transfer in retrieved_transfers
 
 
 class JoinedWithDebtorTests(FlaskTestCase):

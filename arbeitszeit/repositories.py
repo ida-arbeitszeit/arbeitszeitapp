@@ -6,7 +6,7 @@ from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple,
 from uuid import UUID
 
 from arbeitszeit import records
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 T = TypeVar("T", covariant=True)
 
@@ -341,6 +341,8 @@ class TransferResult(QueryResult[records.Transfer], Protocol):
     def where_account_is_debtor(self, *account: UUID) -> Self: ...
 
     def where_account_is_creditor(self, *account: UUID) -> Self: ...
+
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self: ...
 
     def joined_with_debtor(
         self,

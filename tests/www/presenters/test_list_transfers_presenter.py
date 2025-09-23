@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import list_transfers
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.pagination import DEFAULT_PAGE_SIZE
 from arbeitszeit_web.www.presenters.list_transfers_presenter import (
     ListTransfersPresenter,

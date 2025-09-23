@@ -5,7 +5,7 @@ from uuid import UUID
 
 from arbeitszeit.interactors.list_transfers import AccountOwnerType
 from arbeitszeit.interactors.list_transfers import Response as InteractorResponse
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.pagination import Pagination, Paginator
 from arbeitszeit_web.request import Request

@@ -11,9 +11,9 @@ from arbeitszeit.interactors.register_hours_worked import (
     RegisterHoursWorkedInteractor,
     RegisterHoursWorkedRequest,
 )
-from arbeitszeit.payout_factor import PayoutFactorService
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.payout_factor import PayoutFactorService
 from tests.interactors.base_test_case import BaseTestCase
 
 Number = Union[int, Decimal]

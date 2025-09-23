@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.interactors import show_a_account_details
+from arbeitszeit.services.account_details import AccountTransfer
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -18,6 +19,7 @@ class ShowAAccountDetailsPresenter:
         transfer_type: str
         date: str
         transfer_volume: str
+        is_debit_transfer: bool
 
     @dataclass
     class ViewModel:
@@ -53,15 +55,14 @@ class ShowAAccountDetailsPresenter:
             ],
         )
 
-    def _create_info(
-        self, transfer: show_a_account_details.TransferInfo
-    ) -> TransferInfo:
+    def _create_info(self, transfer: AccountTransfer) -> TransferInfo:
         return self.TransferInfo(
-            transfer_type=self._get_transfer_type(transfer.transfer_type),
+            transfer_type=self._get_transfer_type(transfer.type),
             date=self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
-            transfer_volume=str(round(transfer.transfer_volume, 2)),
+            transfer_volume=str(round(transfer.volume, 2)),
+            is_debit_transfer=transfer.is_debit_transfer,
         )
 
     def _get_transfer_type(self, transfer_type: TransferType) -> str:

@@ -20,7 +20,7 @@ from arbeitszeit.interactors.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
 from arbeitszeit.records import ConsumptionType, ProductionCosts, SocialAccounting
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 
 from .base_test_case import BaseTestCase

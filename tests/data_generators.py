@@ -59,7 +59,7 @@ from arbeitszeit.interactors.send_accountant_registration_token import (
 )
 from arbeitszeit.password_hasher import PasswordHasher
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from tests.datetime_service import FakeDatetimeService
 
 

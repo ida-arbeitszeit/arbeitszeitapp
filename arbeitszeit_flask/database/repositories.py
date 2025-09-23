@@ -24,7 +24,7 @@ from sqlalchemy.sql.expression import and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_flask.database import models
 from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.database.models import (
@@ -811,6 +811,15 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
         accounts = list(map(str, account))
         return self._with_modified_query(
             lambda query: query.filter(models.Transfer.credit_account.in_(accounts))
+        )
+
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self:
+        accounts = list(map(str, account))
+        return self._with_modified_query(
+            lambda query: query.filter(
+                models.Transfer.debit_account.in_(accounts)
+                | models.Transfer.credit_account.in_(accounts)
+            )
         )
 
     def joined_with_debtor(

@@ -41,7 +41,7 @@ from arbeitszeit.records import (
     SocialAccounting,
     Transfer,
 )
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 Many = TypeVar("Many", bound=Hashable)
 One = TypeVar("One", bound=Hashable)
@@ -877,6 +877,12 @@ class TransferResult(QueryResultImpl[records.Transfer]):
     def where_account_is_creditor(self, *account: UUID) -> Self:
         return self._filter_elements(
             lambda transfer: transfer.credit_account in account
+        )
+
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self:
+        return self._filter_elements(
+            lambda transfer: transfer.debit_account in account
+            or transfer.credit_account in account
         )
 
     def joined_with_debtor(

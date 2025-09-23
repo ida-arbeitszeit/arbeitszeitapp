@@ -1,7 +1,7 @@
 from typing import Optional
 
 from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
-from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.services.plan_details import PlanDetails
 from arbeitszeit_web.api.presenters.interfaces import (
     JsonBoolean,
     JsonDatetime,

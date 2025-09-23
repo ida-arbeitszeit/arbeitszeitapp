@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import List
 
 from arbeitszeit.interactors import show_r_account_details
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.services import account_details
+from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -18,6 +19,7 @@ class ShowRAccountDetailsPresenter:
         transfer_type: str
         date: str
         transfer_volume: str
+        is_debit_transfer: bool
 
     @dataclass
     class ViewModel:
@@ -53,18 +55,17 @@ class ShowRAccountDetailsPresenter:
             ],
         )
 
-    def _create_info(
-        self, transfer: show_r_account_details.TransferInfo
-    ) -> TransferInfo:
+    def _create_info(self, transfer: account_details.AccountTransfer) -> TransferInfo:
         transfer_type = (
             self.translator.gettext("Consumption")
             if transfer.type == TransferType.productive_consumption_r
             else self.translator.gettext("Credit")
         )
         return self.TransferInfo(
-            transfer_type,
-            self.datetime_formatter.format_datetime(
+            transfer_type=transfer_type,
+            date=self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
-            str(round(transfer.volume, 2)),
+            transfer_volume=str(round(transfer.volume, 2)),
+            is_debit_transfer=transfer.is_debit_transfer,
         )
