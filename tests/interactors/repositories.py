@@ -212,16 +212,14 @@ class PlanResult(QueryResultImpl[Plan]):
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         def items_generator() -> Iterator[records.Plan]:
-            cooperation_id = self.database.relationships.cooperation_to_plan.get_one(
-                plan
-            )
             plan_record = self.database.plans.get(plan)
             if not plan_record:
                 return
+            cooperation_id = self.database.relationships.cooperation_to_plan.get_one(
+                plan
+            )
             if cooperation_id is None:
-                yield from (
-                    other_plan for other_plan in self.items() if other_plan.id == plan
-                )
+                return
             else:
                 for candidate in self.items():
                     candidate_cooperation = (
