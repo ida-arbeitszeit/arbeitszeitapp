@@ -50,9 +50,11 @@ class CompanyConsumptionsPresenter:
             consumption_type=self._format_consumption_type(
                 consumption.consumption_type
             ),
-            price_per_unit=str(round(consumption.price_per_unit, 2)),
+            price_per_unit=str(round(consumption.paid_price_per_unit, 2)),
             amount=str(consumption.amount),
-            price_total=str(round(consumption.price_per_unit * consumption.amount, 2)),
+            price_total=str(
+                round(consumption.paid_price_per_unit * consumption.amount, 2)
+            ),
         )
 
     def _format_consumption_type(self, consumption_type: ConsumptionType) -> str:

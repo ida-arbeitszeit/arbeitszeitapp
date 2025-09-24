@@ -234,9 +234,6 @@ class Plan:
             return Decimal(0)
         return self.production_costs.total_cost() / Decimal(self.prd_amount)
 
-    def price_per_unit(self) -> Decimal:
-        return Decimal(0) if self.is_public_service else self.cost_per_unit()
-
 
 @dataclass
 class PlanApproval:

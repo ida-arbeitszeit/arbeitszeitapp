@@ -108,7 +108,7 @@ class PlanDetailsFormatter:
             ),
             labour_cost_per_unit=(
                 self.translator.gettext("Labour time (hours/unit)"),
-                self._format_price(plan_details.labour_cost_per_unit),
+                self._format_price(plan_details.cost_per_unit),
             ),
             creation_date=self.datetime_formatter.format_datetime(
                 date=plan_details.creation_date,

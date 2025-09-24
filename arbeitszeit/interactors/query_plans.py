@@ -106,9 +106,7 @@ class QueryPlansInteractor:
         planner: records.Company,
         cooperation: Optional[records.Cooperation],
     ) -> QueriedPlan:
-        price_per_unit = self.price_calculator.calculate_cooperative_price(plan.id)
-        if price_per_unit is None:
-            price_per_unit = plan.price_per_unit()
+        price_per_unit = self.price_calculator.calculate_price(plan.id)
         assert plan.approval_date
         return QueriedPlan(
             plan_id=plan.id,

@@ -26,7 +26,7 @@ class PlanDetails:
     labour_cost: Decimal
     is_public_service: bool
     price_per_unit: Decimal
-    labour_cost_per_unit: Decimal
+    cost_per_unit: Decimal
     is_cooperating: bool
     cooperation: Optional[UUID]
     creation_date: datetime
@@ -51,9 +51,7 @@ class PlanDetailsService:
         if not plan_and_cooperation:
             return None
         plan, cooperation = plan_and_cooperation
-        price_per_unit = self.price_calculator.calculate_cooperative_price(plan.id)
-        if price_per_unit is None:
-            price_per_unit = plan.price_per_unit()
+        price_per_unit = self.price_calculator.calculate_price(plan.id)
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner
         return PlanDetails(
@@ -72,7 +70,7 @@ class PlanDetailsService:
             labour_cost=plan.production_costs.labour_cost,
             is_public_service=plan.is_public_service,
             price_per_unit=price_per_unit,
-            labour_cost_per_unit=plan.cost_per_unit(),
+            cost_per_unit=plan.cost_per_unit(),
             is_cooperating=bool(cooperation),
             cooperation=cooperation.id if cooperation else None,
             creation_date=plan.plan_creation_date,

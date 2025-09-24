@@ -111,7 +111,7 @@ class TestBalanceChanges(InteractorBase):
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
-        price_total = pieces * self.price_checker.get_unit_price(plan)
+        price_total = pieces * self.price_checker.get_price_per_unit(plan)
         assert (
             self.balance_checker.get_company_account_balances(sender).p_account
             == -price_total
@@ -127,7 +127,7 @@ class TestBalanceChanges(InteractorBase):
             RegisterProductiveConsumptionRequest(sender, plan, pieces, consumption_type)
         )
 
-        price_total = pieces * self.price_checker.get_unit_price(plan)
+        price_total = pieces * self.price_checker.get_price_per_unit(plan)
         assert (
             self.balance_checker.get_company_account_balances(sender).r_account
             == -price_total
@@ -177,7 +177,7 @@ class TestBalanceChanges(InteractorBase):
         )
         assert (
             self.balance_checker.get_company_account_balances(planner).prd_account
-            == balance_before_transfer + self.price_checker.get_unit_cost(plan) * 5
+            == balance_before_transfer + self.price_checker.get_cost_per_unit(plan) * 5
         )
 
     def test_that_unit_cost_for_cooperating_plans_only_considers_non_expired_plans(
@@ -228,7 +228,7 @@ class TestConsumptionTransfers(InteractorBase):
             plan=plan,
             amount=amount,
         )
-        expected_value = amount * self.price_checker.get_unit_price(plan)
+        expected_value = amount * self.price_checker.get_price_per_unit(plan)
         transfers_of_consumption_p = self._get_transfers_of_type(
             TransferType.productive_consumption_p
         )
@@ -267,7 +267,7 @@ class TestConsumptionTransfers(InteractorBase):
             plan=plan_1,
             amount=AMOUNT,
         )
-        expected_value = AMOUNT * self.price_checker.get_unit_price(plan_1)
+        expected_value = AMOUNT * self.price_checker.get_price_per_unit(plan_1)
         transfers_of_consumption_p = self._get_transfers_of_type(
             TransferType.productive_consumption_p
         )
@@ -286,7 +286,7 @@ class TestConsumptionTransfers(InteractorBase):
             plan=plan,
             amount=amount,
         )
-        expected_value = amount * self.price_checker.get_unit_price(plan)
+        expected_value = amount * self.price_checker.get_price_per_unit(plan)
         transfers_of_consumption_r = self._get_transfers_of_type(
             TransferType.productive_consumption_r
         )
@@ -324,7 +324,7 @@ class TestConsumptionTransfers(InteractorBase):
         self.consumption_generator.create_resource_consumption_by_company(
             plan=plan_1, amount=AMOUNT
         )
-        expected_value = self.price_checker.get_unit_price(plan_1) * AMOUNT
+        expected_value = self.price_checker.get_price_per_unit(plan_1) * AMOUNT
         transfers_of_consumption_r = self._get_transfers_of_type(
             TransferType.productive_consumption_r
         )

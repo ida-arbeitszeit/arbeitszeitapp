@@ -221,7 +221,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan, pieces_consumed)
         )
-        costs = pieces_consumed * self.price_checker.get_unit_price(plan)
+        costs = pieces_consumed * self.price_checker.get_price_per_unit(plan)
         expected_balance = start_balance - costs
         assert (
             self.balance_checker.get_member_account_balance(self.consumer)
@@ -239,7 +239,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         self.register_private_consumption.register_private_consumption(
             self.make_request(plan, pieces)
         )
-        costs = pieces * self.price_checker.get_unit_price(plan)
+        costs = pieces * self.price_checker.get_price_per_unit(plan)
         assert self.balance_checker.get_member_account_balance(self.consumer) == -costs
         assert (
             self.balance_checker.get_company_account_balances(planner).prd_account
@@ -258,8 +258,9 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         )
         assert len(response.consumptions) == 1
         latest_consumption = response.consumptions[0]
-        assert latest_consumption.price_per_unit == self.price_checker.get_unit_price(
-            plan
+        assert (
+            latest_consumption.paid_price_per_unit
+            == self.price_checker.get_price_per_unit(plan)
         )
         assert latest_consumption.amount == pieces
         assert latest_consumption.plan_id == plan
@@ -275,7 +276,7 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         )
         assert len(response.consumptions) == 1
         latest_consumption = response.consumptions[0]
-        assert latest_consumption.price_per_unit == Decimal(0)
+        assert latest_consumption.paid_price_per_unit == Decimal(0)
         assert latest_consumption.plan_id == plan
 
     def make_request(

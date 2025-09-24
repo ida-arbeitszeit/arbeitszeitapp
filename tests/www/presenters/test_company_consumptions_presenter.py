@@ -32,7 +32,7 @@ class TestPresenter(BaseTestCase):
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
                     consumption_type=ConsumptionType.raw_materials,
-                    price_per_unit=Decimal("7.89"),
+                    paid_price_per_unit=Decimal("7.89"),
                     amount=321,
                 ),
                 ConsumptionQueryResponse(
@@ -41,7 +41,7 @@ class TestPresenter(BaseTestCase):
                     product_name="Produkt A",
                     product_description="Beschreibung für Produkt A.",
                     consumption_type=ConsumptionType.means_of_prod,
-                    price_per_unit=Decimal("100000"),
+                    paid_price_per_unit=Decimal("100000"),
                     amount=1,
                 ),
             ]

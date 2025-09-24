@@ -103,9 +103,7 @@ class ShowMyPlansInteractor:
     def _create_plan_info_from_plan(
         self, plan: records.Plan, cooperation: Optional[records.Cooperation]
     ) -> PlanInfo:
-        price_per_unit = self.price_calculator.calculate_cooperative_price(plan.id)
-        if price_per_unit is None:
-            price_per_unit = plan.price_per_unit()
+        price_per_unit = self.price_calculator.calculate_price(plan.id)
         return PlanInfo(
             id=plan.id,
             prd_name=plan.prd_name,

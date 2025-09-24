@@ -96,7 +96,7 @@ class PlanDetailsServiceTests(TestCase):
             (False, False),
         ]
     )
-    def test_that_correct_labour_per_unit_is_shown(
+    def test_that_correct_cost_per_unit_is_shown(
         self, is_public_service: bool, approved: bool
     ) -> None:
         plan = self.plan_generator.create_plan(
@@ -111,7 +111,7 @@ class PlanDetailsServiceTests(TestCase):
         )
         details = self.service.get_details_from_plan(plan)
         assert details
-        self.assertEqual(details.labour_cost_per_unit, Decimal(3))
+        self.assertEqual(details.cost_per_unit, Decimal(3))
 
     @parameterized.expand(
         [

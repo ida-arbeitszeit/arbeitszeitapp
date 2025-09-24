@@ -155,9 +155,9 @@ class AcceptCooperationTests(BaseTestCase):
         )
         self.accept_cooperation.execute(request1)
         self.accept_cooperation.execute(request2)
-        assert self.price_checker.get_unit_price(
+        assert self.price_checker.get_price_per_unit(
             plan1
-        ) == self.price_checker.get_unit_price(plan2)
+        ) == self.price_checker.get_price_per_unit(plan2)
 
     def test_price_of_cooperating_plans_is_correctly_calculated(self) -> None:
         requester = self.company_generator.create_company_record()
@@ -184,8 +184,8 @@ class AcceptCooperationTests(BaseTestCase):
         self.accept_cooperation.execute(request2)
         # In total costs of 30h and 20 units -> price should be 1.5h per unit
         assert (
-            self.price_checker.get_unit_price(plan1)
-            == self.price_checker.get_unit_price(plan2)
+            self.price_checker.get_price_per_unit(plan1)
+            == self.price_checker.get_price_per_unit(plan2)
             == Decimal("1.5")
         )
 

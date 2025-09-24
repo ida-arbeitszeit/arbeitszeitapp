@@ -81,7 +81,7 @@ class GetCoopSummaryInteractor:
     def _get_cooperative_price(self, plans: list[Plan]) -> Optional[Decimal]:
         if not plans:
             return None
-        return self.price_calculator.calculate_cooperative_price(plans[0].id)
+        return self.price_calculator.calculate_price(plans[0].id)
 
     def _get_associated_plans(
         self, plans: list[Plan], requester: UUID
@@ -90,7 +90,7 @@ class GetCoopSummaryInteractor:
             AssociatedPlan(
                 plan_id=plan.id,
                 plan_name=plan.prd_name,
-                plan_individual_price=plan.price_per_unit(),
+                plan_individual_price=plan.cost_per_unit(),
                 planner_id=plan.planner,
                 planner_name=self._get_planner_name(plan.planner),
                 requester_is_planner=plan.planner == requester,
