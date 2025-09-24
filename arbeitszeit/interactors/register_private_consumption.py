@@ -59,19 +59,17 @@ class RegisterPrivateConsumption:
     ) -> RegisterPrivateConsumptionResponse:
         plan, planner = self._get_plan_and_planner(request)
         consumer = self._get_consumer(request)
-        coop_price = self.price_calculator.calculate_cooperative_price(plan.id)
-        if coop_price is None:
-            coop_price = plan.price_per_unit()
+        price_per_unit = self.price_calculator.calculate_price(plan.id)
         consumption_transfer = self._create_private_consumption_transfer(
             debit_account=consumer.account,
             credit_account=planner.product_account,
-            value=coop_price * request.amount,
+            value=price_per_unit * request.amount,
         )
         compensation_transfer = self._get_compensation_transfer_if_any(
             plan_id=plan.id,
             planner_product_account=planner.product_account,
-            plan_price_per_unit=plan.price_per_unit(),
-            coop_price_per_unit=coop_price,
+            cost_per_unit=plan.cost_per_unit(),
+            price_per_unit=price_per_unit,
             consumed_amount=request.amount,
         )
         self.database_gateway.create_private_consumption(
@@ -155,16 +153,16 @@ class RegisterPrivateConsumption:
         self,
         plan_id: UUID,
         planner_product_account: UUID,
-        plan_price_per_unit: Decimal,
-        coop_price_per_unit: Decimal,
+        cost_per_unit: Decimal,
+        price_per_unit: Decimal,
         consumed_amount: int,
     ) -> UUID | None:
         cooperation = self.database_gateway.get_cooperations().of_plan(plan_id).first()
         if not cooperation:
             return None
         return self.compensation_transfer_service.create_compensation_transfer(
-            coop_price_per_unit=coop_price_per_unit,
-            plan_price_per_unit=plan_price_per_unit,
+            price_per_unit=price_per_unit,
+            cost_per_unit=cost_per_unit,
             consumed_amount=consumed_amount,
             planner_product_account=planner_product_account,
             cooperation_account=cooperation.account,

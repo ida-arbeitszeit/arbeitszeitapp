@@ -281,7 +281,7 @@ class InteractorTests(BaseTestCase):
         response = self.interactor.execute(self.make_request())
         assert response.results[0].price_per_unit == 0
 
-    def test_that_labour_per_unit_is_correctly_displayed(
+    def test_that_cost_per_unit_is_correctly_displayed(
         self,
     ) -> None:
         plan = self.plan_generator.create_plan(
@@ -295,7 +295,7 @@ class InteractorTests(BaseTestCase):
         queried_plan = response.results[0]
         assert (
             queried_plan.labour_cost_per_unit
-            == self.price_checker.get_labour_per_unit(plan)
+            == self.price_checker.get_cost_per_unit(plan)
         )
 
     def test_that_two_cooperating_plans_have_the_same_price(self) -> None:
@@ -318,12 +318,12 @@ class InteractorTests(BaseTestCase):
             amount=1,
         )
         response = self.interactor.execute(self.make_request())
-        assert response.results[0].price_per_unit == self.price_checker.get_unit_price(
-            plan1
-        )
-        assert response.results[1].price_per_unit == self.price_checker.get_unit_price(
-            plan2
-        )
+        assert response.results[
+            0
+        ].price_per_unit == self.price_checker.get_price_per_unit(plan1)
+        assert response.results[
+            1
+        ].price_per_unit == self.price_checker.get_price_per_unit(plan2)
 
     @parameterized.expand(
         [

@@ -21,7 +21,7 @@ class ConsumptionQueryResponse:
     product_name: str
     product_description: str
     consumption_type: ConsumptionType
-    price_per_unit: Decimal
+    paid_price_per_unit: Decimal
     amount: int
 
 
@@ -63,6 +63,6 @@ class QueryCompanyConsumptionsInteractor:
             product_name=plan.prd_name,
             product_description=plan.description,
             consumption_type=consumption_type,
-            price_per_unit=transfer.value / consumption.amount,
+            paid_price_per_unit=transfer.value / consumption.amount,
             amount=consumption.amount,
         )

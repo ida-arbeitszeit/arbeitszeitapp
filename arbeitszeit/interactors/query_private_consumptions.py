@@ -13,9 +13,9 @@ class Consumption:
     plan_id: UUID
     product_name: str
     product_description: str
-    price_per_unit: Decimal
+    paid_price_per_unit: Decimal
     amount: int
-    price_total: Decimal
+    paid_price_total: Decimal
 
 
 @dataclass
@@ -53,7 +53,7 @@ class QueryPrivateConsumptions:
             plan_id=plan.id,
             product_name=plan.prd_name,
             product_description=plan.description,
-            price_per_unit=transfer.value / consumption.amount,
+            paid_price_per_unit=transfer.value / consumption.amount,
             amount=consumption.amount,
-            price_total=transfer.value,
+            paid_price_total=transfer.value,
         )

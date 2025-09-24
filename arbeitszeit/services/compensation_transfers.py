@@ -18,13 +18,13 @@ class CompensationTransferService:
 
     def create_compensation_transfer(
         self,
-        coop_price_per_unit: Decimal,
-        plan_price_per_unit: Decimal,
+        price_per_unit: Decimal,
+        cost_per_unit: Decimal,
         consumed_amount: int,
         planner_product_account: UUID,
         cooperation_account: UUID,
     ) -> UUID | None:
-        difference = coop_price_per_unit - plan_price_per_unit
+        difference = price_per_unit - cost_per_unit
         if not difference:
             return None
         elif difference < Decimal(0):

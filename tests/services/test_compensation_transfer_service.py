@@ -19,8 +19,8 @@ class CompensationTransferServiceTests(BaseTestCase):
         self,
     ) -> None:
         self.service.create_compensation_transfer(
-            coop_price_per_unit=Decimal(3),
-            plan_price_per_unit=Decimal(3),
+            price_per_unit=Decimal(3),
+            cost_per_unit=Decimal(3),
             consumed_amount=1,
             cooperation_account=uuid4(),
             planner_product_account=uuid4(),
@@ -50,8 +50,8 @@ class CompensationTransferServiceTests(BaseTestCase):
         )
         self.datetime_service.freeze_time(EXPECTED_TIME)
         self.service.create_compensation_transfer(
-            coop_price_per_unit=coop_price_per_unit,
-            plan_price_per_unit=plan_price_per_unit,
+            price_per_unit=coop_price_per_unit,
+            cost_per_unit=plan_price_per_unit,
             consumed_amount=consumed_amount,
             cooperation_account=EXPECTED_CREDIT_ACCOUNT,
             planner_product_account=EXPECTED_DEBIT_ACCOUNT,
@@ -87,8 +87,8 @@ class CompensationTransferServiceTests(BaseTestCase):
         )
         self.datetime_service.freeze_time(EXPECTED_TIME)
         self.service.create_compensation_transfer(
-            coop_price_per_unit=coop_price_per_unit,
-            plan_price_per_unit=plan_price_per_unit,
+            price_per_unit=coop_price_per_unit,
+            cost_per_unit=plan_price_per_unit,
             consumed_amount=consumed_amount,
             cooperation_account=EXPECTED_DEBIT_ACCOUNT,
             planner_product_account=EXPECTED_CREDIT_ACCOUNT,

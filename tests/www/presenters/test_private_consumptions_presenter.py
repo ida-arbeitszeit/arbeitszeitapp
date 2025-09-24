@@ -38,9 +38,9 @@ class PresenterTests(BaseTestCase):
                     plan_id=uuid4(),
                     product_name="test product",
                     product_description="test product description",
-                    price_per_unit=Decimal("1"),
+                    paid_price_per_unit=Decimal("1"),
                     amount=1,
-                    price_total=Decimal("1"),
+                    paid_price_total=Decimal("1"),
                 )
             ]
         )

@@ -164,7 +164,7 @@ class PlanDetailsGenerator:
             labour_cost=labour_cost,
             is_public_service=is_public_service,
             price_per_unit=price_per_unit,
-            labour_cost_per_unit=labour_cost_per_unit,
+            cost_per_unit=labour_cost_per_unit,
             is_cooperating=is_cooperating,
             cooperation=cooperation,
             creation_date=creation_date,
