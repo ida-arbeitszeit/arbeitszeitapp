@@ -336,41 +336,6 @@ class PlanGenerator:
         assert response.draft_id
         return response.draft_id
 
-    def create_plan_record(
-        self,
-        *,
-        amount: int = 100,
-        approved: bool = True,
-        costs: Optional[records.ProductionCosts] = None,
-        description="Beschreibung für Produkt A.",
-        is_public_service: bool = False,
-        planner: Optional[UUID] = None,
-        product_name: str = "Produkt A",
-        production_unit: str = "500 Gramm",
-        timeframe: Optional[int] = None,
-        requested_cooperation: Optional[UUID] = None,
-        cooperation: Optional[UUID] = None,
-        hidden_by_user: bool = False,
-    ) -> records.Plan:
-        # Don't use this method. It is only here for legacy reasons.
-        plan_id = self.create_plan(
-            amount=amount,
-            approved=approved,
-            costs=costs,
-            description=description,
-            is_public_service=is_public_service,
-            planner=planner,
-            product_name=product_name,
-            production_unit=production_unit,
-            timeframe=timeframe,
-            requested_cooperation=requested_cooperation,
-            cooperation=cooperation,
-            hidden_by_user=hidden_by_user,
-        )
-        plan = self.database_gateway.get_plans().with_id(plan_id).first()
-        assert plan
-        return plan
-
 
 @dataclass
 class ConsumptionGenerator:
