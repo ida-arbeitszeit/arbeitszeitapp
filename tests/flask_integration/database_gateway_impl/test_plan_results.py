@@ -385,30 +385,6 @@ class GetAllPlans(FlaskTestCase):
         assert cooperating_plan in [plan.id for plan in results]
         assert non_cooperating_plan not in [plan.id for plan in results]
 
-    def test_plan_without_cooperation_is_considered_to_be_only_plan_in_its_own_cooperation(
-        self,
-    ) -> None:
-        plan = self.plan_generator.create_plan(cooperation=None)
-        cooperating_plans = (
-            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan)
-        )
-        assert len(cooperating_plans) == 1
-        assert plan in [p.id for p in cooperating_plans]
-
-    def test_that_plans_outside_of_cooperation_are_excluded_when_filtering_for_cooperating_plans(
-        self,
-    ) -> None:
-        coop = self.cooperation_generator.create_cooperation()
-        plan1 = self.plan_generator.create_plan(cooperation=coop)
-        plan2 = self.plan_generator.create_plan(cooperation=coop)
-        self.plan_generator.create_plan(requested_cooperation=None)
-        cooperating_plans = (
-            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1)
-        )
-        assert len(cooperating_plans) == 2
-        assert plan1 in [p.id for p in cooperating_plans]
-        assert plan2 in [p.id for p in cooperating_plans]
-
     def test_can_filter_plans_that_are_part_of_any_cooperation(self) -> None:
         cooperation = self.cooperation_generator.create_cooperation()
         self.plan_generator.create_plan(cooperation=cooperation)
@@ -479,6 +455,71 @@ class GetAllPlans(FlaskTestCase):
         expected_rejection_date = datetime_utc(2000, 3, 2)
         assert plans.update().set_rejection_date(expected_rejection_date).perform()
         assert all(plan.rejection_date == expected_rejection_date for plan in plans)
+
+
+class ThatAreInSameCooperationAsTests(FlaskTestCase):
+    def test_that_noncooperating_plan_is_not_considered_to_be_in_its_own_cooperation(
+        self,
+    ) -> None:
+        plan = self.plan_generator.create_plan(cooperation=None)
+        cooperating_plans = (
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan)
+        )
+        assert not cooperating_plans
+
+    def test_plan_in_single_cooperation_is_considered_to_be_in_its_own_cooperation(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan = self.plan_generator.create_plan(cooperation=coop)
+        cooperating_plans = (
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan)
+        )
+        assert len(cooperating_plans) == 1
+        assert plan in [p.id for p in cooperating_plans]
+
+    def test_that_a_plan_in_same_cooperation_is_returned_together_with_the_plan(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        cooperating_plans = (
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1)
+        )
+        assert len(cooperating_plans) == 2
+        assert plan1 in [p.id for p in cooperating_plans]
+        assert plan2 in [p.id for p in cooperating_plans]
+
+    def test_that_plan_without_cooperation_is_excluded(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        self.plan_generator.create_plan(cooperation=None)
+        cooperating_plans = (
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1)
+        )
+        assert len(cooperating_plans) == 2
+        assert plan1 in [p.id for p in cooperating_plans]
+        assert plan2 in [p.id for p in cooperating_plans]
+
+    def test_that_plan_in_another_cooperation_is_excluded_when_filtering_for_cooperating_plans(
+        self,
+    ) -> None:
+        coop = self.cooperation_generator.create_cooperation()
+        plan1 = self.plan_generator.create_plan(cooperation=coop)
+        plan2 = self.plan_generator.create_plan(cooperation=coop)
+        other_coop = self.cooperation_generator.create_cooperation()
+        other_plan = self.plan_generator.create_plan(cooperation=other_coop)
+        cooperating_plans = (
+            self.database_gateway.get_plans().that_are_in_same_cooperation_as(plan1)
+        )
+        assert len(cooperating_plans) == 2
+        assert plan1 in [p.id for p in cooperating_plans]
+        assert plan2 in [p.id for p in cooperating_plans]
+        assert other_plan not in [p.id for p in cooperating_plans]
 
 
 class GetStatisticsTests(FlaskTestCase):

@@ -137,7 +137,7 @@ class ShowMyPlansPresenter:
             rows=[
                 ActivePlansRow(
                     plan_details_url=self.user_url_index.get_plan_details_url(plan.id),
-                    prd_name=f"{plan.prd_name}",
+                    prd_name=plan.prd_name,
                     price_per_unit=self.__format_price(plan.price_per_unit),
                     approval_date=self.__format_date(plan.approval_date),
                     expiration_date=self.__format_date(plan.expiration_date),

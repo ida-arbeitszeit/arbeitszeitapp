@@ -51,9 +51,8 @@ class PlanDetailsService:
         if not plan_and_cooperation:
             return None
         plan, cooperation = plan_and_cooperation
-        if plan.is_active_as_of(now):
-            price_per_unit = self.price_calculator.calculate_cooperative_price(plan)
-        else:
+        price_per_unit = self.price_calculator.calculate_cooperative_price(plan.id)
+        if price_per_unit is None:
             price_per_unit = plan.price_per_unit()
         planner = self.database_gateway.get_companies().with_id(plan.planner).first()
         assert planner

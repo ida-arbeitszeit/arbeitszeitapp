@@ -209,25 +209,17 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def that_are_in_same_cooperation_as(self, plan: UUID) -> Self:
         plan_cooperation = aliased(models.PlanCooperation)
-        other_plan_cooperation = aliased(models.PlanCooperation)
+
+        cooperation_subquery = (
+            self.db.session.query(models.PlanCooperation.cooperation)
+            .filter(models.PlanCooperation.plan == str(plan))
+            .scalar_subquery()
+        )
+
         return self._with_modified_query(
             lambda query: query.join(
-                plan_cooperation,
-                plan_cooperation.plan == models.Plan.id,
-                isouter=True,
-            )
-            .join(
-                other_plan_cooperation,
-                other_plan_cooperation.cooperation == plan_cooperation.cooperation,
-                isouter=True,
-            )
-            .filter(
-                or_(
-                    other_plan_cooperation.plan == str(plan),
-                    models.Plan.id == str(plan),
-                )
-            )
-            .distinct()
+                plan_cooperation, plan_cooperation.plan == models.Plan.id
+            ).filter(plan_cooperation.cooperation.in_(cooperation_subquery))
         )
 
     def that_are_part_of_cooperation(self, *cooperation: UUID) -> Self:
