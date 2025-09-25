@@ -1,5 +1,5 @@
 <!--Used in company's p, r, a accounts-->
-{% macro basic_transfer(date, type, purpose, volume, is_debit_transfer) %}
+{% macro basic_transfer(date, type, volume, is_debit_transfer) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -12,10 +12,6 @@
                 <strong class="is-size-5">
                     {{ type }}
                 </strong>
-                {% if purpose is defined and purpose %}
-                <br>
-                <small>{{ purpose }}</small>
-                {% endif %}
             </p>
         </div>
     </div>

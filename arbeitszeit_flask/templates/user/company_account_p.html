@@ -32,7 +32,7 @@
         <div class="section has-text-left">
             {% if view_model.transfers is defined and view_model.transfers|length %}
             {% for transfer in view_model.transfers %}
-            {{ basic_transfer(transfer.date, transfer.transfer_type, transfer.purpose, transfer.transfer_volume, transfer.is_debit_transfer) }}
+            {{ basic_transfer(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer) }}
             {% endfor %}
             {% endif %}
         </div>
