@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transfers.html' import member_transfer %}
-
 <div class="section has-text-centered">
     <h1 class="title">
         {{ gettext("My Account") }}
@@ -24,7 +22,29 @@
         <div class="column is-half">
             {% if view_model.transfers is defined and view_model.transfers|length %}
             {% for transfer in view_model.transfers %}
-            {{ member_transfer(transfer.date, transfer.type, transfer.user_name, transfer.volume, transfer.is_volume_positive) }}
+            <article class="media">
+                <div class="media-left">
+                    <p class="pt-1">
+                        <small class="has-text-weight-semibold">{{ transfer.date }}</small><br>
+                    </p>
+                </div>
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong class="is-size-5">
+                                {{ transfer.type }}
+                            </strong>
+                            <br>
+                            <small>{{ transfer.user_name }}</small>
+                        </p>
+                    </div>
+                </div>
+                <div class="media-right">
+                    <p class="is-size-5 pt-1 {{ 'has-text-success' if transfer.is_volume_positive else 'has-text-danger' }}">
+                        {{ transfer.volume }}
+                    </p>
+                </div>
+            </article>
             {% endfor %}
             {% endif %}
         </div>
