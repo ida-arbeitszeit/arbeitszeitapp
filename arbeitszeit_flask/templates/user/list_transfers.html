@@ -20,42 +20,50 @@
 </div>
 
 {% if view_model.show_results %}
-<div class="section">
+<div class="section has-text-left">
     <div class="columns is-centered">
         <div class="column is-four-fifths">
             {{ render_pagination(view_model.pagination) }}
             {% for column in view_model.results.rows %}
             <article class="media">
+                <div class="media-left">
+                    <p class="pt-1">
+                        <small class="has-text-weight-semibold">{{ column.date }}</small>
+                        <br>
+                    </p>
+                </div>
                 <div class="media-content">
                     <div class="content">
                         <p>
                             <strong class="is-size-5">
-                                {{ column.date }}
+                                {{ column.transfer_type }}
                             </strong>
-                            <p>
-                                {{ gettext("Hours:") }} {{ column.value }}
-                            </p>
-                            <p>
-                                {{ gettext("Type:") }} {{ column.transfer_type }}
-                            </p>
-                            <p>
-                                {{ gettext("From:") }} {{ gettext("Account") }} {{ column.debit_account }} 
+                            <br>
+                            <small>
+                                {{ gettext("Account") }} {{ column.debit_account }} 
                                 {% if column.debtor_url is none -%}
                                 @{{ column.debtor_name }}
                                 {% else %}
                                 <a href="{{ column.debtor_url }}">@{{ column.debtor_name }}</a>
                                 {% endif %}
-                            </p>
-                            <p>
-                                {{ gettext("To:") }} {{ gettext("Account") }} {{ column.credit_account }} 
+                            </small>
+                            <br>
+                            <span>⟹</span>
+                            <small>
+                                {{ gettext("Account") }} {{ column.credit_account }} 
                                 {% if column.creditor_url is none -%}
                                 @{{ column.creditor_name }}
                                 {% else %}
                                 <a href="{{ column.creditor_url }}">@{{ column.creditor_name }}</a>
                                 {% endif %}
-                            </p>
+                            </small>
                         </p>
                     </div>
+                </div>
+                <div class="media-right">
+                    <p class="is-size-5 pt-1">
+                        {{ column.value }}
+                    </p>
                 </div>
             </article>
             {% endfor %}
