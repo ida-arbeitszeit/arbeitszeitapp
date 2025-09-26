@@ -33,6 +33,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
             response.rejection_reason
             == RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
         )
+        assert not response.registered_hours_worked_id
 
     def test_that_request_is_granted_when_worker_is_member_of_company(self) -> None:
         worker = self.member_generator.create_member()
@@ -44,6 +45,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
             )
         )
         assert not response.is_rejected
+        assert response.registered_hours_worked_id
 
     def test_that_request_with_negative_hours_worked_is_rejected(self) -> None:
         worker = self.member_generator.create_member()
@@ -73,6 +75,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
             response.rejection_reason
             == RegisterHoursWorkedResponse.RejectionReason.hours_worked_must_be_positive
         )
+        assert not response.registered_hours_worked_id
 
     @parameterized.expand(
         [

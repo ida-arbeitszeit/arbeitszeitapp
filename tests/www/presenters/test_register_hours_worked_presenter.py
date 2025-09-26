@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from arbeitszeit.interactors.register_hours_worked import RegisterHoursWorkedResponse
 from arbeitszeit_web.www.controllers.register_hours_worked_controller import (
     ControllerRejection,
@@ -7,10 +9,13 @@ from arbeitszeit_web.www.presenters.register_hours_worked_presenter import (
 )
 from tests.www.base_test_case import BaseTestCase
 
-SUCCESS_INTERACTOR_RESPONSE = RegisterHoursWorkedResponse(rejection_reason=None)
+SUCCESS_INTERACTOR_RESPONSE = RegisterHoursWorkedResponse(
+    rejection_reason=None, registered_hours_worked_id=uuid4()
+)
 
 REJECTED_INTERACTOR_RESPONSE = RegisterHoursWorkedResponse(
-    rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
+    rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company,
+    registered_hours_worked_id=None,
 )
 
 REJECTED_CONTROLLER_RES_INVALID_INPUT = ControllerRejection(
