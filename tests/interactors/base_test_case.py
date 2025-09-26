@@ -12,6 +12,7 @@ from tests.data_generators import (
     CoordinationTransferRequestGenerator,
     MemberGenerator,
     PlanGenerator,
+    RegisteredHoursWorkedGenerator,
     TransferGenerator,
     WorkerAffiliationGenerator,
 )
@@ -83,5 +84,6 @@ class BaseTestCase(TestCase):
     member_generator = _lazy_property(MemberGenerator)
     plan_generator = _lazy_property(PlanGenerator)
     price_checker = _lazy_property(PriceChecker)
+    registered_hours_worked_generator = _lazy_property(RegisteredHoursWorkedGenerator)
     transfer_generator = _lazy_property(TransferGenerator)
     worker_affiliation_generator = _lazy_property(WorkerAffiliationGenerator)

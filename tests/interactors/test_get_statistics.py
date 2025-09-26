@@ -7,10 +7,6 @@ from parameterized import parameterized
 
 from arbeitszeit.decimal import decimal_sum
 from arbeitszeit.interactors.get_statistics import GetStatisticsInteractor
-from arbeitszeit.interactors.register_hours_worked import (
-    RegisterHoursWorkedInteractor,
-    RegisterHoursWorkedRequest,
-)
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.services.payout_factor import PayoutFactorService
@@ -231,17 +227,9 @@ class CountCertificatesTests(StatisticsBaseTestCase):
             company = self.company_generator.create_company(workers=[worker])
         else:
             company, worker = company_and_worker
-        register_hours_worked_interactor = self.injector.get(
-            RegisterHoursWorkedInteractor
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=company, worker=worker, hours=hours
         )
-        registered_hours_worked = register_hours_worked_interactor.execute(
-            RegisterHoursWorkedRequest(
-                company_id=company,
-                worker_id=worker,
-                hours_worked=hours,
-            )
-        )
-        assert not registered_hours_worked.is_rejected
 
     def assertCertificatesAreEstimatedCorrectly(self) -> None:
         fic = self.fic_service.get_current_payout_factor()

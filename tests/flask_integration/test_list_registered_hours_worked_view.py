@@ -3,11 +3,6 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.interactors.register_hours_worked import (
-    RegisterHoursWorkedInteractor,
-    RegisterHoursWorkedRequest,
-)
-
 from .flask import LogInUser, ViewTestCase
 
 
@@ -36,12 +31,9 @@ class CompanyTests(ViewTestCase):
             workers=[worker_id], email=company_email, password=company_password
         )
         self.login_company(email=company_email, password=company_password)
-        request = RegisterHoursWorkedRequest(
-            company_id=company, worker_id=worker_id, hours_worked=Decimal("10")
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=company, worker=worker_id, hours=Decimal("10")
         )
-        interactor = self.injector.get(RegisterHoursWorkedInteractor)
-        response = interactor.execute(request)
-        assert not response.is_rejected
 
 
 class NonCompanyTests(ViewTestCase):
