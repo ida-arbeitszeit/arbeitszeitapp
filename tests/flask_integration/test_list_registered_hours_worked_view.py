@@ -9,7 +9,7 @@ from .flask import LogInUser, ViewTestCase
 class CompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/list_registered_hours_worked"
+        self.url = "/company/registered_hours_worked"
 
     def test_company_can_access_view_with_200(self) -> None:
         self.login_company()
@@ -39,7 +39,7 @@ class CompanyTests(ViewTestCase):
 class NonCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/list_registered_hours_worked"
+        self.url = "/company/registered_hours_worked"
 
     @parameterized.expand(
         [
