@@ -7,10 +7,6 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import query_private_consumptions
-from arbeitszeit.interactors.register_hours_worked import (
-    RegisterHoursWorkedInteractor,
-    RegisterHoursWorkedRequest,
-)
 from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumption,
     RegisterPrivateConsumptionRequest,
@@ -77,7 +73,6 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
         self.query_private_consumptions = self.injector.get(
             query_private_consumptions.QueryPrivateConsumptions
         )
-        self.register_hours_worked = self.injector.get(RegisterHoursWorkedInteractor)
 
     def test_registration_fails_when_plan_does_not_exist(self) -> None:
         response = self.register_private_consumption.register_private_consumption(
@@ -293,12 +288,10 @@ class RegisterPrivateConsumptionTests(RegisterPrivateConsumptionBase):
     def make_transfer_to_consumer_account(self, amount: Decimal) -> None:
         if amount > 0:
             company = self.company_generator.create_company(workers=[self.consumer])
-            self.register_hours_worked.execute(
-                RegisterHoursWorkedRequest(
-                    company_id=company,
-                    worker_id=self.consumer,
-                    hours_worked=amount,
-                )
+            self.registered_hours_worked_generator.register_hours_worked(
+                company=company,
+                worker=self.consumer,
+                hours=amount,
             )
         else:
             amount = -amount

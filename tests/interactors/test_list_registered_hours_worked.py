@@ -3,7 +3,7 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.interactors import list_registered_hours_worked, register_hours_worked
+from arbeitszeit.interactors import list_registered_hours_worked
 from tests.datetime_service import datetime_utc
 from tests.interactors.base_test_case import BaseTestCase
 
@@ -13,9 +13,6 @@ class ListRegisteredHoursWorkedTests(BaseTestCase):
         super().setUp()
         self.interactor = self.injector.get(
             list_registered_hours_worked.ListRegisteredHoursWorkedInteractor
-        )
-        self.register_hours_worked_interactor = self.injector.get(
-            register_hours_worked.RegisterHoursWorkedInteractor
         )
 
     @parameterized.expand(
@@ -130,12 +127,6 @@ class ListRegisteredHoursWorkedTests(BaseTestCase):
     def register_hours_worked(
         self, company_id: UUID, worker: UUID, hours: Decimal
     ) -> None:
-        request = register_hours_worked.RegisterHoursWorkedRequest(
-            company_id=company_id,
-            worker_id=worker,
-            hours_worked=hours,
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=company_id, worker=worker, hours=hours
         )
-        response = self.register_hours_worked_interactor.execute(
-            interactor_request=request
-        )
-        assert not response.is_rejected

@@ -35,6 +35,10 @@ from arbeitszeit.interactors.invite_worker_to_company import (
 )
 from arbeitszeit.interactors.register_accountant import RegisterAccountantInteractor
 from arbeitszeit.interactors.register_company import RegisterCompany
+from arbeitszeit.interactors.register_hours_worked import (
+    RegisterHoursWorkedInteractor,
+    RegisterHoursWorkedRequest,
+)
 from arbeitszeit.interactors.register_member import RegisterMemberInteractor
 from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumption,
@@ -661,3 +665,19 @@ class WorkerAffiliationGenerator:
                 raise ValueError(
                     f"Could not accept invite for worker {worker}: {answer_response.failure_reason}"
                 )
+
+
+@dataclass
+class RegisteredHoursWorkedGenerator:
+    interactor: RegisterHoursWorkedInteractor
+
+    def register_hours_worked(
+        self, company: UUID, worker: UUID, hours: Decimal
+    ) -> None:
+        request = RegisterHoursWorkedRequest(
+            company_id=company,
+            worker_id=worker,
+            hours_worked=hours,
+        )
+        response = self.interactor.execute(request)
+        assert not response.is_rejected

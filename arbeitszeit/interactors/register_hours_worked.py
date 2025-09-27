@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
-from typing import Optional
 from uuid import UUID
 
 from arbeitszeit.datetime_service import DatetimeService
@@ -24,7 +23,8 @@ class RegisterHoursWorkedResponse:
         worker_not_at_company = auto()
         hours_worked_must_be_positive = auto()
 
-    rejection_reason: Optional[RejectionReason]
+    rejection_reason: RejectionReason | None
+    registered_hours_worked_id: UUID | None
 
     @property
     def is_rejected(self) -> bool:
@@ -43,7 +43,8 @@ class RegisterHoursWorkedInteractor:
     ) -> RegisterHoursWorkedResponse:
         if interactor_request.hours_worked <= Decimal(0):
             return RegisterHoursWorkedResponse(
-                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.hours_worked_must_be_positive
+                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.hours_worked_must_be_positive,
+                registered_hours_worked_id=None,
             )
         company = (
             self.database_gateway.get_companies()
@@ -62,7 +63,8 @@ class RegisterHoursWorkedInteractor:
         )
         if worker not in company_workers:
             return RegisterHoursWorkedResponse(
-                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company
+                rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company,
+                registered_hours_worked_id=None,
             )
         fic = self.fic_service.get_current_payout_factor()
         transfer_of_work_certificates = self.database_gateway.create_transfer(
@@ -79,11 +81,13 @@ class RegisterHoursWorkedInteractor:
             value=interactor_request.hours_worked * (1 - fic),
             type=TransferType.taxes,
         )
-        self.database_gateway.create_registered_hours_worked(
+        registered_hours_worked = self.database_gateway.create_registered_hours_worked(
             company=company.id,
             member=worker.id,
             transfer_of_work_certificates=transfer_of_work_certificates.id,
             transfer_of_taxes=transfer_of_taxes.id,
             registered_on=self.datetime_service.now(),
         )
-        return RegisterHoursWorkedResponse(rejection_reason=None)
+        return RegisterHoursWorkedResponse(
+            rejection_reason=None, registered_hours_worked_id=registered_hours_worked.id
+        )

@@ -3,18 +3,13 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.interactors.register_hours_worked import (
-    RegisterHoursWorkedInteractor,
-    RegisterHoursWorkedRequest,
-)
-
 from .flask import LogInUser, ViewTestCase
 
 
 class CompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/list_registered_hours_worked"
+        self.url = "/company/registered_hours_worked"
 
     def test_company_can_access_view_with_200(self) -> None:
         self.login_company()
@@ -36,18 +31,15 @@ class CompanyTests(ViewTestCase):
             workers=[worker_id], email=company_email, password=company_password
         )
         self.login_company(email=company_email, password=company_password)
-        request = RegisterHoursWorkedRequest(
-            company_id=company, worker_id=worker_id, hours_worked=Decimal("10")
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=company, worker=worker_id, hours=Decimal("10")
         )
-        interactor = self.injector.get(RegisterHoursWorkedInteractor)
-        response = interactor.execute(request)
-        assert not response.is_rejected
 
 
 class NonCompanyTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.url = "/company/list_registered_hours_worked"
+        self.url = "/company/registered_hours_worked"
 
     @parameterized.expand(
         [

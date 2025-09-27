@@ -3,10 +3,6 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.interactors.register_hours_worked import (
-    RegisterHoursWorkedInteractor,
-    RegisterHoursWorkedRequest,
-)
 from arbeitszeit.interactors.show_company_accounts import (
     ShowCompanyAccountsInteractor,
     ShowCompanyAccountsRequest,
@@ -163,12 +159,8 @@ class ShowCompanyAccountsTest(BaseTestCase):
         self.worker_affiliation_generator.add_workers_to_company(
             registering_company, [member]
         )
-        interactor = self.injector.get(RegisterHoursWorkedInteractor)
-        response = interactor.execute(
-            interactor_request=RegisterHoursWorkedRequest(
-                company_id=registering_company,
-                worker_id=member,
-                hours_worked=hours,
-            )
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=registering_company,
+            worker=member,
+            hours=hours,
         )
-        assert not response.is_rejected

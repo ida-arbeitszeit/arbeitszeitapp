@@ -236,6 +236,11 @@ def hide_plan(
 class register_hours_worked(RegisterHoursWorkedView): ...
 
 
+@CompanyRoute("/registered_hours_worked")
+@as_flask_view()
+class registered_hours_worked(ListRegisteredHoursWorkedView): ...
+
+
 @CompanyRoute("/register_productive_consumption", methods=["GET", "POST"])
 @as_flask_view()
 class register_productive_consumption(RegisterProductiveConsumptionView): ...
@@ -345,8 +350,3 @@ class end_cooperation(EndCooperationView): ...
 @CompanyRoute("/review_registered_consumptions")
 @as_flask_view()
 class review_registered_consumptions(ReviewRegisteredConsumptionsView): ...
-
-
-@CompanyRoute("/list_registered_hours_worked")
-@as_flask_view()
-class list_registered_hours_worked(ListRegisteredHoursWorkedView): ...
