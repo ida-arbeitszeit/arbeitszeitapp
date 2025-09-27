@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
 from uuid import UUID
 
-from arbeitszeit.records import AccountOwner, Company, Cooperation, Member
+from arbeitszeit.records import AccountOwner, Cooperation, Member
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers import TransferType
 
@@ -55,21 +53,14 @@ class Response:
 
 @dataclass
 class ShowPRDAccountDetailsInteractor:
-    database: DatabaseGateway
+    database_gateway: DatabaseGateway
 
     def show_details(self, request: Request) -> Response:
-        company = self.database.get_companies().with_id(request.company_id).first()
+        company = (
+            self.database_gateway.get_companies().with_id(request.company_id).first()
+        )
         assert company
-        credit_and_compensation_transfers = (
-            self._get_credit_and_compensation_for_coop_transfers(company)
-        )
-        private_consumption_and_compensation_for_company_transfers = (
-            self._get_consumption_and_compensation_for_company_transfers(company)
-        )
-        transfers = (
-            credit_and_compensation_transfers
-            + private_consumption_and_compensation_for_company_transfers
-        )
+        transfers = self._get_account_transfers(company.product_account)
         transfers.sort(key=lambda t: t.date)
         transfers_descending = transfers.copy()
         transfers_descending.reverse()
@@ -87,63 +78,32 @@ class ShowPRDAccountDetailsInteractor:
             plot=plot,
         )
 
-    def _get_credit_and_compensation_for_coop_transfers(
-        self, company: Company
-    ) -> list[TransferInfo]:
-        debit_transfers_and_creditor = (
-            self.database.get_transfers()
-            .where_account_is_debtor(company.product_account)
-            .joined_with_creditor()
-        )
+    def _get_account_transfers(self, account: UUID) -> list[TransferInfo]:
         transfers: list[TransferInfo] = []
-        for transfer, creditor in debit_transfers_and_creditor:
-            if transfer.type in [
-                TransferType.credit_p,
-                TransferType.credit_r,
-                TransferType.credit_a,
-            ]:
-                transfers.append(
-                    TransferInfo(
-                        type=transfer.type,
-                        date=transfer.date,
-                        volume=-transfer.value,  # negative because account is debit account
-                        peer=None,
-                    )
-                )
-            elif transfer.type == TransferType.compensation_for_coop:
-                transfers.append(
-                    TransferInfo(
-                        type=TransferType.compensation_for_coop,
-                        date=transfer.date,
-                        volume=-transfer.value,  # negative because account is debit account
-                        peer=self._create_peer_info(creditor),
-                    )
-                )
-        return transfers
-
-    def _get_consumption_and_compensation_for_company_transfers(
-        self, company: Company
-    ) -> list[TransferInfo]:
-        transfers_and_debtor = (
-            self.database.get_transfers()
-            .where_account_is_creditor(company.product_account)
-            .joined_with_debtor()
-        )
-        transfers: list[TransferInfo] = []
-        for transfer, debtor in transfers_and_debtor:
+        for transfer, debtor, creditor in (
+            self.database_gateway.get_transfers()
+            .where_account_is_debtor_or_creditor(account)
+            .joined_with_debtor_and_creditor()
+        ):
+            is_debit_transfer = transfer.debit_account == account
             transfers.append(
                 TransferInfo(
                     type=transfer.type,
                     date=transfer.date,
-                    volume=transfer.value,
-                    peer=self._create_peer_info(debtor),
+                    volume=-transfer.value if is_debit_transfer else transfer.value,
+                    peer=self._create_peer_info(
+                        debtor, creditor, is_debit_transfer, transfer.type
+                    ),
                 )
             )
         return transfers
 
     def _get_account_balance(self, account: UUID) -> Decimal:
         result = (
-            self.database.get_accounts().with_id(account).joined_with_balance().first()
+            self.database_gateway.get_accounts()
+            .with_id(account)
+            .joined_with_balance()
+            .first()
         )
         assert result
         return result[1]
@@ -161,8 +121,20 @@ class ShowPRDAccountDetailsInteractor:
         return volumes_cumsum
 
     def _create_peer_info(
-        self, peer: AccountOwner
-    ) -> MemberPeer | CompanyPeer | CooperationPeer:
+        self,
+        debtor: AccountOwner,
+        creditor: AccountOwner,
+        is_debit_transfer: bool,
+        transfer_type: TransferType,
+    ) -> MemberPeer | CompanyPeer | CooperationPeer | None:
+        if transfer_type in [
+            TransferType.credit_p,
+            TransferType.credit_r,
+            TransferType.credit_a,
+        ]:
+            #  Transfer comes from one of company's own accounts
+            return None
+        peer = creditor if is_debit_transfer else debtor
         if isinstance(peer, Member):
             return MemberPeer()
         elif isinstance(peer, Cooperation):
