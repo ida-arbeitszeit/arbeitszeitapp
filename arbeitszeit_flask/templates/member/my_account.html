@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="media-right">
-                    <p class="is-size-5 pt-1 {{ 'has-text-success' if transfer.is_volume_positive else 'has-text-danger' }}">
+                    <p class="is-size-5 pt-1 {{ 'has-text-danger' if transfer.is_debit_transfer else 'has-text-success' }}">
                         {{ transfer.volume }}
                     </p>
                 </div>

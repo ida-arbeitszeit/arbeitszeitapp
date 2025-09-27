@@ -2,6 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 
+from parameterized import parameterized
+
 from arbeitszeit.interactors.get_member_account import (
     GetMemberAccountResponse,
     TransferInfo,
@@ -83,32 +85,15 @@ class TestPresenter(BaseTestCase):
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(view_model.transfers[0].volume, "20.01")
 
-    def test_that_transfer_volume_sign_is_shown_correctly_if_volume_is_negative(
-        self,
+    @parameterized.expand([(True,), (False,)])
+    def test_that_transfer_is_shown_as_debit_transfer_if_that_is_the_case(
+        self, is_debit_transfer: bool
     ):
         response = self.get_interactor_response(
-            [self.get_transfer(transfer_volume=Decimal("-1"))]
+            [self.get_transfer(is_debit_transfer=is_debit_transfer)]
         )
         view_model = self.presenter.present_member_account(response)
-        self.assertFalse(view_model.transfers[0].is_volume_positive)
-
-    def test_that_transfer_volume_sign_is_shown_correctly_if_volume_is_zero(
-        self,
-    ):
-        response = self.get_interactor_response(
-            [self.get_transfer(transfer_volume=Decimal("0"))]
-        )
-        view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transfers[0].is_volume_positive)
-
-    def test_that_transfer_volume_sign_is_shown_correctly_if_volume_is_positive(
-        self,
-    ):
-        response = self.get_interactor_response(
-            [self.get_transfer(transfer_volume=Decimal("2"))]
-        )
-        view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transfers[0].is_volume_positive)
+        assert view_model.transfers[0].is_debit_transfer == is_debit_transfer
 
     def test_that_transfer_type_is_shown_correctly_for_incoming_wages(
         self,
@@ -164,6 +149,7 @@ class TestPresenter(BaseTestCase):
         date: Optional[datetime] = None,
         transfer_volume: Optional[Decimal] = None,
         type: Optional[TransferType] = None,
+        is_debit_transfer: bool = False,
     ) -> TransferInfo:
         if date is None:
             date = self.datetime_service.now()
@@ -176,4 +162,5 @@ class TestPresenter(BaseTestCase):
             peer_name="test company",
             transferred_value=transfer_volume,
             type=type,
+            is_debit_transfer=is_debit_transfer,
         )

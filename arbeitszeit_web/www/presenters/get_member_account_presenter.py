@@ -17,7 +17,7 @@ class GetMemberAccountPresenter:
         type: str
         user_name: str
         volume: str
-        is_volume_positive: bool
+        is_debit_transfer: bool
 
     @dataclass
     class ViewModel:
@@ -39,7 +39,7 @@ class GetMemberAccountPresenter:
                 type=self._transfer_type_as_string(t.type),
                 user_name=t.peer_name,
                 volume=f"{round(t.transferred_value, 2)}",
-                is_volume_positive=t.transferred_value >= 0,
+                is_debit_transfer=t.is_debit_transfer,
             )
             for t in interactor_response.transfers
         ]

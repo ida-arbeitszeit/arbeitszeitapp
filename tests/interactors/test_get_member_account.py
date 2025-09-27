@@ -1,4 +1,7 @@
 from decimal import Decimal
+from uuid import UUID
+
+from parameterized import parameterized
 
 from arbeitszeit import records
 from arbeitszeit.interactors.get_member_account import GetMemberAccountInteractor
@@ -195,3 +198,22 @@ class GetMemberAccountTests(BaseTestCase):
 
         trans5 = response.transfers.pop()
         assert trans5.peer_name == self.social_accounting_name
+
+    @parameterized.expand([(True,), (False,)])
+    def test_that_transfer_is_set_as_debit_transfer_if_that_is_the_case(
+        self, is_debit_transfer: bool
+    ) -> None:
+        member = self.member_generator.create_member()
+        account = self.get_account_of_member(member)
+        if is_debit_transfer:
+            self.transfer_generator.create_transfer(debit_account=account)
+        else:
+            self.transfer_generator.create_transfer(credit_account=account)
+        response = self.interactor.execute(member)
+        assert len(response.transfers) == 1
+        assert response.transfers[0].is_debit_transfer == is_debit_transfer
+
+    def get_account_of_member(self, member: UUID) -> UUID:
+        account = self.database_gateway.get_accounts().owned_by_member(member).first()
+        assert account
+        return account.id
