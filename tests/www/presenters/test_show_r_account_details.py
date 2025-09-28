@@ -6,7 +6,11 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import show_r_account_details
-from arbeitszeit.services.account_details import PlotDetails
+from arbeitszeit.services.account_details import (
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
@@ -113,6 +117,11 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
             date=date,
             volume=volume,
             is_debit_transfer=is_debit,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
         )
 
     def get_interactor_response(

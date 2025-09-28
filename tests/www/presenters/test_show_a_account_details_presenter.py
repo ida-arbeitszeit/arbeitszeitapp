@@ -5,7 +5,12 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import show_a_account_details
-from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -122,7 +127,17 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
     ) -> AccountTransfer:
         if date is None:
             date = self.datetime_service.now()
-        return AccountTransfer(transfer_type, date, transfer_volume, is_debit_transfer)
+        return AccountTransfer(
+            transfer_type,
+            date,
+            transfer_volume,
+            is_debit_transfer,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
+        )
 
     def _interactor_response(
         self,

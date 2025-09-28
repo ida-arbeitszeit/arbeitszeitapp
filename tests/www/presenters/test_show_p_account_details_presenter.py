@@ -7,7 +7,12 @@ from parameterized import parameterized
 from arbeitszeit.interactors.show_p_account_details import (
     ShowPAccountDetailsInteractor as Interactor,
 )
-from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
@@ -106,7 +111,15 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         is_debit_transfer: bool = False,
     ) -> AccountTransfer:
         return AccountTransfer(
-            type=type, date=date, volume=volume, is_debit_transfer=is_debit_transfer
+            type=type,
+            date=date,
+            volume=volume,
+            is_debit_transfer=is_debit_transfer,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
         )
 
     def get_interactor_response(

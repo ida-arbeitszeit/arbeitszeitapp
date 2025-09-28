@@ -1,11 +1,39 @@
+import enum
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from itertools import accumulate
 from uuid import UUID
 
+from arbeitszeit.anonymization import (
+    ANONYMIZED_STR,
+    ANONYMIZED_UUID,
+    MaybeAnonymizedStr,
+    MaybeAnonymizedUUID,
+)
+from arbeitszeit.records import (
+    AccountOwner,
+    Company,
+    Cooperation,
+    Member,
+    SocialAccounting,
+)
 from arbeitszeit.repositories import DatabaseGateway
 from arbeitszeit.transfers import TransferType
+
+
+class TransferPartyType(enum.Enum):
+    member = enum.auto()
+    company = enum.auto()
+    social_accounting = enum.auto()
+    cooperation = enum.auto()
+
+
+@dataclass
+class TransferParty:
+    type: TransferPartyType
+    id: MaybeAnonymizedUUID
+    name: MaybeAnonymizedStr
 
 
 @dataclass
@@ -14,6 +42,7 @@ class AccountTransfer:
     date: datetime
     volume: Decimal
     is_debit_transfer: bool
+    transfer_party: TransferParty
 
 
 @dataclass
@@ -28,18 +57,24 @@ class AccountDetailsService:
 
     def get_account_transfers(self, account: UUID) -> list[AccountTransfer]:
         transfers: list[AccountTransfer] = []
-        for (
-            t
-        ) in self.database_gateway.get_transfers().where_account_is_debtor_or_creditor(
-            account
+        for transfer, debtor, creditor in (
+            self.database_gateway.get_transfers()
+            .where_account_is_debtor_or_creditor(account)
+            .joined_with_debtor_and_creditor()
         ):
-            is_debit_transfer = t.debit_account == account
+            is_debit_transfer = transfer.debit_account == account
+            transfer_party = build_counterparty_transfer_party(
+                debtor=debtor,
+                creditor=creditor,
+                is_debit_transfer=is_debit_transfer,
+            )
             transfers.append(
                 AccountTransfer(
-                    type=t.type,
-                    date=t.date,
-                    volume=-t.value if is_debit_transfer else t.value,
+                    type=transfer.type,
+                    date=transfer.date,
+                    volume=-transfer.value if is_debit_transfer else transfer.value,
                     is_debit_transfer=is_debit_transfer,
+                    transfer_party=transfer_party,
                 )
             )
         return transfers
@@ -53,6 +88,46 @@ class AccountDetailsService:
         )
         assert result
         return result[1]
+
+
+def build_counterparty_transfer_party(
+    debtor: AccountOwner,
+    creditor: AccountOwner,
+    is_debit_transfer: bool,
+) -> TransferParty:
+    if is_debit_transfer:
+        return _transfer_party_from_owner(creditor)
+    else:
+        return _transfer_party_from_owner(debtor)
+
+
+def _transfer_party_from_owner(account_owner: AccountOwner) -> TransferParty:
+    party_type = _transfer_party_type_from_owner(account_owner)
+    return TransferParty(
+        type=party_type,
+        id=(
+            ANONYMIZED_UUID
+            if party_type == TransferPartyType.member
+            else account_owner.id
+        ),
+        name=(
+            ANONYMIZED_STR
+            if party_type == TransferPartyType.member
+            else account_owner.get_name()
+        ),
+    )
+
+
+def _transfer_party_type_from_owner(account_owner: AccountOwner) -> TransferPartyType:
+    match account_owner:
+        case Member():
+            return TransferPartyType.member
+        case Company():
+            return TransferPartyType.company
+        case Cooperation():
+            return TransferPartyType.cooperation
+        case SocialAccounting():
+            return TransferPartyType.social_accounting
 
 
 def construct_plot_data(transfers: list[AccountTransfer]) -> PlotDetails:
