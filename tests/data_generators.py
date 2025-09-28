@@ -431,6 +431,7 @@ class ConsumptionGenerator:
 class TransferGenerator:
     datetime_service: FakeDatetimeService
     database_gateway: DatabaseGateway
+    company_generator: CompanyGenerator
 
     def create_transfer(
         self,
@@ -443,9 +444,11 @@ class TransferGenerator:
         if date is None:
             date = self.datetime_service.now()
         if debit_account is None:
-            debit_account = self.database_gateway.create_account().id
+            company = self.company_generator.create_company_record()
+            debit_account = company.means_account
         if credit_account is None:
-            credit_account = self.database_gateway.create_account().id
+            company = self.company_generator.create_company_record()
+            credit_account = company.product_account
         if value is None:
             value = Decimal(10)
         if type is None:
