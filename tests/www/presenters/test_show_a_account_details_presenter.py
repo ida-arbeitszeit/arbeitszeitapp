@@ -38,7 +38,6 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
-        self.assertEqual(trans.transfer_type, self.translator.gettext("Credit"))
         self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
@@ -71,9 +70,9 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            (TransferType.credit_a, "Credit"),
-            (TransferType.credit_public_a, "Credit"),
-            (TransferType.work_certificates, "Payment"),
+            (TransferType.credit_a, "Credit for labour"),
+            (TransferType.credit_public_a, "Credit for labour (public service)"),
+            (TransferType.work_certificates, "Work certificates"),
         ]
     )
     def test_presenter_shows_correct_string_for_each_transfer_type(

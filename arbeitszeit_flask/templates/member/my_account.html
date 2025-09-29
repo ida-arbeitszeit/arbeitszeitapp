@@ -32,16 +32,14 @@
                     <div class="content">
                         <p>
                             <strong class="is-size-5">
-                                {{ transfer.type }}
+                                {{ transfer.transfer_type }}
                             </strong>
-                            <br>
-                            <small>{{ transfer.user_name }}</small>
                         </p>
                     </div>
                 </div>
                 <div class="media-right">
                     <p class="is-size-5 pt-1 {{ 'has-text-danger' if transfer.is_debit_transfer else 'has-text-success' }}">
-                        {{ transfer.volume }}
+                        {{ transfer.transfer_volume }}
                     </p>
                 </div>
             </article>

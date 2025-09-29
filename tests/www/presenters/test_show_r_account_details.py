@@ -50,11 +50,32 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         assert len(view_model.transfers) == 1
         assert view_model.account_balance == str(round(EXPECTED_ACCOUNT_BALANCE, 2))
         transfer = view_model.transfers[0]
-        assert transfer.transfer_type == self.trans.gettext("Credit")
         assert transfer.date == self.datetime_formatter.format_datetime(
             date=EXPECTED_DATE, fmt="%d.%m.%Y %H:%M"
         )
         assert transfer.transfer_volume == str(round(EXPECTED_VOLUME, 2))
+
+    @parameterized.expand(
+        [
+            (
+                TransferType.credit_r,
+                "Credit for liquid means of production",
+            ),
+            (
+                TransferType.productive_consumption_r,
+                "Productive consumption of liquid means of production",
+            ),
+        ]
+    )
+    def test_that_type_of_transfer_is_converted_into_correct_string(
+        self, transfer_type: TransferType, expected_string: str
+    ) -> None:
+        transfer = self.get_transfer_info(type=transfer_type)
+        response = self.get_interactor_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        assert view_model.transfers[0].transfer_type == (
+            self.translator.gettext(expected_string)
+        )
 
     @parameterized.expand([(True,), (False,)])
     def test_that_debit_transfer_are_shown_as_such(

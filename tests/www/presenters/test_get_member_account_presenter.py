@@ -1,12 +1,17 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import Optional
+from uuid import uuid4
 
 from parameterized import parameterized
 
 from arbeitszeit.interactors.get_member_account import (
     GetMemberAccountResponse,
-    TransferInfo,
+)
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    TransferParty,
+    TransferPartyType,
 )
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.get_member_account_presenter import (
@@ -83,7 +88,7 @@ class TestPresenter(BaseTestCase):
     def test_that_transfer_volume_is_formatted_correctly(self):
         response = self.get_interactor_response([self.get_transfer()])
         view_model = self.presenter.present_member_account(response)
-        self.assertEqual(view_model.transfers[0].volume, "20.01")
+        self.assertEqual(view_model.transfers[0].transfer_volume, "20.01")
 
     @parameterized.expand([(True,), (False,)])
     def test_that_transfer_is_shown_as_debit_transfer_if_that_is_the_case(
@@ -103,7 +108,7 @@ class TestPresenter(BaseTestCase):
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
-            view_model.transfers[0].type,
+            view_model.transfers[0].transfer_type,
             self.translator.gettext("Work certificates"),
         )
 
@@ -115,7 +120,8 @@ class TestPresenter(BaseTestCase):
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
-            view_model.transfers[0].type, self.translator.gettext("Consumption")
+            view_model.transfers[0].transfer_type,
+            self.translator.gettext("Private consumption"),
         )
 
     def test_that_transfer_type_is_shown_correctly_for_taxes(
@@ -126,19 +132,12 @@ class TestPresenter(BaseTestCase):
         )
         view_model = self.presenter.present_member_account(response)
         self.assertEqual(
-            view_model.transfers[0].type,
+            view_model.transfers[0].transfer_type,
             self.translator.gettext("Contribution to public sector"),
         )
 
-    def test_that_name_of_peer_is_shown(
-        self,
-    ):
-        response = self.get_interactor_response([self.get_transfer()])
-        view_model = self.presenter.present_member_account(response)
-        self.assertTrue(view_model.transfers[0].user_name)
-
     def get_interactor_response(
-        self, transfers: List[TransferInfo], balance: Optional[Decimal] = None
+        self, transfers: list[AccountTransfer], balance: Optional[Decimal] = None
     ) -> GetMemberAccountResponse:
         if balance is None:
             balance = Decimal("10")
@@ -150,17 +149,19 @@ class TestPresenter(BaseTestCase):
         transfer_volume: Optional[Decimal] = None,
         type: Optional[TransferType] = None,
         is_debit_transfer: bool = False,
-    ) -> TransferInfo:
+    ) -> AccountTransfer:
         if date is None:
             date = self.datetime_service.now()
         if transfer_volume is None:
             transfer_volume = Decimal("20.006")
         if type is None:
             type = TransferType.work_certificates
-        return TransferInfo(
+        return AccountTransfer(
             date=date,
-            peer_name="test company",
-            transferred_value=transfer_volume,
+            volume=transfer_volume,
             type=type,
             is_debit_transfer=is_debit_transfer,
+            transfer_party=TransferParty(
+                id=uuid4(), name="Some party name", type=TransferPartyType.member
+            ),
         )
