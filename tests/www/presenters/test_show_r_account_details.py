@@ -60,7 +60,7 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         [
             (
                 TransferType.credit_r,
-                "Credit for liquid means of production",
+                "Planned liquid means of production",
             ),
             (
                 TransferType.productive_consumption_r,

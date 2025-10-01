@@ -77,21 +77,21 @@ def description_from_transfer_type(
 ) -> str:
     match transfer_type.name:
         case "credit_p":
-            return translator.gettext("Credit for fixed means of production")
+            return translator.gettext("Planned fixed means of production")
         case "credit_r":
-            return translator.gettext("Credit for liquid means of production")
+            return translator.gettext("Planned liquid means of production")
         case "credit_a":
-            return translator.gettext("Credit for labour")
+            return translator.gettext("Planned labour")
         case "credit_public_p":
             return translator.gettext(
-                "Credit for fixed means of production (public service)"
+                "Planned fixed means of production (public service)"
             )
         case "credit_public_r":
             return translator.gettext(
-                "Credit for liquid means of production (public service)"
+                "Planned liquid means of production (public service)"
             )
         case "credit_public_a":
-            return translator.gettext("Credit for labour (public service)")
+            return translator.gettext("Planned labour (public service)")
         case "private_consumption":
             return translator.gettext("Private consumption")
         case "productive_consumption_p":

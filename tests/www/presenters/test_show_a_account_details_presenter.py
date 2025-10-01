@@ -70,8 +70,8 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            (TransferType.credit_a, "Credit for labour"),
-            (TransferType.credit_public_a, "Credit for labour (public service)"),
+            (TransferType.credit_a, "Planned labour"),
+            (TransferType.credit_public_a, "Planned labour (public service)"),
             (TransferType.work_certificates, "Work certificates"),
         ]
     )

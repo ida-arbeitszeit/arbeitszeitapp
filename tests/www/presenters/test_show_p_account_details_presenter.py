@@ -58,7 +58,7 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         [
             (
                 TransferType.credit_p,
-                "Credit for fixed means of production",
+                "Planned fixed means of production",
             ),
             (
                 TransferType.productive_consumption_p,

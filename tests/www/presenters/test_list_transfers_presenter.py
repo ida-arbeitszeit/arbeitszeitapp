@@ -153,7 +153,7 @@ class ResultsTests(ListTransfersPresenterBase):
         )
         view_model = self.presenter.present(uc_response)
         assert view_model.results.rows[0].transfer_type == self.translator.gettext(
-            "Credit for fixed means of production"
+            "Planned fixed means of production"
         )
 
     def test_that_debit_account_is_converted_to_string(self) -> None:

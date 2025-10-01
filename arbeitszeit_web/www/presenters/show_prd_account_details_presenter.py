@@ -1,34 +1,18 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 
-from arbeitszeit.anonymization import ANONYMIZED_STR
 from arbeitszeit.interactors import show_prd_account_details
-from arbeitszeit.services.account_details import (
-    AccountTransfer,
-    TransferParty,
-)
-from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.navbar import NavbarItem
+from arbeitszeit_web.www.presenters.transfers import TransferInfo, TransferPresenter
 
 
 @dataclass
 class ShowPRDAccountDetailsPresenter:
     @dataclass
-    class TransferInfo:
-        transfer_type: str
-        date: str
-        transfer_volume: str
-        is_debit_transfer: bool
-        party_name: str
-        party_icon: str
-
-    @dataclass
     class ViewModel:
-        transfers: list[ShowPRDAccountDetailsPresenter.TransferInfo]
+        transfers: list[TransferInfo]
         show_transfers: bool
         account_balance: str
         plot_url: str
@@ -37,13 +21,14 @@ class ShowPRDAccountDetailsPresenter:
     translator: Translator
     url_index: UrlIndex
     datetime_formatter: DatetimeFormatter
+    transfer_presenter: TransferPresenter
 
     def present(
         self, interactor_response: show_prd_account_details.Response
     ) -> ViewModel:
-        transfers = [
-            self._create_info(transfer) for transfer in interactor_response.transfers
-        ]
+        transfers = self.transfer_presenter.present_transfers(
+            interactor_response.transfers
+        )
         return self.ViewModel(
             transfers=transfers,
             show_transfers=bool(transfers),
@@ -64,63 +49,3 @@ class ShowPRDAccountDetailsPresenter:
                 ),
             ],
         )
-
-    def _create_info(self, transfer: AccountTransfer) -> TransferInfo:
-        return self.TransferInfo(
-            transfer_type=self._get_transfer_type(transfer),
-            date=self.datetime_formatter.format_datetime(
-                date=transfer.date, fmt="%d.%m.%Y %H:%M"
-            ),
-            transfer_volume=str(round(transfer.volume, 2)),
-            is_debit_transfer=transfer.is_debit_transfer,
-            party_name=self._get_transfer_party_name(
-                transfer.transfer_party, transfer.debtor_equals_creditor
-            ),
-            party_icon=self._get_transfer_party_type_icon(
-                transfer.transfer_party, transfer.debtor_equals_creditor
-            ),
-        )
-
-    def _get_transfer_type(self, transfer: AccountTransfer) -> str:
-        match transfer.type:
-            case TransferType.credit_p | TransferType.credit_r | TransferType.credit_a:
-                return self.translator.gettext("Debit expected sales")
-            case (
-                TransferType.private_consumption
-                | TransferType.productive_consumption_p
-                | TransferType.productive_consumption_r
-            ):
-                return self.translator.gettext("Sale")
-            case (
-                TransferType.compensation_for_company
-                | TransferType.compensation_for_coop
-            ):
-                return self.translator.gettext("Cooperation compensation")
-            case _:
-                return "Unknown transfer type"
-
-    def _get_transfer_party_type_icon(
-        self, transfer_party: TransferParty, debtor_equals_creditor: bool
-    ) -> str:
-        if debtor_equals_creditor:
-            return ""
-        match transfer_party.type.name:
-            case "member":
-                return "user"
-            case "company":
-                return "industry"
-            case "cooperation":
-                return "hands-helping"
-            case _:
-                return ""
-
-    def _get_transfer_party_name(
-        self, transfer_party: TransferParty, debtor_equals_creditor: bool
-    ) -> str:
-        if debtor_equals_creditor:
-            return ""
-        name = transfer_party.name
-        if name is ANONYMIZED_STR:
-            return self.translator.gettext("Anonymous worker")
-        assert isinstance(name, str)
-        return name

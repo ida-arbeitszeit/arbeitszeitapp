@@ -34,21 +34,13 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_transfers)
 
-    @parameterized.expand(
-        [
-            (TransferType.credit_p),
-            (TransferType.credit_r),
-            (TransferType.credit_a),
-        ]
-    )
     def test_return_correct_info_when_one_transfer_of_granting_credit_took_place(
         self,
-        transfer_type: TransferType,
     ) -> None:
         ACCOUNT_BALANCE = Decimal(100.007)
         TRANSFER_VOLUME = Decimal(5.3)
         transfer = self._get_transfer_info(
-            transfer_type=transfer_type,
+            transfer_type=TransferType.credit_p,
             volume=TRANSFER_VOLUME,
         )
         response = self._interactor_response(
@@ -59,9 +51,6 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Debit expected sales")
-        )
-        self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
                 date=transfer.date,
@@ -69,6 +58,26 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             ),
         )
         self.assertEqual(trans.transfer_volume, str(round(TRANSFER_VOLUME, 2)))
+
+    @parameterized.expand(
+        [
+            (TransferType.credit_p, "Planned fixed means of production"),
+            (TransferType.credit_r, "Planned liquid means of production"),
+            (TransferType.credit_a, "Planned labour"),
+        ]
+    )
+    def test_that_transfer_type_is_converted_into_corrected_description(
+        self, transfer_type: TransferType, expected_description: str
+    ) -> None:
+        transfer = self._get_transfer_info(
+            transfer_type=transfer_type,
+        )
+        response = self._interactor_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.transfers[0].transfer_type,
+            self.translator.gettext(expected_description),
+        )
 
     def test_return_correct_info_when_one_private_consumption_took_place(
         self,
@@ -86,7 +95,9 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
-        self.assertEqual(trans.transfer_type, self.translator.gettext("Sale"))
+        self.assertEqual(
+            trans.transfer_type, self.translator.gettext("Private consumption")
+        )
         self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
@@ -107,7 +118,8 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type,
+            self.translator.gettext("Compensation for overproductive planning"),
         )
 
     def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_company_took_place(
@@ -121,7 +133,8 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type,
+            self.translator.gettext("Compensation for underproductive planning"),
         )
 
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
