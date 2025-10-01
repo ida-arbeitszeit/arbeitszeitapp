@@ -5,6 +5,7 @@ from uuid import UUID
 from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit.records import ProductionCosts
 from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.account_details import TransferPartyType
 from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
 
@@ -298,16 +299,21 @@ class InteractorTester(BaseTestCase):
             Decimal(2),  # consumption (+2)
         ]
 
-    def test_that_peer_type_for_credit_transfers_is_none(self) -> None:
+    def test_that_party_type_for_credit_transfers_is_company_and_that_debtor_equals_creditor(
+        self,
+    ) -> None:
         planner = self.company_generator.create_company()
-        self.plan_generator.create_plan(planner=planner)
+        self.plan_generator.create_plan(
+            planner=planner
+        )  # creates three credit transfers
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
         for transfer in response.transfers:
-            assert transfer.peer is None
+            assert transfer.transfer_party.type == TransferPartyType.company
+            assert transfer.debtor_equals_creditor
 
-    def test_that_peer_type_for_private_consumption_is_member(self) -> None:
+    def test_that_party_type_for_private_consumption_is_member(self) -> None:
         consumer = self.member_generator.create_member()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
@@ -317,12 +323,9 @@ class InteractorTester(BaseTestCase):
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
-        assert response.transfers[0].peer is not None
-        assert isinstance(
-            response.transfers[0].peer, show_prd_account_details.MemberPeer
-        )
+        assert response.transfers[0].transfer_party.type == TransferPartyType.member
 
-    def test_that_peer_type_for_fixed_means_consumption_is_company(self) -> None:
+    def test_that_party_type_for_fixed_means_consumption_is_company(self) -> None:
         consumer = self.company_generator.create_company()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
@@ -332,12 +335,9 @@ class InteractorTester(BaseTestCase):
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
-        assert response.transfers[0].peer is not None
-        assert isinstance(
-            response.transfers[0].peer, show_prd_account_details.CompanyPeer
-        )
+        assert response.transfers[0].transfer_party.type == TransferPartyType.company
 
-    def test_that_peer_type_for_resource_consumption_is_company(self) -> None:
+    def test_that_party_type_for_resource_consumption_is_company(self) -> None:
         consumer = self.company_generator.create_company()
         planner = self.company_generator.create_company()
         plan = self.plan_generator.create_plan(planner=planner)
@@ -347,10 +347,7 @@ class InteractorTester(BaseTestCase):
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
-        assert response.transfers[0].peer is not None
-        assert isinstance(
-            response.transfers[0].peer, show_prd_account_details.CompanyPeer
-        )
+        assert response.transfers[0].transfer_party.type == TransferPartyType.company
 
     def test_that_correct_consumer_id_is_shown_after_productive_consumption(
         self,
@@ -370,9 +367,9 @@ class InteractorTester(BaseTestCase):
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
-        company_peer = response.transfers[0].peer
-        assert isinstance(company_peer, show_prd_account_details.CompanyPeer)
-        assert company_peer.id == consumer
+        transfer_party = response.transfers[0].transfer_party
+        assert transfer_party.type == TransferPartyType.company
+        assert transfer_party.id == consumer
 
     def test_that_correct_consumer_name_is_shown_when_company_sold_to_company(
         self,
@@ -393,9 +390,9 @@ class InteractorTester(BaseTestCase):
         response = self.interactor.show_details(
             self.create_interactor_request(company_id=planner)
         )
-        company_peer = response.transfers[0].peer
-        assert isinstance(company_peer, show_prd_account_details.CompanyPeer)
-        assert company_peer.name == EXPECTED_CONSUMER_NAME
+        transfer_party = response.transfers[0].transfer_party
+        assert transfer_party.type == TransferPartyType.company
+        assert transfer_party.name == EXPECTED_CONSUMER_NAME
 
     def create_interactor_request(
         self, company_id: UUID
@@ -460,7 +457,7 @@ class CompensationForCompanyTests(CompensationTests):
         assert len(response.transfers) == 1
         assert response.transfers[0].date == EXPECTED_DATE
 
-    def test_that_peer_is_cooperation(self) -> None:
+    def test_that_otrher_party_is_cooperation(self) -> None:
         planner = self.company_generator.create_company_record()
         self.transfer_generator.create_transfer(
             debit_account=self._get_cooperation_account(),
@@ -471,9 +468,7 @@ class CompensationForCompanyTests(CompensationTests):
             show_prd_account_details.Request(company_id=planner.id)
         )
         assert len(response.transfers) == 1
-        assert isinstance(
-            response.transfers[0].peer, show_prd_account_details.CooperationPeer
-        )
+        assert response.transfers[0].transfer_party.type, TransferPartyType.cooperation
 
 
 class CompensationForCoopTests(CompensationTests):
@@ -518,7 +513,7 @@ class CompensationForCoopTests(CompensationTests):
         assert len(response.transfers) == 1
         assert response.transfers[0].date == EXPECTED_DATE
 
-    def test_that_peer_is_cooperation(self) -> None:
+    def test_that_other_party_is_cooperation(self) -> None:
         planner = self.company_generator.create_company_record()
         self.transfer_generator.create_transfer(
             debit_account=planner.product_account,
@@ -529,6 +524,4 @@ class CompensationForCoopTests(CompensationTests):
             show_prd_account_details.Request(company_id=planner.id)
         )
         assert len(response.transfers) == 1
-        assert isinstance(
-            response.transfers[0].peer, show_prd_account_details.CooperationPeer
-        )
+        assert response.transfers[0].transfer_party.type, TransferPartyType.cooperation

@@ -136,6 +136,7 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
                 id=uuid4(),
                 name="Some counter party name",
             ),
+            debtor_equals_creditor=False,
         )
 
     def _interactor_response(

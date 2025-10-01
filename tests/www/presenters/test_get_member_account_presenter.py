@@ -164,4 +164,5 @@ class TestPresenter(BaseTestCase):
             transfer_party=TransferParty(
                 id=uuid4(), name="Some party name", type=TransferPartyType.member
             ),
+            debtor_equals_creditor=False,
         )

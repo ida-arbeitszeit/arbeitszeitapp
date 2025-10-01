@@ -134,6 +134,7 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
             date=date,
             volume=volume,
             is_debit_transfer=is_debit_transfer,
+            debtor_equals_creditor=False,
             transfer_party=TransferParty(
                 type=TransferPartyType.company,
                 id=uuid4(),

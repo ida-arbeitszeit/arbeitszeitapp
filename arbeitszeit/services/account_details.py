@@ -43,6 +43,7 @@ class AccountTransfer:
     volume: Decimal
     is_debit_transfer: bool
     transfer_party: TransferParty
+    debtor_equals_creditor: bool
 
 
 @dataclass
@@ -75,6 +76,7 @@ class AccountDetailsService:
                     volume=-transfer.value if is_debit_transfer else transfer.value,
                     is_debit_transfer=is_debit_transfer,
                     transfer_party=transfer_party,
+                    debtor_equals_creditor=debtor.id == creditor.id,
                 )
             )
         return transfers

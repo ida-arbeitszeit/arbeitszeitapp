@@ -7,6 +7,7 @@ from parameterized import parameterized
 
 from arbeitszeit.interactors import show_r_account_details
 from arbeitszeit.services.account_details import (
+    AccountTransfer,
     PlotDetails,
     TransferParty,
     TransferPartyType,
@@ -130,10 +131,10 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         date: datetime | None = None,
         volume=Decimal(10),
         is_debit: bool = False,
-    ) -> show_r_account_details.AccountTransfer:
+    ) -> AccountTransfer:
         if date is None:
             date = datetime_min_utc()
-        return show_r_account_details.AccountTransfer(
+        return AccountTransfer(
             type=type,
             date=date,
             volume=volume,
@@ -143,6 +144,7 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
                 id=uuid4(),
                 name="Some counter party name",
             ),
+            debtor_equals_creditor=False,
         )
 
     def get_interactor_response(

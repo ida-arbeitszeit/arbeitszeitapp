@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from arbeitszeit.anonymization import ANONYMIZED_STR
 from arbeitszeit.interactors import show_prd_account_details
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    TransferParty,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -17,6 +22,7 @@ class ShowPRDAccountDetailsPresenter:
         transfer_type: str
         date: str
         transfer_volume: str
+        is_debit_transfer: bool
         peer_name: str
         peer_type_icon: str
 
@@ -59,22 +65,23 @@ class ShowPRDAccountDetailsPresenter:
             ],
         )
 
-    def _create_info(
-        self, transfer: show_prd_account_details.TransferInfo
-    ) -> TransferInfo:
+    def _create_info(self, transfer: AccountTransfer) -> TransferInfo:
         return self.TransferInfo(
             transfer_type=self._get_transfer_type(transfer),
             date=self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
             ),
             transfer_volume=str(round(transfer.volume, 2)),
-            peer_name=self._get_peer_name(transfer.peer),
-            peer_type_icon=self._get_peer_type_icon(transfer.peer),
+            is_debit_transfer=transfer.is_debit_transfer,
+            peer_name=self._get_transfer_party_name(
+                transfer.transfer_party, transfer.debtor_equals_creditor
+            ),
+            peer_type_icon=self._get_transfer_party_type_icon(
+                transfer.transfer_party, transfer.debtor_equals_creditor
+            ),
         )
 
-    def _get_transfer_type(
-        self, transfer: show_prd_account_details.TransferInfo
-    ) -> str:
+    def _get_transfer_type(self, transfer: AccountTransfer) -> str:
         match transfer.type:
             case TransferType.credit_p | TransferType.credit_r | TransferType.credit_a:
                 return self.translator.gettext("Debit expected sales")
@@ -90,40 +97,30 @@ class ShowPRDAccountDetailsPresenter:
             ):
                 return self.translator.gettext("Cooperation compensation")
             case _:
-                raise ValueError(f"Unknown transfer type: {transfer.type}")
+                return "Unknown transfer type"
 
-    def _get_peer_type_icon(
-        self,
-        peer: (
-            show_prd_account_details.MemberPeer
-            | show_prd_account_details.CompanyPeer
-            | show_prd_account_details.CooperationPeer
-            | None
-        ),
+    def _get_transfer_party_type_icon(
+        self, transfer_party: TransferParty, debtor_equals_creditor: bool
     ) -> str:
-        if isinstance(peer, show_prd_account_details.MemberPeer):
-            return "user"
-        elif isinstance(peer, show_prd_account_details.CompanyPeer):
-            return "industry"
-        elif isinstance(peer, show_prd_account_details.CooperationPeer):
-            return "hands-helping"
-        else:
+        if debtor_equals_creditor:
             return ""
+        match transfer_party.type.name:
+            case "member":
+                return "user"
+            case "company":
+                return "industry"
+            case "cooperation":
+                return "hands-helping"
+            case _:
+                return ""
 
-    def _get_peer_name(
-        self,
-        peer: (
-            show_prd_account_details.MemberPeer
-            | show_prd_account_details.CompanyPeer
-            | show_prd_account_details.CooperationPeer
-            | None
-        ),
+    def _get_transfer_party_name(
+        self, transfer_party: TransferParty, debtor_equals_creditor: bool
     ) -> str:
-        if isinstance(peer, show_prd_account_details.MemberPeer):
+        if debtor_equals_creditor:
+            return ""
+        name = transfer_party.name
+        if name is ANONYMIZED_STR:
             return self.translator.gettext("Anonymous worker")
-        elif isinstance(peer, show_prd_account_details.CompanyPeer):
-            return peer.name
-        elif isinstance(peer, show_prd_account_details.CooperationPeer):
-            return peer.name
-        else:
-            return ""
+        assert isinstance(name, str)
+        return name
