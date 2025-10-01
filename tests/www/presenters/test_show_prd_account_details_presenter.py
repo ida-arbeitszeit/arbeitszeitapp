@@ -153,7 +153,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == self.translator.gettext(
+        assert view_model.transfers[0].party_name == self.translator.gettext(
             "Anonymous worker"
         )
 
@@ -171,7 +171,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == expected_name
+        assert view_model.transfers[0].party_name == expected_name
 
     def test_that_name_of_other_party_is_empty_string_if_company_is_debtor_and_creditor(
         self,
@@ -180,7 +180,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             transfers=[self._get_transfer_info(debtor_equals_creditor=True)]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == ""
+        assert view_model.transfers[0].party_name == ""
 
     def test_that_icon_of_other_party_is_empty_string_if_company_is_debtor_and_creditor(
         self,
@@ -189,7 +189,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             transfers=[self._get_transfer_info(debtor_equals_creditor=True)]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == ""
+        assert view_model.transfers[0].party_icon == ""
 
     @parameterized.expand(
         [
@@ -213,7 +213,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == expected_icon
+        assert view_model.transfers[0].party_icon == expected_icon
 
     @parameterized.expand([(True,), (False,)])
     def test_that_debit_transfer_are_shown_as_such(

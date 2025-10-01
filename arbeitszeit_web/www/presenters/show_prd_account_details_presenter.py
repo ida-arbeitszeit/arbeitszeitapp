@@ -23,8 +23,8 @@ class ShowPRDAccountDetailsPresenter:
         date: str
         transfer_volume: str
         is_debit_transfer: bool
-        peer_name: str
-        peer_type_icon: str
+        party_name: str
+        party_icon: str
 
     @dataclass
     class ViewModel:
@@ -73,10 +73,10 @@ class ShowPRDAccountDetailsPresenter:
             ),
             transfer_volume=str(round(transfer.volume, 2)),
             is_debit_transfer=transfer.is_debit_transfer,
-            peer_name=self._get_transfer_party_name(
+            party_name=self._get_transfer_party_name(
                 transfer.transfer_party, transfer.debtor_equals_creditor
             ),
-            peer_type_icon=self._get_transfer_party_type_icon(
+            party_icon=self._get_transfer_party_type_icon(
                 transfer.transfer_party, transfer.debtor_equals_creditor
             ),
         )

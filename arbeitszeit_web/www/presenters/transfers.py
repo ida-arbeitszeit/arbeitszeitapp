@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from arbeitszeit.services.account_details import AccountTransfer
+from arbeitszeit.anonymization import ANONYMIZED_STR
+from arbeitszeit.services.account_details import AccountTransfer, TransferParty
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
@@ -12,6 +13,8 @@ class TransferInfo:
     date: str
     transfer_volume: str
     is_debit_transfer: bool
+    party_name: str
+    party_icon: str
 
 
 @dataclass
@@ -24,7 +27,7 @@ class TransferPresenter:
 
     def _create_info(self, transfer: AccountTransfer) -> TransferInfo:
         return TransferInfo(
-            transfer_type=transfer_description_from_transfer_type(
+            transfer_type=description_from_transfer_type(
                 self.translator, transfer.type
             ),
             date=self.datetime_formatter.format_datetime(
@@ -32,10 +35,44 @@ class TransferPresenter:
             ),
             transfer_volume=str(round(transfer.volume, 2)),
             is_debit_transfer=transfer.is_debit_transfer,
+            party_name=self._get_transfer_party_name(
+                transfer.transfer_party, transfer.debtor_equals_creditor
+            ),
+            party_icon=self._get_transfer_party_type_icon(
+                transfer.transfer_party, transfer.debtor_equals_creditor
+            ),
         )
 
+    def _get_transfer_party_type_icon(
+        self, transfer_party: TransferParty, debtor_equals_creditor: bool
+    ) -> str:
+        if debtor_equals_creditor:
+            return ""
+        match transfer_party.type.name:
+            case "member":
+                return "user"
+            case "company":
+                return "industry"
+            case "cooperation":
+                return "hands-helping"
+            case _:
+                return ""
 
-def transfer_description_from_transfer_type(
+    def _get_transfer_party_name(
+        self, transfer_party: TransferParty, debtor_equals_creditor: bool
+    ) -> str:
+        if debtor_equals_creditor:
+            return ""
+        name = transfer_party.name
+        if name is ANONYMIZED_STR:
+            return self.translator.gettext("Anonymous worker")
+        assert isinstance(name, str)
+        if name == "Social Accounting":
+            name = self.translator.gettext(name)
+        return name
+
+
+def description_from_transfer_type(
     translator: Translator, transfer_type: TransferType
 ) -> str:
     match transfer_type.name:

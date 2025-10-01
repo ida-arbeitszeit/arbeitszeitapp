@@ -11,7 +11,7 @@ from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 from arbeitszeit_web.www.presenters.transfers import (
-    transfer_description_from_transfer_type,
+    description_from_transfer_type,
 )
 
 
@@ -61,7 +61,7 @@ class ListTransfersPresenter:
         rows = [
             ResultTableRow(
                 date=self._format_date(transfer.date),
-                transfer_type=transfer_description_from_transfer_type(
+                transfer_type=description_from_transfer_type(
                     self.translator, transfer.transfer_type
                 ),
                 debit_account=(

@@ -136,6 +136,26 @@ class TestPresenter(BaseTestCase):
             self.translator.gettext("Contribution to public sector"),
         )
 
+    def test_that_transfer_party_name_is_translated_if_it_is_the_name_of_social_accounting(
+        self,
+    ) -> None:
+        nontranslated_social_accounting_name = "Social Accounting"
+        response = self.get_interactor_response(
+            [
+                self.get_transfer(
+                    transfer_party=TransferParty(
+                        id=uuid4(),
+                        name=nontranslated_social_accounting_name,
+                        type=TransferPartyType.social_accounting,
+                    )
+                )
+            ]
+        )
+        view_model = self.presenter.present_member_account(response)
+        assert view_model.transfers[0].party_name == self.translator.gettext(
+            nontranslated_social_accounting_name
+        )
+
     def get_interactor_response(
         self, transfers: list[AccountTransfer], balance: Optional[Decimal] = None
     ) -> GetMemberAccountResponse:
@@ -149,6 +169,7 @@ class TestPresenter(BaseTestCase):
         transfer_volume: Optional[Decimal] = None,
         type: Optional[TransferType] = None,
         is_debit_transfer: bool = False,
+        transfer_party: Optional[TransferParty] = None,
     ) -> AccountTransfer:
         if date is None:
             date = self.datetime_service.now()
@@ -156,13 +177,15 @@ class TestPresenter(BaseTestCase):
             transfer_volume = Decimal("20.006")
         if type is None:
             type = TransferType.work_certificates
+        if transfer_party is None:
+            transfer_party = TransferParty(
+                id=uuid4(), name="Some party name", type=TransferPartyType.member
+            )
         return AccountTransfer(
             date=date,
             volume=transfer_volume,
             type=type,
             is_debit_transfer=is_debit_transfer,
-            transfer_party=TransferParty(
-                id=uuid4(), name="Some party name", type=TransferPartyType.member
-            ),
+            transfer_party=transfer_party,
             debtor_equals_creditor=False,
         )

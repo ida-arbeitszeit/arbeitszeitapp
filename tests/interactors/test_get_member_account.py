@@ -144,7 +144,7 @@ class GetMemberAccountTests(BaseTestCase):
         assert transfer.volume == Decimal(8.5)
         assert transfer.type == TransferType.work_certificates
 
-    def test_that_correct_peer_name_info_is_generated_in_correct_order_after_several_transfers_of_different_kind(
+    def test_that_correct_party_name_info_is_generated_in_correct_order_after_several_transfers_of_different_kind(
         self,
     ) -> None:
         company1_name = "test company 1"
