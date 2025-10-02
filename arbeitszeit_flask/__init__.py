@@ -113,18 +113,25 @@ def create_app(
                     return db.session.query(Accountant).get(user_id)
 
         # register blueprints
-        from . import accountant, company, member, user
         from .api import blueprint as api_blueprint
-        from .auth import routes as auth_routes
         from .context_processors import add_template_variables
         from .plots import routes as plots_routes
+        from .routes import accountant as accountant_routes
+        from .routes import company as company_routes
+        from .routes import member as member_routes
+        from .routes import user as user_routes
+        from .routes.auth import routes as auth_routes
 
         app.register_blueprint(auth_routes.auth)
         app.register_blueprint(plots_routes.plots)
-        app.register_blueprint(company.blueprint.main_company, url_prefix="/company")
-        app.register_blueprint(member.blueprint.main_member, url_prefix="/member")
-        app.register_blueprint(accountant.blueprint.main_accountant)
-        app.register_blueprint(user.blueprint, url_prefix="/user")
+        app.register_blueprint(
+            company_routes.blueprint.main_company, url_prefix="/company"
+        )
+        app.register_blueprint(
+            member_routes.blueprint.main_member, url_prefix="/member"
+        )
+        app.register_blueprint(accountant_routes.blueprint.main_accountant)
+        app.register_blueprint(user_routes.blueprint, url_prefix="/user")
         app.register_blueprint(api_blueprint)
         app.context_processor(add_template_variables)
 
