@@ -7,7 +7,12 @@ from parameterized import parameterized
 from arbeitszeit.interactors.show_p_account_details import (
     ShowPAccountDetailsInteractor as Interactor,
 )
-from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_p_account_details_presenter import (
     ShowPAccountDetailsPresenter,
@@ -40,9 +45,6 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         assert len(view_model.transfers) == 1
         view_model_transfer = view_model.transfers[0]
         self.assertEqual(
-            view_model_transfer.transfer_type, self.translator.gettext("Credit")
-        )
-        self.assertEqual(
             view_model_transfer.date,
             self.datetime_formatter.format_datetime(
                 date=transfer.date, fmt="%d.%m.%Y %H:%M"
@@ -50,6 +52,28 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         )
         self.assertEqual(
             view_model_transfer.transfer_volume, str(round(transfer.volume, 2))
+        )
+
+    @parameterized.expand(
+        [
+            (
+                TransferType.credit_p,
+                "Planned fixed means of production",
+            ),
+            (
+                TransferType.productive_consumption_p,
+                "Productive consumption of fixed means of production",
+            ),
+        ]
+    )
+    def test_that_type_of_transfer_is_converted_into_correct_string(
+        self, transfer_type: TransferType, expected_string: str
+    ) -> None:
+        transfer = self.get_transfer_info(type=transfer_type)
+        response = self.get_interactor_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        assert view_model.transfers[0].transfer_type == (
+            self.translator.gettext(expected_string)
         )
 
     @parameterized.expand([(True,), (False,)])
@@ -106,7 +130,16 @@ class ShowPAccountDetailsPresenterTests(BaseTestCase):
         is_debit_transfer: bool = False,
     ) -> AccountTransfer:
         return AccountTransfer(
-            type=type, date=date, volume=volume, is_debit_transfer=is_debit_transfer
+            type=type,
+            date=date,
+            volume=volume,
+            is_debit_transfer=is_debit_transfer,
+            debtor_equals_creditor=False,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
         )
 
     def get_interactor_response(

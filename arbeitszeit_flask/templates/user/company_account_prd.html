@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+
 {% block navbar_start %}
 {% from 'macros/navbar.html' import navbar %}
 {{ navbar(view_model.navbar_items) }}
 {% endblock %}
 
 {% block content %}
+{% from 'macros/transfers.html' import transfer_with_party %}
 <section class="section columns has-text-centered">
     <div class="column"></div>
     <div class="column is-two-thirds">
@@ -29,27 +31,7 @@
         <div class="section has-text-left">
             {% if view_model.show_transfers %}
             {% for transfer in view_model.transfers %}
-            <article class="media">
-                <div class="media-left">
-                    <p class="pt-1">
-                        <small class="has-text-weight-semibold">{{ transfer.date }}</small><br>
-                    </p>
-                </div>
-                <div class="media-content">
-                    <div class="content">
-                        <p>
-                            <strong class="is-size-5">
-                                {{ transfer.transfer_type }}
-                            </strong><span class="icon">{{ transfer.peer_type_icon|icon }}</span>&nbsp;<span>{{ transfer.peer_name }}</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="media-right">
-                    <p class="is-size-5 pt-1 {{ 'has-text-success' if transfer.transfer_volume|float >= 0 else 'has-text-danger' }}">
-                        {{ transfer.transfer_volume }}
-                    </p>
-                </div>
-            </article>
+                {{ transfer_with_party(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer, transfer.party_icon, transfer.party_name) }}
             {% endfor %}
             {% endif %}
         </div>

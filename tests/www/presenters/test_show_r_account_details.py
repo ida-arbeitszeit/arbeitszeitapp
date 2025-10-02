@@ -6,7 +6,12 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import show_r_account_details
-from arbeitszeit.services.account_details import PlotDetails
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_r_account_details_presenter import (
     ShowRAccountDetailsPresenter,
@@ -46,11 +51,32 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         assert len(view_model.transfers) == 1
         assert view_model.account_balance == str(round(EXPECTED_ACCOUNT_BALANCE, 2))
         transfer = view_model.transfers[0]
-        assert transfer.transfer_type == self.trans.gettext("Credit")
         assert transfer.date == self.datetime_formatter.format_datetime(
             date=EXPECTED_DATE, fmt="%d.%m.%Y %H:%M"
         )
         assert transfer.transfer_volume == str(round(EXPECTED_VOLUME, 2))
+
+    @parameterized.expand(
+        [
+            (
+                TransferType.credit_r,
+                "Planned liquid means of production",
+            ),
+            (
+                TransferType.productive_consumption_r,
+                "Productive consumption of liquid means of production",
+            ),
+        ]
+    )
+    def test_that_type_of_transfer_is_converted_into_correct_string(
+        self, transfer_type: TransferType, expected_string: str
+    ) -> None:
+        transfer = self.get_transfer_info(type=transfer_type)
+        response = self.get_interactor_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        assert view_model.transfers[0].transfer_type == (
+            self.translator.gettext(expected_string)
+        )
 
     @parameterized.expand([(True,), (False,)])
     def test_that_debit_transfer_are_shown_as_such(
@@ -105,14 +131,20 @@ class ShowRAccountDetailsPresenterTests(BaseTestCase):
         date: datetime | None = None,
         volume=Decimal(10),
         is_debit: bool = False,
-    ) -> show_r_account_details.AccountTransfer:
+    ) -> AccountTransfer:
         if date is None:
             date = datetime_min_utc()
-        return show_r_account_details.AccountTransfer(
+        return AccountTransfer(
             type=type,
             date=date,
             volume=volume,
             is_debit_transfer=is_debit,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
+            debtor_equals_creditor=False,
         )
 
     def get_interactor_response(

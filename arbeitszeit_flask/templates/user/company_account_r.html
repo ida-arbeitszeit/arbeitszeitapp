@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transfers.html' import basic_transfer %}
+{% from 'macros/transfers.html' import transfer_with_party %}
 
 <section class="section has-text-centered columns">
     <div class="column"></div>
@@ -31,7 +31,7 @@
         <div class="section has-text-left">
             {% if view_model.transfers is defined and view_model.transfers|length %}
             {% for transfer in view_model.transfers %}
-            {{ basic_transfer(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer) }}
+                {{ transfer_with_party(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer, transfer.party_icon, transfer.party_name) }}
             {% endfor %}
             {% endif %}
         </div>

@@ -5,7 +5,12 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from arbeitszeit.interactors import show_a_account_details
-from arbeitszeit.services.account_details import AccountTransfer, PlotDetails
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    PlotDetails,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_a_account_details_presenter import (
     ShowAAccountDetailsPresenter,
@@ -33,7 +38,6 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
-        self.assertEqual(trans.transfer_type, self.translator.gettext("Credit"))
         self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
@@ -66,9 +70,9 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
 
     @parameterized.expand(
         [
-            (TransferType.credit_a, "Credit"),
-            (TransferType.credit_public_a, "Credit"),
-            (TransferType.work_certificates, "Payment"),
+            (TransferType.credit_a, "Planned labour"),
+            (TransferType.credit_public_a, "Planned labour (public service)"),
+            (TransferType.work_certificates, "Work certificates"),
         ]
     )
     def test_presenter_shows_correct_string_for_each_transfer_type(
@@ -122,7 +126,18 @@ class ShowAAccountDetailsPresenterTests(BaseTestCase):
     ) -> AccountTransfer:
         if date is None:
             date = self.datetime_service.now()
-        return AccountTransfer(transfer_type, date, transfer_volume, is_debit_transfer)
+        return AccountTransfer(
+            transfer_type,
+            date,
+            transfer_volume,
+            is_debit_transfer,
+            transfer_party=TransferParty(
+                type=TransferPartyType.company,
+                id=uuid4(),
+                name="Some counter party name",
+            ),
+            debtor_equals_creditor=False,
+        )
 
     def _interactor_response(
         self,

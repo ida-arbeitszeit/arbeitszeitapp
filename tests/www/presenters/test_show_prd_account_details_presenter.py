@@ -4,7 +4,13 @@ from uuid import UUID, uuid4
 
 from parameterized import parameterized
 
+from arbeitszeit.anonymization import ANONYMIZED_STR
 from arbeitszeit.interactors import show_prd_account_details
+from arbeitszeit.services.account_details import (
+    AccountTransfer,
+    TransferParty,
+    TransferPartyType,
+)
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.www.presenters.show_prd_account_details_presenter import (
     ShowPRDAccountDetailsPresenter,
@@ -28,21 +34,13 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         view_model = self.presenter.present(response)
         self.assertFalse(view_model.show_transfers)
 
-    @parameterized.expand(
-        [
-            (TransferType.credit_p),
-            (TransferType.credit_r),
-            (TransferType.credit_a),
-        ]
-    )
     def test_return_correct_info_when_one_transfer_of_granting_credit_took_place(
         self,
-        transfer_type: TransferType,
     ) -> None:
         ACCOUNT_BALANCE = Decimal(100.007)
         TRANSFER_VOLUME = Decimal(5.3)
         transfer = self._get_transfer_info(
-            transfer_type=transfer_type,
+            transfer_type=TransferType.credit_p,
             volume=TRANSFER_VOLUME,
         )
         response = self._interactor_response(
@@ -53,9 +51,6 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Debit expected sales")
-        )
-        self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
                 date=transfer.date,
@@ -63,6 +58,26 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
             ),
         )
         self.assertEqual(trans.transfer_volume, str(round(TRANSFER_VOLUME, 2)))
+
+    @parameterized.expand(
+        [
+            (TransferType.credit_p, "Planned fixed means of production"),
+            (TransferType.credit_r, "Planned liquid means of production"),
+            (TransferType.credit_a, "Planned labour"),
+        ]
+    )
+    def test_that_transfer_type_is_converted_into_corrected_description(
+        self, transfer_type: TransferType, expected_description: str
+    ) -> None:
+        transfer = self._get_transfer_info(
+            transfer_type=transfer_type,
+        )
+        response = self._interactor_response(transfers=[transfer])
+        view_model = self.presenter.present(response)
+        self.assertEqual(
+            view_model.transfers[0].transfer_type,
+            self.translator.gettext(expected_description),
+        )
 
     def test_return_correct_info_when_one_private_consumption_took_place(
         self,
@@ -80,7 +95,9 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         self.assertEqual(view_model.account_balance, str(round(ACCOUNT_BALANCE, 2)))
         trans = view_model.transfers[0]
-        self.assertEqual(trans.transfer_type, self.translator.gettext("Sale"))
+        self.assertEqual(
+            trans.transfer_type, self.translator.gettext("Private consumption")
+        )
         self.assertEqual(
             trans.date,
             self.datetime_formatter.format_datetime(
@@ -101,7 +118,8 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type,
+            self.translator.gettext("Compensation for overproductive planning"),
         )
 
     def test_return_correct_transfer_type_info_shown_when_one_transfer_of_compensation_for_company_took_place(
@@ -115,7 +133,8 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(len(view_model.transfers), 1)
         trans = view_model.transfers[0]
         self.assertEqual(
-            trans.transfer_type, self.translator.gettext("Cooperation compensation")
+            trans.transfer_type,
+            self.translator.gettext("Compensation for underproductive planning"),
         )
 
     def test_return_two_transfers_when_two_transfers_took_place(self) -> None:
@@ -134,150 +153,91 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
         self.assertTrue(view_model.plot_url)
         self.assertIn(str(response.company_id), view_model.plot_url)
 
-    def test_name_of_peer_is_shown_if_transfer_is_productive_consumption(
+    def test_name_of_other_party_is_shown_correctly_if_party_name_is_anonymized(
         self,
     ) -> None:
-        expected_user_name = "some user name"
         response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
-                    transfer_type=TransferType.productive_consumption_p,
-                    peer=show_prd_account_details.CompanyPeer(
-                        id=uuid4(), name=expected_user_name
+                    transfer_party=TransferParty(
+                        type=TransferPartyType.company, id=uuid4(), name=ANONYMIZED_STR
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == expected_user_name
-
-    def test_name_of_peer_is_anonymized_if_transfer_is_private_consumption(
-        self,
-    ) -> None:
-        expected_user_name = self.translator.gettext("Anonymous worker")
-        response = self._interactor_response(
-            transfers=[
-                self._get_transfer_info(
-                    transfer_type=TransferType.private_consumption,
-                    peer=show_prd_account_details.MemberPeer(),
-                )
-            ]
+        assert view_model.transfers[0].party_name == self.translator.gettext(
+            "Anonymous worker"
         )
-        view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == expected_user_name
 
-    def test_name_of_peer_is_shown_if_transfer_is_compensation_for_coop(
+    def test_name_of_other_party_is_shown_correctly_if_party_name_is_not_anonymized(
         self,
     ) -> None:
-        expected_coop_name = "some coop name"
+        expected_name = "Some party name"
         response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
-                    transfer_type=TransferType.compensation_for_coop,
-                    peer=show_prd_account_details.CooperationPeer(
-                        id=uuid4(), name=expected_coop_name
+                    transfer_party=TransferParty(
+                        type=TransferPartyType.company, id=uuid4(), name=expected_name
                     ),
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == expected_coop_name
+        assert view_model.transfers[0].party_name == expected_name
 
-    def test_name_of_peer_is_shown_if_transfer_is_compensation_for_company(
-        self,
-    ) -> None:
-        expected_company_name = "some company name"
-        response = self._interactor_response(
-            transfers=[
-                self._get_transfer_info(
-                    transfer_type=TransferType.compensation_for_company,
-                    peer=show_prd_account_details.CompanyPeer(
-                        id=uuid4(), name=expected_company_name
-                    ),
-                )
-            ]
-        )
-        view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == expected_company_name
-
-    def test_member_peer_icon_is_shown_if_transfer_was_with_member(
+    def test_that_name_of_other_party_is_empty_string_if_company_is_debtor_and_creditor(
         self,
     ) -> None:
         response = self._interactor_response(
-            transfers=[
-                self._get_transfer_info(
-                    transfer_type=TransferType.private_consumption,
-                    peer=show_prd_account_details.MemberPeer(),
-                )
-            ]
+            transfers=[self._get_transfer_info(debtor_equals_creditor=True)]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == "user"
+        assert view_model.transfers[0].party_name == ""
 
-    def test_company_peer_icon_is_shown_if_transfer_was_with_company(
+    def test_that_icon_of_other_party_is_empty_string_if_company_is_debtor_and_creditor(
         self,
     ) -> None:
         response = self._interactor_response(
-            transfers=[
-                self._get_transfer_info(
-                    transfer_type=TransferType.productive_consumption_p,
-                    peer=show_prd_account_details.CompanyPeer(
-                        id=uuid4(), name="company name"
-                    ),
-                )
-            ]
+            transfers=[self._get_transfer_info(debtor_equals_creditor=True)]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == "industry"
+        assert view_model.transfers[0].party_icon == ""
 
     @parameterized.expand(
         [
-            (TransferType.compensation_for_company),
-            (TransferType.compensation_for_coop),
+            (TransferPartyType.member, "user"),
+            (TransferPartyType.company, "industry"),
+            (TransferPartyType.cooperation, "hands-helping"),
         ]
     )
-    def test_peer_type_icon_is_hands_helping_if_transfer_was_with_cooperation(
-        self,
-        transfer_type: TransferType,
+    def test_that_correct_icon_is_shown_per_transfer_party_type(
+        self, transfer_party_type: TransferPartyType, expected_icon: str
     ) -> None:
         response = self._interactor_response(
             transfers=[
                 self._get_transfer_info(
-                    transfer_type=transfer_type,
-                    peer=show_prd_account_details.CooperationPeer(
-                        id=uuid4(), name="coop name"
-                    ),
+                    transfer_party=TransferParty(
+                        id=uuid4(),
+                        name="Some party name",
+                        type=transfer_party_type,
+                    )
                 )
             ]
         )
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == "hands-helping"
+        assert view_model.transfers[0].party_icon == expected_icon
 
-    def test_peer_type_icon_is_empty_string_if_peer_is_none(
+    @parameterized.expand([(True,), (False,)])
+    def test_that_debit_transfer_are_shown_as_such(
         self,
+        is_debit: bool,
     ) -> None:
-        transfer = show_prd_account_details.TransferInfo(
-            type=TransferType.credit_p,
-            date=datetime_min_utc(),
-            volume=Decimal(10.007),
-            peer=None,
+        response = self._interactor_response(
+            transfers=[self._get_transfer_info(is_debit_transfer=is_debit)]
         )
-        response = self._interactor_response(transfers=[transfer])
         view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_type_icon == ""
-
-    def test_name_of_peer_is_empty_string_if_peer_is_none(
-        self,
-    ) -> None:
-        transfer = show_prd_account_details.TransferInfo(
-            type=TransferType.credit_p,
-            date=datetime_min_utc(),
-            volume=Decimal(10.007),
-            peer=None,
-        )
-        response = self._interactor_response(transfers=[transfer])
-        view_model = self.presenter.present(response)
-        assert view_model.transfers[0].peer_name == ""
+        assert view_model.transfers[0].is_debit_transfer == is_debit
 
     def test_view_model_contains_two_navbar_items(self) -> None:
         response = self._interactor_response()
@@ -303,7 +263,7 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
     def _interactor_response(
         self,
         company_id: UUID = uuid4(),
-        transfers: List[show_prd_account_details.TransferInfo] | None = None,
+        transfers: List[AccountTransfer] | None = None,
         account_balance: Decimal = Decimal(0),
         plot: show_prd_account_details.PlotDetails | None = None,
     ) -> show_prd_account_details.Response:
@@ -317,22 +277,23 @@ class ShowPRDAccountDetailsPresenterTests(BaseTestCase):
 
     def _get_transfer_info(
         self,
-        transfer_type: TransferType | None = None,
-        peer: (
-            show_prd_account_details.MemberPeer
-            | show_prd_account_details.CompanyPeer
-            | show_prd_account_details.CooperationPeer
-            | None
-        ) = None,
+        transfer_party: TransferParty | None = None,
         volume: Decimal = Decimal(10.007),
-    ) -> show_prd_account_details.TransferInfo:
-        if transfer_type is None:
-            transfer_type = TransferType.private_consumption
-        if peer is None:
-            peer = show_prd_account_details.MemberPeer()
-        return show_prd_account_details.TransferInfo(
+        transfer_type: TransferType = TransferType.private_consumption,
+        debtor_equals_creditor: bool = False,
+        is_debit_transfer: bool = False,
+    ) -> AccountTransfer:
+        if transfer_party is None:
+            transfer_party = TransferParty(
+                id=uuid4(),
+                name="Some party name",
+                type=TransferPartyType.company,
+            )
+        return AccountTransfer(
             type=transfer_type,
             date=datetime_min_utc(),
             volume=volume,
-            peer=peer,
+            is_debit_transfer=is_debit_transfer,
+            transfer_party=transfer_party,
+            debtor_equals_creditor=debtor_equals_creditor,
         )

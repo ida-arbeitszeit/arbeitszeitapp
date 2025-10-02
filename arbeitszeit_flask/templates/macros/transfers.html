@@ -1,5 +1,4 @@
-<!--Used in company's p, r, a accounts-->
-{% macro basic_transfer(date, type, volume, is_debit_transfer) %}
+{% macro transfer_with_party(date, type, volume, is_debit_transfer, party_icon, party_name) %}
 <article class="media">
     <div class="media-left">
         <p class="pt-1">
@@ -12,6 +11,10 @@
                 <strong class="is-size-5">
                     {{ type }}
                 </strong>
+                {% if party_name %}
+                <br>
+                <span class="icon">{{ party_icon|icon }}</span>&nbsp;<span>{{ party_name }}</span>
+                {% endif %}
             </p>
         </div>
     </div>

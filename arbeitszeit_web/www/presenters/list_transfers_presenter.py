@@ -5,12 +5,14 @@ from uuid import UUID
 
 from arbeitszeit.interactors.list_transfers import AccountOwnerType
 from arbeitszeit.interactors.list_transfers import Response as InteractorResponse
-from arbeitszeit.transfers import TransferType
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.pagination import Pagination, Paginator
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
+from arbeitszeit_web.www.presenters.transfers import (
+    description_from_transfer_type,
+)
 
 
 @dataclass
@@ -59,7 +61,9 @@ class ListTransfersPresenter:
         rows = [
             ResultTableRow(
                 date=self._format_date(transfer.date),
-                transfer_type=self._transform_transfer_type(transfer.transfer_type),
+                transfer_type=description_from_transfer_type(
+                    self.translator, transfer.transfer_type
+                ),
                 debit_account=(
                     str(transfer.debit_account) if transfer.debit_account else ""
                 ),
@@ -100,49 +104,6 @@ class ListTransfersPresenter:
             date,
             fmt="%d.%m.%Y %H:%M",
         )
-
-    def _transform_transfer_type(self, transfer_type: TransferType) -> str:
-        match transfer_type.name:
-            case "credit_p":
-                return self.translator.gettext("Credit for fixed means of production")
-            case "credit_r":
-                return self.translator.gettext("Credit for liquid means of production")
-            case "credit_a":
-                return self.translator.gettext("Credit for labour")
-            case "credit_public_p":
-                return self.translator.gettext(
-                    "Credit for fixed means of production (public service)"
-                )
-            case "credit_public_r":
-                return self.translator.gettext(
-                    "Credit for liquid means of production (public service)"
-                )
-            case "credit_public_a":
-                return self.translator.gettext("Credit for labour (public service)")
-            case "private_consumption":
-                return self.translator.gettext("Private consumption")
-            case "productive_consumption_p":
-                return self.translator.gettext(
-                    "Productive consumption of fixed means of production"
-                )
-            case "productive_consumption_r":
-                return self.translator.gettext(
-                    "Productive consumption of liquid means of production"
-                )
-            case "compensation_for_coop":
-                return self.translator.gettext(
-                    "Compensation for overproductive planning"
-                )
-            case "compensation_for_company":
-                return self.translator.gettext(
-                    "Compensation for underproductive planning"
-                )
-            case "work_certificates":
-                return self.translator.gettext("Work certificates")
-            case "taxes":
-                return self.translator.gettext("Contribution to public sector")
-            case _:
-                raise ValueError(f"Unknown transfer type: {transfer_type}")
 
     def _convert_account_owner_name(
         self, name: str | None, owner_type: AccountOwnerType
