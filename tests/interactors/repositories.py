@@ -1241,33 +1241,6 @@ class AccountResult(QueryResultImpl[Account]):
             lambda account: account in self.database.l_accounts
         )
 
-    def joined_with_owner(
-        self,
-    ) -> QueryResultImpl[Tuple[Account, records.AccountOwner]]:
-        def items() -> Iterable[Tuple[Account, records.AccountOwner]]:
-            for account in self.items():
-                if account.id == self.database.social_accounting.account_psf:
-                    yield account, self.database.social_accounting
-                for member in self.database.members.values():
-                    if account.id == member.account:
-                        yield account, member
-                for cooperation in self.database.cooperations.values():
-                    if account.id == cooperation.account:
-                        yield account, cooperation
-                for company in self.database.companies.values():
-                    if account.id in [
-                        company.means_account,
-                        company.raw_material_account,
-                        company.work_account,
-                        company.product_account,
-                    ]:
-                        yield account, company
-
-        return QueryResultImpl(
-            items=items,
-            database=self.database,
-        )
-
     def joined_with_balance(self) -> QueryResultImpl[Tuple[Account, Decimal]]:
         def items() -> Iterable[Tuple[Account, Decimal]]:
             for account in self.items():
