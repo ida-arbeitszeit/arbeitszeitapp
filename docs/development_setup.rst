@@ -14,7 +14,7 @@ The extensive test coverage allows us to work on the code without the
 constant fear that it might be broken because of one of our changes.
 
 The architecture of the program is modeled after the principles of
-Clean Code (Robert C. Martin, *Clean Code*, Pearson, 2008).  Here 
+Clean Architecture (Robert C. Martin, *Clean Architecture*, Pearson, 2018).  Here
 is a small overview of the most important
 directories in the source code.
 
@@ -23,6 +23,9 @@ directories in the source code.
     deciding whether your code belongs there is "Would my code still
     make sense if this app were a CLI application without a SQL
     database?"
+    Use case "interactors" implement the business logic. They make use of
+    the "Database Gateway" interface to persist and retrieve data. "Records"
+    are business-level data structures.
 
 ``arbeitszeit_web/``
     Contains the code for implementing the Web interface.  The code in
@@ -39,6 +42,13 @@ directories in the source code.
 ``tests/``
    Contains all the tests.  You should find at least one test for
    every line of code in the other directories in here.
+
+Here is a diagram that shows the main components of the application:
+
+  .. image:: images/components_overview.png
+    :alt: Overview of the main components of Arbeitszeitapp
+    :align: center
+    :width: 600px
 
 
 PostgreSQL Setup

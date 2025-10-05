@@ -3,7 +3,6 @@
 .DS_Store
 my_database_key.py
 *.pyc
-*.png
 .vscode/
 custom_settings.py
 
