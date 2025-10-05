@@ -41,6 +41,14 @@ class TransferResultTests(FlaskTestCase):
         code_values = [member.value for member in TransferType]
         assert set(db_values) == set(code_values)
 
+    def test_that_transfers_with_all_existing_transfer_types_can_be_created(
+        self,
+    ) -> None:
+        transfer_types = [t for t in TransferType]
+        for type_ in transfer_types:
+            transfer = self.transfer_generator.create_transfer(type=type_)
+            assert transfer.type == type_
+
 
 class WhereAccountIsDebtorTests(FlaskTestCase):
     def test_that_where_account_is_debtor_yields_none_if_debit_account_is_not_in_db(
