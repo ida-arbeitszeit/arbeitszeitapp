@@ -1112,41 +1112,6 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             lambda query: query.join(company, company.a_account == models.Account.id)
         )
 
-    def joined_with_owner(
-        self,
-    ) -> FlaskQueryResult[Tuple[records.Account, records.AccountOwner]]:
-        member = aliased(models.Member)
-        company = aliased(models.Company)
-        social_accounting = aliased(models.SocialAccounting)
-        cooperation = aliased(models.Cooperation)
-        query = (
-            self.query.join(member, member.account == models.Account.id, isouter=True)
-            .join(
-                company,
-                or_(
-                    company.p_account == models.Account.id,
-                    company.r_account == models.Account.id,
-                    company.a_account == models.Account.id,
-                    company.prd_account == models.Account.id,
-                ),
-                isouter=True,
-            )
-            .join(
-                social_accounting,
-                social_accounting.account_psf == models.Account.id,
-                isouter=True,
-            )
-            .join(cooperation, cooperation.account == models.Account.id, isouter=True)
-            .with_entities(
-                models.Account, member, company, social_accounting, cooperation
-            )
-        )
-        return FlaskQueryResult(
-            query=query,
-            mapper=self.map_account_and_owner,
-            db=self.db,
-        )
-
     def joined_with_balance(self) -> FlaskQueryResult[Tuple[records.Account, Decimal]]:
         from sqlalchemy import func, select
 
@@ -1191,25 +1156,6 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
     @classmethod
     def map_account_and_balance(cls, orm: Any) -> Tuple[records.Account, Decimal]:
         return DatabaseGatewayImpl.account_from_orm(orm[0]), orm[1] or Decimal(0)
-
-    @classmethod
-    def map_account_and_owner(
-        cls, orm: Any
-    ) -> Tuple[records.Account, records.AccountOwner]:
-        owner: records.AccountOwner
-        account, member, company, social_accounting, cooperation = orm
-        if member:
-            owner = DatabaseGatewayImpl.member_from_orm(member)
-        elif company:
-            owner = DatabaseGatewayImpl.company_from_orm(company)
-        elif social_accounting:
-            owner = AccountingRepository.social_accounting_from_orm(social_accounting)
-        else:
-            owner = DatabaseGatewayImpl.cooperation_from_orm(cooperation)
-        return (
-            DatabaseGatewayImpl.account_from_orm(account),
-            owner,
-        )
 
 
 class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption]):

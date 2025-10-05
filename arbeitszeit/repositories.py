@@ -374,10 +374,6 @@ class AccountResult(QueryResult[records.Account], Protocol):
 
     def that_are_labour_accounts(self) -> Self: ...
 
-    def joined_with_owner(
-        self,
-    ) -> QueryResult[Tuple[records.Account, records.AccountOwner]]: ...
-
     def joined_with_balance(self) -> QueryResult[Tuple[records.Account, Decimal]]: ...
 
 
