@@ -3,9 +3,6 @@ from enum import Enum
 
 class TransferType(Enum):
     """
-    Warning: These enum values map to database columns.
-    If you change them, you need to create a database migration.
-
     See https://arbeitszeitapp.readthedocs.io/en/latest/concepts.html for
     a documentation of the transfer types.
     """

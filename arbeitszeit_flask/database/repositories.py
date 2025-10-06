@@ -2394,6 +2394,25 @@ class DatabaseGatewayImpl:
         value: Decimal,
         type: TransferType,
     ) -> records.Transfer:
+        KNOWN_TRANSFER_TYPES = [
+            "credit_p",
+            "credit_r",
+            "credit_a",
+            "credit_public_p",
+            "credit_public_r",
+            "credit_public_a",
+            "private_consumption",
+            "productive_consumption_p",
+            "productive_consumption_r",
+            "compensation_for_coop",
+            "compensation_for_company",
+            "work_certificates",
+            "taxes",
+        ]
+        if type.value not in KNOWN_TRANSFER_TYPES:
+            raise ValueError(
+                f"Invalid transfer type: {type}. Check if you need to create a db migration for {type.value}. Then add it to the whitelist."
+            )
         transfer = models.Transfer(
             id=str(uuid4()),
             date=date,
