@@ -203,7 +203,7 @@ the command:
 
 .. code-block:: bash
 
-  coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web -m pytest && coverage html
+  coverage run -m pytest && coverage html
 
 It is possible to disable tests that require a PostgreSQL database to
 run via an environment variable:

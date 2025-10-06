@@ -18,7 +18,7 @@ class AnonymizedUUID:
 
     __slots__: tuple[str, ...] = ()
 
-    def __repr__(self) -> str:  # pragma: no cover - trivial
+    def __repr__(self) -> str:
         return "<ANONYMIZED_UUID>"
 
     def __bool__(self) -> bool:  # pragma: no cover - defensive
@@ -35,7 +35,7 @@ class AnonymizedStr:
 
     __slots__: tuple[str, ...] = ()
 
-    def __repr__(self) -> str:  # pragma: no cover - trivial
+    def __repr__(self) -> str:
         return "<ANONYMIZED_STR>"
 
     def __bool__(self) -> bool:  # pragma: no cover - defensive
