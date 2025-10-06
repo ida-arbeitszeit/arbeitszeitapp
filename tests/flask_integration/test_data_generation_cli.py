@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from tests.flask_integration.dev_cli import generate
+from arbeitszeit_development.dev_cli import generate
 from tests.flask_integration.flask import FlaskTestCase
 
 

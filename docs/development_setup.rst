@@ -125,9 +125,9 @@ when you enter the top-level directory of the repo.
 
 .. code-block:: bash
 
-  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
   export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
-  export FLASK_APP=tests.development_server:main
+  export FLASK_APP=arbeitszeit_development.development_server:main
   export FLASK_DEBUG=1
   
   export DEV_SECRET_KEY="my_secret_key"

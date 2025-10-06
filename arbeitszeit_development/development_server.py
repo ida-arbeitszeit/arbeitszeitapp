@@ -1,7 +1,7 @@
 from flask import Flask
 
+from arbeitszeit_development.dev_cli import generate
 from arbeitszeit_flask import create_app
-from tests.flask_integration.dev_cli import generate
 
 
 def main() -> Flask:
