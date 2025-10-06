@@ -125,15 +125,16 @@ when you enter the top-level directory of the repo.
 
 .. code-block:: bash
 
-  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
-  export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
   export FLASK_APP=arbeitszeit_development.development_server:main
-  export FLASK_DEBUG=1
-  
+  export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
   export DEV_SECRET_KEY="my_secret_key"
   export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
   export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
+  # Optionally, adjust the following variables:
+  # export ALLOWED_OVERDRAW_MEMBER=1000
+  # export DEFAULT_USER_TIMEZONE="Europe/Berlin"
 
 Development server
 ------------------
@@ -145,7 +146,7 @@ Before you start the development server for the first time, you need to run the
 database migrations via ``alembic upgrade head`` once.
 
 Afterwards, you can start the development server with ``flask
-run``.
+run --debug``.
 
 In the development app, you might want to sign up a company or a member. While doing this,
 you will be redirected to a site that asks to click a confirmation link provided in an e-mail. 
