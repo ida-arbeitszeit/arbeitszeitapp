@@ -312,14 +312,8 @@ Profiling
 ---------
 
 This project uses ``flask_profiler`` to provided a very basic
-graphical user interface for response times.  More profiling
-information is printed to ``stdout`` (the terminal) when detailed
-debugging is enabled. Run the following in the same terminal as where you
-start the development server to enable detailed profiling:
-
-.. code-block:: bash
-
-  export DEBUG_DETAILS=true
+graphical user interface for response times. You can access this interface
+at ``/profiling`` in the development server.
 
 
 Documentation

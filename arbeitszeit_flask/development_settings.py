@@ -1,7 +1,6 @@
 from os import environ
 
 PREFERRED_URL_SCHEME = "http"
-DEBUG_DETAILS = environ.get("DEBUG_DETAILS") in ("true", "True", "1", "t")
 TESTING = True
 SQLALCHEMY_DATABASE_URI = environ.get("ARBEITSZEITAPP_DEV_DB")
 SECRET_KEY = environ.get("DEV_SECRET_KEY")

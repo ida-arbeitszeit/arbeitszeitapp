@@ -1,7 +1,6 @@
 from os import environ
 
 FLASK_DEBUG = 0
-DEBUG_DETAILS = False
 TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_DATABASE_URI = environ.get(

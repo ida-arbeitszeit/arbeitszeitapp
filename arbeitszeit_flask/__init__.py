@@ -12,10 +12,7 @@ from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.mail_service import load_email_plugin
 from arbeitszeit_flask.migrations.auto_migrate import auto_migrate
-from arbeitszeit_flask.profiling import (  # type: ignore
-    initialize_flask_profiler,
-    show_profile_info,
-)
+from arbeitszeit_flask.profiling import initialize_flask_profiler  # type: ignore
 
 
 def load_configuration(app: Flask, configuration: Any = None) -> None:
@@ -134,9 +131,6 @@ def create_app(
         app.register_blueprint(user_routes.blueprint, url_prefix="/user")
         app.register_blueprint(api_blueprint)
         app.context_processor(add_template_variables)
-
-        if app.config["DEBUG_DETAILS"] == True:
-            show_profile_info(app)
 
         # The profiler needs to be initialized last because all the
         # routes to monitor need to present in the app at that point
