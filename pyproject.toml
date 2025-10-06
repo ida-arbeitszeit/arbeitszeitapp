@@ -62,13 +62,10 @@ module = [
     "arbeitszeit",
     "arbeitszeit_web",
     "arbeitszeit_flask",
+    "arbeitszeit_development",
     "tests"
 ]
 allow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = [ "arbeitszeit_flask.database.models" ]
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -76,15 +73,7 @@ module = [
     "flask_login",
     "flask_restx.*",
     "flask_wtf",
-    "matplotlib.*",
     "parameterized.*",
-    "sqlalchemy.*",
     "wtforms.*",
 ]
 ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
-    "sqlalchemy.*",
-]
-ignore_missing_imports = true
