@@ -180,7 +180,6 @@ The script uses ``black`` and
 formatting to a limited selection of paths.  You can add more paths by
 adding lines to ``.autoformattingrc``.
 
-
 We use type hints.  You can check the consistency of the type hints
 via the ``mypy`` command. Furthermore ``flake8`` is employed to
 prevent certain mistakes, such as unused imports or
@@ -198,22 +197,7 @@ You are encouraged to use the ``./run-checks`` command before you
 submit changes in a pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
-You can generate a code coverage report at ``htmlcov/index.html`` via
-the command:
-
-.. code-block:: bash
-
-  coverage run -m pytest && coverage html
-
-It is possible to disable tests that require a PostgreSQL database to
-run via an environment variable:
-
-.. code-block:: bash
-
-  DISABLED_TESTS="database_required" pytest
-
-Since running tests against the database is generally very slow, we
-recommend that you run only the tests for the part of the application 
+You can run only the tests for the part of the application 
 on which you are working.  For example, if you are working on the business 
 logic, you can use the following command to quickly run all the interactor 
 tests:
@@ -222,10 +206,19 @@ tests:
 
   pytest tests/interactors
 
-When you feel confident about your changes, and you want to run all the
-tests, you can do so by executing ``./run-checks``, which will run all
-tests that need to pass before your code reviewers can consider merging 
-your change into the main development branch.
+It is possible to disable tests that require a PostgreSQL database to
+run via an environment variable:
+
+.. code-block:: bash
+
+  DISABLED_TESTS="database_required" pytest
+
+You can generate a code coverage report at ``htmlcov/index.html`` via
+the command:
+
+.. code-block:: bash
+
+  coverage run -m pytest && coverage html
 
 
 Update Development Dependencies
