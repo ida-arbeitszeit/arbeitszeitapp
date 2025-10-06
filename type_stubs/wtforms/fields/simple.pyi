@@ -22,11 +22,7 @@ class BooleanField(Field):
     widget: Incomplete
     false_values: Incomplete
     def __init__(
-        self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        false_values: Incomplete | None = None,
-        **kwargs,
+        self, label=None, validators=None, false_values=None, **kwargs
     ) -> None: ...
     data: Incomplete
     def process_data(self, value) -> None: ...

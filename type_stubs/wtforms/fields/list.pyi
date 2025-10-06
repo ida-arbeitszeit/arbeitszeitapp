@@ -13,19 +13,17 @@ class FieldList(Field):
     def __init__(
         self,
         unbound_field,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
+        label=None,
+        validators=None,
         min_entries: int = 0,
-        max_entries: Incomplete | None = None,
+        max_entries=None,
         separator: str = "-",
         default=(),
         **kwargs,
     ) -> None: ...
     entries: Incomplete
     object_data: Incomplete
-    def process(
-        self, formdata, data=..., extra_filters: Incomplete | None = None
-    ) -> None: ...
+    def process(self, formdata, data=..., extra_filters=None) -> None: ...
     errors: Incomplete
     def validate(self, form, extra_validators=()): ...
     def populate_obj(self, obj, name) -> None: ...

@@ -21,7 +21,7 @@ file_required = FileRequired
 class FileAllowed:
     upload_set: Incomplete
     message: Incomplete
-    def __init__(self, upload_set, message: Incomplete | None = None) -> None: ...
+    def __init__(self, upload_set, message=None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 file_allowed = FileAllowed
@@ -30,9 +30,7 @@ class FileSize:
     min_size: Incomplete
     max_size: Incomplete
     message: Incomplete
-    def __init__(
-        self, max_size, min_size: int = 0, message: Incomplete | None = None
-    ) -> None: ...
+    def __init__(self, max_size, min_size: int = 0, message=None) -> None: ...
     def __call__(self, form, field) -> None: ...
 
 file_size = FileSize

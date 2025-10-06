@@ -48,9 +48,7 @@ class _param(NamedTuple):
 class param(_param):
     def __new__(cls, *args, **kwargs): ...
     @classmethod
-    def explicit(
-        cls, args: Incomplete | None = None, kwargs: Incomplete | None = None
-    ): ...
+    def explicit(cls, args=None, kwargs=None): ...
     @classmethod
     def from_decorator(cls, args): ...
 
@@ -67,9 +65,7 @@ class parameterized:
     get_input: Incomplete
     doc_func: Incomplete
     skip_on_empty: Incomplete
-    def __init__(
-        self, input, doc_func: Incomplete | None = None, skip_on_empty: bool = False
-    ) -> None: ...
+    def __init__(self, input, doc_func=None, skip_on_empty: bool = False) -> None: ...
     def __call__(self, test_func): ...
     def param_as_nose_tuple(self, test_self, func, num, p): ...
     def assert_not_in_testcase_subclass(self) -> None: ...
@@ -81,10 +77,10 @@ class parameterized:
     def expand(
         cls,
         input,
-        name_func: Incomplete | None = None,
-        doc_func: Incomplete | None = None,
+        name_func=None,
+        doc_func=None,
         skip_on_empty: bool = False,
-        namespace: Incomplete | None = None,
+        namespace=None,
         **legacy,
     ): ...
     @classmethod
@@ -93,10 +89,7 @@ class parameterized:
     def to_safe_name(cls, s): ...
 
 def parameterized_class(
-    attrs,
-    input_values: Incomplete | None = None,
-    class_name_func: Incomplete | None = None,
-    classname_func: Incomplete | None = None,
+    attrs, input_values=None, class_name_func=None, classname_func=None
 ): ...
 def get_class_name_suffix(params_dict): ...
 def default_class_name_func(cls, num, params_dict): ...
