@@ -30,7 +30,6 @@ class FlaskConfiguration(dict):
                 "WTF_CSRF_ENABLED": False,
                 "SERVER_NAME": "test.name",
                 "DEBUG": True,
-                "DEBUG_DETAILS": False,
                 "SECURITY_PASSWORD_SALT": "dev password salt",
                 "TESTING": True,
                 "MAIL_DEFAULT_SENDER": "test_sender@cp.org",

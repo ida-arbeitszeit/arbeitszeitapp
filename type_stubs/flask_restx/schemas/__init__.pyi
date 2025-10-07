@@ -5,7 +5,7 @@ from flask_restx import errors as errors
 
 class SchemaValidationError(errors.ValidationError):
     errors: Incomplete
-    def __init__(self, msg, errors: Incomplete | None = None) -> None: ...
+    def __init__(self, msg, errors=None) -> None: ...
     __unicode__: Incomplete
 
 class LazySchema(Mapping):

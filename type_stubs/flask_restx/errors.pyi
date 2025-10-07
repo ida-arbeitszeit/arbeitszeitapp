@@ -2,7 +2,7 @@ from _typeshed import Incomplete
 
 __all__ = ["abort", "RestError", "ValidationError", "SpecsError"]
 
-def abort(code=..., message: Incomplete | None = None, **kwargs) -> None: ...
+def abort(code=..., message=None, **kwargs) -> None: ...
 
 class RestError(Exception):
     msg: Incomplete

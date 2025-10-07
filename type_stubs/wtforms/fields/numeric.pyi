@@ -15,21 +15,16 @@ class LocaleAwareNumberField(Field):
     locale: Incomplete
     def __init__(
         self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
+        label=None,
+        validators=None,
         use_locale: bool = False,
-        number_format: Incomplete | None = None,
+        number_format=None,
         **kwargs,
     ) -> None: ...
 
 class IntegerField(Field):
     widget: Incomplete
-    def __init__(
-        self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        **kwargs,
-    ) -> None: ...
+    def __init__(self, label=None, validators=None, **kwargs) -> None: ...
     data: Incomplete
     def process_data(self, value) -> None: ...
     def process_formdata(self, valuelist) -> None: ...
@@ -39,24 +34,14 @@ class DecimalField(LocaleAwareNumberField):
     places: Incomplete
     rounding: Incomplete
     def __init__(
-        self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        places=...,
-        rounding: Incomplete | None = None,
-        **kwargs,
+        self, label=None, validators=None, places=..., rounding=None, **kwargs
     ) -> None: ...
     data: Incomplete
     def process_formdata(self, valuelist) -> None: ...
 
 class FloatField(Field):
     widget: Incomplete
-    def __init__(
-        self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        **kwargs,
-    ) -> None: ...
+    def __init__(self, label=None, validators=None, **kwargs) -> None: ...
     data: Incomplete
     def process_formdata(self, valuelist) -> None: ...
 

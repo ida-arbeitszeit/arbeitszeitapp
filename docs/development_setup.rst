@@ -135,15 +135,16 @@ when you enter the top-level directory of the repo.
 
 .. code-block:: bash
 
-  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_flask/development_settings.py
+  export FLASK_APP=arbeitszeit_development.development_server:main
   export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
-  export FLASK_APP=tests.development_server:main
-  export FLASK_DEBUG=1
-  
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
   export DEV_SECRET_KEY="my_secret_key"
   export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
   export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
 
+  # Optionally, adjust the following variables:
+  # export ALLOWED_OVERDRAW_MEMBER=1000
+  # export DEFAULT_USER_TIMEZONE="Europe/Berlin"
 
 Development server
 ------------------
@@ -155,7 +156,7 @@ Before you start the development server for the first time, you need to run the
 database migrations via ``alembic upgrade head`` once.
 
 Afterwards, you can start the development server with ``flask
-run``.
+run --debug``.
 
 In the development app, you might want to sign up a company or a member. While doing this,
 you will be redirected to a site that asks to click a confirmation link provided in an e-mail. 
@@ -190,7 +191,6 @@ The script uses ``black`` and
 formatting to a limited selection of paths.  You can add more paths by
 adding lines to ``.autoformattingrc``.
 
-
 We use type hints.  You can check the consistency of the type hints
 via the ``mypy`` command. Furthermore ``flake8`` is employed to
 prevent certain mistakes, such as unused imports or
@@ -208,22 +208,7 @@ You are encouraged to use the ``./run-checks`` command before you
 submit changes in a pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
-You can generate a code coverage report at ``htmlcov/index.html`` via
-the command:
-
-.. code-block:: bash
-
-  coverage run --source arbeitszeit_flask,arbeitszeit,arbeitszeit_web -m pytest && coverage html
-
-It is possible to disable tests that require a PostgreSQL database to
-run via an environment variable:
-
-.. code-block:: bash
-
-  DISABLED_TESTS="database_required" pytest
-
-Since running tests against the database is generally very slow, we
-recommend that you run only the tests for the part of the application 
+You can run only the tests for the part of the application 
 on which you are working.  For example, if you are working on the business 
 logic, you can use the following command to quickly run all the interactor 
 tests:
@@ -232,10 +217,19 @@ tests:
 
   pytest tests/interactors
 
-When you feel confident about your changes, and you want to run all the
-tests, you can do so by executing ``./run-checks``, which will run all
-tests that need to pass before your code reviewers can consider merging 
-your change into the main development branch.
+It is possible to disable tests that require a PostgreSQL database to
+run via an environment variable:
+
+.. code-block:: bash
+
+  DISABLED_TESTS="database_required" pytest
+
+You can generate a code coverage report at ``htmlcov/index.html`` via
+the command:
+
+.. code-block:: bash
+
+  coverage run -m pytest && coverage html
 
 
 Update Development Dependencies
@@ -322,14 +316,8 @@ Profiling
 ---------
 
 This project uses ``flask_profiler`` to provided a very basic
-graphical user interface for response times.  More profiling
-information is printed to ``stdout`` (the terminal) when detailed
-debugging is enabled. Run the following in the same terminal as where you
-start the development server to enable detailed profiling:
-
-.. code-block:: bash
-
-  export DEBUG_DETAILS=true
+graphical user interface for response times. You can access this interface
+at ``/profiling`` in the development server.
 
 
 Documentation
