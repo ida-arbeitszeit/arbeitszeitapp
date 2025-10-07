@@ -214,3 +214,9 @@ Transfers occur between two accounts, where the debit account is charged, and th
      - member
      - psf
      - On registration of worked hours, :math:`hours * (1 - FIC)` are subtracted from the member's account and added to the PSF account.
+
+Here is a graphical overview of the accounts and transfers:
+
+.. image:: images/accounts_and_transfers.svg
+  :alt: Overview of accounts and transfers of Arbeitszeitapp
+  :width: 600px
