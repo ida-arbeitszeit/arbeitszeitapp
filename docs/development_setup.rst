@@ -1,7 +1,27 @@
 Development Setup
 =================
 
-The recommended development environment is Linux. 
+Quickstart
+-----------
+
+- The recommended development environment is Linux.
+- First, clone the repository from Github.
+- Activate a virtual environment and run ``pip install -r requirements-dev.txt`` to install the dependencies.
+- Create two postgres databases, one for testing, one for the development server.
+- Set the following environment variables in the terminal:
+
+.. code-block:: bash
+
+  export FLASK_APP=arbeitszeit_development.development_server:main
+  export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
+  export DEV_SECRET_KEY="my_secret_key"
+  export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
+  export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
+
+- Run ``alembic upgrade head`` to run the database migrations.
+- Run ``flask run --debug`` to start the development server.
+- Run ``pytest`` to run the testsuite.
 
 
 Development Philosophy
