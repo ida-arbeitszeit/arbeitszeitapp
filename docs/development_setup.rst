@@ -45,10 +45,9 @@ directories in the source code.
 
 Here is a diagram that shows the main components of the application:
 
-  .. image:: images/components_overview.png
+  .. image:: images/components_overview.svg
     :alt: Overview of the main components of Arbeitszeitapp
-    :align: center
-    :width: 600px
+    :width: 500px
 
 
 PostgreSQL Setup
