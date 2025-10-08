@@ -1,22 +1,28 @@
-from flask import Config
-from alembic import command as alembic_command
+from flask import Config as FlaskConfig
 from alembic.config import Config as AlembicConfig
+from alembic import command as alembic_command
+from sqlalchemy import Connection
 
 from arbeitszeit_flask.database.db import Database
 
-def auto_migrate(flask_config: Config, db: Database) -> None:
+def auto_migrate(flask_config: FlaskConfig, db: Database) -> None:
+    alembic_config = _get_alembic_config(flask_config)
+    if flask_config.get("TESTING", False):
+        # Testing: Use the existing connection from the testing session
+        _set_connection_to_use_for_migration(alembic_config, db.session.connection())
+        alembic_command.ensure_version(alembic_config)
+        alembic_command.upgrade(alembic_config, "head")
+    else:
+        # Dev/Prod: Create a new connection
+        with db.engine.begin() as connection:
+            _set_connection_to_use_for_migration(alembic_config, connection)
+            alembic_command.ensure_version(alembic_config)
+            alembic_command.upgrade(alembic_config, "head")
+
+def _get_alembic_config(flask_config: FlaskConfig) -> AlembicConfig:
+    return AlembicConfig(flask_config["ALEMBIC_CONFIGURATION_FILE"])
+
+def _set_connection_to_use_for_migration(alembic_config: AlembicConfig, connection: Connection) -> None:
     # For details see:
     # https://alembic.sqlalchemy.org/en/latest/cookbook.html#sharing-a-connection-across-one-or-more-programmatic-migration-commands
-    alembic_cfg = AlembicConfig(flask_config["ALEMBIC_CONFIGURATION_FILE"])
-
-    if flask_config.get("TESTING", False):
-        # Use the connection from the testing session
-        alembic_cfg.attributes["connection"] = db.session.connection()
-        alembic_command.ensure_version(alembic_cfg)
-        alembic_command.upgrade(alembic_cfg, "head")
-    else:
-        # Use a new connection, commiting it to the database
-        with db.engine.begin() as connection:
-            alembic_cfg.attributes["connection"] = connection
-            alembic_command.ensure_version(alembic_cfg)
-            alembic_command.upgrade(alembic_cfg, "head")
+    alembic_config.attributes["connection"] = connection
