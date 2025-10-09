@@ -15,8 +15,7 @@ class QueryPlansSortedByActivationDateBenchmark:
     def __init__(self) -> None:
         injector = get_dependency_injector()
         db = injector.get(Database)
-        with db.engine.connect() as connection:
-            drop_and_recreate_schema(connection)
+        drop_and_recreate_schema(db.engine)
         app = injector.get(Flask)
         self.app_context = app.app_context()
         self.app_context.push()
