@@ -15,8 +15,7 @@ class ShowRAccountDetailsBenchmark:
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
         self.db = self.injector.get(Database)
-        with self.db.engine.connect() as connection:
-            drop_and_recreate_schema(connection)
+        drop_and_recreate_schema(self.db.engine)
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()

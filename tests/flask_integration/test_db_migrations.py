@@ -40,7 +40,7 @@ class AutoMigrationTests(AutoMigrationsTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        drop_and_recreate_schema(self.db.engine.connect())
+        drop_and_recreate_schema(self.db.engine)
 
     def test_that_app_starts_successfully_when_auto_migrate_is_enabled(self) -> None:
         self.injector.get(Flask)
