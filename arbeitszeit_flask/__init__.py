@@ -112,6 +112,7 @@ def create_app(
         # register blueprints
         from .api import blueprint as api_blueprint
         from .context_processors import add_template_variables
+        from .healthcheck import blueprint as healthcheck_blueprint
         from .plots import routes as plots_routes
         from .routes import accountant as accountant_routes
         from .routes import company as company_routes
@@ -130,6 +131,7 @@ def create_app(
         app.register_blueprint(accountant_routes.blueprint.main_accountant)
         app.register_blueprint(user_routes.blueprint, url_prefix="/user")
         app.register_blueprint(api_blueprint)
+        app.register_blueprint(healthcheck_blueprint.healthcheck_blueprint)
         app.context_processor(add_template_variables)
 
         # The profiler needs to be initialized last because all the
