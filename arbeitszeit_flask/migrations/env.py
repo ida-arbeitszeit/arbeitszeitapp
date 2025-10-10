@@ -1,9 +1,7 @@
 from logging.config import fileConfig
+import os
 
-from arbeitszeit_flask import load_configuration
-
-from arbeitszeit_flask.database.db import Database
-from flask import Flask
+from sqlalchemy import create_engine
 
 from alembic import context
 
@@ -29,17 +27,21 @@ def run_migrations_offline() -> None:
     raise NotImplementedError()
 
 def get_db_uri() -> str:
-    tmp_flask_app = Flask(__name__)
-    load_configuration(tmp_flask_app)
-    db_uri = tmp_flask_app.config["SQLALCHEMY_DATABASE_URI"]
-    return db_uri
+    if db_uri := os.getenv("ALEMBIC_SQLALCHEMY_DATABASE_URI"):
+        return db_uri
+    if db_uri := config.get_main_option("sqlalchemy.url"):
+        return db_uri
+    if db_uri := os.getenv("ARBEITSZEITAPP_DEV_DB"):
+        return db_uri
+    raise ValueError(
+        "No database URI configured. Set ALEMBIC_SQLALCHEMY_DATABASE_URI, "
+        "ARBEITSZEITAPP_DEV_DB or sqlalchemy.url in alembic.ini"
+    )
 
 def run_migrations_online() -> None:
     connectable = config.attributes.get('connection', None)
     if connectable is None:
-        Database().configure(get_db_uri())   
-        connectable = Database().engine
-
+        connectable = create_engine(get_db_uri())
         with connectable.connect() as connection:
             context.configure(
                 connection=connection,
