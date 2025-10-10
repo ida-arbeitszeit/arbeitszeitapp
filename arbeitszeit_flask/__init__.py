@@ -49,7 +49,11 @@ def create_app(
     load_configuration(app=app, configuration=config)
 
     db = Database()
-    db.configure(uri=app.config["SQLALCHEMY_DATABASE_URI"])
+    db.configure(
+        uri=app.config.get(
+            "SQLALCHEMY_DATABASE_URI", "sqlite:////tmp/arbeitszeitapp.db"
+        )
+    )
 
     # Choose between auto-migration or direct table creation
     if app.config["AUTO_MIGRATE"]:
