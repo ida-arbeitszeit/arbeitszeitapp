@@ -36,9 +36,7 @@ class Database:
     def session(self) -> scoped_session:
         if self._session is None:
             engine = self.engine
-            session_factory = sessionmaker(
-                autocommit=False, autoflush=False, bind=engine
-            )
+            session_factory = sessionmaker(bind=engine)
             self._session = scoped_session(session_factory)
         return self._session
 
