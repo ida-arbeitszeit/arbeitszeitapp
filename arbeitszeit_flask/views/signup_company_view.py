@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 import flask
 from flask import redirect, render_template, request, url_for
-from flask_login import current_user
 
 from arbeitszeit.interactors.register_company import RegisterCompany
 from arbeitszeit_flask.database import commit_changes
@@ -26,7 +25,7 @@ class SignupCompanyView:
 
     def GET(self) -> Response:
         register_form = RegisterForm(request.form)
-        if current_user.is_authenticated:
+        if self.flask_session.is_current_user_authenticated():
             if self.flask_session.is_logged_in_as_company():
                 return redirect(url_for("main_company.dashboard"))
             else:
@@ -38,7 +37,7 @@ class SignupCompanyView:
         register_form = RegisterForm(request.form)
         if register_form.validate():
             return self._handle_successful_post_request(register_form)
-        if current_user.is_authenticated:
+        if self.flask_session.is_current_user_authenticated():
             if self.flask_session.is_logged_in_as_company():
                 return redirect(url_for("main_company.dashboard"))
             else:

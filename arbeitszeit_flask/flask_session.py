@@ -47,6 +47,12 @@ class FlaskSession:
         except AttributeError:
             return None
 
+    def is_current_user_authenticated(self) -> bool:
+        try:
+            return current_user.is_authenticated
+        except AttributeError:
+            return False
+
     def login_member(self, member: UUID, remember: bool = False) -> None:
         member_orm = (
             self.db.session.query(models.Member)
