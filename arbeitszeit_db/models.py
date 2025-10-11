@@ -6,7 +6,6 @@ import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from flask_login import UserMixin
 from sqlalchemy import (
     Column,
     DateTime,
@@ -19,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from arbeitszeit.transfers import TransferType
-from arbeitszeit_flask.database.db import Base
+from arbeitszeit_db.db import Base
 
 
 def generate_uuid() -> str:
@@ -87,7 +86,7 @@ jobs_table = Table(
 )
 
 
-class Member(UserMixin, Base):
+class Member(Base):
     __tablename__ = "member"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
@@ -103,7 +102,7 @@ class Member(UserMixin, Base):
     )
 
 
-class Company(UserMixin, Base):
+class Company(Base):
     __tablename__ = "company"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
@@ -125,7 +124,7 @@ class Company(UserMixin, Base):
     )
 
 
-class Accountant(UserMixin, Base):
+class Accountant(Base):
     __tablename__ = "accountant"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)

@@ -9,7 +9,7 @@ from arbeitszeit.interactors.invite_worker_to_company import (
     InviteWorkerToCompanyInteractor,
 )
 from arbeitszeit.interactors.list_workers import ListWorkersInteractor
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.forms import InviteWorkerToCompanyForm

@@ -4,7 +4,7 @@ from flask import Response as FlaskResponse
 from flask import redirect, render_template
 
 from arbeitszeit.interactors import create_plan_draft
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex

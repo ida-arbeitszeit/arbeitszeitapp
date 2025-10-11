@@ -6,8 +6,8 @@ from flask import Response, render_template, request
 from arbeitszeit.interactors.request_coordination_transfer import (
     RequestCoordinationTransferInteractor,
 )
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask import types
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RequestCoordinationTransferForm
 from arbeitszeit_web.www.controllers.request_coordination_transfer_controller import (
     RequestCoordinationTransferController,

@@ -6,7 +6,7 @@ from flask import current_app
 from flask.cli import AppGroup
 
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 from tests.data_generators import (
     CompanyGenerator,

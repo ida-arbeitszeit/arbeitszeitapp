@@ -9,8 +9,8 @@ from arbeitszeit.interactors.accept_coordination_transfer import (
 from arbeitszeit.interactors.get_coordination_transfer_request_details import (
     GetCoordinationTransferRequestDetailsInteractor,
 )
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask import types
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.views.http_error_view import http_403, http_404, http_409
 from arbeitszeit_web.www.controllers.accept_coordination_transfer_controller import (
     AcceptCoordinationTransferController,

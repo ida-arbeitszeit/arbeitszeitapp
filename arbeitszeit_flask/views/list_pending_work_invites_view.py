@@ -7,7 +7,7 @@ from arbeitszeit.interactors.list_pending_work_invites import (
     ListPendingWorkInvitesInteractor,
 )
 from arbeitszeit.interactors.resend_work_invite import ResendWorkInviteInteractor
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.controllers.list_pending_work_invites_controller import (

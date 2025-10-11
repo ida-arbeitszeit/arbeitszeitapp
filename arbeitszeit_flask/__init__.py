@@ -5,13 +5,14 @@ from flask import Flask, session
 from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.models import Base
+from arbeitszeit_flask.auto_migrate import auto_migrate
 from arbeitszeit_flask.babel import initialize_babel
-from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.models import Base
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
+from arbeitszeit_flask.flask_session import FlaskLoginUser
 from arbeitszeit_flask.mail_service import load_email_plugin
-from arbeitszeit_flask.migrations.auto_migrate import auto_migrate
 from arbeitszeit_flask.profiling import initialize_flask_profiler  # type: ignore
 
 
@@ -96,10 +97,12 @@ def create_app(
 
         app.cli.command("invite-accountant")(invite_accountant)
 
-        from .database.models import Accountant, Company, Member
+        from arbeitszeit_db.models import Accountant, Company, Member
 
         @login_manager.user_loader
-        def load_user(user_id: Any) -> Any:
+        def load_user(
+            user_id: str,
+        ) -> FlaskLoginUser | None:
             """
             This callback is used to reload the user object from the user ID
             stored in the session.
@@ -107,11 +110,15 @@ def create_app(
             if "user_type" in session:
                 user_type = session["user_type"]
                 if user_type == "member":
-                    return db.session.query(Member).get(user_id)
+                    member_orm = db.session.query(Member).get(user_id)
+                    return FlaskLoginUser(member_orm) if member_orm else None
                 elif user_type == "company":
-                    return db.session.query(Company).get(user_id)
+                    company_orm = db.session.query(Company).get(user_id)
+                    return FlaskLoginUser(company_orm) if company_orm else None
                 elif user_type == "accountant":
-                    return db.session.query(Accountant).get(user_id)
+                    accountant_orm = db.session.query(Accountant).get(user_id)
+                    return FlaskLoginUser(accountant_orm) if accountant_orm else None
+            return None
 
         # register blueprints
         from .api import blueprint as api_blueprint

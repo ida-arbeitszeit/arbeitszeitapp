@@ -6,7 +6,7 @@ from flask import redirect, render_template, request
 from arbeitszeit.interactors.change_user_email_address import (
     ChangeUserEmailAddressInteractor,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.forms import ConfirmEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_error_view import http_404

@@ -5,7 +5,7 @@ from flask import Flask
 
 from arbeitszeit.interactors import get_statistics
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db.db import Database
 from tests.data_generators import PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 from tests.flask_integration.flask import drop_and_recreate_schema

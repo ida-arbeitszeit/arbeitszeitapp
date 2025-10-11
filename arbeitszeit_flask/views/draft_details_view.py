@@ -6,7 +6,7 @@ from flask import redirect, render_template
 
 from arbeitszeit.interactors import edit_draft
 from arbeitszeit.interactors.get_draft_details import GetDraftDetailsInteractor
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.url_index import GeneralUrlIndex

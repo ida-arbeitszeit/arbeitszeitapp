@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from flask import redirect
 
 from arbeitszeit.interactors.end_cooperation import EndCooperationInteractor
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask import types
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.end_cooperation_controller import (
