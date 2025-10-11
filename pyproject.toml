@@ -34,14 +34,14 @@ target-version = ['py312']
 extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
-  ^/arbeitszeit_flask/migrations/
+  ^/arbeitszeit_db/migrations/
 )
 '''
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-skip = "arbeitszeit_flask/migrations"
+skip = "arbeitszeit_db/migrations"
 
 [tool.mypy]
 files = [
@@ -90,7 +90,7 @@ source = [
     "arbeitszeit_db",
 ]
 omit = [
-    "arbeitszeit_flask/migrations/versions/*",
+    "arbeitszeit_db/migrations/versions/*",
 ]
 
 [tool.coverage.report]

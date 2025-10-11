@@ -7,12 +7,12 @@ from jinja2 import StrictUndefined
 
 from arbeitszeit_db.db import Database
 from arbeitszeit_db.models import Base
+from arbeitszeit_flask.auto_migrate import auto_migrate
 from arbeitszeit_flask.babel import initialize_babel
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.flask_session import FlaskLoginUser
 from arbeitszeit_flask.mail_service import load_email_plugin
-from arbeitszeit_flask.migrations.auto_migrate import auto_migrate
 from arbeitszeit_flask.profiling import initialize_flask_profiler  # type: ignore
 
 
