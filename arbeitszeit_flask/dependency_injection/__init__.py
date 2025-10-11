@@ -16,10 +16,10 @@ from arbeitszeit.injector import (
     Module,
 )
 from arbeitszeit.password_hasher import PasswordHasher
+from arbeitszeit_db import get_social_accounting
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.control_thresholds import ControlThresholdsFlask
-from arbeitszeit_flask.database import get_social_accounting
-from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.datetime import (
     FlaskDatetimeFormatter,
     FlaskTimezoneConfiguration,

@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Any, Callable
 
 from arbeitszeit import records
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db.db import Database
 
 from .repositories import AccountingRepository
 

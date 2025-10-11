@@ -11,7 +11,7 @@ from arbeitszeit.interactors.answer_company_work_invite import (
 from arbeitszeit.interactors.show_company_work_invite_details import (
     ShowCompanyWorkInviteDetailsInteractor,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.forms import AnswerCompanyWorkInviteForm
 from arbeitszeit_flask.views.http_error_view import http_404
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (

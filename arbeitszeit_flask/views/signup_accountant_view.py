@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from flask import Response, redirect, render_template, request
 
 from arbeitszeit.interactors.register_accountant import RegisterAccountantInteractor
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask import types
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.forms import RegisterAccountantForm
 from arbeitszeit_web.www.controllers.register_accountant_controller import (
     RegisterAccountantController,

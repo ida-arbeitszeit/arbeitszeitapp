@@ -25,6 +25,8 @@ include = [
     "arbeitszeit_flask.*",
     "arbeitszeit_web",
     "arbeitszeit_web.*",
+    "arbeitszeit_db",
+    "arbeitszeit_db.*",
 ]
 
 [tool.black]
@@ -32,14 +34,14 @@ target-version = ['py312']
 extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
-  ^/arbeitszeit_flask/migrations/
+  ^/arbeitszeit_db/migrations/
 )
 '''
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-skip = "arbeitszeit_flask/migrations"
+skip = "arbeitszeit_db/migrations"
 
 [tool.mypy]
 files = [
@@ -48,6 +50,7 @@ files = [
     "arbeitszeit_development",
     "arbeitszeit_flask",
     "arbeitszeit_web",
+    "arbeitszeit_db",
     "build_support",
     "tests"
 ]
@@ -63,6 +66,7 @@ module = [
     "arbeitszeit_web",
     "arbeitszeit_flask",
     "arbeitszeit_development",
+    "arbeitszeit_db",
     "tests"
 ]
 allow_untyped_defs = false
@@ -83,9 +87,10 @@ source = [
     "arbeitszeit",
     "arbeitszeit_flask",
     "arbeitszeit_web",
+    "arbeitszeit_db",
 ]
 omit = [
-    "arbeitszeit_flask/migrations/versions/*",
+    "arbeitszeit_db/migrations/versions/*",
 ]
 
 [tool.coverage.report]

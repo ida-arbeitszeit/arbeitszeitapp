@@ -7,7 +7,7 @@ from arbeitszeit.interactors.create_cooperation import (
     CreateCooperationInteractor,
     CreateCooperationRequest,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import CreateCooperationForm
 from arbeitszeit_flask.types import Response

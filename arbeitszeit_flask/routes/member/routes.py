@@ -3,12 +3,12 @@ from uuid import UUID
 
 from flask import Response as FlaskResponse
 from flask import render_template
-from flask_login import current_user
 
 from arbeitszeit.interactors import get_member_dashboard
 from arbeitszeit.interactors.get_member_account import GetMemberAccountInteractor
 from arbeitszeit.interactors.get_plan_details import GetPlanDetailsInteractor
 from arbeitszeit_flask.class_based_view import as_flask_view
+from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views import (
     CompanyWorkInviteView,
@@ -47,9 +47,12 @@ class register_private_consumption(RegisterPrivateConsumptionView): ...
 class dashboard:
     interactor: get_member_dashboard.GetMemberDashboardInteractor
     presenter: GetMemberDashboardPresenter
+    flask_session: FlaskSession
 
     def GET(self) -> Response:
-        request = get_member_dashboard.Request(member=UUID(current_user.id))
+        current_user = self.flask_session.get_current_user()
+        assert current_user
+        request = get_member_dashboard.Request(member=current_user)
         response = self.interactor.get_member_dashboard(request)
         view_model = self.presenter.present(response)
         return FlaskResponse(
@@ -66,9 +69,12 @@ class dashboard:
 class my_account:
     get_member_account: GetMemberAccountInteractor
     presenter: GetMemberAccountPresenter
+    flask_session: FlaskSession
 
     def GET(self) -> Response:
-        response = self.get_member_account.execute(UUID(current_user.id))
+        current_user = self.flask_session.get_current_user()
+        assert current_user
+        response = self.get_member_account.execute(current_user)
         view_model = self.presenter.present_member_account(response)
         return FlaskResponse(
             render_template(

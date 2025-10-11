@@ -9,7 +9,7 @@ from arbeitszeit.interactors.register_productive_consumption import (
 from arbeitszeit.interactors.select_productive_consumption import (
     SelectProductiveConsumptionInteractor,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.forms import RegisterProductiveConsumptionForm
 from arbeitszeit_flask.types import Response

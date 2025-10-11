@@ -1,9 +1,7 @@
-from uuid import UUID
-
 from flask import Blueprint
 from flask import Response as FlaskResponse
 from flask import flash, redirect, render_template, request, session, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required
 
 from arbeitszeit.interactors.confirm_company import ConfirmCompanyInteractor
 from arbeitszeit.interactors.confirm_member import ConfirmMemberInteractor
@@ -14,8 +12,8 @@ from arbeitszeit.interactors.resend_confirmation_mail import (
     ResendConfirmationMailInteractor,
 )
 from arbeitszeit.interactors.start_page import StartPageInteractor
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.class_based_view import as_flask_view
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm
@@ -124,7 +122,7 @@ def login_member(
                 render_template("auth/login_member.html", form=login_form), status=401
             )
 
-    if current_user.is_authenticated:
+    if flask_session.is_current_user_authenticated():
         if flask_session.is_logged_in_as_member():
             return redirect(url_for("main_member.dashboard"))
         else:
@@ -136,8 +134,13 @@ def login_member(
 @auth.route("/member/resend")
 @with_injection()
 @login_required
-def resend_confirmation_member(interactor: ResendConfirmationMailInteractor):
-    request = interactor.Request(user=UUID(current_user.id))
+def resend_confirmation_member(
+    interactor: ResendConfirmationMailInteractor,
+    session: FlaskSession,
+):
+    current_user = session.get_current_user()
+    assert current_user
+    request = interactor.Request(user=current_user)
     response = interactor.resend_confirmation_mail(request)
     if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")
@@ -183,7 +186,7 @@ def login_company(
             render_template("auth/login_company.html", form=login_form), status=401
         )
 
-    if current_user.is_authenticated:
+    if flask_session.is_current_user_authenticated():
         if flask_session.is_logged_in_as_company():
             return redirect(url_for("main_company.dashboard"))
         else:
@@ -223,8 +226,12 @@ def confirm_email_company(
 @auth.route("/company/resend")
 @with_injection()
 @login_required
-def resend_confirmation_company(interactor: ResendConfirmationMailInteractor):
-    request = interactor.Request(user=UUID(current_user.id))
+def resend_confirmation_company(
+    interactor: ResendConfirmationMailInteractor, flask_session: FlaskSession
+):
+    current_user = flask_session.get_current_user()
+    assert current_user
+    request = interactor.Request(user=current_user)
     response = interactor.resend_confirmation_mail(request)
     if response.is_token_sent:
         flash("Eine neue Bestätigungsmail wurde gesendet.")

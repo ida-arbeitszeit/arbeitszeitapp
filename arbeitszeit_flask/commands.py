@@ -4,7 +4,7 @@ from flask_babel import force_locale
 from arbeitszeit.interactors.send_accountant_registration_token import (
     SendAccountantRegistrationTokenInteractor,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 
 

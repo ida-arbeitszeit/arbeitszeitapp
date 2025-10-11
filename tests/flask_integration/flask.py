@@ -8,8 +8,8 @@ from sqlalchemy import Engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
-from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.repositories import DatabaseGatewayImpl
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.repositories import DatabaseGatewayImpl
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import GeneralUrlIndex
 from tests.data_generators import (

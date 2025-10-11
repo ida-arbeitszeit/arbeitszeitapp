@@ -2,7 +2,6 @@ from uuid import UUID
 
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, url_for
-from flask_login import current_user
 
 from arbeitszeit.interactors.create_draft_from_plan import CreateDraftFromPlanInteractor
 from arbeitszeit.interactors.delete_draft import DeleteDraftInteractor
@@ -28,8 +27,8 @@ from arbeitszeit.interactors.show_my_plans import (
     ShowMyPlansInteractor,
     ShowMyPlansRequest,
 )
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.class_based_view import as_flask_view
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
@@ -118,8 +117,11 @@ class dashboard(CompanyDashboardView): ...
 def my_consumptions(
     query_consumptions: QueryCompanyConsumptionsInteractor,
     presenter: CompanyConsumptionsPresenter,
+    flask_session: FlaskSession,
 ):
-    response = query_consumptions.execute(UUID(current_user.id))
+    current_user = flask_session.get_current_user()
+    assert current_user
+    response = query_consumptions.execute(current_user)
     view_model = presenter.present(response)
     return FlaskResponse(
         render_template(
@@ -197,8 +199,11 @@ class get_draft_details(DraftDetailsView): ...
 def my_plans(
     show_my_plans_interactor: ShowMyPlansInteractor,
     show_my_plans_presenter: ShowMyPlansPresenter,
+    flask_session: FlaskSession,
 ):
-    request = ShowMyPlansRequest(company_id=UUID(current_user.id))
+    current_user = flask_session.get_current_user()
+    assert current_user
+    request = ShowMyPlansRequest(company_id=current_user)
     response = show_my_plans_interactor.show_company_plans(request)
     view_model = show_my_plans_presenter.present(response)
     return render_template(
@@ -292,17 +297,18 @@ def my_cooperations(
     show_company_cooperations: ShowCompanyCooperationsInteractor,
     list_my_cooperating_plans: ListMyCooperatingPlansInteractor,
     presenter: ShowMyCooperationsPresenter,
+    flask_session: FlaskSession,
 ):
+    current_user = flask_session.get_current_user()
+    assert current_user
     list_coord_response = list_coordinations.execute(
-        ListCoordinationsOfCompanyRequest(UUID(current_user.id))
+        ListCoordinationsOfCompanyRequest(current_user)
     )
     show_company_cooperations_response = (
-        show_company_cooperations.show_company_cooperations(
-            Request(UUID(current_user.id))
-        )
+        show_company_cooperations.show_company_cooperations(Request(current_user))
     )
     list_my_coop_plans_response = list_my_cooperating_plans.list_cooperations(
-        ListMyCooperatingPlansInteractor.Request(company=UUID(current_user.id))
+        ListMyCooperatingPlansInteractor.Request(company=current_user)
     )
     view_model = presenter.present(
         list_coord_response=list_coord_response,

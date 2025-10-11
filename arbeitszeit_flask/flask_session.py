@@ -6,8 +6,8 @@ from uuid import UUID
 from flask import request, session
 from flask_login import current_user, login_user, logout_user
 
-from arbeitszeit_flask.database import models
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db import models
+from arbeitszeit_db.db import Database
 from arbeitszeit_web.session import UserRole
 
 
@@ -17,6 +17,33 @@ def is_safe_url(target: str, host_url: str) -> bool:
     return test_url.scheme in ("http", "https") and (
         test_url.netloc == "" or test_url.netloc == ref_url.netloc
     )
+
+
+class FlaskLoginUser:
+    """Adapter that wraps a User for Flask-Login."""
+
+    def __init__(
+        self, orm_user: models.Member | models.Company | models.Accountant
+    ) -> None:
+        self.orm_user = orm_user
+
+    def get_id(self) -> str:
+        return self.orm_user.id
+
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    @property
+    def is_active(self) -> bool:
+        return True
+
+    @property
+    def is_anonymous(self) -> bool:
+        return False
+
+    def __getattr__(self, name):
+        return getattr(self.orm_user, name)
 
 
 @dataclass
@@ -47,6 +74,12 @@ class FlaskSession:
         except AttributeError:
             return None
 
+    def is_current_user_authenticated(self) -> bool:
+        try:
+            return current_user.is_authenticated
+        except AttributeError:
+            return False
+
     def login_member(self, member: UUID, remember: bool = False) -> None:
         member_orm = (
             self.db.session.query(models.Member)
@@ -54,7 +87,7 @@ class FlaskSession:
             .first()
         )
         assert member_orm
-        login_user(member_orm, remember=remember)
+        login_user(FlaskLoginUser(member_orm), remember=remember)
         session["user_type"] = "member"
 
     def login_company(self, company: UUID, remember: bool = False) -> None:
@@ -64,7 +97,7 @@ class FlaskSession:
             .first()
         )
         assert company_orm
-        login_user(company_orm, remember=remember)
+        login_user(FlaskLoginUser(company_orm), remember=remember)
         session["user_type"] = "company"
 
     def login_accountant(self, accountant: UUID, remember: bool = False) -> None:
@@ -74,7 +107,7 @@ class FlaskSession:
             .first()
         )
         assert accountant_orm
-        login_user(accountant_orm, remember=remember)
+        login_user(FlaskLoginUser(accountant_orm), remember=remember)
         session["user_type"] = "accountant"
 
     def logout(self) -> None:

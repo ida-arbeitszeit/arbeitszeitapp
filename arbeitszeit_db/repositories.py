@@ -25,9 +25,9 @@ from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
 from arbeitszeit.transfers import TransferType
-from arbeitszeit_flask.database import models
-from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.models import (
+from arbeitszeit_db import models
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.models import (
     Account,
     Company,
     Member,
