@@ -4,7 +4,7 @@ import flask
 from flask import redirect, render_template, request, url_for
 
 from arbeitszeit.interactors.register_company import RegisterCompany
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RegisterForm
 from arbeitszeit_flask.types import Response

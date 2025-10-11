@@ -7,7 +7,7 @@ from arbeitszeit.interactors.cancel_cooperation_solicitation import (
     CancelCooperationSolicitationInteractor,
     CancelCooperationSolicitationRequest,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
 from arbeitszeit_web.www.presenters.cancel_cooperation_request_presenter import (

@@ -18,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from arbeitszeit.transfers import TransferType
-from arbeitszeit_flask.database.db import Base
+from arbeitszeit_db.db import Base
 
 
 def generate_uuid() -> str:

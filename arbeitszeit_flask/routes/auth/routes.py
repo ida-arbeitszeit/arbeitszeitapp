@@ -12,8 +12,8 @@ from arbeitszeit.interactors.resend_confirmation_mail import (
     ResendConfirmationMailInteractor,
 )
 from arbeitszeit.interactors.start_page import StartPageInteractor
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.class_based_view import as_flask_view
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.dependency_injection import with_injection
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import LoginForm

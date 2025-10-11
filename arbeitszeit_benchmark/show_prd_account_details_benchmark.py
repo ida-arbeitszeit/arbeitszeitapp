@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import Flask
 
 from arbeitszeit.interactors import show_prd_account_details
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
 from tests.flask_integration.flask import drop_and_recreate_schema

@@ -35,9 +35,13 @@ directories in the source code.
     the business logic through the develivery mechanism of the World
     Wide Web.
 
+``arbeitszeit_db/``
+    The concrete implementation for persistence. Currently we support
+    Postgres databases via SQLAlchemy.
+
 ``arbeitszeit_flask/``
-    Contains the conrete implementation for persistence and IO.  We
-    use the ``flask`` framework to achieve these goals.
+    Contains the conrete implementation for IO. We use the ``flask``
+    framework.
 
 ``tests/``
    Contains all the tests.  You should find at least one test for

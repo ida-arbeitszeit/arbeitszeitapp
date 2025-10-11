@@ -6,8 +6,8 @@ from uuid import UUID
 from flask import request, session
 from flask_login import current_user, login_user, logout_user
 
-from arbeitszeit_flask.database import models
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db import models
+from arbeitszeit_db.db import Database
 from arbeitszeit_web.session import UserRole
 
 

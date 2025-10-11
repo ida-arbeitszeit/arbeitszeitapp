@@ -25,6 +25,8 @@ include = [
     "arbeitszeit_flask.*",
     "arbeitszeit_web",
     "arbeitszeit_web.*",
+    "arbeitszeit_db",
+    "arbeitszeit_db.*",
 ]
 
 [tool.black]
@@ -48,6 +50,7 @@ files = [
     "arbeitszeit_development",
     "arbeitszeit_flask",
     "arbeitszeit_web",
+    "arbeitszeit_db",
     "build_support",
     "tests"
 ]
@@ -63,6 +66,7 @@ module = [
     "arbeitszeit_web",
     "arbeitszeit_flask",
     "arbeitszeit_development",
+    "arbeitszeit_db",
     "tests"
 ]
 allow_untyped_defs = false
@@ -83,6 +87,7 @@ source = [
     "arbeitszeit",
     "arbeitszeit_flask",
     "arbeitszeit_web",
+    "arbeitszeit_db",
 ]
 omit = [
     "arbeitszeit_flask/migrations/versions/*",

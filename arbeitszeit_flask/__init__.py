@@ -5,9 +5,9 @@ from flask import Flask, session
 from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.models import Base
 from arbeitszeit_flask.babel import initialize_babel
-from arbeitszeit_flask.database.db import Database
-from arbeitszeit_flask.database.models import Base
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.flask_session import FlaskLoginUser
@@ -97,7 +97,7 @@ def create_app(
 
         app.cli.command("invite-accountant")(invite_accountant)
 
-        from .database.models import Accountant, Company, Member
+        from arbeitszeit_db.models import Accountant, Company, Member
 
         @login_manager.user_loader
         def load_user(

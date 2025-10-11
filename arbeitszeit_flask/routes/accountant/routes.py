@@ -12,7 +12,7 @@ from arbeitszeit.interactors.list_plans_with_pending_review import (
     ListPlansWithPendingReviewInteractor,
 )
 from arbeitszeit.interactors.reject_plan import RejectPlanInteractor
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_error_view import http_404

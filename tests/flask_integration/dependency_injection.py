@@ -6,8 +6,8 @@ from typing import List, Optional
 from flask import Flask
 
 from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
+from arbeitszeit_db.db import Database
 from arbeitszeit_flask import create_app
-from arbeitszeit_flask.database.db import Database
 from arbeitszeit_flask.dependency_injection import FlaskModule
 from tests.dependency_injection import TestingModule
 from tests.flask_integration.mail_service import MockEmailService

@@ -6,7 +6,7 @@ from arbeitszeit.interactors.list_active_plans_of_company import (
     ListActivePlansOfCompanyInteractor,
 )
 from arbeitszeit.interactors.request_cooperation import RequestCooperationInteractor
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.forms import RequestCooperationForm
 from arbeitszeit_flask.views.http_error_view import http_404

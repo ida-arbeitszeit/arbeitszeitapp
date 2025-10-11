@@ -27,8 +27,8 @@ from arbeitszeit.interactors.show_my_plans import (
     ShowMyPlansInteractor,
     ShowMyPlansRequest,
 )
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.class_based_view import as_flask_view
-from arbeitszeit_flask.database import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response

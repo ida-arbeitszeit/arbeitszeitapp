@@ -3,7 +3,7 @@ from alembic.config import Config as AlembicConfig
 from alembic import command as alembic_command
 from sqlalchemy import Connection
 
-from arbeitszeit_flask.database.db import Database
+from arbeitszeit_db.db import Database
 
 def auto_migrate(flask_config: FlaskConfig, db: Database) -> None:
     alembic_config = _get_alembic_config(flask_config)

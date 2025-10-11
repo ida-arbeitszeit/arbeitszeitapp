@@ -8,7 +8,7 @@ from parameterized import parameterized
 from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor
 from arbeitszeit.interactors.reject_plan import RejectPlanInteractor
 from arbeitszeit.records import Plan, ProductionCosts
-from arbeitszeit_flask.database import models
+from arbeitszeit_db import models
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import datetime_utc
 from tests.flask_integration.flask import FlaskTestCase
