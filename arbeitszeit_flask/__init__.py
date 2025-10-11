@@ -99,7 +99,7 @@ def create_app(
         from .database.models import Accountant, Company, Member
 
         @login_manager.user_loader
-        def load_user(user_id: Any) -> Any:
+        def load_user(user_id: str) -> Member | Company | Accountant | None:
             """
             This callback is used to reload the user object from the user ID
             stored in the session.
@@ -112,6 +112,7 @@ def create_app(
                     return db.session.query(Company).get(user_id)
                 elif user_type == "accountant":
                     return db.session.query(Accountant).get(user_id)
+            return None
 
         # register blueprints
         from .api import blueprint as api_blueprint
