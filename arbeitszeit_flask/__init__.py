@@ -56,13 +56,9 @@ def create_app(
         )
     )
 
-    # Choose between auto-migration or direct table creation
     if app.config["AUTO_MIGRATE"]:
-        # Let Alembic handle table creation
         auto_migrate(app.config, db)
     else:
-        # Create tables directly with SQLAlchemy if they do not exist.
-        # These table creations are NOT rolled back in tests for performance reasons
         Base.metadata.create_all(db.engine, checkfirst=True)
 
     # Where to redirect the user when he attempts to access a login_required
