@@ -10,11 +10,14 @@ def auto_migrate(flask_config: FlaskConfig, db: Database) -> None:
     if flask_config.get("TESTING", False):
         # Testing: Use the existing connection from the testing session
         _set_connection_to_use_for_migration(alembic_config, db.session.connection())
+        alembic_command.ensure_version(alembic_config)
+        alembic_command.upgrade(alembic_config, "head")
     else:
         # Dev/Prod: Create a new connection
         with db.engine.begin() as connection:
             _set_connection_to_use_for_migration(alembic_config, connection)
-    _migrate(alembic_config)
+            alembic_command.ensure_version(alembic_config)
+            alembic_command.upgrade(alembic_config, "head")
 
 def _get_alembic_config(flask_config: FlaskConfig) -> AlembicConfig:
     return AlembicConfig(flask_config["ALEMBIC_CONFIGURATION_FILE"])
@@ -23,7 +26,3 @@ def _set_connection_to_use_for_migration(alembic_config: AlembicConfig, connecti
     # For details see:
     # https://alembic.sqlalchemy.org/en/latest/cookbook.html#sharing-a-connection-across-one-or-more-programmatic-migration-commands
     alembic_config.attributes["connection"] = connection
-
-def _migrate(alembic_config: AlembicConfig) -> None:
-    alembic_command.ensure_version(alembic_config)
-    alembic_command.upgrade(alembic_config, "head")
