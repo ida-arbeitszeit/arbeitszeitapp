@@ -3,9 +3,6 @@ from os import environ
 FLASK_DEBUG = 0
 TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_DATABASE_URI = environ.get(
-    "ARBEITSZEITAPP_DATABASE_URI", "sqlite:////tmp/arbeitszeitapp.db"
-)
 SECURITY_PASSWORD_SALT = environ.get("SECURITY_PASSWORD_SALT")
 LANGUAGES = {"en": "English", "de": "Deutsch", "es": "Español"}
 MAIL_PORT = "25"

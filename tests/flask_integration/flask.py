@@ -4,7 +4,7 @@ from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
-from sqlalchemy import Connection, text
+from sqlalchemy import Engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
@@ -71,7 +71,7 @@ class DatabaseTestCase(TestCase):
 
         # Drop and recreate schema once per test run
         if not DatabaseTestCase._schema_initialized:
-            drop_and_recreate_schema(self.db.engine.connect())
+            drop_and_recreate_schema(self.db.engine)
             DatabaseTestCase._schema_initialized = True
 
         # Set up connection-level transaction for test isolation
@@ -311,10 +311,10 @@ class ViewTestCase(FlaskTestCase):
             return self.login_accountant()
 
 
-def drop_and_recreate_schema(connection: Connection) -> None:
+def drop_and_recreate_schema(engine: Engine) -> None:
     """
     Drops and recreates the public schema to ensure a clean database state for tests.
     """
-    connection.execute(text("DROP SCHEMA public CASCADE"))
-    connection.execute(text("CREATE SCHEMA public"))
-    connection.commit()
+    with engine.begin() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))

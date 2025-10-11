@@ -34,10 +34,15 @@ configuration options are available
    Path to the alembic configuration. Alembic is used to manage
    database migrations. See the `alembic documentation`_ for further
    information.
+   The target database for migrations is set either via the "sqlalchemy.url"
+   option in the alembic configuration file or via the 
+   ALEMBIC_SQLALCHEMY_DATABASE_URI environment variable. 
 
 .. py:data:: AUTO_MIGRATE
    
-   Upgrade the database schema if changes are detected.
+   Upgrade the database schema if changes are detected on startup. If auto 
+   migration is not activated, you need to run database migrations manually 
+   via the ``alembic`` command line tool.
 
    Example: ``AUTO_MIGRATE = True``
 

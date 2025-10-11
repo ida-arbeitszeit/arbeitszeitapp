@@ -40,11 +40,11 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix develop --command alembic upgrade head
       env:
-        ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
         FLASK_APP: arbeitszeit_flask
     - run: nix develop --command alembic check
       env:
-        ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
         FLASK_APP: arbeitszeit_flask
     services:
       postgres:
