@@ -31,11 +31,9 @@ def get_db_uri() -> str:
         return db_uri
     if db_uri := config.get_main_option("sqlalchemy.url"):
         return db_uri
-    if db_uri := os.getenv("ARBEITSZEITAPP_DEV_DB"):
-        return db_uri
     raise ValueError(
-        "No database URI configured. Set ALEMBIC_SQLALCHEMY_DATABASE_URI, "
-        "ARBEITSZEITAPP_DEV_DB or sqlalchemy.url in alembic.ini"
+        "No database URI configured. Set ALEMBIC_SQLALCHEMY_DATABASE_URI "
+        "or sqlalchemy.url in alembic.ini"
     )
 
 def run_migrations_online() -> None:

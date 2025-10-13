@@ -144,7 +144,9 @@ when you enter the top-level directory of the repo.
   export DEV_SECRET_KEY="my_secret_key"
   export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
   export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
-
+  export ALEMBIC_CONFIG=${PWD}/arbeitszeit_development/alembic.ini
+  export ALEMBIC_SQLALCHEMY_DATABASE_URI=${ARBEITSZEITAPP_DEV_DB}
+  
   # Optionally, adjust the following variables:
   # export ALLOWED_OVERDRAW_MEMBER=1000
   # export DEFAULT_USER_TIMEZONE="Europe/Berlin"

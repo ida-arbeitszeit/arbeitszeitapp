@@ -29,13 +29,14 @@ configuration options are available
 
    Default: ``"UTC"``
 
-.. py:data:: ALEMBIC_CONFIGURATION_FILE
+.. py:data:: ALEMBIC_CONFIG
 
    Path to the alembic configuration. Alembic is used to manage
    database migrations. See the `alembic documentation`_ for further
    information.
-   The target database for migrations is set either via the "sqlalchemy.url"
-   option in the alembic configuration file or via the 
+
+   The target database for migrations is set via the "sqlalchemy.url"
+   option in this file or via the 
    ALEMBIC_SQLALCHEMY_DATABASE_URI environment variable. 
 
 .. py:data:: AUTO_MIGRATE
