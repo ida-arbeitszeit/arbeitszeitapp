@@ -3,6 +3,7 @@ arbeitszeit_benchmark/
 arbeitszeit_development/
 arbeitszeit_flask/
 arbeitszeit_web/
+arbeitszeit_db/
 build_support
 format_code.py
 run-checks
