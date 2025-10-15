@@ -6,9 +6,8 @@ from flask_talisman import Talisman
 from jinja2 import StrictUndefined
 
 from arbeitszeit_db.db import Database
-from arbeitszeit_db.models import Base
-from arbeitszeit_flask.auto_migrate import auto_migrate
 from arbeitszeit_flask.babel import initialize_babel
+from arbeitszeit_flask.database import run_db_migrations
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.flask_session import FlaskLoginUser
@@ -55,11 +54,7 @@ def create_app(
             "SQLALCHEMY_DATABASE_URI", "sqlite:////tmp/arbeitszeitapp.db"
         )
     )
-
-    if app.config["AUTO_MIGRATE"]:
-        auto_migrate(app.config, db)
-    else:
-        Base.metadata.create_all(db.engine, checkfirst=True)
+    run_db_migrations(app.config, db)
 
     # Where to redirect the user when he attempts to access a login_required
     load_email_plugin(app)

@@ -41,10 +41,12 @@ jobs:
     - run: nix develop --command alembic upgrade head
       env:
         ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_CONFIG: tests/flask_integration/alembic.ini
         FLASK_APP: arbeitszeit_flask
     - run: nix develop --command alembic check
       env:
         ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_CONFIG: tests/flask_integration/alembic.ini
         FLASK_APP: arbeitszeit_flask
     services:
       postgres:

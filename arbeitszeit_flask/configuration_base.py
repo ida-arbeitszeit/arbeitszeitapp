@@ -7,7 +7,7 @@ SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT")
 LANGUAGES = {"en": "English", "de": "Deutsch", "es": "Español"}
 MAIL_PORT = "25"
 FORCE_HTTPS = True
-AUTO_MIGRATE = False
+AUTO_MIGRATE = os.getenv("AUTO_MIGRATE", False)
 PREFERRED_URL_SCHEME = "https"
 
 # control thresholds
