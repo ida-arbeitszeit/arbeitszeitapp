@@ -144,22 +144,29 @@ when you enter the top-level directory of the repo.
   export DEV_SECRET_KEY="my_secret_key"
   export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
   export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
-
+  export ALEMBIC_CONFIG=${PWD}/arbeitszeit_development/alembic.ini
+  export ALEMBIC_SQLALCHEMY_DATABASE_URI=${ARBEITSZEITAPP_DEV_DB}
+  
   # Optionally, adjust the following variables:
   # export ALLOWED_OVERDRAW_MEMBER=1000
   # export DEFAULT_USER_TIMEZONE="Europe/Berlin"
+  # export AUTO_MIGRATE=true
+
 
 Development server
 ------------------
 
-When developing, you can run the development app to manually test your 
-latest changes from a user interface perspective.  The app will use the
-development database you set up above.  
-Before you start the development server for the first time, you need to run the
-database migrations via ``alembic upgrade head`` once.
+You can run the arbeitszeitapp in a development environment to manually test your 
+latest changes from a user interface perspective. Start the development 
+server with ``flask run --debug``.
 
-Afterwards, you can start the development server with ``flask
-run --debug``.
+The app will use the development database you set up above. You can
+manually upgrade or downgrade the development database using the
+`alembic` command line tool. Run `alembic --help` to see the
+options. The tool has been customized to always upgrade to the newest
+migration version if it detects a fresh database. Moreover, if the environment
+variable ``AUTO_MIGRATE`` is set to ``true``, it will always
+upgrade the database automatically when you start the development server.
 
 In the development app, you might want to sign up a company or a member. While doing this,
 you will be redirected to a site that asks to click a confirmation link provided in an e-mail. 

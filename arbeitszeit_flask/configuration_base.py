@@ -1,13 +1,13 @@
-from os import environ
+import os
 
 FLASK_DEBUG = 0
 TESTING = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SECURITY_PASSWORD_SALT = environ.get("SECURITY_PASSWORD_SALT")
+SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT")
 LANGUAGES = {"en": "English", "de": "Deutsch", "es": "Español"}
 MAIL_PORT = "25"
 FORCE_HTTPS = True
-AUTO_MIGRATE = False
+AUTO_MIGRATE = os.getenv("AUTO_MIGRATE", False)
 PREFERRED_URL_SCHEME = "https"
 
 # control thresholds
@@ -28,7 +28,5 @@ SWAGGER_VALIDATOR_URL = "placeholder"
 SWAGGER_UI_OAUTH_REALM = "placeholder"
 SWAGGER_UI_OAUTH_APP_NAME = "placeholder"
 
-# Path to the alembic configuration file relative to the working directory of
-# the flask process.
-ALEMBIC_CONFIGURATION_FILE = "alembic.ini"
+ALEMBIC_CONFIG = os.getenv("ALEMBIC_CONFIG")
 DEFAULT_USER_TIMEZONE = "UTC"

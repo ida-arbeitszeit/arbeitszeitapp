@@ -34,14 +34,14 @@ target-version = ['py312']
 extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
-  ^/arbeitszeit_db/migrations/
+  ^/arbeitszeit_db/migrations/versions/
 )
 '''
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-skip = "arbeitszeit_db/migrations"
+skip = "arbeitszeit_db/migrations/versions/"
 
 [tool.mypy]
 files = [
@@ -56,7 +56,7 @@ files = [
 ]
 mypy_path = "type_stubs"
 exclude = '''
-    migrations/
+    migrations/versions/
 '''
 disable_error_code = "type-abstract"
 
