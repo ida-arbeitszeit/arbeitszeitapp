@@ -1,10 +1,13 @@
-# my own
+# arbeitszeitapp specific
 *.swp
 .DS_Store
 my_database_key.py
 *.pyc
 .vscode/
 custom_settings.py
+arbeitszeitapp_test.db
+arbeitszeitapp_dev.db
+*.db-journal
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
