@@ -66,7 +66,7 @@ buildPythonPackage {
 
     # Run tests with SQLite.
 
-    pytest -x
+    ARBEITSZEITAPP_TEST_DB=sqlite:////tmp/arbeitszeitapp_test.db pytest -x
 
     # Run tests with PostgreSQL.
 
