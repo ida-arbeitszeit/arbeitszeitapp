@@ -1,10 +1,11 @@
 from enum import Enum, auto
+from pathlib import Path
 from typing import Any, Generic, List, Optional, Type, TypeVar
 from unittest import TestCase
 from uuid import UUID
 
 from flask import Flask, current_app
-from sqlalchemy import Engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from arbeitszeit.injector import Module
@@ -67,12 +68,9 @@ class DatabaseTestCase(TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.injector = get_dependency_injector(self.get_injection_modules())
-        self.db = self.injector.get(Database)
 
-        # Drop and recreate schema once per test run
-        if not DatabaseTestCase._schema_initialized:
-            drop_and_recreate_schema(self.db.engine)
-            DatabaseTestCase._schema_initialized = True
+        self.reset_test_db_once_per_testrun()
+        self.db = self.injector.get(Database)
 
         # Set up connection-level transaction for test isolation
         self.connection = self.db.engine.connect()
@@ -95,6 +93,11 @@ class DatabaseTestCase(TestCase):
 
     def get_injection_modules(self) -> List[Module]:
         return []
+
+    def reset_test_db_once_per_testrun(self) -> None:
+        if not DatabaseTestCase._schema_initialized:
+            reset_test_db()
+            DatabaseTestCase._schema_initialized = True
 
 
 class FlaskTestCase(DatabaseTestCase):
@@ -311,10 +314,16 @@ class ViewTestCase(FlaskTestCase):
             return self.login_accountant()
 
 
-def drop_and_recreate_schema(engine: Engine) -> None:
-    """
-    Drops and recreates the public schema to ensure a clean database state for tests.
-    """
-    with engine.begin() as conn:
-        conn.execute(text("DROP SCHEMA public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
+def reset_test_db() -> None:
+    db = get_dependency_injector().get(Database)
+    dialect = db.engine.dialect.name
+    if dialect == "postgresql":
+        with db.engine.begin() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+    elif dialect == "sqlite":
+        path_string = db.engine.url.database
+        assert path_string, "Expected a file path for SQLite database"
+        path = Path(path_string)
+        if path.exists():
+            path.unlink()
