@@ -16,8 +16,8 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from sqlalchemy import Delete, Insert, String, Update, insert
-from sqlalchemy.dialects import postgresql
+from sqlalchemy import Delete, Insert, String, Update
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import InstrumentedAttribute, aliased, scoped_session
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql.expression import ColumnElement, and_, delete, func, or_, update
@@ -481,14 +481,29 @@ class PlanUpdate:
                         dict(plan=plan.id, cooperation=str(coop_id))
                         for plan in self.query
                     ]
-                    sql_statement = (
-                        insert(models.PlanCooperation)
-                        .values(values)
-                        .on_conflict_do_update(
-                            constraint="plan_cooperation_pkey",
-                            set_=dict(cooperation=str(coop_id)),
+                    dialect = self.db.engine.dialect.name
+                    if dialect == "postgresql":
+                        sql_statement = (
+                            postgresql.insert(models.PlanCooperation)
+                            .values(values)
+                            .on_conflict_do_update(
+                                constraint="plan_cooperation_pkey",
+                                set_=dict(cooperation=str(coop_id)),
+                            )
                         )
-                    )
+                    elif dialect == "sqlite":
+                        sql_statement = (
+                            sqlite.insert(models.PlanCooperation)
+                            .values(values)
+                            .on_conflict_do_update(
+                                index_elements=[models.PlanCooperation.plan],
+                                set_=dict(cooperation=str(coop_id)),
+                            )
+                        )
+                    else:
+                        raise NotImplementedError(
+                            f"Upsert not implemented for dialect {dialect}"
+                        )
             result = self.db.session.execute(sql_statement)
             row_count = max(row_count, result.rowcount)
         self.db.session.flush()
