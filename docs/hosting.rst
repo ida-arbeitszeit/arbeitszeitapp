@@ -124,7 +124,8 @@ configuration options are available
 
 .. py:data:: SQLALCHEMY_DATABASE_URI
    
-   The address of the database used for persistence.
+   The address of the database used for persistence. The
+   application has been tested with PostgreSQL and SQLite databases.
 
    Default: ``"sqlite:////tmp/arbeitszeitapp.db"``
 
