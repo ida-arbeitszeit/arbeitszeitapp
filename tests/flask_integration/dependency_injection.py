@@ -65,12 +65,7 @@ class FlaskConfiguration(dict):
 
 
 def provide_test_database_uri() -> str:
-    uri = os.getenv("ARBEITSZEITAPP_TEST_DB")
-    if uri is None:
-        raise ValueError(
-            "Environment variable ARBEITSZEITAPP_TEST_DB is unset. Set it to point to a postgres db"
-        )
-    return uri
+    return os.environ["ARBEITSZEITAPP_TEST_DB"]
 
 
 def provide_app(config: FlaskConfiguration) -> Flask:
