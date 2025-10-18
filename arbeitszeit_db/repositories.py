@@ -476,21 +476,25 @@ class PlanUpdate:
                             self.query.with_entities(models.Plan.id).scalar_subquery()
                         )
                     )
+                    result = self.db.session.execute(sql_statement)
+                    row_count = max(row_count, result.rowcount)
                 case self.SetCooperation(cooperation=coop_id):
-                    values = [
-                        dict(plan=plan.id, cooperation=str(coop_id))
-                        for plan in self.query
-                    ]
-                    sql_statement = (
-                        insert(models.PlanCooperation)
-                        .values(values)
-                        .on_conflict_do_update(
-                            constraint="plan_cooperation_pkey",
-                            set_=dict(cooperation=str(coop_id)),
+                    # Database-agnostic upsert: delete existing then insert
+                    plan_ids = [plan.id for plan in self.query]
+                    if plan_ids:
+                        # First delete existing plan cooperations
+                        delete_stmt = delete(models.PlanCooperation).where(
+                            models.PlanCooperation.plan.in_(plan_ids)
                         )
-                    )
-            result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)
+                    self.db.session.execute(delete_stmt)
+                    # Then insert new ones
+                    values = [
+                        dict(plan=plan_id, cooperation=str(coop_id))
+                        for plan_id in plan_ids
+                    ]
+                    sql_statement = insert(models.PlanCooperation).values(values)
+                    result = self.db.session.execute(sql_statement)
+                    row_count = max(row_count, result.rowcount)
         self.db.session.flush()
         return row_count
 
