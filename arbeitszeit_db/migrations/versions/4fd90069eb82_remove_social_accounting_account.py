@@ -21,8 +21,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_constraint('social_accounting_account_fkey', 'social_accounting', type_='foreignkey')
-    op.drop_column('social_accounting', 'account')
+    with op.batch_alter_table('social_accounting') as batch_op:
+        batch_op.drop_constraint('social_accounting_account_fkey', type_='foreignkey')
+        batch_op.drop_column('account')
 
 
 def downgrade() -> None:
@@ -32,8 +33,9 @@ def downgrade() -> None:
     social_accounting = table('social_accounting', column('account', sa.VARCHAR()))
     op.execute(social_accounting.update().values(account=generate_valid_account_id()))
     
-    op.alter_column('social_accounting', 'account', nullable=False)
-    op.create_foreign_key('social_accounting_account_fkey', 'social_accounting', 'account', ['account'], ['id'])
+    with op.batch_alter_table('social_accounting') as batch_op:
+        batch_op.alter_column('account', nullable=False)
+        batch_op.create_foreign_key('social_accounting_account_fkey', 'account', ['account'], ['id'])
 
 
 def generate_valid_account_id() -> str:
