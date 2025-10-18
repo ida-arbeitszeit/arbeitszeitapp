@@ -224,7 +224,7 @@ class RegisteredHoursWorkedResultTests(FlaskTestCase):
             .joined_with_transfer_of_work_certificates()
             .first()
         )
-        assert result[1].value == expected_value
+        self.assertAlmostEqual(result[1].value, expected_value)
 
     def register_hours_worked(
         self, company: UUID, worker: UUID, hours: Decimal = Decimal(1)

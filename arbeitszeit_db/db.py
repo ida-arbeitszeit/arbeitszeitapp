@@ -1,14 +1,16 @@
 from typing import Optional
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import URL, Engine, create_engine, make_url
 from sqlalchemy.orm import DeclarativeBase, scoped_session, sessionmaker
 
 
 class Database:
+    """This class is a singleton."""
+
     _instance: Optional["Database"] = None
     _engine: Optional[Engine] = None
     _session: Optional[scoped_session] = None
-    _uri: Optional[str] = None
+    _uri: Optional[URL] = None
 
     def __new__(cls) -> "Database":
         if cls._instance is None:
@@ -16,11 +18,18 @@ class Database:
         return cls._instance
 
     def configure(self, uri: str) -> None:
-        if self._uri == uri:
+        supported_dialects = ["postgresql", "sqlite"]
+        sqlalchemy_uri = make_url(uri)
+        if sqlalchemy_uri.get_backend_name() not in supported_dialects:
+            raise ValueError(
+                f"Unsupported database dialect: {sqlalchemy_uri.get_backend_name()}. "
+                f"Supported dialects are: {', '.join(supported_dialects)}."
+            )
+        if self._uri == sqlalchemy_uri:
             # URI is already set to the same value
             pass
         elif self._uri is None:
-            self._uri = uri
+            self._uri = sqlalchemy_uri
         else:
             raise ValueError("Database URI is already set to a different value.")
 

@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import Connection, create_engine, inspect
+from sqlalchemy import URL, Connection, create_engine, inspect, make_url
 
 from arbeitszeit_db.models import Base
 
@@ -52,11 +52,11 @@ def upgrade_to_head_if_database_is_fresh(connection: Connection) -> None:
         init_db(migration_context)
 
 
-def get_db_uri() -> str:
+def get_db_uri() -> URL:
     if db_uri := os.getenv("ALEMBIC_SQLALCHEMY_DATABASE_URI"):
-        return db_uri
+        return make_url(db_uri)
     if db_uri := config.get_main_option("sqlalchemy.url"):
-        return db_uri
+        return make_url(db_uri)
     raise ValueError(
         "No database URI configured. Set ALEMBIC_SQLALCHEMY_DATABASE_URI "
         "or sqlalchemy.url in alembic.ini"
@@ -79,7 +79,7 @@ def run_migrations_online() -> None:
         run_migrations(connectable)
     else:
         engine = create_engine(get_db_uri())
-        with engine.connect() as connection:
+        with engine.begin() as connection:
             run_migrations(connection)
 
 

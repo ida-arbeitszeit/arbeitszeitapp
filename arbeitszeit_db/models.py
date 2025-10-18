@@ -5,17 +5,22 @@ Definition of database tables.
 import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
+from sqlite3 import Connection as SQLiteConnection
+from typing import Any
 
 from sqlalchemy import (
     Column,
     DateTime,
     Dialect,
+    Engine,
     ForeignKey,
     String,
     Table,
     TypeDecorator,
+    event,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.pool import ConnectionPoolEntry
 
 from arbeitszeit.transfers import TransferType
 from arbeitszeit_db.db import Base
@@ -23,6 +28,25 @@ from arbeitszeit_db.db import Base
 
 def generate_uuid() -> str:
     return str(uuid.uuid4())
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(
+    dbapi_connection: Any, connection_record: ConnectionPoolEntry
+) -> None:
+    # This event listener is necessary to enable "on delete cascading" in SQlite
+    # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#sqlite-foreign-keys
+    # https://docs.sqlalchemy.org/en/20/orm/cascades.html#using-foreign-key-on-delete-cascade-with-orm-relationships
+    if type(dbapi_connection) is SQLiteConnection:
+        ac = dbapi_connection.autocommit
+        dbapi_connection.autocommit = True
+
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+        # restore orginal autocommit setting
+        dbapi_connection.autocommit = ac
 
 
 class TZDateTime(TypeDecorator):

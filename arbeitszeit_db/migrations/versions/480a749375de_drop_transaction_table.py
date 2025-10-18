@@ -19,19 +19,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_table('transaction')
+    op.drop_constraint('transaction_receiving_account_fkey', 'transaction', type_='foreignkey', if_exists=True)
+    op.drop_constraint('transaction_sending_account_fkey', 'transaction', type_='foreignkey', if_exists=True)
+    op.drop_constraint('transaction_pkey', 'transaction', type_='primary', if_exists=True)
+    op.drop_table('transaction', if_exists=True)
 
 
 def downgrade() -> None:
-    op.create_table('transaction',
-    sa.Column('id', sa.VARCHAR(), autoincrement=False, nullable=False),
-    sa.Column('date', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
-    sa.Column('sending_account', sa.VARCHAR(), autoincrement=False, nullable=False),
-    sa.Column('receiving_account', sa.VARCHAR(), autoincrement=False, nullable=False),
-    sa.Column('purpose', sa.VARCHAR(length=1000), autoincrement=False, nullable=False),
-    sa.Column('amount_sent', sa.NUMERIC(), autoincrement=False, nullable=False),
-    sa.Column('amount_received', sa.NUMERIC(), autoincrement=False, nullable=False),
-    sa.ForeignKeyConstraint(['receiving_account'], ['account.id'], name='transaction_receiving_account_fkey'),
-    sa.ForeignKeyConstraint(['sending_account'], ['account.id'], name='transaction_sending_account_fkey'),
-    sa.PrimaryKeyConstraint('id', name='transaction_pkey')
-    )
+    pass

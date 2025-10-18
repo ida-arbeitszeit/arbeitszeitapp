@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from parameterized import parameterized
-from sqlalchemy import text
 
 from arbeitszeit.records import AccountTypes, SocialAccounting
 from arbeitszeit.transfers import TransferType
@@ -30,16 +29,6 @@ class TransferResultTests(FlaskTestCase):
         transfer = self.database_gateway.get_transfers().first()
         assert transfer
         assert transfer.type == type
-
-    def test_that_transfer_type_enum_from_database_matches_enum_in_code(self) -> None:
-        db_values = [
-            row[0]
-            for row in self.db.session.execute(
-                text("SELECT unnest(enum_range(NULL::transfertype))")
-            )
-        ]
-        code_values = [member.value for member in TransferType]
-        assert set(db_values) == set(code_values)
 
     def test_that_transfers_with_all_existing_transfer_types_can_be_created(
         self,

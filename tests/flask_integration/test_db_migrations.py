@@ -5,18 +5,23 @@ from flask import Flask
 from sqlalchemy import inspect, text
 
 from arbeitszeit.injector import Binder, CallableProvider, Module
-from tests.flask_integration.flask import DatabaseTestCase, drop_and_recreate_schema
+from arbeitszeit_db.db import Base
+from tests.flask_integration.flask import DatabaseTestCase
 
 from .dependency_injection import FlaskConfiguration
 
 
-class AutoMigrationsTestCase(DatabaseTestCase):
+class MigrationsTestCase(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
+        Base.metadata.drop_all(bind=self.db.engine)
+        with self.db.engine.begin() as conn:
+            conn.execute(text("DROP TABLE IF EXISTS alembic_version;"))
         self.alembic_config = Config("tests/flask_integration/alembic.ini")
 
     def tearDown(self) -> None:
-        self.upgrade_to_head()
+        Base.metadata.drop_all(bind=self.db.engine)
+        Base.metadata.create_all(bind=self.db.engine)
         super().tearDown()
 
     @property
@@ -43,13 +48,8 @@ class AutoMigrationsTestCase(DatabaseTestCase):
         modules.append(_Module())
         return modules
 
-    def upgrade_to_head(self) -> None:
-        with self.db.engine.begin() as connection:
-            self.alembic_config.attributes["connection"] = connection
-            command.upgrade(self.alembic_config, "head")
-
     def table_exists(self, table_name: str) -> bool:
-        inspector = inspect(self.db.session.connection())
+        inspector = inspect(self.db.engine)
         tables = inspector.get_table_names()
         return table_name in tables
 
@@ -65,7 +65,7 @@ class AutoMigrationsTestCase(DatabaseTestCase):
         assert current_version_row
         assert current_version_row[0] == VERSION
 
-    def db_is_at_head(self) -> bool:
+    def is_db_at_head(self) -> bool:
         current_version_row = self.db.session.execute(
             text("select version_num from alembic_version;")
         ).first()
@@ -79,15 +79,11 @@ class AutoMigrationsTestCase(DatabaseTestCase):
         return current_version in head_revisions
 
 
-class TestsWithFreshDatabaseAndAutoMigration(AutoMigrationsTestCase):
+class TestsWithFreshDatabaseAndAutoMigration(MigrationsTestCase):
     @property
     def auto_migrate_setting(self) -> bool:
         return True
 
-    def setUp(self) -> None:
-        super().setUp()
-        drop_and_recreate_schema(self.db.engine)
-
     def test_that_app_starts_successfully(self) -> None:
         self.injector.get(Flask)
 
@@ -99,15 +95,11 @@ class TestsWithFreshDatabaseAndAutoMigration(AutoMigrationsTestCase):
         assert self.table_exists("plan")
 
 
-class TestsWithFreshDatabaseAndDeactivatedAutoMigration(AutoMigrationsTestCase):
+class TestsWithFreshDatabaseAndNoAutoMigration(MigrationsTestCase):
     @property
     def auto_migrate_setting(self) -> bool:
         return False
 
-    def setUp(self) -> None:
-        super().setUp()
-        drop_and_recreate_schema(self.db.engine)
-
     def test_that_app_starts_successfully(self) -> None:
         self.injector.get(Flask)
 
@@ -118,8 +110,16 @@ class TestsWithFreshDatabaseAndDeactivatedAutoMigration(AutoMigrationsTestCase):
         assert self.table_exists("alembic_version")
         assert self.table_exists("plan")
 
+    def test_that_alembic_table_has_version_num(self) -> None:
+        self.injector.get(Flask)
+        version_row = self.db.session.execute(
+            text("select version_num from alembic_version;")
+        ).first()
+        assert version_row
+        assert version_row[0]
 
-class TestsWithUpgradableDatabaseAndAutoMigration(AutoMigrationsTestCase):
+
+class TestsWithUpgradableDatabaseAndAutoMigration(MigrationsTestCase):
     @property
     def auto_migrate_setting(self) -> bool:
         return True
@@ -132,12 +132,12 @@ class TestsWithUpgradableDatabaseAndAutoMigration(AutoMigrationsTestCase):
         self.injector.get(Flask)
 
     def test_that_db_gets_upgraded_to_head(self) -> None:
-        assert not self.db_is_at_head()
+        assert not self.is_db_at_head()
         self.injector.get(Flask)
-        assert self.db_is_at_head()
+        assert self.is_db_at_head()
 
 
-class TestsWithUpgradableDatabaseAndDeactivatedAutoMigration(AutoMigrationsTestCase):
+class TestsWithUpgradableDatabaseAndNoAutoMigration(MigrationsTestCase):
     @property
     def auto_migrate_setting(self) -> bool:
         return False
@@ -151,4 +151,16 @@ class TestsWithUpgradableDatabaseAndDeactivatedAutoMigration(AutoMigrationsTestC
 
     def test_that_db_does_not_get_upgraded_to_head(self) -> None:
         self.injector.get(Flask)
-        assert not self.db_is_at_head()
+        assert not self.is_db_at_head()
+
+
+class TestDowngrade(MigrationsTestCase):
+    @property
+    def auto_migrate_setting(self) -> bool:
+        return False
+
+    def test_that_downgrade_to_base_is_possible_after_an_upgrade_to_head(self) -> None:
+        with self.db.engine.begin() as connection:
+            self.alembic_config.attributes["connection"] = connection
+            command.upgrade(self.alembic_config, "head")
+            command.downgrade(self.alembic_config, "base")

@@ -64,7 +64,12 @@ buildPythonPackage {
   checkPhase = ''
     runHook preCheck
 
-    # Set up postgres so that we can run the DB tests.
+    # Run tests with SQLite.
+
+    ARBEITSZEITAPP_TEST_DB=sqlite:////tmp/arbeitszeitapp_test.db pytest -x
+
+    # Run tests with PostgreSQL.
+
     POSTGRES_DIR=$(mktemp -d)
     initdb -D $POSTGRES_DIR
     postgres -h "" -k $POSTGRES_DIR -D $POSTGRES_DIR &
