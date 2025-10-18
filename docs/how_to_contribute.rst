@@ -11,19 +11,8 @@ We want people around the world to use the arbeitszeitapp. To achieve this, it's
 Contributing code
 ------------------
 
-We appreciate contributions to the code! Before you start contributing, you'll need to set up your development environment. We recommend using Linux with Nix for development. The setup process is detailed in our :doc:`development_setup` guide, which covers:
-
-* Setting up PostgreSQL databases
-* Installing development dependencies
-* Configuring environment variables
-* Running the development server
-
-We maintain high code quality standards through:
-
-* Type hints and static type checking with ``mypy``
-* Code formatting with ``black`` and ``isort``
-* Linting with ``flake8``
-* Comprehensive test coverage
+We appreciate contributions to the code! Before you start contributing, you'll need to set up your development environment. The setup process is
+detailed in our :doc:`development_setup` guide.
 
 You can propose changes by `forking the repository <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>`_ and creating a pull request on GitHub.
 Before submitting changes, run ``./run-checks`` to ensure your code meets our standards.
