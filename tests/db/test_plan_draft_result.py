@@ -7,8 +7,7 @@ from parameterized import parameterized
 
 from arbeitszeit.records import PlanDraft, ProductionCosts
 from tests.datetime_service import datetime_utc
-
-from ..flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 DEFAULT_COST = ProductionCosts(
     labour_cost=Decimal(1),
@@ -17,7 +16,7 @@ DEFAULT_COST = ProductionCosts(
 )
 
 
-class PlanDraftRepositoryBaseTests(FlaskTestCase):
+class PlanDraftRepositoryBaseTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.planner = self.company_generator.create_company_record()

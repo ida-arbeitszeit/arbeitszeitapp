@@ -2,8 +2,8 @@ from typing import List
 from uuid import UUID, uuid4
 
 from arbeitszeit import records
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 from .utility import Utility
 
 
@@ -13,7 +13,7 @@ def company_in_companies(
     return company.id in (c.id for c in companies)
 
 
-class CompanyResultTests(FlaskTestCase):
+class CompanyResultTests(DatabaseTestCase):
     def create_company(
         self, *, name: str = "test company name", email_address: str = "test@test.test"
     ) -> records.Company:
@@ -157,7 +157,7 @@ class CreateCompanyTests(CompanyResultTests):
         self.create_company_from_credentials(credentials=credentials.id)
 
 
-class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
+class ThatAreWorkplaceOfMemberTests(DatabaseTestCase):
     def test_that_by_default_random_members_are_not_assigned_to_a_company(self) -> None:
         self.company_generator.create_company()
         member = self.member_generator.create_member()
@@ -193,7 +193,7 @@ class ThatAreWorkplaceOfMemberTests(FlaskTestCase):
         )
 
 
-class WithNameContainingTests(FlaskTestCase):
+class WithNameContainingTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
 
@@ -222,7 +222,7 @@ class WithNameContainingTests(FlaskTestCase):
         assert returned_company[0].id == expected_company_id
 
 
-class WithEmailContainingTests(FlaskTestCase):
+class WithEmailContainingTests(DatabaseTestCase):
     def test_that_companies_can_be_filtered_by_email(self):
         expected_company_id = self.company_generator.create_company(
             email="some.mail@cp.org"
@@ -265,7 +265,7 @@ class WithEmailContainingTests(FlaskTestCase):
         assert returned_company[0].id == expected_company_id
 
 
-class JoinedWithEmailTests(FlaskTestCase):
+class JoinedWithEmailTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
 
@@ -281,7 +281,7 @@ class JoinedWithEmailTests(FlaskTestCase):
         assert record
 
 
-class ThatIsCoordinatingCooperationTests(FlaskTestCase):
+class ThatIsCoordinatingCooperationTests(DatabaseTestCase):
     def test_that_unrelated_company_is_not_included(self) -> None:
         company = self.company_generator.create_company()
         cooperation = self.cooperation_generator.create_cooperation()

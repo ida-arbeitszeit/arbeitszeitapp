@@ -1,4 +1,4 @@
-from .flask import LogInUser, ViewTestCase
+from .base_test_case import LogInUser, ViewTestCase
 
 
 class AccountantTests(ViewTestCase):

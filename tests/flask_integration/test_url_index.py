@@ -12,7 +12,7 @@ from arbeitszeit.interactors.send_accountant_registration_token import (
 from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.session import UserRole
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class PlotUrlIndexTests(ViewTestCase):

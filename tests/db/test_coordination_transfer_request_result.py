@@ -2,10 +2,10 @@ from uuid import UUID
 
 from arbeitszeit.records import CoordinationTransferRequest
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class CoordinationTransferRequestResultTests(FlaskTestCase):
+class CoordinationTransferRequestResultTests(DatabaseTestCase):
     def test_that_a_priori_no_coordination_transfer_requests_are_in_db(
         self,
     ) -> None:
@@ -78,7 +78,7 @@ class CoordinationTransferRequestResultTests(FlaskTestCase):
         )
 
 
-class RequestedByCoordinationTenureTests(FlaskTestCase):
+class RequestedByCoordinationTenureTests(DatabaseTestCase):
     def test_results_filtered_by_requesting_coordination_tenure_does_return_transfer_request_of_that_coordination_tenure(
         self,
     ) -> None:
@@ -126,7 +126,7 @@ class RequestedByCoordinationTenureTests(FlaskTestCase):
         )
 
 
-class JoinedWithCooperationTests(FlaskTestCase):
+class JoinedWithCooperationTests(DatabaseTestCase):
     def test_that_joining_with_cooperation_returns_the_cooperation_from_which_the_request_has_been_issued(
         self,
     ) -> None:

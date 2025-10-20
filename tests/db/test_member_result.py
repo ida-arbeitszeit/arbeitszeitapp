@@ -7,12 +7,11 @@ from sqlalchemy.exc import IntegrityError
 
 from arbeitszeit import records
 from tests.datetime_service import datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
+from tests.db.utility import Utility
 
-from ..flask import FlaskTestCase
-from .utility import Utility
 
-
-class MemberResultTests(FlaskTestCase):
+class MemberResultTests(DatabaseTestCase):
     def create_member(self, email_address: Optional[str] = None) -> records.Member:
         if email_address is None:
             email_address = self.email_generator.get_random_email()

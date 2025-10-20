@@ -19,10 +19,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_constraint('transaction_receiving_account_fkey', 'transaction', type_='foreignkey', if_exists=True)
-    op.drop_constraint('transaction_sending_account_fkey', 'transaction', type_='foreignkey', if_exists=True)
-    op.drop_constraint('transaction_pkey', 'transaction', type_='primary', if_exists=True)
-    op.drop_table('transaction', if_exists=True)
+    with op.batch_alter_table('transaction') as batch_op:
+        batch_op.drop_constraint('transaction_receiving_account_fkey', type_='foreignkey')
+        batch_op.drop_constraint('transaction_sending_account_fkey', type_='foreignkey')
+        batch_op.drop_constraint('transaction_pkey', type_='primary')
+    
+    op.drop_table('transaction')
 
 
 def downgrade() -> None:

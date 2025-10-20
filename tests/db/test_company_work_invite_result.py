@@ -1,9 +1,9 @@
 from uuid import uuid4
 
-from ..flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class CooperationResultTests(FlaskTestCase):
+class CooperationResultTests(DatabaseTestCase):
     def test_that_there_are_no_invites_in_database_by_default(self) -> None:
         assert not self.database_gateway.get_company_work_invites()
 

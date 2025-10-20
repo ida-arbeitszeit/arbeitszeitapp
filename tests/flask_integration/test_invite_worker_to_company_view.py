@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 URL = "/company/invite_worker_to_company"
 
