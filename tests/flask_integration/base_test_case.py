@@ -1,115 +1,32 @@
 from enum import Enum, auto
-from pathlib import Path
-from typing import Any, Generic, List, Optional, Type, TypeVar
-from unittest import TestCase
+from typing import Any, Optional
 from uuid import UUID
 
 from flask import Flask, current_app
-from sqlalchemy import text
-from sqlalchemy.orm import scoped_session, sessionmaker
 
-from arbeitszeit.injector import Module
-from arbeitszeit_db.db import Database
+from arbeitszeit.injector import Injector, Module
 from arbeitszeit_db.repositories import DatabaseGatewayImpl
+from arbeitszeit_flask.dependency_injection import FlaskModule
 from arbeitszeit_flask.token import FlaskTokenService
 from arbeitszeit_flask.url_index import GeneralUrlIndex
-from tests.data_generators import (
-    AccountantGenerator,
-    CompanyGenerator,
-    ConsumptionGenerator,
-    CooperationGenerator,
-    CoordinationTenureGenerator,
-    CoordinationTransferRequestGenerator,
-    EmailGenerator,
-    MemberGenerator,
-    PlanGenerator,
-    RegisteredHoursWorkedGenerator,
-    TransferGenerator,
-    WorkerAffiliationGenerator,
-)
-from tests.datetime_service import FakeDatetimeService
+from tests import data_generators
+from tests.db.base_test_case import DatabaseTestCase
+from tests.flask_integration.dependency_injection import FlaskTestingModule
 from tests.flask_integration.mail_service import MockEmailService
-from tests.markers import database_required
-from tests.www.datetime_formatter import FakeTimezoneConfiguration
-
-from .dependency_injection import get_dependency_injector
-
-T = TypeVar("T")
-
-
-# This class is a descriptor.
-class _lazy_property(Generic[T]):
-    def __init__(self, cls: Type[T]):
-        """Implement a lazy property for the FlaskTestCase.  If the
-        implementor asks for this attribute then it is generated on
-        demand and cached.
-        """
-        self.cls = cls
-
-    def __set_name__(self, owner, name: str) -> None:
-        self._attribute_name = name
-
-    def __get__(self, obj: Any, objtype=None) -> T:
-        cache = obj._lazy_property_cache
-        instance = cache.get(self._attribute_name)
-        if instance is None:
-            instance = obj.injector.get(self.cls)
-            cache[self._attribute_name] = instance
-        return instance
-
-    def __set__(self, obj: Any, value: T) -> None:
-        raise Exception("This attribute is read-only")
-
-
-@database_required
-class DatabaseTestCase(TestCase):
-    _schema_initialized = False
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.injector = get_dependency_injector(self.get_injection_modules())
-
-        self.reset_test_db_once_per_testrun()
-        self.db = self.injector.get(Database)
-
-        # Set up connection-level transaction for test isolation
-        self.connection = self.db.engine.connect()
-        self.transaction = self.connection.begin()
-        # Create test session
-        session_factory = sessionmaker(bind=self.connection)
-        self.test_session = scoped_session(session_factory)
-        # Use test session for all database operations
-        self.db._session = self.test_session
-
-    def tearDown(self) -> None:
-        # Clean up database resources
-        if hasattr(self, "test_session"):
-            self.test_session.close()
-        if hasattr(self, "transaction"):
-            self.transaction.rollback()
-        if hasattr(self, "connection"):
-            self.connection.close()
-        super().tearDown()
-
-    def get_injection_modules(self) -> List[Module]:
-        return []
-
-    def reset_test_db_once_per_testrun(self) -> None:
-        if not DatabaseTestCase._schema_initialized:
-            reset_test_db()
-            DatabaseTestCase._schema_initialized = True
+from tests.lazy_property import _lazy_property
 
 
 class FlaskTestCase(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self._lazy_property_cache: dict[str, Any] = dict()
+        self.dependencies.extend([FlaskModule(), FlaskTestingModule()])
+        self.dependencies.extend(self.get_injection_modules())
+        self.injector = Injector(self.dependencies)
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
 
     def tearDown(self) -> None:
-        self._lazy_property_cache = dict()
         if hasattr(self, "app_context"):
             self.app_context.pop()
         super().tearDown()
@@ -117,27 +34,33 @@ class FlaskTestCase(DatabaseTestCase):
     def email_service(self) -> MockEmailService:
         return current_app.extensions["arbeitszeit_email_plugin"]
 
-    # It would be nice to have the following list sorted
-    # alphabetically
-    accountant_generator = _lazy_property(AccountantGenerator)
-    company_generator = _lazy_property(CompanyGenerator)
-    consumption_generator = _lazy_property(ConsumptionGenerator)
-    cooperation_generator = _lazy_property(CooperationGenerator)
-    coordination_tenure_generator = _lazy_property(CoordinationTenureGenerator)
+    def get_injection_modules(self) -> list[Module]:
+        # tests inheriting from this class can override this method in
+        # order to change dependency injection behaviour (useful for the
+        # flask configuration)
+        return []
+
+    accountant_generator = _lazy_property(data_generators.AccountantGenerator)
+    company_generator = _lazy_property(data_generators.CompanyGenerator)
+    consumption_generator = _lazy_property(data_generators.ConsumptionGenerator)
+
+    cooperation_generator = _lazy_property(data_generators.CooperationGenerator)
     coordination_transfer_request_generator = _lazy_property(
-        CoordinationTransferRequestGenerator
+        data_generators.CoordinationTransferRequestGenerator
     )
     database_gateway = _lazy_property(DatabaseGatewayImpl)
-    datetime_service = _lazy_property(FakeDatetimeService)
-    timezone_configuration = _lazy_property(FakeTimezoneConfiguration)
-    email_generator = _lazy_property(EmailGenerator)
-    member_generator = _lazy_property(MemberGenerator)
-    plan_generator = _lazy_property(PlanGenerator)
-    registered_hours_worked_generator = _lazy_property(RegisteredHoursWorkedGenerator)
+    email_generator = _lazy_property(data_generators.EmailGenerator)
+    member_generator = _lazy_property(data_generators.MemberGenerator)
+    plan_generator = _lazy_property(data_generators.PlanGenerator)
+    registered_hours_worked_generator = _lazy_property(
+        data_generators.RegisteredHoursWorkedGenerator
+    )
     token_service = _lazy_property(FlaskTokenService)
-    transfer_generator = _lazy_property(TransferGenerator)
+    transfer_generator = _lazy_property(data_generators.TransferGenerator)
     url_index = _lazy_property(GeneralUrlIndex)
-    worker_affiliation_generator = _lazy_property(WorkerAffiliationGenerator)
+    worker_affiliation_generator = _lazy_property(
+        data_generators.WorkerAffiliationGenerator
+    )
 
 
 class LogInUser(Enum):
@@ -312,18 +235,3 @@ class ViewTestCase(FlaskTestCase):
             return self.login_company(confirm_company=False)
         elif login == LogInUser.accountant:
             return self.login_accountant()
-
-
-def reset_test_db() -> None:
-    db = get_dependency_injector().get(Database)
-    dialect = db.engine.dialect.name
-    if dialect == "postgresql":
-        with db.engine.begin() as conn:
-            conn.execute(text("DROP SCHEMA public CASCADE"))
-            conn.execute(text("CREATE SCHEMA public"))
-    elif dialect == "sqlite":
-        path_string = db.engine.url.database
-        assert path_string, "Expected a file path for SQLite database"
-        path = Path(path_string)
-        if path.exists():
-            path.unlink()

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class ViewTests(ViewTestCase):

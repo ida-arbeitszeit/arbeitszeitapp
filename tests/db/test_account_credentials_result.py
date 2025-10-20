@@ -3,13 +3,15 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit import records
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 
-
-class AccountCredentialsResultTests(FlaskTestCase):
+class AccountCredentialsResultTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
 
     def create_account_credentials(
         self, *, email_address: str = "test@cp.org", password_hash: str = ""

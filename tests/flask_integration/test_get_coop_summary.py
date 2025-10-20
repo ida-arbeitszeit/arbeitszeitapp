@@ -4,9 +4,9 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from tests.data_generators import CooperationGenerator
-from tests.flask_integration.flask import LogInUser
+from tests.flask_integration.base_test_case import LogInUser
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class UserAccessTests(ViewTestCase):

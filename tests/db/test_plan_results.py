@@ -11,10 +11,10 @@ from arbeitszeit.records import Plan, ProductionCosts
 from arbeitszeit_db import models
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class PlanResultTests(FlaskTestCase):
+class PlanResultTests(DatabaseTestCase):
     def test_that_plan_gets_hidden(self) -> None:
         plan = self.plan_generator.create_plan()
         self.database_gateway.get_plans().with_id(plan).update().hide().perform()
@@ -83,7 +83,7 @@ class PlanResultTests(FlaskTestCase):
         )
 
 
-class GetActivePlansTests(FlaskTestCase):
+class GetActivePlansTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.approve_plan_interactor = self.injector.get(ApprovePlanInteractor)
@@ -240,7 +240,7 @@ class GetActivePlansTests(FlaskTestCase):
         assert plans[1].id == second_plan
 
 
-class GetAllPlans(FlaskTestCase):
+class GetAllPlans(DatabaseTestCase):
     def test_that_without_any_plans_nothing_is_returned(self) -> None:
         assert not list(self.database_gateway.get_plans())
 
@@ -457,7 +457,7 @@ class GetAllPlans(FlaskTestCase):
         assert all(plan.rejection_date == expected_rejection_date for plan in plans)
 
 
-class ThatAreInSameCooperationAsTests(FlaskTestCase):
+class ThatAreInSameCooperationAsTests(DatabaseTestCase):
     def test_that_noncooperating_plan_is_not_considered_to_be_in_its_own_cooperation(
         self,
     ) -> None:
@@ -522,7 +522,7 @@ class ThatAreInSameCooperationAsTests(FlaskTestCase):
         assert other_plan not in [p.id for p in cooperating_plans]
 
 
-class GetStatisticsTests(FlaskTestCase):
+class GetStatisticsTests(DatabaseTestCase):
     def test_with_no_plans_that_average_planning_duration_is_0(self) -> None:
         stats = self.database_gateway.get_plans().get_statistics()
         assert stats.average_plan_duration_in_days == Decimal(0)
@@ -581,7 +581,7 @@ class GetStatisticsTests(FlaskTestCase):
         )
 
 
-class ThatWereApprovedBeforeTests(FlaskTestCase):
+class ThatWereApprovedBeforeTests(DatabaseTestCase):
     def test_plan_activated_before_a_specified_timestamp_are_included_in_the_result(
         self,
     ) -> None:
@@ -610,7 +610,7 @@ class ThatWereApprovedBeforeTests(FlaskTestCase):
         )
 
 
-class ThatWillExpireAfterTests(FlaskTestCase):
+class ThatWillExpireAfterTests(DatabaseTestCase):
     def test_that_plan_that_will_expire_after_specified_date_is_included_in_results(
         self,
     ) -> None:
@@ -653,7 +653,7 @@ class ThatWillExpireAfterTests(FlaskTestCase):
         )
 
 
-class ThatAreExpiredAsOfTests(FlaskTestCase):
+class ThatAreExpiredAsOfTests(DatabaseTestCase):
     def test_that_plan_that_will_expire_after_specified_date_is_not_included_in_results(
         self,
     ) -> None:
@@ -682,7 +682,7 @@ class ThatAreExpiredAsOfTests(FlaskTestCase):
         )
 
 
-class ThatAreNotHiddenTests(FlaskTestCase):
+class ThatAreNotHiddenTests(DatabaseTestCase):
     def test_that_plan_that_is_not_hidden_will_show_in_results(self) -> None:
         self.plan_generator.create_plan()
         assert self.database_gateway.get_plans().that_are_not_hidden()
@@ -693,7 +693,7 @@ class ThatAreNotHiddenTests(FlaskTestCase):
         assert not self.database_gateway.get_plans().that_are_not_hidden()
 
 
-class JoinedWithPlannerAndCooperationTests(FlaskTestCase):
+class JoinedWithPlannerAndCooperationTests(DatabaseTestCase):
     def test_that_one_result_is_yieled_when_one_plan_exists(self) -> None:
         self.plan_generator.create_plan()
         assert (
@@ -789,7 +789,7 @@ class JoinedWithPlannerAndCooperationTests(FlaskTestCase):
         results.first()
 
 
-class JoinedWithCooperationTests(FlaskTestCase):
+class JoinedWithCooperationTests(DatabaseTestCase):
     def test_that_no_results_are_returned_if_no_plans_exist(self) -> None:
         assert not self.database_gateway.get_plans().joined_with_cooperation()
 
@@ -815,7 +815,7 @@ class JoinedWithCooperationTests(FlaskTestCase):
         assert result[1]
 
 
-class JoinedWithProvidedProductAmountTests(FlaskTestCase):
+class JoinedWithProvidedProductAmountTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)
@@ -889,7 +889,7 @@ class JoinedWithProvidedProductAmountTests(FlaskTestCase):
         assert queried_amount == expected_amount
 
 
-class ThatRequestCooperationWithCoordinatorTests(FlaskTestCase):
+class ThatRequestCooperationWithCoordinatorTests(DatabaseTestCase):
     def test_possible_to_set_and_unset_requested_cooperation_attribute(self):
         cooperation = self.cooperation_generator.create_cooperation()
         plan = self.plan_generator.create_plan()

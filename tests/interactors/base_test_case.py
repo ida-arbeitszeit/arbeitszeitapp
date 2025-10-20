@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, Type, TypeVar
+from typing import Any, Dict
 from unittest import TestCase
 
 from arbeitszeit.repositories import DatabaseGateway
@@ -19,38 +19,11 @@ from tests.data_generators import (
 from tests.datetime_service import FakeDatetimeService
 from tests.economic_scenarios import EconomicScenarios
 from tests.email_notifications import EmailSenderTestImpl
+from tests.lazy_property import _lazy_property
 
 from .balance_checker import BalanceChecker
 from .dependency_injection import get_dependency_injector
 from .price_checker import PriceChecker
-
-T = TypeVar("T")
-
-
-# This class is a descriptor. Check
-# https://docs.python.org/3/howto/descriptor.html for more information
-# on descriptors.
-class _lazy_property(Generic[T]):
-    def __init__(self, cls: Type[T]):
-        """Implement a lazy property for the BaseTestCase.  If the
-        implementor asks for this attribute then it is generated on
-        demand and cached.
-        """
-        self.cls = cls
-
-    def __set_name__(self, owner, name: str) -> None:
-        self._attribute_name = name
-
-    def __get__(self, obj: Any, objtype=None) -> T:
-        cache = obj._lazy_property_cache
-        instance = cache.get(self._attribute_name)
-        if instance is None:
-            instance = obj.injector.get(self.cls)
-            cache[self._attribute_name] = instance
-        return instance
-
-    def __set__(self, obj: Any, value: T) -> None:
-        raise Exception("This attribute is read-only")
 
 
 class BaseTestCase(TestCase):

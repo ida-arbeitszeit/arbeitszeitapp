@@ -5,11 +5,10 @@ from uuid import UUID, uuid4
 from parameterized import parameterized
 
 from tests.datetime_service import datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 
-
-class RegisteredHoursWorkedResultTests(FlaskTestCase):
+class RegisteredHoursWorkedResultTests(DatabaseTestCase):
     def test_get_registered_hours_worked_yields_empty_result_before_any_records_were_created(
         self,
     ) -> None:

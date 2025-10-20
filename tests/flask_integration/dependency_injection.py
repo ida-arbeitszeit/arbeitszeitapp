@@ -1,15 +1,8 @@
-from __future__ import annotations
-
-import os
-from typing import List, Optional
-
 from flask import Flask
 
-from arbeitszeit.injector import Binder, CallableProvider, Injector, Module
-from arbeitszeit_db.db import Database
+from arbeitszeit.injector import Binder, CallableProvider, Module
 from arbeitszeit_flask import create_app
-from arbeitszeit_flask.dependency_injection import FlaskModule
-from tests.dependency_injection import TestingModule
+from tests.db.dependency_injection import provide_test_database_uri
 from tests.flask_integration.mail_service import MockEmailService
 
 
@@ -21,7 +14,7 @@ class FlaskConfiguration(dict):
                 setattr(self, key, value)
 
     @classmethod
-    def default(cls) -> FlaskConfiguration:
+    def default(cls) -> "FlaskConfiguration":
         return cls(
             {
                 "SQLALCHEMY_DATABASE_URI": provide_test_database_uri(),
@@ -41,13 +34,14 @@ class FlaskConfiguration(dict):
                 "AUTO_MIGRATE": False,
                 "DEFAULT_USER_TIMEZONE": "UTC",
                 "ALEMBIC_CONFIG": "tests/flask_integration/alembic.ini",
+                "ALLOWED_OVERDRAW_MEMBER": "unlimited",
             }
         )
 
-    def _get_template_folder(self) -> Optional[str]:
+    def _get_template_folder(self) -> str | None:
         return self.get("template_folder")
 
-    def _set_template_folder(self, template_folder: Optional[str]) -> None:
+    def _set_template_folder(self, template_folder: str | None) -> None:
         self["template_folder"] = template_folder
 
     def __setitem__(self, key, value):
@@ -64,39 +58,12 @@ class FlaskConfiguration(dict):
     template_folder = property(_get_template_folder, _set_template_folder)
 
 
-def provide_test_database_uri() -> str:
-    return os.environ["ARBEITSZEITAPP_TEST_DB"]
-
-
 def provide_app(config: FlaskConfiguration) -> Flask:
     return create_app(config=config, template_folder=config.template_folder)
 
 
-def provide_database() -> Database:
-    Database().configure(uri=provide_test_database_uri())
-    return Database()
-
-
-class DatabaseModule(Module):
+class FlaskTestingModule(Module):
     def configure(self, binder: Binder) -> None:
         super().configure(binder)
         binder[Flask] = CallableProvider(provide_app, is_singleton=True)
         binder[FlaskConfiguration] = CallableProvider(FlaskConfiguration.default)
-        binder[Database] = CallableProvider(provide_database, is_singleton=True)
-
-
-def get_dependency_injector(
-    additional_modules: Optional[List[Module]] = None,
-) -> Injector:
-    # Please be aware that the get_dependency_injector function is only called
-    # from the testing side. The app itself is used with its default dependency
-    # injector. Influencing the dependency injector used by the app is
-    # currently only possible via configuration options.
-    modules: List[Module] = [
-        FlaskModule(),
-        TestingModule(),
-        DatabaseModule(),
-    ]
-    if additional_modules is not None:
-        modules.extend(additional_modules)
-    return Injector(modules)

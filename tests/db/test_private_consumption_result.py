@@ -2,10 +2,10 @@ from datetime import timedelta
 
 from tests.control_thresholds import ControlThresholdsTestImpl
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class PrivateConsumptionTests(FlaskTestCase):
+class PrivateConsumptionTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.control_thresholds = self.injector.get(ControlThresholdsTestImpl)

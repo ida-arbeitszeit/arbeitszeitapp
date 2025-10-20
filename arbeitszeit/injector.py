@@ -154,7 +154,7 @@ class ClassProvider(Provider[T]):
         try:
             instance = self.cls(**kwargs)
         except TypeError as e:
-            raise TypeError(f"Could not instance of class {self.cls}") from e
+            raise TypeError(f"Could not create instance of class {self.cls}") from e
         if self.is_singleton:
             binder._instances[self.cls] = instance
         return instance

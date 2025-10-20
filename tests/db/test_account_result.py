@@ -7,11 +7,10 @@ from parameterized import parameterized
 from arbeitszeit import records
 from arbeitszeit.records import SocialAccounting
 from tests.datetime_service import datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 
-
-class AccountResultTests(FlaskTestCase):
+class AccountResultTests(DatabaseTestCase):
     def test_that_by_default_there_is_one_account_for_social_accounting(
         self,
     ) -> None:
@@ -131,7 +130,7 @@ class AccountResultTests(FlaskTestCase):
         )
 
 
-class JoinedWithBalanceTests(FlaskTestCase):
+class JoinedWithBalanceTests(DatabaseTestCase):
     @parameterized.expand(
         [
             ([], 0),

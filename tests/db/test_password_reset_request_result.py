@@ -3,11 +3,10 @@ from uuid import uuid4
 
 from arbeitszeit import records
 from tests.datetime_service import datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 
-
-class PasswordResetRequestResultTests(FlaskTestCase):
+class PasswordResetRequestResultTests(DatabaseTestCase):
     def _generateResetToken(self) -> str:
         return str(uuid4())
 

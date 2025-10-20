@@ -4,10 +4,10 @@ from uuid import UUID, uuid4
 
 from arbeitszeit.records import ProductionCosts
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class ProductiveConsumptionResultTests(FlaskTestCase):
+class ProductiveConsumptionResultTests(DatabaseTestCase):
     def test_that_by_default_no_company_consumptions_are_in_db(self) -> None:
         assert not self.database_gateway.get_productive_consumptions()
 
@@ -269,7 +269,7 @@ class ProductiveConsumptionResultTests(FlaskTestCase):
         return plan
 
 
-class FilterWhereProviderIsCompanyTests(FlaskTestCase):
+class FilterWhereProviderIsCompanyTests(DatabaseTestCase):
     def test_no_consumption_is_returned_when_queried_providing_company_does_not_exist(
         self,
     ) -> None:

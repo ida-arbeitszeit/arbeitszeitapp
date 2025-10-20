@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import uuid4
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):

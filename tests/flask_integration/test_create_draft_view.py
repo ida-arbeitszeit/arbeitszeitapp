@@ -8,7 +8,7 @@ from arbeitszeit.interactors.show_my_plans import (
     ShowMyPlansRequest,
 )
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class AuthenticatedCompanyTestsForGet(ViewTestCase):

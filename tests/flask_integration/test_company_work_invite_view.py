@@ -4,7 +4,7 @@ from arbeitszeit.interactors.invite_worker_to_company import (
     InviteWorkerToCompanyInteractor,
 )
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class AuthenticatedTests(ViewTestCase):

@@ -3,12 +3,12 @@ from uuid import uuid4
 from parameterized import parameterized
 
 from arbeitszeit import records
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 from .utility import Utility
 
 
-class AccountantResultTests(FlaskTestCase):
+class AccountantResultTests(DatabaseTestCase):
     def setUp(self) -> None:
         super().setUp()
 

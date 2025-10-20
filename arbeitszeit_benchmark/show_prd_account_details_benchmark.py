@@ -1,12 +1,10 @@
-from __future__ import annotations
-
-from flask import Flask
-
+from arbeitszeit.injector import Injector
 from arbeitszeit.interactors import show_prd_account_details
 from arbeitszeit_db.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
-from tests.flask_integration.dependency_injection import get_dependency_injector
-from tests.flask_integration.flask import reset_test_db
+from tests.db.base_test_case import reset_test_db
+from tests.db.dependency_injection import DatabaseModule
+from tests.dependency_injection import TestingModule
 
 
 class ShowPrdAccountDetailsBenchmark:
@@ -16,15 +14,11 @@ class ShowPrdAccountDetailsBenchmark:
     """
 
     def __init__(self) -> None:
-        self.injector = get_dependency_injector()
-
+        self.injector = Injector([TestingModule(), DatabaseModule()])
         reset_test_db()
         self.db = self.injector.get(Database)
         self.db.engine.dispose()
 
-        self.app = self.injector.get(Flask)
-        self.app_context = self.app.app_context()
-        self.app_context.push()
         self.company_generator = self.injector.get(CompanyGenerator)
         self.plan_generator = self.injector.get(PlanGenerator)
         self.consumption_generator = self.injector.get(ConsumptionGenerator)
@@ -42,7 +36,7 @@ class ShowPrdAccountDetailsBenchmark:
         self.db.session.flush()
 
     def tear_down(self) -> None:
-        self.app_context.pop()
+        self.db.session.remove()
 
     def run(self) -> None:
         interactor_request = show_prd_account_details.Request(company_id=self.seller)

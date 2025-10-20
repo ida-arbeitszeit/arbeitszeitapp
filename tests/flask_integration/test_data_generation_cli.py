@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from arbeitszeit_development.dev_cli import generate
-from tests.flask_integration.flask import FlaskTestCase
+from tests.flask_integration.base_test_case import FlaskTestCase
 
 
 class DataGenerationCliTester(FlaskTestCase):

@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from tests.flask_integration.flask import FlaskTestCase
+from tests.flask_integration.base_test_case import FlaskTestCase
 
 
 class LogInUser(Enum):

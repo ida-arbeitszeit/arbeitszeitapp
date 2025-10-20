@@ -1,6 +1,6 @@
 from arbeitszeit_flask.commands import invite_accountant
 
-from .flask import FlaskTestCase
+from .base_test_case import FlaskTestCase
 
 
 class InviteAccountantTests(FlaskTestCase):

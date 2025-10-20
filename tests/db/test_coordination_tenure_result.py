@@ -4,10 +4,10 @@ from uuid import UUID
 
 from arbeitszeit.records import CoordinationTenure
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class CoordinationTenureResultTests(FlaskTestCase):
+class CoordinationTenureResultTests(DatabaseTestCase):
     def test_that_a_priori_no_coordination_tenures_are_in_db(self) -> None:
         coordination_tenures = self.database_gateway.get_coordination_tenures()
         assert not coordination_tenures
@@ -78,7 +78,7 @@ class CoordinationTenureResultTests(FlaskTestCase):
         )
 
 
-class CoordinationsOfCooperationTests(FlaskTestCase):
+class CoordinationsOfCooperationTests(DatabaseTestCase):
     def test_results_filtered_by_cooperation_dont_include_coordinations_of_other_cooperation(
         self,
     ) -> None:
@@ -106,7 +106,7 @@ class CoordinationsOfCooperationTests(FlaskTestCase):
         )
 
 
-class JoinedWithCoordinatorTests(FlaskTestCase):
+class JoinedWithCoordinatorTests(DatabaseTestCase):
     def test_that_joining_with_coordinator_returns_coordinator(
         self,
     ) -> None:

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from tests.api.dependency_injection import get_dependency_injector
+from arbeitszeit.injector import Injector
+from tests.api.dependency_injection import ApiModule
 
 
 class BaseTestCase(TestCase):
@@ -8,4 +9,4 @@ class BaseTestCase(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.injector = get_dependency_injector()
+        self.injector = Injector([ApiModule()])

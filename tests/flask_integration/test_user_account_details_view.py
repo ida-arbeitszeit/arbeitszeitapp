@@ -5,7 +5,7 @@ from parameterized import parameterized
 from arbeitszeit.injector import Binder, CallableProvider, Module
 from tests.flask_integration.dependency_injection import FlaskConfiguration
 
-from .flask import LogInUser, ViewTestCase
+from .base_test_case import LogInUser, ViewTestCase
 
 
 class UserAccountDetailsViewTests(ViewTestCase):

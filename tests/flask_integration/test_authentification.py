@@ -1,7 +1,7 @@
 from flask import url_for
 from parameterized import parameterized
 
-from tests.flask_integration.flask import LogInUser, ViewTestCase
+from tests.flask_integration.base_test_case import LogInUser, ViewTestCase
 
 
 class NextUrlTests(ViewTestCase):

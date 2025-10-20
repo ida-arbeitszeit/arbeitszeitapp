@@ -1,6 +1,6 @@
 from arbeitszeit_flask.password_hasher import PasswordHasherImpl
 
-from .flask import FlaskTestCase
+from .base_test_case import FlaskTestCase
 
 
 class PasswordHasherTests(FlaskTestCase):

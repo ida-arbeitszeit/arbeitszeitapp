@@ -2,7 +2,7 @@ from typing import Optional
 
 from parameterized import parameterized
 
-from tests.flask_integration.flask import LogInUser, ViewTestCase
+from tests.flask_integration.base_test_case import LogInUser, ViewTestCase
 
 
 class UserAccessTests(ViewTestCase):

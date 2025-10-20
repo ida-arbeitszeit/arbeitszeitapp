@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from markupsafe import Markup
 
 from arbeitszeit_flask.filters import icon_filter
-from tests.flask_integration.flask import ViewTestCase
+from tests.flask_integration.base_test_case import ViewTestCase
 
 
 class IconFilterUnitTests(unittest.TestCase):
