@@ -7,13 +7,11 @@ from arbeitszeit.interactors.list_plans_with_pending_review import (
 )
 
 from .base_test_case import BaseTestCase
-from .dependency_injection import get_dependency_injector
 
 
 class InteractorTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.injector = get_dependency_injector()
         self.interactor = self.injector.get(ListPlansWithPendingReviewInteractor)
         self.file_plan_with_accounting_interactor = self.injector.get(
             FilePlanWithAccounting

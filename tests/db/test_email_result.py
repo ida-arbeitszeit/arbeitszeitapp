@@ -5,12 +5,12 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from tests.datetime_service import datetime_min_utc, datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 from .utility import Utility
 
 
-class CreateEmailAddressTests(FlaskTestCase):
+class CreateEmailAddressTests(DatabaseTestCase):
     def test_created_email_address_contains_utc_confirmation_date(self) -> None:
         confirmation_date = datetime_utc(2023, 1, 2, 3, 4, 5)
         self.database_gateway.create_email_address(
@@ -54,7 +54,7 @@ class CreateEmailAddressTests(FlaskTestCase):
             )
 
 
-class ThatBelongToMemberTests(FlaskTestCase):
+class ThatBelongToMemberTests(DatabaseTestCase):
     def test_that_member_email_addresses_is_included(self) -> None:
         member = self.member_generator.create_member()
         assert self.database_gateway.get_email_addresses().that_belong_to_member(member)
@@ -66,7 +66,7 @@ class ThatBelongToMemberTests(FlaskTestCase):
         )
 
 
-class ThatBelongToCompanyTests(FlaskTestCase):
+class ThatBelongToCompanyTests(DatabaseTestCase):
     def test_that_members_are_not_included(self) -> None:
         member = self.member_generator.create_member()
         assert not self.database_gateway.get_email_addresses().that_belong_to_company(
@@ -80,7 +80,7 @@ class ThatBelongToCompanyTests(FlaskTestCase):
         )
 
 
-class DeleteTests(FlaskTestCase):
+class DeleteTests(DatabaseTestCase):
     def test_can_delete_email_address(self) -> None:
         ADDRESS = "example@mail.org"
         assert not self.database_gateway.get_email_addresses()

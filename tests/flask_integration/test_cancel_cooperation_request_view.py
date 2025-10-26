@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from tests.flask_integration.flask import ViewTestCase
+from tests.flask_integration.base_test_case import ViewTestCase
 
 URL = "/company/cancel_cooperation_request"
 

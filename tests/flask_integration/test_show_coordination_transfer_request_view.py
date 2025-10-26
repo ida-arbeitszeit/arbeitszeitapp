@@ -6,7 +6,7 @@ from parameterized import parameterized
 from arbeitszeit.interactors.accept_coordination_transfer import (
     AcceptCoordinationTransferInteractor,
 )
-from tests.flask_integration.flask import LogInUser, ViewTestCase
+from tests.flask_integration.base_test_case import LogInUser, ViewTestCase
 
 
 class ShowTransferRequestBaseTest(ViewTestCase):

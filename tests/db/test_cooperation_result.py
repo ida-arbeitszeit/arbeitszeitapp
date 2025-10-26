@@ -3,11 +3,10 @@ from uuid import uuid4
 
 from arbeitszeit.records import Cooperation
 from tests.datetime_service import datetime_utc
+from tests.db.base_test_case import DatabaseTestCase
 
-from ..flask import FlaskTestCase
 
-
-class CooperationResultTests(FlaskTestCase):
+class CooperationResultTests(DatabaseTestCase):
     def test_that_a_priori_no_cooperations_are_in_db(self) -> None:
         cooperations = self.database_gateway.get_cooperations()
         assert not cooperations
@@ -84,7 +83,7 @@ class CooperationResultTests(FlaskTestCase):
         )
 
 
-class CoordinatedByCompanyTests(FlaskTestCase):
+class CoordinatedByCompanyTests(DatabaseTestCase):
     def test_results_filtered_by_coordinator_includes_previously_created_coop_by_coordinator(
         self,
     ) -> None:
@@ -137,7 +136,7 @@ class CoordinatedByCompanyTests(FlaskTestCase):
         assert not cooperations.coordinated_by_company(other_company)
 
 
-class OfPlanTests(FlaskTestCase):
+class OfPlanTests(DatabaseTestCase):
     def test_that_no_cooperations_are_yielded_if_plan_does_not_exist(self) -> None:
         cooperations = self.database_gateway.get_cooperations()
         assert not cooperations.of_plan(uuid4())
@@ -160,7 +159,7 @@ class OfPlanTests(FlaskTestCase):
         assert result.id == cooperation
 
 
-class JoinedWithCurrentCoordinatorTests(FlaskTestCase):
+class JoinedWithCurrentCoordinatorTests(DatabaseTestCase):
     def test_that_joining_with_current_coordinator_yields_the_current_coordinator_of_a_coop(
         self,
     ) -> None:

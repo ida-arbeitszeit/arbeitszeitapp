@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class DeleteDraftViewTests(ViewTestCase):

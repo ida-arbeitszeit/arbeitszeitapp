@@ -5,10 +5,10 @@ from parameterized import parameterized
 from arbeitszeit.records import AccountTypes, SocialAccounting
 from arbeitszeit.transfers import TransferType
 from tests.datetime_service import datetime_utc
-from tests.flask_integration.flask import FlaskTestCase
+from tests.db.base_test_case import DatabaseTestCase
 
 
-class TransferResultTests(FlaskTestCase):
+class TransferResultTests(DatabaseTestCase):
     def test_that_by_default_no_transfers_are_in_db(self) -> None:
         assert not self.database_gateway.get_transfers()
 
@@ -39,7 +39,7 @@ class TransferResultTests(FlaskTestCase):
             assert transfer.type == type_
 
 
-class WhereAccountIsDebtorTests(FlaskTestCase):
+class WhereAccountIsDebtorTests(DatabaseTestCase):
     def test_that_where_account_is_debtor_yields_none_if_debit_account_is_not_in_db(
         self,
     ) -> None:
@@ -99,7 +99,7 @@ class WhereAccountIsDebtorTests(FlaskTestCase):
         assert expected_transfer.debit_account == expected_debit_account.id
 
 
-class WhereAccountIsCreditorTests(FlaskTestCase):
+class WhereAccountIsCreditorTests(DatabaseTestCase):
     def test_that_where_account_is_creditor_yields_none_if_credit_account_is_not_in_db(
         self,
     ) -> None:
@@ -124,7 +124,7 @@ class WhereAccountIsCreditorTests(FlaskTestCase):
         assert expected_transfer in retrieved_transfers
 
 
-class WhereAccountIsDebtorOrCreditorTests(FlaskTestCase):
+class WhereAccountIsDebtorOrCreditorTests(DatabaseTestCase):
     def test_that_transfer_of_debit_account_is_retrieved(self) -> None:
         debit_account = self.database_gateway.create_account()
         transfer = self.transfer_generator.create_transfer(
@@ -164,7 +164,7 @@ class WhereAccountIsDebtorOrCreditorTests(FlaskTestCase):
         assert transfer in retrieved_transfers
 
 
-class JoinedWithDebtorTests(FlaskTestCase):
+class JoinedWithDebtorTests(DatabaseTestCase):
     def test_that_joined_with_debtor_yields_member(
         self,
     ) -> None:
@@ -231,7 +231,7 @@ class JoinedWithDebtorTests(FlaskTestCase):
         assert transfer_with_debtor[1] == cooperation
 
 
-class JoinedWithCreditorTests(FlaskTestCase):
+class JoinedWithCreditorTests(DatabaseTestCase):
     def test_that_joined_with_creditor_yields_member(
         self,
     ) -> None:
@@ -298,7 +298,7 @@ class JoinedWithCreditorTests(FlaskTestCase):
         assert transfer_with_creditor[1] == cooperation
 
 
-class OrderedByDateTests(FlaskTestCase):
+class OrderedByDateTests(DatabaseTestCase):
     @parameterized.expand(
         [
             (True,),
@@ -323,7 +323,7 @@ class OrderedByDateTests(FlaskTestCase):
         assert actual_dates == expected_dates
 
 
-class JoinedWithDebtorAndCreditorTests(FlaskTestCase):
+class JoinedWithDebtorAndCreditorTests(DatabaseTestCase):
     def test_that_join_yields_member_and_same_member(self) -> None:
         member_id = self.member_generator.create_member()
         member = self.database_gateway.get_members().with_id(member_id).first()

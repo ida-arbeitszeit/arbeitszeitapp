@@ -3,8 +3,8 @@ from typing import Dict, List
 from arbeitszeit.injector import Binder, CallableProvider, Module
 from arbeitszeit_flask.language_repository import LanguageRepositoryImpl
 
+from .base_test_case import FlaskTestCase
 from .dependency_injection import FlaskConfiguration
-from .flask import FlaskTestCase
 
 
 class LanguageRepositoryTestCase(FlaskTestCase):
