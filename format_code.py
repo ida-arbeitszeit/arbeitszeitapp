@@ -6,15 +6,16 @@ apropriate comment below.
 """
 
 import os
-import subprocess
 from os import path
 from typing import List
 
+from arbeitszeit_development.command import Shell, Subprocess, SubprocessRunner
 
-def main():
-    format_python_files(read_autoformat_target_paths())
-    if is_nixfmt_installed():
-        format_nix_files()
+
+def main(subprocess_runner: SubprocessRunner):
+    format_python_files(subprocess_runner, read_autoformat_target_paths())
+    if is_nixfmt_installed(subprocess_runner):
+        format_nix_files(subprocess_runner)
 
 
 def read_autoformat_target_paths() -> List[str]:
@@ -22,26 +23,27 @@ def read_autoformat_target_paths() -> List[str]:
         return [line.strip() for line in handle.read().splitlines() if line.strip()]
 
 
-def format_python_files(python_files):
-    subprocess.run(
-        ["isort"] + python_files,
-        check=True,
-    )
-    subprocess.run(
-        ["black"] + python_files,
-        check=True,
-    )
+def format_python_files(
+    subprocess_runner: SubprocessRunner, python_files: list[str]
+) -> None:
+    subprocess_runner.run_command(Subprocess(["isort"] + python_files, check=True))
+    subprocess_runner.run_command(Subprocess(["black"] + python_files, check=True))
 
 
-def format_nix_files():
+def format_nix_files(subprocess_runner: SubprocessRunner):
     for nix_file in get_nix_files():
-        format_nix_file(nix_file)
+        format_nix_file(subprocess_runner, nix_file)
 
 
-def format_nix_file(path):
-    if subprocess.run(["nixfmt", "--check", path], capture_output=True).returncode != 0:
+def format_nix_file(subprocess_runner: SubprocessRunner, path: str):
+    if (
+        subprocess_runner.run_command(
+            Subprocess(["nixfmt", "--check", path], capture_output=True)
+        ).return_code
+        != 0
+    ):
         print(f"Reformatting {path}")
-        subprocess.run(["nixfmt", path])
+        subprocess_runner.run_command(Subprocess(["nixfmt", path]))
 
 
 def get_nix_files():
@@ -51,13 +53,15 @@ def get_nix_files():
                 yield path.join(root, file_name)
 
 
-def is_nixfmt_installed():
+def is_nixfmt_installed(subprocess_runner: SubprocessRunner):
     try:
-        subprocess.run(["nixfmt", "--help"], capture_output=True)
+        subprocess_runner.run_command(
+            Subprocess(["nixfmt", "--help"], capture_output=True)
+        )
     except FileNotFoundError:
         return False
     return True
 
 
 if __name__ == "__main__":
-    main()
+    main(Shell())
