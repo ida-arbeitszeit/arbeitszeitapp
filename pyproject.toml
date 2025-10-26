@@ -52,7 +52,9 @@ files = [
     "arbeitszeit_web",
     "arbeitszeit_db",
     "build_support",
-    "tests"
+    "tests",
+    "run-checks",
+    "format_code.py",
 ]
 mypy_path = "type_stubs"
 exclude = '''
@@ -109,4 +111,54 @@ exclude_also = [
 
     # Don't complain about abstract methods, they aren't run:
     "@(abc\\.)?abstractmethod",
+]
+
+[tool.importlinter]
+root_packages = [
+    "arbeitszeit",
+    "arbeitszeit_db",
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "arbeitszeit_benchmark",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Business logic component does not depend on any other component"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit",
+]
+forbidden_modules = [
+    "arbeitszeit_db",
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "arbeitszeit_benchmark",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Database component does not depend on web, flask, dev, benchmark or test components"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit_db",
+]
+forbidden_modules = [
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "arbeitszeit_benchmark",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Web component does not depend on flask component"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit_web",
+]
+forbidden_modules = [
+    "arbeitszeit_flask",
 ]
