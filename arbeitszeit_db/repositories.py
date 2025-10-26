@@ -16,11 +16,11 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from sqlalchemy import Delete, Insert, Update
-from sqlalchemy.dialects.postgresql import INTERVAL, insert
-from sqlalchemy.orm import aliased
+from sqlalchemy import Delete, Insert, String, Update
+from sqlalchemy.dialects import postgresql, sqlite
+from sqlalchemy.orm import InstrumentedAttribute, aliased, scoped_session
 from sqlalchemy.orm.query import Query
-from sqlalchemy.sql.expression import and_, delete, func, or_, update
+from sqlalchemy.sql.expression import ColumnElement, and_, delete, func, or_, update
 from sqlalchemy.sql.functions import concat
 
 from arbeitszeit import records
@@ -36,6 +36,25 @@ from arbeitszeit_db.models import (
 )
 
 T = TypeVar("T", covariant=True)
+
+
+def _add_days_to_date(
+    db_session: scoped_session,
+    date_column: InstrumentedAttribute[datetime],
+    days_column: InstrumentedAttribute[Decimal],
+) -> ColumnElement[datetime]:
+    bind = db_session.bind
+    assert bind is not None
+    engine_name = bind.engine.name
+
+    if engine_name == "sqlite":
+        return func.datetime(
+            date_column, "+" + func.cast(days_column, String) + " days"
+        )
+    else:
+        return (
+            func.cast(concat(days_column, " days"), postgresql.INTERVAL) + date_column
+        )
 
 
 class FlaskQueryResult(Generic[T]):
@@ -137,8 +156,8 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def that_will_expire_after(self, timestamp: datetime) -> Self:
         approval = aliased(models.PlanApproval)
-        expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
+        expiration_date = _add_days_to_date(
+            self.db.session, approval.date, models.Plan.timeframe
         )
         return self._with_modified_query(
             lambda query: query.join(approval).filter(expiration_date > timestamp)
@@ -146,8 +165,8 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def that_are_expired_as_of(self, timestamp: datetime) -> Self:
         approval = aliased(models.PlanApproval)
-        expiration_date = (
-            func.cast(concat(models.Plan.timeframe, "days"), INTERVAL) + approval.date
+        expiration_date = _add_days_to_date(
+            self.db.session, approval.date, models.Plan.timeframe
         )
         return self._with_modified_query(
             lambda query: query.join(approval).filter(expiration_date <= timestamp)
@@ -462,14 +481,29 @@ class PlanUpdate:
                         dict(plan=plan.id, cooperation=str(coop_id))
                         for plan in self.query
                     ]
-                    sql_statement = (
-                        insert(models.PlanCooperation)
-                        .values(values)
-                        .on_conflict_do_update(
-                            constraint="plan_cooperation_pkey",
-                            set_=dict(cooperation=str(coop_id)),
+                    dialect = self.db.engine.dialect.name
+                    if dialect == "postgresql":
+                        sql_statement = (
+                            postgresql.insert(models.PlanCooperation)
+                            .values(values)
+                            .on_conflict_do_update(
+                                constraint="plan_cooperation_pkey",
+                                set_=dict(cooperation=str(coop_id)),
+                            )
                         )
-                    )
+                    elif dialect == "sqlite":
+                        sql_statement = (
+                            sqlite.insert(models.PlanCooperation)
+                            .values(values)
+                            .on_conflict_do_update(
+                                index_elements=[models.PlanCooperation.plan],
+                                set_=dict(cooperation=str(coop_id)),
+                            )
+                        )
+                    else:
+                        raise NotImplementedError(
+                            f"Upsert not implemented for dialect {dialect}"
+                        )
             result = self.db.session.execute(sql_statement)
             row_count = max(row_count, result.rowcount)
         self.db.session.flush()

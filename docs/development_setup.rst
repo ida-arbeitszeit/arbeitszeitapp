@@ -1,7 +1,31 @@
 Development Setup
 =================
 
-The recommended development environment is Linux. 
+Quickstart
+-----------
+
+The following steps should get you quickly set up. You find more detailed instructions in the rest of this
+document.
+
+- The recommended development environment is Linux.
+- Clone the repository from Github.
+- Activate a virtual environment and run ``pip install -r requirements-dev.txt`` to install the dependencies.
+- Set the following environment variables in the terminal:
+
+.. code-block:: bash
+
+  export FLASK_APP=arbeitszeit_development.development_server:main
+  export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
+  export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
+  export DEV_SECRET_KEY="my_secret_key"
+  export ALEMBIC_CONFIG=${PWD}/arbeitszeit_development/alembic.ini
+  export ARBEITSZEITAPP_TEST_DB=sqlite:///${PWD}/arbeitszeitapp_test.db
+  export ARBEITSZEITAPP_DEV_DB=sqlite:///${PWD}/arbeitszeitapp_dev.db
+  export ALEMBIC_SQLALCHEMY_DATABASE_URI=${ARBEITSZEITAPP_DEV_DB}
+
+- Run ``pytest`` to run the testsuite.
+- Run ``python -m build_support.translations compile`` (only if you need translations in the development app)
+- Run ``flask run --debug`` to start the development app.
 
 
 Development Philosophy
@@ -54,17 +78,17 @@ Here is a diagram that shows the main components of the application:
     :width: 500px
 
 
-PostgreSQL Setup
--------------------
+Database Setup
+-----------------
 
-In order to work on Arbeitszeitapp you need to have the `PostgreSQL
-<https://www.postgresql.org>`_ relational
-database management system set up on your machine.  Once you have
-PostgreSQL set up locally, you will need to create two databases.
-One is a development database that you will use when running the
-development server. The other database is used for the automated
-test suite. The names you choose for these two databases are arbitrary 
---- e.g., ``Arbeitszeitapp_dev`` and ``Arbeitszeitapp_test``, respectively.
+We support both PostgreSQL and SQLite databases for testing, development and 
+production. In testing and development, by default, two SQLite databases are 
+created automatically in the project's root directory when starting tests or 
+the development server. No manual setup is necessary.
+
+You may use your own databases by setting the environment variables 
+``ARBEITSZEITAPP_DEV_DB`` and/or ``ARBEITSZEITAPP_TEST_DB`` to point to 
+databases of your choice. See :ref:`environment-variables` for details.
 
 
 Virtual Environment via Nix
@@ -75,22 +99,6 @@ developers to use `Nix <https://nixos.org>`_, which sets up a virtual
 environment within a directory subtree, as a more powerful alternative 
 to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
 A Nix flake is located in this repository.
-
-    **A note for Mac users:**
-    By default, during Nix installation, commands are added to configure path and environment
-    variables within scripts located in the global /etc directory. However, macOS updates can
-    overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
-    adding the following command to your ~/.zshrc file:
-
-    .. code-block:: bash
-
-      # Nix
-      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-      fi
-      # End Nix
-
-    see https://github.com/NixOs/nix/issues/3616 for more details.
 
 If you are working with Nix, go to the top-level directory of the repo
 and enter ``nix develop`` at the command prompt.  This will cause Nix to 
@@ -114,6 +122,22 @@ When you have Direnv installed, this will automatically invoke Nix and install
 all dependencies in the virtual environment every time you enter the root code directory. 
 For the line ``use flake`` to have effect you might need to install nix-direnv. 
 
+    **A note for Mac users:**
+    By default, during Nix installation, commands are added to configure path and environment
+    variables within scripts located in the global /etc directory. However, macOS updates can
+    overwrite these scripts, leading to Nix becoming inaccessible. To address this issue, consider
+    adding the following command to your ~/.zshrc file:
+
+    .. code-block:: bash
+
+      # Nix
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+      # End Nix
+
+    see https://github.com/NixOs/nix/issues/3616 for more details.
+
 
 Virtual Environment via Venv
 ----------------------------
@@ -126,6 +150,8 @@ Within the venv environment, install all required packages:
 virtual environment by typing ``deactivate`` at the command prompt.
 
 
+.. _environment-variables:
+
 Environment Variables
 ---------------------
 
@@ -135,6 +161,9 @@ in an `.envrc` file in the top-level directory of the repo, and install
 `direnv <https://direnv.net/>`_ to automatically load these variables
 when you enter the top-level directory of the repo.
 
+Database URIs should be in the form
+used by SQLAlchemy: ``dialect[+driver]://user:password@host:port/database[?options]``.
+Commented out variables are optional. 
 
 .. code-block:: bash
 
@@ -142,12 +171,10 @@ when you enter the top-level directory of the repo.
   export ARBEITSZEITAPP_SERVER_NAME=127.0.0.1:5000
   export ARBEITSZEITAPP_CONFIGURATION_PATH=${PWD}/arbeitszeit_development/development_settings.py
   export DEV_SECRET_KEY="my_secret_key"
-  export ARBEITSZEITAPP_DEV_DB="postgresql://postgres@localhost:5432/<name of dev database>"
-  export ARBEITSZEITAPP_TEST_DB="postgresql://postgres@localhost:5432/<name of test database>"
   export ALEMBIC_CONFIG=${PWD}/arbeitszeit_development/alembic.ini
+  export ARBEITSZEITAPP_TEST_DB=sqlite:///${PWD}/arbeitszeitapp_test.db
+  export ARBEITSZEITAPP_DEV_DB=sqlite:///${PWD}/arbeitszeitapp_dev.db
   export ALEMBIC_SQLALCHEMY_DATABASE_URI=${ARBEITSZEITAPP_DEV_DB}
-  
-  # Optionally, adjust the following variables:
   # export ALLOWED_OVERDRAW_MEMBER=1000
   # export DEFAULT_USER_TIMEZONE="Europe/Berlin"
   # export AUTO_MIGRATE=true
@@ -160,7 +187,7 @@ You can run the arbeitszeitapp in a development environment to manually test you
 latest changes from a user interface perspective. Start the development 
 server with ``flask run --debug``.
 
-The app will use the development database you set up above. You can
+The app will use the configured development database. You can
 manually upgrade or downgrade the development database using the
 `alembic` command line tool. Run `alembic --help` to see the
 options. The tool has been customized to always upgrade to the newest
@@ -218,6 +245,10 @@ You are encouraged to use the ``./run-checks`` command before you
 submit changes in a pull request.  This program runs ``flake8``,
 ``mypy`` and the test suite.
 
+If you have chosen to use a nix environment, the command ``nix flake check`` will test
+the app against both databases, several python and nixpkgs versions. This command
+is run as part of our CI Tests on Github, as well.
+
 You can run only the tests for the part of the application 
 on which you are working.  For example, if you are working on the business 
 logic, you can use the following command to quickly run all the interactor 
@@ -227,7 +258,7 @@ tests:
 
   pytest tests/interactors
 
-It is possible to disable tests that require a PostgreSQL database to
+It is possible to disable tests that require a database to
 run via an environment variable:
 
 .. code-block:: bash

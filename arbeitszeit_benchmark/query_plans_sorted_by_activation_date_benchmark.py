@@ -8,20 +8,23 @@ from arbeitszeit.records import ProductionCosts
 from arbeitszeit_db.db import Database
 from tests.data_generators import CooperationGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
-from tests.flask_integration.flask import drop_and_recreate_schema
+from tests.flask_integration.flask import reset_test_db
 
 
 class QueryPlansSortedByActivationDateBenchmark:
     def __init__(self) -> None:
-        injector = get_dependency_injector()
-        db = injector.get(Database)
-        drop_and_recreate_schema(db.engine)
-        app = injector.get(Flask)
+        self.injector = get_dependency_injector()
+
+        reset_test_db()
+        self.db = self.injector.get(Database)
+        self.db.engine.dispose()
+
+        app = self.injector.get(Flask)
         self.app_context = app.app_context()
         self.app_context.push()
-        plan_generator = injector.get(PlanGenerator)
-        cooperation_generator = injector.get(CooperationGenerator)
-        self.query_plans = injector.get(query_plans.QueryPlansInteractor)
+        plan_generator = self.injector.get(PlanGenerator)
+        cooperation_generator = self.injector.get(CooperationGenerator)
+        self.query_plans = self.injector.get(query_plans.QueryPlansInteractor)
         random.seed()
         for _ in range(500):
             plan_generator.create_plan(
@@ -45,7 +48,7 @@ class QueryPlansSortedByActivationDateBenchmark:
             limit=None,
             offset=None,
         )
-        db.session.flush()
+        self.db.session.flush()
 
     def tear_down(self) -> None:
         self.app_context.pop()

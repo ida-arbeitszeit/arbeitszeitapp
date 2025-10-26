@@ -6,7 +6,7 @@ from arbeitszeit.interactors import get_company_summary
 from arbeitszeit_db.db import Database
 from tests.data_generators import CompanyGenerator, ConsumptionGenerator, PlanGenerator
 from tests.flask_integration.dependency_injection import get_dependency_injector
-from tests.flask_integration.flask import drop_and_recreate_schema
+from tests.flask_integration.flask import reset_test_db
 
 
 class GetCompanySummaryBenchmark:
@@ -17,8 +17,11 @@ class GetCompanySummaryBenchmark:
 
     def __init__(self) -> None:
         self.injector = get_dependency_injector()
+
+        reset_test_db()
         self.db = self.injector.get(Database)
-        drop_and_recreate_schema(self.db.engine)
+        self.db.engine.dispose()
+
         self.app = self.injector.get(Flask)
         self.app_context = self.app.app_context()
         self.app_context.push()
