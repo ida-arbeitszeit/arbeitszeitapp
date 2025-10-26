@@ -94,11 +94,10 @@ databases of your choice. See :ref:`environment-variables` for details.
 Virtual Environment via Nix
 ----------------------------
 
-Although it is not obligatory, we encourage 
-developers to use `Nix <https://nixos.org>`_, which sets up a virtual 
-environment within a directory subtree, as a more powerful alternative 
-to the Python `venv <https://docs.python.org/3/library/venv.html>`_ module.
-A Nix flake is located in this repository.
+You may use `Nix <https://nixos.org>`_ as package manager and virtual environment.
+While this is NOT obligatory and you may use venv and pip instead (see below),
+it is indeed needed for the specific task of changing or updating
+dependencies (see :ref:`updating-dependencies`).
 
 If you are working with Nix, go to the top-level directory of the repo
 and enter ``nix develop`` at the command prompt.  This will cause Nix to 
@@ -142,7 +141,8 @@ For the line ``use flake`` to have effect you might need to install nix-direnv.
 Virtual Environment via Venv
 ----------------------------
 
-If you decide to use ``venv`` instead of Nix, create a virtual environment 
+If you decide to use `venv <https://docs.python.org/3/library/venv.html>`_
+instead of Nix, create a virtual environment
 with ``python -m venv venv``.
 Then, to execute the virtual environment ``source ./venv/bin/activate``.
 Within the venv environment, install all required packages: 
@@ -273,18 +273,20 @@ the command:
   coverage run -m pytest && coverage html
 
 
-Update Development Dependencies
--------------------------------
+.. _updating-dependencies:
 
-We use Nix to manage the development dependencies of
+Update Dependencies
+--------------------
+
+We use Nix to manage the dependencies of
 ``arbeitszeitapp``. We try to leverage ``nixpkgs`` as a source for our
-development dependencies as much as possible, so as to reduce the required
-maintenance effort. Some packages, however, are currently managed outside
+dependencies as much as possible, so as to reduce the required
+maintenance effort. You can update the
+dependencies via ``python -m arbeitszeit_development.update_dependencies``.
+Some packages, however, are currently managed outside
 of ``nixpkgs``, through custom mechanisms. The Python program
 ``arbeitszeit_development/update_dependencies.py`` automates this
-custom package management as much as possible. You can update the
-development dependencies via ``python -m
-arbeitszeit_development.update_dependencies``.
+custom package management as much as possible.
 
 
 Translation
