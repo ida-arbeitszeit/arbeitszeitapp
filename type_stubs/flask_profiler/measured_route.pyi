@@ -2,14 +2,13 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from _typeshed import Incomplete
-from flask import Response as FlaskResponse
 
 from .clock import Clock as Clock
 from .configuration import Configuration as Configuration
 from .entities.measurement_archive import MeasurementArchivist as MeasurementArchivist
 from .use_cases import observe_request_handling_use_case as use_case
 
-ResponseT = str | FlaskResponse
+ResponseT = Any
 logger: Incomplete
 
 class RequestHandler:
@@ -31,4 +30,4 @@ class MeasuredRouteFactory:
     archivist: MeasurementArchivist
     def create_measured_route(
         self, route_name: str, original_route: Callable[..., ResponseT]
-    ) -> MeasuredRoute: ...
+    ) -> Callable[..., ResponseT]: ...
