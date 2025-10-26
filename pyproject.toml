@@ -46,7 +46,6 @@ skip = "arbeitszeit_db/migrations/versions/"
 [tool.mypy]
 files = [
     "arbeitszeit",
-    "arbeitszeit_benchmark",
     "arbeitszeit_development",
     "arbeitszeit_flask",
     "arbeitszeit_web",
@@ -120,7 +119,6 @@ root_packages = [
     "arbeitszeit_web",
     "arbeitszeit_flask",
     "arbeitszeit_development",
-    "arbeitszeit_benchmark",
     "tests",
 ]
 
@@ -135,12 +133,11 @@ forbidden_modules = [
     "arbeitszeit_web",
     "arbeitszeit_flask",
     "arbeitszeit_development",
-    "arbeitszeit_benchmark",
     "tests",
 ]
 
 [[tool.importlinter.contracts]]
-name = "Database component does not depend on web, flask, dev, benchmark or test components"
+name = "Database component does not depend on web, flask, dev or test components"
 type = "forbidden"
 source_modules = [
     "arbeitszeit_db",
@@ -149,7 +146,6 @@ forbidden_modules = [
     "arbeitszeit_web",
     "arbeitszeit_flask",
     "arbeitszeit_development",
-    "arbeitszeit_benchmark",
     "tests",
 ]
 
