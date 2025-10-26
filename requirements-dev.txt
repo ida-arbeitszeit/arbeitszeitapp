@@ -11,5 +11,6 @@ pytest
 sphinx
 sphinx-rtd-theme
 types-setuptools
+import-linter
 
 git+https://github.com/seppeljordan/flask-profiler.git#egg=flask-profiler

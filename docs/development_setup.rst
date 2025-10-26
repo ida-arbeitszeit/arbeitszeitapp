@@ -61,7 +61,7 @@ directories in the source code.
 
 ``arbeitszeit_db/``
     The concrete implementation for persistence. Currently we support
-    Postgres databases via SQLAlchemy.
+    Postgres and SQLite databases via SQLAlchemy.
 
 ``arbeitszeit_flask/``
     Contains the conrete implementation for IO. We use the ``flask``
@@ -242,8 +242,8 @@ You can run the tests by executing ``pytest`` in the root folder
 of this project.
 
 You are encouraged to use the ``./run-checks`` command before you
-submit changes in a pull request.  This program runs ``flake8``,
-``mypy`` and the test suite.
+submit changes in a pull request.  This program runs several 
+checks and the test suite.
 
 If you have chosen to use a nix environment, the command ``nix flake check`` will test
 the app against both databases, several python and nixpkgs versions. This command
