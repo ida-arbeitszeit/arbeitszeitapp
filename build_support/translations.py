@@ -49,7 +49,7 @@ def compile_messages(arguments: object = None) -> None:
 
 
 def extract_messages(arguments: object = None) -> None:
-    mapping_file = "babel.cfg"
+    mapping_file = "build_support/babel.cfg"
     keywords = ["lazy_gettext"]
     input_paths = [
         "arbeitszeit",
