@@ -386,9 +386,10 @@ Benchmarking
 ------------
 
 Included in the source code for this project is a rudimentary
-framework for testing the running time of our code, called
-``arbeitszeit_benchmark``.  You can run all the benchmarks via
-``python -m arbeitszeit_benchmark``.  This benchmarking tool can be
+framework for testing the running time of our code. 
+You can run all the benchmarks via
+``python -m arbeitszeit_development.benchmark``.
+This benchmarking tool can be
 used to compare runtime characteristics across changes to the codebase. 
 A contributor to the ``arbeitszeitapp`` might want to compare
 the results of those benchmarks from the master branch to the results
