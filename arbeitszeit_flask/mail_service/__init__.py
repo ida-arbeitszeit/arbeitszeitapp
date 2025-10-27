@@ -8,16 +8,8 @@ from .smtp_mail_service import SmtpMailService
 
 
 def load_email_plugin(app: Flask) -> None:
-    # This is an exception to the usual email plugin configuration and *should*
-    # be deleted as soon as we don't use flask_mail anymore. Any other email
-    # plugins must be configured using the MAIL_PLUGIN_MODULE and
-    # MAIL_PLUGIN_CLASS variables.
-    if app.config.get("MAIL_BACKEND") == "flask_mail":
-        module_name = SmtpMailService.__module__
-        class_name = SmtpMailService.__name__
-    else:
-        module_name = app.config.get("MAIL_PLUGIN_MODULE", DebugMailService.__module__)
-        class_name = app.config.get("MAIL_PLUGIN_CLASS", DebugMailService.__name__)
+    module_name = app.config.get("MAIL_PLUGIN_MODULE", DebugMailService.__module__)
+    class_name = app.config.get("MAIL_PLUGIN_CLASS", DebugMailService.__name__)
     module = importlib.import_module(module_name)
     plugin_class = getattr(module, class_name)
     assert issubclass(plugin_class, EmailPlugin)
