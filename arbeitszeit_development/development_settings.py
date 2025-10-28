@@ -4,6 +4,8 @@ The settings in this module override settings in configuration_base.py.
 
 from os import environ
 
+from arbeitszeit_flask.mail_service.debug_mail_service import DebugMailService
+
 PREFERRED_URL_SCHEME = "http"
 TESTING = True
 
@@ -35,3 +37,5 @@ ALLOWED_OVERDRAW_MEMBER = environ.get("ALLOWED_OVERDRAW_MEMBER", "unlimited")
 ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION = environ.get(
     "ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION", "33"
 )
+MAIL_PLUGIN_MODULE = DebugMailService.__module__
+MAIL_PLUGIN_CLASS = DebugMailService.__name__

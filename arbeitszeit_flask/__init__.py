@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 from flask import Flask, session
@@ -7,32 +6,15 @@ from jinja2 import StrictUndefined
 
 from arbeitszeit_db.db import Database
 from arbeitszeit_flask.babel import initialize_babel
+from arbeitszeit_flask.config.checks import ConfigValidator
+from arbeitszeit_flask.config.loader import load_configuration
+from arbeitszeit_flask.config.options import CONFIG_OPTIONS
 from arbeitszeit_flask.database import run_db_migrations
 from arbeitszeit_flask.extensions import csrf_protect, login_manager
 from arbeitszeit_flask.filters import icon_filter
 from arbeitszeit_flask.flask_session import FlaskLoginUser
 from arbeitszeit_flask.mail_service import load_email_plugin
 from arbeitszeit_flask.profiling import initialize_flask_profiler  # type: ignore
-
-
-def load_configuration(app: Flask, configuration: Any = None) -> None:
-    """Load the right configuration for the application.
-
-    First we load the base configuration from arbeitszeit_flask.configuration_base.
-
-    Then, on top of this, we load the first configuration we can find from the following sources
-    from top to bottom:
-    - Configuration passed into create_app
-    - From path ARBEITSZEITAPP_CONFIGURATION_PATH
-    - From path /etc/arbeitszeitapp/arbeitszeitapp.py
-    """
-    app.config.from_object("arbeitszeit_flask.configuration_base")
-    if configuration:
-        app.config.from_object(configuration)
-    elif config_path := os.environ.get("ARBEITSZEITAPP_CONFIGURATION_PATH"):
-        app.config.from_pyfile(config_path)
-    else:
-        app.config.from_pyfile("/etc/arbeitszeitapp/arbeitszeitapp.py", silent=True)
 
 
 def create_app(
@@ -47,6 +29,10 @@ def create_app(
     )
 
     load_configuration(app=app, configuration=config)
+
+    config_validator = ConfigValidator(app.config, CONFIG_OPTIONS)
+    config_validator.validate_options()
+    config_validator.validate_option_types()
 
     db = Database()
     db.configure(
