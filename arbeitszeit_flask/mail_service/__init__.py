@@ -4,7 +4,6 @@ from flask import Flask, current_app
 
 from .debug_mail_service import DebugMailService
 from .interface import EmailPlugin
-from .smtp_mail_service import SmtpMailService
 
 
 def load_email_plugin(app: Flask) -> None:

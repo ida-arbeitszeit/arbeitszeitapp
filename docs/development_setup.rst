@@ -305,7 +305,7 @@ for translation.
 
 
 2. Add the new language to the LANGUAGES variable in
-   ``arbeitszeit_flask/configuration_base.py``.
+   ``arbeitszeit_flask/config/configuration_base.py``.
 
 3. Mark translatable, user-facing strings in the code.
 
