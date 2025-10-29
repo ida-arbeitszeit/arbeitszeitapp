@@ -13,11 +13,13 @@ from typing import (
     Self,
     Tuple,
     TypeVar,
+    cast,
 )
 from uuid import UUID, uuid4
 
 from sqlalchemy import Delete, Insert, String, Update
 from sqlalchemy.dialects import postgresql, sqlite
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import InstrumentedAttribute, aliased, scoped_session
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql.expression import ColumnElement, and_, delete, func, or_, update
@@ -454,7 +456,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = result.rowcount
+            row_count = cast(CursorResult, result).rowcount
         if self.review_update_values:
             sql_statement = (
                 update(models.PlanReview)
@@ -467,7 +469,7 @@ class PlanUpdate:
                 .execution_options(synchronize_session="fetch")
             )
             result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)
+            row_count = max(row_count, cast(CursorResult, result).rowcount)
         if self.cooperation_update:
             match self.cooperation_update:
                 case self.SetCooperation(cooperation=None):
@@ -505,7 +507,7 @@ class PlanUpdate:
                             f"Upsert not implemented for dialect {dialect}"
                         )
             result = self.db.session.execute(sql_statement)
-            row_count = max(row_count, result.rowcount)
+            row_count = max(row_count, cast(CursorResult, result).rowcount)
         self.db.session.flush()
         return row_count
 
@@ -642,7 +644,7 @@ class PlanDraftUpdate:
             .values(**self.changes)
             .execution_options(synchronize_session="fetch")
         )
-        rowcount = self.db.session.execute(sql_statement).rowcount
+        rowcount = cast(CursorResult, self.db.session.execute(sql_statement)).rowcount
         self.db.session.flush()
         return rowcount
 
@@ -1761,7 +1763,7 @@ class EmailAddressUpdate:
             .values(**self.changes)
             .execution_options(synchronize_session="fetch")
         )
-        rowcount = self.db.session.execute(sql_statement).rowcount
+        rowcount = cast(CursorResult, self.db.session.execute(sql_statement)).rowcount
         self.db.session.flush()
         return rowcount
 
@@ -2094,7 +2096,7 @@ class AccountCredentialsUpdate:
             .values(**new_values)
             .execution_options(synchronize_session="fetch")
         )
-        rowcount = self.db.session.execute(sql_statement).rowcount
+        rowcount = cast(CursorResult, self.db.session.execute(sql_statement)).rowcount
         self.db.session.flush()
         return rowcount
 

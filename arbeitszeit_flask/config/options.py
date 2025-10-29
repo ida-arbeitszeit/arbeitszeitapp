@@ -53,17 +53,17 @@ CONFIG_OPTIONS = [
         name="MAIL_PLUGIN_MODULE",
         converts_to_types=(str,),
         description_paragraphs=[
-            "This option must be a python module path to the email plugin to be used. By default a mock email service will be used that is intended for development purposes.",
-            "The arbeitszeitapp provides a very basic mechanism for sending emails synchronously via SMTP. This plugin is found in the ``arbeitszeit_flask.mail_service.smtp_mail_service`` module.",
+            "This option must be a python module path to the email plugin to be used. By default flask-mail is used. Other plugins can be found in the ``arbeitszeit_flask/mail_service`` directory.",
         ],
+        default="arbeitszeit_flask.mail_service.flask_mail_service",
     ),
     ConfigOption(
         name="MAIL_PLUGIN_CLASS",
         converts_to_types=(str,),
         description_paragraphs=[
-            "This option must be the class name of the email service found under ``MAIL_PLUGIN_MODULE``. By default a mock email service will be used that is intended for development purposes.",
-            "The arbeitszeitapp provides a very basic mechanism for sending emails synchronously via SMTP. The name of this class in ``SmtpMailService``",
+            "This option must be the class name of the email service found under ``MAIL_PLUGIN_MODULE``. By default ``FlaskMailService`` is used."
         ],
+        default="FlaskMailService",
     ),
     ConfigOption(
         name="MAIL_SERVER",
@@ -78,7 +78,7 @@ CONFIG_OPTIONS = [
         description_paragraphs=[
             "The port number of the SMTP server used for sending emails."
         ],
-        default="25",
+        default="587",
     ),
     ConfigOption(
         name="MAIL_USERNAME",
@@ -105,6 +105,22 @@ CONFIG_OPTIONS = [
         description_paragraphs=[
             "The email address of the administrator for the application. Users may use this email address to contact the administrator."
         ],
+    ),
+    ConfigOption(
+        name="MAIL_USE_TLS",
+        converts_to_types=(bool,),
+        description_paragraphs=[
+            "Whether to use TLS when connecting to the SMTP server."
+        ],
+        default="True",
+    ),
+    ConfigOption(
+        name="MAIL_USE_SSL",
+        converts_to_types=(bool,),
+        description_paragraphs=[
+            "Whether to use SSL when connecting to the SMTP server."
+        ],
+        default="False",
     ),
     ConfigOption(
         name="SECRET_KEY",

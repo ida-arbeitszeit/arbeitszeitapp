@@ -29,6 +29,8 @@ class FlaskConfiguration(dict):
                 "MAIL_ADMIN": "test_admin@cp.org",
                 "MAIL_PLUGIN_MODULE": MockEmailService.__module__,
                 "MAIL_PLUGIN_CLASS": MockEmailService.__name__,
+                "MAIL_USE_TLS": False,
+                "MAIL_USE_SSL": False,
                 "MAIL_SERVER": "localhost",
                 "MAIL_PORT": 0,
                 "MAIL_USERNAME": "",

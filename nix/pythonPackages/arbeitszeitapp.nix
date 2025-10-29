@@ -9,6 +9,7 @@
   email_validator,
   flask,
   flask-babel,
+  flask_mail,
   flask-profiler,
   flask-restx,
   flask-talisman,
@@ -43,6 +44,7 @@ buildPythonPackage {
     email_validator
     flask
     flask-babel
+    flask_mail
     flask-talisman
     flask_login
     flask-restx

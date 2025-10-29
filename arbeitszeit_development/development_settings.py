@@ -20,8 +20,10 @@ MAIL_USERNAME = environ.get("MAIL_USERNAME", "")
 MAIL_PASSWORD = environ.get("MAIL_PASSWORD", "")
 MAIL_DEFAULT_SENDER = environ.get("MAIL_DEFAULT_SENDER", "admin@dev.org")
 MAIL_ADMIN = environ.get("MAIL_ADMIN", "admin@dev.org")
+MAIL_PLUGIN_MODULE = DebugMailService.__module__
+MAIL_PLUGIN_CLASS = DebugMailService.__name__
 MAIL_USE_TLS = False
-MAIL_USE_SSL = True
+MAIL_USE_SSL = False
 
 FLASK_PROFILER = {
     "enabled": True,
@@ -37,5 +39,3 @@ ALLOWED_OVERDRAW_MEMBER = environ.get("ALLOWED_OVERDRAW_MEMBER", "unlimited")
 ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION = environ.get(
     "ACCEPTABLE_RELATIVE_ACCOUNT_DEVIATION", "33"
 )
-MAIL_PLUGIN_MODULE = DebugMailService.__module__
-MAIL_PLUGIN_CLASS = DebugMailService.__name__
