@@ -17,8 +17,8 @@ jobs:
     - uses: cachix/install-nix-action@v31
     - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix develop --command ./run-checks --no-unittests
 
   flake-check:
@@ -28,8 +28,8 @@ jobs:
     - uses: cachix/install-nix-action@v31
     - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix flake check --print-build-logs
 
   check-migrations:
@@ -39,8 +39,8 @@ jobs:
     - uses: cachix/install-nix-action@v31
     - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix develop --command alembic upgrade head
       env:
         ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
