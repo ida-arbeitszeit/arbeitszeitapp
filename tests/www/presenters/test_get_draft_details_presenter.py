@@ -92,13 +92,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_means_cost_is_returned_in_view_model(
+    def test_that_means_cost_is_returned_in_view_model_rounded(
         self, means_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(means_cost=means_cost),
         )
-        assert view_model.form.means_cost_value == str(means_cost)
+        assert view_model.form.means_cost_value == str(round(means_cost, 2))
 
     @parameterized.expand(
         [
@@ -106,13 +106,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_resources_cost_is_returned_in_view_model(
+    def test_that_resources_cost_is_returned_in_view_model_rounded(
         self, resources_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(resources_cost=resources_cost),
         )
-        assert view_model.form.resource_cost_value == str(resources_cost)
+        assert view_model.form.resource_cost_value == str(round(resources_cost, 2))
 
     @parameterized.expand(
         [
@@ -120,13 +120,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_labour_cost_is_returned_in_view_model(
+    def test_that_labour_cost_is_returned_in_view_model_rounded(
         self, labour_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(labour_cost=labour_cost),
         )
-        assert view_model.form.labour_cost_value == str(labour_cost)
+        assert view_model.form.labour_cost_value == str(round(labour_cost, 2))
 
     @parameterized.expand(
         [
