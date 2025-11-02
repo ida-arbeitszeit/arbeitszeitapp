@@ -3,7 +3,7 @@ from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.email_notifications import EmailSender
 from arbeitszeit.injector import AliasProvider, Binder, CallableProvider, Module
 from arbeitszeit.password_hasher import PasswordHasher
-from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.colors import HexColors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.text_renderer import TextRenderer
@@ -24,7 +24,7 @@ class TestingModule(Module):
         super().configure(binder)
         binder[EmailSender] = AliasProvider(EmailSenderTestImpl)
         binder[TextRenderer] = AliasProvider(TextRendererImpl)
-        binder[Colors] = AliasProvider(ColorsTestImpl)
+        binder[HexColors] = AliasProvider(ColorsTestImpl)
         binder[Plotter] = AliasProvider(FakePlotter)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsTestImpl)
         binder[Translator] = AliasProvider(FakeTranslator)

@@ -10,7 +10,7 @@ from arbeitszeit.interactors.show_prd_account_details import (
     ShowPRDAccountDetailsInteractor,
 )
 from arbeitszeit_flask.dependency_injection import with_injection
-from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.colors import HexColors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.www.controllers.show_a_account_details_controller import (
@@ -27,7 +27,7 @@ plots = Blueprint("plots", __name__)
 @with_injection()
 @login_required
 def global_barplot_for_certificates(
-    plotter: Plotter, translator: Translator, colors: Colors
+    plotter: Plotter, translator: Translator, colors: HexColors
 ):
     certificates_count = Decimal(request.args["certificates_count"])
     available_product = Decimal(request.args["available_product"])
@@ -51,7 +51,7 @@ def global_barplot_for_certificates(
 @with_injection()
 @login_required
 def global_barplot_for_means_of_production(
-    plotter: Plotter, translator: Translator, colors: Colors
+    plotter: Plotter, translator: Translator, colors: HexColors
 ):
     planned_means = Decimal(request.args["planned_means"])
     planned_resources = Decimal(request.args["planned_resources"])
@@ -81,7 +81,9 @@ def global_barplot_for_means_of_production(
 @plots.route("/plots/global_barplot_for_plans")
 @with_injection()
 @login_required
-def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: Colors):
+def global_barplot_for_plans(
+    plotter: Plotter, translator: Translator, colors: HexColors
+):
     productive_plans = Decimal(request.args["productive_plans"])
     public_plans = Decimal(request.args["public_plans"])
     png = plotter.create_bar_plot(
@@ -90,7 +92,7 @@ def global_barplot_for_plans(plotter: Plotter, translator: Translator, colors: C
             translator.gettext("Public plans"),
         ],
         height_of_bars=[productive_plans, public_plans],
-        colors_of_bars=list(colors.get_all_defined_colors().values()),
+        colors_of_bars=[colors.primary, colors.info],
         fig_size=(5, 4),
         y_label=translator.gettext("Amount"),
     )

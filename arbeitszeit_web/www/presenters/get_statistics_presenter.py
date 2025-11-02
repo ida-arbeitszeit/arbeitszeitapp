@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.interactors.get_statistics import StatisticsResponse
-from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.colors import HexColors
 from arbeitszeit_web.plotter import Plotter
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
@@ -34,7 +34,7 @@ class GetStatisticsViewModel:
 class GetStatisticsPresenter:
     translator: Translator
     plotter: Plotter
-    colors: Colors
+    colors: HexColors
     url_index: UrlIndex
     datetime_service: DatetimeService
 
