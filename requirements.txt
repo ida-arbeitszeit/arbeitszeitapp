@@ -1,5 +1,5 @@
 alembic
-email_validator
+email-validator
 Flask
 Flask-Babel
 Flask-Login
