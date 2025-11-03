@@ -4,10 +4,11 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
+from arbeitszeit.interactors.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.www.presenters.get_draft_details_presenter import (
     GetDraftDetailsPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 from tests.www.presenters.data_generators import PlanDetailsGenerator
 
@@ -91,13 +92,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_means_cost_is_returned_in_view_model(
+    def test_that_means_cost_is_returned_in_view_model_rounded(
         self, means_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(means_cost=means_cost),
         )
-        assert view_model.form.means_cost_value == str(means_cost)
+        assert view_model.form.means_cost_value == str(round(means_cost, 2))
 
     @parameterized.expand(
         [
@@ -105,13 +106,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_resources_cost_is_returned_in_view_model(
+    def test_that_resources_cost_is_returned_in_view_model_rounded(
         self, resources_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(resources_cost=resources_cost),
         )
-        assert view_model.form.resource_cost_value == str(resources_cost)
+        assert view_model.form.resource_cost_value == str(round(resources_cost, 2))
 
     @parameterized.expand(
         [
@@ -119,13 +120,13 @@ class DraftDetailsPresenterTests(BaseTestCase):
             (Decimal(10),),
         ]
     )
-    def test_that_labour_cost_is_returned_in_view_model(
+    def test_that_labour_cost_is_returned_in_view_model_rounded(
         self, labour_cost: Decimal
     ) -> None:
         view_model = self.presenter.present_draft_details(
             self.create_draft_data(labour_cost=labour_cost),
         )
-        assert view_model.form.labour_cost_value == str(labour_cost)
+        assert view_model.form.labour_cost_value == str(round(labour_cost, 2))
 
     @parameterized.expand(
         [
@@ -154,7 +155,7 @@ class DraftDetailsPresenterTests(BaseTestCase):
         resources_cost: Decimal = Decimal(7),
         labour_cost: Decimal = Decimal(7),
         is_public_service: bool = False,
-        creation_timestamp: datetime = datetime(2000, 1, 1),
+        creation_timestamp: datetime = datetime_utc(2000, 1, 1),
     ) -> DraftDetailsSuccess:
         return DraftDetailsSuccess(
             planner_id=uuid4(),

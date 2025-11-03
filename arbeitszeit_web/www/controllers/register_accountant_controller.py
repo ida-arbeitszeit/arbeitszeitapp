@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Protocol
 
-from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.interactors.register_accountant import RegisterAccountantInteractor
 from arbeitszeit_web.token import TokenService
 
 
@@ -18,10 +18,10 @@ class RegisterAccountantForm(Protocol):
 class RegisterAccountantController:
     token_service: TokenService
 
-    def create_use_case_request(
+    def create_interactor_request(
         self, form: RegisterAccountantForm
-    ) -> RegisterAccountantUseCase.Request:
-        return RegisterAccountantUseCase.Request(
+    ) -> RegisterAccountantInteractor.Request:
+        return RegisterAccountantInteractor.Request(
             name=form.get_name(),
             email=form.get_email_address(),
             password=form.get_password(),

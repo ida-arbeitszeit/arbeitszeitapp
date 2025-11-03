@@ -3,20 +3,14 @@ from uuid import UUID
 
 from parameterized import parameterized
 
-from arbeitszeit.psf_balance import PublicSectorFundService
-from arbeitszeit.use_cases.register_hours_worked import (
-    RegisterHoursWorked,
-    RegisterHoursWorkedRequest,
-)
-from tests.data_generators import TransactionGenerator
-from tests.use_cases.base_test_case import BaseTestCase
+from arbeitszeit.services.psf_balance import PublicSectorFundService
+from tests.interactors.base_test_case import BaseTestCase
 
 
 class PublicSectorFundServiceCalculationTests(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.service = self.injector.get(PublicSectorFundService)
-        self.transaction_generator = self.injector.get(TransactionGenerator)
 
     def test_balance_is_zero_if_no_plans_are_approved(self) -> None:
         psf_balance = self.service.calculate_psf_balance()
@@ -95,8 +89,6 @@ class PublicSectorFundServiceCalculationTests(BaseTestCase):
     def _register_hours_worked(
         self, company_id: UUID, worker_id: UUID, hours_worked: Decimal
     ) -> None:
-        use_case = self.injector.get(RegisterHoursWorked)
-        response = use_case(
-            RegisterHoursWorkedRequest(company_id, worker_id, hours_worked)
+        self.registered_hours_worked_generator.register_hours_worked(
+            company=company_id, worker=worker_id, hours=hours_worked
         )
-        assert not response.is_rejected

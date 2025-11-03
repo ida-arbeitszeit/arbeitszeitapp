@@ -21,9 +21,8 @@ mkShell (
         mypy
         pip
         psycopg2
-        types-dateutil
-        types-pytz
         types-setuptools
+        import-linter
       ])
       ++ [
         nixfmt

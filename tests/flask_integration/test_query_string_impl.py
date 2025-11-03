@@ -2,7 +2,7 @@ from werkzeug.datastructures import MultiDict
 
 from arbeitszeit_flask.flask_request import QueryStringImpl
 
-from .flask import FlaskTestCase
+from .base_test_case import FlaskTestCase
 
 
 class QueryStringTests(FlaskTestCase):

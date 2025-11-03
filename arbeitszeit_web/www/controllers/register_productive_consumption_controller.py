@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.register_productive_consumption import (
+from arbeitszeit.interactors.register_productive_consumption import (
     RegisterProductiveConsumptionRequest,
 )
-from arbeitszeit_web.fields import ParsingFailure, ParsingSuccess, parse_formfield
+from arbeitszeit.records import ConsumptionType
 from arbeitszeit_web.forms import RegisterProductiveConsumptionForm
+from arbeitszeit_web.forms.fields import ParsingFailure, ParsingSuccess, parse_formfield
+from arbeitszeit_web.forms.formfield_parsers import PositiveIntegerParser, UuidParser
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
-from arbeitszeit_web.www.formfield_parsers import PositiveIntegerParser, UuidParser
 
 
 @dataclass

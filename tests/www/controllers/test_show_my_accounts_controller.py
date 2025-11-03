@@ -11,11 +11,11 @@ class ControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ShowCompanyAccountsController)
 
-    def test_company_id_is_returned_unchanged_as_use_case_request(
+    def test_company_id_is_returned_unchanged_as_interactor_request(
         self,
     ) -> None:
         expected_company_id = uuid4()
-        use_case_request = self.controller.create_request(
+        interactor_request = self.controller.create_request(
             company_id=expected_company_id
         )
-        assert use_case_request.company == expected_company_id
+        assert interactor_request.company == expected_company_id

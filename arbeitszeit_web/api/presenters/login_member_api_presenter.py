@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.log_in_member import LogInMemberUseCase
+from arbeitszeit.interactors.log_in_member import LogInMemberInteractor
 from arbeitszeit_web.api.presenters.interfaces import JsonBoolean, JsonObject, JsonValue
 from arbeitszeit_web.api.response_errors import Unauthorized
 from arbeitszeit_web.session import Session
@@ -21,7 +21,7 @@ class LoginMemberApiPresenter:
 
     session: Session
 
-    def create_view_model(self, response: LogInMemberUseCase.Response) -> ViewModel:
+    def create_view_model(self, response: LogInMemberInteractor.Response) -> ViewModel:
         if response.is_logged_in:
             assert response.user_id
             self.session.login_member(member=response.user_id, remember=False)
@@ -29,7 +29,7 @@ class LoginMemberApiPresenter:
         else:
             if (
                 response.rejection_reason
-                == LogInMemberUseCase.RejectionReason.unknown_email_address
+                == LogInMemberInteractor.RejectionReason.unknown_email_address
             ):
                 raise Unauthorized(message="Unknown email address.")
             else:

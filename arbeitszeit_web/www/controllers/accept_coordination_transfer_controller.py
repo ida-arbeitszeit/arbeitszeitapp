@@ -1,21 +1,21 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.accept_coordination_transfer import (
-    AcceptCoordinationTransferUseCase,
+from arbeitszeit.interactors.accept_coordination_transfer import (
+    AcceptCoordinationTransferInteractor,
 )
 from arbeitszeit_web.session import Session
 
-UseCaseRequest = AcceptCoordinationTransferUseCase.Request
+InteractorRequest = AcceptCoordinationTransferInteractor.Request
 
 
 @dataclass
 class AcceptCoordinationTransferController:
     session: Session
 
-    def create_use_case_request(self, transfer_request: UUID) -> UseCaseRequest:
+    def create_interactor_request(self, transfer_request: UUID) -> InteractorRequest:
         current_user = self.session.get_current_user()
         assert current_user
-        return UseCaseRequest(
+        return InteractorRequest(
             transfer_request_id=transfer_request, accepting_company=current_user
         )

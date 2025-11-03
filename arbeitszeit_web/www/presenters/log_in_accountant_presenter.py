@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.log_in_accountant import LogInAccountantUseCase as UseCase
+from arbeitszeit.interactors.log_in_accountant import (
+    LogInAccountantInteractor as Interactor,
+)
 from arbeitszeit_web.forms import LogInAccountantForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -19,16 +21,16 @@ class LogInAccountantPresenter:
     translator: Translator
 
     def present_login_process(
-        self, form: LogInAccountantForm, response: UseCase.Response
+        self, form: LogInAccountantForm, response: Interactor.Response
     ) -> ViewModel:
         if response.user_id is None:
-            if response.rejection_reason == UseCase.RejectionReason.wrong_password:
+            if response.rejection_reason == Interactor.RejectionReason.wrong_password:
                 form.password_field().attach_error(
                     self.translator.gettext("Incorrect password")
                 )
             elif (
                 response.rejection_reason
-                == UseCase.RejectionReason.email_is_not_accountant
+                == Interactor.RejectionReason.email_is_not_accountant
             ):
                 form.email_field().attach_error(
                     self.translator.gettext(

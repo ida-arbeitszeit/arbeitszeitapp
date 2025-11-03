@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases import resend_work_invite
+from arbeitszeit.interactors import resend_work_invite
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session, UserRole
 
@@ -10,7 +10,7 @@ from arbeitszeit_web.session import Session, UserRole
 class ResendWorkInviteController:
     session: Session
 
-    def create_use_case_request(self, request: Request) -> resend_work_invite.Request:
+    def create_interactor_request(self, request: Request) -> resend_work_invite.Request:
         user_role = self.session.get_user_role()
         assert user_role == UserRole.company
         company_id = self.session.get_current_user()

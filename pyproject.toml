@@ -8,7 +8,7 @@ name = "arbeitszeitapp"
 version = "0.0.0"
 classifiers = [
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.optional-dependencies]
@@ -25,35 +25,39 @@ include = [
     "arbeitszeit_flask.*",
     "arbeitszeit_web",
     "arbeitszeit_web.*",
+    "arbeitszeit_db",
+    "arbeitszeit_db.*",
 ]
 
 [tool.black]
-target-version = ['py311']
+target-version = ['py312']
 extend-exclude = '''
 (
   ^/arbeitszeit_flask/development_settings\.py |
-  ^/arbeitszeit_flask/migrations/
+  ^/arbeitszeit_db/migrations/versions/
 )
 '''
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-skip = "arbeitszeit_flask/migrations"
+skip = "arbeitszeit_db/migrations/versions/"
 
 [tool.mypy]
 files = [
     "arbeitszeit",
-    "arbeitszeit_benchmark",
     "arbeitszeit_development",
     "arbeitszeit_flask",
     "arbeitszeit_web",
+    "arbeitszeit_db",
     "build_support",
-    "tests"
+    "tests",
+    "run-checks",
+    "format_code.py",
 ]
 mypy_path = "type_stubs"
 exclude = '''
-    migrations/
+    migrations/versions/
 '''
 disable_error_code = "type-abstract"
 
@@ -62,13 +66,11 @@ module = [
     "arbeitszeit",
     "arbeitszeit_web",
     "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "arbeitszeit_db",
     "tests"
 ]
 allow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = [ "arbeitszeit_flask.database.models" ]
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -76,20 +78,83 @@ module = [
     "flask_login",
     "flask_restx.*",
     "flask_wtf",
-    "matplotlib.*",
     "parameterized.*",
-    "sqlalchemy.*",
     "wtforms.*",
 ]
 ignore_errors = true
 
-[[tool.mypy.overrides]]
-module = [
-    "sqlalchemy.*",
+[tool.coverage.run]
+source = [
+    "arbeitszeit",
+    "arbeitszeit_flask",
+    "arbeitszeit_web",
+    "arbeitszeit_db",
 ]
-ignore_missing_imports = true
+omit = [
+    "arbeitszeit_db/migrations/versions/*",
+]
 
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore:.*jsonschema.RefResolver is deprecated.*:DeprecationWarning:flask_restx\\.api",
+[tool.coverage.report]
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.importlinter]
+root_packages = [
+    "arbeitszeit",
+    "arbeitszeit_db",
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Business logic component does not depend on any other component"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit",
+]
+forbidden_modules = [
+    "arbeitszeit_db",
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Database component does not depend on web, flask, dev or test components"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit_db",
+]
+forbidden_modules = [
+    "arbeitszeit_web",
+    "arbeitszeit_flask",
+    "arbeitszeit_development",
+    "tests",
+]
+
+[[tool.importlinter.contracts]]
+name = "Web component does not depend on flask component"
+type = "forbidden"
+source_modules = [
+    "arbeitszeit_web",
+]
+forbidden_modules = [
+    "arbeitszeit_flask",
 ]

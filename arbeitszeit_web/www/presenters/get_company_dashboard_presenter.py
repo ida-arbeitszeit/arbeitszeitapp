@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.get_company_dashboard import GetCompanyDashboardUseCase
+from arbeitszeit.interactors.get_company_dashboard import GetCompanyDashboardInteractor
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.translator import Translator
@@ -40,29 +40,29 @@ class GetCompanyDashboardPresenter:
     translator: Translator
 
     def present(
-        self, use_case_response: GetCompanyDashboardUseCase.Response
+        self, interactor_response: GetCompanyDashboardInteractor.Response
     ) -> ViewModel:
         latest_plans = [
             self._get_plan_details_web(plan_detail)
-            for plan_detail in use_case_response.three_latest_plans
+            for plan_detail in interactor_response.three_latest_plans
         ]
         return self.ViewModel(
-            has_workers=use_case_response.has_workers,
-            company_name=use_case_response.company_info.name,
-            company_id=str(use_case_response.company_info.id),
-            company_email=use_case_response.company_info.email,
-            has_latest_plans=bool(use_case_response.three_latest_plans),
+            has_workers=interactor_response.has_workers,
+            company_name=interactor_response.company_info.name,
+            company_id=str(interactor_response.company_info.id),
+            company_email=interactor_response.company_info.email,
+            has_latest_plans=bool(interactor_response.three_latest_plans),
             latest_plans=latest_plans,
-            accounts_tile=self._create_accounts_tile(use_case_response),
+            accounts_tile=self._create_accounts_tile(interactor_response),
         )
 
     def _get_plan_details_web(
-        self, plan: GetCompanyDashboardUseCase.Response.LatestPlansDetails
+        self, plan: GetCompanyDashboardInteractor.Response.LatestPlansDetails
     ) -> PlanDetailsWeb:
         return self.PlanDetailsWeb(
             prd_name=plan.prd_name,
             approval_date=self.datetime_formatter.format_datetime(
-                plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
+                plan.approval_date, fmt="%d.%m."
             ),
             plan_details_url=self.url_index.get_plan_details_url(
                 plan_id=plan.plan_id, user_role=UserRole.company
@@ -70,13 +70,13 @@ class GetCompanyDashboardPresenter:
         )
 
     def _create_accounts_tile(
-        self, use_case_response: GetCompanyDashboardUseCase.Response
+        self, interactor_response: GetCompanyDashboardInteractor.Response
     ) -> Tile:
         return self.Tile(
             title=self.translator.gettext("Accounts"),
             subtitle=self.translator.gettext("You have four accounts"),
             icon="chart-line",
             url=self.url_index.get_company_accounts_url(
-                company_id=use_case_response.company_info.id
+                company_id=interactor_response.company_info.id
             ),
         )

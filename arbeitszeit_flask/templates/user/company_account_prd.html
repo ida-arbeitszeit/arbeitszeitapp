@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
+
 {% block navbar_start %}
 {% from 'macros/navbar.html' import navbar %}
 {{ navbar(view_model.navbar_items) }}
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transactions.html' import transaction_with_peer %}
-
+{% from 'macros/transfers.html' import transfer_with_party %}
 <section class="section columns has-text-centered">
     <div class="column"></div>
     <div class="column is-two-thirds">
@@ -29,9 +29,9 @@
             </div>
         </div>
         <div class="section has-text-left">
-            {% if view_model.show_transactions %}
-            {% for trans_info in view_model.transactions %}
-            {{ transaction_with_peer(trans_info.date, trans_info.transaction_type, trans_info.transaction_volume, trans_info.peer_name, trans_info.peer_type_icon) }}
+            {% if view_model.show_transfers %}
+            {% for transfer in view_model.transfers %}
+                {{ transfer_with_party(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer, transfer.party_icon, transfer.party_name) }}
             {% endfor %}
             {% endif %}
         </div>

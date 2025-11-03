@@ -3,7 +3,7 @@ from parameterized import parameterized
 from arbeitszeit.injector import Binder, CallableProvider, Module
 from tests.flask_integration.dependency_injection import FlaskConfiguration
 
-from .flask import LogInUser, ViewTestCase
+from .base_test_case import LogInUser, ViewTestCase
 
 URL = "/user/request-email-change"
 AUTHENTICATED_USER_LOGINS = [
@@ -54,6 +54,20 @@ class RequestEmailChangeViewTests(ViewTestCase):
             },
         )
         assert response.status_code == 400
+
+    def test_that_member_gets_error_message_when_posting_with_wrong_password(
+        self,
+    ) -> None:
+        password = "123password"
+        self.login_member(password=password)
+        response = self.client.post(
+            URL,
+            data={
+                "new_email": "new_email@test.test",
+                "current_password": password + "wrong",
+            },
+        )
+        assert "The password is incorrect." in response.text
 
     def test_that_unauthenticated_users_get_redirect_response_on_post_without_data(
         self,

@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from arbeitszeit.use_cases.approve_plan import ApprovePlanUseCase as UseCase
+from arbeitszeit.interactors.approve_plan import ApprovePlanInteractor as Interactor
 
 
 class ApprovePlanController:
-    def approve_plan(self, plan: UUID) -> UseCase.Request:
-        return UseCase.Request(plan=plan)
+    def approve_plan(self, plan: UUID) -> Interactor.Request:
+        return Interactor.Request(plan=plan)

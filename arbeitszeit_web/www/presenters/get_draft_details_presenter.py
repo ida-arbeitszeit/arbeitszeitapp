@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.get_draft_details import DraftDetailsSuccess
+from arbeitszeit.interactors.get_draft_details import DraftDetailsSuccess
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -23,9 +23,9 @@ class GetDraftDetailsPresenter:
             timeframe_value=str(draft_data.timeframe),
             unit_of_distribution_value=draft_data.production_unit,
             amount_value=str(draft_data.amount),
-            means_cost_value=str(draft_data.means_cost),
-            resource_cost_value=str(draft_data.resources_cost),
-            labour_cost_value=str(draft_data.labour_cost),
+            means_cost_value=str(round(draft_data.means_cost, 2)),
+            resource_cost_value=str(round(draft_data.resources_cost, 2)),
+            labour_cost_value=str(round(draft_data.labour_cost, 2)),
             is_public_plan_value="on" if draft_data.is_public_service else "",
         )
         return self.ViewModel(

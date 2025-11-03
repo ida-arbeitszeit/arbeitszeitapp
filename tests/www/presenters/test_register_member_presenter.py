@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.interactors.register_member import RegisterMemberInteractor
 from arbeitszeit_web.www.presenters.register_member_presenter import (
     RegisterMemberPresenter,
 )
@@ -24,7 +24,7 @@ class PresenterTests(BaseTestCase):
     ) -> None:
         form = RegisterFormImpl.create()
         response = self.create_failure_response(
-            reason=RegisterMemberUseCase.Response.RejectionReason.member_already_exists
+            reason=RegisterMemberInteractor.Response.RejectionReason.member_already_exists
         )
         self.presenter.present_member_registration(response, form)
         error = form.errors()[0]
@@ -37,7 +37,7 @@ class PresenterTests(BaseTestCase):
     ) -> None:
         form = RegisterFormImpl.create()
         response = self.create_failure_response(
-            reason=RegisterMemberUseCase.Response.RejectionReason.company_with_different_password_exists
+            reason=RegisterMemberInteractor.Response.RejectionReason.company_with_different_password_exists
         )
         self.presenter.present_member_registration(response, form)
         error = form.errors()[0]
@@ -72,8 +72,8 @@ class PresenterTests(BaseTestCase):
 
     def create_success_response(
         self, is_confirmation_required: bool = True
-    ) -> RegisterMemberUseCase.Response:
-        return RegisterMemberUseCase.Response(
+    ) -> RegisterMemberInteractor.Response:
+        return RegisterMemberInteractor.Response(
             rejection_reason=None,
             user_id=uuid4(),
             is_confirmation_required=is_confirmation_required,
@@ -82,8 +82,8 @@ class PresenterTests(BaseTestCase):
     def create_failure_response(
         self,
         *,
-        reason: RegisterMemberUseCase.Response.RejectionReason = RegisterMemberUseCase.Response.RejectionReason.member_already_exists,
-    ) -> RegisterMemberUseCase.Response:
-        return RegisterMemberUseCase.Response(
+        reason: RegisterMemberInteractor.Response.RejectionReason = RegisterMemberInteractor.Response.RejectionReason.member_already_exists,
+    ) -> RegisterMemberInteractor.Response:
+        return RegisterMemberInteractor.Response(
             rejection_reason=reason, user_id=None, is_confirmation_required=False
         )

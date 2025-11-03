@@ -6,7 +6,7 @@ from typing import Generic, Iterable, Iterator, Optional, Protocol, Self, Tuple,
 from uuid import UUID
 
 from arbeitszeit import records
-from arbeitszeit.transfers.transfer_type import TransferType
+from arbeitszeit.transfers import TransferType
 
 T = TypeVar("T", covariant=True)
 
@@ -200,6 +200,8 @@ class CooperationResult(QueryResult[records.Cooperation], Protocol):
 
     def coordinated_by_company(self, company_id: UUID) -> Self: ...
 
+    def of_plan(self, plan_id: UUID) -> Self: ...
+
     def joined_with_current_coordinator(
         self,
     ) -> QueryResult[Tuple[records.Cooperation, records.Company]]: ...
@@ -250,18 +252,18 @@ class PrivateConsumptionResult(QueryResult[records.PrivateConsumption], Protocol
 
     def where_provider_is_company(self, company: UUID) -> Self: ...
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
     ) -> QueryResult[
-        Tuple[records.PrivateConsumption, records.Transaction, records.Plan]
+        Tuple[records.PrivateConsumption, records.Transfer, records.Plan]
     ]: ...
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResult[
         Tuple[
             records.PrivateConsumption,
-            records.Transaction,
+            records.Transfer,
             records.Plan,
             records.Member,
         ]
@@ -275,28 +277,28 @@ class ProductiveConsumptionResult(QueryResult[records.ProductiveConsumption], Pr
 
     def where_provider_is_company(self, company: UUID) -> Self: ...
 
-    def joined_with_transactions_and_plan(
+    def joined_with_transfer_and_plan(
         self,
     ) -> QueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Plan]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Plan]
     ]: ...
 
-    def joined_with_transaction_and_provider(
+    def joined_with_transfer_and_provider(
         self,
     ) -> QueryResult[
-        Tuple[records.ProductiveConsumption, records.Transaction, records.Company]
+        Tuple[records.ProductiveConsumption, records.Transfer, records.Company]
     ]: ...
 
-    def joined_with_transaction(
+    def joined_with_transfer(
         self,
-    ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transaction]]: ...
+    ) -> QueryResult[Tuple[records.ProductiveConsumption, records.Transfer]]: ...
 
-    def joined_with_transaction_and_plan_and_consumer(
+    def joined_with_transfer_and_plan_and_consumer(
         self,
     ) -> QueryResult[
         Tuple[
-            records.PrivateConsumption,
-            records.Transaction,
+            records.ProductiveConsumption,
+            records.Transfer,
             records.Plan,
             records.Company,
         ]
@@ -335,28 +337,12 @@ class AccountantResult(QueryResult[records.Accountant], Protocol):
     ) -> QueryResult[Tuple[records.Accountant, records.EmailAddress]]: ...
 
 
-class TransactionResult(QueryResult[records.Transaction], Protocol):
-    def where_account_is_sender(self, *account: UUID) -> Self: ...
-
-    def where_account_is_receiver(self, *account: UUID) -> Self: ...
-
-    def ordered_by_transaction_date(self, descending: bool = ...) -> Self: ...
-
-    def joined_with_receiver(
-        self,
-    ) -> QueryResult[Tuple[records.Transaction, records.AccountOwner]]: ...
-
-    def joined_with_sender_and_receiver(
-        self,
-    ) -> QueryResult[
-        Tuple[records.Transaction, records.AccountOwner, records.AccountOwner]
-    ]: ...
-
-
 class TransferResult(QueryResult[records.Transfer], Protocol):
     def where_account_is_debtor(self, *account: UUID) -> Self: ...
 
     def where_account_is_creditor(self, *account: UUID) -> Self: ...
+
+    def where_account_is_debtor_or_creditor(self, *account: UUID) -> Self: ...
 
     def joined_with_debtor(
         self,
@@ -365,6 +351,14 @@ class TransferResult(QueryResult[records.Transfer], Protocol):
     def joined_with_creditor(
         self,
     ) -> QueryResult[Tuple[records.Transfer, records.AccountOwner]]: ...
+
+    def joined_with_debtor_and_creditor(
+        self,
+    ) -> QueryResult[
+        Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
+    ]: ...
+
+    def ordered_by_date(self, *, ascending: bool = ...) -> Self: ...
 
 
 class AccountResult(QueryResult[records.Account], Protocol):
@@ -379,10 +373,6 @@ class AccountResult(QueryResult[records.Account], Protocol):
     def that_are_product_accounts(self) -> Self: ...
 
     def that_are_labour_accounts(self) -> Self: ...
-
-    def joined_with_owner(
-        self,
-    ) -> QueryResult[Tuple[records.Account, records.AccountOwner]]: ...
 
     def joined_with_balance(self) -> QueryResult[Tuple[records.Account, Decimal]]: ...
 
@@ -515,13 +505,21 @@ class RegisteredHoursWorkedResult(QueryResult[records.RegisteredHoursWorked], Pr
 
 class DatabaseGateway(Protocol):
     def create_private_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        transfer_of_private_consumption: UUID,
+        transfer_of_compensation: UUID | None,
+        amount: int,
+        plan: UUID,
     ) -> records.PrivateConsumption: ...
 
     def get_private_consumptions(self) -> PrivateConsumptionResult: ...
 
     def create_productive_consumption(
-        self, transaction: UUID, amount: int, plan: UUID
+        self,
+        plan: UUID,
+        amount: int,
+        transfer_of_productive_consumption: UUID,
+        transfer_of_compensation: UUID | None,
     ) -> records.ProductiveConsumption: ...
 
     def get_productive_consumptions(self) -> ProductiveConsumptionResult: ...
@@ -567,18 +565,6 @@ class DatabaseGateway(Protocol):
     def get_coordination_transfer_requests(
         self,
     ) -> CoordinationTransferRequestResult: ...
-
-    def get_transactions(self) -> TransactionResult: ...
-
-    def create_transaction(
-        self,
-        date: datetime,
-        sending_account: UUID,
-        receiving_account: UUID,
-        amount_sent: Decimal,
-        amount_received: Decimal,
-        purpose: str,
-    ) -> records.Transaction: ...
 
     def create_transfer(
         self,

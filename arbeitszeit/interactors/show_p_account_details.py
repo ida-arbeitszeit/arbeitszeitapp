@@ -1,0 +1,43 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from decimal import Decimal
+from uuid import UUID
+
+from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.account_details import (
+    AccountDetailsService,
+    AccountTransfer,
+    PlotDetails,
+    construct_plot_data,
+)
+
+
+@dataclass
+class ShowPAccountDetailsInteractor:
+    @dataclass
+    class Request:
+        company: UUID
+
+    @dataclass
+    class Response:
+        company_id: UUID
+        transfers: list[AccountTransfer]
+        account_balance: Decimal
+        plot: PlotDetails
+
+    database: DatabaseGateway
+    account_details_service: AccountDetailsService
+
+    def show_details(self, request: Request) -> Response:
+        company = self.database.get_companies().with_id(request.company).first()
+        assert company
+        account = company.means_account
+        transfers = self.account_details_service.get_account_transfers(account)
+        account_balance = self.account_details_service.get_account_balance(account)
+        return self.Response(
+            company_id=request.company,
+            transfers=sorted(transfers, key=lambda t: t.date, reverse=True),
+            account_balance=account_balance,
+            plot=construct_plot_data(transfers),
+        )

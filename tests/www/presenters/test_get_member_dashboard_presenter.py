@@ -1,12 +1,10 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from dateutil import tz
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import get_member_dashboard
+from arbeitszeit.interactors import get_member_dashboard
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_member_dashboard_presenter import (
     GetMemberDashboardPresenter,
@@ -114,7 +112,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=uuid4(),
                     prd_name=expected_name,
-                    approval_date=datetime.now(),
+                    approval_date=self.datetime_service.now(),
                 )
             ]
         )
@@ -122,7 +120,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
         self.assertEqual(presentation.three_latest_plans[0].prd_name, expected_name)
 
     def test_approval_date_of_latest_plans_is_correctly_formatted(self):
-        now = datetime.now(tz=tz.gettz("Europe/Berlin"))
+        now = self.datetime_service.now()
         response = self.get_response(
             three_latest_plans=[
                 get_member_dashboard.PlanDetails(
@@ -144,7 +142,7 @@ class GetMemberDashboardPresenterTests(BaseTestCase):
                 get_member_dashboard.PlanDetails(
                     plan_id=plan_id,
                     prd_name="test name",
-                    approval_date=datetime.now(),
+                    approval_date=self.datetime_service.now(),
                 )
             ]
         )

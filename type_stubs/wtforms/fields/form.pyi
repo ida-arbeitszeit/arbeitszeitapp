@@ -9,18 +9,11 @@ class FormField(Field):
     form_class: Incomplete
     separator: Incomplete
     def __init__(
-        self,
-        form_class,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        separator: str = "-",
-        **kwargs,
+        self, form_class, label=None, validators=None, separator: str = "-", **kwargs
     ) -> None: ...
     object_data: Incomplete
     form: Incomplete
-    def process(
-        self, formdata, data=..., extra_filters: Incomplete | None = None
-    ) -> None: ...
+    def process(self, formdata, data=..., extra_filters=None) -> None: ...
     def validate(self, form, extra_validators=()): ...
     def populate_obj(self, obj, name) -> None: ...
     def __iter__(self): ...

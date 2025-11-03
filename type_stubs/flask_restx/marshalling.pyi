@@ -7,9 +7,9 @@ def make(cls): ...
 def marshal(
     data,
     fields,
-    envelope: Incomplete | None = None,
+    envelope=None,
     skip_none: bool = False,
-    mask: Incomplete | None = None,
+    mask=None,
     ordered: bool = False,
 ): ...
 
@@ -22,9 +22,9 @@ class marshal_with:
     def __init__(
         self,
         fields,
-        envelope: Incomplete | None = None,
+        envelope=None,
         skip_none: bool = False,
-        mask: Incomplete | None = None,
+        mask=None,
         ordered: bool = False,
     ) -> None: ...
     def __call__(self, f): ...

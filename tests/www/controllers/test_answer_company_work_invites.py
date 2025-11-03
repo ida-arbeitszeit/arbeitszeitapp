@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, cast
 from uuid import uuid4
 
-from arbeitszeit.use_cases.answer_company_work_invite import (
+from arbeitszeit.interactors.answer_company_work_invite import (
     AnswerCompanyWorkInviteRequest,
 )
 from arbeitszeit_web.www.controllers.answer_company_work_invite_controller import (

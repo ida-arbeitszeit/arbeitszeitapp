@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-{% from 'macros/transactions.html' import basic_transaction %}
+{% from 'macros/transfers.html' import transfer_with_party %}
 
 <section class="section columns has-text-centered">
     <div class="column"></div>
@@ -29,9 +29,9 @@
             <img src="{{ view_model.plot_url }}" alt="plot of a account">
         </div>
         <div class="section has-text-left">
-            {% if view_model.transactions is defined and view_model.transactions|length %}
-            {% for trans_info in view_model.transactions %}
-            {{ basic_transaction(trans_info.date, trans_info.transaction_type, trans_info.purpose, trans_info.transaction_volume) }}
+            {% if view_model.transfers is defined and view_model.transfers|length %}
+            {% for transfer in view_model.transfers %}
+                {{ transfer_with_party(transfer.date, transfer.transfer_type, transfer.transfer_volume, transfer.is_debit_transfer, transfer.party_icon, transfer.party_name) }}
             {% endfor %}
             {% endif %}
         </div>

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
+from arbeitszeit.interactors import request_email_address_change as interactor
 from arbeitszeit.repositories import DatabaseGateway
-from arbeitszeit.use_cases import request_email_address_change as use_case
 from arbeitszeit_web.forms import RequestEmailAddressChangeForm
 from arbeitszeit_web.session import Session, UserRole
 
@@ -13,7 +13,7 @@ class RequestEmailAddressChangeController:
 
     def process_email_address_change_request(
         self, form: RequestEmailAddressChangeForm
-    ) -> use_case.Request:
+    ) -> interactor.Request:
         current_user_id = self.session.get_current_user()
         assert current_user_id
         if self.session.get_user_role() == UserRole.member:
@@ -38,7 +38,7 @@ class RequestEmailAddressChangeController:
             assert query
             email_address = query[1]
         assert email_address
-        return use_case.Request(
+        return interactor.Request(
             current_email_address=email_address.address,
             new_email_address=form.new_email_field.get_value(),
             current_password=form.current_password_field.get_value(),

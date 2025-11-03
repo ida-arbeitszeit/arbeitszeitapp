@@ -1,11 +1,18 @@
-from datetime import date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Optional
-
-import pytz
-from dateutil import tz
 
 from arbeitszeit.datetime_service import DatetimeService
 from arbeitszeit.injector import singleton
+
+
+def datetime_utc(
+    year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0
+) -> datetime:
+    return datetime(year, month, day, hour, minute, second, tzinfo=UTC)
+
+
+def datetime_min_utc() -> datetime:
+    return datetime.min.replace(tzinfo=UTC)
 
 
 @singleton
@@ -14,7 +21,7 @@ class FakeDatetimeService(DatetimeService):
         self.frozen_time: Optional[datetime] = None
 
     def freeze_time(self, timestamp: Optional[datetime] = None) -> None:
-        self.frozen_time = timestamp if timestamp else datetime.min
+        self.frozen_time = timestamp if timestamp else datetime.min.replace(tzinfo=UTC)
 
     def unfreeze_time(self) -> None:
         self.frozen_time = None
@@ -29,43 +36,9 @@ class FakeDatetimeService(DatetimeService):
         return self.frozen_time
 
     def now(self) -> datetime:
-        return self.frozen_time if self.frozen_time else datetime.now()
+        if self.frozen_time:
+            return self.frozen_time
+        return datetime.now(UTC)
 
-    def today(self) -> date:
-        return (
-            date(self.frozen_time.year, self.frozen_time.month, self.frozen_time.day)
-            if self.frozen_time
-            else date.today()
-        )
-
-    def format_datetime(
-        self,
-        date: datetime,
-        zone: Optional[str] = None,
-        fmt: Optional[str] = None,
-    ) -> str:
-        if date.tzinfo is None:
-            date = date.replace(tzinfo=pytz.UTC)
-        if zone is not None:
-            date = date.astimezone(tz.gettz(zone))
-        if fmt is None:
-            fmt = "%d.%m.%Y %H:%M"
-        return date.strftime(fmt)
-
-    def now_minus_one_day(self) -> datetime:
-        return self.now() - timedelta(days=1)
-
-    def now_minus_20_hours(self) -> datetime:
-        return self.now() - timedelta(hours=20)
-
-    def now_minus_25_hours(self) -> datetime:
-        return self.now() - timedelta(hours=25)
-
-    def now_minus_two_days(self) -> datetime:
-        return self.now() - timedelta(days=2)
-
-    def now_minus_ten_days(self) -> datetime:
-        return self.now() - timedelta(days=10)
-
-    def now_plus_one_day(self) -> datetime:
-        return self.now() + timedelta(days=1)
+    def now_minus(self, delta: timedelta) -> datetime:
+        return self.now() - delta

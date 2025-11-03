@@ -1,14 +1,14 @@
-from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
-from arbeitszeit.use_cases.get_company_dashboard import (
-    GetCompanyDashboardUseCase as UseCase,
+from arbeitszeit.interactors.get_company_dashboard import (
+    GetCompanyDashboardInteractor as Interactor,
 )
 from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.get_company_dashboard_presenter import (
     GetCompanyDashboardPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.www.base_test_case import BaseTestCase
 
 
@@ -17,25 +17,25 @@ class CompanyDashboardBaseTestCase(BaseTestCase):
         super().setUp()
         self.presenter = self.injector.get(GetCompanyDashboardPresenter)
 
-    def get_use_case_response(
+    def get_interactor_response(
         self,
         has_workers: bool = False,
-        company_info: Optional[UseCase.Response.CompanyInfo] = None,
-        latest_plans: Optional[List[UseCase.Response.LatestPlansDetails]] = None,
-    ) -> UseCase.Response:
+        company_info: Optional[Interactor.Response.CompanyInfo] = None,
+        latest_plans: Optional[List[Interactor.Response.LatestPlansDetails]] = None,
+    ) -> Interactor.Response:
         if company_info is None:
-            company_info = UseCase.Response.CompanyInfo(
+            company_info = Interactor.Response.CompanyInfo(
                 id=uuid4(), name="company name", email="mail@test.de"
             )
         if latest_plans is None:
             latest_plans = [
-                UseCase.Response.LatestPlansDetails(
+                Interactor.Response.LatestPlansDetails(
                     plan_id=uuid4(),
                     prd_name="prd name test",
                     approval_date=self.datetime_service.now(),
                 )
             ]
-        return UseCase.Response(
+        return Interactor.Response(
             company_info=company_info,
             has_workers=has_workers,
             three_latest_plans=latest_plans,
@@ -43,19 +43,19 @@ class CompanyDashboardBaseTestCase(BaseTestCase):
 
 
 class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
-    def test_presenter_successfully_presents_a_use_case_response(self):
-        self.assertTrue(self.presenter.present(self.get_use_case_response()))
+    def test_presenter_successfully_presents_a_interactor_response(self):
+        self.assertTrue(self.presenter.present(self.get_interactor_response()))
 
     def test_presenter_correctly_shows_that_company_has_no_workers(self):
         has_workers = self.presenter.present(
-            self.get_use_case_response(has_workers=False)
+            self.get_interactor_response(has_workers=False)
         ).has_workers
         self.assertFalse(has_workers)
 
     def test_presenter_correctly_shows_company_name(self):
         view_model = self.presenter.present(
-            self.get_use_case_response(
-                company_info=UseCase.Response.CompanyInfo(
+            self.get_interactor_response(
+                company_info=Interactor.Response.CompanyInfo(
                     id=uuid4(), name="company test name", email="mail@test.de"
                 )
             )
@@ -65,8 +65,8 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
     def test_presenter_correctly_shows_company_id(self):
         company_id = uuid4()
         view_model = self.presenter.present(
-            self.get_use_case_response(
-                company_info=UseCase.Response.CompanyInfo(
+            self.get_interactor_response(
+                company_info=Interactor.Response.CompanyInfo(
                     id=company_id, name="company test name", email="mail@test.de"
                 )
             )
@@ -75,8 +75,8 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
 
     def test_presenter_correctly_shows_company_email(self):
         view_model = self.presenter.present(
-            self.get_use_case_response(
-                company_info=UseCase.Response.CompanyInfo(
+            self.get_interactor_response(
+                company_info=Interactor.Response.CompanyInfo(
                     id=uuid4(), name="company test name", email="mail@test.de"
                 )
             )
@@ -84,20 +84,22 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
         self.assertEqual(view_model.company_email, "mail@test.de")
 
     def test_presenter_correctly_shows_that_there_are_no_latest_plans_to_show(self):
-        view_model = self.presenter.present(self.get_use_case_response(latest_plans=[]))
+        view_model = self.presenter.present(
+            self.get_interactor_response(latest_plans=[])
+        )
         self.assertFalse(view_model.has_latest_plans)
 
     def test_presenter_correctly_shows_that_there_are_latest_plans_to_show(self):
-        view_model = self.presenter.present(self.get_use_case_response())
+        view_model = self.presenter.present(self.get_interactor_response())
         self.assertTrue(view_model.has_latest_plans)
 
     def test_presenter_correctly_formats_date_of_latest_plans(self):
-        self.datetime_service.freeze_time(datetime(2022, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2022, 1, 1))
         approval_time = self.datetime_service.now()
         view_model = self.presenter.present(
-            self.get_use_case_response(
+            self.get_interactor_response(
                 latest_plans=[
-                    UseCase.Response.LatestPlansDetails(
+                    Interactor.Response.LatestPlansDetails(
                         plan_id=uuid4(),
                         prd_name="prd name test",
                         approval_date=approval_time,
@@ -110,9 +112,9 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
     def test_presenter_shows_correct_link_to_latest_plan(self):
         plan_id = uuid4()
         view_model = self.presenter.present(
-            self.get_use_case_response(
+            self.get_interactor_response(
                 latest_plans=[
-                    UseCase.Response.LatestPlansDetails(
+                    Interactor.Response.LatestPlansDetails(
                         plan_id=plan_id,
                         prd_name="prd name test",
                         approval_date=self.datetime_service.now(),
@@ -130,29 +132,29 @@ class CompanyDashboardPresenterTests(CompanyDashboardBaseTestCase):
 
 class CompanyDashboardTileTests(CompanyDashboardBaseTestCase):
     def test_accounts_tile_has_correct_title(self) -> None:
-        view_model = self.presenter.present(self.get_use_case_response())
+        view_model = self.presenter.present(self.get_interactor_response())
         self.assertEqual(
             view_model.accounts_tile.title, self.translator.gettext("Accounts")
         )
 
     def test_accounts_tile_has_correct_subtitle(self) -> None:
-        view_model = self.presenter.present(self.get_use_case_response())
+        view_model = self.presenter.present(self.get_interactor_response())
         self.assertEqual(
             view_model.accounts_tile.subtitle,
             self.translator.gettext("You have four accounts"),
         )
 
     def test_accounts_tile_has_correct_icon(self) -> None:
-        view_model = self.presenter.present(self.get_use_case_response())
+        view_model = self.presenter.present(self.get_interactor_response())
         self.assertEqual(view_model.accounts_tile.icon, "chart-line")
 
-    def test_accounts_tile_has_url_that_leads_to_accounts_of_company_from_use_case_response(
+    def test_accounts_tile_has_url_that_leads_to_accounts_of_company_from_interactor_response(
         self,
     ) -> None:
         expected_company_id = uuid4()
         view_model = self.presenter.present(
-            self.get_use_case_response(
-                company_info=UseCase.Response.CompanyInfo(
+            self.get_interactor_response(
+                company_info=Interactor.Response.CompanyInfo(
                     id=expected_company_id,
                     name="company test name",
                     email="mail@test.de",

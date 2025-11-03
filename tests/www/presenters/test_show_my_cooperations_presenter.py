@@ -1,15 +1,14 @@
-from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.use_cases.list_coordinations_of_company import (
+from arbeitszeit.interactors.list_coordinations_of_company import (
     CooperationInfo,
     ListCoordinationsOfCompanyResponse,
 )
-from arbeitszeit.use_cases.list_my_cooperating_plans import (
-    ListMyCooperatingPlansUseCase,
+from arbeitszeit.interactors.list_my_cooperating_plans import (
+    ListMyCooperatingPlansInteractor,
 )
-from arbeitszeit.use_cases.show_company_cooperations import (
+from arbeitszeit.interactors.show_company_cooperations import (
     InboundCoopRequest,
     OutboundCoopRequest,
     Response,
@@ -18,13 +17,14 @@ from arbeitszeit_web.session import UserRole
 from arbeitszeit_web.www.presenters.show_my_cooperations_presenter import (
     ShowMyCooperationsPresenter,
 )
+from tests.datetime_service import datetime_min_utc
 from tests.www.base_test_case import BaseTestCase
 
 LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
     coordinations=[
         CooperationInfo(
             id=uuid4(),
-            creation_date=datetime.now(),
+            creation_date=datetime_min_utc(),
             name="coop name",
             definition="first paragraph\nsecond paragraph",
             count_plans_in_coop=3,
@@ -35,14 +35,14 @@ LIST_COORDINATIONS_RESPONSE_LEN_1 = ListCoordinationsOfCompanyResponse(
 
 def get_coop_plans_response_length_1(
     plan_id: Optional[UUID] = None, coop_id: Optional[UUID] = None
-) -> ListMyCooperatingPlansUseCase.Response:
+) -> ListMyCooperatingPlansInteractor.Response:
     if plan_id is None:
         plan_id = uuid4()
     if coop_id is None:
         coop_id = uuid4()
-    return ListMyCooperatingPlansUseCase.Response(
+    return ListMyCooperatingPlansInteractor.Response(
         cooperating_plans=[
-            ListMyCooperatingPlansUseCase.CooperatingPlan(
+            ListMyCooperatingPlansInteractor.CooperatingPlan(
                 plan_id=plan_id,
                 plan_name="test plan name",
                 coop_id=coop_id,

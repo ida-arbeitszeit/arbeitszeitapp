@@ -1,4 +1,5 @@
 from _typeshed import Incomplete
+from werkzeug.utils import cached_property
 
 from . import apidoc as apidoc
 from ._http import HTTPStatus as HTTPStatus
@@ -58,32 +59,32 @@ class Api:
     url_scheme: Incomplete
     def __init__(
         self,
-        app: Incomplete | None = None,
+        app=None,
         version: str = "1.0",
-        title: Incomplete | None = None,
-        description: Incomplete | None = None,
-        terms_url: Incomplete | None = None,
-        license: Incomplete | None = None,
-        license_url: Incomplete | None = None,
-        contact: Incomplete | None = None,
-        contact_url: Incomplete | None = None,
-        contact_email: Incomplete | None = None,
-        authorizations: Incomplete | None = None,
-        security: Incomplete | None = None,
+        title=None,
+        description=None,
+        terms_url=None,
+        license=None,
+        license_url=None,
+        contact=None,
+        contact_url=None,
+        contact_email=None,
+        authorizations=None,
+        security=None,
         doc: str = "/",
         default_id=...,
         default: str = "default",
         default_label: str = "Default namespace",
-        validate: Incomplete | None = None,
-        tags: Incomplete | None = None,
+        validate=None,
+        tags=None,
         prefix: str = "",
         ordered: bool = False,
         default_mediatype: str = "application/json",
-        decorators: Incomplete | None = None,
+        decorators=None,
         catch_all_404s: bool = False,
         serve_challenge_on_401: bool = False,
-        format_checker: Incomplete | None = None,
-        url_scheme: Incomplete | None = None,
+        format_checker=None,
+        url_scheme=None,
         default_swagger_filename: str = "swagger.json",
         **kwargs,
     ) -> None: ...
@@ -98,7 +99,7 @@ class Api:
     def default_endpoint(self, resource, namespace): ...
     def get_ns_path(self, ns): ...
     def ns_urls(self, ns, urls): ...
-    def add_namespace(self, ns, path: Incomplete | None = None) -> None: ...
+    def add_namespace(self, ns, path=None) -> None: ...
     def namespace(self, *args, **kwargs): ...
     def endpoint(self, name): ...
     @property
@@ -107,6 +108,7 @@ class Api:
     def base_url(self): ...
     @property
     def base_path(self): ...
+    @cached_property
     def __schema__(self): ...
     def errorhandler(self, exception): ...
     def owns_endpoint(self, endpoint): ...

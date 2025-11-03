@@ -2,6 +2,7 @@ from typing import Generic, Self, TypeVar
 
 from wtforms import (
     BooleanField,
+    Field,
     Form,
     PasswordField,
     RadioField,
@@ -18,22 +19,17 @@ T = TypeVar("T")
 
 
 class WtFormField(Generic[T]):
-    def __init__(self, form: Form, field_name: str) -> None:
-        self._form = form
-        self._field_name = field_name
+    def __init__(self, field: Field) -> None:
+        self._field = field
 
     def get_value(self) -> T:
-        return self._form.data[self._field_name]
+        return self._field.data
 
     def attach_error(self, message: str) -> None:
         self._field.errors.append(message)
 
     def set_value(self, value: T) -> None:
         self._field.data = value
-
-    @property
-    def _field(self):
-        return getattr(self._form, self._field_name)
 
 
 trans = FlaskTranslator()
@@ -42,24 +38,6 @@ error_msgs = {
     "uuid": trans.lazy_gettext("Invalid ID."),
     "num_range_min_0": trans.lazy_gettext("Number must be at least 0."),
 }
-
-
-class FieldMustExist:
-    def __init__(self, message: object) -> None:
-        self.message = message
-
-    def __call__(self, form, field):
-        if not self._field_has_data(field):
-            if self.message is None:
-                message = field.gettext("This field is required.")
-            else:
-                message = self.message
-
-            field.errors[:] = []
-            raise validators.StopValidation(message)
-
-    def _field_has_data(self, field):
-        return field.raw_data
 
 
 class PlanSearchForm(Form):
@@ -137,15 +115,15 @@ class RegisterForm(Form):
 
     @property
     def email_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="email")
+        return WtFormField(self.email)
 
     @property
     def password_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="password")
+        return WtFormField(self.password)
 
     @property
     def name_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="name")
+        return WtFormField(self.name)
 
 
 class RegisterAccountantForm(Form):
@@ -217,13 +195,13 @@ class LoginForm(Form):
     remember = BooleanField(trans.lazy_gettext("Remember login?"))
 
     def email_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="email")
+        return WtFormField(self.email)
 
     def password_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="password")
+        return WtFormField(self.password)
 
     def remember_field(self) -> WtFormField[bool]:
-        return WtFormField(form=self, field_name="remember")
+        return WtFormField(self.remember)
 
 
 class CompanySearchForm(Form):
@@ -304,13 +282,13 @@ class RegisterProductiveConsumptionForm(Form):
     )
 
     def amount_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="amount")
+        return WtFormField(self.amount)
 
     def plan_id_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="plan_id")
+        return WtFormField(self.plan_id)
 
     def type_of_consumption_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="type_of_consumption")
+        return WtFormField(self.type_of_consumption)
 
 
 class AnswerCompanyWorkInviteForm(Form):
@@ -325,10 +303,10 @@ class RequestCoordinationTransferForm(Form):
     cooperation = StringField()
 
     def candidate_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="candidate")
+        return WtFormField(self.candidate)
 
     def cooperation_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="cooperation")
+        return WtFormField(self.cooperation)
 
 
 class RequestEmailAddressChangeForm(Form):
@@ -350,15 +328,15 @@ class RequestEmailAddressChangeForm(Form):
 
     @property
     def new_email_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="new_email")
+        return WtFormField(self.new_email)
 
     @property
     def current_password_field(self) -> WtFormField[str]:
-        return WtFormField(form=self, field_name="current_password")
+        return WtFormField(self.current_password)
 
 
 class ConfirmEmailAddressChangeForm(Form):
     is_accepted = BooleanField()
 
     def is_accepted_field(self) -> WtFormField[bool]:
-        return WtFormField(form=self, field_name="is_accepted")
+        return WtFormField(self.is_accepted)

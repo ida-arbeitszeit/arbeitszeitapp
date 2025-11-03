@@ -42,7 +42,7 @@ class TableWidget:
 class Input:
     html_params: Incomplete
     input_type: Incomplete
-    def __init__(self, input_type: Incomplete | None = None) -> None: ...
+    def __init__(self, input_type=None) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class TextInput(Input):
@@ -145,19 +145,14 @@ class NumberInput(Input):
     step: Incomplete
     min: Incomplete
     max: Incomplete
-    def __init__(
-        self,
-        step: Incomplete | None = None,
-        min: Incomplete | None = None,
-        max: Incomplete | None = None,
-    ) -> None: ...
+    def __init__(self, step=None, min=None, max=None) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class RangeInput(Input):
     input_type: str
     validation_attrs: Incomplete
     step: Incomplete
-    def __init__(self, step: Incomplete | None = None) -> None: ...
+    def __init__(self, step=None) -> None: ...
     def __call__(self, field, **kwargs): ...
 
 class ColorInput(Input):

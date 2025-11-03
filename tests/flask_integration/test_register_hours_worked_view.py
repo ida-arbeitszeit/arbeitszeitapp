@@ -1,6 +1,4 @@
-from tests.company import CompanyManager
-
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class AuthenticatedCompanyTests(ViewTestCase):
@@ -8,7 +6,6 @@ class AuthenticatedCompanyTests(ViewTestCase):
         super().setUp()
         self.company = self.login_company()
         self.url = "company/register_hours_worked"
-        self.company_manager = self.injector.get(CompanyManager)
 
     def test_company_gets_200_when_accessing_page(self) -> None:
         response = self.client.get(self.url)
@@ -20,7 +17,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
 
     def test_company_gets_302_when_posting_correct_data(self) -> None:
         worker = self.member_generator.create_member()
-        self.company_manager.add_worker_to_company(self.company, worker)
+        self.worker_affiliation_generator.add_workers_to_company(self.company, [worker])
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker), amount="10"),
@@ -41,7 +38,7 @@ class AuthenticatedCompanyTests(ViewTestCase):
         self,
     ) -> None:
         worker = self.member_generator.create_member()
-        self.company_manager.add_worker_to_company(self.company, worker)
+        self.worker_affiliation_generator.add_workers_to_company(self.company, [worker])
         response = self.client.post(
             self.url,
             data=dict(member_id=str(worker), amount="-10"),

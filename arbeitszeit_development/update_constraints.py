@@ -134,9 +134,8 @@ class PackageFilter:
         # Since we use a custom flask-profiler package we need to exclude it
         # from constraints.txt.
         "flask_profiler",
-        # Unfortunately jsonschema packages with nixpkgs is not officially
-        # supported by flask-restx.
-        "jsonschema",
+        # Flask_Babel in nixpkgs is 4.1.0 while in PyPi it is still 4.0.0.
+        "flask-babel",
     }
 
     def is_package_to_be_included_in_requirements(self, package_name: str) -> bool:

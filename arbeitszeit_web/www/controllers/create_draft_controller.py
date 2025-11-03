@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
+from arbeitszeit.interactors.create_plan_draft import Request as InteractorRequest
 from arbeitszeit.records import ProductionCosts
-from arbeitszeit.use_cases.create_plan_draft import Request as UseCaseRequest
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.request import Request as WebRequest
@@ -17,7 +17,7 @@ class CreateDraftController:
     notifier: Notifier
     form_validator: DraftFormValidator
 
-    def import_form_data(self, request: WebRequest) -> UseCaseRequest | DraftForm:
+    def import_form_data(self, request: WebRequest) -> InteractorRequest | DraftForm:
         planner = self.session.get_current_user()
         assert planner
         validation_result = self.form_validator.validate(request)
@@ -26,7 +26,7 @@ class CreateDraftController:
                 self.translator.gettext("Please correct the errors in the form.")
             )
             return validation_result
-        return UseCaseRequest(
+        return InteractorRequest(
             planner=planner,
             product_name=validation_result.product_name,
             description=validation_result.description,

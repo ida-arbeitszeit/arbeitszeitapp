@@ -33,15 +33,15 @@ class Argument:
     def __init__(
         self,
         name,
-        default: Incomplete | None = None,
-        dest: Incomplete | None = None,
+        default=None,
+        dest=None,
         required: bool = False,
         ignore: bool = False,
         type=...,
         location=("json", "values"),
         choices=(),
         action: str = "store",
-        help: Incomplete | None = None,
+        help=None,
         operators=("=",),
         case_sensitive: bool = True,
         store_missing: bool = True,
@@ -69,7 +69,7 @@ class RequestParser:
         bundle_errors: bool = False,
     ) -> None: ...
     def add_argument(self, *args, **kwargs): ...
-    def parse_args(self, req: Incomplete | None = None, strict: bool = False): ...
+    def parse_args(self, req=None, strict: bool = False): ...
     def copy(self): ...
     def replace_argument(self, name, *args, **kwargs): ...
     def remove_argument(self, name): ...

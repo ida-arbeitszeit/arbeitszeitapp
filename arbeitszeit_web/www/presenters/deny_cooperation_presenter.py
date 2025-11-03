@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.deny_cooperation import DenyCooperationResponse
+from arbeitszeit.interactors.deny_cooperation import DenyCooperationResponse
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex

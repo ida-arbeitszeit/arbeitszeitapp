@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases.get_coop_summary import (
+from arbeitszeit.interactors.get_coop_summary import (
     AssociatedPlan,
     GetCoopSummaryResponse,
 )

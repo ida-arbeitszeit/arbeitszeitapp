@@ -2,9 +2,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from tests.company import CompanyManager
-
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 URL = "/company/invite_worker_to_company"
 
@@ -34,9 +32,8 @@ class InviteWorkerToCompanyTests(ViewTestCase):
         self, worker_name: str
     ) -> None:
         company = self.login_company()
-        company_manager = self.injector.get(CompanyManager)
         worker = self.member_generator.create_member(name=worker_name)
-        company_manager.add_worker_to_company(company, worker)
+        self.worker_affiliation_generator.add_workers_to_company(company, [worker])
         response = self.client.get(URL)
         assert worker_name in response.text
 

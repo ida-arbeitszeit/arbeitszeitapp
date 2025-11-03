@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Protocol, Union
 from uuid import UUID
 
-from arbeitszeit.use_cases.request_cooperation import RequestCooperationRequest
+from arbeitszeit.interactors.request_cooperation import RequestCooperationRequest
 from arbeitszeit_web.malformed_input_data import MalformedInputData
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator

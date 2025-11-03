@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from arbeitszeit.use_cases import create_plan_draft
+from arbeitszeit.interactors import create_plan_draft
 from arbeitszeit_web.forms import DraftForm
 from arbeitszeit_web.www.controllers.create_draft_controller import (
     CreateDraftController,
@@ -54,11 +54,13 @@ class CreateDraftControllerBase(BaseTestCase):
 
 
 class SuccessfulValidationTests(CreateDraftControllerBase):
-    def test_that_correct_web_form_data_is_converted_to_use_case_request(self) -> None:
+    def test_that_correct_web_form_data_is_converted_to_interactor_request(
+        self,
+    ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
 
     def test_that_no_warning_is_displayed_if_form_data_is_valid(self) -> None:
         request = FakeRequest()
@@ -73,14 +75,14 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ("  product name with whitespace  ",),
         ]
     )
-    def test_that_use_case_request_contains_stripped_product_name_from_web_form(
+    def test_that_interactor_request_contains_stripped_product_name_from_web_form(
         self, product_name: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, prd_name=product_name)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.product_name == product_name.strip()
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.product_name == product_name.strip()
 
     @parameterized.expand(
         [
@@ -91,14 +93,14 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ],
         ]
     )
-    def test_that_use_case_request_contains_stripped_description_from_web_form(
+    def test_that_interactor_request_contains_stripped_description_from_web_form(
         self, description: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, description=description)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.description == description.strip()
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.description == description.strip()
 
     @parameterized.expand(
         [
@@ -108,14 +110,14 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ("  10  ",),
         ]
     )
-    def test_that_use_case_request_contains_timeframe_from_web_form(
+    def test_that_interactor_request_contains_timeframe_from_web_form(
         self, timeframe: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, timeframe=timeframe)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.timeframe_in_days == int(timeframe)
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.timeframe_in_days == int(timeframe)
 
     @parameterized.expand(
         [
@@ -124,14 +126,14 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ("  1 piece  ",),
         ]
     )
-    def test_that_use_case_request_contains_stripped_production_unit_from_web_form(
+    def test_that_interactor_request_contains_stripped_production_unit_from_web_form(
         self, prd_unit: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, prd_unit=prd_unit)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.production_unit == prd_unit.strip()
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.production_unit == prd_unit.strip()
 
     @parameterized.expand(
         [
@@ -140,14 +142,14 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ("  30  ",),
         ]
     )
-    def test_that_use_case_request_contains_production_amount_from_web_form(
+    def test_that_interactor_request_contains_production_amount_from_web_form(
         self, prd_amount: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(request, prd_amount=prd_amount)
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.production_amount == int(prd_amount)
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.production_amount == int(prd_amount)
 
     @parameterized.expand(
         [
@@ -156,18 +158,18 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ("  5.00  ", "6.00", "7.00"),
         ]
     )
-    def test_that_use_case_request_contains_costs_from_web_form(
+    def test_that_interactor_request_contains_costs_from_web_form(
         self, costs_p: str, costs_r: str, costs_a: str
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(
             request, costs_p=costs_p, costs_r=costs_r, costs_a=costs_a
         )
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.costs.labour_cost == Decimal(costs_a)
-        assert use_case_request.costs.means_cost == Decimal(costs_p)
-        assert use_case_request.costs.resource_cost == Decimal(costs_r)
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.costs.labour_cost == Decimal(costs_a)
+        assert interactor_request.costs.means_cost == Decimal(costs_p)
+        assert interactor_request.costs.resource_cost == Decimal(costs_r)
 
     @parameterized.expand(
         [
@@ -193,16 +195,16 @@ class SuccessfulValidationTests(CreateDraftControllerBase):
             ),
         ]
     )
-    def test_that_use_case_request_contains_correct_public_plan_field_from_web_form(
+    def test_that_interactor_request_contains_correct_public_plan_field_from_web_form(
         self, is_public_plan: str, expected: bool
     ) -> None:
         request = FakeRequest()
         request = self.attach_form_data_to_request(
             request, is_public_plan=is_public_plan
         )
-        use_case_request = self.controller.import_form_data(request)
-        assert isinstance(use_case_request, create_plan_draft.Request)
-        assert use_case_request.is_public_service == expected
+        interactor_request = self.controller.import_form_data(request)
+        assert isinstance(interactor_request, create_plan_draft.Request)
+        assert interactor_request.is_public_service == expected
 
 
 class UnsuccessfulValidationTests(CreateDraftControllerBase):

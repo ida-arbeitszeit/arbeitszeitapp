@@ -8,11 +8,7 @@ __all__ = ["SelectField", "SelectMultipleField", "RadioField"]
 class SelectFieldBase(Field):
     option_widget: Incomplete
     def __init__(
-        self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
-        option_widget: Incomplete | None = None,
-        **kwargs,
+        self, label=None, validators=None, option_widget=None, **kwargs
     ) -> None: ...
     def iter_choices(self) -> None: ...
     def has_groups(self): ...
@@ -29,10 +25,10 @@ class SelectField(SelectFieldBase):
     validate_choice: Incomplete
     def __init__(
         self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
+        label=None,
+        validators=None,
         coerce=...,
-        choices: Incomplete | None = None,
+        choices=None,
         validate_choice: bool = True,
         **kwargs,
     ) -> None: ...

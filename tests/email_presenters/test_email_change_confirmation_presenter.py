@@ -1,11 +1,10 @@
-from datetime import datetime
-
 from parameterized import parameterized
 
 from arbeitszeit import email_notifications
 from arbeitszeit_web.email.email_change_confirmation_presenter import (
     EmailChangeConfirmationPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.email import FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
 from tests.www.base_test_case import BaseTestCase
@@ -43,7 +42,7 @@ class EmailChangeConfirmationPresenterTests(BaseTestCase):
     def test_that_the_content_of_the_mail_is_rendered_correctly(self) -> None:
         old_email = "test@test.test"
         new_email = "new@test.test"
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         self.presenter.present_email_change_confirmation(
             self.create_email_change_confirmation(
                 new_email_address=new_email,

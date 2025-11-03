@@ -1,6 +1,6 @@
 from parameterized import param, parameterized
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class AuthenticatedMemberTests(ViewTestCase):

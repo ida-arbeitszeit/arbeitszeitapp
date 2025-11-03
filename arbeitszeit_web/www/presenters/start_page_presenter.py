@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.start_page import StartPageUseCase
+from arbeitszeit.interactors.start_page import StartPageInteractor
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 
@@ -21,7 +21,7 @@ class StartPagePresenter:
 
     datetime_formatter: DatetimeFormatter
 
-    def show_start_page(self, response: StartPageUseCase.Response) -> ViewModel:
+    def show_start_page(self, response: StartPageInteractor.Response) -> ViewModel:
         if not response.latest_plans:
             return StartPagePresenter.ViewModel(show_plans=False, plans=[])
         return self.ViewModel(
@@ -30,7 +30,7 @@ class StartPagePresenter:
                 self.Plan(
                     prd_name=plan.product_name,
                     approval_date=self.datetime_formatter.format_datetime(
-                        plan.approval_date, zone="Europe/Berlin", fmt="%d.%m."
+                        plan.approval_date, fmt="%d.%m."
                     ),
                 )
                 for plan in response.latest_plans

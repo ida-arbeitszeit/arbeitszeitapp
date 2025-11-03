@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
-from arbeitszeit.use_cases.register_private_consumption import (
+from arbeitszeit.interactors.register_private_consumption import (
     RegisterPrivateConsumption,
     RegisterPrivateConsumptionRequest,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.flask_request import FlaskRequest
 from arbeitszeit_flask.flask_session import FlaskSession
 from arbeitszeit_flask.types import Response
@@ -44,10 +44,10 @@ class RegisterPrivateConsumptionView:
                 return FlaskResponse(self._render_template(error.form), status=400)
             case Redirect(url=url):
                 return redirect(url)
-            case RegisterPrivateConsumptionRequest() as use_case_request:
+            case RegisterPrivateConsumptionRequest() as interactor_request:
                 pass
         response = self.register_private_consumption.register_private_consumption(
-            use_case_request
+            interactor_request
         )
         view_model = self.presenter.present(response, request=FlaskRequest())
         match view_model:

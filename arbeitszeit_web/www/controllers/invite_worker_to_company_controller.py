@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from arbeitszeit.use_cases.invite_worker_to_company import InviteWorkerToCompanyUseCase
+from arbeitszeit.interactors.invite_worker_to_company import (
+    InviteWorkerToCompanyInteractor,
+)
 from arbeitszeit_web.forms import InviteWorkerToCompanyForm
 from arbeitszeit_web.request import Request
 from arbeitszeit_web.session import Session
@@ -20,9 +22,9 @@ class InviteWorkerToCompanyController:
     def import_request_data(
         self,
         request: Request,
-    ) -> InviteWorkerToCompanyUseCase.Request:
+    ) -> InviteWorkerToCompanyInteractor.Request:
         worker_id = self._get_worker_id(request)
-        return InviteWorkerToCompanyUseCase.Request(
+        return InviteWorkerToCompanyInteractor.Request(
             company=self._get_current_user_id(),
             worker=worker_id,
         )

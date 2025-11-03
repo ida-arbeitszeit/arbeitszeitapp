@@ -21,7 +21,7 @@ class ControllerTests(BaseTestCase):
                 draft_id, self.session
             )
 
-    def test_that_proper_use_case_request_is_returned_when_draft_id_is_a_uuid_string(
+    def test_that_proper_interactor_request_is_returned_when_draft_id_is_a_uuid_string(
         self,
     ) -> None:
         draft_id = str(uuid4())

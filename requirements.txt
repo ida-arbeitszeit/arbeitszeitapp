@@ -7,7 +7,6 @@ Flask-Mail
 flask-restx
 Flask-Talisman
 Flask-WTF
-is_safe_url
 matplotlib
 
 -c constraints.txt

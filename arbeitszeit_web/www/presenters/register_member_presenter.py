@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.register_member import RegisterMemberUseCase
+from arbeitszeit.interactors.register_member import RegisterMemberInteractor
 from arbeitszeit_web.forms import RegisterForm
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -20,19 +20,19 @@ class RegisterMemberPresenter:
     url_index: UrlIndex
 
     def present_member_registration(
-        self, response: RegisterMemberUseCase.Response, form: RegisterForm
+        self, response: RegisterMemberInteractor.Response, form: RegisterForm
     ) -> RegisterMemberViewModel:
         if response.is_rejected:
             if (
                 response.rejection_reason
-                == RegisterMemberUseCase.Response.RejectionReason.member_already_exists
+                == RegisterMemberInteractor.Response.RejectionReason.member_already_exists
             ):
                 form.email_field.attach_error(
                     self.translator.gettext("This email address is already registered.")
                 )
             if (
                 response.rejection_reason
-                == RegisterMemberUseCase.Response.RejectionReason.company_with_different_password_exists
+                == RegisterMemberInteractor.Response.RejectionReason.company_with_different_password_exists
             ):
                 form.email_field.attach_error(
                     self.translator.gettext(

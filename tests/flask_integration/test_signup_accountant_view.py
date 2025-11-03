@@ -1,15 +1,15 @@
-from arbeitszeit.use_cases.send_accountant_registration_token import (
-    SendAccountantRegistrationTokenUseCase,
+from arbeitszeit.interactors.send_accountant_registration_token import (
+    SendAccountantRegistrationTokenInteractor,
 )
 
-from .flask import ViewTestCase
+from .base_test_case import ViewTestCase
 
 
 class ViewTests(ViewTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.send_token_use_case = self.injector.get(
-            SendAccountantRegistrationTokenUseCase
+        self.send_token_interactor = self.injector.get(
+            SendAccountantRegistrationTokenInteractor
         )
 
     def test_get_proper_200_response_with_valid_token(self) -> None:

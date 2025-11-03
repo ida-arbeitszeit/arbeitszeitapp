@@ -8,5 +8,6 @@ class Apidoc(Blueprint):
 
 apidoc: Incomplete
 
+@apidoc.add_app_template_global
 def swagger_static(filename): ...
 def ui_for(api): ...

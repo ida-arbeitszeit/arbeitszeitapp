@@ -14,7 +14,7 @@ DEFAULT_FEATURE_POLICY: Incomplete
 NONCE_LENGTH: int
 
 class Talisman:
-    def __init__(self, app: Incomplete | None = None, **kwargs) -> None: ...
+    def __init__(self, app=None, **kwargs) -> None: ...
     feature_policy: Incomplete
     permissions_policy: Incomplete
     document_policy: Incomplete
@@ -46,15 +46,15 @@ class Talisman:
         force_https_permanent: bool = False,
         force_file_save: bool = False,
         frame_options=...,
-        frame_options_allow_from: Incomplete | None = None,
+        frame_options_allow_from=None,
         strict_transport_security: bool = True,
         strict_transport_security_preload: bool = False,
         strict_transport_security_max_age=...,
         strict_transport_security_include_subdomains: bool = True,
         content_security_policy=...,
-        content_security_policy_report_uri: Incomplete | None = None,
+        content_security_policy_report_uri=None,
         content_security_policy_report_only: bool = False,
-        content_security_policy_nonce_in: Incomplete | None = None,
+        content_security_policy_nonce_in=None,
         referrer_policy=...,
         session_cookie_secure: bool = True,
         session_cookie_http_only: bool = True,

@@ -10,9 +10,9 @@ class ListPendingInvitesControllerTests(BaseTestCase):
         super().setUp()
         self.controller = self.injector.get(ListPendingWorkInvitesController)
 
-    def test_company_id_of_logged_in_company_is_passed_to_use_case_request(self):
+    def test_company_id_of_logged_in_company_is_passed_to_interactor_request(self):
         company_id = self.company_generator.create_company()
         session = self.injector.get(Session)
         session.login_company(company=company_id)
-        request = self.controller.create_use_case_request()
+        request = self.controller.create_interactor_request()
         assert request.company == company_id

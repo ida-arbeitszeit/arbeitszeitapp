@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from arbeitszeit.use_cases.query_private_consumptions import Response
+from arbeitszeit.interactors.query_private_consumptions import Response
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 
@@ -34,9 +34,9 @@ class PrivateConsumptionsPresenter:
                     ),
                     product_name=consumption.product_name,
                     product_description=consumption.product_description,
-                    price_per_unit=str(consumption.price_per_unit),
+                    price_per_unit=str(consumption.paid_price_per_unit),
                     consumption_amount=str(consumption.amount),
-                    price_total=str(consumption.price_total),
+                    price_total=str(consumption.paid_price_total),
                 )
                 for consumption in response.consumptions
             ],

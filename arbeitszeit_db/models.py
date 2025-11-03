@@ -1,0 +1,354 @@
+"""
+Definition of database tables.
+"""
+
+import uuid
+from datetime import UTC, datetime
+from decimal import Decimal
+from sqlite3 import Connection as SQLiteConnection
+from typing import Any
+
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Dialect,
+    Engine,
+    ForeignKey,
+    String,
+    Table,
+    TypeDecorator,
+    event,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.pool import ConnectionPoolEntry
+
+from arbeitszeit.transfers import TransferType
+from arbeitszeit_db.db import Base
+
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(
+    dbapi_connection: Any, connection_record: ConnectionPoolEntry
+) -> None:
+    # This event listener is necessary to enable "on delete cascading" in SQlite
+    # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#sqlite-foreign-keys
+    # https://docs.sqlalchemy.org/en/20/orm/cascades.html#using-foreign-key-on-delete-cascade-with-orm-relationships
+    if type(dbapi_connection) is SQLiteConnection:
+        ac = dbapi_connection.autocommit
+        dbapi_connection.autocommit = True
+
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+        # restore orginal autocommit setting
+        dbapi_connection.autocommit = ac
+
+
+class TZDateTime(TypeDecorator):
+    """
+    We store all datetimes in UTC without timezone info, but require
+    that all datetimes passed in have tzinfo set.
+    Output datetimes have tzinfo set to UTC.
+    """
+
+    impl = DateTime
+    cache_ok = True
+
+    def process_bind_param(
+        self, value: datetime | None, dialect: Dialect
+    ) -> datetime | None:
+        if value is not None:
+            if not value.tzinfo or value.tzinfo.utcoffset(value) is None:
+                raise TypeError("tzinfo is required")
+            value = value.astimezone(UTC).replace(tzinfo=None)
+        return value
+
+    def process_result_value(
+        self, value: datetime | None, dialect: Dialect
+    ) -> datetime | None:
+        if value is not None:
+            value = value.replace(tzinfo=UTC)
+        return value
+
+
+class User(Base):
+    __tablename__ = "user"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    password: Mapped[str] = mapped_column(String(300))
+    email_address: Mapped[str] = mapped_column(ForeignKey("email.address"), unique=True)
+
+    def __str__(self) -> str:
+        return f"User {self.email_address} ({self.id})"
+
+
+class Email(Base):
+    __tablename__ = "email"
+
+    address: Mapped[str] = mapped_column(primary_key=True)
+    confirmed_on: Mapped[datetime | None] = mapped_column(TZDateTime)
+
+
+class SocialAccounting(Base):
+    __tablename__ = "social_accounting"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    account_psf: Mapped[str] = mapped_column(ForeignKey("account.id"))
+
+
+# Association table Company - Member
+jobs_table = Table(
+    "jobs",
+    Base.metadata,
+    Column("member_id", String, ForeignKey("member.id"), primary_key=True),
+    Column("company_id", String, ForeignKey("company.id"), primary_key=True),
+)
+
+
+class Member(Base):
+    __tablename__ = "member"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.id"), unique=True)
+    name: Mapped[str] = mapped_column(String(1000))
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
+    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+
+    workplaces = relationship(
+        "Company",
+        secondary=jobs_table,
+        back_populates="workers",
+    )
+
+
+class Company(Base):
+    __tablename__ = "company"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.id"), unique=True)
+    name: Mapped[str] = mapped_column(String(1000))
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
+    p_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    r_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    a_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+    prd_account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+
+    def __repr__(self):
+        return "<Company(name='%s')>" % (self.name,)
+
+    workers = relationship(
+        "Member",
+        secondary=jobs_table,
+        back_populates="workplaces",
+    )
+
+
+class Accountant(Base):
+    __tablename__ = "accountant"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.id"), unique=True)
+    name: Mapped[str] = mapped_column(String(1000))
+
+
+class PlanDraft(Base):
+    __tablename__ = "plan_draft"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_creation_date: Mapped[datetime] = mapped_column(TZDateTime)
+    planner: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    costs_p: Mapped[Decimal]
+    costs_r: Mapped[Decimal]
+    costs_a: Mapped[Decimal]
+    prd_name: Mapped[str] = mapped_column(String(100))
+    prd_unit: Mapped[str] = mapped_column(String(100))
+    prd_amount: Mapped[int]
+    description: Mapped[str] = mapped_column(String(5000))
+    timeframe: Mapped[Decimal]
+    is_public_service: Mapped[bool] = mapped_column(default=False)
+
+
+class Plan(Base):
+    __tablename__ = "plan"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_creation_date: Mapped[datetime] = mapped_column(TZDateTime)
+    planner: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    costs_p: Mapped[Decimal]
+    costs_r: Mapped[Decimal]
+    costs_a: Mapped[Decimal]
+    prd_name: Mapped[str] = mapped_column(String(100))
+    prd_unit: Mapped[str] = mapped_column(String(100))
+    prd_amount: Mapped[int]
+    description: Mapped[str] = mapped_column(String(5000))
+    timeframe: Mapped[Decimal]
+    is_public_service: Mapped[bool] = mapped_column(default=False)
+    requested_cooperation: Mapped[str | None] = mapped_column(
+        ForeignKey("cooperation.id")
+    )
+    hidden_by_user: Mapped[bool] = mapped_column(default=False)
+
+    review: Mapped["PlanReview  | None"] = relationship(
+        "PlanReview", back_populates="plan"
+    )
+    approval: Mapped["PlanApproval | None"] = relationship(
+        "PlanApproval", back_populates="plan"
+    )
+
+
+class PlanCooperation(Base):
+    __tablename__ = "plan_cooperation"
+
+    plan: Mapped[str] = mapped_column(ForeignKey("plan.id"), primary_key=True)
+    cooperation: Mapped[str] = mapped_column(ForeignKey("cooperation.id"))
+
+
+class PlanReview(Base):
+    __tablename__ = "plan_review"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    rejection_date: Mapped[datetime | None] = mapped_column(TZDateTime)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
+
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="review")
+
+    def __repr__(self) -> str:
+        return f"PlanReview(id={self.id!r}, plan_id={self.plan_id!r}, rejection_date={self.rejection_date!r})"
+
+
+class PlanApproval(Base):
+    __tablename__ = "plan_approval"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id", ondelete="CASCADE"))
+    date: Mapped[datetime] = mapped_column(TZDateTime)
+    transfer_of_credit_p: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_r: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    transfer_of_credit_a: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="approval")
+
+
+class Account(Base):
+    __tablename__ = "account"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+
+
+class Transfer(Base):
+    __tablename__ = "transfer"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    date: Mapped[datetime] = mapped_column(TZDateTime, index=True)
+    debit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    credit_account: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    value: Mapped[Decimal]
+    type: Mapped[TransferType]
+
+    def __repr__(self) -> str:
+        fields = ", ".join(
+            [
+                f"id={self.id!r}",
+                f"date={self.date!r}",
+                f"debit_account={self.debit_account!r}",
+                f"credit_account={self.credit_account!r}",
+                f"value={self.value!r}",
+                f"type={self.type!r}",
+            ]
+        )
+        return f"Transfer({fields})"
+
+
+class PrivateConsumption(Base):
+    __tablename__ = "private_consumption"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
+    transfer_of_private_consumption: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_compensation: Mapped[str | None] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    amount: Mapped[int]
+
+
+class ProductiveConsumption(Base):
+    __tablename__ = "productive_consumption"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("plan.id"))
+    transfer_of_productive_consumption: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_compensation: Mapped[str | None] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    amount: Mapped[int]
+
+
+class RegisteredHoursWorked(Base):
+    __tablename__ = "registered_hours_worked"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    company: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    worker: Mapped[str] = mapped_column(ForeignKey("member.id"))
+    transfer_of_work_certificates: Mapped[str] = mapped_column(
+        ForeignKey("transfer.id")
+    )
+    transfer_of_taxes: Mapped[str] = mapped_column(ForeignKey("transfer.id"))
+    registered_on: Mapped[datetime] = mapped_column(TZDateTime)
+
+
+class CompanyWorkInvite(Base):
+    __tablename__ = "company_work_invite"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    company: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    member: Mapped[str] = mapped_column(ForeignKey("member.id"))
+
+
+class Cooperation(Base):
+    __tablename__ = "cooperation"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    creation_date: Mapped[datetime] = mapped_column(TZDateTime)
+    name: Mapped[str] = mapped_column(String(100))
+    definition: Mapped[str] = mapped_column(String(5000))
+    account: Mapped[str] = mapped_column(ForeignKey("account.id"))
+
+
+class CoordinationTenure(Base):
+    __tablename__ = "coordination_tenure"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    company: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    cooperation: Mapped[str] = mapped_column(ForeignKey("cooperation.id"))
+    start_date: Mapped[datetime] = mapped_column(TZDateTime)
+
+
+class CoordinationTransferRequest(Base):
+    __tablename__ = "coordination_transfer_request"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    requesting_coordination_tenure: Mapped[str] = mapped_column(
+        ForeignKey("coordination_tenure.id")
+    )
+    candidate: Mapped[str] = mapped_column(ForeignKey("company.id"))
+    request_date: Mapped[datetime] = mapped_column(TZDateTime)
+
+
+class PasswordResetRequest(Base):
+    __tablename__ = "password_reset_request"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=generate_uuid)
+    email_address: Mapped[str] = mapped_column(
+        ForeignKey("email.address"), unique=False
+    )
+    reset_token: Mapped[str] = mapped_column(String(300))
+    created_at: Mapped[datetime] = mapped_column(TZDateTime)

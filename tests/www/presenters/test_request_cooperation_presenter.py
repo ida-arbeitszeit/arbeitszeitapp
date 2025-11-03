@@ -1,6 +1,6 @@
 from typing import Optional
 
-from arbeitszeit.use_cases.request_cooperation import RequestCooperationResponse
+from arbeitszeit.interactors.request_cooperation import RequestCooperationResponse
 from arbeitszeit_web.www.presenters.request_cooperation_presenter import (
     RequestCooperationPresenter,
 )

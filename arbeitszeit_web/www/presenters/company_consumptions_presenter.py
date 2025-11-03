@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Iterator, List
 
+from arbeitszeit.interactors.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit.records import ConsumptionType
-from arbeitszeit.use_cases.query_company_consumptions import ConsumptionQueryResponse
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 from arbeitszeit_web.translator import Translator
 
@@ -29,10 +29,10 @@ class CompanyConsumptionsPresenter:
     translator: Translator
 
     def present(
-        self, use_case_response: Iterator[ConsumptionQueryResponse]
+        self, interactor_response: Iterator[ConsumptionQueryResponse]
     ) -> ViewModel:
         consumptions = [
-            self._format_consumption(consumption) for consumption in use_case_response
+            self._format_consumption(consumption) for consumption in interactor_response
         ]
         show_consumptions = True if (len(consumptions) > 0) else False
         return ViewModel(consumptions=consumptions, show_consumptions=show_consumptions)
@@ -43,7 +43,6 @@ class CompanyConsumptionsPresenter:
         return ViewModel.Consumption(
             consumption_date=self.datetime_formatter.format_datetime(
                 date=consumption.consumption_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             product_name=consumption.product_name,
@@ -51,9 +50,11 @@ class CompanyConsumptionsPresenter:
             consumption_type=self._format_consumption_type(
                 consumption.consumption_type
             ),
-            price_per_unit=str(round(consumption.price_per_unit, 2)),
+            price_per_unit=str(round(consumption.paid_price_per_unit, 2)),
             amount=str(consumption.amount),
-            price_total=str(round(consumption.price_per_unit * consumption.amount, 2)),
+            price_total=str(
+                round(consumption.paid_price_per_unit * consumption.amount, 2)
+            ),
         )
 
     def _format_consumption_type(self, consumption_type: ConsumptionType) -> str:

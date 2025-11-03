@@ -3,20 +3,21 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from arbeitszeit.plan_details import PlanDetails
-from arbeitszeit.use_cases.query_companies import (
+from arbeitszeit.interactors.query_companies import (
     CompanyFilter,
     CompanyQueryResponse,
     QueriedCompany,
     QueryCompaniesRequest,
 )
-from arbeitszeit.use_cases.query_plans import (
+from arbeitszeit.interactors.query_plans import (
     PlanFilter,
     PlanQueryResponse,
     PlanSorting,
     QueriedPlan,
     QueryPlansRequest,
 )
+from arbeitszeit.services.plan_details import PlanDetails
+from tests.datetime_service import datetime_utc
 
 
 class QueriedPlanGenerator:
@@ -37,9 +38,9 @@ class QueriedPlanGenerator:
         if company_id is None:
             company_id = uuid4()
         if approval_date is None:
-            approval_date = datetime.now()
+            approval_date = datetime.min
         if rejection_date is None:
-            rejection_date = datetime.now()
+            rejection_date = datetime.min
         return QueriedPlan(
             plan_id=plan_id,
             company_name="Planner name",
@@ -136,7 +137,7 @@ class PlanDetailsGenerator:
         price_per_unit: Decimal = Decimal(0.061),
         is_cooperating: bool = False,
         cooperation: Optional[UUID] = None,
-        creation_date: datetime = datetime(2023, 5, 1),
+        creation_date: datetime = datetime_utc(2023, 5, 1),
         approval_date: Optional[datetime] = None,
         expiration_date: Optional[datetime] = None,
     ) -> PlanDetails:
@@ -163,7 +164,7 @@ class PlanDetailsGenerator:
             labour_cost=labour_cost,
             is_public_service=is_public_service,
             price_per_unit=price_per_unit,
-            labour_cost_per_unit=labour_cost_per_unit,
+            cost_per_unit=labour_cost_per_unit,
             is_cooperating=is_cooperating,
             cooperation=cooperation,
             creation_date=creation_date,

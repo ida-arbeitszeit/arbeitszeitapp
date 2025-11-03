@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.query_companies import CompanyFilter, QueryCompaniesRequest
+from arbeitszeit.interactors.query_companies import CompanyFilter, QueryCompaniesRequest
 from arbeitszeit_web.api.controllers import query_parser
 from arbeitszeit_web.api.controllers.parameters import QueryParameter
 from arbeitszeit_web.request import Request

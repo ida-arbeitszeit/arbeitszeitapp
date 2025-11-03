@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+import format_code
 from arbeitszeit_development import generate_type_stubs
 
 from . import update_bulma, update_constraints, update_python_packages
@@ -19,6 +20,7 @@ def main() -> None:
     update_python_packages.main(shell)
     update_constraints.main(development_shell)
     generate_type_stubs.main(development_shell)
+    format_code.main(shell)
 
 
 def update_flake(subprocess_runner: SubprocessRunner) -> None:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from arbeitszeit.use_cases.register_accountant import RegisterAccountantUseCase
+from arbeitszeit.interactors.register_accountant import RegisterAccountantInteractor
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.session import Session
 from arbeitszeit_web.translator import Translator
@@ -20,7 +20,7 @@ class RegisterAccountantPresenter:
     dashboard_url_index: UrlIndex
 
     def present_registration_result(
-        self, response: RegisterAccountantUseCase.Response
+        self, response: RegisterAccountantInteractor.Response
     ) -> ViewModel:
         if response.is_accepted:
             assert response.user_id

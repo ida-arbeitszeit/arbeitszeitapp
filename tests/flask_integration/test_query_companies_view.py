@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
-from .flask import LogInUser, ViewTestCase
+from .base_test_case import LogInUser, ViewTestCase
 
 URL = "/user/query_companies"
 

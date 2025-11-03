@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases.create_plan_draft import Response
+from arbeitszeit.interactors.create_plan_draft import Response
 from arbeitszeit_web.notification import Notifier
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex

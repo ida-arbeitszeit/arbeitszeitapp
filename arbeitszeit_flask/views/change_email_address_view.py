@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from flask import Response as FlaskResponse
 from flask import redirect, render_template, request
 
-from arbeitszeit.use_cases.change_user_email_address import (
-    ChangeUserEmailAddressUseCase,
+from arbeitszeit.interactors.change_user_email_address import (
+    ChangeUserEmailAddressInteractor,
 )
-from arbeitszeit_flask.database import commit_changes
+from arbeitszeit_db import commit_changes
 from arbeitszeit_flask.forms import ConfirmEmailAddressChangeForm
 from arbeitszeit_flask.types import Response
 from arbeitszeit_flask.views.http_error_view import http_404
@@ -25,7 +25,7 @@ TEMPLATE_NAME = "user/confirm_email_address_change.html"
 class ChangeEmailAddressView:
     url_index: UrlIndex
     controller: ChangeUserEmailAddressController
-    use_case: ChangeUserEmailAddressUseCase
+    interactor: ChangeUserEmailAddressInteractor
     presenter: ChangeUserEmailAddressPresenter
 
     def GET(self, token: str) -> Response:
@@ -58,12 +58,12 @@ class ChangeEmailAddressView:
                 ),
                 status=400,
             )
-        uc_request = self.controller.create_use_case_request(
+        uc_request = self.controller.create_interactor_request(
             new_email_address=new_email, form=form
         )
         if uc_request is None:
             return redirect(self.url_index.get_user_account_details_url())
-        uc_response = self.use_case.change_user_email_address(uc_request)
+        uc_response = self.interactor.change_user_email_address(uc_request)
         view_model = self.presenter.render_response(uc_response)
         if view_model.redirect_url is not None:
             return redirect(view_model.redirect_url)

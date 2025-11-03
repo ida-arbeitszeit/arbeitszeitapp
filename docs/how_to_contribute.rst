@@ -1,38 +1,47 @@
 How to contribute
 =================
 
-There are several options for you to contribute to the project if you
-wish to do so.
+You can contribute in various ways, if you wish to do so:
 
 Translating the app
 -------------------
 
-The developers want people around the world to use the
-arbeitszeitapp. To achieve this, it's crucial to translate the app
-into as many languages as we can. Since we're a small team of software
-creators, we haven't had the resources to create a detailed guide on
-how to translate the app step by step. However, we invite you to reach
-out to us through the issue tracker on GitHub. The README file in this
-project provides technical details about our translation technology,
-but don't be concerned if you find it complex. We're here to assist
-you with the technical setup to the best of our ability. Feel free to
-ask for help!
+We want people around the world to use the arbeitszeitapp. To achieve this, it's crucial to translate the app into as many languages as we can. We are happy to help you with the translation process.
 
-Contributing to the source code
--------------------------------
+Contributing code
+------------------
 
-We appreciate contributions to the code! When you contribute to the
-project, it means you agree that your source code is distributed under
-our Free-and-Open-Source Software license. If you want to help with
-the project but don't know where to begin, check out the issue
-tracker. You can propose changes by `forking the repository
-<https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>`_
-and creating a pull request on GitHub. This action initiates a review
-process by the arbeitszeitapp collective. Please be patient if we
-don't start reviewing your code immediately, as our resources are
-limited, and none of us is economically compensated for working on the
-app. If you're unsure about creating a pull request, don't worry –
-there's a `helpful guide
-<https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork>`_
-in the GitHub documentation on how to do it. Feel free to refer to
-that!
+We appreciate contributions to the code! Before you start contributing, you'll need to set up your development environment. The setup process is
+detailed in our :doc:`development_setup` guide.
+
+You can propose changes by `forking the repository <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>`_ and creating a pull request on GitHub.
+Before submitting changes, run ``./run-checks`` to ensure your code meets our standards.
+
+
+Working on Milestones
+-----------------------
+
+Milestones are our way of organizing larger work packages (>50h of work) that have been identified as important for the project. Unlike regular Issues or Pull Requests, milestones follow a formal approval process that includes an obligatory RFC (Request For Comments). This structured approach helps us plan better and ensures that all developers are aligned with the project's direction.
+
+Milestone Lifecycle
+~~~~~~~~~~~~~~~~~~~
+
+1. RFC Candidate
+    - An Issue on GitHub that has potential to become a Milestone
+    - Marked with the "rfc candidate" label
+    - Requires initial conceptual work and discussion
+    - View `current candidates <https://github.com/ida-arbeitszeit/arbeitszeitapp/issues?q=state%3Aopen%20label%3A%22rfc%20candidate%22>`_
+
+2. RFC (Request For Comments)
+    - A detailed proposal marked with the "RFC" label
+    - Must include a motivation for the change and a detailed implementation proposal
+    - Sent to the programmers mailing list for visibility
+    - Requires approval in an app group meeting
+    - View `current RFCs <https://github.com/ida-arbeitszeit/arbeitszeitapp/issues?q=is%3Aissue%20state%3Aopen%20label%3Arfc>`_
+
+3. Active Milestone
+    - Published on GitHub after RFC approval
+    - Ready for implementation
+    - View `all milestones <https://github.com/ida-arbeitszeit/arbeitszeitapp/milestones>`_
+
+Feel free to contribute to any of these stages.

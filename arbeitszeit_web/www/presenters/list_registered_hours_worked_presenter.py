@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from arbeitszeit.use_cases import list_registered_hours_worked
+from arbeitszeit.interactors import list_registered_hours_worked
 from arbeitszeit_web.formatters.datetime_formatter import DatetimeFormatter
 
 
@@ -29,7 +29,6 @@ class ListRegisteredHoursWorkedPresenter:
                 worker_id=str(record.worker_id),
                 registered_on=self.datetime_formatter.format_datetime(
                     date=record.registered_on,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 ),
             )

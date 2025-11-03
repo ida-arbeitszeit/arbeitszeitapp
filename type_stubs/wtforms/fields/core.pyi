@@ -26,19 +26,19 @@ class Field:
     label: Incomplete
     def __init__(
         self,
-        label: Incomplete | None = None,
-        validators: Incomplete | None = None,
+        label=None,
+        validators=None,
         filters=(),
         description: str = "",
-        id: Incomplete | None = None,
-        default: Incomplete | None = None,
-        widget: Incomplete | None = None,
-        render_kw: Incomplete | None = None,
-        name: Incomplete | None = None,
-        _form: Incomplete | None = None,
+        id=None,
+        default=None,
+        widget=None,
+        render_kw=None,
+        name=None,
+        _form=None,
         _prefix: str = "",
-        _translations: Incomplete | None = None,
-        _meta: Incomplete | None = None,
+        _translations=None,
+        _meta=None,
     ) -> None: ...
     def __html__(self): ...
     def __call__(self, **kwargs): ...
@@ -51,9 +51,7 @@ class Field:
     def post_validate(self, form, validation_stopped) -> None: ...
     object_data: Incomplete
     data: Incomplete
-    def process(
-        self, formdata, data=..., extra_filters: Incomplete | None = None
-    ) -> None: ...
+    def process(self, formdata, data=..., extra_filters=None) -> None: ...
     def process_data(self, value) -> None: ...
     def process_formdata(self, valuelist) -> None: ...
     def populate_obj(self, obj, name) -> None: ...
@@ -64,17 +62,8 @@ class UnboundField:
     args: Incomplete
     name: Incomplete
     kwargs: Incomplete
-    def __init__(
-        self, field_class, *args, name: Incomplete | None = None, **kwargs
-    ) -> None: ...
-    def bind(
-        self,
-        form,
-        name,
-        prefix: str = "",
-        translations: Incomplete | None = None,
-        **kwargs,
-    ): ...
+    def __init__(self, field_class, *args, name=None, **kwargs) -> None: ...
+    def bind(self, form, name, prefix: str = "", translations=None, **kwargs): ...
 
 class Flags:
     def __getattr__(self, name): ...
@@ -85,4 +74,4 @@ class Label:
     text: Incomplete
     def __init__(self, field_id, text) -> None: ...
     def __html__(self): ...
-    def __call__(self, text: Incomplete | None = None, **kwargs): ...
+    def __call__(self, text=None, **kwargs): ...

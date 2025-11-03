@@ -10,9 +10,13 @@
     <p>
       {{ gettext("Email address:") }} {{ view_model.email_address }}
     </p>
+    <p>
       <a href="{{ view_model.request_email_address_change_url }}">
         {{ gettext("Change email address") }}
       </a>
+    </p>
+    <p>
+      {{ gettext("Current time:") }} {{ view_model.current_user_time }}
     </p>
   </div>
 </div>

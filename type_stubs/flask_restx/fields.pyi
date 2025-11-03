@@ -1,4 +1,5 @@
 from _typeshed import Incomplete
+from werkzeug.utils import cached_property
 
 from .errors import RestError
 
@@ -40,20 +41,23 @@ class Raw:
     readonly: Incomplete
     example: Incomplete
     mask: Incomplete
+    nullable: Incomplete
     def __init__(
         self,
-        default: Incomplete | None = None,
-        attribute: Incomplete | None = None,
-        title: Incomplete | None = None,
-        description: Incomplete | None = None,
-        required: Incomplete | None = None,
-        readonly: Incomplete | None = None,
-        example: Incomplete | None = None,
-        mask: Incomplete | None = None,
+        default=None,
+        attribute=None,
+        title=None,
+        description=None,
+        required=None,
+        readonly=None,
+        example=None,
+        mask=None,
+        nullable=None,
         **kwargs,
     ) -> None: ...
     def format(self, value): ...
     def output(self, key, obj, **kwargs): ...
+    @cached_property
     def __schema__(self): ...
     def schema(self): ...
 
@@ -75,7 +79,7 @@ class Nested(Raw):
     def nested(self): ...
     def output(self, key, obj, ordered: bool = False, **kwargs): ...
     def schema(self): ...
-    def clone(self, mask: Incomplete | None = None): ...
+    def clone(self, mask=None): ...
 
 class List(Raw):
     min_items: Incomplete
@@ -86,7 +90,7 @@ class List(Raw):
     def format(self, value): ...
     def output(self, key, data, ordered: bool = False, **kwargs): ...
     def schema(self): ...
-    def clone(self, mask: Incomplete | None = None): ...
+    def clone(self, mask=None): ...
 
 class StringMixin:
     __schema_type__: str
@@ -158,11 +162,7 @@ class Url(StringMixin, Raw):
     absolute: Incomplete
     scheme: Incomplete
     def __init__(
-        self,
-        endpoint: Incomplete | None = None,
-        absolute: bool = False,
-        scheme: Incomplete | None = None,
-        **kwargs,
+        self, endpoint=None, absolute: bool = False, scheme=None, **kwargs
     ) -> None: ...
     def output(self, key, obj, **kwargs): ...
 
@@ -181,7 +181,7 @@ class Polymorph(Nested):
     def __init__(self, mapping, required: bool = False, **kwargs) -> None: ...
     def output(self, key, obj, ordered: bool = False, **kwargs): ...
     def resolve_ancestor(self, models): ...
-    def clone(self, mask: Incomplete | None = None): ...
+    def clone(self, mask=None): ...
 
 class Wildcard(Raw):
     exclude: Incomplete

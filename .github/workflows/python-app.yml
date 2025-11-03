@@ -6,45 +6,50 @@ on:
       - master
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   static-code-analysis:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v22
-    - uses: cachix/cachix-action@v12
+    - uses: actions/checkout@v5
+    - uses: cachix/install-nix-action@v31
+    - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix develop --command ./run-checks --no-unittests
 
   flake-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v22
-    - uses: cachix/cachix-action@v12
+    - uses: actions/checkout@v5
+    - uses: cachix/install-nix-action@v31
+    - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix flake check --print-build-logs
 
   check-migrations:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v22
-    - uses: cachix/cachix-action@v12
+    - uses: actions/checkout@v5
+    - uses: cachix/install-nix-action@v31
+    - uses: cachix/cachix-action@v16
       with:
-        name: arbeitszeit
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        name: arbeitszeit-2
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN_2 }}'
     - run: nix develop --command alembic upgrade head
       env:
-        ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_CONFIG: tests/flask_integration/alembic.ini
         FLASK_APP: arbeitszeit_flask
     - run: nix develop --command alembic check
       env:
-        ARBEITSZEITAPP_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres
+        ALEMBIC_CONFIG: tests/flask_integration/alembic.ini
         FLASK_APP: arbeitszeit_flask
     services:
       postgres:
@@ -64,11 +69,11 @@ jobs:
   unittests-pip:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4.5.0
+    - uses: actions/checkout@v5
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
         cache: 'pip'
     - name: Install dependencies
       run: |

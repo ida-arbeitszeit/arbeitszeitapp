@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from arbeitszeit_web.email.registration_email_presenter import (
     RegistrationEmailPresenter,
 )
+from tests.datetime_service import datetime_utc
 from tests.email import Email, FakeEmailConfiguration
 from tests.text_renderer import TextRendererImpl
 from tests.www.base_test_case import BaseTestCase
@@ -37,7 +36,7 @@ class MemberPresenterTests(BaseTestCase):
         self.assertEqual(self.email_address, recipient)
 
     def test_that_correct_message_is_rendered(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token(self.email_address)
         expected_url = self.url_index.get_member_confirmation_url(token=token)
         self.presenter.show_member_registration_message(self.email_address)
@@ -87,7 +86,7 @@ class CompanyPresenterTests(BaseTestCase):
         self.assertEqual(self.email_address, recipient)
 
     def test_that_correct_message_is_rendered(self) -> None:
-        self.datetime_service.freeze_time(datetime(2000, 1, 1))
+        self.datetime_service.freeze_time(datetime_utc(2000, 1, 1))
         token = self.token_service.generate_token(self.email_address)
         expected_url = self.url_index.get_company_confirmation_url(token=token)
         self.presenter.show_company_registration_message(self.email_address)

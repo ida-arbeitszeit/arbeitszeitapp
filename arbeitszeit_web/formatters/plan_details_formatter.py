@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
-from arbeitszeit.plan_details import PlanDetails
+from arbeitszeit.services.plan_details import PlanDetails
 from arbeitszeit_web.translator import Translator
 from arbeitszeit_web.url_index import UrlIndex
 
@@ -108,17 +108,15 @@ class PlanDetailsFormatter:
             ),
             labour_cost_per_unit=(
                 self.translator.gettext("Labour time (hours/unit)"),
-                self._format_price(plan_details.labour_cost_per_unit),
+                self._format_price(plan_details.cost_per_unit),
             ),
             creation_date=self.datetime_formatter.format_datetime(
                 date=plan_details.creation_date,
-                zone="Europe/Berlin",
                 fmt="%d.%m.%Y %H:%M",
             ),
             approval_date=(
                 self.datetime_formatter.format_datetime(
                     date=plan_details.approval_date,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 )
                 if plan_details.approval_date
@@ -127,7 +125,6 @@ class PlanDetailsFormatter:
             expiration_date=(
                 self.datetime_formatter.format_datetime(
                     date=plan_details.expiration_date,
-                    zone="Europe/Berlin",
                     fmt="%d.%m.%Y %H:%M",
                 )
                 if plan_details.expiration_date
