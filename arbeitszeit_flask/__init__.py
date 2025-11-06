@@ -100,7 +100,6 @@ def create_app(
         # register blueprints
         from .api import blueprint as api_blueprint
         from .context_processors import add_template_variables
-        from .healthcheck import blueprint as healthcheck_blueprint
         from .plots import routes as plots_routes
         from .routes import accountant as accountant_routes
         from .routes import company as company_routes
