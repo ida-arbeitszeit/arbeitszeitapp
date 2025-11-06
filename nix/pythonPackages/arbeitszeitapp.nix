@@ -4,17 +4,17 @@
 
   # python packages
   alembic,
-  Babel,
+  babel,
   psycopg2,
-  email_validator,
+  email-validator,
   flask,
   flask-babel,
-  flask_mail,
+  flask-mail,
   flask-profiler,
   flask-restx,
   flask-talisman,
-  flask_login,
-  flask_wtf,
+  flask-login,
+  flask-wtf,
   matplotlib,
   parameterized,
   pytest,
@@ -36,19 +36,19 @@ buildPythonPackage {
     sphinx
     sphinx-rtd-theme
     parameterized
-    Babel
+    babel
     setuptools
   ];
   propagatedBuildInputs = [
     alembic
-    email_validator
+    email-validator
     flask
     flask-babel
-    flask_mail
+    flask-mail
     flask-talisman
-    flask_login
+    flask-login
     flask-restx
-    flask_wtf
+    flask-wtf
     matplotlib
   ];
   nativeBuildInputs = [

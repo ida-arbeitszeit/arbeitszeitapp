@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "Babel"]
+requires = ["setuptools", "wheel", "babel"]
 build-backend = "build_support.backend"
 backend-path = ["."]
 
