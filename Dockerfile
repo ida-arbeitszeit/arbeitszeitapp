@@ -56,7 +56,7 @@ COPY --from=builder /arbeitszeitapp/arbeitszeit_flask /arbeitszeitapp/arbeitszei
 COPY --from=builder /arbeitszeitapp/arbeitszeit_web /arbeitszeitapp/arbeitszeit_web
 
 ENV PATH="/arbeitszeitapp/.venv/bin:$PATH"
-ENV FLASK_APP=arbeitszeit_flask
+ENV FLASK_APP=arbeitszeit_flask.wsgi:app
 ENV FLASK_DEBUG=0
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
@@ -73,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 USER arbeitszeit
 
 # Use --preload to load the app before forking workers (run db migrations only once)
-CMD ["gunicorn", "--preload", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "arbeitszeit_flask.wsgi:app"]
+CMD ["sh", "-c", "gunicorn --preload --bind 0.0.0.0:5000 --workers 4 --timeout 120 \"${FLASK_APP}\""]
