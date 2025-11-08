@@ -77,6 +77,9 @@ Here is a diagram that shows the main components of the application:
     :alt: Overview of the main components of Arbeitszeitapp
     :width: 500px
 
+We use our own dependency injection logic to achieve the inversion of control depicted
+in the diagram.
+
 
 Database Setup
 -----------------
