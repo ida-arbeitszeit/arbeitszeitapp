@@ -13,17 +13,11 @@
 </h1>
 <div class="column is-offset-2 is-8">
     <div class="box">
-        <div class="tile is-ancestor">
-            <div class="tile is-vertical">
-                <div class="tile is-parent" href="">
-                    <div class="tile is-child box has-background-danger-light">
-                        <h1 class="title is-4">{{ gettext("Register consumption") }}</h1>
-                        <a class="button is-primary" href="{{ view_model.register_private_consumption_url }}">
-                            <span>{{ gettext("Register consumption") }}</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="box has-background-danger-light">
+            <h1 class="title is-4">{{ gettext("Register consumption") }}</h1>
+            <a class="button is-primary" href="{{ view_model.register_private_consumption_url }}">
+                <span>{{ gettext("Register consumption") }}</span>
+            </a>
         </div>
     </div>
 </div>
