@@ -12,16 +12,14 @@
 </div>
 
 <div class="section has-text-centered">
-    <div class="tile is-ancestor">
-        <div class="tile is-parent"></div>
-        <a class="tile is-parent" href="{{ url_for('main_company.create_cooperation') }}">
-            <div class="tile is-child box has-background-primary-light">
-                <h1 class="title is-5"><span class="icon">{{ "hands-helping"|icon }}</span>
-                    {{ gettext("Create cooperation ") }}</h1>
-                <div class="subtitle"></div>
-            </div>
-        </a>
-        <div class="tile is-parent"></div>
+    <div class="column is-offset-4 is-4">
+            <a href="{{ url_for('main_company.create_cooperation') }}">
+                <div class="box has-background-primary-light">
+                    <h1 class="title is-5"><span class="icon">{{ "hands-helping"|icon }}</span>
+                        {{ gettext("Create cooperation ") }}</h1>
+                    <div class="subtitle"></div>
+                </div>
+            </a>
     </div>
 </div>
 <div class="section has-text-centered">
