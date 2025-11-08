@@ -1,7 +1,7 @@
-from typing import Dict, Protocol
+from typing import Protocol
 
 
-class Colors(Protocol):
+class HexColors(Protocol):
     @property
     def primary(self) -> str: ...
 
@@ -16,5 +16,3 @@ class Colors(Protocol):
 
     @property
     def success(self) -> str: ...
-
-    def get_all_defined_colors(self) -> Dict[str, str]: ...

@@ -41,7 +41,7 @@ from arbeitszeit_flask.url_index import GeneralUrlIndex
 from arbeitszeit_flask.views.accountant_invitation_email_view import (
     AccountantInvitationEmailViewImpl,
 )
-from arbeitszeit_web.colors import Colors
+from arbeitszeit_web.colors import HexColors
 from arbeitszeit_web.email import EmailConfiguration, MailService
 from arbeitszeit_web.email.accountant_invitation_presenter import (
     AccountantInvitationEmailView,
@@ -92,7 +92,7 @@ class FlaskModule(Module):
         binder[MailService] = CallableProvider(get_mail_service)
         binder[Translator] = AliasProvider(FlaskTranslator)
         binder[Plotter] = AliasProvider(FlaskPlotter)
-        binder[Colors] = AliasProvider(FlaskColors)
+        binder[HexColors] = AliasProvider(FlaskColors)
         binder[ControlThresholds] = AliasProvider(ControlThresholdsFlask)
         binder[DatetimeFormatter] = AliasProvider(FlaskDatetimeFormatter)
         binder[TimezoneConfiguration] = AliasProvider(FlaskTimezoneConfiguration)

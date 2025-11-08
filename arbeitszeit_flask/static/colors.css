@@ -1,0 +1,22 @@
+/* must be in sync with color definitions in code */
+:root {
+    --bulma-primary-h: 171deg;
+    --bulma-primary-s: 100%;
+    --bulma-primary-l: 41%;
+
+    --bulma-info-h: 198deg;
+    --bulma-info-s: 100%;
+    --bulma-info-l: 70%;
+
+    --bulma-warning-h: 42deg;
+    --bulma-warning-s: 100%;
+    --bulma-warning-l: 53%;
+
+    --bulma-danger-h: 348deg;
+    --bulma-danger-s: 100%;
+    --bulma-danger-l: 70%;
+
+    --bulma-success-h: 153deg;
+    --bulma-success-s: 53%;
+    --bulma-success-l: 53%;
+}

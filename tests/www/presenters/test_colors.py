@@ -1,6 +1,3 @@
-from typing import Dict
-
-
 class ColorsTestImpl:
     def __init__(self) -> None:
         self.all_colors = {
@@ -30,6 +27,3 @@ class ColorsTestImpl:
     @property
     def success(self) -> str:
         return self.all_colors["success"]
-
-    def get_all_defined_colors(self) -> Dict[str, str]:
-        return self.all_colors
