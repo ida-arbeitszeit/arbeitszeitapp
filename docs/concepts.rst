@@ -18,49 +18,36 @@ There are three user roles:
 Accounts  
 ---------
 
-Seven different account types exist in our app. See :ref:`transfers-of-labor-time` for a list of allowed transfers between the accounts.
+There are seven account types in our app. See :ref:`transfers-of-labor-time` for a list of allowed transfers between these accounts.
 
-**p**
+.. list-table::
+   :widths: auto
+   :header-rows: 1
 
-*owner*: Company
-
-Each company has a "p" account ("Produktionsmittel" - means of production) where transfers related to the consumption or provision of "fixed means of production" are recorded. Fixed means of production are, for example, machines or buildings that wear out gradually and do not transfer their value to the product in one planning cycle all at once.
-
-**r**
-
-*owner*: Company
-
-Each company has a "r" account ("Rohstoffe" - raw materials) where transfers related to the consumption or provision of "liquid means of production" are recorded. Liquid means of production are, for example, raw materials that transfer their value to the product in one planning cycle all at once.
-
-**a**
-
-*owner*: Company
-
-Each company has an "a" account ("Arbeit" - work), where inflows and outflows of work certificates are recorded.
-
-**prd**
-
-*owner*: Company
-
-Each company has a "prd" account ("Produkt" - product), where quantities of planned and delivered products are recorded. When a productive plan gets approved, the total planned costs are debited from this account. As the finished product gets consumed and work certificates are spent for it, the account balance increases back toward zero, item by item.
-
-**member**
-
-*owner*: Member
-
-Each member has a "member" account where inflows and outflows of work certificates are recorded. Work certificates are credited when a company registers work and debited when the member consumes a product. 
-
-**psf**
-
-*owner*: Social Accounting
-
-The "psf" account (Public Sector Fund) is used to track hours credited to and debited from the public sector. In the current implementation of the app, there is one Social Accounting instance with one psf account.
-
-**cooperation**
-
-*owner*: Cooperation
-
-Each cooperation has an account that tracks the differences between the cooperative (averaged) prices and the actual costs of the products (see :ref:`cooperations` for details).
+   * - Account
+     - Owner
+     - Description
+   * - p
+     - Company
+     - Each company has a "p" account ("Produktionsmittel" - means of production) where transfers related to the consumption or provision of "fixed means of production" are recorded. Fixed means of production are, for example, machines or buildings that wear out gradually and do not transfer their value to the product in one planning cycle all at once.
+   * - r
+     - Company
+     - Each company has a "r" account ("Rohstoffe" - raw materials) where transfers related to the consumption or provision of "liquid means of production" are recorded. Liquid means of production are, for example, raw materials that transfer their value to the product in one planning cycle all at once.
+   * - a
+     - Company
+     - Each company has an "a" account ("Arbeit" - work), where inflows and outflows of work certificates are recorded.
+   * - prd
+     - Company
+     - Each company has a "prd" account ("Produkt" - product), where quantities of planned and delivered products are recorded. When a productive plan gets approved, the total planned costs are debited from this account. As the finished product gets consumed and work certificates are spent for it, the account balance increases back toward zero, item by item.
+   * - member
+     - Member
+     - Each member has a "member" account where inflows and outflows of work certificates are recorded. Work certificates are credited when a company registers work and debited when the member consumes a product. 
+   * - psf
+     - Social Accounting
+     - The "psf" account (Public Sector Fund) is used to track hours credited to and debited from the public sector. In the current implementation of the app, there is one Social Accounting instance with one psf account.
+   * - cooperation
+     - Cooperation
+     - Each cooperation has an account that tracks the differences between the cooperative (averaged) prices and the actual costs of the products (see :ref:`cooperations` for details).
 
 
 Plans
@@ -155,7 +142,7 @@ Transfers of labor time
 Transfers occur between two accounts, where the debit account is charged, and the credit account is credited. The table below lists the allowed transfers and their corresponding variable names in the code.
 
 .. list-table::
-   :widths: 30 20 20 60
+   :widths: 10 20 20 60
    :header-rows: 1
 
    * - Variable name

@@ -1,0 +1,5 @@
+/* Enable normal wrapping of table cells */
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+    white-space: normal;
+}
