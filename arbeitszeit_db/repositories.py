@@ -59,7 +59,7 @@ def _add_days_to_date(
         )
 
 
-class FlaskQueryResult(Generic[T]):
+class SqlQueryResult(Generic[T]):
     def __init__(self, query: Query, mapper: Callable[[Any], T], db: Database) -> None:
         self.query = query
         self.mapper = mapper
@@ -89,7 +89,7 @@ class FlaskQueryResult(Generic[T]):
         return self.query.count()
 
 
-class PlanQueryResult(FlaskQueryResult[records.Plan]):
+class PlanQueryResult(SqlQueryResult[records.Plan]):
     def ordered_by_creation_date(self, ascending: bool = True) -> Self:
         ordering = (
             models.Plan.plan_creation_date.asc()
@@ -315,7 +315,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             lambda query: query.filter(models.Plan.hidden_by_user == False)
         )
 
-    def joined_with_planner_and_cooperation(self) -> FlaskQueryResult[
+    def joined_with_planner_and_cooperation(self) -> SqlQueryResult[
         Tuple[
             records.Plan,
             records.Company,
@@ -354,7 +354,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             )
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=query,
@@ -362,7 +362,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def joined_with_cooperation(
         self,
-    ) -> FlaskQueryResult[tuple[records.Plan, Optional[records.Cooperation]]]:
+    ) -> SqlQueryResult[tuple[records.Plan, Optional[records.Cooperation]]]:
         def mapper(orm: Any) -> tuple[records.Plan, Optional[records.Cooperation]]:
             return (
                 DatabaseGatewayImpl.plan_from_orm(orm[0]),
@@ -383,7 +383,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             .with_entities(models.Plan, cooperation)
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
@@ -391,7 +391,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
 
     def joined_with_provided_product_amount(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Plan, int]]:
+    ) -> SqlQueryResult[Tuple[records.Plan, int]]:
         productive_consumptions = (
             self.db.session.query(models.ProductiveConsumption)
             .filter(models.ProductiveConsumption.plan_id == models.Plan.id)
@@ -409,7 +409,7 @@ class PlanQueryResult(FlaskQueryResult[records.Plan]):
             func.coalesce(productive_consumptions, 0)
             + func.coalesce(private_consumptions, 0),
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=lambda orm: (
@@ -544,7 +544,7 @@ class PlanUpdate:
         )
 
 
-class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
+class PlanDraftResult(SqlQueryResult[records.PlanDraft]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.PlanDraft.id == str(id_))
@@ -567,7 +567,7 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
 
     def joined_with_planner_and_email_address(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         tuple[records.PlanDraft, records.Company, records.EmailAddress]
     ]:
         def mapper(
@@ -588,7 +588,7 @@ class PlanDraftResult(FlaskQueryResult[records.PlanDraft]):
             .join(email, user.email_address == email.address)
             .with_entities(models.PlanDraft, company, email)
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=query,
@@ -650,10 +650,10 @@ class PlanDraftUpdate:
 
 
 @dataclass
-class PlanApprovalResult(FlaskQueryResult[records.PlanApproval]): ...
+class PlanApprovalResult(SqlQueryResult[records.PlanApproval]): ...
 
 
-class MemberQueryResult(FlaskQueryResult[records.Member]):
+class MemberQueryResult(SqlQueryResult[records.Member]):
     def working_at_company(self, company: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Member.workplaces.any(id=str(company)))
@@ -674,7 +674,7 @@ class MemberQueryResult(FlaskQueryResult[records.Member]):
 
     def joined_with_email_address(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Member, records.EmailAddress]]:
+    ) -> SqlQueryResult[Tuple[records.Member, records.EmailAddress]]:
         def mapper(row):
             member_orm, email_orm = row
             return (
@@ -684,7 +684,7 @@ class MemberQueryResult(FlaskQueryResult[records.Member]):
 
         user = aliased(models.User)
         email = aliased(models.Email)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             mapper=mapper,
             db=self.db,
             query=self.query.join(user, user.id == models.Member.user_id)
@@ -693,7 +693,7 @@ class MemberQueryResult(FlaskQueryResult[records.Member]):
         )
 
 
-class CompanyQueryResult(FlaskQueryResult[records.Company]):
+class CompanyQueryResult(SqlQueryResult[records.Company]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Company.id == str(id_))
@@ -771,7 +771,7 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
 
     def joined_with_email_address(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Company, records.EmailAddress]]:
+    ) -> SqlQueryResult[Tuple[records.Company, records.EmailAddress]]:
         def mapper(row):
             company_orm, email_orm = row
             return (
@@ -781,7 +781,7 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
 
         user = aliased(models.User)
         email = aliased(models.Email)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             mapper=mapper,
             db=self.db,
             query=self.query.join(user, user.id == models.Company.user_id)
@@ -790,7 +790,7 @@ class CompanyQueryResult(FlaskQueryResult[records.Company]):
         )
 
 
-class AccountantResult(FlaskQueryResult[records.Accountant]):
+class AccountantResult(SqlQueryResult[records.Accountant]):
     def with_email_address(self, email: str) -> Self:
         user = aliased(models.User)
         return self._with_modified_query(
@@ -806,7 +806,7 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
 
     def joined_with_email_address(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Accountant, records.EmailAddress]]:
+    ) -> SqlQueryResult[Tuple[records.Accountant, records.EmailAddress]]:
         def mapper(orm: Any) -> Tuple[records.Accountant, records.EmailAddress]:
             return (
                 DatabaseGatewayImpl.accountant_from_orm(orm[0]),
@@ -821,14 +821,14 @@ class AccountantResult(FlaskQueryResult[records.Accountant]):
             .with_entities(models.Accountant, email)
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
 
-class TransferQueryResult(FlaskQueryResult[records.Transfer]):
+class TransferQueryResult(SqlQueryResult[records.Transfer]):
     def where_account_is_debtor(self, *account: UUID) -> Self:
         accounts = list(map(str, account))
         return self._with_modified_query(
@@ -852,7 +852,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
 
     def joined_with_debtor(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+    ) -> SqlQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
@@ -885,7 +885,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
                 models.Transfer, member, company, social_accounting, cooperation
             )
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             mapper=self.map_transfer_and_account_owner,
             db=self.db,
@@ -893,7 +893,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
 
     def joined_with_creditor(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
+    ) -> SqlQueryResult[Tuple[records.Transfer, records.AccountOwner]]:
         member = aliased(models.Member)
         company = aliased(models.Company)
         social_accounting = aliased(models.SocialAccounting)
@@ -926,7 +926,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
                 models.Transfer, member, company, social_accounting, cooperation
             )
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             mapper=self.map_transfer_and_account_owner,
             db=self.db,
@@ -952,7 +952,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
 
     def joined_with_debtor_and_creditor(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.Transfer, records.AccountOwner, records.AccountOwner]
     ]:
         debtor_aliases = self._create_account_owner_aliases()
@@ -1030,7 +1030,7 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
                 creditor_aliases.cooperation,
             )
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             mapper=self.map_transfer_and_debtor_and_creditor,
             db=self.db,
@@ -1094,14 +1094,14 @@ class TransferQueryResult(FlaskQueryResult[records.Transfer]):
 
     def ordered_by_date(
         self, *, ascending: bool = True
-    ) -> FlaskQueryResult[records.Transfer]:
+    ) -> SqlQueryResult[records.Transfer]:
         ordering = (
             models.Transfer.date.asc() if ascending else models.Transfer.date.desc()
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
 
-class AccountQueryResult(FlaskQueryResult[records.Account]):
+class AccountQueryResult(SqlQueryResult[records.Account]):
     def with_id(self, *id_: UUID) -> Self:
         ids = list(map(str, id_))
         return self._with_modified_query(
@@ -1148,7 +1148,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             lambda query: query.join(company, company.a_account == models.Account.id)
         )
 
-    def joined_with_balance(self) -> FlaskQueryResult[Tuple[records.Account, Decimal]]:
+    def joined_with_balance(self) -> SqlQueryResult[Tuple[records.Account, Decimal]]:
         from sqlalchemy import func, select
 
         tf_credited = (
@@ -1183,7 +1183,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
             )
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=self.map_account_and_balance,
@@ -1194,7 +1194,7 @@ class AccountQueryResult(FlaskQueryResult[records.Account]):
         return DatabaseGatewayImpl.account_from_orm(orm[0]), orm[1] or Decimal(0)
 
 
-class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption]):
+class ProductiveConsumptionResult(SqlQueryResult[records.ProductiveConsumption]):
     def where_consumer_is_company(self, company: UUID) -> Self:
         transfer = aliased(models.Transfer)
         account = aliased(models.Account)
@@ -1247,7 +1247,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
     def joined_with_transfer_and_plan(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.ProductiveConsumption, records.Transfer, records.Plan]
     ]:
         def mapper(
@@ -1262,7 +1262,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
         transfer = aliased(models.Transfer)
         plan = aliased(models.Plan)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1276,7 +1276,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
     def joined_with_transfer(
         self,
-    ) -> FlaskQueryResult[Tuple[records.ProductiveConsumption, records.Transfer]]:
+    ) -> SqlQueryResult[Tuple[records.ProductiveConsumption, records.Transfer]]:
         def mapper(
             orm,
         ) -> Tuple[records.ProductiveConsumption, records.Transfer]:
@@ -1287,7 +1287,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
             )
 
         transfer = aliased(models.Transfer)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1299,7 +1299,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
     def joined_with_transfer_and_provider(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.ProductiveConsumption, records.Transfer, records.Company]
     ]:
         def mapper(
@@ -1315,7 +1315,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
         transfer = aliased(models.Transfer)
         provider = aliased(models.Company)
         plan = aliased(models.Plan)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1330,7 +1330,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
 
     def joined_with_transfer_and_plan_and_consumer(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[
             records.ProductiveConsumption,
             records.Transfer,
@@ -1358,7 +1358,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
         account = aliased(models.Account)
         plan = aliased(models.Plan)
         company = aliased(models.Company)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1379,7 +1379,7 @@ class ProductiveConsumptionResult(FlaskQueryResult[records.ProductiveConsumption
         )
 
 
-class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
+class PrivateConsumptionResult(SqlQueryResult[records.PrivateConsumption]):
     def where_consumer_is_member(self, member: UUID) -> Self:
         transfer = aliased(models.Transfer)
         account = aliased(models.Account)
@@ -1429,7 +1429,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
 
     def joined_with_transfer_and_plan(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.PrivateConsumption, records.Transfer, records.Plan]
     ]:
         def mapper(
@@ -1444,7 +1444,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
 
         transfer = aliased(models.Transfer)
         plan = aliased(models.Plan)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1458,7 +1458,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
 
     def joined_with_transfer_and_plan_and_consumer(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[
             records.PrivateConsumption,
             records.Transfer,
@@ -1486,7 +1486,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
         account = aliased(models.Account)
         plan = aliased(models.Plan)
         member = aliased(models.Member)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             mapper=mapper,
             query=self.query.join(
@@ -1504,7 +1504,7 @@ class PrivateConsumptionResult(FlaskQueryResult[records.PrivateConsumption]):
         )
 
 
-class CooperationResult(FlaskQueryResult[records.Cooperation]):
+class CooperationResult(SqlQueryResult[records.Cooperation]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Cooperation.id == str(id_))
@@ -1540,7 +1540,7 @@ class CooperationResult(FlaskQueryResult[records.Cooperation]):
 
     def joined_with_current_coordinator(
         self,
-    ) -> FlaskQueryResult[Tuple[records.Cooperation, records.Company]]:
+    ) -> SqlQueryResult[Tuple[records.Cooperation, records.Company]]:
         def mapper(
             orm,
         ) -> Tuple[records.Cooperation, records.Company]:
@@ -1564,14 +1564,14 @@ class CooperationResult(FlaskQueryResult[records.Cooperation]):
             company, most_recent_tenure_holder == company.id
         ).with_entities(models.Cooperation, company)
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
 
-class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
+class CoordinationTenureResult(SqlQueryResult[records.CoordinationTenure]):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.CoordinationTenure.id == str(id_))
@@ -1586,7 +1586,7 @@ class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
 
     def joined_with_coordinator(
         self,
-    ) -> FlaskQueryResult[Tuple[records.CoordinationTenure, records.Company]]:
+    ) -> SqlQueryResult[Tuple[records.CoordinationTenure, records.Company]]:
         def mapper(
             orm,
         ) -> Tuple[records.CoordinationTenure, records.Company]:
@@ -1601,7 +1601,7 @@ class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
             company, models.CoordinationTenure.company == company.id
         ).with_entities(models.CoordinationTenure, company)
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
@@ -1617,7 +1617,7 @@ class CoordinationTenureResult(FlaskQueryResult[records.CoordinationTenure]):
 
 
 class CoordinationTransferRequestResult(
-    FlaskQueryResult[records.CoordinationTransferRequest]
+    SqlQueryResult[records.CoordinationTransferRequest]
 ):
     def with_id(self, id_: UUID) -> Self:
         return self._with_modified_query(
@@ -1636,7 +1636,7 @@ class CoordinationTransferRequestResult(
 
     def joined_with_cooperation(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.CoordinationTransferRequest, records.Cooperation]
     ]:
         def mapper(
@@ -1660,14 +1660,14 @@ class CoordinationTransferRequestResult(
             .with_entities(models.CoordinationTransferRequest, cooperation)
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
 
-class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
+class CompanyWorkInviteResult(SqlQueryResult[records.CompanyWorkInvite]):
     def with_id(self, id: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.CompanyWorkInvite.id == str(id))
@@ -1689,7 +1689,7 @@ class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
 
     def joined_with_member(
         self,
-    ) -> FlaskQueryResult[Tuple[records.CompanyWorkInvite, records.Member]]:
+    ) -> SqlQueryResult[Tuple[records.CompanyWorkInvite, records.Member]]:
         def mapper(orm) -> Tuple[records.CompanyWorkInvite, records.Member]:
             invite_orm, member_orm = orm
             return (
@@ -1702,14 +1702,14 @@ class CompanyWorkInviteResult(FlaskQueryResult[records.CompanyWorkInvite]):
             member, member.id == models.CompanyWorkInvite.member
         ).with_entities(models.CompanyWorkInvite, member)
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
 
-class EmailAddressResult(FlaskQueryResult[records.EmailAddress]):
+class EmailAddressResult(SqlQueryResult[records.EmailAddress]):
     def with_address(self, *addresses: str) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(models.Email.address.in_(addresses))
@@ -1768,7 +1768,7 @@ class EmailAddressUpdate:
         return rowcount
 
 
-class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked]):
+class RegisteredHoursWorkedResult(SqlQueryResult[records.RegisteredHoursWorked]):
     def at_company(self, company: UUID) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(
@@ -1784,7 +1784,7 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
         )
         return self._with_modified_query(lambda query: query.order_by(ordering))
 
-    def joined_with_worker(self) -> FlaskQueryResult[
+    def joined_with_worker(self) -> SqlQueryResult[
         Tuple[
             records.RegisteredHoursWorked,
             records.Member,
@@ -1804,13 +1804,13 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             members, members.id == models.RegisteredHoursWorked.worker
         ).with_entities(models.RegisteredHoursWorked, members)
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
-    def joined_with_transfer_of_work_certificates(self) -> FlaskQueryResult[
+    def joined_with_transfer_of_work_certificates(self) -> SqlQueryResult[
         Tuple[
             records.RegisteredHoursWorked,
             records.Transfer,
@@ -1831,13 +1831,13 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             transfers.id == models.RegisteredHoursWorked.transfer_of_work_certificates,
         ).with_entities(models.RegisteredHoursWorked, transfers)
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
-    def joined_with_worker_and_transfer_of_work_certificates(self) -> FlaskQueryResult[
+    def joined_with_worker_and_transfer_of_work_certificates(self) -> SqlQueryResult[
         Tuple[
             records.RegisteredHoursWorked,
             records.Member,
@@ -1866,14 +1866,14 @@ class RegisteredHoursWorkedResult(FlaskQueryResult[records.RegisteredHoursWorked
             .with_entities(models.RegisteredHoursWorked, members, transfers)
         )
 
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
         )
 
 
-class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
+class AccountCredentialsResult(SqlQueryResult[records.AccountCredentials]):
     def for_user_account_with_id(self, user_id: UUID) -> Self:
         id_ = str(user_id)
         member = aliased(models.Member)
@@ -1897,7 +1897,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_accountant(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[records.AccountCredentials, Optional[records.Accountant]]
     ]:
         def mapper(
@@ -1912,7 +1912,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
         query = self.query.join(
             accountant, accountant.user_id == models.User.id, isouter=True
         ).with_entities(models.User, accountant)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=mapper,
@@ -1920,7 +1920,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_email_address_and_accountant(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[
             records.AccountCredentials,
             records.EmailAddress,
@@ -1947,7 +1947,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
             .join(accountant, accountant.user_id == models.User.id, isouter=True)
             .with_entities(models.User, email, accountant)
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=mapper,
@@ -1955,7 +1955,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_member(
         self,
-    ) -> FlaskQueryResult[Tuple[records.AccountCredentials, Optional[records.Member]]]:
+    ) -> SqlQueryResult[Tuple[records.AccountCredentials, Optional[records.Member]]]:
         def mapper(
             orm: Any,
         ) -> Tuple[records.AccountCredentials, Optional[records.Member]]:
@@ -1968,7 +1968,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
         query = self.query.join(
             member, member.user_id == models.User.id, isouter=True
         ).with_entities(models.User, member)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=mapper,
@@ -1976,7 +1976,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_email_address_and_member(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[
             records.AccountCredentials, records.EmailAddress, Optional[records.Member]
         ]
@@ -1999,7 +1999,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
             .join(member, member.user_id == models.User.id, isouter=True)
             .with_entities(models.User, email, member)
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=mapper,
@@ -2007,7 +2007,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_company(
         self,
-    ) -> FlaskQueryResult[Tuple[records.AccountCredentials, Optional[records.Company]]]:
+    ) -> SqlQueryResult[Tuple[records.AccountCredentials, Optional[records.Company]]]:
         def mapper(
             orm: Any,
         ) -> Tuple[records.AccountCredentials, Optional[records.Company]]:
@@ -2020,7 +2020,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
         query = self.query.join(
             company, company.user_id == models.User.id, isouter=True
         ).with_entities(models.User, company)
-        return FlaskQueryResult(
+        return SqlQueryResult(
             query=query,
             db=self.db,
             mapper=mapper,
@@ -2028,7 +2028,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
 
     def joined_with_email_address_and_company(
         self,
-    ) -> FlaskQueryResult[
+    ) -> SqlQueryResult[
         Tuple[
             records.AccountCredentials,
             records.EmailAddress,
@@ -2053,7 +2053,7 @@ class AccountCredentialsResult(FlaskQueryResult[records.AccountCredentials]):
             .join(company, company.user_id == models.User.id, isouter=True)
             .with_entities(models.User, email, company)
         )
-        return FlaskQueryResult(
+        return SqlQueryResult(
             db=self.db,
             query=query,
             mapper=mapper,
@@ -2141,7 +2141,7 @@ class AccountingRepository:
         return self.social_accounting_from_orm(accounting_orm)
 
 
-class PasswordResetRequestResult(FlaskQueryResult[records.PasswordResetRequest]):
+class PasswordResetRequestResult(SqlQueryResult[records.PasswordResetRequest]):
     def with_email_address(self, email_address: str) -> Self:
         return self._with_modified_query(
             lambda query: query.filter(
