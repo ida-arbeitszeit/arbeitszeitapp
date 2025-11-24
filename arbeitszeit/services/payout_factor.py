@@ -27,10 +27,21 @@ class PayoutFactorService:
 
 
 def calculate_payout_factor(plans: Iterable[Plan]) -> Decimal:
-    # payout factor = (L − ( P_o + R_o )) / (L + L_o)
+    # payout factor or factor of individual consumption (FIC)
+    # = (l − ( p_o + r_o )) / (l + l_o)
+    # where:
+    # l = labour in productive plans
+    # l_o = labour in public plans
+    # p_o = means of production in public plans
+    # r_o = raw materials in public plans
+
+    if not plans:
+        return Decimal(1)
+
     l: Decimal = Decimal(0)
     l_o: Decimal = Decimal(0)
     p_o_and_r_o = Decimal(0)
+
     for plan in plans:
         costs = plan.production_costs
         if plan.is_public_service:
@@ -38,7 +49,13 @@ def calculate_payout_factor(plans: Iterable[Plan]) -> Decimal:
             p_o_and_r_o += costs.means_cost + costs.resource_cost
         else:
             l += costs.labour_cost
-    if l + l_o:
-        return (l - p_o_and_r_o) / (l + l_o)
-    else:
+    total_labour = l + l_o
+
+    if not total_labour:
+        # prevent division by zero
+        if p_o_and_r_o:
+            return Decimal(0)
         return Decimal(1)
+
+    possibly_negative_fic = (l - p_o_and_r_o) / total_labour
+    return max(Decimal(0), possibly_negative_fic)
