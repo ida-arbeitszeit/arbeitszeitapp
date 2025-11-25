@@ -212,14 +212,14 @@ class RegisterHoursWorkedTests(BaseTestCase):
             == -hours_worked
         )
 
-    def test_that_with_negative_fic_worker_receives_negative_certificates(self) -> None:
+    def test_that_with_fic_of_zero_worker_receives_zero_certificates(self) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self._make_fic_negative()
+        self._make_fic_zero()
         self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=Decimal(10))
         )
-        assert self.balance_checker.get_member_account_balance(worker) < Decimal("0")
+        assert self.balance_checker.get_member_account_balance(worker) == Decimal("0")
 
     @parameterized.expand(
         [
@@ -227,13 +227,13 @@ class RegisterHoursWorkedTests(BaseTestCase):
             (Decimal(20),),
         ]
     )
-    def test_that_with_negative_fic_company_gets_deducted_all_hours_worked(
+    def test_that_with_fic_of_zero_company_gets_deducted_all_hours_worked(
         self,
         hours_worked: Decimal,
     ) -> None:
         worker = self.member_generator.create_member()
         company = self.company_generator.create_company_record(workers=[worker])
-        self._make_fic_negative()
+        self._make_fic_zero()
         self.register_hours_worked.execute(
             RegisterHoursWorkedRequest(company.id, worker, hours_worked=hours_worked)
         )
@@ -242,7 +242,7 @@ class RegisterHoursWorkedTests(BaseTestCase):
             == -hours_worked
         )
 
-    def _make_fic_negative(self) -> None:
+    def _make_fic_zero(self) -> None:
         self.plan_generator.create_plan(
             is_public_service=True,
             costs=ProductionCosts(
@@ -251,4 +251,4 @@ class RegisterHoursWorkedTests(BaseTestCase):
                 resource_cost=Decimal(10),
             ),
         )
-        self.fic_service.get_current_payout_factor() < Decimal("0")
+        assert self.fic_service.get_current_payout_factor() == Decimal("0")
