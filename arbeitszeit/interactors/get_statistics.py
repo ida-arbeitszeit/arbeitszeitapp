@@ -33,7 +33,7 @@ class GetStatisticsInteractor:
     psf_service: PublicSectorFundService
 
     def get_statistics(self) -> StatisticsResponse:
-        fic = self.fic_service.get_current_payout_factor()
+        fic = self.fic_service.calculate_current_payout_factor()
         psf_balance = self.psf_service.calculate_psf_balance()
         now = self.datetime_service.now()
         active_plans = (

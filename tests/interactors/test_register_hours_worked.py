@@ -251,4 +251,4 @@ class RegisterHoursWorkedTests(BaseTestCase):
                 resource_cost=Decimal(10),
             ),
         )
-        assert self.fic_service.get_current_payout_factor() == Decimal("0")
+        assert self.fic_service.calculate_current_payout_factor() == Decimal("0")

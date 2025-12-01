@@ -232,7 +232,7 @@ class CountCertificatesTests(StatisticsBaseTestCase):
         )
 
     def assertCertificatesAreEstimatedCorrectly(self) -> None:
-        fic = self.fic_service.get_current_payout_factor()
+        fic = self.fic_service.calculate_current_payout_factor()
         stats = self.interactor.get_statistics()
         certs_in_member_accounts = self._count_certs_in_member_accounts()
         certs_in_company_accounts = self._count_certs_in_company_accounts()

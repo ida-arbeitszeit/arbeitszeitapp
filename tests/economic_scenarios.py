@@ -27,9 +27,9 @@ class EconomicScenarios:
         assert (
             not self.database_gateway.get_plans()
         ), "There should be no plans in the database"
-        assert self.payout_factor_service.calculate_payout_factor(
-            self.datetime_service.now()
-        ) == Decimal(1), "Payout factor is not 1"
+        assert self.payout_factor_service.calculate_current_payout_factor() == Decimal(
+            1
+        ), "Payout factor is not 1"
         if target_fic < 0 or target_fic > 1:
             raise ValueError("FIC must be between 0 and 1")
         elif target_fic == 1:
@@ -78,7 +78,5 @@ class EconomicScenarios:
                 resource_cost=public_resources,
             ),
         )
-        current_fic = self.payout_factor_service.calculate_payout_factor(
-            self.datetime_service.now()
-        )
+        current_fic = self.payout_factor_service.calculate_current_payout_factor()
         assert round(current_fic, 7) == round(target_fic, 7)

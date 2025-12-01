@@ -66,7 +66,7 @@ class RegisterHoursWorkedInteractor:
                 rejection_reason=RegisterHoursWorkedResponse.RejectionReason.worker_not_at_company,
                 registered_hours_worked_id=None,
             )
-        fic = self.fic_service.get_current_payout_factor()
+        fic = self.fic_service.calculate_current_payout_factor()
         transfer_of_work_certificates = self.database_gateway.create_transfer(
             date=self.datetime_service.now(),
             debit_account=company.work_account,
