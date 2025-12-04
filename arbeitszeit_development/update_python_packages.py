@@ -13,10 +13,8 @@ def main(subprocess_runner: SubprocessRunner) -> None:
     update_python_package(
         subprocess_runner, "nix/pythonPackages/flask-restx.json", "flask-restx"
     )
-    update_python_package(
-        subprocess_runner, "nix/pythonPackages/import-linter.json", "import_linter"
-    )
     update_python_package(subprocess_runner, "nix/pythonPackages/grimp.json", "grimp")
+    # do not update import-linter
 
 
 def update_python_package(
