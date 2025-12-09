@@ -1,13 +1,29 @@
+import os
+from datetime import timedelta
 from decimal import Decimal
+from functools import wraps
 from uuid import UUID
 
 import click
 from flask import current_app
 from flask.cli import AppGroup
 
+from arbeitszeit.datetime_service import DatetimeService
+from arbeitszeit.injector import (
+    AliasProvider,
+    Binder,
+    CallableProvider,
+    Injector,
+    Module,
+)
 from arbeitszeit.records import ProductionCosts
+from arbeitszeit.repositories import DatabaseGateway
+from arbeitszeit.services.payout_factor import PayoutFactorService
 from arbeitszeit_db import commit_changes
-from arbeitszeit_flask.dependency_injection import with_injection
+from arbeitszeit_db.db import Database
+from arbeitszeit_db.repositories import DatabaseGatewayImpl
+from arbeitszeit_development.timeline_printer import TimelinePrinter
+from arbeitszeit_flask.dependency_injection import FlaskModule
 from tests.data_generators import (
     CompanyGenerator,
     ConsumptionGenerator,
@@ -16,6 +32,90 @@ from tests.data_generators import (
     PlanGenerator,
     WorkerAffiliationGenerator,
 )
+from tests.datetime_service import FakeDatetimeService
+from tests.dependency_injection import TestingModule
+from tests.flask_integration.dependency_injection import FlaskTestingModule
+
+
+def provide_dev_database_uri() -> str:
+    return os.environ["ARBEITSZEITAPP_DEV_DB"]
+
+
+def provide_database() -> Database:
+    Database().configure(uri=provide_dev_database_uri())
+    return Database()
+
+
+class DevDatabaseModule(Module):
+    def configure(self, binder: Binder) -> None:
+        super().configure(binder)
+        binder[Database] = CallableProvider(provide_database, is_singleton=True)
+        binder[DatabaseGateway] = AliasProvider(DatabaseGatewayImpl)
+
+
+class with_injection:
+    def __init__(self) -> None:
+        self._injector = Injector(
+            [
+                FlaskModule(),
+                FlaskTestingModule(),
+                DevDatabaseModule(),
+                TestingModule(),
+            ]
+        )
+
+    def __call__(self, original_function):
+        """When you wrap a function, make sure that the parameters to be
+        injected come after the the parameters that the caller should
+        provide.
+        """
+
+        @wraps(original_function)
+        def wrapped_function(*args, **kwargs):
+            return self._injector.call_with_injection(
+                original_function, args=args, kwargs=kwargs
+            )
+
+        return wrapped_function
+
+    @property
+    def injector(self) -> Injector:
+        return self._injector
+
+
+fic = AppGroup(
+    name="fic",
+    help="""
+    Commands related to the Factor of Individual Consumption (FIC).
+    """,
+)
+
+
+@fic.command("calculate")
+@with_injection()
+def calculate_fic(payout_factor_service: PayoutFactorService) -> None:
+    """Calculate and print the current FIC."""
+    fic = payout_factor_service.calculate_current_payout_factor()
+    click.echo(f"Current FIC: {fic}")
+
+
+@fic.command("print-timeline")
+@with_injection()
+def print_timeline(
+    datatime_service: DatetimeService,
+    database_gateway: DatabaseGateway,
+) -> None:
+    """Print plans on a timeline along the fic calculation window."""
+    WINDOW_LENGTH_DAYS = 180
+    now = datatime_service.now()
+    plans = list(database_gateway.get_plans().that_are_approved())
+    tp = TimelinePrinter(
+        now,
+        plans,
+        WINDOW_LENGTH_DAYS,
+    )
+    click.echo(tp.render())
+
 
 generate = AppGroup(
     name="generate",
@@ -139,6 +239,22 @@ def generate_member(
     default=14,
     show_default=True,
 )
+@click.option(
+    "--is-public",
+    "-i",
+    help="Whether the plan is public service.",
+    type=bool,
+    default=False,
+    show_default=True,
+)
+@click.option(
+    "--backdate_days",
+    "-b",
+    help="Backdate start of plan for days.",
+    type=int,
+    default=0,
+    show_default=True,
+)
 @commit_changes
 @with_injection()
 def generate_plan(
@@ -151,7 +267,10 @@ def generate_plan(
     planner: UUID | None,
     amount: int,
     timeframe: int,
+    is_public: bool,
+    backdate_days: int,
     data_generator: PlanGenerator,
+    datetime_service: FakeDatetimeService,
 ) -> None:
     """Create a plan."""
     costs = ProductionCosts(
@@ -159,15 +278,20 @@ def generate_plan(
         resource_cost=resource_cost,
         means_cost=means_cost,
     )
+    now = datetime_service.now()
+    datetime_service.freeze_time(now - timedelta(days=backdate_days))
     plan_id = data_generator.create_plan(
         amount=amount,
         product_name=name,
         description=description,
+        is_public_service=is_public,
         production_unit=production_unit,
         costs=costs,
         planner=planner if planner else None,
         timeframe=timeframe,
     )
+    datetime_service.freeze_time(now)
+    datetime_service.unfreeze_time()
     click.echo(f"Plan with ID {plan_id} created.")
 
 
