@@ -131,7 +131,7 @@ A plan in a cooperation that is less productive than the average (needs more lab
 
 A cooperation begins its life as empty, without any plans attached to it. Companies may then freely choose to join the new cooperation. An empty cooperation can be created by any company. The company that creates a cooperation automatically becomes the "coordinator" of that cooperation. A coordinator has several privileges and duties: They can accept or deny incoming cooperation requests, remove plans from the cooperation, or transfer the coordination role to another company. The history of past coordinator tenures is visible to all users.
 
-While this implementation may seem undemocratic at first glance, it must be noted that the Arbeitszeitapp only provides the technical front-end to diverse political processes that must happen in "real life". The app does not prescribe the political procedures that companies and communities choose to elect coordinators or to define cooperations. Because every company is able to create cooperations, companies that are unhappy with a certain coordination can easily form a new cooperation.
+While this implementation may seem undemocratic at first glance, it must be noted that the workers control app only provides the technical front-end to diverse political processes that must happen in "real life". The app does not prescribe the political procedures that companies and communities choose to elect coordinators or to define cooperations. Because every company is able to create cooperations, companies that are unhappy with a certain coordination can easily form a new cooperation.
 
 
 .. _transfers-of-labor-time:
@@ -205,5 +205,5 @@ Transfers occur between two accounts, where the debit account is charged, and th
 Here is a graphical overview of the accounts and transfers:
 
 .. image:: images/accounts_and_transfers.svg
-  :alt: Overview of accounts and transfers of Arbeitszeitapp
+  :alt: Overview of accounts and transfers of worker control app
   :width: 600px

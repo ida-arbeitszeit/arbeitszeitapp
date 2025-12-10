@@ -296,7 +296,7 @@ to it.
 Handling transfers of labor time
 ---------------------------------
 
-Transfers of labor time between accounts are at the core of the arbeitszeitapp. 
+Transfers of labor time between accounts are at the core of the workers control app. 
 A ``Transfer`` object follows roughly this structure::
 
     class Transfer:
@@ -344,7 +344,7 @@ Following this pattern, we can be sure to have all transfers of labor time recor
 Presenters
 ----------
 
-One of the design approaches of the arbeitszeitapp is a separation of
+One of the design approaches of the workers control app is a separation of
 business logic and presentational logic. We have previously learned
 about interactor classes. We have seen that the responses returned by
 calling to those interactor objects are pretty abstract, hence we need a
@@ -437,7 +437,7 @@ this::
 User identification
 -------------------
 
-Arbeitszeitapp knows 3 different types of users: members, companies
+Workers control app knows 3 different types of users: members, companies
 and accountants. Members represent individual workers, companies
 represent worker organized production units, e.g. workshops, factories
 or offices. Accountants keep track of all transfers and review
@@ -492,7 +492,7 @@ is flipped.
 HTTP Routing
 ------------
 
-The ``arbeitszeitapp`` webserver processes incoming requests using
+The ``workers control app`` webserver processes incoming requests using
 specific functions designed for different types of requests. For
 example, there's a special handler for authentication requests when a
 member logs in, and another for viewing a company's accounts. Each of
@@ -518,7 +518,7 @@ responses for users. Request handlers deal with all requests directed
 to a specific URI path. This means that a request handler handles
 different types of requests, like ``GET`` or ``POST``.
 
-In the ``arbeitszeitapp``, request handlers fall into two categories
+In the ``workers control app``, request handlers fall into two categories
 based on their structure: function-based and class-based. Consider
 function-based handlers as outdated, and avoid using them for new
 implementations. This document focuses on explaining class-based

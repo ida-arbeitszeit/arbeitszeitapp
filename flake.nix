@@ -1,5 +1,5 @@
 {
-  description = "Arbeitszeitapp";
+  description = "Workers control - a web app for labour time accounting.";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixos-25-11.url = "github:NixOS/nixpkgs/nixos-25.11";

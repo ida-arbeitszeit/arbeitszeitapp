@@ -1,5 +1,5 @@
 """This module contains all possible types of email notifications that
-the arbeitszeitapp can issue and the interface by which the interactors
+the workers control app can issue and the interface by which the interactors
 request those notifications to be sent.
 """
 

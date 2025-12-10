@@ -1,4 +1,4 @@
-# arbeitszeitapp specific
+# workers control specific
 *.swp
 .DS_Store
 my_database_key.py

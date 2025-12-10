@@ -74,7 +74,7 @@ directories in the source code.
 Here is a diagram that shows the main components of the application:
 
   .. image:: images/components_overview.svg
-    :alt: Overview of the main components of Arbeitszeitapp
+    :alt: Overview of the main components of workers control app
     :width: 500px
 
 We use our own dependency injection logic to achieve the inversion of control depicted
@@ -186,7 +186,7 @@ Commented out variables are optional.
 Development server
 ------------------
 
-You can run the arbeitszeitapp in a development environment to manually test your 
+You can run the workers control app in a development environment to manually test your 
 latest changes from a user interface perspective. Start the development 
 server with ``flask run --debug``.
 
@@ -282,7 +282,7 @@ Update Dependencies
 --------------------
 
 We use Nix to manage the dependencies of
-``arbeitszeitapp``. We try to leverage ``nixpkgs`` as a source for our
+``workers control app``. We try to leverage ``nixpkgs`` as a source for our
 dependencies as much as possible, so as to reduce the required
 maintenance effort. You can update the
 dependencies via ``python -m arbeitszeit_development.update_dependencies``.
@@ -394,7 +394,7 @@ You can run all the benchmarks via
 ``python -m arbeitszeit_development.benchmark``.
 This benchmarking tool can be
 used to compare runtime characteristics across changes to the codebase. 
-A contributor to the ``arbeitszeitapp`` might want to compare
+A contributor to the ``workers control app`` might want to compare
 the results of those benchmarks from the master branch to the results
 from their changes. The output of this tool is in JSON.
 
@@ -415,5 +415,5 @@ Web API
 --------
 
 We are currently developing a JSON Web API that provides access to 
-core features of Arbeitszeitapp. Its OpenAPI specification can be 
+core features of workers control app. Its OpenAPI specification can be 
 found in `/api/v1/doc/`

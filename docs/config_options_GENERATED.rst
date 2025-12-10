@@ -108,7 +108,7 @@
 
    This variable tells the application how it is addressed. This is important to generate links in emails it sends out.
 
-   Example: ``SERVER_NAME = "arbeitszeitapp.cp.org"``
+   Example: ``SERVER_NAME = "workers-control.cp.org"``
 
 .. py:data:: SQLALCHEMY_DATABASE_URI
    :no-index:

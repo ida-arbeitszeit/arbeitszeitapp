@@ -6,7 +6,7 @@ You can contribute in various ways, if you wish to do so:
 Translating the app
 -------------------
 
-We want people around the world to use the arbeitszeitapp. To achieve this, it's crucial to translate the app into as many languages as we can. We are happy to help you with the translation process.
+We want people around the world to use the workers control app. To achieve this, it's crucial to translate the app into as many languages as we can. We are happy to help you with the translation process.
 
 Contributing code
 ------------------
@@ -30,18 +30,18 @@ Milestone Lifecycle
     - An Issue on GitHub that has potential to become a Milestone
     - Marked with the "rfc candidate" label
     - Requires initial conceptual work and discussion
-    - View `current candidates <https://github.com/ida-arbeitszeit/arbeitszeitapp/issues?q=state%3Aopen%20label%3A%22rfc%20candidate%22>`_
+    - View `current candidates <https://github.com/ida-arbeitszeit/workers-control/issues?q=state%3Aopen%20label%3A%22rfc%20candidate%22>`_
 
 2. RFC (Request For Comments)
     - A detailed proposal marked with the "RFC" label
     - Must include a motivation for the change and a detailed implementation proposal
     - Sent to the programmers mailing list for visibility
     - Requires approval in an app group meeting
-    - View `current RFCs <https://github.com/ida-arbeitszeit/arbeitszeitapp/issues?q=is%3Aissue%20state%3Aopen%20label%3Arfc>`_
+    - View `current RFCs <https://github.com/ida-arbeitszeit/workers-control/issues?q=is%3Aissue%20state%3Aopen%20label%3Arfc>`_
 
 3. Active Milestone
     - Published on GitHub after RFC approval
     - Ready for implementation
-    - View `all milestones <https://github.com/ida-arbeitszeit/arbeitszeitapp/milestones>`_
+    - View `all milestones <https://github.com/ida-arbeitszeit/workers-control/milestones>`_
 
 Feel free to contribute to any of these stages.
