@@ -1,4 +1,4 @@
-name: Arbeitszeitapp CI Tests
+name: Workers control app CI Tests
 
 on:
   push:

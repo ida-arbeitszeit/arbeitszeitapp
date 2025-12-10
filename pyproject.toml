@@ -4,7 +4,7 @@ build-backend = "build_support.backend"
 backend-path = ["."]
 
 [project]
-name = "arbeitszeitapp"
+name = "workers-control"
 version = "0.0.0"
 classifiers = [
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",

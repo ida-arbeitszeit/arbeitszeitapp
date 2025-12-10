@@ -1,13 +1,13 @@
 |Generic badge|
 
-.. |Generic badge| image:: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml/badge.svg
-   :target: https://github.com/arbeitszeit/arbeitszeitapp/actions/workflows/python-app.yml
+.. |Generic badge| image:: https://github.com/arbeitszeit/workers-control/actions/workflows/python-app.yml/badge.svg
+   :target: https://github.com/arbeitszeit/workers-control/actions/workflows/python-app.yml
 
 
 Introduction
 ============
 
-Arbeitszeitapp is a plattform to exchange services and products on the
+The workers control app is a platform to exchange services and products on the
 basis of working time. It is designed as a Web app to be self-hosted by communities
 or organizations. A test instance is running on
 https://demo-app.arbeitszeitrechnung.org/.
@@ -21,7 +21,7 @@ It offers planning tools for companies and communities, and work
 time management for companies and workers. Plans can be approved, 
 products published, and work or consumption recorded.
 
-This application implements a theory (`"Arbeitszeitrechnung"
+This application implements a theory (`"Labour time accounting"
 <https://aaap.be/Pages/Transition-en-Fundamental-Principles-1930.html>`_)
 elaborated in the 1920s by members of a German working-class movement.
 

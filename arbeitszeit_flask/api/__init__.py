@@ -11,7 +11,7 @@ from .plans import namespace as plans_ns
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
 DESCRIPTION = """
-The JSON API of Arbeitszeitapp.
+The JSON API of workers control app.
 
 **Authentication:**
 
@@ -22,7 +22,7 @@ If you have no account yet, you have to register via the webapp first.
 
 api_extension = Api(
     app=blueprint,
-    title="Arbeitszeitapp API",
+    title="Workers control app API",
     version="0.1",
     description=DESCRIPTION,
     doc="/doc/",

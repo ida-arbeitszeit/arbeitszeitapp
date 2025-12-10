@@ -1,7 +1,7 @@
-arbeitszeitapp's developer documentation
-=========================================
+Workers control app's developer documentation
+=============================================
 
-Source code: `<https://github.com/arbeitszeit/arbeitszeitapp>`_
+Source code: `<https://github.com/arbeitszeit/workers-control>`_
 
 .. toctree::
    :maxdepth: 2

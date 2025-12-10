@@ -4,7 +4,7 @@ Introduction
 About The App
 ---------------
 
-Arbeitszeitapp is a plattform to exchange services and products on the
+The workers control app is a platform to exchange services and products on the
 basis of working time. It is designed as a Web app to be self-hosted by communities
 or organizations. A test instance is running on
 https://demo-app.arbeitszeitrechnung.org/.
@@ -23,8 +23,8 @@ This application implements a theory (`"Arbeitszeitrechnung"
 elaborated in the 1920s by members of a German working-class movement.
 
 
-The Arbeitszeitapp Collective
------------------------------
+The Workers Control App Collective
+-----------------------------------
 
 We are a group of programmers closely associated with the `IDA association <https://arbeitszeit.noblogs.org>`_. To coordinate our work, we meet once a week for half an hour online. If needed, we can also meet in person at the IDA office in Berlin. Otherwise, we communicate via a mailing list and use the Github Issue tracker. 
 

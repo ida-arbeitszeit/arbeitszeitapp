@@ -9,7 +9,7 @@ Configuration of the web server
 -------------------------------
 
 The application needs to be configured to function properly. This is
-done via a configuration file. When starting ``arbeitszeitapp`` it
+done via a configuration file. When starting ``workers control app`` it
 looks for configuration files in the following locations from top to
 bottom. It loads the first configuration file it finds:
 
