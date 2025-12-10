@@ -3,7 +3,7 @@ from enum import Enum
 
 class TransferType(Enum):
     """
-    See https://arbeitszeitapp.readthedocs.io/en/latest/concepts.html for
+    See https://workers-control.readthedocs.io/en/latest/concepts.html for
     a documentation of the transfer types.
     """
 

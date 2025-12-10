@@ -55,4 +55,4 @@ repository.
 
 .. end-license-do-not-delete
 
-.. _developer documentation: https://arbeitszeitapp.readthedocs.io/
+.. _developer documentation: https://workers-control.readthedocs.io/

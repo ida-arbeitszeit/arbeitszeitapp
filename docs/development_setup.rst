@@ -382,7 +382,7 @@ browser at ``build/html/index.html``. The HTML code is generated from
 documentation files in the ``docs`` folder, using parts of the 
 top-level file ``README.rst``. 
 
-The docs are hosted on `Read the Docs <https://arbeitszeitapp.readthedocs.io/en/latest/>`_
+The docs are hosted on `Read the Docs <https://workers-control.readthedocs.io/en/latest/>`_
 and are automatically updated when changes are pushed to the master branch. 
 
 Benchmarking
