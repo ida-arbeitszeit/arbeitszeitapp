@@ -1,7 +1,7 @@
 |Generic badge|
 
-.. |Generic badge| image:: https://github.com/arbeitszeit/workers-control/actions/workflows/python-app.yml/badge.svg
-   :target: https://github.com/arbeitszeit/workers-control/actions/workflows/python-app.yml
+.. |Generic badge| image:: https://github.com/ida-arbeitszeit/workers-control/actions/workflows/python-app.yml/badge.svg
+   :target: https://github.com/ida-arbeitszeit/workers-control/actions/workflows/python-app.yml
 
 
 Introduction
